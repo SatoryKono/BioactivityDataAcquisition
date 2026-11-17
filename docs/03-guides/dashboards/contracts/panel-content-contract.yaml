@@ -371,10 +371,9 @@ dashboards:
         render_profiles: *id001
         required_columns:
         - Context
-        - Run ID
-        - Execution
-        - Verdict
-        - Context checked at
+        - Read at
+        - Saved assessment at
+        - Saved age · not source age
       '9402':
         title: Inspect Run Identity
         role: guidance
@@ -3049,10 +3048,9 @@ dashboards:
         render_profiles: *id001
         required_columns:
         - Context
-        - Run ID
-        - Execution
-        - Verdict
-        - Context checked at
+        - Read at
+        - Saved assessment at
+        - Saved age · not source age
       '1000':
         title: ''
         role: navigation

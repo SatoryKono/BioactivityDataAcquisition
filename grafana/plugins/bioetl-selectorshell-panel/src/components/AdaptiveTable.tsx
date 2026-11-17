@@ -203,8 +203,14 @@ function RunDetails({fields, row, isRuns, onDismiss}: Readonly<{
 
 const AdaptiveTableView: React.FC<PanelProps<AdaptiveTableOptions>> = (props) => {
   const { data, width, height, options, fieldConfig, timeRange } = props;
+  const rawFrame = data.series.find((item) => item.length > 0);
   const [page, setPage] = useState(0);
-  const [detailRow, setDetailRow] = useState<number | null>(null);
+  const [selection, setSelection] = useState<{ frame: DataFrame | undefined; row: number | null }>({ frame: rawFrame, row: null });
+  // An index belongs to one response, including evidence without run_id.
+  // Clear it before committing a replacement frame with a different row order.
+  if (selection.frame !== rawFrame) {
+    setSelection({ frame: rawFrame, row: null });
+  }
   const [host, setHost] = useState<HTMLDivElement | null>(null);
   const [bounds, setBounds] = useState<{ width: number; height: number } | null>(null);
   useLayoutEffect(() => {
@@ -218,7 +224,6 @@ const AdaptiveTableView: React.FC<PanelProps<AdaptiveTableOptions>> = (props) =>
     return () => observer.disconnect();
   }, [host]);
   const viewport = useSyncExternalStore(subscribeViewport, () => window.innerWidth, () => 1920);
-  const rawFrame = data.series.find((item) => item.length > 0);
   const frame = useMemo(() => rawFrame ? {
     ...rawFrame, fields: rawFrame.fields.map(safeField),
   } : undefined, [rawFrame]);
@@ -270,7 +275,7 @@ const AdaptiveTableView: React.FC<PanelProps<AdaptiveTableOptions>> = (props) =>
       {isCompact ? (
         <CompactRows fields={summaryFields} row={row} isRuns={isRuns} isPaged={isPaged}
           title={props.title} currentPage={currentPage} rowCount={rowOrder.length}
-          onPageChange={setPage} onDetails={setDetailRow} />
+          onPageChange={setPage} onDetails={(row) => setSelection({ frame: rawFrame, row })} />
       ) : (
         <Table
           data={displayFrame as DataFrame}
@@ -289,7 +294,8 @@ const AdaptiveTableView: React.FC<PanelProps<AdaptiveTableOptions>> = (props) =>
           timeRange={timeRange}
         />
       )}
-      <RunDetails fields={detailFields} row={detailRow} isRuns={isRuns} onDismiss={() => setDetailRow(null)} />
+      <RunDetails fields={detailFields} row={selection.frame === rawFrame ? selection.row : null} isRuns={isRuns}
+        onDismiss={() => setSelection({ frame: rawFrame, row: null })} />
     </div>
   );
 };

@@ -213,6 +213,25 @@ it('clears an old page and full detail when the dashboard scope changes', () => 
   expect(screen.getByText('1 / 3')).toBeInTheDocument();
 });
 
+it('closes details when evidence without run_id is replaced or reordered', () => {
+  const panel = props();
+  panel.options = { ...panel.options, viewMode: 'rows' };
+  const frame: DataFrame = { length: 2, fields: [{
+    name: 'Signal', type: 'string' as FieldType, config: {}, values: ['lag', 'backlog'],
+  }] };
+  const view = render(<AdaptiveTable {...panel} data={{ ...panel.data, series: [frame] }} />);
+  fireEvent.click(screen.getByRole('button', { name: 'Details' }));
+  expect(within(screen.getByRole('dialog')).getByText('lag')).toBeInTheDocument();
+  const refreshed = { ...frame, fields: frame.fields.map((field) => ({ ...field, values: ['backlog', 'lag'] })) };
+  view.rerender(<AdaptiveTable {...panel} data={{ ...panel.data, series: [refreshed] }} />);
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  expect(screen.getByText('backlog')).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Details' }));
+  expect(within(screen.getByRole('dialog')).getByText('backlog')).toBeInTheDocument();
+  view.rerender(<AdaptiveTable {...panel} data={{ ...panel.data, series: [frame] }} />);
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+});
+
 it('replaces previous successful data with a visible source error and removes old details', () => {
   const panelProps = props();
   const view = render(<AdaptiveTable {...panelProps} />);

@@ -10,6 +10,7 @@ import shutil
 import subprocess
 
 import pytest
+import yaml
 
 from scripts.ops.observability.grafana.apply_phase25_srs_prr_budget import _OV_DONOR
 
@@ -87,6 +88,41 @@ def test_context_separates_cache_freshness_from_saved_assessment_and_run_result(
     assert "2026-11-11 08:00 +00:00" in context["evidence_freshness"]
     assert len(context["evidence_freshness"]) <= 90
     assert context["execution_state"] == "UNFINISHED"
+
+
+@pytest.mark.parametrize("profile", ["dashboards", "dashboards-adaptive"])
+@pytest.mark.parametrize(
+    ("uid", "panel_id"), [("bioetl-overview-v2", 99), ("bioetl-dq-v2", 9400)]
+)
+def test_context_columns_match_contract_and_evaluated_donor(profile, uid, panel_id):
+    payload = donor_payload(None, None)
+    payload["summary"][0]["evaluation_at"] = "2026-11-11T08:00:00Z"
+    context = next(
+        row
+        for row in evaluate_donor(payload)
+        if row["_bioetl_frame"] == "selection_context"
+    )
+    dashboard = json.loads(Path(f"grafana/{profile}/{uid}.json").read_text())
+    panel = next(panel for panel in dashboard["panels"] if panel["id"] == panel_id)
+    transforms = panel["transformations"]
+    fields = next(
+        t["options"]["include"]["names"]
+        for t in transforms
+        if t["id"] == "filterFieldsByName"
+    )
+    assert set(fields) <= context.keys(), (
+        "Visible context columns must exist in the executed HTTP donor"
+    )
+    rename = next(
+        t["options"]["renameByName"] for t in transforms if t["id"] == "organize"
+    )
+    contract = yaml.safe_load(
+        Path(
+            "docs/03-guides/dashboards/contracts/panel-content-contract.yaml"
+        ).read_text(encoding="utf-8")
+    )
+    required = contract["dashboards"][uid]["panels"][str(panel_id)]["required_columns"]
+    assert required == [rename.get(field, field) for field in fields]
 
 
 @pytest.mark.parametrize(

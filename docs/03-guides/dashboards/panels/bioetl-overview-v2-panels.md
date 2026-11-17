@@ -4,29 +4,29 @@
 
 Run Overview separates two scopes. Saved evidence assesses one persisted Run ID;
 an unresolved selection resolves the latest run in scope; absent evidence is UNKNOWN or INCOMPLETE, and
-failed requests remain QUERY ERROR. GLOBAL / CURRENT alerts assess the fleet
-independently of that selection. They never prove this run succeeded or change
+failed requests remain QUERY ERROR. Global alerts assess the fleet independently
+of that selection: native panels use the selected period end, while the adaptive
+profile evaluates its explicitly marked CURRENT panels independently. They never prove this run succeeded or change
 its saved verdict. Incident Workspace owns incident triage and fleet diagnostics.
 
-## Monitor Global Alerts — LA-06 (#12940)
+## Review Fleet Alerts — LA-06 (#12940)
 
 Panel `2005` is an always-expanded root table at `y=18`, copied by
 `render_nav_bus` from Incident Workspace's global alert donor. It reads the
 existing `bioetl_incident_global_alerts` recording rule, which evaluates the
 same expression as the donor. Its query does not
-use Run ID, Pipeline, Provider, Workflow or Run Type selections. The summary
-retains the donor's descending priority order and two-row limit, so critical
-fleet alerts remain visible even when no saved run can be assessed. The
+use Run ID, Pipeline, Provider, Workflow or Run Type selections. The table
+retains the donor's descending priority order and every matching alert, with
+pagination enabled at the top level and in the legacy footer. There is no
+topk or row-limit transformation. The
 `Open Incident Workspace (all global alerts)` action resets the destination to
 all workflows/pipelines/run types and Run ID `-`, retaining the time range.
 
-Collapsed row `32005` is last, after the saved-run panels, and holds full table
-`22005`. Both alert tables independently read `bioetl_incident_global_alerts`;
-the full table has no row limit. A Dashboard-datasource consumer inside a
-collapsed Grafana Scenes row can hide its source summary, so this pair does not
-share a panel query runner. Expanding the full list makes every alert available
-without changing the selected-run context. Provider and stage blocks move together five rows down;
-their sizes, relative placement, queries and the upper saved-run layout remain.
+Use pagination in panel `2005` to inspect the complete list, or follow its
+Incident Workspace action for incident details. Overview has no separate
+collapsed full-list row; no expansion is required and there is no second query
+for the same alert list. In the adaptive compact view, Next/Previous and Details
+retain access to all returned rows and their complete evidence.
 
 Local validation covers JSON, query independence, donor parity, complete-list
 access, non-overlapping geometry and regeneration. Live v2 rendering with
@@ -35,8 +35,10 @@ was recorded as NOT_VERIFIABLE under owner decision 175 for the original LA-06
 delivery. Isolated 100000 was then an operating legacy generation without an
 Overview JSON/generator in this checkout; neither generation had been
 live-validated by that delivery. The owner subsequently confirmed retirement of
-Isolated. Current v2 acceptance must inspect the complete page with the full-list
-row collapsed and no selected Run ID, in addition to individual panel renders.
+Isolated. Current v2 verification must inspect the complete page without a
+selected Run ID, exercise pagination beyond the first visible rows, and verify
+the Incident handoff, in addition to individual panel renders. This protocol
+does not change the historical acceptance result.
 
 ## Review Run Identity
 

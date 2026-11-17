@@ -5,8 +5,8 @@
     "grafana/plugins/bioetl-selectorshell-panel/src/adaptive-build-provenance.test.js": "3557511b506bc3ec432c6e63c078c239e216ec4541d89aa52a7f0ef343a3a0e6",
     "grafana/plugins/bioetl-selectorshell-panel/src/adaptive-module.ts": "b9c6a13c090ba63fb3eea3f687628f8a98fff2dbf9a2e541b2bc1864e86b9b5d",
     "grafana/plugins/bioetl-selectorshell-panel/src/adaptive-types.ts": "c0e0fdf9d4c41185118006c3a622055aa691123258b271d6f9a050ff6b3b5d4a",
-    "grafana/plugins/bioetl-selectorshell-panel/src/components/AdaptiveTable.test.tsx": "3b0983e3be15f8448f03e5dc0a9700407c3dd1cb2bbbd6d50bca5926d0caf62d",
-    "grafana/plugins/bioetl-selectorshell-panel/src/components/AdaptiveTable.tsx": "fcc57d1e73191308909adfbc69416c6a7cc7e3649313812858e7c8c76e0ef7a5",
+    "grafana/plugins/bioetl-selectorshell-panel/src/components/AdaptiveTable.test.tsx": "1327990dd0300cc7a9985730f10b06d1537b565e169806b7a17bd81036bd0a57",
+    "grafana/plugins/bioetl-selectorshell-panel/src/components/AdaptiveTable.tsx": "d5b164a9a25b5d0e68503ae708cd50f2b5277076d3b1b4c3309c830b987b4c29",
     "grafana/plugins/bioetl-selectorshell-panel/src/components/CurrentPanel.test.tsx": "9ab99ba650b2d9d5c683c00bfd66cae0e1ca55fcf73e90e3fe48876964fbc5b7",
     "grafana/plugins/bioetl-selectorshell-panel/src/components/CurrentPanel.tsx": "9c95bb09ca9ea0e357f241346eb1c33aab94dca697a133ea2087b36b61ac51d1",
     "grafana/plugins/bioetl-selectorshell-panel/src/components/SimplePanel.test.tsx": "124229d28dced94a525ef31452e0252716a71cb6293a2431b38d1266716fd0d1",
@@ -54,8 +54,8 @@
     "LICENSE": "c5accbbd8546e94c34aed24afe689a617627d18eed5a6c48277e48db57c23851",
     "README.md": "21cbe16d6e1b1efb90b085f59b265d5bef9e5f55ac39a80639645245a860a672",
     "img/logo.svg": "1defc6f7e585c67657bcfd8fddc599ee7dfa82f8674413f49fa274c2cd453ec6",
-    "module.js": "c3dbffe588a1d216cf2d35243350690a6dbdb857a6d235a846b3f3ad4670fd61",
-    "module.js.map": "79a1e6e7e07c112109059062e39c4b87151d0da1d41a66fdc5e5525f7f554fb1",
+    "module.js": "0bdf64a0b580b5dc54efbe083b51102a6142ba819b1d332bceb2cee0935f2b77",
+    "module.js.map": "ff4b292296b5b64ac8ddedb409bd40ded688a2c0bb2a54ada2e2714d20190553",
     "plugin.json": "1758dcf3cab78d8346eba6b208d14f8bd66d16b8615bcc47c31fb32a99b10d2b"
   }
 }
