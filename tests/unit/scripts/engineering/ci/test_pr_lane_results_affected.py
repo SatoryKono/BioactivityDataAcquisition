@@ -23,6 +23,27 @@ HEAD = "a" * 40
 
 
 @pytest.mark.parametrize(
+    "changed",
+    [
+        "configs/ide/zed/settings.json",
+        "configs/ide/zed/tasks.json",
+        "configs/ide/zed/agent-settings.json",
+        "scripts/engineering/dev/README.md",
+        "tests/integration/ide/test_zed_portability.py",
+    ],
+)
+def test_zed_changes_keep_integration_portability_in_both_impact_paths(
+    changed: str,
+) -> None:
+    repo_root = Path(__file__).resolve().parents[5]
+    owner = "tests/integration/ide/test_zed_portability.py"
+    assert owner in affected_pytest_targets([changed], repo_root=repo_root)
+    report = build_shadow_compare([changed], repo_root=repo_root)
+    assert owner in report["selected"]
+    assert report["covers_full_suite"] is False
+
+
+@pytest.mark.parametrize(
     ("changed", "owner"),
     [
         (

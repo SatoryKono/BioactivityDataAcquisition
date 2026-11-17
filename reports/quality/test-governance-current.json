@@ -500,13 +500,6 @@
       "path": "tests/unit/interfaces/http/test_health_server.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_consume_headers"
-    },
-    {
-      "category": "weak_no_value",
-      "line": "34",
-      "path": "tests/unit/iuphar_target_class/test_integration_acceptance.py",
-      "rationale": "candidate tests that need later assertion strengthening or removal review",
-      "test_name": "test_reference_conflict_codes_compare_json_collections"
     }
   ],
   "assertless_category_counts": {
@@ -514,7 +507,7 @@
     "benchmark_or_performance": 0,
     "helper_asserted": 1,
     "intentional_no_exception_contract": 66,
-    "weak_no_value": 1
+    "weak_no_value": 0
   },
   "assertless_examples": [
     "tests/integration/infrastructure/storage/test_delta_reader.py:586",
@@ -802,35 +795,10 @@
       "categories": {
         "intentional_no_exception_contract": 1
       }
-    },
-    "tests/unit/iuphar_target_class/test_integration_acceptance.py": {
-      "assertless_tests": 1,
-      "categories": {
-        "weak_no_value": 1
-      }
     }
   },
-  "assertless_total_candidates": 68,
-  "budget_violations": [
-    {
-      "actual": 1,
-      "budget": "refined_assertless_max",
-      "expected_max": 0,
-      "metric": "refined_assertless_tests"
-    },
-    {
-      "actual": 53,
-      "budget": "markerless_test_functions_max",
-      "expected_max": 0,
-      "metric": "markerless_test_functions"
-    },
-    {
-      "actual": 1,
-      "budget": "uuid4_call_sites_max",
-      "expected_max": 0,
-      "metric": "uuid4_call_sites"
-    }
-  ],
+  "assertless_total_candidates": 67,
+  "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1004,71 +972,17 @@
     ]
   },
   "intentional_no_exception_contract": 66,
-  "markerless_examples": [
-    "tests/unit/composition/test_target_fk_repair.py:137",
-    "tests/unit/composition/test_target_fk_repair.py:149",
-    "tests/unit/composition/test_target_migration_binding.py:58",
-    "tests/unit/composition/test_target_migration_binding.py:68",
-    "tests/unit/composition/test_target_migration_binding.py:78",
-    "tests/unit/composition/test_target_migration_binding.py:87",
-    "tests/unit/composition/test_target_migration_rehearsal.py:107",
-    "tests/unit/composition/test_target_migration_rehearsal.py:167",
-    "tests/unit/composition/test_target_migration_rehearsal.py:205",
-    "tests/unit/composition/test_target_migration_rehearsal.py:212",
-    "tests/unit/composition/test_target_migration_rehearsal.py:224",
-    "tests/unit/composition/test_target_migration_rehearsal.py:253",
-    "tests/unit/infrastructure/storage/test_target_candidate_builder.py:90",
-    "tests/unit/infrastructure/storage/test_target_candidate_builder.py:111",
-    "tests/unit/infrastructure/storage/test_target_candidate_builder.py:120",
-    "tests/unit/infrastructure/storage/test_target_candidate_builder.py:127",
-    "tests/unit/infrastructure/storage/test_target_classification_guard.py:44",
-    "tests/unit/infrastructure/storage/test_target_classification_guard.py:52",
-    "tests/unit/infrastructure/storage/test_target_classification_guard.py:62",
-    "tests/unit/infrastructure/storage/test_target_classification_guard.py:74",
-    "tests/unit/infrastructure/storage/test_target_classification_migration.py:57",
-    "tests/unit/infrastructure/storage/test_target_classification_migration.py:70",
-    "tests/unit/infrastructure/storage/test_target_classification_migration.py:79",
-    "tests/unit/infrastructure/storage/test_target_classification_migration.py:86",
-    "tests/unit/infrastructure/storage/test_target_classification_migration.py:92",
-    "tests/unit/infrastructure/storage/test_target_classification_migration.py:109",
-    "tests/unit/infrastructure/storage/test_target_classification_migration.py:117",
-    "tests/unit/infrastructure/storage/test_target_classification_migration.py:127",
-    "tests/unit/infrastructure/storage/test_target_classification_migration.py:152",
-    "tests/unit/infrastructure/storage/test_target_classification_migration.py:192",
-    "tests/unit/infrastructure/storage/test_target_classification_migration.py:208",
-    "tests/unit/infrastructure/storage/test_target_fk_repair.py:88",
-    "tests/unit/infrastructure/storage/test_target_fk_repair.py:122",
-    "tests/unit/infrastructure/storage/test_target_fk_repair.py:137",
-    "tests/unit/infrastructure/storage/test_target_fk_repair.py:170",
-    "tests/unit/infrastructure/storage/test_target_fk_repair.py:176",
-    "tests/unit/infrastructure/storage/test_target_fk_repair.py:188",
-    "tests/unit/iuphar_target_class/test_integration_acceptance.py:61",
-    "tests/unit/iuphar_target_class/test_integration_acceptance.py:264",
-    "tests/unit/iuphar_target_class/test_integration_acceptance.py:284",
-    "tests/unit/iuphar_target_class/test_integration_acceptance.py:300",
-    "tests/unit/iuphar_target_class/test_integration_acceptance.py:314",
-    "tests/unit/iuphar_target_class/test_integration_acceptance.py:325",
-    "tests/unit/iuphar_target_class/test_integration_acceptance.py:342",
-    "tests/unit/iuphar_target_class/test_integration_acceptance.py:356",
-    "tests/unit/iuphar_target_class/test_integration_acceptance.py:390",
-    "tests/unit/iuphar_target_class/test_integration_acceptance.py:400",
-    "tests/unit/iuphar_target_class/test_integration_acceptance.py:469",
-    "tests/unit/iuphar_target_class/test_integration_acceptance.py:485",
-    "tests/unit/iuphar_target_class/test_integration_acceptance.py:501",
-    "tests/unit/iuphar_target_class/test_integration_acceptance.py:515",
-    "tests/unit/iuphar_target_class/test_integration_acceptance.py:531",
-    "tests/unit/iuphar_target_class/test_integration_acceptance.py:548"
-  ],
-  "markerless_test_functions": 53,
+  "markerless_examples": [],
+  "markerless_test_functions": 0,
   "parse_errors": [],
-  "refined_assertless_tests": 1,
+  "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
     "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
     "lane": "repo-backed-unit",
-    "marked_test_files": 82,
+    "marked_test_files": 80,
     "marker": "pytest.mark.repo_backed",
     "subtree": "tests/unit/repo_backed/",
-    "test_files": 82,
+    "test_files": 80,
     "unmarked_test_files": []
   },
   "report": {
@@ -1573,13 +1487,6 @@
         "path": "tests/unit/interfaces/http/test_health_server.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_consume_headers"
-      },
-      {
-        "category": "weak_no_value",
-        "line": "34",
-        "path": "tests/unit/iuphar_target_class/test_integration_acceptance.py",
-        "rationale": "candidate tests that need later assertion strengthening or removal review",
-        "test_name": "test_reference_conflict_codes_compare_json_collections"
       }
     ],
     "assertless_category_counts": {
@@ -1587,7 +1494,7 @@
       "benchmark_or_performance": 0,
       "helper_asserted": 1,
       "intentional_no_exception_contract": 66,
-      "weak_no_value": 1
+      "weak_no_value": 0
     },
     "assertless_examples": [
       "tests/integration/infrastructure/storage/test_delta_reader.py:586",
@@ -1616,7 +1523,7 @@
       "tests/unit/infrastructure/test_issue_10469_stream_a_infra_twenty_one.py:507",
       "tests/unit/infrastructure/test_storage_factory.py:820"
     ],
-    "assertless_total_candidates": 68,
+    "assertless_total_candidates": 67,
     "compatibility_examples": [],
     "compatibility_files": [],
     "compatibility_test_files": 0,
@@ -1789,71 +1696,17 @@
         ".yml"
       ]
     },
-    "markerless_examples": [
-      "tests/unit/composition/test_target_fk_repair.py:137",
-      "tests/unit/composition/test_target_fk_repair.py:149",
-      "tests/unit/composition/test_target_migration_binding.py:58",
-      "tests/unit/composition/test_target_migration_binding.py:68",
-      "tests/unit/composition/test_target_migration_binding.py:78",
-      "tests/unit/composition/test_target_migration_binding.py:87",
-      "tests/unit/composition/test_target_migration_rehearsal.py:107",
-      "tests/unit/composition/test_target_migration_rehearsal.py:167",
-      "tests/unit/composition/test_target_migration_rehearsal.py:205",
-      "tests/unit/composition/test_target_migration_rehearsal.py:212",
-      "tests/unit/composition/test_target_migration_rehearsal.py:224",
-      "tests/unit/composition/test_target_migration_rehearsal.py:253",
-      "tests/unit/infrastructure/storage/test_target_candidate_builder.py:90",
-      "tests/unit/infrastructure/storage/test_target_candidate_builder.py:111",
-      "tests/unit/infrastructure/storage/test_target_candidate_builder.py:120",
-      "tests/unit/infrastructure/storage/test_target_candidate_builder.py:127",
-      "tests/unit/infrastructure/storage/test_target_classification_guard.py:44",
-      "tests/unit/infrastructure/storage/test_target_classification_guard.py:52",
-      "tests/unit/infrastructure/storage/test_target_classification_guard.py:62",
-      "tests/unit/infrastructure/storage/test_target_classification_guard.py:74",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:57",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:70",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:79",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:86",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:92",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:109",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:117",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:127",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:152",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:192",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:208",
-      "tests/unit/infrastructure/storage/test_target_fk_repair.py:88",
-      "tests/unit/infrastructure/storage/test_target_fk_repair.py:122",
-      "tests/unit/infrastructure/storage/test_target_fk_repair.py:137",
-      "tests/unit/infrastructure/storage/test_target_fk_repair.py:170",
-      "tests/unit/infrastructure/storage/test_target_fk_repair.py:176",
-      "tests/unit/infrastructure/storage/test_target_fk_repair.py:188",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:61",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:264",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:284",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:300",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:314",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:325",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:342",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:356",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:390",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:400",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:469",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:485",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:501",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:515",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:531",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:548"
-    ],
-    "markerless_test_functions": 53,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "parse_errors": [],
-    "refined_assertless_tests": 1,
+    "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
       "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
       "lane": "repo-backed-unit",
-      "marked_test_files": 82,
+      "marked_test_files": 80,
       "marker": "pytest.mark.repo_backed",
       "subtree": "tests/unit/repo_backed/",
-      "test_files": 82,
+      "test_files": 80,
       "unmarked_test_files": []
     },
     "root": ".",
@@ -1862,8 +1715,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 3363,
-      "test_python_file_count": 3616,
+      "test_glob_file_count": 3339,
+      "test_python_file_count": 3591,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -1904,88 +1757,34 @@
       "top_level_directory_count_including_pycache": 16
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 3363,
-    "total_test_functions": 33676,
+    "total_test_files": 3339,
+    "total_test_functions": 33420,
     "unreviewed_assertion_bypass_count": 0,
-    "uuid4_call_sites": 1
+    "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "64ae4b6787faf3d595aeef863e35f4c248d2be45c55c5a87c1c7faeeedf2c45c",
+  "source_tree_sha256": "c47d8308ead93eacfddf19400736d1c6f83b19339618b562889c6aa21fa81297",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
-    "assertless_total_candidates": 68,
+    "assertless_total_candidates": 67,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
     "intentional_no_exception_contract": 66,
-    "markerless_examples": [
-      "tests/unit/composition/test_target_fk_repair.py:137",
-      "tests/unit/composition/test_target_fk_repair.py:149",
-      "tests/unit/composition/test_target_migration_binding.py:58",
-      "tests/unit/composition/test_target_migration_binding.py:68",
-      "tests/unit/composition/test_target_migration_binding.py:78",
-      "tests/unit/composition/test_target_migration_binding.py:87",
-      "tests/unit/composition/test_target_migration_rehearsal.py:107",
-      "tests/unit/composition/test_target_migration_rehearsal.py:167",
-      "tests/unit/composition/test_target_migration_rehearsal.py:205",
-      "tests/unit/composition/test_target_migration_rehearsal.py:212",
-      "tests/unit/composition/test_target_migration_rehearsal.py:224",
-      "tests/unit/composition/test_target_migration_rehearsal.py:253",
-      "tests/unit/infrastructure/storage/test_target_candidate_builder.py:90",
-      "tests/unit/infrastructure/storage/test_target_candidate_builder.py:111",
-      "tests/unit/infrastructure/storage/test_target_candidate_builder.py:120",
-      "tests/unit/infrastructure/storage/test_target_candidate_builder.py:127",
-      "tests/unit/infrastructure/storage/test_target_classification_guard.py:44",
-      "tests/unit/infrastructure/storage/test_target_classification_guard.py:52",
-      "tests/unit/infrastructure/storage/test_target_classification_guard.py:62",
-      "tests/unit/infrastructure/storage/test_target_classification_guard.py:74",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:57",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:70",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:79",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:86",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:92",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:109",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:117",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:127",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:152",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:192",
-      "tests/unit/infrastructure/storage/test_target_classification_migration.py:208",
-      "tests/unit/infrastructure/storage/test_target_fk_repair.py:88",
-      "tests/unit/infrastructure/storage/test_target_fk_repair.py:122",
-      "tests/unit/infrastructure/storage/test_target_fk_repair.py:137",
-      "tests/unit/infrastructure/storage/test_target_fk_repair.py:170",
-      "tests/unit/infrastructure/storage/test_target_fk_repair.py:176",
-      "tests/unit/infrastructure/storage/test_target_fk_repair.py:188",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:61",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:264",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:284",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:300",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:314",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:325",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:342",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:356",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:390",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:400",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:469",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:485",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:501",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:515",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:531",
-      "tests/unit/iuphar_target_class/test_integration_acceptance.py:548"
-    ],
-    "markerless_test_functions": 53,
-    "refined_assertless_tests": 1,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
+    "refined_assertless_tests": 0,
     "unreviewed_assertion_bypass_count": 0,
-    "uuid4_call_sites": 1
+    "uuid4_call_sites": 0
   },
   "test_file_inventory": {
     "pytest_python_files": [
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 3363,
-    "test_python_file_count": 3616,
+    "test_glob_file_count": 3339,
+    "test_python_file_count": 3591,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2026,8 +1825,8 @@
     "top_level_directory_count_including_pycache": 16
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 3363,
-  "total_test_functions": 33676,
+  "total_test_files": 3339,
+  "total_test_functions": 33420,
   "unreviewed_assertion_bypass_count": 0,
-  "uuid4_call_sites": 1
+  "uuid4_call_sites": 0
 }

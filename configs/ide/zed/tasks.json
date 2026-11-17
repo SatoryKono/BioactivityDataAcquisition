@@ -1,7 +1,7 @@
 [
     {
         "label": "Python: active project interpreter",
-        "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
+        "command": "& (Join-Path $env:ZED_WORKTREE_ROOT '.venv-win\\Scripts\\python.exe')",
         "args": [
             "-c",
             "\"import sys; print(sys.executable); print(sys.version)\""
@@ -14,7 +14,7 @@
     },
     {
         "label": "Environment: verify",
-        "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
+        "command": "& (Join-Path $env:ZED_WORKTREE_ROOT '.venv-win\\Scripts\\python.exe')",
         "args": [
             "scripts/engineering/dev/zed_env_doctor.py"
         ],
@@ -26,16 +26,18 @@
     },
     {
         "label": "pytest: current test file (quick; project addopts disabled)",
-        "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
+        "command": "& (Join-Path $env:ZED_WORKTREE_ROOT '.venv-win\\Scripts\\python.exe')",
         "args": [
             "-m",
             "pytest",
             "-q",
             "-o",
             "addopts=",
+            "-p",
+            "no:benchmark",
             "-o",
             "cache_dir=.cache/pytest/windows",
-            "$ZED_FILE"
+            "\"$env:ZED_FILE\""
         ],
         "cwd": "$ZED_WORKTREE_ROOT",
         "env": {
@@ -49,13 +51,13 @@
     },
     {
         "label": "pytest: current test file (project settings)",
-        "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
+        "command": "& (Join-Path $env:ZED_WORKTREE_ROOT '.venv-win\\Scripts\\python.exe')",
         "args": [
             "-m",
             "pytest",
             "-o",
             "cache_dir=.cache/pytest/windows",
-            "$ZED_FILE"
+            "\"$env:ZED_FILE\""
         ],
         "cwd": "$ZED_WORKTREE_ROOT",
         "env": {
@@ -72,12 +74,12 @@
     },
     {
         "label": "Ruff: check current file",
-        "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
+        "command": "& (Join-Path $env:ZED_WORKTREE_ROOT '.venv-win\\Scripts\\python.exe')",
         "args": [
             "-m",
             "ruff",
             "check",
-            "$ZED_FILE"
+            "\"$env:ZED_FILE\""
         ],
         "cwd": "$ZED_WORKTREE_ROOT",
         "save": "current",
@@ -87,13 +89,13 @@
     },
     {
         "label": "Ruff: check formatting of current file",
-        "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
+        "command": "& (Join-Path $env:ZED_WORKTREE_ROOT '.venv-win\\Scripts\\python.exe')",
         "args": [
             "-m",
             "ruff",
             "format",
             "--check",
-            "$ZED_FILE"
+            "\"$env:ZED_FILE\""
         ],
         "cwd": "$ZED_WORKTREE_ROOT",
         "save": "current",
