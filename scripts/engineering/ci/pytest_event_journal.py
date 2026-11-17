@@ -87,7 +87,7 @@ _SECRET_KEY = re.compile(
 )
 _SECRET_ASSIGNMENT = re.compile(
     r"(?i)(?:^|[^A-Za-z0-9])"
-    r"(token|secret|password|passwd|api[_-]?key|access[_-]?key|"
+    r"(token|secret|password|passwd|passphrase|api[_-]?key|access[_-]?key|"
     r"authorization|credential)"
     r"""['"]?\s*[:=]\s*(?:"([^"]*)"|'([^']*)'|([^\s,;\]"']+))"""
 )
@@ -192,14 +192,33 @@ def _is_password_name(name: str) -> bool:
     return _PASSWORD_NAME.search(name) is not None
 
 
-def _seal_tree(value: Any) -> Any:
+def _seal_tree(value: Any, secrets: tuple[str, ...]) -> Any:
     if isinstance(value, dict):
-        return {str(key): _seal_tree(item) for key, item in value.items()}
+        return {
+            _redact_text(str(key), secrets): _seal_tree(item, secrets)
+            for key, item in value.items()
+        }
     if isinstance(value, (list, tuple)):
-        return [_seal_tree(item) for item in value]
+        return [_seal_tree(item, secrets) for item in value]
     if value is None:
         return None
     return _sealed_marker()
+
+
+def _password_assignment_replacement(value: str) -> str | None:
+    """Return the password capture to write, or None when it is already sealed.
+
+    Unquoted values stop before ``]``. A stored marker is therefore captured as
+    ``[redacted`` or ``[redacted:<12 hex>``. Rewriting those without the closing
+    bracket keeps the unmatched ``]`` and stays idempotent.
+    """
+    if value in {"[redacted", _SEALED_REDACTION}:
+        return None
+    if _REDACTED_ASSIGNMENT_VALUE.fullmatch(value) is not None:
+        if value.endswith("]"):
+            return _SEALED_REDACTION
+        return "[redacted"
+    return _SEALED_REDACTION
 
 
 def _redaction_token(captured: str) -> str:
@@ -228,18 +247,19 @@ def _assigned_secret(match: re.Match[str]) -> tuple[int, str]:
 def _replace_assignment(match: re.Match[str]) -> str:
     keyword = match.group(1)
     index, value = _assigned_secret(match)
+    prefix = match.group(0)[: match.start(index) - match.start(0)]
+    suffix = match.group(0)[match.end(index) - match.start(0) :]
+    if _is_password_name(keyword):
+        replacement = _password_assignment_replacement(value)
+        if replacement is None:
+            return match.group(0)
+        return prefix + replacement + suffix
     if (
         _REDACTED_ASSIGNMENT_VALUE.fullmatch(value) is not None
         or value == _SEALED_REDACTION
     ):
         return match.group(0)
-    prefix = match.group(0)[: match.start(index) - match.start(0)]
-    suffix = match.group(0)[match.end(index) - match.start(0) :]
-    if _is_password_name(keyword):
-        replacement = _sealed_marker()
-    else:
-        replacement = _redaction_token(value)
-    return prefix + replacement + suffix
+    return prefix + _redaction_token(value) + suffix
 
 
 def _replace_prefix(match: re.Match[str]) -> str:
@@ -392,7 +412,7 @@ def _redact_structured(value: Any, secrets: tuple[str, ...]) -> Any:
             name = str(key)
             safe_name = _redact_text(name, secrets)
             if _is_password_name(name):
-                redacted[safe_name] = _seal_tree(item)
+                redacted[safe_name] = _seal_tree(item, secrets)
             elif _SECRET_KEY.search(name) is not None:
                 redacted[safe_name] = _redact_secret_value(item, secrets)
             else:

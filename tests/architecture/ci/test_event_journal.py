@@ -1563,6 +1563,47 @@ def test_quoted_assignment_redacts_the_enclosed_value() -> None:
     assert "''" not in redacted_empty
 
 
+def test_password_assignments_stay_sealed_across_a_second_pass() -> None:
+    from scripts.engineering.ci.pytest_event_journal import _redact_text
+
+    samples = (
+        "password=swordfish",
+        "passwd=swordfish",
+        "passphrase=private-value",
+        'passphrase="private-value"',
+        "notes passphrase=private-value tail",
+    )
+    known = ("swordfish", "private-value")
+    for raw in samples:
+        for secrets in ((), known):
+            once = _redact_text(raw, secrets)
+            twice = _redact_text(once, secrets)
+            assert once == twice
+            assert "swordfish" not in once
+            assert "private-value" not in once
+            assert "[redacted:" not in once
+            assert "[redacted]" in once
+            assert "[redacted]]" not in once
+
+
+def test_nested_password_keys_do_not_keep_secret_text() -> None:
+    import json
+
+    from scripts.engineering.ci.pytest_event_journal import _redact_structured
+
+    fixture = "canary-private-token"
+    redacted = _redact_structured(
+        {"password": {f"token={fixture}": "unused", "label": "public-name"}},
+        (),
+    )
+    blob = json.dumps(redacted, sort_keys=True)
+    assert fixture not in blob
+    assert "unused" not in blob
+    nested = redacted["password"]
+    assert nested["label"] == "[redacted]"
+    assert any(key.startswith("token=") and "[redacted:" in key for key in nested)
+
+
 def test_redaction_token_is_not_an_unsalted_digest() -> None:
     import hashlib
 
