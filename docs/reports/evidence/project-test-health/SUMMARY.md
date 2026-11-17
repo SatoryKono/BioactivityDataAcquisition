@@ -58,10 +58,10 @@ coverage refresh:
 ## Freshness note
 
 Re-verified on 2026-11-17 at source commit
-`362ca1bfd73a907a1a4185f05ce0cc6dc3864dd5`: the canonical source list and historical shard manifest
-remain present. The tracked tree contains 3,355 files with basenames
+`MERGE_TIP_PLACEHOLDER`: the canonical source list and historical shard manifest
+remain present. The tracked tree contains 3,362 files with basenames
 matching `test_*.py` under `tests/`, counted from
-`git ls-tree -r --name-only 362ca1bfd73a907a1a4185f05ce0cc6dc3864dd5 -- tests`.
+`git ls-files 'tests/**/test_*.py'`.
 This inventory check records no test execution or coverage measurement.
 The 2026-10-08 17-shard capture remains the latest measured coverage in this summary.
 

@@ -8,7 +8,7 @@ source_refs:
 - docs/00-project/ai/agents/guides/MEMORY_USAGE.md
 - src/memory/tooling/workflow.py
 confidence: curated
-last_verified: '2026-08-04T00:00:00Z'
+last_verified: '2026-11-17T00:00:00Z'
 summary: Promote notes only when the knowledge is reusable across future tasks and leave one-off debug detail in episodic memory.
 ---
 

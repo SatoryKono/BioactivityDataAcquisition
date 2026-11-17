@@ -904,10 +904,13 @@ def _render_server_transport_lines(server: dict[str, Any]) -> list[str]:
     """Render command/url/args lines for one MCP server entry."""
     if "url" in server:
         return [f"url = {_toml_string(str(server['url']))}"]
-    return [
+    lines = [
         f"command = {_toml_string(str(server['command']))}",
         f"args = {_toml_array(server.get('args', []))}",
     ]
+    if "cwd" in server:
+        lines.append(f"cwd = {_toml_string(str(server['cwd']))}")
+    return lines
 
 
 def _render_server_env_section(key: str, env: dict[str, Any]) -> list[str]:

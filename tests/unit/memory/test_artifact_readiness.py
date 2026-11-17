@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import subprocess
 from pathlib import Path
 
@@ -185,3 +186,38 @@ def test_timeline_readiness_requires_manifest_inside_repository(
     (events_dir / "ci.jsonl").write_text('{"id":"ci::one"}\n', encoding="utf-8")
 
     assert timeline_events_ready(events_dir, repo_root=tmp_path) is False
+
+
+@pytest.mark.parametrize(
+    ("source_refs", "expected_ready"),
+    [
+        pytest.param(1, False, id="integer"),
+        pytest.param(0, False, id="zero"),
+        pytest.param(False, False, id="boolean"),
+        pytest.param("ref", False, id="string"),
+        pytest.param("", False, id="empty-string"),
+        pytest.param({}, False, id="mapping"),
+        pytest.param(None, True, id="null"),
+        pytest.param([], True, id="empty-list"),
+        pytest.param(["docs/00-project/RULES.md"], True, id="reference-list"),
+    ],
+)
+@pytest.mark.parametrize("with_manifest", [False, True])
+@pytest.mark.parametrize("field", ["source_refs", "related_refs", "graph_node_refs"])
+def test_timeline_readiness_validates_reference_lists(
+    tmp_path: Path,
+    source_refs: object,
+    expected_ready: bool,
+    with_manifest: bool,
+    field: str,
+) -> None:
+    events = tmp_path / "events"
+    events.mkdir()
+    (events / "runs.jsonl").write_text(
+        json.dumps({"id": "run-1", field: source_refs}) + "\n",
+        encoding="utf-8",
+    )
+    if with_manifest:
+        write_timeline_manifest(tmp_path, events)
+
+    assert timeline_events_ready(events) is expected_ready
