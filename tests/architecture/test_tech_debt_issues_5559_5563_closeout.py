@@ -174,6 +174,8 @@ def test_issue_5562_skip_inventory_entries_are_individually_accountable() -> Non
         # Existing engine guards moved from unit to the integration census;
         # no skip call or historical closeout status was added or changed.
         "#13168": 2,
+        # Existing Windows/Zed guards moved from unit to integration (#13170).
+        "#13170": 1,
     }
 
 
