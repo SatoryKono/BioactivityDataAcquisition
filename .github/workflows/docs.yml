@@ -526,6 +526,15 @@ jobs:
             source_file="${source_path##*/}"
             stem="${source_file%.*}"
             expected_svg="${source_dir}/svg/${stem}.svg"
+            # A deleted source has no sibling to track. A source that still
+            # exists must already have a committed SVG: render.sh would
+            # otherwise recreate it untracked, and git diff ignores that.
+            if [ -f "${source_path}" ]; then
+              if ! git ls-files --error-unmatch -- "${expected_svg}" >/dev/null 2>&1; then
+                echo "::error::Sibling ${expected_svg} is not committed."
+                exit 1
+              fi
+            fi
             bash docs/02-architecture/diagrams/tooling/render.sh \
               --svg-only \
               --puppeteer /tmp/puppeteer-config.json \
