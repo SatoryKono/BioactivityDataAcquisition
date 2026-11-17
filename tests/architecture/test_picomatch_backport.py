@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import subprocess
 import tarfile
 from pathlib import Path
@@ -21,7 +22,7 @@ CONSUMERS = (
     "grafana/plugins/bioetl-scenes-app",
     "grafana/plugins/bioetl-selectorshell-panel",
 )
-ARCHIVE = BACKPORT / "picomatch-4.0.8-bioetl.15.tgz"
+ARCHIVE = BACKPORT / "picomatch-4.0.8-bioetl.16.tgz"
 
 
 @pytest.fixture
@@ -60,7 +61,7 @@ def test_picomatch_archive_matches_reviewed_source() -> None:
         expected={
             "upstream_commit": "7be3276fb8bd215a8c73fa066bcaf696c244ad88",
             "advisory": "GHSA-fc5q-39xc-vjpf",
-            "local_version": "4.0.8-bioetl.15",
+            "local_version": "4.0.8-bioetl.16",
         },
     )
 
@@ -70,7 +71,7 @@ def test_picomatch_consumers_install_verified_archive(consumer: str) -> None:
     assert_consumers_pin_archive(
         [consumer],
         package_name="picomatch",
-        version="4.0.8-bioetl.15",
+        version="4.0.8-bioetl.16",
         archive=ARCHIVE,
         forbidden_versions=(
             "2.3.2",
@@ -281,30 +282,41 @@ def test_quote_and_unclosed_bracket_nested_repeat_bypass(
 
 
 @pytest.mark.parametrize(
-    ("pattern", "repeat"),
+    ("pattern", "repeat", "options"),
     [
-        ("+(a)" * 8, 62),
-        ("*(a)" * 8, 62),
-        ("?(a)" * 32, 24),
-        ("?(a|aa)" * 32, 24),
-        ("?(a)+(a)" * 16, 24),
-        ("(a)?" * 32, 24),
-        ("@(a|aa)" * 30, 45),
-        ("(a|aa)" * 30, 45),
-        ("{a,aa}" * 30, 45),
+        ("+(a)" * 8, 62, {}),
+        ("*(a)" * 8, 62, {}),
+        ("?(a)" * 32, 24, {}),
+        ("?(a|aa)" * 32, 24, {}),
+        ("?(a)+(a)" * 16, 24, {}),
+        ("(a)?" * 32, 24, {}),
+        ("@(a|aa)" * 30, 45, {}),
+        ("(a|aa)" * 30, 45, {}),
+        ("{a,aa}" * 30, 45, {}),
+        ("@(a|AA)" * 30, 45, {"nocase": True}),
+        ("@(a|AA)" * 30, 45, {"flags": "i"}),
     ],
 )
 def test_sequential_quantified_extglobs_finish(
     pattern: str,
     repeat: int,
+    options: dict[str, object],
     packed_picomatch: Path,
 ) -> None:
     code = (
         "const p=require(process.argv[1]);"
-        "console.log(p.makeRe(process.argv[2]).test('a'.repeat(Number(process.argv[3]))+'!'));"
+        "console.log(p.makeRe(process.argv[2],JSON.parse(process.argv[4])).test('a'.repeat(Number(process.argv[3]))+'!'));"
     )
     result = subprocess.run(
-        ["node", "-e", code, str(packed_picomatch), pattern, str(repeat)],
+        [
+            "node",
+            "-e",
+            code,
+            str(packed_picomatch),
+            pattern,
+            str(repeat),
+            json.dumps(options),
+        ],
         capture_output=True,
         text=True,
         timeout=3,

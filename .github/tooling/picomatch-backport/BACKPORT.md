@@ -1,7 +1,7 @@
 # Local picomatch security backport
 
 This is a private BioETL build, **not an upstream release**. Version
-`4.0.8-bioetl.15` identifies modified code based on upstream `4.0.7`.
+`4.0.8-bioetl.16` identifies modified code based on upstream `4.0.7`.
 
 It addresses GHSA-fc5q-39xc-vjpf / CVE-2026-112366 with a **fail-closed**
 boundary:
@@ -26,7 +26,8 @@ boundary:
    after a parenthesized group is also literal.
 8. Patterns compiling multiple overlapping alternative-bearing groups use whole-pattern
    literal fallback. This includes compositions of raw parentheses, `@(...)`,
-   and `{...,...}`; a single overlapping group and disjoint fixed-word alternatives stay supported.
+   and `{...,...}`. Overlap uses effective regex flags, including both
+   `nocase` and explicit `flags: "i"`; a single overlapping group and disjoint fixed-word alternatives stay supported.
 
 9. Source nesting beyond 32 groups triggers one whole-pattern literal escape
    before tokenization, bounding the cost of deep fallback.
