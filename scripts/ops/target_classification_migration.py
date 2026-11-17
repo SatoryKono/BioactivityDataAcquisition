@@ -6,7 +6,7 @@ import argparse
 import json
 from pathlib import Path
 
-from bioetl.composition.bootstrap.runtime.composite_runtime_management_bundle import (
+from bioetl.composition.bootstrap.target_migration_binding import (
     bind_target_deployment,
 )
 from bioetl.infrastructure.config.config_root import resolve_configs_root

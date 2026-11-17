@@ -12,7 +12,7 @@ import pyarrow as pa
 import pytest
 from deltalake import DeltaTable, write_deltalake
 
-from bioetl.composition.bootstrap.runtime.composite_control_plane_bundle import (
+from bioetl.composition.bootstrap.target_fk_repair import (
     TargetFKRepairRequest,
     _verify_isolated_paths,
     isolate_recovery_config,

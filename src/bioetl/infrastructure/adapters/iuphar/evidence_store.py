@@ -10,7 +10,7 @@ from bioetl.domain.entities.target_classification_boundary import (
     TargetClassificationArtifactReference,
     TargetClassificationResult,
 )
-from bioetl.infrastructure.control_plane._evidence_location_publish import (
+from bioetl.infrastructure.control_plane.evidence_location_publish import (
     publish_bytes_if_absent,
 )
 from iuphar_target_class.stage0.io import canonical_json_bytes

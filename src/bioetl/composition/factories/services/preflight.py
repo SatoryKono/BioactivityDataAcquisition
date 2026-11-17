@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from functools import partial
 from pathlib import Path
-from typing import Protocol, TypeGuard
 
 from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.preflight import (
@@ -17,7 +16,7 @@ from bioetl.domain.medallion import WriteModePolicy
 from bioetl.domain.ports import HealthMonitorPort, LoggerPort
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.time import SystemClock
-from bioetl.composition.bootstrap.runtime.publication_vocab_init import (
+from bioetl.composition.bootstrap.target_classification_init import (
     validate_target_runtime_dependency,
 )
 from bioetl.infrastructure.storage.target_classification_guard import (
@@ -25,12 +24,13 @@ from bioetl.infrastructure.storage.target_classification_guard import (
 )
 
 
-class _TablePathResolver(Protocol):
-    def _resolve_table_path(self, table_name: str) -> str: ...
-
-
-def _resolves_table_path(value: object) -> TypeGuard[_TablePathResolver]:
+def _resolves_table_path(value: object) -> bool:
     return callable(getattr(value, "_resolve_table_path", None))
+
+
+def _table_path(writer: object, table_name: str) -> str:
+    resolver = getattr(writer, "_resolve_table_path")
+    return str(resolver(table_name))
 
 
 def build_preflight_service(
@@ -84,9 +84,9 @@ def _validate_target_dependencies(
         )
     assert_target_table_compatibility(
         silver_path=Path(
-            silver._resolve_table_path(pipeline.config.effective_silver_table)
+            _table_path(silver, pipeline.config.effective_silver_table)
         ),
-        gold_path=Path(gold._resolve_table_path(pipeline.config.effective_gold_table)),
+        gold_path=Path(_table_path(gold, pipeline.config.effective_gold_table)),
         mode=config.target_classification.mode,
         destructive=pipeline.runtime.run_type.value in {"backfill", "rebuild"},
     )

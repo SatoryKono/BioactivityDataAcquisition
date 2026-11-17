@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
-from bioetl.composition.bootstrap.runtime.publication_vocab_init import (
+from bioetl.composition.bootstrap.target_classification_init import (
     hydrate_target_runtime_config,
 )
 

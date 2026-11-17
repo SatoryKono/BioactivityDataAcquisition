@@ -20,18 +20,30 @@ def _validate_manifest_hash(digest: str | None) -> None:
         raise ValueError("target classification manifest hash must be SHA-256 hex")
 
 
+def _require_nonblank_manifest(manifest: str | None) -> None:
+    if manifest is not None and not manifest.strip():
+        raise ValueError("target classification manifest must not be blank")
+
+
+def _require_paired_manifest(manifest: str | None, digest: str | None) -> None:
+    if (manifest is not None) != (digest is not None):
+        raise ValueError("target classification manifest and hash must be paired")
+
+
+def _require_manifest_when_enabled(mode: str, manifest: str | None) -> None:
+    if mode != "off" and manifest is None:
+        raise ValueError("enabled target classification requires a pinned manifest")
+
+
 def _validate_target_classification_manifest(
     mode: str,
     manifest: str | None,
     digest: str | None,
 ) -> None:
-    if manifest is not None and not manifest.strip():
-        raise ValueError("target classification manifest must not be blank")
+    _require_nonblank_manifest(manifest)
     _validate_manifest_hash(digest)
-    if (manifest is not None) != (digest is not None):
-        raise ValueError("target classification manifest and hash must be paired")
-    if mode != "off" and manifest is None:
-        raise ValueError("enabled target classification requires a pinned manifest")
+    _require_paired_manifest(manifest, digest)
+    _require_manifest_when_enabled(mode, manifest)
 
 
 TARGET_CLASSIFICATION_FIELDS: tuple[str, ...] = (

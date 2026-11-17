@@ -3,11 +3,8 @@
 from __future__ import annotations
 
 import os
-import re
 from collections.abc import Mapping, Sequence
-from datetime import datetime
 from pathlib import Path
-from typing import cast
 
 import pandas as pd
 import psutil
@@ -15,28 +12,29 @@ import yaml
 from pandera.pandas import DataFrameModel, DataFrameSchema
 
 from bioetl.domain.config.target_classification import TARGET_CLASSIFICATION_FIELDS
-from bioetl.domain.normalization.profiles.base import NormalizationProfile
 from bioetl.domain.normalization.profiles.chembl_target import CHEMBL_TARGET_PROFILE
-from bioetl.domain.normalization.profiles.chembl_target_classification import (
-    target_v31_normalization_profile,
-)
-from bioetl.domain.schemas.base import ISO8601_TIMESTAMP_REGEX
-from bioetl.domain.transformations import generate_content_hash
-from bioetl.infrastructure.adapters.iuphar.adapter import (
-    IupharTargetClassificationAdapter,
-)
 from bioetl.infrastructure.adapters.iuphar.snapshot_loader import (
     LoadedIupharProfile,
+)
+from bioetl.infrastructure.adapters.iuphar.acceptance_receipt import (
     load_profile,
 )
 
-_META = frozenset({"entity_id", "content_hash"})
+from bioetl.infrastructure.storage.target_migration_row_ops import (
+    GOLD_SCD_COLUMNS as _GOLD_SCD_COLUMNS,
+    META as _META,
+    by_id as _by_id,
+    hash_input as _hash_input,
+    read_delta as _read_delta,
+    scoped_target_hash as _scoped_target_hash,
+    validate_scd_types as _validate_scd_types,
+)
+
 _LEGACY_PHYSICAL_POLICY = "legacy_physical_target_v30_to_v31_v1"
 _OMITTABLE_RUNTIME_COLUMNS = {
     "silver": frozenset({"_run_id", "_run_type", "_ingestion_ts"}),
     "gold": frozenset({"_index", "_dq_error", "_dq_warn"}),
 }
-_GOLD_SCD_COLUMNS = frozenset({"_valid_from", "_valid_to", "_is_current", "_version"})
 
 
 def assert_no_managed_writers() -> None:
@@ -73,53 +71,10 @@ def _managed_writer_command(argv: Sequence[str]) -> bool:
     )
 
 
-def _business(row: Mapping[str, object]) -> dict[str, object]:
-    return {
-        key: value
-        for key, value in row.items()
-        if not key.startswith("_") and key not in _META
-    }
 
 
-def _hash_input(row: Mapping[str, object]) -> dict[str, object]:
-    record = _business(row)
-    if "description" in record and "target_description" not in record:
-        record["target_description"] = record["description"]
-    return record
 
 
-def _by_id(
-    rows: Sequence[Mapping[str, object]],
-) -> dict[tuple[str, int | None], Mapping[str, object]]:
-    indexed: dict[tuple[str, int | None], Mapping[str, object]] = {}
-    current_ids: set[str] = set()
-    scd = any(_GOLD_SCD_COLUMNS.intersection(row) for row in rows)
-    for row in rows:
-        identity = row.get("target_id")
-        if not isinstance(identity, str) or not identity:
-            raise ValueError("target migration needs unique, nonempty target IDs")
-        version: int | None = None
-        if scd:
-            if not _GOLD_SCD_COLUMNS.issubset(row):
-                raise ValueError(
-                    "invalid legacy technical field: incomplete target SCD history envelope"
-                )
-            try:
-                _validate_scd_types(row)
-            except ValueError as error:
-                raise ValueError(f"invalid legacy technical field: {error}") from error
-            version = cast(int, row["_version"])
-            if row["_is_current"]:
-                if identity in current_ids:
-                    raise ValueError("target migration needs unique current target IDs")
-                current_ids.add(identity)
-        key = identity, version
-        if key in indexed:
-            raise ValueError("target migration needs unique target ID/version pairs")
-        indexed[key] = row
-    if not indexed:
-        raise ValueError("empty target cohort cannot replace a canonical table")
-    return indexed
 
 
 def compare_target_rows(
@@ -165,33 +120,6 @@ def _assert_legacy_values(
             raise ValueError(f"candidate changed legacy {kind} field: {key}/{field}")
 
 
-def _scoped_target_hash(
-    row: Mapping[str, object],
-    include_fields: tuple[str, ...],
-    profile: NormalizationProfile,
-) -> str:
-    """Recompute the runtime hash of an already normalized persisted row.
-
-    Use the same null and set-like policies as RecordNormalizationProcessor.
-    Gold's description alias is projected back to the canonical Silver field.
-    """
-    record = _hash_input(row)
-    # Persisted values have already crossed the normalization boundary. Applying
-    # display-name or JSON rules again can be lossy (for example virus strains).
-    # Only restore the reviewed Gold storage coercion of the integer TaxID.
-    taxonomy_id = record.get("taxonomy_id")
-    if isinstance(taxonomy_id, float) and taxonomy_id.is_integer():
-        record["taxonomy_id"] = int(taxonomy_id)
-    return str(
-        generate_content_hash(
-            record,
-            "chembl",
-            exclude_none=True,
-            include_fields=set(include_fields),
-            set_like_fields=set(profile.set_like_fields),
-            datetime_policy="v2_datetime_utc",
-        )
-    )
 
 
 def _frozen_v31_hash_fields(
@@ -207,16 +135,6 @@ def _frozen_v31_hash_fields(
     return tuple(dict.fromkeys((*legacy_include_fields, *TARGET_CLASSIFICATION_FIELDS)))
 
 
-def _read_delta(path: Path) -> list[dict[str, object]]:
-    from deltalake import DeltaTable
-
-    from bioetl.infrastructure.storage.delta.table_ops import read_delta_records
-
-    # Arrow's JSON-compatible row boundary is untyped in the installed stubs.
-    return cast(
-        "list[dict[str, object]]",
-        read_delta_records(DeltaTable(str(path))),
-    )
 
 
 def validate_target_candidate(
@@ -368,98 +286,12 @@ def _validate_storage_envelope(
     return sorted(storage)
 
 
-def _validate_scd_types(row: Mapping[str, object]) -> None:
-    if not _scd_timestamp(row["_valid_from"]):
-        raise ValueError("Gold SCD _valid_from requires datetime or valid ISO8601 text")
-    valid_to = row["_valid_to"]
-    if valid_to is not None and not _scd_timestamp(valid_to):
-        raise ValueError(
-            "Gold SCD _valid_to requires nullable datetime or valid ISO8601 text"
-        )
-    if type(row["_is_current"]) is not bool:
-        raise ValueError("Gold SCD _is_current must retain its boolean type")
-    version = row["_version"]
-    if not isinstance(version, int) or isinstance(version, bool) or version < 1:
-        raise ValueError("Gold SCD _version must retain its positive integer type")
 
 
-def _scd_timestamp(value: object) -> bool:
-    if isinstance(value, datetime):
-        return True
-    if (
-        not isinstance(value, str)
-        or re.fullmatch(ISO8601_TIMESTAMP_REGEX, value) is None
-    ):
-        return False
-    try:
-        datetime.fromisoformat(value.replace("Z", "+00:00"))
-    except ValueError:
-        return False
-    return True
 
 
-def _verify_candidate_hashes(
-    rows: Sequence[Mapping[str, object]], include_fields: tuple[str, ...]
-) -> None:
-    """Reject arbitrary or stale candidate hashes, including classification drift."""
-    profile = target_v31_normalization_profile()
-    for row in rows:
-        if row.get("content_hash") != _scoped_target_hash(row, include_fields, profile):
-            raise ValueError("candidate V31 content hash verification failed")
-
-
-def _verify_source_classifications(
-    layers: Mapping[str, list[dict[str, object]]], profile: LoadedIupharProfile
-) -> None:
-    """Reclassify original Silver inputs, then bind both candidate projections."""
-    adapter = IupharTargetClassificationAdapter(profile)
-    silver_ids = {key[0] for key in _by_id(layers["silver"])}
-    for layer, rows in layers.items():
-        for (target_id, version), row in _by_id(rows).items():
-            if layer == "gold" and target_id not in silver_ids:
-                raise ValueError(
-                    "candidate Gold target has no classified Silver source"
-                )
-            business = {
-                key: value
-                for key, value in _hash_input(row).items()
-                if key not in TARGET_CLASSIFICATION_FIELDS
-            }
-            result = adapter.classify_record(
-                business,
-                input_row_id=f"migration:{layer}:{target_id}:{version}",
-                run_id="migration-validation",
-                run_started_at="1970-01-01T00:00:00+00:00",
-            )
-            _assert_classification_projection(row, result.projection)
-
-
-def _assert_classification_projection(
-    row: Mapping[str, object], expected: Mapping[str, str | None]
-) -> None:
-    """Keep direct, local and effective fields equal to the admitted classifier."""
-    for field in TARGET_CLASSIFICATION_FIELDS:
-        if row.get(field) != expected[field]:
-            raise ValueError(
-                f"candidate classification differs from admitted source: {field}"
-            )
-
-
-def _assert_candidate_cohort_closure(
-    paths: dict[str, Path], gold_rows: Sequence[Mapping[str, object]]
-) -> None:
-    """Require every final assay FK, preserving additional Gold targets.
-
-    Baseline reconciliation mutates Gold only; Silver can retain a superset.
-    Each old/new layer's full identity set is checked independently above.
-    """
-    assay_targets = {
-        row["target_id"]
-        for row in _read_delta(paths["assay"])
-        if row.get("target_id") is not None and row.get("_is_current", True)
-    }
-    current_target_ids = {
-        key[0] for key, row in _by_id(gold_rows).items() if row.get("_is_current", True)
-    }
-    if not assay_targets.issubset(current_target_ids):
-        raise ValueError("baseline assay/target foreign-key closure failed")
+from bioetl.infrastructure.storage.target_migration_classification_checks import (
+    assert_candidate_cohort_closure as _assert_candidate_cohort_closure,
+    verify_candidate_hashes as _verify_candidate_hashes,
+    verify_source_classifications as _verify_source_classifications,
+)

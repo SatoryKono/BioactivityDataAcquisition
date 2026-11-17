@@ -8,7 +8,7 @@ from datetime import datetime
 from pathlib import Path
 from uuid import UUID
 
-from bioetl.composition.bootstrap.runtime.composite_control_plane_bundle import (
+from bioetl.composition.bootstrap.target_fk_repair import (
     TargetFKRepairRequest,
     prepare_target_fk_repair,
 )

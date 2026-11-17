@@ -2,13 +2,6 @@
 
 from __future__ import annotations
 
-from bioetl.composition.bootstrap.runtime.publication_vocab_init import (
-    resolve_target_runtime_config,
-)
-from bioetl.composition.runtime_builders._exact_replay_cached_bronze_context import (
-    restore_target_replay_config,
-)
-
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Literal
@@ -17,6 +10,9 @@ from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.runtime_builders._exact_replay_cached_bronze_context import (
     bind_cached_bronze_context as _bind_cached_bronze_context,
     resolve_exact_replay_cached_bronze_context as _resolve_exact_replay_cached_bronze_context,
+)
+from bioetl.composition.runtime_builders._target_runner_config import (
+    load_target_aware_pipeline_config,
 )
 from bioetl.composition.runtime_builders._inputs_resolution_support import (
     apply_tracing_override as _apply_tracing_override_impl,
@@ -44,7 +40,6 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.config.settings_api import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
-
 @dataclass(frozen=True, slots=True)
 class PreparedRunnerContext:
     settings: Settings
@@ -53,12 +48,10 @@ class PreparedRunnerContext:
     yaml_config: PipelineYamlConfig
     observability: ObservabilityBundle
 
-
 @dataclass(frozen=True, slots=True)
 class ResolvedRunnerDerivedInputs:
     runtime_config: RuntimeConfig
     filter_config: InputFilterConfig | None
-
 
 def _resolve_settings_for_runner(
     *,
@@ -69,7 +62,6 @@ def _resolve_settings_for_runner(
         settings=get_settings_fn(),
         enabled=getattr(ctx, "tracing_enabled_override", None),
     )
-
 
 def _resolve_required_persistence_profile(
     *,
@@ -101,7 +93,6 @@ def _resolve_required_persistence_profile(
         )
     )
 
-
 def _resolve_effective_context(
     *,
     ctx: PipelineRunContext,
@@ -117,7 +108,6 @@ def _resolve_effective_context(
     )
     return _bind_cached_bronze_context(ctx, cached_bronze), cached_bronze
 
-
 def _load_runner_yaml_config(
     *,
     pipeline_name: str,
@@ -126,17 +116,13 @@ def _load_runner_yaml_config(
     ctx: PipelineRunContext | None = None,
     settings: Settings | None = None,
 ) -> PipelineYamlConfig:
-    yaml_config = load_pipeline_config_fn(pipeline_name)
-    if pipeline_name == "chembl_target":
-        if ctx is not None and settings is not None:
-            yaml_config = restore_target_replay_config(
-                ctx=ctx, settings=settings, current_config=yaml_config
-            )
-
-        yaml_config = resolve_target_runtime_config(yaml_config)
-    validate_pk_contract_fn(yaml_config)
-    return yaml_config
-
+    return load_target_aware_pipeline_config(
+        pipeline_name,
+        load_pipeline_config_fn,
+        validate_pk_contract_fn,
+        ctx=ctx,
+        settings=settings,
+    )
 
 def _build_runner_observability(
     *,
@@ -153,7 +139,6 @@ def _build_runner_observability(
         yaml_config=yaml_config,
         skip_gold=bool(getattr(ctx, "skip_gold", False)),
     )
-
 
 def prepare_runner_context(
     *,
@@ -204,7 +189,6 @@ def prepare_runner_context(
         yaml_config=yaml_config,
         observability=observability,
     )
-
 
 def resolve_runner_derived_inputs(
     *,

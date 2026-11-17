@@ -9,7 +9,7 @@ import pytest
 import yaml
 from deltalake import DeltaTable, write_deltalake
 
-from bioetl.composition.bootstrap.runtime.composite_runtime_management_bundle import (
+from bioetl.composition.bootstrap.target_migration_binding import (
     bind_target_deployment,
     bind_target_rehearsal,
 )

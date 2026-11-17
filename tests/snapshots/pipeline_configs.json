@@ -436,6 +436,11 @@
       "silver_table": "chembl.activity",
       "silver_write_mode": "merge"
     },
+    "target_classification": {
+      "mode": "off",
+      "snapshot_manifest": null,
+      "snapshot_manifest_sha256": null
+    },
     "transform_steps": [],
     "transform_version": null
   },
@@ -792,6 +797,11 @@
       "silver_table": "chembl.molecule",
       "silver_write_mode": "merge"
     },
+    "target_classification": {
+      "mode": "off",
+      "snapshot_manifest": null,
+      "snapshot_manifest_sha256": null
+    },
     "transform_steps": [],
     "transform_version": null
   },
@@ -1028,6 +1038,11 @@
       "silver_idempotency_contract": "merge_upsert",
       "silver_table": "chembl.publication_term",
       "silver_write_mode": "merge"
+    },
+    "target_classification": {
+      "mode": "off",
+      "snapshot_manifest": null,
+      "snapshot_manifest_sha256": null
     },
     "transform_steps": [],
     "transform_version": null
@@ -1717,6 +1732,11 @@
       "silver_idempotency_contract": "merge_upsert",
       "silver_table": "crossref.publication",
       "silver_write_mode": "merge"
+    },
+    "target_classification": {
+      "mode": "off",
+      "snapshot_manifest": null,
+      "snapshot_manifest_sha256": null
     },
     "transform_steps": [],
     "transform_version": null
@@ -2499,6 +2519,11 @@
       "silver_table": "openalex.publication",
       "silver_write_mode": "merge"
     },
+    "target_classification": {
+      "mode": "off",
+      "snapshot_manifest": null,
+      "snapshot_manifest_sha256": null
+    },
     "transform_steps": [],
     "transform_version": null
   },
@@ -2800,6 +2825,11 @@
       "silver_idempotency_contract": "merge_upsert",
       "silver_table": "pubchem.compound",
       "silver_write_mode": "merge"
+    },
+    "target_classification": {
+      "mode": "off",
+      "snapshot_manifest": null,
+      "snapshot_manifest_sha256": null
     },
     "transform_steps": [],
     "transform_version": null
@@ -3540,6 +3570,11 @@
       "silver_table": "pubmed.publication",
       "silver_write_mode": "merge"
     },
+    "target_classification": {
+      "mode": "off",
+      "snapshot_manifest": null,
+      "snapshot_manifest_sha256": null
+    },
     "transform_steps": [],
     "transform_version": null
   },
@@ -4182,6 +4217,11 @@
       "silver_table": "semanticscholar.publication",
       "silver_write_mode": "merge"
     },
+    "target_classification": {
+      "mode": "off",
+      "snapshot_manifest": null,
+      "snapshot_manifest_sha256": null
+    },
     "transform_steps": [],
     "transform_version": null
   },
@@ -4416,6 +4456,11 @@
       "silver_idempotency_contract": "merge_upsert",
       "silver_table": "uniprot.idmapping",
       "silver_write_mode": "merge"
+    },
+    "target_classification": {
+      "mode": "off",
+      "snapshot_manifest": null,
+      "snapshot_manifest_sha256": null
     },
     "transform_steps": [],
     "transform_version": null
@@ -4818,6 +4863,11 @@
       "silver_idempotency_contract": "merge_upsert",
       "silver_table": "uniprot.protein",
       "silver_write_mode": "merge"
+    },
+    "target_classification": {
+      "mode": "off",
+      "snapshot_manifest": null,
+      "snapshot_manifest_sha256": null
     },
     "transform_steps": [],
     "transform_version": null

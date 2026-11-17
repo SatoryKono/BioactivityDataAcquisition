@@ -6,7 +6,7 @@ from bioetl.application.pipelines.chembl.target_transformer import (
     TargetTransformer,
 )
 from bioetl.composition.runtime_builders.config_access import get_settings
-from bioetl.composition.bootstrap.runtime.publication_vocab_init import (
+from bioetl.composition.bootstrap.target_classification_init import (
     build_target_classification_session,
 )
 from bioetl.application.pipelines.chembl.target_classified_transformer import (

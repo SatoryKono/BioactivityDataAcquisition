@@ -7,7 +7,7 @@ from pathlib import Path
 
 from iuphar_target_class.policy import PLAN_VERSION
 
-from . import snapshot_loader
+from .snapshot_loader import load_snapshot_manifest
 from ._manifest import checked_document, header, referenced_path, require_sha256, text
 from .snapshot_models import (
     CLASSIFICATION_SCHEMA_VERSION,
@@ -103,7 +103,7 @@ def load_profile(
     snapshot_path, snapshot_hash = referenced_path(
         path.parent, document.get("snapshot")
     )
-    snapshot = snapshot_loader.load_snapshot_manifest(snapshot_path, snapshot_hash)
+    snapshot = load_snapshot_manifest(snapshot_path, snapshot_hash)
     if require_acceptance and snapshot.manifest.get("schema_version") != 2:
         raise ValueError("new enrich requires source-verified snapshot schema 2")
     if require_acceptance and not (

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.composition.bootstrap.runtime.publication_vocab_init import (
+from bioetl.composition.bootstrap.target_classification_init import (
     target_classification_source_refs,
 )
 

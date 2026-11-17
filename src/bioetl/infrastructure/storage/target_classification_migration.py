@@ -22,7 +22,7 @@ if sys.platform == "win32":
 else:
     import fcntl
 
-from bioetl.infrastructure.control_plane._evidence_location_publish import (
+from bioetl.infrastructure.control_plane.evidence_location_publish import (
     publish_bytes_if_absent,
 )
 from bioetl.infrastructure.storage.target_deployment_binding import (

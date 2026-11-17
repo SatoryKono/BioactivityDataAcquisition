@@ -7,7 +7,7 @@ from dataclasses import replace
 import pytest
 
 from bioetl.composition.runtime_builders.config_access import load_pipeline_config
-from bioetl.composition.bootstrap.runtime.publication_vocab_init import (
+from bioetl.composition.bootstrap.target_classification_init import (
     apply_target_contract_identity,
     build_target_classification_session,
     load_target_runtime_profile,

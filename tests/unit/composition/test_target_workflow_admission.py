@@ -21,10 +21,10 @@ from bioetl.application.services.workflow.control_plane.mutation_plan import (
     build_workflow_mutation_plan,
 )
 from bioetl.composition.runtime_builders.config_access import load_pipeline_config
-from bioetl.composition.bootstrap.runtime.publication_vocab_init import (
+from bioetl.composition.bootstrap.target_classification_init import (
     preflight_workflow_target_dependencies,
 )
-from bioetl.composition.bootstrap.cli.lineage import (
+from bioetl.composition.bootstrap.workflow_target_admission import (
     validate_workflow_target_mutations,
 )
 from bioetl.domain.config.target_classification import TARGET_CLASSIFICATION_FIELDS

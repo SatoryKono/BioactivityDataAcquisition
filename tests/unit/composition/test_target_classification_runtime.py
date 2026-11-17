@@ -29,7 +29,7 @@ from bioetl.composition.factories.services._record_processor_policy_support impo
     extract_hash_policy_by_version,
 )
 from bioetl.composition.runtime_builders.config_access import load_pipeline_config
-from bioetl.composition.bootstrap.runtime.publication_vocab_init import (
+from bioetl.composition.bootstrap.target_classification_init import (
     preflight_workflow_target_dependencies,
     resolve_target_runtime_config,
     target_classification_config_source_refs,
@@ -181,7 +181,7 @@ async def test_enrich_uses_v31_schema_and_identical_direct_staged_hash(
     from bioetl.composition.factories.storage._layer_writers import (
         load_contract_rollout_policy,
     )
-    from bioetl.composition.bootstrap.runtime.publication_vocab_init import (
+    from bioetl.composition.bootstrap.target_classification_init import (
         target_classification_normalization_identity,
     )
 
