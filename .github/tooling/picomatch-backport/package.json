@@ -1,7 +1,7 @@
 {
   "name": "picomatch",
   "description": "BioETL local backport of micromatch/picomatch#194 for GHSA-fc5q-39xc-vjpf; not an upstream release.",
-  "version": "4.0.8-bioetl.1",
+  "version": "4.0.8-bioetl.2",
   "homepage": "https://github.com/micromatch/picomatch",
   "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
   "funding": "https://github.com/sponsors/jonschlinkert",

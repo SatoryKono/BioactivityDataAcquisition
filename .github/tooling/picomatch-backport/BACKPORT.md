@@ -1,7 +1,7 @@
 # Local picomatch security backport
 
 This is a private BioETL build, **not an upstream release**. Version
-`4.0.8-bioetl.1` identifies modified code based on upstream `4.0.7`.
+`4.0.8-bioetl.2` identifies modified code based on upstream `4.0.7`.
 It addresses GHSA-fc5q-39xc-vjpf / CVE-2026-112366 with the proposed upstream
 fix from https://github.com/micromatch/picomatch/pull/194 at commit
 `7be3276fb8bd215a8c73fa066bcaf696c244ad88` in `maximilliangrand/picomatch`
@@ -9,7 +9,10 @@ fix from https://github.com/micromatch/picomatch/pull/194 at commit
 
 The archive contains the JavaScript implementation and MIT license from upstream
 `4.0.7` plus that guard. `provenance.json` pins each packaged file hash.
-Only package metadata differs: the private version and description.
+The local amendment also rejects a top-level unbounded wildcard in every repeated
+extglob branch, including `+(*)` and `+(*a)`. The upstream mixed-wildcard
+guard alone leaves these inputs vulnerable. Package metadata uses a private
+version and description.
 The tarball is built with `npm pack`. Architecture tests bind consumer lockfiles
 to the archive integrity. **No OSV advisory is ignored or suppressed.**
 

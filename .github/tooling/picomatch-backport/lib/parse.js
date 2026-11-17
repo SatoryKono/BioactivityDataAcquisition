@@ -139,12 +139,11 @@ const normalizeSimpleBranch = branch => {
   return value.replace(/\\(.)/g, '$1');
 };
 
-const hasMixedWildcards = branch => {
+const hasUnboundedWildcard = branch => {
   let escaped = false;
   let bracket = 0;
   let paren = 0;
   let star = false;
-  let qmark = false;
 
   for (let i = 0; i < branch.length; i++) {
     const ch = branch[i];
@@ -187,11 +186,10 @@ const hasMixedWildcards = branch => {
       // An extglob opener is not a wildcard of its own.
       if (branch[i + 1] === '(') continue;
       if (ch === '*') star = true;
-      else qmark = true;
     }
   }
 
-  return star === true && qmark === true;
+  return star === true;
 };
 
 const hasRepeatedCharPrefixOverlap = branches => {
@@ -353,7 +351,7 @@ const analyzeRepeatedExtglob = (body, options) => {
 
   // Checked for every branch count: a single branch is enough to nest an
   // unbounded quantifier inside the repeat. (GHSA-fc5q-39xc-vjpf / micromatch#194)
-  if (branches.some(hasMixedWildcards)) {
+  if (branches.some(hasUnboundedWildcard)) {
     return { risky: true };
   }
 
