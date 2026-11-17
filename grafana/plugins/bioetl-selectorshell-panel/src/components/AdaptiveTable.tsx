@@ -201,6 +201,49 @@ function RunDetails({fields, row, isRuns, onDismiss}: Readonly<{
   );
 }
 
+function hasRunIdentity(frame: DataFrame): boolean {
+  return Boolean(frame.fields.find((field) => field.name === 'run_id')?.values.some(
+    (value) => typeof value === 'string' && value !== '' && value !== '-',
+  ));
+}
+
+function runsCatalogStatus(frame: DataFrame, isRuns: boolean): React.ReactNode {
+  if (!isRuns || hasRunIdentity(frame)) {
+    return null;
+  }
+  const validEmpty = frame.fields.find((field) => label(field) === 'Pipeline')?.values[0] === 'VALID EMPTY';
+  return <div className={shell}>{validEmpty ? 'VALID EMPTY · No matching launches' : 'UNKNOWN · No run identity'}</div>;
+}
+
+function resolveSummaryFields(
+  frame: DataFrame,
+  fields: Field[],
+  compactFields: AdaptiveTableOptions['compactFields'],
+): Field[] {
+  if (!compactFields) {
+    return fields;
+  }
+  return compactFields
+    .map((name) => frame.fields.find((field) => label(field) === name))
+    .filter((field): field is Field => Boolean(field));
+}
+
+function selectDetailFields(
+  frame: DataFrame,
+  fields: Field[],
+  viewMode: AdaptiveTableOptions['viewMode'],
+  isRuns: boolean,
+): Field[] {
+  const identityNames = ['run_id', 'pipeline', 'run_type', 'workflow_scope'];
+  const runExtraLabels = ['Workflow', 'Provider', 'Duration', 'Saved Evidence', 'Data Quality'];
+  return frame.fields.filter((field) =>
+    viewMode === 'rows'
+    || fields.includes(field)
+    || identityNames.includes(field.name)
+    || (isRuns && runExtraLabels.includes(label(field)))
+  );
+}
+
 const AdaptiveTableView: React.FC<PanelProps<AdaptiveTableOptions>> = (props) => {
   const { data, width, height, options, fieldConfig, timeRange } = props;
   const rawFrame = data.series.find((item) => item.length > 0);
@@ -252,23 +295,15 @@ const AdaptiveTableView: React.FC<PanelProps<AdaptiveTableOptions>> = (props) =>
   if (!frame || fields.length === 0) {
     return <div className={shell}>UNKNOWN · No matching data</div>;
   }
-  if (isRuns && !frame.fields.find((field) => field.name === 'run_id')?.values.some((value) => typeof value === 'string' && value !== '' && value !== '-')) {
-    const validEmpty = frame.fields.find((field) => label(field) === 'Pipeline')?.values[0] === 'VALID EMPTY';
-    return <div className={shell}>{validEmpty ? 'VALID EMPTY · No matching launches' : 'UNKNOWN · No run identity'}</div>;
-  }
+  const catalogStatus = runsCatalogStatus(frame, isRuns);
+  if (catalogStatus !== null) { return catalogStatus; }
   // Explicit compact summaries may use metadata hidden from the wide table.
-  const summaryFields = options.compactFields
-    ? options.compactFields.map((name) => frame.fields.find((field) => label(field) === name)).filter((field): field is Field => Boolean(field))
-    : fields;
+  const summaryFields = resolveSummaryFields(frame, fields, options.compactFields);
   if (isCompact && options.compactFields && summaryFields.length !== options.compactFields.length) {
     return <div className={shell}>UNKNOWN · Required fields unavailable</div>;
   }
 
-  const detailFields = frame.fields.filter((field) =>
-    options.viewMode === 'rows' || fields.includes(field) || ['run_id', 'pipeline', 'run_type', 'workflow_scope'].includes(field.name)
-    || (isRuns && ['Workflow', 'Provider', 'Duration', 'Saved Evidence', 'Data Quality'].includes(label(field)))
-  );
-
+  const detailFields = selectDetailFields(frame, fields, options.viewMode, isRuns);
 
   return (
     <div ref={setHost} className={isCompact ? `${shell} ${compact}` : nativeShell} data-bioetl-adaptive-table={isCompact ? 'compact' : 'wide'}>
