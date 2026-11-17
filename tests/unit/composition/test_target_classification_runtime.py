@@ -54,7 +54,7 @@ def shadow_config(tmp_path: Path, monkeypatch) -> PipelineYamlConfig:
         test_mode=True, data_dir=tmp_path / "workflow-data", _env_file=None
     )
     monkeypatch.setattr(
-        "bioetl.composition.bootstrap.runtime.publication_vocab_init.get_settings",
+        "bioetl.composition.bootstrap.target_classification_init.get_settings",
         lambda: settings,
     )
 
@@ -300,6 +300,7 @@ async def test_shadow_preserves_old_output_and_staged_direct_parity(
     evidence = json.loads(manifests[0].read_text())
     assert evidence["status"] == "complete"
     assert evidence["row_count"] == 1
+    assert evidence["input_row_ids"] == ["chembl.target:CHEMBL1"]
     assert evidence["mode"] == "shadow"
     assert evidence["artifact_sha256"]
 
@@ -379,7 +380,7 @@ def test_workflow_resume_restores_and_forbids_replacing_pinned_dependency(
     )
 
     monkeypatch.setattr(
-        "bioetl.composition.bootstrap.runtime.publication_vocab_init.load_pipeline_config",
+        "bioetl.composition.bootstrap.target_classification_init.load_pipeline_config",
         lambda _: shadow_config,
     )
     config = WorkflowConfig(
@@ -450,7 +451,7 @@ def test_workflow_dependency_pins_profile_and_rechecks_bytes(
     shadow_config, monkeypatch, tmp_path
 ):
     monkeypatch.setattr(
-        "bioetl.composition.bootstrap.runtime.publication_vocab_init.load_pipeline_config",
+        "bioetl.composition.bootstrap.target_classification_init.load_pipeline_config",
         lambda _: shadow_config,
     )
     workflow = WorkflowConfig(
@@ -490,7 +491,7 @@ def test_workflow_resume_rejects_changed_dependency_identity(
     shadow_config, monkeypatch
 ):
     monkeypatch.setattr(
-        "bioetl.composition.bootstrap.runtime.publication_vocab_init.load_pipeline_config",
+        "bioetl.composition.bootstrap.target_classification_init.load_pipeline_config",
         lambda _: shadow_config,
     )
     workflow = WorkflowConfig(
@@ -520,7 +521,7 @@ def test_completed_resume_verifies_legacy_pin_without_new_enrich_admission(
         "historic", steps=(WorkflowStepConfig("target", "chembl_target"),)
     )
     monkeypatch.setattr(
-        "bioetl.composition.bootstrap.runtime.publication_vocab_init.load_pipeline_config",
+        "bioetl.composition.bootstrap.target_classification_init.load_pipeline_config",
         lambda _: config,
     )
     plan = WorkflowMutationSpec(frozenset(), resumed=True)
@@ -741,6 +742,7 @@ async def test_real_runner_persists_both_layers_and_completes_evidence(
     evidence = json.loads(manifest_path.read_text())
     assert evidence["status"] == "complete"
     assert evidence["row_count"] == 1
+    assert evidence["input_row_ids"] == ["chembl.target:CHEMBL1"]
     report = json.loads(Path(result.run_report_json_path).read_text())
     observation = report["observations"]["Target Classification"]
     assert observation["verdict"] == "OK"
@@ -757,7 +759,7 @@ async def test_real_runner_persists_both_layers_and_completes_evidence(
         from bioetl.domain.workflow import WorkflowRunOptionsConfig
 
         monkeypatch.setattr(
-            "bioetl.composition.bootstrap.runtime.publication_vocab_init.load_pipeline_config",
+            "bioetl.composition.bootstrap.target_classification_init.load_pipeline_config",
             lambda name: (
                 config if name == "chembl_target" else load_pipeline_config(name)
             ),

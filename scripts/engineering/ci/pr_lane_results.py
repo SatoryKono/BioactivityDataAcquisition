@@ -209,6 +209,12 @@ EXPLICIT_SCRIPT_FALLBACK_PATHS = frozenset(
 
 NO_PARTIAL_TREE_TEST = "tests/unit/scripts/repo/test_check_no_partial_tree.py"
 HOOK_INSTALLATION_TEST = "tests/unit/scripts/test_hook_installation.py"
+CONFIG_VALIDATION_SURFACE_TEST = "tests/architecture/test_config_validation_surface.py"
+
+ZED_WORKSPACE_CONFIG_TEST = (
+    "tests/unit/repo_backed/scripts/test_zed_workspace_config.py"
+)
+
 SCOPED_CHECKS_TEST = "tests/unit/scripts/repo/test_scoped_checks.py"
 HOOK_RECEIPTS_TEST = "tests/unit/scripts/repo/test_hook_receipts.py"
 IUPHAR_STAGE0_TEST = "tests/unit/iuphar_target_class/test_stage0_manifest.py"
@@ -585,13 +591,13 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/unit/repo_backed/scripts/engineering/dev/test_setup_env_wsl_branches.py",
     ),
     "configs/README.md": (
-        "tests/architecture/test_config_validation_surface.py",
+        CONFIG_VALIDATION_SURFACE_TEST,
         DOCUMENTATION_SYNC_TEST,
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
     "scripts/engineering/dev/README.md": (
-        "tests/unit/repo_backed/scripts/test_zed_portability.py",
-        "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
+        "tests/integration/ide/test_zed_portability.py",
+        ZED_WORKSPACE_CONFIG_TEST,
         SCRIPTS_INVENTORY_MANIFEST_TEST,
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
@@ -1106,20 +1112,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "tests/architecture/test_root_hygiene_workflow.py",
         ),
     ),
-    "configs/README.md": (
-        "tests/architecture/test_config_validation_surface.py",
-        DOCUMENTATION_SYNC_TEST,
-        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
-    ),
-    "scripts/engineering/dev/README.md": (
-        "tests/integration/ide/test_zed_portability.py",
-        "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-        SCRIPTS_INVENTORY_MANIFEST_TEST,
-        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
-    ),
-    "configs/quality/config_validation_surface.yaml": (
-        "tests/architecture/test_config_validation_surface.py",
-    ),
+    "configs/quality/config_validation_surface.yaml": (CONFIG_VALIDATION_SURFACE_TEST,),
     ".gitleaks.toml": (
         "tests/architecture/test_secret_shape_and_operator_guide_contracts.py",
         RUNTIME_ACCEPTANCE_12553_TEST,
@@ -2033,6 +2026,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "docs/reports/ci/stage0_closure.json": (STAGE0_EVIDENCE_TEST,),
     "docs/reports/ci/stage0_closure_report.md": (STAGE0_EVIDENCE_TEST,),
     "reports/mypy_eval.json": (STAGE0_EVIDENCE_TEST,),
+    "tests/snapshots/pipeline_configs.json": (
+        "tests/architecture/test_config_golden_master.py",
+    ),
     "docs/reports/generated/documentation-cleanup-inventory.json": (
         DOCUMENTATION_CLEANUP_INVENTORY_TESTS
     ),
@@ -2102,8 +2098,8 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
 # governing tests; fail-closed semantics are unchanged for unmapped paths.
 AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
     "configs/ide/zed/": (
-        "tests/unit/repo_backed/scripts/test_zed_portability.py",
-        "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
+        "tests/integration/ide/test_zed_portability.py",
+        ZED_WORKSPACE_CONFIG_TEST,
     ),
     "tests/fixtures/grafana/run_explorer/": (
         "tests/integration/test_run_explorer_request_fixtures.py",
@@ -2166,10 +2162,6 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
         "tests/architecture/test_documentation_cleanup_inventory.py",
     ),
     ".vscode/": (TECH_DEBT_5847_5852_CLOSEOUT_TEST,),
-    "configs/ide/zed/": (
-        "tests/integration/ide/test_zed_portability.py",
-        "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-    ),
     ".cursor/": (
         TECH_DEBT_5847_5852_CLOSEOUT_TEST,
         "tests/unit/repo_backed/cursor/test_hook_gate.py",

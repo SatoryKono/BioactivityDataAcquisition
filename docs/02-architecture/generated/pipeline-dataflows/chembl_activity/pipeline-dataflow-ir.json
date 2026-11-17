@@ -768,7 +768,7 @@
     "strict_validation": false
   },
   "effective_config_loader": "scripts.docs.passports.source_facts.load_effective_pipeline_facts",
-  "effective_config_sha256": "ca50c12b1434d90fcbd17a8055a5a2dd4f6874c7e9b64414af4c43611b187b96",
+  "effective_config_sha256": "55381d8cf6325f61a3b111816879352c735069482fb0ea57e059d358794ab65c",
   "entity": "activity",
   "extraction_criteria": [
     {

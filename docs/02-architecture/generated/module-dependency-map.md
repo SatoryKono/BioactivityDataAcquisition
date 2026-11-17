@@ -5,8 +5,8 @@
 
 ## Summary
 
-- Scanned modules: `2650`
-- Internal import edges (raw): `8758`
+- Scanned modules: `2660`
+- Internal import edges (raw): `8766`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `340`
@@ -23,13 +23,13 @@ flowchart LR
     interfaces[interfaces]
     application -->|1686 OK| application
     application -->|1156 OK| domain
-    composition -->|253 OK| application
-    composition -->|686 OK| composition
-    composition -->|340 OK| domain
-    composition -->|357 OK| infrastructure
+    composition -->|252 OK| application
+    composition -->|687 OK| composition
+    composition -->|339 OK| domain
+    composition -->|354 OK| infrastructure
     domain -->|1327 OK| domain
-    infrastructure -->|829 OK| domain
-    infrastructure -->|1377 OK| infrastructure
+    infrastructure -->|830 OK| domain
+    infrastructure -->|1388 OK| infrastructure
     interfaces -->|86 OK| application
     interfaces -->|64 OK| composition
     interfaces -->|100 OK| domain
@@ -42,13 +42,13 @@ flowchart LR
 | ---------------- | ---------------- | ------: | ------- |
 | `application`    | `application`    |    1686 | allowed |
 | `application`    | `domain`         |    1156 | allowed |
-| `composition`    | `application`    |     253 | allowed |
-| `composition`    | `composition`    |     686 | allowed |
-| `composition`    | `domain`         |     340 | allowed |
-| `composition`    | `infrastructure` |     357 | allowed |
+| `composition`    | `application`    |     252 | allowed |
+| `composition`    | `composition`    |     687 | allowed |
+| `composition`    | `domain`         |     339 | allowed |
+| `composition`    | `infrastructure` |     354 | allowed |
 | `domain`         | `domain`         |    1327 | allowed |
-| `infrastructure` | `domain`         |     829 | allowed |
-| `infrastructure` | `infrastructure` |    1377 | allowed |
+| `infrastructure` | `domain`         |     830 | allowed |
+| `infrastructure` | `infrastructure` |    1388 | allowed |
 | `interfaces`     | `application`    |      86 | allowed |
 | `interfaces`     | `composition`    |      64 | allowed |
 | `interfaces`     | `domain`         |     100 | allowed |
@@ -67,8 +67,8 @@ flowchart LR
 | `infrastructure.storage`       | `domain.ports`                 |      67 |
 | `application.services`         | `domain.ports`                 |      59 |
 | `application.pipelines`        | `domain.types`                 |      58 |
-| `composition.bootstrap`        | `application.services`         |      56 |
 | `application.composite`        | `domain.ports`                 |      55 |
+| `composition.bootstrap`        | `application.services`         |      55 |
 | `composition.factories`        | `application.core`             |      50 |
 | `infrastructure.storage`       | `domain.value_objects`         |      43 |
 | `composition.runtime_builders` | `domain.control_plane`         |      42 |
@@ -76,12 +76,12 @@ flowchart LR
 | `application.composite`        | `domain.exceptions`            |      36 |
 | `composition.bootstrap`        | `domain.ports`                 |      36 |
 | `infrastructure.storage`       | `domain.models`                |      36 |
-| `composition.bootstrap`        | `infrastructure.storage`       |      35 |
 | `infrastructure.control_plane` | `domain.control_plane`         |      35 |
+| `composition.bootstrap`        | `infrastructure.storage`       |      34 |
 | `composition.factories`        | `infrastructure.config`        |      34 |
-| `composition.bootstrap`        | `infrastructure.config`        |      33 |
 | `interfaces.cli`               | `application.services`         |      33 |
 | `application.core`             | `domain.ports`                 |      32 |
+| `composition.bootstrap`        | `infrastructure.config`        |      32 |
 | `interfaces.http`              | `domain.control_plane`         |      32 |
 | `infrastructure.storage`       | `domain.medallion`             |      31 |
 | `composition.bootstrap`        | `infrastructure.control_plane` |      29 |

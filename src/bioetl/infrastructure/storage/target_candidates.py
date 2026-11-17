@@ -27,14 +27,24 @@ from bioetl.infrastructure.storage.target_deployment_binding import (
     TargetDeploymentBinding,
     validate_deployment_binding,
 )
+from bioetl.infrastructure.storage.target_migration_classification_checks import (
+    assert_candidate_cohort_closure as _assert_candidate_cohort_closure,
+)
+from bioetl.infrastructure.storage.target_migration_row_ops import (
+    business_fields as _business,
+)
+from bioetl.infrastructure.storage.target_migration_row_ops import (
+    by_id as _by_id,
+)
+from bioetl.infrastructure.storage.target_migration_row_ops import (
+    read_delta as _read_delta,
+)
+from bioetl.infrastructure.storage.target_migration_row_ops import (
+    scoped_target_hash as _scoped_target_hash,
+)
 from bioetl.infrastructure.storage.target_migration_validation import (
-    _assert_candidate_cohort_closure,
-    _business,
-    _by_id,
     _frozen_v31_hash_fields,
     _load_candidate_profile,
-    _read_delta,
-    _scoped_target_hash,
     compare_target_rows,
     validate_target_candidate,
 )
@@ -66,7 +76,7 @@ def freeze_target_inputs(
     silver, gold = _read_delta(checked["silver"]), _read_delta(checked["gold"])
     compare_target_rows(silver, silver, legacy_include_fields)
     compare_target_rows(gold, gold, legacy_include_fields)
-    if not set(_by_id(gold)).issubset(_by_id(silver)):
+    if not {key[0] for key in _by_id(gold)}.issubset(key[0] for key in _by_id(silver)):
         raise ValueError("original Gold targets have no persisted Silver source")
     _assert_candidate_cohort_closure(checked, gold)
     if _input_facts(checked) != before:
@@ -85,6 +95,7 @@ def freeze_target_inputs(
 
 
 def _input_facts(paths: dict[str, Path]) -> dict[str, object]:
+    """Capture Delta identities, versions, file hashes, and config digest."""
     facts: dict[str, object] = {}
     for name in ("silver", "gold", "assay"):
         table = DeltaTable(str(paths[name]))
@@ -103,6 +114,7 @@ def _input_facts(paths: dict[str, Path]) -> dict[str, object]:
 
 
 def _assert_local_files(table: DeltaTable, root: Path) -> None:
+    """Reject Delta data files outside the preserved table root."""
     from bioetl.infrastructure.storage.delta.table_ops import resolve_parquet_file_uri
 
     for uri in table.file_uris():
@@ -112,6 +124,7 @@ def _assert_local_files(table: DeltaTable, root: Path) -> None:
 
 
 def _safe_output(path: Path, paths: TargetMigrationPaths, *, directory: bool) -> None:
+    """Validate output containment, disjointness, and occurrence freshness."""
     resolved = path.resolve()
     if (
         path.name == ".env"
@@ -131,6 +144,7 @@ def _safe_output(path: Path, paths: TargetMigrationPaths, *, directory: bool) ->
 
 
 def _assert_output_disjoint(resolved: Path, paths: TargetMigrationPaths) -> None:
+    """Reject output paths that overlap preserved or candidate resources."""
     for original in (
         paths.silver,
         paths.gold,
@@ -151,6 +165,7 @@ def _assert_output_disjoint(resolved: Path, paths: TargetMigrationPaths) -> None
 
 
 def _assert_no_path_links(path: Path) -> None:
+    """Reject symlink and junction ancestors before creating output."""
     for parent in (path, *path.parents):
         if parent.is_symlink() or parent.is_junction():
             raise ValueError("candidate output refuses symlink/junction paths")
@@ -159,6 +174,7 @@ def _assert_no_path_links(path: Path) -> None:
 def _verified_inputs(
     request: TargetCandidateBuildRequest, checked: dict[str, Path]
 ) -> dict[str, object]:
+    """Verify the frozen manifest and unchanged source facts before building."""
     if sha256_file(request.input_manifest) != request.input_manifest_sha256:
         raise ValueError("target input manifest digest mismatch")
     document = orjson.loads(request.input_manifest.read_bytes())
@@ -177,6 +193,7 @@ def _verified_inputs(
 def _write_layer(
     destination: Path, original: Path, rows: list[dict[str, object]]
 ) -> None:
+    """Write additive V31 fields while retaining the original Delta schema."""
     table = DeltaTable(str(original))
     old_schema = delta_schema_to_pyarrow(table.schema())
     names = set(old_schema.names)
@@ -213,7 +230,9 @@ def build_target_candidates(request: TargetCandidateBuildRequest) -> dict[str, o
         "silver": sorted(_by_id(old_silver)),
         "gold": sorted(_by_id(old_gold)),
     }
-    if frozen["cohorts"] != expected_cohorts:
+    if canonical_json_bytes(frozen["cohorts"]) != canonical_json_bytes(
+        expected_cohorts
+    ):
         raise ValueError("target frozen cohort identity differs")
     request.output_dir.mkdir(parents=True, exist_ok=True)
     adapter = IupharTargetClassificationAdapter(profile)

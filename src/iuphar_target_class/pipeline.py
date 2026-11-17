@@ -8,7 +8,7 @@ from collections import defaultdict
 from collections.abc import Mapping
 from dataclasses import dataclass, field, replace
 from types import MappingProxyType
-from typing import Literal, cast
+from typing import Literal
 
 from .evidence import (
     ContractDefect,
@@ -228,19 +228,16 @@ def _scope_match(
     species = {taxon for _, taxon in snapshot.species_annotations}
     missing_variant = _missing_variant(row, snapshot)
     if row.taxon not in species or (not snapshot.complete and missing_variant):
-        return cast(
-            MatchResult,
-            replace(
-                match,
-                match_status="source_unavailable",
-                matched_target_id=None,
-                diagnostics=(
-                    *match.diagnostics,
-                    Diagnostic(
-                        "source_unavailable",
-                        "warning",
-                        "requested species identity is outside verified matching coverage",
-                    ),
+        return replace(
+            match,
+            match_status="source_unavailable",
+            matched_target_id=None,
+            diagnostics=(
+                *match.diagnostics,
+                Diagnostic(
+                    "source_unavailable",
+                    "warning",
+                    "requested species identity is outside verified matching coverage",
                 ),
             ),
         )

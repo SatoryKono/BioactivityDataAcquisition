@@ -26,8 +26,8 @@ from tests.unit.infrastructure.storage.test_target_migration_admission import (
 )
 
 
-@pytest.fixture
-def source_bundle(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+@pytest.fixture(params=[False, True], ids=["plain-gold", "scd-gold"])
+def source_bundle(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, request):
     root = Path(__file__).resolve().parents[4]
     config = yaml.safe_load((root / "configs/entities/chembl/target.yaml").read_bytes())
     fields = tuple(config["hash_policy"]["hash_policy"]["include_fields"])
@@ -55,9 +55,17 @@ def source_bundle(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     write_deltalake(
         str(paths.silver), pa.Table.from_pylist(rows, schema=CHEMBL_TARGET_SCHEMA)
     )
+    gold_row = _gold(rows[0])
+    if request.param:
+        gold_row.update(
+            _valid_from="2026-11-16T00:00:00Z",
+            _valid_to=None,
+            _is_current=True,
+            _version=1,
+        )
     write_deltalake(
         str(paths.gold),
-        coerce_null_types_for_delta(pa.Table.from_pylist([_gold(rows[0])])),
+        coerce_null_types_for_delta(pa.Table.from_pylist([gold_row])),
     )
     write_deltalake(str(paths.assay), pa.table({"target_id": ["CHEMBL1", None]}))
     profile = _synthetic_profile(tmp_path)

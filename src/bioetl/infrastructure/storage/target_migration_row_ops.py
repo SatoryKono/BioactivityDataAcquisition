@@ -17,6 +17,7 @@ GOLD_SCD_COLUMNS = frozenset({"_valid_from", "_valid_to", "_is_current", "_versi
 
 
 def business_fields(row: Mapping[str, object]) -> dict[str, object]:
+    """Return business fields without storage metadata or technical columns."""
     return {
         key: value
         for key, value in row.items()
@@ -25,6 +26,7 @@ def business_fields(row: Mapping[str, object]) -> dict[str, object]:
 
 
 def hash_input(row: Mapping[str, object]) -> dict[str, object]:
+    """Map legacy descriptions into the canonical target hash input."""
     record = business_fields(row)
     if "description" in record and "target_description" not in record:
         record["target_description"] = record["description"]
@@ -32,6 +34,7 @@ def hash_input(row: Mapping[str, object]) -> dict[str, object]:
 
 
 def scd_timestamp(value: object) -> bool:
+    """Accept datetimes or complete ISO8601 timestamps for SCD bounds."""
     if isinstance(value, datetime):
         return True
     if (
@@ -47,6 +50,7 @@ def scd_timestamp(value: object) -> bool:
 
 
 def validate_scd_types(row: Mapping[str, object]) -> None:
+    """Reject malformed temporal bounds, current flags, and SCD versions."""
     if not scd_timestamp(row["_valid_from"]):
         raise ValueError("Gold SCD _valid_from requires datetime or valid ISO8601 text")
     valid_to = row["_valid_to"]
@@ -61,9 +65,32 @@ def validate_scd_types(row: Mapping[str, object]) -> None:
         raise ValueError("Gold SCD _version must retain its positive integer type")
 
 
+def _row_version(
+    row: Mapping[str, object], scd: bool, identity: str, current_ids: set[str]
+) -> int | None:
+    """Validate an optional SCD envelope and enforce one current version per target."""
+    version: int | None = None
+    if scd:
+        if not GOLD_SCD_COLUMNS.issubset(row):
+            raise ValueError(
+                "invalid legacy technical field: incomplete target SCD history envelope"
+            )
+        try:
+            validate_scd_types(row)
+        except ValueError as error:
+            raise ValueError(f"invalid legacy technical field: {error}") from error
+        version = cast(int, row["_version"])
+        if row["_is_current"]:
+            if identity in current_ids:
+                raise ValueError("target migration needs unique current target IDs")
+            current_ids.add(identity)
+    return version
+
+
 def by_id(
     rows: Sequence[Mapping[str, object]],
 ) -> dict[tuple[str, int | None], Mapping[str, object]]:
+    """Index rows by target and SCD version while rejecting duplicate identities."""
     indexed: dict[tuple[str, int | None], Mapping[str, object]] = {}
     current_ids: set[str] = set()
     scd = any(GOLD_SCD_COLUMNS.intersection(row) for row in rows)
@@ -71,21 +98,7 @@ def by_id(
         identity = row.get("target_id")
         if not isinstance(identity, str) or not identity:
             raise ValueError("target migration needs unique, nonempty target IDs")
-        version: int | None = None
-        if scd:
-            if not GOLD_SCD_COLUMNS.issubset(row):
-                raise ValueError(
-                    "invalid legacy technical field: incomplete target SCD history envelope"
-                )
-            try:
-                validate_scd_types(row)
-            except ValueError as error:
-                raise ValueError(f"invalid legacy technical field: {error}") from error
-            version = cast(int, row["_version"])
-            if row["_is_current"]:
-                if identity in current_ids:
-                    raise ValueError("target migration needs unique current target IDs")
-                current_ids.add(identity)
+        version = _row_version(row, scd, identity, current_ids)
         key = identity, version
         if key in indexed:
             raise ValueError("target migration needs unique target ID/version pairs")
@@ -118,6 +131,7 @@ def scoped_target_hash(
 
 
 def read_delta(path: Path) -> list[dict[str, object]]:
+    """Read all persisted Delta rows for cohort validation."""
     from deltalake import DeltaTable
 
     from bioetl.infrastructure.storage.delta.table_ops import read_delta_records
@@ -135,7 +149,7 @@ __all__ = [
     "by_id",
     "hash_input",
     "read_delta",
-    "scoped_target_hash",
     "scd_timestamp",
+    "scoped_target_hash",
     "validate_scd_types",
 ]

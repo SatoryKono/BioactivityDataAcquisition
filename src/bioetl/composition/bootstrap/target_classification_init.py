@@ -12,7 +12,6 @@ from bioetl.domain.normalization.profiles.chembl_target_classification import (
 )
 
 from collections.abc import Mapping
-from dataclasses import replace
 from typing import TYPE_CHECKING
 
 from bioetl.application.services.target_runtime.classification import (
@@ -120,8 +119,10 @@ def apply_target_contract_identity(
         return identity
     normalization = target_classification_normalization_identity(config)
     assert normalization is not None
-    return replace(
-        identity,
+    return RunManifestContractIdentity(
+        contract_ref=identity.contract_ref,
+        dq_policy_ref=identity.dq_policy_ref,
+        rule_bundle_version=identity.rule_bundle_version,
         contract_version=schema_identity[0],
         contract_schema_hash=schema_identity[1],
         normalization_profile_ref=normalization[0],

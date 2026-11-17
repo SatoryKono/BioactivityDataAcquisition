@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from dataclasses import replace
 
 from bioetl.domain.entities.target_classification_boundary import (
     TargetClassificationArtifact,
@@ -133,8 +132,7 @@ def _project_rows(
     results: dict[str, TargetClassificationResult] = {}
     for row in classified.rows:
         invalid = row.result.input_validation_status == "invalid_input"
-        one = replace(
-            classified,
+        one = BatchResult(
             rows=(row,),
             diagnostics=tuple(
                 (key, value)

@@ -203,6 +203,11 @@ def admitted_candidate(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     }
     monkeypatch.setattr(validation, "_load_candidate_profile", lambda _: profile)
     monkeypatch.setattr(validation, "_read_delta", lambda path: tables[path])
+    from bioetl.infrastructure.storage import target_migration_classification_checks
+
+    monkeypatch.setattr(
+        target_migration_classification_checks, "read_delta", lambda path: tables[path]
+    )
     return paths, fields, tables
 
 
