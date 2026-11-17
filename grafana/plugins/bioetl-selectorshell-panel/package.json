@@ -73,7 +73,7 @@
     "react-dom": "^19.3.1",
     "react-router-dom-v5-compat": "file:../../tooling/router-v7-bridge/bioetl-grafana-router-v7-bridge-0.3.0.tgz"
   },
-  "packageManager": "npm@10.8.2",
+  "packageManager": "npm@11.18.0",
   "overrides": {
     "glob@>=9.0.0 <=14.0.1": "14.0.3",
     "minimatch@>=7.0.0 <11.0.1": "11.0.1",

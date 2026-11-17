@@ -36,7 +36,7 @@
     "grafana/plugins/bioetl-selectorshell-panel/.config/types/webpack-plugins.d.ts": "8992a6645aee040f450e303348d5525b5bce2c27bfbe82ef9f1a053444486ad4",
     "grafana/plugins/bioetl-selectorshell-panel/.config/webpack/BuildModeWebpackPlugin.ts": "b7ac5e5d710cf528f93a6e61e7c0eec0de55ccd4cf7d3f6a1d9a29eed121fb05",
     "grafana/plugins/bioetl-selectorshell-panel/.config/webpack/webpack.config.ts": "5c32c85631f649a74fa4058f227582e578621415f9ffb80c067cb1bc7e774f65",
-    "grafana/plugins/bioetl-selectorshell-panel/package.json": "4e2a4a770dd82c4e8d3f179eb364f6b2444bc0949828041ee6140cf309329749",
+    "grafana/plugins/bioetl-selectorshell-panel/package.json": "7481b19fa8ca044a2be00a18b787978ecd21143660211674386398545581db05",
     "grafana/plugins/bioetl-selectorshell-panel/package-lock.json": "a1d91ead8d19eb9d0770f2e38dbe14ce56c17a6c65b32654a7dbf91108f53f66",
     "grafana/plugins/bioetl-selectorshell-panel/tsconfig.json": "8e26b3d5a2e9e5d5c2636f789b0baa16e57916ed46e5776b6032c684cfa22522",
     "grafana/plugins/bioetl-selectorshell-panel/eslint.config.mjs": "f97ee55a03e678066a755a4a3d74a55266eff1c68894feb423d574580a9c3f6f",
