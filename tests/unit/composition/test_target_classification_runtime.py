@@ -745,6 +745,82 @@ async def test_real_runner_persists_both_layers_and_completes_evidence(
     assert evidence["row_count"] == 1
     assert evidence["input_row_ids"] == ["chembl.target:CHEMBL1"]
     report = json.loads(Path(result.run_report_json_path).read_text())
+    if mode == "shadow":
+        from bioetl.infrastructure.adapters.iuphar import load_profile
+        from bioetl.infrastructure.adapters.iuphar.canonical_target_rows import (
+            render_canonical_target_rows,
+        )
+        from bioetl.infrastructure.adapters.iuphar.cohort_contract import (
+            ARROW_SOURCE_FORMAT,
+            NORMALIZED_TARGET_SCHEMA,
+            CohortExportRequest,
+        )
+        from iuphar_target_class.models import RunProvenance
+        from iuphar_target_class.pipeline import classify_batch
+        from iuphar_target_class.pipeline_io import (
+            read_bioetl_target_kernel_csv_v1,
+        )
+        from iuphar_target_class.pipeline_proof import (
+            PipelineExecutionBinding,
+            execution_semantics,
+            verify_stored_pipeline_proof,
+        )
+
+        profile = load_profile(
+            Path(config.target_classification.snapshot_manifest),
+            config.target_classification.snapshot_manifest_sha256,
+            require_acceptance=False,
+        )
+        canonical, _, _ = render_canonical_target_rows(
+            silver.to_pylist(),
+            request=CohortExportRequest(
+                tmp_path / "synthetic-silver.arrow",
+                "a" * 64,
+                ARROW_SOURCE_FORMAT,
+                NORMALIZED_TARGET_SCHEMA,
+                "synthetic-runtime-cohort-only",
+                "synthetic-test",
+            ),
+        )
+        provenance = RunProvenance(
+            profile.snapshot.snapshot.snapshot_id,
+            profile.normalization_version,
+            profile.rules_version,
+            profile.classification_schema_version,
+            profile.snapshot.retrieved_at,
+            FIXED_TEST_TIME.isoformat(),
+        )
+        expected = classify_batch(
+            read_bioetl_target_kernel_csv_v1(
+                canonical, source_path="synthetic-silver", target_kind="protein"
+            ),
+            snapshot=profile.snapshot.snapshot,
+            provenance=provenance,
+            run_id="synthetic-canonical-replay",
+        )
+        assert (
+            verify_stored_pipeline_proof(
+                manifest_path,
+                profile.snapshot.snapshot_manifest_sha256,
+                Path(result.run_report_json_path),
+                provenance,
+                expected_execution=tuple(
+                    PipelineExecutionBinding(
+                        raw.input_row_id, raw.fields, execution_semantics(row.result)
+                    )
+                    for raw, row in zip(
+                        read_bioetl_target_kernel_csv_v1(
+                            canonical,
+                            source_path="synthetic-silver",
+                            target_kind="protein",
+                        ),
+                        expected.rows,
+                        strict=True,
+                    )
+                ),
+            )
+            == hashlib.sha256(manifest_path.read_bytes()).hexdigest()
+        )
     observation = report["observations"]["Target Classification"]
     assert observation["verdict"] == "OK"
     assert observation["facts"]["mode"] == mode

@@ -5,7 +5,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from bioetl.infrastructure.adapters.iuphar.snapshot_loader import load_profile
+from bioetl.infrastructure.adapters.iuphar import load_profile
 from iuphar_target_class.integration_acceptance import (
     IntegrationAcceptanceRequest,
     run_integration_acceptance,
