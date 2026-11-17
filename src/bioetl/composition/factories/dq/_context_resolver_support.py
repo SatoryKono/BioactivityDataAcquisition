@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Protocol, cast, get_args, get_origin
+from typing import TYPE_CHECKING, cast, get_args, get_origin
 
 from pydantic import BaseModel
 
@@ -35,20 +35,8 @@ from bioetl.infrastructure.schemas.dq_report_config import (
 )
 
 
-class DQLayerPathSettings(Protocol):
-    """Layer roots that place canonical DQ directories under ``data_dir``."""
-
-    bronze_path: Path
-    silver_path: Path
-    gold_path: Path
-
-
 def _rebase_local_data_path(configured: Path, layer_root: Path) -> Path:
-    """Keep canonical ``data/output/<layer>`` paths inside the runtime root.
-
-    Matches ``rebase_local_data_path`` in the storage factory. This copy stays
-    in the DQ package so the import does not cross into a private storage module.
-    """
+    """Match storage ``rebase_local_data_path`` without a private cross-import."""
     prefix = ("data", "output", layer_root.name)
     if layer_root.parent.name == "output" and configured.parts[:3] == prefix:
         return layer_root.joinpath(*configured.parts[3:])
@@ -252,20 +240,26 @@ def extract_dq_output_paths_impl(
     )
 
 
+def _layer_root(settings: object, name: str) -> Path:
+    """Read one settings layer root without a new composition Protocol."""
+    return Path(getattr(settings, name))
+
+
 def rebase_dq_output_paths(
     paths: DQOutputPathsContext,
-    settings: DQLayerPathSettings,
+    settings: object,
 ) -> DQOutputPathsContext:
-    """Place canonical ``data/output/<layer>/...`` DQ dirs under ``data_dir``.
-
-    Uses the same ``rebase_local_data_path`` branch as ``resolve_layer_path``
-    when YAML paths are honored. Test mode still keeps the provider/entity
-    suffix; only the runtime root changes.
-    """
+    """Place canonical ``data/output/<layer>/...`` DQ dirs under ``data_dir``."""
     return DQOutputPathsContext(
-        bronze_path=_rebase_dq_layer_path(paths.bronze_path, settings.bronze_path),
-        silver_path=_rebase_dq_layer_path(paths.silver_path, settings.silver_path),
-        gold_path=_rebase_dq_layer_path(paths.gold_path, settings.gold_path),
+        bronze_path=_rebase_dq_layer_path(
+            paths.bronze_path, _layer_root(settings, "bronze_path")
+        ),
+        silver_path=_rebase_dq_layer_path(
+            paths.silver_path, _layer_root(settings, "silver_path")
+        ),
+        gold_path=_rebase_dq_layer_path(
+            paths.gold_path, _layer_root(settings, "gold_path")
+        ),
         flat_structure=paths.flat_structure,
     )
 

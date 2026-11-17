@@ -12,7 +12,6 @@ from typing import TYPE_CHECKING, cast
 
 from bioetl.composition.bootstrap_contexts import DQConfigsContext, DQOutputPathsContext
 from bioetl.composition.factories.dq._context_resolver_support import (
-    DQLayerPathSettings,
     DQServiceBundle,
     create_dq_services_impl,
     extract_dq_configs_impl,
@@ -47,7 +46,6 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 __all__ = [
-    "DQLayerPathSettings",
     "DQServiceBundle",
     "create_dq_services",
     "extract_dq_configs",
@@ -104,7 +102,7 @@ def has_flat_structure(config: object) -> bool:
 
 def extract_dq_output_paths(
     yaml_config: PipelineYamlConfig | None,
-    settings: DQLayerPathSettings | None = None,
+    settings: object | None = None,
 ) -> DQOutputPathsContext:
     """Extract per-layer DQ output paths and rebase them onto ``settings``.
 

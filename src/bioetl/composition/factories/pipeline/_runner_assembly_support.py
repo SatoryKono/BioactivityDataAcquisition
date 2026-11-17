@@ -23,10 +23,7 @@ from bioetl.application.services.medallion.medallion_lifecycle import (
     MedallionLifecycleService,
 )
 from bioetl.composition.bootstrap_contexts import DQConfigsContext
-from bioetl.composition.factories.dq.context_resolver import (
-    DQLayerPathSettings,
-    extract_dq_output_paths,
-)
+from bioetl.composition.factories.dq.context_resolver import extract_dq_output_paths
 from bioetl.composition.factories.pipeline._runner_preflight_observer import (
     build_observer as build_observer,
     build_preflight_service as build_preflight_service,
@@ -60,7 +57,7 @@ class RunnerAssemblyContext:
     gold_schema: GoldSchemaType
     strict_gold_validation: bool
     dq_configs_extractor: Callable[[PipelineYamlConfig | None], DQConfigsContext]
-    settings: DQLayerPathSettings | None = None
+    settings: object | None = None
 
 
 def build_lock_runtime_service(
