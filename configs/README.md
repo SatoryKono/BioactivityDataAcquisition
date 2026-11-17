@@ -83,6 +83,9 @@ Current-working-directory `config.yaml` is not a runtime Settings source.
 - `configs/composites/`: composite seed/enricher/merge runtime definitions
 - `configs/ide/pycharm/`: reviewed portable PyCharm templates copied into the
   ignored local `.idea/` directory
+- `configs/ide/zed/`: native-Windows project settings/tasks for ignored `.zed/`,
+  plus a separate opt-in Agent user-settings fragment; review and merge existing
+  settings rather than overwriting local or user-global customizations
 - `configs/quality/`: architecture, compatibility, generated-artifact routing,
   and debt registries
 
