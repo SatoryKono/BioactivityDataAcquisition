@@ -42,6 +42,74 @@ Bootstrap commands:
 bash scripts/engineering/dev/setup_env_wsl.sh
 ```
 
+### Portable Zed tasks and language servers
+
+Reviewed project templates live in `configs/ide/zed/settings.json` and
+`configs/ide/zed/tasks.json`. The local `.zed/` directory is ignored by Git.
+For a new checkout, copy those two files into `.zed/`; for an existing checkout,
+review and merge instead of overwriting customizations. Do not copy the separate
+`agent-settings.json` user template into the worktree configuration.
+
+The six base tasks invoke `.venv-win/Scripts/python.exe` through PowerShell
+`& (Join-Path $env:ZED_WORKTREE_ROOT ...)`. Zed inserts task variables without
+shell quotes, so the executable and `$env:ZED_FILE` stay single arguments when
+the checkout path contains spaces or apostrophes. The interpreter diagnostic
+quotes its full Python `-c` payload because PowerShell otherwise treats
+semicolons as shell commands. Ruff checks use that interpreter, not a bare
+executable from `PATH`.
+
+Two current-file pytest modes are intentionally distinct:
+
+- `pytest: current test file (project settings)` preserves `pyproject.toml`
+  addopts, including strict markers/config and importlib imports. It owns the
+  `python-test` gutter tag, but is not the full CI merge gate.
+- `pytest: current test file (quick; project addopts disabled)` explicitly clears
+  addopts for diagnosis and passes `-p no:benchmark`, because clearing addopts
+  would otherwise reload pytest-benchmark. Other ini policy, including
+  warnings-as-errors, remains active. A quick pass is not equivalent to a
+  project-settings pass.
+
+Both tasks keep the cache provider enabled and write to
+`.cache/pytest/windows`, already excluded from Git and Zed scanning. This isolates
+native-Windows tasks from the old shared `.pytest_cache`, which was inaccessible
+on the audited workstation. The old directory and its ACL are not modified.
+The WSL shard runner and PowerShell wrapper retain their own cache policies.
+Both tasks save the current file, use replay-only VCR and disable bytecode writes.
+Diagnostics do not save buffers. Tasks retain visible output and disallow
+concurrent duplicates of themselves; different tasks can still overlap.
+
+LSP binary paths are not changed by these templates. Select the checkout's
+`.venv-win/Scripts/python.exe` with `toolchain: select`. This selects the analysis
+interpreter, not necessarily the server executable. Open a Python file, run
+`dev: open language server logs`, and inspect basedpyright's `Setting pythonPath`
+separately from its server root and version. Ruff workspace registration alone
+does not prove which binary/version was selected.
+
+The base profile deliberately does not prescribe autosave or format-on-save,
+redeclare tool settings owned by `pyproject.toml` and `.editorconfig`, force
+Docker Compose extensions, or expose the former full audit/generator task menu.
+Canonical lane membership and locking remain covered by the lane-runner tests.
+The optional Compose contract is checked only when local Compose settings exist.
+Cache/scan exclusions, replay-only defaults, task execution and secret guards
+remain explicit contracts, rather than personal IDE preferences.
+
+`configs/ide/zed/agent-settings.json` is an **opt-in user-settings fragment**.
+It provides a read-only Ask profile, an explicitly selected Write profile,
+confirmation defaults, guards for `.env*` and private-key file mutations, and
+no automatic MCP/subagent attachment. Merge it only after review through Zed's
+user settings UI; no user-global settings are changed by repository setup.
+These are conservative guardrails, not a complete shell sandbox: arbitrary shell
+commands require confirmation, but regex rules cannot recognize every indirect
+mutation. A passing template test proves configuration intent, not that the
+current editor loaded or enforced it. External agents have their own controls.
+
+The task syntax and Agent policy shapes were checked against installed Zed
+`1.27.0`, commit `c84af5b99cbc366d675064e52b23664a015b6e35`, using its
+[task documentation](https://github.com/zed-industries/zed/blob/c84af5b99cbc366d675064e52b23664a015b6e35/docs/src/tasks.md),
+[tool permission documentation](https://github.com/zed-industries/zed/blob/c84af5b99cbc366d675064e52b23664a015b6e35/docs/src/ai/tool-permissions.md),
+and [Agent profile documentation](https://github.com/zed-industries/zed/blob/c84af5b99cbc366d675064e52b23664a015b6e35/docs/src/ai/agent-profiles.md).
+`$ZED_WORKTREE_ROOT` is a task variable, not an assumed LSP binary-path expansion.
+
 Optional agent diagnostics are intentionally excluded from the default setup.
 Select one tool or both with `-AgentTools agentdebugx|proofagent|all` on Windows,
 or `--agent-tools agentdebugx|proofagent|all` on WSL. The installers use exact
