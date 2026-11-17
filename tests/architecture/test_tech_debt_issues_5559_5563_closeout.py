@@ -174,6 +174,9 @@ def test_issue_5562_skip_inventory_entries_are_individually_accountable() -> Non
         "#12106": 1,
         "#12407": 1,
         "#12929": 1,
+        # Existing engine guards moved from unit to the integration census;
+        # no skip call or historical closeout status was added or changed.
+        "#13168": 2,
     }
 
 

@@ -97,13 +97,31 @@ def test_context_separates_cache_freshness_from_saved_assessment_and_run_result(
 def test_context_columns_match_contract_and_evaluated_donor(profile, uid, panel_id):
     payload = donor_payload(None, None)
     payload["summary"][0]["evaluation_at"] = "2026-11-11T08:00:00Z"
+    dashboard = json.loads(Path(f"grafana/{profile}/{uid}.json").read_text())
+    panels = {panel["id"]: panel for panel in dashboard["panels"]}
+    panel = source = panels[panel_id]
+    visited = set()
+    while source.get("datasource", {}).get("uid") == "-- Dashboard --":
+        assert source["id"] not in visited, "Dashboard donor cycle"
+        visited.add(source["id"])
+        assert len(source["targets"]) == 1
+        handoff = source["targets"][0]
+        assert handoff["withTransforms"] is False, "Context must consume raw evidence"
+        source = panels[handoff["panelId"]]
+    assert source["datasource"]["uid"] == "bioetl-ops-http"
+    target = source["targets"][0]
+    assert target["parser"] == "backend"
     context = next(
         row
-        for row in evaluate_donor(payload)
+        for row in evaluate_donor(payload, target["root_selector"])
         if row["_bioetl_frame"] == "selection_context"
     )
-    dashboard = json.loads(Path(f"grafana/{profile}/{uid}.json").read_text())
-    panel = next(panel for panel in dashboard["panels"] if panel["id"] == panel_id)
+    assert context["context"]
+    assert datetime.fromisoformat(context["context_checked_at"]) == datetime(
+        2026, 11, 11, 10, tzinfo=UTC
+    )
+    assert context["saved_assessment_at"] == "2026-11-11T08:00:00Z"
+    assert context["assessment_age_seconds"] == 7200
     transforms = panel["transformations"]
     fields = next(
         t["options"]["include"]["names"]
