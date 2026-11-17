@@ -236,7 +236,9 @@ def test_services_package_root_uses_public_creation_support_module() -> None:
     # Eager ImportFrom of creation_support recreates package import cycles; the
     # package root must keep the public seam via lazy import_module instead.
     assert "bioetl.composition.factories.pipeline.creation_api" not in imported_modules
-    assert "bioetl.composition.factories.pipeline.creation_support" not in imported_modules
+    assert (
+        "bioetl.composition.factories.pipeline.creation_support" not in imported_modules
+    )
     lazy_creation_support_loads = {
         node.args[0].value
         for node in ast.walk(tree)
