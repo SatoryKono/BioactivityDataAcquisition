@@ -9,7 +9,7 @@ import pytest
 import yaml
 from deltalake import DeltaTable, write_deltalake
 
-from bioetl.composition.bootstrap.cli.config import (
+from bioetl.composition.bootstrap.cli.target_deployment import (
     bind_target_deployment,
     bind_target_rehearsal,
 )

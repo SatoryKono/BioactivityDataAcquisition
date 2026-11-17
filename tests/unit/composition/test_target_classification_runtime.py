@@ -609,6 +609,170 @@ async def test_postrun_failure_never_completes_classification_evidence():
     transformer.finalize_target_classification.assert_not_called()
 
 
+class _SyntheticChemblSource:
+    provider_name = "chembl"
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *args):
+        await self.aclose()
+
+    async def aclose(self):
+        pass
+
+    async def health_check(self):
+        from bioetl.domain.types import HealthStatus
+
+        return HealthStatus.HEALTHY
+
+    async def fetch(self, entity_type, **kwargs):
+        yield {
+            "target_chembl_id": "CHEMBL1",
+            "target_type": "SINGLE PROTEIN",
+            "pref_name": "known enzyme",
+            "tax_id": 9606,
+            "organism": "Homo sapiens",
+            "species_group_flag": False,
+            "target_components": [
+                {
+                    "accession": "P12345",
+                    "component_id": 1,
+                    "component_type": "PROTEIN",
+                    "relationship": "SINGLE PROTEIN",
+                    "target_component_synonyms": [],
+                    "target_component_xrefs": [],
+                }
+            ],
+        }
+
+
+def _assert_shadow_pipeline_proof(
+    *, config, silver, manifest_path, run_report_json_path, tmp_path
+):
+    from bioetl.infrastructure.adapters.iuphar import load_profile
+    from bioetl.infrastructure.adapters.iuphar.canonical_target_rows import (
+        render_canonical_target_rows,
+    )
+    from bioetl.infrastructure.adapters.iuphar.cohort_contract import (
+        ARROW_SOURCE_FORMAT,
+        NORMALIZED_TARGET_SCHEMA,
+        CohortExportRequest,
+    )
+    from iuphar_target_class.models import RunProvenance
+    from iuphar_target_class.pipeline import classify_batch
+    from iuphar_target_class.pipeline_io import read_bioetl_target_kernel_csv_v1
+    from iuphar_target_class.pipeline_proof import (
+        PipelineExecutionBinding,
+        execution_semantics,
+        verify_stored_pipeline_proof,
+    )
+
+    profile = load_profile(
+        Path(config.target_classification.snapshot_manifest),
+        config.target_classification.snapshot_manifest_sha256,
+        require_acceptance=False,
+    )
+    canonical, _, _ = render_canonical_target_rows(
+        silver.to_pylist(),
+        request=CohortExportRequest(
+            tmp_path / "synthetic-silver.arrow",
+            "a" * 64,
+            ARROW_SOURCE_FORMAT,
+            NORMALIZED_TARGET_SCHEMA,
+            "synthetic-runtime-cohort-only",
+            "synthetic-test",
+        ),
+    )
+    provenance = RunProvenance(
+        profile.snapshot.snapshot.snapshot_id,
+        profile.normalization_version,
+        profile.rules_version,
+        profile.classification_schema_version,
+        profile.snapshot.retrieved_at,
+        FIXED_TEST_TIME.isoformat(),
+    )
+    expected = classify_batch(
+        read_bioetl_target_kernel_csv_v1(
+            canonical, source_path="synthetic-silver", target_kind="protein"
+        ),
+        snapshot=profile.snapshot.snapshot,
+        provenance=provenance,
+        run_id="synthetic-canonical-replay",
+    )
+    assert (
+        verify_stored_pipeline_proof(
+            manifest_path,
+            profile.snapshot.snapshot_manifest_sha256,
+            Path(run_report_json_path),
+            provenance,
+            expected_execution=tuple(
+                PipelineExecutionBinding(
+                    raw.input_row_id, raw.fields, execution_semantics(row.result)
+                )
+                for raw, row in zip(
+                    read_bioetl_target_kernel_csv_v1(
+                        canonical,
+                        source_path="synthetic-silver",
+                        target_kind="protein",
+                    ),
+                    expected.rows,
+                    strict=True,
+                )
+            ),
+        )
+        == hashlib.sha256(manifest_path.read_bytes()).hexdigest()
+    )
+
+
+async def _assert_enrich_blocks_destructive(
+    *, factory, config, settings, observability, monkeypatch
+):
+    from bioetl.domain.config import RuntimeConfig
+    from bioetl.domain.ports import PipelineCreateRunnerRequest
+    from bioetl.domain.workflow import WorkflowRunOptionsConfig
+    from deltalake import DeltaTable
+
+    monkeypatch.setattr(
+        "bioetl.composition.bootstrap.assembly.storage.load_pipeline_config",
+        lambda name: config if name == "chembl_target" else load_pipeline_config(name),
+    )
+    workflow = WorkflowConfig(
+        name="chembl_baseline",
+        defaults=WorkflowRunOptionsConfig(run_type="backfill", limit=1000),
+        steps=(
+            WorkflowStepConfig(step_id="assay", pipeline_name="chembl_assay"),
+            WorkflowStepConfig(
+                step_id="target",
+                pipeline_name="chembl_target",
+                depends_on=("assay",),
+            ),
+        ),
+    )
+    with pytest.raises(ValueError, match="destructive"):
+        preflight_workflow_target_dependencies(workflow, {}, settings=settings)
+    destructive = factory.create_runner(
+        PipelineCreateRunnerRequest(
+            run_id=UUID("8b8f8439-77c7-47b0-a48a-6adaf43fc817"),
+            started_at=FIXED_TEST_TIME,
+            runtime=RuntimeConfig(run_type=RunType.BACKFILL, limit=1000),
+            settings=settings,
+            config=config,
+            observability=observability,
+        )
+    )
+    with pytest.raises(ValueError, match="destructive"):
+        await destructive.run()
+    assert (
+        DeltaTable(settings.silver_path / "chembl/target").to_pyarrow_table().num_rows
+        == 1
+    )
+    assert (
+        DeltaTable(settings.gold_path / "chembl/target").to_pyarrow_table().num_rows
+        == 1
+    )
+
+
 @pytest.mark.asyncio
 @pytest.mark.parametrize("mode", ["shadow", "enrich"])
 async def test_real_runner_persists_both_layers_and_completes_evidence(
@@ -620,7 +784,6 @@ async def test_real_runner_persists_both_layers_and_completes_evidence(
     from bioetl.composition.factories.pipeline.registry import chembl_target_factory
     from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.ports import PipelineCreateRunnerRequest
-    from bioetl.domain.types import HealthStatus
     from bioetl.infrastructure.config.settings_api import Settings
     from bioetl.infrastructure.storage.run_report_store_adapter import (
         FileRunReportStoreAdapter,
@@ -640,42 +803,7 @@ async def test_real_runner_persists_both_layers_and_completes_evidence(
         build_test_observability_bundle,
     )
 
-    class SyntheticSource:
-        provider_name = "chembl"
-
-        async def __aenter__(self):
-            return self
-
-        async def __aexit__(self, *args):
-            await self.aclose()
-
-        async def aclose(self):
-            pass
-
-        async def health_check(self):
-            return HealthStatus.HEALTHY
-
-        async def fetch(self, entity_type, **kwargs):
-            yield {
-                "target_chembl_id": "CHEMBL1",
-                "target_type": "SINGLE PROTEIN",
-                "pref_name": "known enzyme",
-                "tax_id": 9606,
-                "organism": "Homo sapiens",
-                "species_group_flag": False,
-                "target_components": [
-                    {
-                        "accession": "P12345",
-                        "component_id": 1,
-                        "component_type": "PROTEIN",
-                        "relationship": "SINGLE PROTEIN",
-                        "target_component_synonyms": [],
-                        "target_component_xrefs": [],
-                    }
-                ],
-            }
-
-    source = SyntheticSource()
+    source = _SyntheticChemblSource()
     config = (
         _admitted_synthetic_config(shadow_config) if mode == "enrich" else shadow_config
     )
@@ -746,80 +874,12 @@ async def test_real_runner_persists_both_layers_and_completes_evidence(
     assert evidence["input_row_ids"] == ["chembl.target:CHEMBL1"]
     report = json.loads(Path(result.run_report_json_path).read_text())
     if mode == "shadow":
-        from bioetl.infrastructure.adapters.iuphar import load_profile
-        from bioetl.infrastructure.adapters.iuphar.canonical_target_rows import (
-            render_canonical_target_rows,
-        )
-        from bioetl.infrastructure.adapters.iuphar.cohort_contract import (
-            ARROW_SOURCE_FORMAT,
-            NORMALIZED_TARGET_SCHEMA,
-            CohortExportRequest,
-        )
-        from iuphar_target_class.models import RunProvenance
-        from iuphar_target_class.pipeline import classify_batch
-        from iuphar_target_class.pipeline_io import (
-            read_bioetl_target_kernel_csv_v1,
-        )
-        from iuphar_target_class.pipeline_proof import (
-            PipelineExecutionBinding,
-            execution_semantics,
-            verify_stored_pipeline_proof,
-        )
-
-        profile = load_profile(
-            Path(config.target_classification.snapshot_manifest),
-            config.target_classification.snapshot_manifest_sha256,
-            require_acceptance=False,
-        )
-        canonical, _, _ = render_canonical_target_rows(
-            silver.to_pylist(),
-            request=CohortExportRequest(
-                tmp_path / "synthetic-silver.arrow",
-                "a" * 64,
-                ARROW_SOURCE_FORMAT,
-                NORMALIZED_TARGET_SCHEMA,
-                "synthetic-runtime-cohort-only",
-                "synthetic-test",
-            ),
-        )
-        provenance = RunProvenance(
-            profile.snapshot.snapshot.snapshot_id,
-            profile.normalization_version,
-            profile.rules_version,
-            profile.classification_schema_version,
-            profile.snapshot.retrieved_at,
-            FIXED_TEST_TIME.isoformat(),
-        )
-        expected = classify_batch(
-            read_bioetl_target_kernel_csv_v1(
-                canonical, source_path="synthetic-silver", target_kind="protein"
-            ),
-            snapshot=profile.snapshot.snapshot,
-            provenance=provenance,
-            run_id="synthetic-canonical-replay",
-        )
-        assert (
-            verify_stored_pipeline_proof(
-                manifest_path,
-                profile.snapshot.snapshot_manifest_sha256,
-                Path(result.run_report_json_path),
-                provenance,
-                expected_execution=tuple(
-                    PipelineExecutionBinding(
-                        raw.input_row_id, raw.fields, execution_semantics(row.result)
-                    )
-                    for raw, row in zip(
-                        read_bioetl_target_kernel_csv_v1(
-                            canonical,
-                            source_path="synthetic-silver",
-                            target_kind="protein",
-                        ),
-                        expected.rows,
-                        strict=True,
-                    )
-                ),
-            )
-            == hashlib.sha256(manifest_path.read_bytes()).hexdigest()
+        _assert_shadow_pipeline_proof(
+            config=config,
+            silver=silver,
+            manifest_path=manifest_path,
+            run_report_json_path=result.run_report_json_path,
+            tmp_path=tmp_path,
         )
     observation = report["observations"]["Target Classification"]
     assert observation["verdict"] == "OK"
@@ -833,47 +893,10 @@ async def test_real_runner_persists_both_layers_and_completes_evidence(
         == hashlib.sha256(manifest_path.read_bytes()).hexdigest()
     )
     if mode == "enrich":
-        from bioetl.domain.workflow import WorkflowRunOptionsConfig
-
-        monkeypatch.setattr(
-            "bioetl.composition.bootstrap.assembly.storage.load_pipeline_config",
-            lambda name: (
-                config if name == "chembl_target" else load_pipeline_config(name)
-            ),
-        )
-        workflow = WorkflowConfig(
-            name="chembl_baseline",
-            defaults=WorkflowRunOptionsConfig(run_type="backfill", limit=1000),
-            steps=(
-                WorkflowStepConfig(step_id="assay", pipeline_name="chembl_assay"),
-                WorkflowStepConfig(
-                    step_id="target",
-                    pipeline_name="chembl_target",
-                    depends_on=("assay",),
-                ),
-            ),
-        )
-        with pytest.raises(ValueError, match="destructive"):
-            preflight_workflow_target_dependencies(workflow, {}, settings=settings)
-        destructive = factory.create_runner(
-            PipelineCreateRunnerRequest(
-                run_id=UUID("8b8f8439-77c7-47b0-a48a-6adaf43fc817"),
-                started_at=FIXED_TEST_TIME,
-                runtime=RuntimeConfig(run_type=RunType.BACKFILL, limit=1000),
-                settings=settings,
-                config=config,
-                observability=observability,
-            )
-        )
-        with pytest.raises(ValueError, match="destructive"):
-            await destructive.run()
-        assert (
-            DeltaTable(settings.silver_path / "chembl/target")
-            .to_pyarrow_table()
-            .num_rows
-            == 1
-        )
-        assert (
-            DeltaTable(settings.gold_path / "chembl/target").to_pyarrow_table().num_rows
-            == 1
+        await _assert_enrich_blocks_destructive(
+            factory=factory,
+            config=config,
+            settings=settings,
+            observability=observability,
+            monkeypatch=monkeypatch,
         )
