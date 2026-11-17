@@ -2,39 +2,16 @@ diff --git a/.github/tooling/picomatch-backport/lib/parse.js b/.github/tooling/p
 index 4bd332d04f8..ea5397ac4a1 100644
 --- a/.github/tooling/picomatch-backport/lib/parse.js
 +++ b/.github/tooling/picomatch-backport/lib/parse.js
-@@ -139,12 +139,11 @@ const normalizeSimpleBranch = branch => {
-   return value.replace(/\\(.)/g, '$1');
- };
- 
+@@ -142 +142 @@ const normalizeSimpleBranch = branch => {
 -const hasMixedWildcards = branch => {
 +const hasUnboundedWildcard = branch => {
-   let escaped = false;
-   let bracket = 0;
-   let paren = 0;
-   let star = false;
+@@ -147 +146,0 @@ const hasMixedWildcards = branch => {
 -  let qmark = false;
- 
-   for (let i = 0; i < branch.length; i++) {
-     const ch = branch[i];
-@@ -187,11 +186,10 @@ const hasMixedWildcards = branch => {
-       // An extglob opener is not a wildcard of its own.
-       if (branch[i + 1] === '(') continue;
-       if (ch === '*') star = true;
+@@ -190 +188,0 @@ const hasMixedWildcards = branch => {
 -      else qmark = true;
-     }
-   }
- 
+@@ -194 +192 @@ const hasMixedWildcards = branch => {
 -  return star === true && qmark === true;
 +  return star === true;
- };
- 
- const hasRepeatedCharPrefixOverlap = branches => {
-@@ -353,7 +351,7 @@ const analyzeRepeatedExtglob = (body, options) => {
- 
-   // Checked for every branch count: a single branch is enough to nest an
-   // unbounded quantifier inside the repeat. (GHSA-fc5q-39xc-vjpf / micromatch#194)
+@@ -356 +354 @@ const analyzeRepeatedExtglob = (body, options) => {
 -  if (branches.some(hasMixedWildcards)) {
 +  if (branches.some(hasUnboundedWildcard)) {
-     return { risky: true };
-   }
- 
