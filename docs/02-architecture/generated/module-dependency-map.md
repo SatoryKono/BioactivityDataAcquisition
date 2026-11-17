@@ -5,8 +5,8 @@
 
 ## Summary
 
-- Scanned modules: `2654`
-- Internal import edges (raw): `8778`
+- Scanned modules: `2653`
+- Internal import edges (raw): `8776`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `330`
@@ -24,9 +24,9 @@ flowchart LR
     application -->|1686 OK| application
     application -->|1156 OK| domain
     composition -->|253 OK| application
-    composition -->|687 OK| composition
+    composition -->|686 OK| composition
     composition -->|337 OK| domain
-    composition -->|360 OK| infrastructure
+    composition -->|359 OK| infrastructure
     domain -->|1330 OK| domain
     infrastructure -->|824 OK| domain
     infrastructure -->|1398 OK| infrastructure
@@ -43,9 +43,9 @@ flowchart LR
 | `application`    | `application`    |    1686 | allowed |
 | `application`    | `domain`         |    1156 | allowed |
 | `composition`    | `application`    |     253 | allowed |
-| `composition`    | `composition`    |     687 | allowed |
+| `composition`    | `composition`    |     686 | allowed |
 | `composition`    | `domain`         |     337 | allowed |
-| `composition`    | `infrastructure` |     360 | allowed |
+| `composition`    | `infrastructure` |     359 | allowed |
 | `domain`         | `domain`         |    1330 | allowed |
 | `infrastructure` | `domain`         |     824 | allowed |
 | `infrastructure` | `infrastructure` |    1398 | allowed |
@@ -79,9 +79,9 @@ flowchart LR
 | `infrastructure.control_plane` | `domain.control_plane`         |      35 |
 | `composition.bootstrap`        | `infrastructure.storage`       |      34 |
 | `composition.factories`        | `infrastructure.config`        |      34 |
-| `composition.bootstrap`        | `infrastructure.config`        |      33 |
 | `interfaces.cli`               | `application.services`         |      33 |
 | `application.core`             | `domain.ports`                 |      32 |
+| `composition.bootstrap`        | `infrastructure.config`        |      32 |
 | `interfaces.http`              | `domain.control_plane`         |      32 |
 | `infrastructure.storage`       | `domain.medallion`             |      31 |
 | `composition.bootstrap`        | `infrastructure.control_plane` |      29 |
