@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING, cast
 from bioetl.composition.bootstrap_contexts import DQConfigsContext, DQOutputPathsContext
 from bioetl.composition.factories.dq._context_resolver_support import (
     DQServiceBundle,
+    _resolved_dq_output_paths,
     create_dq_services_impl,
     extract_dq_configs_impl,
     extract_dq_output_paths_impl,
@@ -27,6 +28,7 @@ from bioetl.composition.factories.dq._context_resolver_support import (
 from bioetl.composition.factories.dq.factory import DQServicesFactory
 
 from bioetl.application.services.quality.dq_report_service import DQReportService
+from bioetl.infrastructure.config.settings_api import Settings
 
 if TYPE_CHECKING:
     from pydantic import BaseModel
@@ -42,7 +44,6 @@ if TYPE_CHECKING:
         SilverDQAnalyzerPort,
         SilverDQConfigPort,
     )
-    from bioetl.infrastructure.config.settings_api import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 __all__ = [
@@ -104,13 +105,18 @@ def extract_dq_output_paths(
     yaml_config: PipelineYamlConfig | None,
     settings: object | None = None,
 ) -> DQOutputPathsContext:
-    """Extract per-layer DQ output paths and rebase them onto ``settings``.
+    """Extract per-layer DQ output paths with dual settings semantics.
 
-    Convention defaults store ``data/output/<layer>/<provider>/<entity>``.
-    When ``settings`` is the same object used to build storage, DQ reports
-    follow that ``data_dir``, including test mode. Callers that omit
-    ``settings`` keep the configured path unchanged.
+    - Real ``Settings`` follow storage/table/flat-path decisions used by writers
+      (IUPHAR target rehearsal destinations).
+    - Structural settings objects rebase canonical
+      ``data/output/<layer>/<provider>/<entity>`` under ``BIOETL_DATA_DIR``
+      (#13176 test-mode data_dir).
+    - Callers that omit ``settings`` keep the configured path unchanged.
     """
+    if isinstance(settings, Settings) and yaml_config is not None:
+        return _resolved_dq_output_paths(settings, yaml_config)
+
     paths = extract_dq_output_paths_impl(
         yaml_config,
         get_layer_path_fn=get_layer_path,
