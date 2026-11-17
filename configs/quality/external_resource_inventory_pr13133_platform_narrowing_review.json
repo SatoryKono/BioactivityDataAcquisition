@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "9a28ecff5af9d0c5264a07a7f6acfd3a8cc60568",
+  "source_ref": "0947639367a4d8420b2a167576c422b0e22ad032",
+  "source_reviews": {
+    "src/bioetl/infrastructure/quarantine/write_lock.py": "Explicit platform else replaces a terminal Windows return followed by the POSIX flock call, so Windows mypy excludes the unavailable fcntl branch. The same existing Windows helper and POSIX flock operations, descriptor arguments, lock/unlock modes, retry behavior, exception propagation and enclosing descriptor cleanup remain unchanged. No acquisition or cleanup expression is added or removed; source bindings are relocated only against this immutable snapshot. Actual applied lock/store regression suites passed on Windows (41 pass, 3 POSIX skips) and native Linux (44 pass). Static source review only; runtime inventory qualification remains NOT_RUN_12553.",
+    "src/bioetl/infrastructure/control_plane/file_lineage_store.py": "Explicit platform else replaces a terminal Windows return followed by the POSIX flock call, so Windows mypy excludes the unavailable fcntl branch. The same existing Windows helper and POSIX flock operations, descriptor arguments, lock/unlock modes, retry behavior, exception propagation and enclosing descriptor cleanup remain unchanged. No acquisition or cleanup expression is added or removed; source bindings are relocated only against this immutable snapshot. Actual applied lock/store regression suites passed on Windows (41 pass, 3 POSIX skips) and native Linux (44 pass). Static source review only; runtime inventory qualification remains NOT_RUN_12553."
+  }
+}

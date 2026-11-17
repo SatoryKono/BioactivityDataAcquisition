@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-16T10:17:39.071042+00:00",
+  "generated_at": "2026-11-16T15:37:13.604857+00:00",
   "summary": {
     "total_scripts": 753,
     "status_counts": {
@@ -705,7 +705,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 893,
+          "line": 899,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/ensure-mcp.sh\","
         }
@@ -1416,7 +1416,7 @@
         },
         {
           "path": "tests/unit/scripts/test_mcp_routes.py",
-          "line": 16,
+          "line": 19,
           "source_group": "tests",
           "text": "from scripts.ai.codex.mcp_routes import ("
         }
@@ -1477,7 +1477,7 @@
         },
         {
           "path": "tests/unit/scripts/test_mcp_routes.py",
-          "line": 21,
+          "line": 24,
           "source_group": "tests",
           "text": "from scripts.ai.codex.native_mcp_config import ("
         }
@@ -1516,7 +1516,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 755,
+          "line": 761,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/native_runtime_contract.py\": ("
         },
@@ -2106,7 +2106,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 935,
+          "line": 941,
           "source_group": "scripts",
           "text": "\"scripts/ai/cursor/setup_skills.sh\","
         },
@@ -3034,7 +3034,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1972,
+          "line": 2008,
           "source_group": "ci",
           "text": "bash scripts/ai/junie/check_junie_mirror.sh --check >> \"$log\" 2>&1"
         },
@@ -3240,7 +3240,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1795,
+          "line": 1805,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/check.sh\": ("
         }
@@ -3340,7 +3340,7 @@
         },
         {
           "path": "tests/unit/scripts/ai/mcp/test_export_mcp_env_from_dotenv.py",
-          "line": 90,
+          "line": 91,
           "source_group": "tests",
           "text": "reason=\"PowerShell (pwsh or powershell) is required to run export_mcp_env_from_dotenv.ps1\","
         }
@@ -3359,7 +3359,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 919,
+          "line": 925,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/github-mcp-wrapper.ps1\","
         },
@@ -3422,7 +3422,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 920,
+          "line": 926,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/github-mcp-wrapper.sh\","
         },
@@ -3461,7 +3461,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 63,
+          "line": 65,
           "source_group": "tests",
           "text": "ADR_ANALYSIS_PS1 = MCP_DIR / \"mcp_adr_analysis_wrapper.ps1\""
         },
@@ -3498,7 +3498,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 895,
+          "line": 901,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_adr_analysis_wrapper.sh\","
         },
@@ -3523,7 +3523,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 942,
+          "line": 948,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_ast_grep_wrapper.ps1\","
         },
@@ -3572,7 +3572,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 963,
+          "line": 969,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_ast_grep_wrapper.sh\","
         },
@@ -3584,7 +3584,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 66,
+          "line": 68,
           "source_group": "tests",
           "text": "AST_GREP_SH = MCP_DIR / \"mcp_ast_grep_wrapper.sh\""
         },
@@ -3609,7 +3609,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 943,
+          "line": 949,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.ps1\","
         },
@@ -3670,7 +3670,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 944,
+          "line": 950,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.sh\","
         },
@@ -3752,7 +3752,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 896,
+          "line": 902,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_code_analyzer_wrapper.sh\","
         }
@@ -3771,7 +3771,7 @@
       "references": [
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 59,
+          "line": 61,
           "source_group": "tests",
           "text": "CODE_INTERPRETER_PS1 = MCP_DIR / \"mcp_code_interpreter_wrapper.ps1\""
         }
@@ -3815,13 +3815,13 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 945,
+          "line": 951,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_context7_wrapper.ps1\","
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 65,
+          "line": 67,
           "source_group": "tests",
           "text": "CONTEXT7_PS1 = MCP_DIR / \"mcp_context7_wrapper.ps1\""
         },
@@ -3864,7 +3864,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 964,
+          "line": 970,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_context7_wrapper.sh\","
         },
@@ -3876,7 +3876,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 64,
+          "line": 66,
           "source_group": "tests",
           "text": "CONTEXT7_SH = MCP_DIR / \"mcp_context7_wrapper.sh\""
         },
@@ -3940,7 +3940,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 897,
+          "line": 903,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_deja_wrapper.sh\","
         }
@@ -4084,19 +4084,19 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1786,
+          "line": 1796,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.ps1\": (MCP_WRAPPER_CONTRACTS_TEST,),"
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 57,
+          "line": 59,
           "source_group": "tests",
           "text": "FETCH_PS1 = MCP_DIR / \"mcp_fetch_wrapper.ps1\""
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 1187,
+          "line": 1214,
           "source_group": "tests",
           "text": "assert \"mcp_fetch_wrapper.ps1\" in bash_source"
         },
@@ -4139,13 +4139,13 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1785,
+          "line": 1795,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.sh\": (MCP_WRAPPER_CONTRACTS_TEST,),"
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 56,
+          "line": 58,
           "source_group": "tests",
           "text": "FETCH_SH = MCP_DIR / \"mcp_fetch_wrapper.sh\""
         },
@@ -4184,7 +4184,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1784,
+          "line": 1794,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\": (NPM_RUNTIME_TEST,),"
         },
@@ -4239,7 +4239,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1783,
+          "line": 1793,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\": (NPM_RUNTIME_TEST,),"
         },
@@ -4315,7 +4315,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 898,
+          "line": 904,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_github_actions_wrapper.sh\","
         },
@@ -4434,7 +4434,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 901,
+          "line": 907,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_memory_wrapper.ps1\","
         },
@@ -4485,7 +4485,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 902,
+          "line": 908,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_memory_wrapper.sh\","
         },
@@ -4586,7 +4586,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 62,
+          "line": 64,
           "source_group": "tests",
           "text": "MUTMUT_PS1 = MCP_DIR / \"mcp_mutmut_wrapper.ps1\""
         }
@@ -4617,7 +4617,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 61,
+          "line": 63,
           "source_group": "tests",
           "text": "MUTMUT_SH = MCP_DIR / \"mcp_mutmut_wrapper.sh\""
         }
@@ -4655,7 +4655,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 903,
+          "line": 909,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1\","
         },
@@ -4667,7 +4667,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 1346,
+          "line": 1373,
           "source_group": "tests",
           "text": "powershell_source = (MCP_DIR / \"mcp_neo4j_cypher_wrapper.ps1\").read_text("
         }
@@ -4698,7 +4698,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 904,
+          "line": 910,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\","
         },
@@ -4710,7 +4710,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 60,
+          "line": 62,
           "source_group": "tests",
           "text": "NEO4J_CYPHER_SH = MCP_DIR / \"mcp_neo4j_cypher_wrapper.sh\""
         },
@@ -4731,7 +4731,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 905,
+          "line": 911,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1\","
         },
@@ -5087,13 +5087,13 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1791,
+          "line": 1801,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/exec_windows_ps1_wrapper.sh\": ("
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 1188,
+          "line": 1215,
           "source_group": "tests",
           "text": "assert \"exec_windows_ps1_wrapper.sh\" in bash_source"
         },
@@ -5136,7 +5136,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 921,
+          "line": 927,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/github_project_transport.mjs\","
         },
@@ -5173,7 +5173,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 946,
+          "line": 952,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/host_transport.mjs\","
         },
@@ -5222,7 +5222,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 947,
+          "line": 953,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/invoke_host_transport.ps1\","
         },
@@ -5283,7 +5283,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 948,
+          "line": 954,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/invoke_host_transport.sh\","
         },
@@ -5506,13 +5506,13 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1787,
+          "line": 1797,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/run_owned_stdio.ps1\": ("
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 1184,
+          "line": 1211,
           "source_group": "tests",
           "text": "owned_stdio = (MCP_DIR / \"support\" / \"run_owned_stdio.ps1\").read_text("
         },
@@ -5663,7 +5663,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 55,
+          "line": 57,
           "source_group": "tests",
           "text": "UV_RESOLVER_PS1 = MCP_DIR / \"support\" / \"uv_resolver.ps1\""
         }
@@ -5706,7 +5706,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 54,
+          "line": 56,
           "source_group": "tests",
           "text": "UV_RESOLVER_SH = MCP_DIR / \"support\" / \"uv_resolver.sh\""
         },
@@ -5767,7 +5767,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 900,
+          "line": 906,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/test_env_loading.sh\","
         },
@@ -11095,7 +11095,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1862,
+          "line": 1898,
           "source_group": "ci",
           "text": "python -m scripts.engineering.ci.junit_duration_summary"
         },
@@ -11248,7 +11248,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1773,
+          "line": 1783,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/nightly_shadow_archive.py\": NIGHTLY_SHADOW_TESTS,"
         },
@@ -11348,7 +11348,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 39,
+      "reference_count": 40,
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
@@ -11393,10 +11393,10 @@
           "text": "from scripts.engineering.ci.pr_lane_results import NEGATIVE_CONTROL_ENV"
         },
         {
-          "path": "tests/unit/scripts/engineering/ci/test_physical_schema_parity.py",
-          "line": 11,
+          "path": "tests/unit/repo_backed/scripts/engineering/ci/test_pr_gate.py",
+          "line": 14,
           "source_group": "tests",
-          "text": "from scripts.engineering.ci import pr_lane_results as parity"
+          "text": "from scripts.engineering.ci.pr_lane_results import build_shadow_compare"
         }
       ],
       "owner": "@bioetl-platform",
@@ -11419,7 +11419,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1667,
+          "line": 1677,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/presubmit_gate.py\": ("
         },
@@ -11462,7 +11462,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1813,
+          "line": 1823,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/publish_docker_image.sh\": ("
         },
@@ -11573,7 +11573,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1487,
+          "line": 1523,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci.pytest_event_journal \\"
         },
@@ -11665,7 +11665,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 2064,
+          "line": 2100,
           "source_group": "ci",
           "text": "\"python -m scripts.engineering.ci.quality_integral_gate\" \\"
         },
@@ -11891,7 +11891,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1461,
+          "line": 1497,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -12757,7 +12757,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 544,
+          "line": 550,
           "source_group": "scripts",
           "text": "\"scripts/engineering/dev/pretest_guardrails.ps1\": (SCOPED_CHECKS_TEST,),"
         },
@@ -12806,7 +12806,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 2050,
+          "line": 2086,
           "source_group": "ci",
           "text": "\"bash scripts/engineering/dev/pretest_guardrails.sh\" \\"
         },
@@ -13104,7 +13104,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 42,
+      "reference_count": 43,
       "references": [
         {
           "path": ".pre-commit-config.yaml",
@@ -13480,7 +13480,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 545,
+          "line": 551,
           "source_group": "scripts",
           "text": "\"scripts/engineering/dev/setup_bioetl_wsl.ps1\": ("
         },
@@ -13498,13 +13498,13 @@
         },
         {
           "path": "tests/unit/scripts/test_wsl_uv_install_integrity.py",
-          "line": 26,
+          "line": 29,
           "source_group": "tests",
           "text": "source = ROOT / \"scripts/engineering/dev/setup_bioetl_wsl.ps1\""
         },
         {
           "path": "tests/unit/scripts/test_wsl_uv_install_integrity.py",
-          "line": 115,
+          "line": 141,
           "source_group": "tests",
           "text": "source = (ROOT / \"scripts/engineering/dev/setup_bioetl_wsl.ps1\").read_text()"
         }
@@ -13860,7 +13860,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1265,
+          "line": 1271,
           "source_group": "scripts",
           "text": "\"scripts/engineering/dev/zed_mypy.py\","
         },
@@ -16666,7 +16666,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1374,
+          "line": 1410,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa.generate_hotspot_degradation_report \\"
         },
@@ -19510,19 +19510,19 @@
         },
         {
           "path": "docs/05-engineering/test-telemetry-baseline.md",
-          "line": 130,
+          "line": 125,
           "source_group": "docs",
-          "text": "| 9 | `9.767` | `tests.unit.scripts.engineering.ci.test_pr_lane_results_runtime_acceptance_routes::test_runtime_evidence_selects_owning_contract[tests/helpers/runtime_acceptance_12553.py]` | `junit-un"
+          "text": "| 4 | `25.934` | `tests.unit.scripts.engineering.ci.test_pr_lane_results_runtime_acceptance_routes::test_runtime_evidence_selects_owning_contract[tests/helpers/runtime_acceptance_12553.py]` | `unit-sc"
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 788,
+          "line": 794,
           "source_group": "scripts",
           "text": "\"scripts/engineering/qa/runtime_acceptance_12553.py\","
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 790,
+          "line": 796,
           "source_group": "scripts",
           "text": "\"tests/helpers/runtime_acceptance_12553.py\","
         },
@@ -19565,7 +19565,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 789,
+          "line": 795,
           "source_group": "scripts",
           "text": "\"scripts/engineering/qa/runtime_acceptance_12553_coverage.py\","
         },
@@ -21856,7 +21856,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1912,
+          "line": 1922,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/check_github_actions_runtime_policy.py\": ("
         }
@@ -22807,7 +22807,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 602,
+          "line": 608,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/process_supervisor.py\": ("
         },
@@ -22838,7 +22838,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 539,
+          "line": 545,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/scoped_checks.py\": ("
         },
@@ -23144,7 +23144,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 693,
+          "line": 699,
           "source_group": "scripts",
           "text": "\"scripts/memory/run_workflow.sh\": ("
         },
@@ -24244,7 +24244,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 619,
+          "line": 625,
           "source_group": "scripts",
           "text": "\"scripts/ops/launchers/codex/setup_plugins.sh\": ("
         },
@@ -25691,7 +25691,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 815,
+          "line": 821,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/audit_live_grafana_panels.py\": ("
         },
@@ -25809,7 +25809,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 2124,
+          "line": 2134,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },
@@ -25983,7 +25983,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 818,
+          "line": 824,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/dashboard_context_links.py\": ("
         },
@@ -26520,7 +26520,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 8,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -26537,6 +26537,12 @@
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
           "line": 1766,
+          "source_group": "other",
+          "text": "\"scripts/ops/observability/grafana/router_candidate.py\": \"e435d491abd9d8a8e07d05b820cafb5b90c381c961bfacf42f60a1ae2bd7a7d1\","
+        },
+        {
+          "path": "grafana/tooling/router-v7-bridge/host-image.json",
+          "line": 1965,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/router_candidate.py\": \"e435d491abd9d8a8e07d05b820cafb5b90c381c961bfacf42f60a1ae2bd7a7d1\","
         },
@@ -26575,7 +26581,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 18,
+      "reference_count": 19,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -26636,7 +26642,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 16,
+      "reference_count": 17,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -26934,7 +26940,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 14,
+      "reference_count": 15,
       "references": [
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
@@ -27077,7 +27083,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 17,
+      "reference_count": 18,
       "references": [
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
@@ -28037,7 +28043,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 957,
+          "line": 963,
           "source_group": "scripts",
           "text": "\"scripts/ops/runtime/mcp/apply-shared-to-devin.py\","
         },

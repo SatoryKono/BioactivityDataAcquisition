@@ -11,6 +11,7 @@ from typing import Any
 import pytest
 
 from scripts.engineering.ci import pr_gate
+from scripts.engineering.ci.pr_lane_results import build_shadow_compare
 
 from scripts.engineering.ci.pr_gate import (
     NOT_APPLICABLE,
@@ -411,6 +412,32 @@ def test_live_catalog_classifies_gemini_code_assist_config() -> None:
     assert matrix["decisions"]["tests"]["decision"] == NOT_APPLICABLE
     assert matrix["decisions"]["docker"]["decision"] == NOT_APPLICABLE
     assert matrix["decisions"]["security"]["decision"] == NOT_APPLICABLE
+
+
+def test_live_catalog_classifies_gitattributes() -> None:
+    """Keep every prior gate and execute the evidence-byte ownership checks."""
+    root = Path(__file__).resolve().parents[6]
+    catalog = load_catalog(root / "configs/quality/github_required_checks.yaml")
+    matrix = classify_changes(catalog, [".gitattributes"], head_sha=HEAD_SHA)
+
+    assert matrix["unclassified_files"] == []
+    assert all(row["decision"] == REQUIRED for row in matrix["decisions"].values())
+    assert matrix["decisions"]["tests"]["reason"] == "path_match"
+    assert matrix["decisions"]["lint-arch"]["reason"] == "path_match"
+    report = build_shadow_compare([".gitattributes"], repo_root=root)
+    assert {
+        "tests/unit/scripts/repo/test_hook_receipts.py",
+        "tests/architecture/test_config_discrepancy_report_drift.py",
+        "tests/architecture/test_tech_debt_issues_5847_5852_closeout.py",
+    } <= set(report["selected"])
+    assert report["covers_full_suite"] is False
+
+    unknown = classify_changes(
+        catalog, [".gitattributes.unreviewed"], head_sha=HEAD_SHA
+    )
+    assert unknown["unclassified_files"] == [".gitattributes.unreviewed"]
+    assert all(row["decision"] == REQUIRED for row in unknown["decisions"].values())
+    assert unknown["decisions"]["tests"]["reason"] == "fail_closed_unclassified_path"
 
 
 @pytest.mark.parametrize(

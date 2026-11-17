@@ -20,8 +20,19 @@ def test_coverage_expansion_moves_following_sections_once_without_changing_queri
             "id": pid,
             "type": "stat",
             "gridPos": {"x": x, "y": 5, "w": 8, "h": 3},
-            "options": {"orientation": "horizontal", "textMode": "value_and_name"},
-            "targets": [{"expr": "observed_coverage", "refId": "A"}],
+            "options": {
+                "orientation": "horizontal",
+                "textMode": "value_and_name",
+                "reduceOptions": {
+                    "values": False,
+                    "calcs": ["lastNotNull"],
+                    "fields": "",
+                },
+            },
+            "targets": [
+                {"expr": f"coverage_{ref}", "refId": ref, "instant": True}
+                for ref in ("ABC" if pid == 9102 else "ABCDE")
+            ],
             "fieldConfig": {"defaults": {"noValue": "UNKNOWN", "mappings": []}},
         }
 
@@ -59,6 +70,16 @@ def test_coverage_expansion_moves_following_sections_once_without_changing_queri
     ):
         assert current["targets"] == previous["targets"]
         assert current["fieldConfig"] == previous["fieldConfig"]
+        assert current["options"]["reduceOptions"] == {
+            **previous["options"]["reduceOptions"],
+            "values": True,
+        }
+        assert current["transformations"] == [
+            {
+                "id": "reduce",
+                "options": {"reducers": ["lastNotNull"], "mode": "reduceFields"},
+            }
+        ]
     first = deepcopy(dashboard)
     stamp_audit_presentation(dashboard)
     assert dashboard == first

@@ -7,6 +7,9 @@ import hashlib
 import json
 from pathlib import Path
 import sys
+import threading
+import time
+from typing import Any
 
 import pytest
 
@@ -182,10 +185,17 @@ def test_effective_disable_and_workspace_drift_are_explicit(tmp_path: Path) -> N
 
 def server_command(tmp_path: Path, reply: str) -> list[str]:
     script = (
-        "import json,sys,time\nfrom pathlib import Path\nfor line in sys.stdin:\n request=json.loads(line)\n with Path(sys.argv[1]).open('a',encoding='utf-8') as log: log.write(json.dumps(request)+'\\n')\n "
+        "import json,sys,time\nfrom pathlib import Path\nPath(sys.argv[2]).touch()\nfor line in sys.stdin:\n request=json.loads(line)\n with Path(sys.argv[1]).open('a',encoding='utf-8') as log: log.write(json.dumps(request)+'\\n')\n "
         + reply.replace("\n", "\n ")
     )
-    return [sys.executable, "-u", "-c", script, str(tmp_path / "requests.jsonl")]
+    return [
+        sys.executable,
+        "-u",
+        "-c",
+        script,
+        str(tmp_path / "requests.jsonl"),
+        str(tmp_path / "fixture-ready"),
+    ]
 
 
 def test_native_exchange_only_reads_config_and_closes_owned_process(
@@ -217,10 +227,58 @@ def test_native_exchange_only_reads_config_and_closes_owned_process(
     assert client._process.poll() is not None
 
 
+class _ReplyReadyClient(NativeConfigClient):
+    """Exercise real reader errors after the fixture reply has been read.
+
+    This fixture readiness bound matches the existing successful IPC fixture.
+    It is separate from the unchanged 0.5-second observation deadline: these
+    cases verify parsing, not end-to-end process startup latency.
+    """
+
+    def __init__(self, command: list[str], workspace: Path) -> None:
+        self._reply_ready = threading.Event()
+        super().__init__(command, workspace, timeout=0.5, max_message_bytes=1024)
+
+    def _put(self, message: dict[str, Any] | None) -> None:
+        super()._put(message)
+        self._reply_ready.set()
+
+    def _send(self, value: dict[str, Any]) -> None:
+        super()._send(value)
+        if value.get("method") == "initialize":
+            assert self._reply_ready.wait(timeout=4), "fixture reader not ready"
+
+
+def _wait_fixture_ready(tmp_path: Path) -> None:
+    """Bound fixture startup separately; do not change the client deadline."""
+    deadline = time.monotonic() + 4
+    while not (tmp_path / "fixture-ready").is_file():
+        assert time.monotonic() < deadline, "fixture process not ready"
+        time.sleep(0.005)
+
+
+def test_native_observation_timeout_does_not_replay_or_disclose_stderr(
+    tmp_path: Path,
+) -> None:
+    client = NativeConfigClient(
+        server_command(tmp_path, "time.sleep(5)"),
+        tmp_path,
+        timeout=0.5,
+        max_message_bytes=1024,
+    )
+    with pytest.raises(NativeConfigError, match="observation timeout") as error:
+        with client:
+            _wait_fixture_ready(tmp_path)
+            client.read()
+    assert SECRET not in str(error.value)
+    assert client._process.poll() is not None
+    requests = (tmp_path / "requests.jsonl").read_text(encoding="utf-8").splitlines()
+    assert len(requests) == 1
+
+
 @pytest.mark.parametrize(
     "reply,expected",
     [
-        ("time.sleep(5)", "observation timeout"),
         (
             "print(json.dumps({'id':request.get('id'),'error':{'code':-1,'message':'"
             + SECRET
@@ -236,12 +294,14 @@ def test_native_exchange_only_reads_config_and_closes_owned_process(
         ("print('x'*2048,flush=True)", "exceeded bounds or was malformed"),
     ],
 )
+@pytest.mark.parametrize("fixture_startup_delay", [0.0, 0.6])
 def test_native_failures_do_not_replay_or_disclose_stderr(
-    tmp_path: Path, reply: str, expected: str
+    tmp_path: Path, reply: str, expected: str, fixture_startup_delay: float
 ) -> None:
-    client = NativeConfigClient(
-        server_command(tmp_path, reply), tmp_path, timeout=0.5, max_message_bytes=1024
-    )
+    command = server_command(tmp_path, reply)
+    # A real delayed child must still exercise parsing, not an earlier timeout.
+    command[3] = f"import time;time.sleep({fixture_startup_delay})\n" + command[3]
+    client = _ReplyReadyClient(command, tmp_path)
     with pytest.raises(NativeConfigError, match=expected) as error:
         with client:
             client.read()
