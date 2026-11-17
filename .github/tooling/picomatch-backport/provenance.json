@@ -1,0 +1,19 @@
+{
+  "upstream_repository": "https://github.com/maximilliangrand/picomatch",
+  "upstream_commit": "7be3276fb8bd215a8c73fa066bcaf696c244ad88",
+  "upstream_pr": "https://github.com/micromatch/picomatch/pull/194",
+  "upstream_version": "4.0.7",
+  "local_version": "4.0.8-bioetl.1",
+  "advisory": "GHSA-fc5q-39xc-vjpf",
+  "license": "MIT",
+  "files": {
+    "index.js": "02ae26406508e28f9ba0865be16cf77f0b33de6c4d4d49c212c4176df1d5625a",
+    "posix.js": "5695ff5dfcd5a338a40630bd506056f2950bcb08fe1cc068519cbbfe60add480",
+    "LICENSE": "d0cd141b0c322fded5dfad1d4645bb2fedfc05b7321fe1009469638190d59ef9",
+    "lib/constants.js": "c28f952d2758261fe5428a121add485cc25b03e0193633f649de903dc0e5e222",
+    "lib/parse.js": "48008c5de4003e6af46fc2c968b57ddb097801f7bcd07cd8fbe8c868402ef883",
+    "lib/picomatch.js": "fdd249d7ffff853f3bb1c77eafc8baa1a437bea85a94c35877b83c6a40d9ca94",
+    "lib/scan.js": "6457a1764e5c2e543cc3a0c00ce12ebb3764097628868198370b64d4e642aaae",
+    "lib/utils.js": "f04604f70cd1a3f6ace80b84766468674ff38b4bb83818d2ef1d81fc6355f935"
+  }
+}

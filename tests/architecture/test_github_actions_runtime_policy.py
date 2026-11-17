@@ -1079,7 +1079,9 @@ def test_osv_high_critical_gate_ignores_medium_and_fails_high() -> None:
     assert policy.collect_blocking_osv_findings(vector_medium) == []
     assert policy.collect_blocking_osv_findings(high) == ["GHSA-high HIGH demo==1.0"]
 
-    picomatch_residual = {
+    # Picomatch residual allowlisting is forbidden; vulnerable versions stay
+    # fail-closed. Consumers remediates via .github/tooling/picomatch-backport.
+    picomatch_vulnerable = {
         "results": [
             {
                 "packages": [
@@ -1096,7 +1098,9 @@ def test_osv_high_critical_gate_ignores_medium_and_fails_high() -> None:
             }
         ]
     }
-    assert policy.collect_blocking_osv_findings(picomatch_residual) == []
+    assert policy.collect_blocking_osv_findings(picomatch_vulnerable) == [
+        "GHSA-fc5q-39xc-vjpf HIGH picomatch==4.0.7"
+    ]
 
 
 def test_osv_gate_fails_closed_for_unknown_severity() -> None:

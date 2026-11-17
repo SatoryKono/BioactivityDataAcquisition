@@ -6,9 +6,11 @@
     "jscpd": "4.0.8"
   },
   "overrides": {
-    "braces": "$braces"
+    "braces": "$braces",
+    "picomatch": "$picomatch"
   },
   "devDependencies": {
-    "braces": "file:../braces-backport/braces-3.0.4-bioetl.1.tgz"
+    "braces": "file:../braces-backport/braces-3.0.4-bioetl.1.tgz",
+    "picomatch": "file:../picomatch-backport/picomatch-4.0.8-bioetl.1.tgz"
   }
 }

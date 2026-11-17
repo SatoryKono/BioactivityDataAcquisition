@@ -33,9 +33,6 @@ SELECTOR_LOCK = (
     ROOT / "grafana" / "plugins" / "bioetl-selectorshell-panel" / "package-lock.json"
 )
 EXPIRY = "2026-11-30"
-PICOMATCH_GHSA = "GHSA-fc5q-39xc-vjpf"
-PICOMATCH_EXPIRY = "2026-12-31"
-JSCPD_LOCK = ROOT / ".github" / "tooling" / "jscpd" / "package-lock.json"
 
 
 def _json(path: Path) -> dict[str, Any]:
@@ -48,38 +45,6 @@ def _lock_packages(path: Path) -> dict[str, Any]:
     packages = _json(path).get("packages")
     assert isinstance(packages, dict)
     return cast(dict[str, Any], packages)
-
-
-def _osv_scanner_scan_args(workflow_path: Path) -> str:
-    """Return executable OSV-Scanner ``scan-args`` (YAML comments already dropped)."""
-    workflow = yaml.safe_load(workflow_path.read_text(encoding="utf-8"))
-    assert isinstance(workflow, dict)
-    jobs = workflow.get("jobs")
-    assert isinstance(jobs, dict)
-    for job in jobs.values():
-        if not isinstance(job, dict):
-            continue
-        steps = job.get("steps")
-        if not isinstance(steps, list):
-            continue
-        for step in steps:
-            if not isinstance(step, dict):
-                continue
-            uses = str(step.get("uses") or "")
-            if "osv-scanner-action/osv-scanner-action@" not in uses:
-                continue
-            with_block = step.get("with") or {}
-            assert isinstance(with_block, dict)
-            scan_args = with_block.get("scan-args")
-            assert isinstance(scan_args, str) and scan_args.strip(), workflow_path.name
-            # Drop residual shell-style comments inside the multiline scalar.
-            active_lines = [
-                line
-                for line in scan_args.splitlines()
-                if line.strip() and not line.lstrip().startswith("#")
-            ]
-            return "\n".join(active_lines)
-    raise AssertionError(f"OSV-Scanner step missing in {workflow_path}")
 
 
 def test_osv_scanner_toml_must_not_exist() -> None:
@@ -120,75 +85,11 @@ def test_policy_documents_residual_osv_exception() -> None:
     assert "grafana/plugins" in text
     assert "ADR-010" in text
     assert "#9859" in text
-    assert PICOMATCH_GHSA in text
-    assert PICOMATCH_EXPIRY in text
-    assert "#13180" in text
-
-
-def test_picomatch_residual_osv_is_timeboxed() -> None:
-    """Unpatchable picomatch HIGH must stay documented and gate-allowlisted (#13180)."""
-    from scripts.engineering.repo import check_github_actions_runtime_policy as policy
-
-    deadline = date.fromisoformat(PICOMATCH_EXPIRY)
-    assert deadline == date(2026, 12, 31)
-    assert PICOMATCH_EXPIRY == policy._RESIDUAL_OSV_EXPIRY
-    assert PICOMATCH_GHSA in policy._RESIDUAL_OSV_IDS
-    assert current_utc_time().date() <= deadline, (
-        f"picomatch residual OSV expired on {PICOMATCH_EXPIRY}; bump picomatch "
-        "when a patched release exists or renew #13180 with a new dated expiry"
-    )
-    security_md = SECURITY_MD.read_text(encoding="utf-8")
-    assert PICOMATCH_GHSA in security_md
-    assert PICOMATCH_EXPIRY in security_md
-    assert "#13180" in security_md
-    # Residual surfaces must stay in the active OSV-Scanner step args (not in
-    # YAML/shell comments). Exact picomatch versions are not pinned: a patched
-    # bump must not fail this gate while the GHSA id remains allowlisted until
-    # #13180 expiry/re-triage.
-    scanned_lockfiles = (
-        "grafana/plugins/bioetl-scenes-app/package-lock.json",
-        "grafana/plugins/bioetl-selectorshell-panel/package-lock.json",
-        ".github/tooling/jscpd/package-lock.json",
-    )
-    for workflow_path in (
-        SECURITY_WORKFLOW,
-        ROOT / ".github" / "workflows" / "pr-required.yml",
-    ):
-        scan_args = _osv_scanner_scan_args(workflow_path)
-        for lockfile in scanned_lockfiles:
-            assert f"--lockfile={lockfile}" in scan_args, workflow_path.name
-    for lock_path in (SCENES_LOCK, SELECTOR_LOCK, JSCPD_LOCK):
-        packages = _lock_packages(lock_path)
-        assert "node_modules/picomatch" in packages, lock_path.as_posix()
-    payload = {
-        "results": [
-            {
-                "packages": [
-                    {
-                        "package": {"name": "picomatch", "version": "4.0.7"},
-                        "vulnerabilities": [
-                            {
-                                "id": PICOMATCH_GHSA,
-                                "database_specific": {"severity": "HIGH"},
-                            }
-                        ],
-                    },
-                    {
-                        "package": {"name": "other", "version": "1.0"},
-                        "vulnerabilities": [
-                            {
-                                "id": "GHSA-other-high",
-                                "database_specific": {"severity": "HIGH"},
-                            }
-                        ],
-                    },
-                ]
-            }
-        ]
-    }
-    assert policy.collect_blocking_osv_findings(payload) == [
-        "GHSA-other-high HIGH other==1.0"
-    ]
+    # Picomatch is remediated by local backport (#13180/#13181), not an OSV-gate
+    # allowlist (AGENTS.md forbids growing exemptions).
+    assert "4.0.8-bioetl.1" in text
+    assert "picomatch-backport" in text
+    assert "allowlists **only this GHSA id**" not in text
 
 
 def test_residual_osv_exception_has_not_expired() -> None:
@@ -261,6 +162,7 @@ def test_grafana_plugins_do_not_force_router_or_uuid_majors() -> None:
         **audited_overrides,
         "react-router-dom-v5-compat": "$react-router-dom-v5-compat",
         "braces": "$braces",
+        "picomatch": "$picomatch",
         "@istanbuljs/load-nyc-config": {"js-yaml": "4.3.2"},
     }
     scenes_pkg = _json(SCENES_PKG)
@@ -273,6 +175,7 @@ def test_grafana_plugins_do_not_force_router_or_uuid_majors() -> None:
         **audited_overrides,
         "@grafana/scenes": {"react-router-dom": "7.18.4"},
         "braces": "$braces",
+        "picomatch": "$picomatch",
         "react-router-dom-v5-compat": "$react-router-dom-v5-compat",
         "@istanbuljs/load-nyc-config": {"js-yaml": "4.3.2"},
     }

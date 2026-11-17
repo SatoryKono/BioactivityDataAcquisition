@@ -188,7 +188,7 @@ check, and do **not** dismiss #1294 as a false green.
 | GHSA-3h5v / 58qx / 96hv | `ws` | mermaid puppeteer | Override **8.21.3** | CI diagrams |
 | PYSEC-2026-3721 / CVE-2026-3219 | `pip==26.2.1` | `uv.lock` | Remediated 2026-08-31; `pip-audit --strict` is clean without `--ignore-vuln` | CI/dev extra; not runtime image |
 | GHSA-2v37, 337j, wrjc, jjmj, 5c6j, qj8w, w5hq | Grafana npm (`react-router` 6.x, `uuid` 9.x, …) | `grafana/plugins/*` | No React Router 7 / uuid 11 force-bump (Grafana 13 host API) | Optional monitoring (ADR-010); not BioETL runtime |
-| GHSA-fc5q-39xc-vjpf | `picomatch` (`<=4.0.7`, no patched release) | `grafana/plugins/*`, `.github/tooling/jscpd` | Unpatchable HIGH ReDoS; Class-lane OSV gate allowlists **only this GHSA id** until **2026-12-31** (#13180) | CI tooling / optional monitoring; not BioETL runtime |
+| GHSA-fc5q-39xc-vjpf | `picomatch` | `grafana/plugins/*`, `.github/tooling/jscpd` | Remediated via local backport `4.0.8-bioetl.1` (`.github/tooling/picomatch-backport`, micromatch/picomatch#194); **no** OSV-gate allowlist (#13180/#13181) | CI tooling / optional monitoring; not BioETL runtime |
 
 Expiry (mermaid/Grafana/#9853 family): **2026-11-30**. Owner: BioETL Team.
 Accepted on #9853 (closed). Re-triage: #9859. CI fail-closed gate:
@@ -197,10 +197,11 @@ Upgrade mermaid-cli (keep diagram golden pins) and/or Grafana plugin majors, or
 renew the exception with a new dated issue. Scorecard Vulnerabilities **#1294**
 stays undismissed.
 
-`picomatch` residual (#13180) expires **2026-12-31** and is enforced by
-`check_github_actions_runtime_policy.collect_blocking_osv_findings` plus
-`tests/architecture/test_residual_osv_9853.py::test_picomatch_residual_osv_is_timeboxed`.
-Do **not** broaden the allowlist beyond that GHSA id.
+`picomatch` (#13180/#13181) is **not** an OSV-gate residual: consumers install
+`.github/tooling/picomatch-backport/picomatch-4.0.8-bioetl.1.tgz` through npm
+`overrides` so lockfiles leave the vulnerable `<=4.0.7` range. Gate stays
+fail-closed for any remaining HIGH/CRITICAL. Do **not** add `osv-scanner.toml`
+and do **not** grow tech-debt exemptions.
 
 ### 2.3.3 GitHub supply-chain settings (#10264)
 
@@ -1172,11 +1173,10 @@ Merge-block proof: `PUT /repos/SatoryKono/BioactivityDataAcquisition/pulls/9895/
 
 ### Migration notes (1.2.18)
 
-- #13180: unpatchable `picomatch` `GHSA-fc5q-39xc-vjpf` (HIGH, no upstream
-  patch as of 2026-11-17) is a timeboxed Class-lane OSV gate residual until
-  **2026-12-31**. Surfaces: `grafana/plugins/*` and `.github/tooling/jscpd`.
-  Allowlist is GHSA-id-only in
-  `check_github_actions_runtime_policy.collect_blocking_osv_findings`.
-  Do **not** add `osv-scanner.toml`; Scorecard #1294 stays undismissed.
-  Fail-closed:
-  `test_picomatch_residual_osv_is_timeboxed`.
+- #13180 / #13181: `picomatch` `GHSA-fc5q-39xc-vjpf` remediated without an
+  OSV-gate allowlist (AGENTS.md forbids growing exemptions). Local backport
+  `4.0.8-bioetl.1` from upstream `4.0.7` + micromatch/picomatch#194 lands in
+  `.github/tooling/picomatch-backport` and is forced through npm `overrides`
+  for jscpd + Grafana plugins. Scorecard #1294 stays undismissed; no
+  `osv-scanner.toml`. Fail-closed archive binding:
+  `tests/architecture/test_picomatch_backport.py`.
