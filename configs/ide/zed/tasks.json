@@ -1,0 +1,104 @@
+[
+    {
+        "label": "Python: active project interpreter",
+        "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
+        "args": [
+            "-c",
+            "\"import sys; print(sys.executable); print(sys.version)\""
+        ],
+        "cwd": "$ZED_WORKTREE_ROOT",
+        "save": "none",
+        "reveal": "always",
+        "hide": "never",
+        "allow_concurrent_runs": false
+    },
+    {
+        "label": "Environment: verify",
+        "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
+        "args": [
+            "scripts/engineering/dev/zed_env_doctor.py"
+        ],
+        "cwd": "$ZED_WORKTREE_ROOT",
+        "save": "none",
+        "reveal": "always",
+        "hide": "never",
+        "allow_concurrent_runs": false
+    },
+    {
+        "label": "pytest: current test file (quick; project addopts disabled)",
+        "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
+        "args": [
+            "-m",
+            "pytest",
+            "-q",
+            "-o",
+            "addopts=",
+            "-o",
+            "cache_dir=.cache/pytest/windows",
+            "$ZED_FILE"
+        ],
+        "cwd": "$ZED_WORKTREE_ROOT",
+        "env": {
+            "VCR_RECORD_MODE": "none",
+            "PYTHONDONTWRITEBYTECODE": "1"
+        },
+        "save": "current",
+        "reveal": "always",
+        "hide": "never",
+        "allow_concurrent_runs": false
+    },
+    {
+        "label": "pytest: current test file (project settings)",
+        "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
+        "args": [
+            "-m",
+            "pytest",
+            "-o",
+            "cache_dir=.cache/pytest/windows",
+            "$ZED_FILE"
+        ],
+        "cwd": "$ZED_WORKTREE_ROOT",
+        "env": {
+            "VCR_RECORD_MODE": "none",
+            "PYTHONDONTWRITEBYTECODE": "1"
+        },
+        "save": "current",
+        "reveal": "always",
+        "hide": "never",
+        "allow_concurrent_runs": false,
+        "tags": [
+            "python-test"
+        ]
+    },
+    {
+        "label": "Ruff: check current file",
+        "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
+        "args": [
+            "-m",
+            "ruff",
+            "check",
+            "$ZED_FILE"
+        ],
+        "cwd": "$ZED_WORKTREE_ROOT",
+        "save": "current",
+        "reveal": "always",
+        "hide": "never",
+        "allow_concurrent_runs": false
+    },
+    {
+        "label": "Ruff: check formatting of current file",
+        "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
+        "args": [
+            "-m",
+            "ruff",
+            "format",
+            "--check",
+            "$ZED_FILE"
+        ],
+        "cwd": "$ZED_WORKTREE_ROOT",
+        "save": "current",
+        "reveal": "always",
+        "hide": "never",
+        "allow_concurrent_runs": false
+    }
+]
