@@ -41,6 +41,17 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import GoldValidatorPort, TracingPort
 
 
+def _target_normalization_profile(config: RecordProcessorConfig) -> object | None:
+    versions = config.content_hash_policy_by_version
+    if (
+        config.pipeline_name == "chembl_target"
+        and versions is not None
+        and versions.active_version == "3.1.0"
+    ):
+        return target_v31_normalization_profile()
+    return None
+
+
 def create_batch_processing_components(
     *,
     services: PipelineService,
@@ -73,13 +84,7 @@ def create_batch_processing_components(
         RecordNormalizationProcessor(
             provider=config.provider,
             entity_type=config.entity_type,
-            profile=(
-                target_v31_normalization_profile()
-                if config.pipeline_name == "chembl_target"
-                and config.content_hash_policy_by_version is not None
-                and config.content_hash_policy_by_version.active_version == "3.1.0"
-                else None
-            ),
+            profile=_target_normalization_profile(config),
             rule_set=config.normalization_rule_set,
             allow_compatibility_fallback=config.allow_compatibility_fallback,
             content_hash_include_fields=config.content_hash_include_fields,

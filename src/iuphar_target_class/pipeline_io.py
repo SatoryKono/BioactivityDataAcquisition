@@ -16,6 +16,7 @@ from .pipeline import BatchResult, IndexedSnapshot, RowResult, classify_batch
 from .stage0.io import canonical_json_bytes
 
 BIOETL_TARGET_KERNEL_CSV_V1 = "bioetl_target_kernel_csv_v1"
+_INVALID_CSV_ROW_WIDTH = "invalid CSV row width"
 _BIOETL_KERNEL_COLUMNS = frozenset(
     {
         "input_row_id",
@@ -70,7 +71,7 @@ def _require_bioetl_kernel_header(headers: Sequence[str]) -> None:
 def _bioetl_kernel_identity(raw: dict[str, str], target_kind: str) -> str:
     """Require a coherent row before constructing its source provenance."""
     if None in raw or any(value is None for value in raw.values()):
-        raise ValueError("invalid CSV row width")
+        raise ValueError(_INVALID_CSV_ROW_WIDTH)
     identity = raw["input_row_id"]
     if not identity.strip() or any(mark in identity for mark in ("/", "\n", "\r")):
         raise ValueError("invalid canonical CSV input_row_id")
@@ -80,7 +81,7 @@ def _bioetl_kernel_identity(raw: dict[str, str], target_kind: str) -> str:
 
 
 def _require_canonical_taxon(taxon: str) -> None:
-    if taxon and re.fullmatch(r"[1-9][0-9]*", taxon) is None:
+    if taxon and re.fullmatch(r"[1-9]\d*", taxon) is None:
         raise ValueError(
             "canonical CSV organism must be a positive ASCII TaxID or blank"
         )
@@ -120,7 +121,7 @@ def read_legacy_batch(content: bytes) -> tuple[RawTargetRow, ...]:
     rows: list[RawTargetRow] = []
     for row in source_rows:
         if None in row or any(value is None for value in row.values()):
-            raise ValueError("invalid CSV row width")
+            raise ValueError(_INVALID_CSV_ROW_WIDTH)
         fields: dict[str, str | None] = {
             k: v for k, v in row.items() if k not in {"input_row_id", "target_kind"}
         }
@@ -173,7 +174,7 @@ def _chembl_target_row(
 ) -> RawTargetRow:
     """Preserve source columns and record identity after strict width checks."""
     if None in raw or any(value is None for value in raw.values()):
-        raise ValueError("invalid CSV row width")
+        raise ValueError(_INVALID_CSV_ROW_WIDTH)
     names = tuple(
         name.strip() for name in raw["target_names"].split("|") if name.strip()
     )

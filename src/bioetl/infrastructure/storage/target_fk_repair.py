@@ -18,6 +18,11 @@ from urllib.parse import urlparse
 import pyarrow as pa
 from deltalake import DeltaTable, write_deltalake
 
+_TARGETS_JSON = "targets.json"
+_STATUS_JSON = "status.json"
+_ACQUISITION_JSON = "acquisition.json"
+_RECOVERY_FILES = (_TARGETS_JSON, _STATUS_JSON, _ACQUISITION_JSON)
+
 
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -158,7 +163,7 @@ def _check_receipt(entry: Mapping[str, object], path: Path) -> None:
 
 
 def _read_acquisition(root: Path) -> dict[str, dict[str, object]]:
-    receipts = json.loads((root / "acquisition.json").read_bytes())
+    receipts = json.loads((root / _ACQUISITION_JSON).read_bytes())
     if not isinstance(receipts, list) or len(receipts) != 2:
         raise ValueError("Expected exactly targets/status acquisition receipts")
     by_role = {
@@ -172,7 +177,7 @@ def _read_acquisition(root: Path) -> dict[str, dict[str, object]]:
 
 
 def _read_target_rows(root: Path, expected_ids: set[str]) -> list[dict[str, object]]:
-    payload = _object(root / "targets.json")
+    payload = _object(root / _TARGETS_JSON)
     records = payload.get("targets")
     page = payload.get("page_meta")
     if not isinstance(records, list) or not all(isinstance(x, dict) for x in records):
@@ -194,10 +199,10 @@ def read_recovered_target_source(
 ) -> RecoveredTargetSource:
     """Validate actual source bytes against receipts and the exact missing cohort."""
     root = directory.resolve(strict=True)
-    acquisition = root / "acquisition.json"
+    acquisition = root / _ACQUISITION_JSON
     by_role = _read_acquisition(root)
     records = _read_target_rows(root, expected_ids)
-    status = _object(root / "status.json")
+    status = _object(root / _STATUS_JSON)
     release = status.get("chembl_db_version")
     if not isinstance(release, str) or not release.startswith("ChEMBL_"):
         raise ValueError("Provider release is unverified")
@@ -215,10 +220,7 @@ def read_recovered_target_source(
             },
         },
         root,
-        {
-            name: _sha256(root / name)
-            for name in ("targets.json", "status.json", "acquisition.json")
-        },
+        {name: _sha256(root / name) for name in _RECOVERY_FILES},
     )
 
 
@@ -310,7 +312,7 @@ def _freeze_input_copies(
         references[layer] = copied.reference()
     copy_root = destination / "frozen-inputs" / "source"
     copy_root.mkdir(parents=True)
-    for name in ("targets.json", "status.json", "acquisition.json"):
+    for name in _RECOVERY_FILES:
         shutil.copyfile(source.directory / name, copy_root / name)
     if _file_inventory(copy_root) != source.files:
         raise ValueError("Frozen acquisition bytes do not match original source pins")

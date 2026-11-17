@@ -16,6 +16,7 @@ from bioetl.infrastructure.config.contract_policy_loader import (
     load_pipeline_contract_policy,
 )
 from bioetl.infrastructure.config.target_classification_profile import (
+    TargetClassificationSchemaProfile,
     resolve_target_classification_profile,
 )
 from bioetl.infrastructure.schemas.pipeline_contract_policy import (
@@ -57,23 +58,18 @@ class TransformerBuilder:
 
         entity_type = self.entity_type_extractor(self.pipeline_name)
         contract_policy = self._load_contract_policy(entity_type)
-        target_profile = None
-        if self.pipeline_name == "chembl_target":
-            target_profile = resolve_target_classification_profile(
-                yaml_config,
-                contract_policy
-                if isinstance(contract_policy, PipelineContractPolicy)
-                else None,
-            )
-            yaml_config = target_profile.resolved_yaml_config
-            contract_policy = target_profile.contract_policy
-            pandera_silver_schema = target_profile.pandera_silver_schema
-            if target_profile.config.mode == "enrich":
-                from bioetl.application.pipelines.chembl.target_classified_transformer import (
-                    TargetClassifiedTransformer,
-                )
-
-                transformer_class = TargetClassifiedTransformer
+        (
+            transformer_class,
+            yaml_config,
+            contract_policy,
+            pandera_silver_schema,
+            target_profile,
+        ) = self._with_target_classification(
+            transformer_class,
+            yaml_config,
+            contract_policy,
+            pandera_silver_schema,
+        )
 
         authoritative_hash_policy = yaml_config.content_hash_policy
         identity_service = EntityIdentityGenerator(
@@ -124,6 +120,48 @@ class TransformerBuilder:
             if session is not None:
                 transformer.configure_target_classification(session)
         return transformer
+
+    def _with_target_classification(
+        self,
+        transformer_class: type[BaseTransformer],
+        yaml_config: PipelineYamlConfig,
+        contract_policy: ContractPolicyProtocol | None,
+        pandera_silver_schema: object | None,
+    ) -> tuple[
+        type[BaseTransformer],
+        PipelineYamlConfig,
+        ContractPolicyProtocol | None,
+        object | None,
+        TargetClassificationSchemaProfile | None,
+    ]:
+        if self.pipeline_name != "chembl_target":
+            return (
+                transformer_class,
+                yaml_config,
+                contract_policy,
+                pandera_silver_schema,
+                None,
+            )
+        target_profile = resolve_target_classification_profile(
+            yaml_config,
+            contract_policy
+            if isinstance(contract_policy, PipelineContractPolicy)
+            else None,
+        )
+        selected = transformer_class
+        if target_profile.config.mode == "enrich":
+            from bioetl.application.pipelines.chembl.target_classified_transformer import (
+                TargetClassifiedTransformer,
+            )
+
+            selected = TargetClassifiedTransformer
+        return (
+            selected,
+            target_profile.resolved_yaml_config,
+            target_profile.contract_policy,
+            target_profile.pandera_silver_schema,
+            target_profile,
+        )
 
     def _load_contract_policy(
         self, entity_type: str | None

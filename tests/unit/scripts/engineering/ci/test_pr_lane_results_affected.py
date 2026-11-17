@@ -323,6 +323,57 @@ def test_iuphar_batch_pipeline_keeps_a_bounded_owner(tmp_path: Path) -> None:
         assert report["covers_full_suite"] is False
 
 
+def test_iuphar_shadow_paths_keep_explicit_owners(tmp_path: Path) -> None:
+    owners = (
+        "tests/unit/iuphar_target_class/test_csv_io.py",
+        "tests/unit/iuphar_target_class/test_integration_acceptance.py",
+        "tests/unit/iuphar_target_class/test_reference_coverage_v2.py",
+        "tests/architecture/test_codex_skill_agent_links.py",
+        "tests/architecture/test_documentation_cleanup_inventory.py",
+        "tests/architecture/test_gold_strict_validation_policy.py",
+        "tests/architecture/test_issue_12029_remaining_parity_gates.py",
+        "tests/architecture/test_tech_debt_issue_6038_governance_taxonomy.py",
+        "tests/integration/config/test_semantic_field_unification_contract.py",
+        "tests/architecture/test_gold_schema_contracts.py",
+        "tests/unit/infrastructure/config/test_contract_registry_loader.py",
+        "tests/integration/config/test_non_chembl_contract_registry_coverage.py",
+        "tests/architecture/test_doc_crossref_integrity.py",
+        "tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py",
+    )
+    for owner in owners:
+        path = tmp_path / owner
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("def test_owner():\n    assert True\n", encoding="utf-8")
+    changed = (
+        "configs/base/contract_registry.yaml",
+        "docs/00-project/ai/skills/COMBINED-CATALOG.md",
+        "docs/00-project/ai/skills/README.md",
+        "docs/00-project/ai/skills/SKILLS-CATALOG.md",
+        "docs/00-project/ai/skills/SKILLS-PRACTICAL-INDEX.md",
+        "docs/02-architecture/generated/pipeline-dataflows/chembl_activity/pipeline-dataflow-ir.json",
+        "docs/02-architecture/generated/pipeline-dataflows/chembl_activity/pipeline-passport.md",
+        "docs/04-reference/contracts/gold-schemas.md",
+        "docs/04-reference/contracts/gold/chembl_target_v3.1.json",
+        "docs/05-operations/runbooks/index.md",
+        "docs/05-operations/runbooks/iuphar-target-classification.md",
+        "src/iuphar_target_class/_pipeline_proof_rows.py",
+        "src/iuphar_target_class/csv_io.py",
+        "src/iuphar_target_class/integration_acceptance.py",
+        "src/iuphar_target_class/pipeline_proof.py",
+        "src/iuphar_target_class/reference_coverage.py",
+    )
+    report = build_shadow_compare(list(changed), repo_root=tmp_path)
+    assert set(report["selected"]) == set(owners)
+    assert report["covers_full_suite"] is False
+    for unowned in (
+        "src/iuphar_target_class/unmapped.py",
+        "docs/00-project/ai/skills/UNMAPPED.md",
+        "docs/02-architecture/generated/other/file.json",
+    ):
+        with pytest.raises(ValueError, match="unmapped paths"):
+            build_shadow_compare([unowned], repo_root=tmp_path)
+
+
 def test_iuphar_policy_paths_keep_the_policy_owner(tmp_path: Path) -> None:
     owner = tmp_path / "tests/unit/iuphar_target_class/test_policy.py"
     owner.parent.mkdir(parents=True)

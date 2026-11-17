@@ -1497,7 +1497,9 @@ def main(argv: list[str] | None = None) -> int:
         return gate_exit
 
     if gate_exit:
-        print("[module-coverage-inventory] regression gate failed; output not published")
+        print(
+            "[module-coverage-inventory] regression gate failed; output not published"
+        )
         return gate_exit
 
     _write_text_atomically(args.json_out, rendered, root=repo_root)

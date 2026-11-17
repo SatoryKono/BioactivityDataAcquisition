@@ -18,6 +18,11 @@ from ._snapshot_payloads import identifier
 from .snapshot_evidence import SourceEvidence
 
 SOURCE_FORMAT = "gtopdb_targets_csv_v1"
+_FAMILY_ID = "Family id"
+_FAMILY_NAME = "Family name"
+_TARGET_ID = "Target id"
+_TARGET_NAME = "Target name"
+_StringList = list[str]
 SPECIES_COLUMNS = {
     "9606": ("Human", "HGNC symbol"),
     "10116": ("Rat", "RGD symbol"),
@@ -25,10 +30,10 @@ SPECIES_COLUMNS = {
 }
 _COMMON_COLUMNS = (
     "Type",
-    "Family id",
-    "Family name",
-    "Target id",
-    "Target name",
+    _FAMILY_ID,
+    _FAMILY_NAME,
+    _TARGET_ID,
+    _TARGET_NAME,
     "Subunit id",
     "Subunit name",
     "Target systematic name",
@@ -92,14 +97,14 @@ def _require_rows(rows: list[dict[str, str]]) -> None:
 def _groups(rows: list[dict[str, str]]) -> dict[str, list[tuple[int, dict[str, str]]]]:
     result: dict[str, list[tuple[int, dict[str, str]]]] = defaultdict(list)
     for record, row in enumerate(rows, 1):
-        result[identifier(row["Target id"])].append((record, row))
+        result[identifier(row[_TARGET_ID])].append((record, row))
     return dict(result)
 
 
 def _selection(
     groups: Mapping[str, list[tuple[int, dict[str, str]]]], scope: Mapping[str, object]
 ) -> set[str]:
-    selected = set(cast("list[str]", scope["included_target_ids"]))
+    selected = set(cast(_StringList, scope["included_target_ids"]))
     excluded = cast("list[dict[str, object]]", scope["excluded_targets"])
     excluded_ids = {str(item["target_id"]) for item in excluded}
     if selected.intersection(excluded_ids) or selected | excluded_ids != set(groups):
@@ -115,7 +120,7 @@ def _selection(
 
 def _consistent(group: list[tuple[int, dict[str, str]]]) -> dict[str, str]:
     first = group[0][1]
-    identity_columns = set(first) - {"Type", "Family id", "Family name"}
+    identity_columns = set(first) - {"Type", _FAMILY_ID, _FAMILY_NAME}
     if any(any(row[key] != first[key] for key in identity_columns) for _, row in group):
         raise ValueError("conflicting provider identity columns across family rows")
     if first["Subunit id"]:
@@ -143,16 +148,16 @@ def _variant(row: Mapping[str, str], taxon: str) -> dict[str, object] | None:
     if not accessions and gene_id is None and gene_symbol is None:
         return None
     return {
-        "targetId": identifier(row["Target id"]),
+        "targetId": identifier(row[_TARGET_ID]),
         "taxonId": taxon,
         "uniprotIds": accessions,
         "geneId": gene_id,
         "geneSymbol": gene_symbol,
-        "name": row["Target name"] or None,
+        "name": row[_TARGET_NAME] or None,
         "names": [
             row[key]
             for key in (
-                "Target name",
+                _TARGET_NAME,
                 "Target systematic name",
                 "Target abbreviated name",
             )
@@ -172,8 +177,8 @@ def _family_rows(
             raise ValueError("unsupported official family type")
         result.append(
             {
-                "familyId": identifier(row["Family id"]),
-                "familyName": row["Family name"],
+                "familyId": identifier(row[_FAMILY_ID]),
+                "familyName": row[_FAMILY_NAME],
                 "familyType": row["Type"],
                 "sourceRecord": record,
             }
@@ -194,7 +199,7 @@ def _project_group(
     for taxon in species:
         variant = _variant(row, taxon)
         if variant is None:
-            gaps.append({"target_id": row["Target id"], "taxon_id": taxon})
+            gaps.append({"target_id": row[_TARGET_ID], "taxon_id": taxon})
             continue
         outputs.append(
             {
@@ -235,7 +240,7 @@ def _raw_scope(
     ):
         raise ValueError("official raw denominator differs from reviewed scope")
     selected = _selection(groups, scope)
-    species = cast("list[str]", scope["species_taxon_ids"])
+    species = cast(_StringList, scope["species_taxon_ids"])
     if not set(species).issubset(SPECIES_COLUMNS):
         raise ValueError(
             "official wide export supports only its explicit species columns"
@@ -258,7 +263,7 @@ def project_official_export(evidence: SourceEvidence) -> OfficialProjection:
     if len(projected) != scope["expected_variant_count"]:
         raise ValueError("species variant count differs from reviewed scope")
     loaded_types = {row["Type"] for target in selected for _, row in groups[target]}
-    if not set(cast("list[str]", scope["required_family_types"])).issubset(
+    if not set(cast(_StringList, scope["required_family_types"])).issubset(
         loaded_types
     ):
         raise ValueError("required reviewed family types are missing")

@@ -31,6 +31,8 @@ from bioetl.infrastructure.storage.target_migration_validation import (
 )
 from iuphar_target_class.stage0.io import canonical_json_bytes, sha256_file
 
+_JOURNAL_JSON = "journal.json"
+
 
 class TargetMigrationJournal(TypedDict):
     """Persisted occurrence state used by paired promotion and recovery."""
@@ -138,7 +140,7 @@ def _lock(root: Path) -> Iterator[None]:
 def _save(backup: Path, state: Mapping[str, object]) -> None:
     temporary = backup / "journal.tmp"
     temporary.write_bytes(canonical_json_bytes(state))
-    temporary.replace(backup / "journal.json")
+    temporary.replace(backup / _JOURNAL_JSON)
 
 
 def _restore_pairs(paths: dict[str, Path], state: TargetMigrationJournal) -> None:
@@ -235,7 +237,7 @@ def promote_target_migration(
     with _lock(paths.workspace):
         state = cast(
             "TargetMigrationJournal",
-            json.loads((checked["backup"] / "journal.json").read_bytes()),
+            json.loads((checked["backup"] / _JOURNAL_JSON).read_bytes()),
         )
         _assert_prepared_identity(checked, state, deployment)
         verify_target_dependencies(paths.workspace, state["dependencies"])
@@ -299,7 +301,7 @@ def rollback_target_migration(paths: TargetMigrationPaths) -> TargetMigrationJou
     with _lock(paths.workspace):
         state = cast(
             "TargetMigrationJournal",
-            json.loads((checked["backup"] / "journal.json").read_bytes()),
+            json.loads((checked["backup"] / _JOURNAL_JSON).read_bytes()),
         )
         if state["phase"] not in {"promoted", "promoting"}:
             raise ValueError("migration has no activated bundle to restore")

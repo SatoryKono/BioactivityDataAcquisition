@@ -9,6 +9,7 @@ from collections.abc import Mapping
 
 from iuphar_target_class.stage0.io import canonical_json_bytes
 
+_TAXONOMY_ERROR = "taxonomy_id must be a positive integer"
 _SOURCE_TAXA = {
     "Homo sapiens": "9606",
     "Mus musculus": "10090",
@@ -43,14 +44,14 @@ def _taxon(value: object) -> str | None:
     if value is None:
         return None
     if isinstance(value, bool):
-        raise ValueError("taxonomy_id must be a positive integer")
+        raise ValueError(_TAXONOMY_ERROR)
     if isinstance(value, float):
         if not math.isfinite(value) or not value.is_integer():
-            raise ValueError("taxonomy_id must be a positive integer")
+            raise ValueError(_TAXONOMY_ERROR)
         value = int(value)
     text = str(value).strip()
     if not text.isascii() or not text.isdecimal() or text.startswith("0"):
-        raise ValueError("taxonomy_id must be a positive integer")
+        raise ValueError(_TAXONOMY_ERROR)
     return text
 
 

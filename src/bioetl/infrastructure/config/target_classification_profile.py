@@ -29,6 +29,29 @@ from bioetl.infrastructure.schemas.silver_chembl_target_classification import (
 
 if TYPE_CHECKING:
     from bioetl.domain.composite import ColumnGroupConfig, DataSchemaConfig
+    from bioetl.infrastructure.schemas.pipeline_config_common_schemas import (
+        AuthoritativeContentHashPolicyConfig,
+    )
+
+
+def _policy_fields(
+    policy: AuthoritativeContentHashPolicyConfig | None,
+) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    if policy is None:
+        return (), ()
+    return tuple(policy.include_fields), tuple(policy.exclude_fields)
+
+
+def _contract_for_mode(
+    *,
+    enrich: bool,
+    contract_policy: PipelineContractPolicy | None,
+    policy: AuthoritativeContentHashPolicyConfig | None,
+) -> PipelineContractPolicy | None:
+    if not enrich or contract_policy is None:
+        return contract_policy
+    include_fields, exclude_fields = _policy_fields(policy)
+    return _enrich_contract_policy(contract_policy, include_fields, exclude_fields)
 
 
 @dataclass(frozen=True, slots=True)
@@ -142,20 +165,17 @@ def resolve_target_classification_profile(
         raise ValueError(
             "off/shadow target profiles require the legacy V30 hash policy"
         )
-    resolved_contract = (
-        _enrich_contract_policy(
-            contract_policy,
-            tuple(policy.include_fields) if policy else (),
-            tuple(policy.exclude_fields) if policy else (),
-        )
-        if enrich and contract_policy is not None
-        else contract_policy
+    resolved_contract = _contract_for_mode(
+        enrich=enrich,
+        contract_policy=contract_policy,
+        policy=policy,
     )
     if (
         resolved_contract is not None
         and resolved_contract.active_version != config.contract_version
     ):
         raise ValueError("target classification schema and contract versions disagree")
+    include_fields, exclude_fields = _policy_fields(policy)
     return TargetClassificationSchemaProfile(
         config=config,
         contract_version=config.contract_version,
@@ -163,8 +183,8 @@ def resolve_target_classification_profile(
         silver_schema=CHEMBL_TARGET_SCHEMA_V31 if enrich else CHEMBL_TARGET_SCHEMA,
         pandera_silver_schema=TargetSchemaV31 if enrich else TargetSchema,
         gold_schema=ChEMBLTargetGoldSchemaV31 if enrich else ChEMBLTargetGoldSchema,
-        content_hash_include_fields=tuple(policy.include_fields) if policy else (),
-        content_hash_exclude_fields=tuple(policy.exclude_fields) if policy else (),
+        content_hash_include_fields=include_fields,
+        content_hash_exclude_fields=exclude_fields,
         resolved_yaml_config=resolved,
         contract_policy=resolved_contract,
     )

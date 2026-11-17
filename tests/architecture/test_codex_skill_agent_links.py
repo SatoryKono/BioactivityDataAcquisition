@@ -213,7 +213,9 @@ def test_codex_skill_descriptions_route_to_one_neighbor() -> None:
             problems.append(f"{name}: description must be a string")
             continue
         if len(description) > DESCRIPTION_LIMIT:
-            problems.append(f"{name}: description length {len(description)} > {DESCRIPTION_LIMIT}")
+            problems.append(
+                f"{name}: description length {len(description)} > {DESCRIPTION_LIMIT}"
+            )
         match = NEIGHBOR_SKILL_RE.search(description)
         neighbor = match.group(1) if match else ""
         if neighbor not in names or neighbor == name:

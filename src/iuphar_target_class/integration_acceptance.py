@@ -223,6 +223,14 @@ def run_integration_acceptance(
     clock: Callable[[], float] = perf_counter,
 ) -> Mapping[str, object]:
     """Run full frozen cohort, compare reviewed cases and preserve a new receipt."""
+    resolved_output = output_dir.expanduser().resolve(strict=False)
+    output_root = resolved_output.parent
+    relative_output = resolved_output.relative_to(output_root)
+    if output_root == resolved_output or any(
+        part in {"..", "."} for part in relative_output.parts
+    ):
+        raise ValueError("acceptance output escapes its parent directory")
+    output_dir = output_root.joinpath(*relative_output.parts)
     output_dir.mkdir(parents=True, exist_ok=False)
     checks = dict.fromkeys(CHECKS, "NOT_RUN")
     receipt: dict[str, object] = {

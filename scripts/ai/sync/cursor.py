@@ -172,9 +172,7 @@ def _is_managed_command(content: str) -> bool:
 def _command_body_without_marker(content: str) -> str:
     """Drop the managed marker and the blank spacer that precedes it."""
     lines = [
-        line
-        for line in content.splitlines()
-        if line.strip() != MANAGED_COMMAND_MARKER
+        line for line in content.splitlines() if line.strip() != MANAGED_COMMAND_MARKER
     ]
     while lines and not lines[-1].strip():
         lines.pop()

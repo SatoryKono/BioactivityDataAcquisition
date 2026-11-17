@@ -10,14 +10,16 @@ from typing import cast
 
 from .models import ClassificationResult, RunProvenance
 
+_CLASSIFICATION_JSON = "classification.json"
+_METRICS_JSON = "metrics.json"
 OUTPUT_NAMES = frozenset(
     {
-        "classification.json",
+        _CLASSIFICATION_JSON,
         "evidence.json",
         "candidates.json",
         "components.json",
         "diagnostics.json",
-        "metrics.json",
+        _METRICS_JSON,
     }
 )
 
@@ -144,19 +146,19 @@ def validate_row_outputs(
     outputs: Mapping[str, bytes], *, row_id: str, run_id: str, provenance: RunProvenance
 ) -> None:
     """Require exactly one row, its children, executed versions and resolved links."""
-    classification = records(outputs["classification.json"])
+    classification = records(outputs[_CLASSIFICATION_JSON])
     if len(classification) != 1:
         raise ValueError("pipeline artifact needs exactly one classification row")
     row = classification[0]
     require_values(row, {"input_row_id": row_id})
     children = {
         name: records(outputs[name])
-        for name in OUTPUT_NAMES - {"classification.json", "metrics.json"}
+        for name in OUTPUT_NAMES - {_CLASSIFICATION_JSON, _METRICS_JSON}
     }
     for items in children.values():
         for item in items:
             require_values(item, {"input_row_id": row_id})
-    metrics = document(outputs["metrics.json"])
+    metrics = document(outputs[_METRICS_JSON])
     if type(metrics.get("rows")) is not int or metrics["rows"] != 1:
         raise ValueError("pipeline row metrics count differs")
     known = _known_evidence(children["evidence.json"], row_id, run_id)

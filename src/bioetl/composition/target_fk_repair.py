@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import json
 from dataclasses import dataclass
@@ -79,6 +80,7 @@ class _FrozenAPISource:
 
     async def health_check(self) -> HealthStatus:
         """The local immutable response has already passed acquisition checks."""
+        await asyncio.sleep(0)
         return HealthStatus.HEALTHY
 
     async def fetch(
@@ -91,6 +93,8 @@ class _FrozenAPISource:
         offset: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
         """Replay the complete verified missing-target cohort once."""
+        # Pagination is part of the port. This source always replays the full cohort.
+        _ = (limit, query, filter_ids, filter_field, offset)
         if entity_type != "target":
             raise ValueError("Recovery source supports target only")
         for record in self._source.records:

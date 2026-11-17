@@ -59,6 +59,9 @@ def freeze_target_inputs(
     """Record stable table versions/files/cohorts without writing a source table."""
     checked = paths.checked()
     _safe_output(output, paths, directory=False)
+    workspace = paths.workspace.resolve()
+    relative_output = output.resolve().relative_to(workspace)
+    safe_output = workspace.joinpath(*relative_output.parts)
     before = _input_facts(checked)
     silver, gold = _read_delta(checked["silver"]), _read_delta(checked["gold"])
     compare_target_rows(silver, silver, legacy_include_fields)
@@ -75,8 +78,8 @@ def freeze_target_inputs(
         "cohorts": {"silver": sorted(_by_id(silver)), "gold": sorted(_by_id(gold))},
         "legacy_include_fields": list(legacy_include_fields),
     }
-    output.parent.mkdir(parents=True, exist_ok=True)
-    with output.open("xb") as handle:
+    safe_output.parent.mkdir(parents=True, exist_ok=True)
+    with safe_output.open("xb") as handle:
         handle.write(canonical_json_bytes(document))
     return document
 

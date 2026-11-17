@@ -35,17 +35,20 @@ from iuphar_target_class.stage0.io import (
     sha256_file,
 )
 
+EntityDocument = dict[str, object]
+_CANONICAL_TARGET_ENTITY = "entities/chembl/target.yaml"
 
-def _entity_document(path: Path) -> dict[str, object]:
+
+def _entity_document(path: Path) -> EntityDocument:
     value = yaml.safe_load(path.read_bytes())
     if not isinstance(value, dict) or not isinstance(value.get("pipeline"), dict):
         raise ValueError("migration configuration must be a complete entity YAML")
-    return cast("dict[str, object]", value)
+    return cast(EntityDocument, value)
 
 
-def _without_classification(document: dict[str, object]) -> dict[str, object]:
+def _without_classification(document: EntityDocument) -> EntityDocument:
     value = deepcopy(document)
-    pipeline = cast("dict[str, object]", value["pipeline"])
+    pipeline = cast(EntityDocument, value["pipeline"])
     pipeline.pop("target_classification", None)
     return value
 
@@ -65,14 +68,14 @@ def bind_target_deployment(
     """
     checked = paths.checked()
     root = resolve_configs_root(configs_root).resolve()
-    canonical = (root / "entities/chembl/target.yaml").resolve()
+    canonical = (root / _CANONICAL_TARGET_ENTITY).resolve()
     if checked["config"] != canonical or paths.workspace.resolve() != root.parent:
         raise ValueError("migration workspace/config must match the active config root")
     original = _entity_document(canonical)
     deployment = _entity_document(checked["candidate_config"])
     if _without_classification(original) != _without_classification(deployment):
         raise ValueError("deployment YAML may change only target_classification")
-    pipeline = cast("dict[str, object]", deployment["pipeline"])
+    pipeline = cast(EntityDocument, deployment["pipeline"])
     classification = TargetClassificationYamlConfig.model_validate(
         pipeline.get("target_classification")
     )
@@ -127,10 +130,10 @@ def _rehearsal_locations(
     )
     copied = resolve_configs_root(configs_root).resolve()
     if not copied.is_relative_to(root) or checked["config"] != (
-        copied / "entities/chembl/target.yaml"
+        copied / _CANONICAL_TARGET_ENTITY
     ):
         raise ValueError("rehearsal must load its copied configs tree")
-    canonical = active / "entities/chembl/target.yaml"
+    canonical = active / _CANONICAL_TARGET_ENTITY
     if sha256_file(canonical) != sha256_file(checked["config"]):
         raise ValueError(
             "rehearsal old configuration must equal the active canonical bytes"
@@ -149,7 +152,7 @@ def _rehearsal_future(
     deployment = _entity_document(checked["candidate_config"])
     if _without_classification(original) != _without_classification(deployment):
         raise ValueError("deployment YAML may change only target_classification")
-    pipeline = cast("dict[str, object]", deployment["pipeline"])
+    pipeline = cast(EntityDocument, deployment["pipeline"])
     classification = TargetClassificationYamlConfig.model_validate(
         pipeline.get("target_classification")
     )
@@ -173,7 +176,7 @@ def _protect_active_resources(
     protected = tuple(
         path.resolve()
         for path in (
-            active_configs_root / "entities/chembl/target.yaml",
+            active_configs_root / _CANONICAL_TARGET_ENTITY,
             *resolve_target_table_paths(settings, target),
             resolve_target_table_paths(settings, assay)[1],
         )

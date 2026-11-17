@@ -15,6 +15,7 @@ from ._official_targets_csv import OfficialProjection, project_official_export
 from .snapshot_evidence import SourceEvidence, load_source_evidence
 
 SNAPSHOT_FORMAT = "gtopdb_target_species_payload_v2"
+_SNAPSHOT_JSON = "snapshot.json"
 
 
 @dataclass(frozen=True, slots=True)
@@ -72,11 +73,11 @@ def compile_snapshot_bundle(evidence: SourceEvidence) -> SnapshotBundle:
             "sources/coverage/coverage.json", evidence.coverage_bytes
         ),
     }
-    files["snapshot.json"] = canonical_json_bytes(snapshot)
+    files[_SNAPSHOT_JSON] = canonical_json_bytes(snapshot)
     profile = {
         "artifact": "bioetl_iuphar_profile",
         "schema_version": 2,
-        "snapshot": _reference("snapshot.json", files["snapshot.json"]),
+        "snapshot": _reference(_SNAPSHOT_JSON, files[_SNAPSHOT_JSON]),
         "acceptance": None,
         "normalization_version": "bioetl-iuphar-input-v1",
         "rules_version": PLAN_VERSION,
@@ -85,7 +86,7 @@ def compile_snapshot_bundle(evidence: SourceEvidence) -> SnapshotBundle:
     files["profile.json"] = canonical_json_bytes(profile)
     return SnapshotBundle(
         MappingProxyType(files),
-        sha256(files["snapshot.json"]),
+        sha256(files[_SNAPSHOT_JSON]),
         sha256(files["profile.json"]),
     )
 

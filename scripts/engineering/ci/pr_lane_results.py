@@ -746,6 +746,56 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         ),
         ("tests/unit/iuphar_target_class/test_pipeline.py",),
     ),
+    "src/iuphar_target_class/csv_io.py": (
+        "tests/unit/iuphar_target_class/test_csv_io.py",
+    ),
+    **dict.fromkeys(
+        (
+            "src/iuphar_target_class/_pipeline_proof_rows.py",
+            "src/iuphar_target_class/pipeline_proof.py",
+            "src/iuphar_target_class/integration_acceptance.py",
+        ),
+        ("tests/unit/iuphar_target_class/test_integration_acceptance.py",),
+    ),
+    "src/iuphar_target_class/reference_coverage.py": (
+        "tests/unit/iuphar_target_class/test_reference_coverage_v2.py",
+    ),
+    **dict.fromkeys(
+        (
+            "docs/00-project/ai/skills/SKILLS-CATALOG.md",
+            "docs/00-project/ai/skills/SKILLS-PRACTICAL-INDEX.md",
+        ),
+        ("tests/architecture/test_codex_skill_agent_links.py",),
+    ),
+    **dict.fromkeys(
+        (
+            "docs/00-project/ai/skills/COMBINED-CATALOG.md",
+            "docs/00-project/ai/skills/README.md",
+        ),
+        DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    "docs/04-reference/contracts/gold-schemas.md": (
+        "tests/architecture/test_gold_strict_validation_policy.py",
+        "tests/architecture/test_issue_12029_remaining_parity_gates.py",
+        "tests/architecture/test_tech_debt_issue_6038_governance_taxonomy.py",
+        "tests/integration/config/test_semantic_field_unification_contract.py",
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    "docs/04-reference/contracts/gold/chembl_target_v3.1.json": (
+        "tests/architecture/test_gold_schema_contracts.py",
+    ),
+    "configs/base/contract_registry.yaml": (
+        "tests/unit/infrastructure/config/test_contract_registry_loader.py",
+        "tests/integration/config/test_non_chembl_contract_registry_coverage.py",
+    ),
+    "docs/05-operations/runbooks/index.md": (
+        "tests/architecture/test_doc_crossref_integrity.py",
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    "docs/05-operations/runbooks/iuphar-target-classification.md": (
+        "tests/architecture/test_doc_crossref_integrity.py",
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
     **dict.fromkeys(
         (
             "src/iuphar_target_class/gtopdb_2026_3_1.py",
@@ -2150,6 +2200,9 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
         "tests/architecture/test_diagram_corpus_regression_guards.py",
         "tests/architecture/test_diagram_drift_and_embed_guards.py",
         "tests/architecture/test_diagram_lint_policy_rules.py",
+    ),
+    "docs/02-architecture/generated/pipeline-dataflows/": (
+        "tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py",
     ),
     "src/memory/episodic/": (
         "tests/architecture/test_ai_session_memory_placement.py",

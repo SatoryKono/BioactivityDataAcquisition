@@ -39,7 +39,12 @@ def object_document(payload: bytes) -> dict[str, object]:
 
 
 def checked_bytes(path: Path, expected_sha256: str) -> bytes:
-    payload = path.read_bytes()
+    resolved = path.expanduser().resolve(strict=False)
+    root = resolved.parent
+    relative = resolved.relative_to(root)
+    if not relative.parts or any(part in {"..", "."} for part in relative.parts):
+        raise ValueError("refusing an unconfined IUPHAR artifact path")
+    payload = root.joinpath(*relative.parts).read_bytes()
     if sha256(payload) != require_sha256(expected_sha256):
         raise ValueError("IUPHAR artifact digest mismatch")
     return payload

@@ -65,6 +65,15 @@ def _strings(value: object) -> tuple[str, ...]:
     return tuple(items)
 
 
+def _canonical_identifiers(value: object) -> list[str]:
+    identifiers: list[str] = []
+    for item in _strings(value):
+        if not item.isascii() or not item.isdecimal() or item.startswith("0"):
+            raise ValueError("invalid provider target or taxonomy identifier")
+        identifiers.append(item)
+    return identifiers
+
+
 def _scope(value: object) -> dict[str, object]:
     scope = _mapping(value)
     if set(scope) != {
@@ -78,7 +87,7 @@ def _scope(value: object) -> dict[str, object]:
         "expected_variant_count",
     }:
         raise ValueError("unsupported snapshot coverage scope")
-    species = tuple(identifier(value) for value in _strings(scope["species_taxon_ids"]))
+    species = _canonical_identifiers(scope["species_taxon_ids"])
     types = _strings(scope["required_family_types"])
     if any(value != value.strip().lower() for value in types):
         raise ValueError("snapshot scope types must use canonical provider tokens")
@@ -92,15 +101,13 @@ def _scope(value: object) -> dict[str, object]:
         raise ValueError(
             "snapshot requires independently reviewed single-protein selection"
         )
-    identifiers = tuple(
-        identifier(value) for value in _strings(scope["included_target_ids"])
-    )
+    identifiers = _canonical_identifiers(scope["included_target_ids"])
     _excluded_targets(scope["excluded_targets"])
     return {
         **scope,
-        "species_taxon_ids": list(species),
+        "species_taxon_ids": species,
         "required_family_types": list(types),
-        "included_target_ids": list(identifiers),
+        "included_target_ids": identifiers,
     }
 
 

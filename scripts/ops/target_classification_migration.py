@@ -8,6 +8,7 @@ from pathlib import Path
 
 from bioetl.composition.target_migration import bind_target_deployment
 from bioetl.infrastructure.config.config_root import resolve_configs_root
+from scripts.engineering.common.repo_paths import confined_io_path
 from bioetl.infrastructure.storage.target_candidate_builder import (
     TargetCandidateBuildRequest,
     build_target_candidates,
@@ -22,7 +23,7 @@ from bioetl.infrastructure.storage.target_classification_migration import (
 )
 
 
-def main(argv: list[str] | None = None) -> int:
+def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "action",
@@ -40,11 +41,11 @@ def main(argv: list[str] | None = None) -> int:
         help="JSON: explicit paths and frozen legacy_include_fields",
     )
     args = parser.parse_args(argv)
-    document = json.loads(args.plan.read_bytes())
+    active_root = resolve_configs_root().resolve().parent
+    document = json.loads(confined_io_path(args.plan, root=active_root).read_bytes())
     paths = TargetMigrationPaths(
         **{key: Path(value) for key, value in document["paths"].items()}
     )
-    active_root = resolve_configs_root().resolve().parent
     if paths.workspace.resolve() != active_root:
         parser.error("plan workspace must be the active repository/configs root")
     fields = tuple(document["legacy_include_fields"])
@@ -53,8 +54,7 @@ def main(argv: list[str] | None = None) -> int:
             parser.error("freeze-inputs requires --output NEW_MANIFEST_PATH")
         freeze_target_inputs(paths, legacy_include_fields=fields, output=args.output)
         print(json.dumps({"status": "frozen", "manifest": str(args.output)}))
-        return 0
-    if args.action == "build-candidates":
+    elif args.action == "build-candidates":
         if not all(
             (
                 args.input_manifest,
@@ -80,25 +80,27 @@ def main(argv: list[str] | None = None) -> int:
             )
         )
         print(json.dumps({"status": "complete", "output": str(args.output)}))
-        return 0
-    if args.action == "prepare":
-        state = prepare_target_migration(
-            paths,
-            legacy_include_fields=fields,
-            deployment=bind_target_deployment(paths),
-        )
-    elif args.action == "promote":
-        state = promote_target_migration(
-            paths, deployment=bind_target_deployment(paths)
-        )
     else:
-        state = rollback_target_migration(paths)
-    print(
-        json.dumps(
-            {"phase": state["phase"], "journal": str(paths.backup / "journal.json")}
+        if args.action == "prepare":
+            state = prepare_target_migration(
+                paths,
+                legacy_include_fields=fields,
+                deployment=bind_target_deployment(paths),
+            )
+        elif args.action == "promote":
+            state = promote_target_migration(
+                paths, deployment=bind_target_deployment(paths)
+            )
+        else:
+            state = rollback_target_migration(paths)
+        print(
+            json.dumps(
+                {
+                    "phase": state["phase"],
+                    "journal": str(paths.backup / "journal.json"),
+                }
+            )
         )
-    )
-    return 0
 
 
 if __name__ == "__main__":

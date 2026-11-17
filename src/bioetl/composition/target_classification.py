@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import replace
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.services.target_classification import (
     TargetClassificationSession,
@@ -118,13 +118,16 @@ def apply_target_contract_identity(
         return identity
     normalization = target_classification_normalization_identity(config)
     assert normalization is not None
-    return replace(
-        identity,
-        contract_version=schema_identity[0],
-        contract_schema_hash=schema_identity[1],
-        normalization_profile_ref=normalization[0],
-        normalization_profile_version=normalization[1],
-        normalization_profile_hash=normalization[2],
+    return cast(
+        RunManifestContractIdentity,
+        replace(
+            identity,
+            contract_version=schema_identity[0],
+            contract_schema_hash=schema_identity[1],
+            normalization_profile_ref=normalization[0],
+            normalization_profile_version=normalization[1],
+            normalization_profile_hash=normalization[2],
+        ),
     )
 
 
