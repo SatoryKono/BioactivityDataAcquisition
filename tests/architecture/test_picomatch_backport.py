@@ -1,85 +1,75 @@
-"""Bind the picomatch security backport archive to reviewed source bytes."""
+"""Picomatch local backport: archive integrity and GHSA-fc5q ReDoS guards."""
 
 from __future__ import annotations
 
-import base64
-import hashlib
-import json
-import tarfile
 import subprocess
+import tarfile
 from pathlib import Path
 
 import pytest
 
+from tests.architecture.backport_tarball import (
+    ROOT,
+    assert_archive_matches_provenance,
+    assert_consumers_pin_archive,
+)
+
 pytestmark = pytest.mark.architecture
-ROOT = Path(__file__).resolve().parents[2]
 BACKPORT = ROOT / ".github/tooling/picomatch-backport"
 CONSUMERS = (
     ".github/tooling/jscpd",
     "grafana/plugins/bioetl-scenes-app",
     "grafana/plugins/bioetl-selectorshell-panel",
 )
+ARCHIVE = BACKPORT / "picomatch-4.0.8-bioetl.3.tgz"
 
 
-def test_backport_archive_matches_reviewed_source() -> None:
-    provenance = json.loads((BACKPORT / "provenance.json").read_text())
-    assert provenance["upstream_commit"] == "7be3276fb8bd215a8c73fa066bcaf696c244ad88"
-    assert provenance["advisory"] == "GHSA-fc5q-39xc-vjpf"
-    assert provenance["local_version"] == "4.0.8-bioetl.2"
-    archive = BACKPORT / "picomatch-4.0.8-bioetl.2.tgz"
-    with tarfile.open(archive) as packed:
-        assert set(packed.getnames()) == {
-            *(f"package/{name}" for name in provenance["files"]),
-            "package/package.json",
-        }
-        for relative, digest in provenance["files"].items():
-            member = packed.extractfile(f"package/{relative}")
-            assert member is not None
-            assert hashlib.sha256(member.read()).hexdigest() == digest
-        metadata = packed.extractfile("package/package.json")
-        assert metadata is not None
-        assert json.loads(metadata.read()) == json.loads(
-            (BACKPORT / "package.json").read_text(encoding="utf-8")
-        )
+def test_picomatch_surface_is_tarball_only() -> None:
+    names = {path.name for path in BACKPORT.iterdir() if path.is_file()}
+    assert names == {
+        "BACKPORT.md",
+        "LICENSE",
+        "package.json",
+        ARCHIVE.name,
+        "provenance.json",
+        "test.cjs",
+    }
+    assert not (BACKPORT / "lib").exists()
+    assert not (BACKPORT / "single-branch-wildcard.patch").exists()
+
+
+def test_picomatch_archive_matches_reviewed_source() -> None:
+    assert_archive_matches_provenance(
+        BACKPORT,
+        archive_name=ARCHIVE.name,
+        expected={
+            "upstream_commit": "7be3276fb8bd215a8c73fa066bcaf696c244ad88",
+            "advisory": "GHSA-fc5q-39xc-vjpf",
+            "local_version": "4.0.8-bioetl.3",
+        },
+    )
 
 
 @pytest.mark.parametrize("consumer", CONSUMERS)
-def test_consumers_install_the_verified_backport(consumer: str) -> None:
-    folder = ROOT / consumer
-    package = json.loads((folder / "package.json").read_text())
-    lock = json.loads((folder / "package-lock.json").read_text())
-    assert package["overrides"]["picomatch"] == "$picomatch"
-    entries = [
-        row
-        for name, row in lock["packages"].items()
-        if name.endswith("node_modules/picomatch")
-    ]
-    assert entries
-    archive = BACKPORT / "picomatch-4.0.8-bioetl.2.tgz"
-    integrity = (
-        "sha512-"
-        + base64.b64encode(hashlib.sha512(archive.read_bytes()).digest()).decode()
-    )
-    for entry in entries:
-        assert entry["version"] == "4.0.8-bioetl.2"
-        assert entry["integrity"] == integrity
-        assert entry["resolved"].startswith("file:")
-        assert (folder / entry["resolved"][5:]).resolve() == archive.resolve()
-    # No vulnerable registry picomatch remains in the lockfile graph.
-    assert not any(
-        row.get("version") in {"2.3.2", "4.0.7"}
-        for name, row in lock["packages"].items()
-        if name.endswith("node_modules/picomatch")
+def test_picomatch_consumers_install_verified_archive(consumer: str) -> None:
+    assert_consumers_pin_archive(
+        [consumer],
+        package_name="picomatch",
+        version="4.0.8-bioetl.3",
+        archive=ARCHIVE,
+        forbidden_versions=("2.3.2", "4.0.7", "4.0.8-bioetl.1", "4.0.8-bioetl.2"),
     )
 
 
-@pytest.mark.parametrize("pattern", ["+(*)", "+(*a)", "*(*)", "*(*a)"])
-def test_repeated_single_branch_wildcards_finish_with_bounded_input(
+@pytest.mark.parametrize(
+    "pattern",
+    ["+(*)", "+(*a)", "*(*)", "*(*a)", "+(@(*a))", "*(@(*a))", "+(@(*))"],
+)
+def test_repeated_and_nested_extglob_wildcards_finish_with_bounded_input(
     pattern: str,
     tmp_path: Path,
 ) -> None:
-    archive = BACKPORT / "picomatch-4.0.8-bioetl.2.tgz"
-    with tarfile.open(archive) as packed:
+    with tarfile.open(ARCHIVE) as packed:
         for member in packed.getmembers():
             assert member.isfile() and member.name.startswith("package/")
             relative = Path(member.name)

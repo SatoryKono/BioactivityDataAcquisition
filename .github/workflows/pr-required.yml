@@ -645,7 +645,7 @@ jobs:
         run: |
           # Residual OSV #9853/#9859 (expiry 2026-11-30): mermaid/Grafana only.
           # picomatch GHSA-fc5q-39xc-vjpf is remediated via
-          # .github/tooling/picomatch-backport (4.0.8-bioetl.1); no gate allowlist.
+          # .github/tooling/picomatch-backport (4.0.8-bioetl.3); no gate allowlist.
           # pip PYSEC-2026-3721 / CVE-2026-3219 is remediated at pip==26.2.1.
           # Do not restore --ignore-vuln for that advisory.
           # Do not add osv-scanner.toml and do not dismiss Scorecard
@@ -721,6 +721,7 @@ jobs:
           mkdir -p reports/jscpd
           npm ci --ignore-scripts --no-fund --no-audit --prefix "${GITHUB_WORKSPACE}/.github/tooling/jscpd"
           node .github/tooling/braces-backport/test.cjs .github/tooling/jscpd
+          node .github/tooling/picomatch-backport/test.cjs .github/tooling/jscpd
           "${GITHUB_WORKSPACE}/.github/tooling/jscpd/node_modules/.bin/jscpd" \
             "${GITHUB_WORKSPACE}/src" "${GITHUB_WORKSPACE}/tests" \
             --config "${GITHUB_WORKSPACE}/.jscpd.json" \
