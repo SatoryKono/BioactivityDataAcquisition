@@ -109,14 +109,24 @@ def test_picomatch_residual_osv_is_timeboxed() -> None:
     assert PICOMATCH_GHSA in security_md
     assert PICOMATCH_EXPIRY in security_md
     assert "#13180" in security_md
-    # Surfaces that currently resolve vulnerable picomatch stay present so the
-    # residual cannot silently drop out of the scanned lockfile set.
-    scenes = _lock_packages(SCENES_LOCK)
-    selector = _lock_packages(SELECTOR_LOCK)
-    jscpd = _lock_packages(JSCPD_LOCK)
-    assert scenes["node_modules/picomatch"]["version"] == "4.0.7"
-    assert selector["node_modules/picomatch"]["version"] == "4.0.7"
-    assert jscpd["node_modules/picomatch"]["version"] == "2.3.2"
+    # Residual surfaces must stay in the OSV lockfile scan set. Exact picomatch
+    # versions are not pinned here: a patched bump must not fail this gate while
+    # the GHSA id remains allowlisted until #13180 expiry/re-triage.
+    scanned_lockfiles = (
+        "grafana/plugins/bioetl-scenes-app/package-lock.json",
+        "grafana/plugins/bioetl-selectorshell-panel/package-lock.json",
+        ".github/tooling/jscpd/package-lock.json",
+    )
+    for workflow_path in (
+        SECURITY_WORKFLOW,
+        ROOT / ".github" / "workflows" / "pr-required.yml",
+    ):
+        workflow_text = workflow_path.read_text(encoding="utf-8")
+        for lockfile in scanned_lockfiles:
+            assert f"--lockfile={lockfile}" in workflow_text, workflow_path.name
+    for lock_path in (SCENES_LOCK, SELECTOR_LOCK, JSCPD_LOCK):
+        packages = _lock_packages(lock_path)
+        assert "node_modules/picomatch" in packages, lock_path.as_posix()
     payload = {
         "results": [
             {
