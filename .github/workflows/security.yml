@@ -43,6 +43,8 @@ jobs:
       - name: Run pip-audit
         run: |
           # Residual OSV #9853/#9859 (expiry 2026-11-30): mermaid/Grafana only.
+          # Residual picomatch GHSA-fc5q-39xc-vjpf (#13180, expiry 2026-12-31)
+          # is allowlisted only in check_github_actions_runtime_policy.
           # pip PYSEC-2026-3721 / CVE-2026-3219 is remediated at pip==26.2.1.
           # Do not restore --ignore-vuln for that advisory.
           # Do not add osv-scanner.toml and do not dismiss Scorecard

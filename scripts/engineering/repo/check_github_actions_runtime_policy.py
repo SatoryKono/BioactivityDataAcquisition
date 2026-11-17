@@ -10,6 +10,7 @@ import os
 import re
 import sys
 from collections.abc import Sequence
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -508,6 +509,15 @@ def _report_violations(violations: list[str]) -> int:
 
 
 _BLOCKING_OSV_SEVERITIES = frozenset({"HIGH", "CRITICAL"})
+# Timeboxed residuals: unpatchable HIGH/CRITICAL on non-runtime surfaces.
+# Documented in docs/00-project/governance/05-github-policy.md §2.3.2 / #13180.
+# Do not add osv-scanner.toml; Scorecard Vulnerabilities #1294 stays open.
+_RESIDUAL_OSV_IDS: frozenset[str] = frozenset(
+    {
+        "GHSA-fc5q-39xc-vjpf",  # picomatch ReDoS; no upstream patch as of 2026-11-17
+    }
+)
+_RESIDUAL_OSV_EXPIRY = "2026-12-31"
 _CVSS_HIGH = 7.0
 _CVSS_CRITICAL = 9.0
 _CVSS_AV = {"N": 0.85, "A": 0.62, "L": 0.55, "P": 0.2}
@@ -621,6 +631,19 @@ def _osv_package_identity(package: dict[str, Any]) -> tuple[str, str]:
     )
 
 
+def _residual_osv_active() -> bool:
+    """Return True while the documented unpatchable residual window is open."""
+    try:
+        deadline = date.fromisoformat(_RESIDUAL_OSV_EXPIRY)
+    except ValueError:
+        return False
+    return date.today() <= deadline
+
+
+def _is_residual_osv_id(vulnerability_id: str) -> bool:
+    return vulnerability_id in _RESIDUAL_OSV_IDS and _residual_osv_active()
+
+
 def _blocking_vulnerability_finding(
     vuln: dict[str, Any],
     *,
@@ -631,6 +654,8 @@ def _blocking_vulnerability_finding(
     if severity not in _BLOCKING_OSV_SEVERITIES and severity != "UNKNOWN":
         return None
     vulnerability_id = str(vuln.get("id") or "unknown-id")
+    if _is_residual_osv_id(vulnerability_id):
+        return None
     return f"{vulnerability_id} {severity} {package_name}=={package_version}"
 
 

@@ -33,6 +33,9 @@ SELECTOR_LOCK = (
     ROOT / "grafana" / "plugins" / "bioetl-selectorshell-panel" / "package-lock.json"
 )
 EXPIRY = "2026-11-30"
+PICOMATCH_GHSA = "GHSA-fc5q-39xc-vjpf"
+PICOMATCH_EXPIRY = "2026-12-31"
+JSCPD_LOCK = ROOT / ".github" / "tooling" / "jscpd" / "package-lock.json"
 
 
 def _json(path: Path) -> dict[str, Any]:
@@ -85,6 +88,64 @@ def test_policy_documents_residual_osv_exception() -> None:
     assert "grafana/plugins" in text
     assert "ADR-010" in text
     assert "#9859" in text
+    assert PICOMATCH_GHSA in text
+    assert PICOMATCH_EXPIRY in text
+    assert "#13180" in text
+
+
+def test_picomatch_residual_osv_is_timeboxed() -> None:
+    """Unpatchable picomatch HIGH must stay documented and gate-allowlisted (#13180)."""
+    from scripts.engineering.repo import check_github_actions_runtime_policy as policy
+
+    deadline = date.fromisoformat(PICOMATCH_EXPIRY)
+    assert deadline == date(2026, 12, 31)
+    assert PICOMATCH_EXPIRY == policy._RESIDUAL_OSV_EXPIRY
+    assert PICOMATCH_GHSA in policy._RESIDUAL_OSV_IDS
+    assert current_utc_time().date() <= deadline, (
+        f"picomatch residual OSV expired on {PICOMATCH_EXPIRY}; bump picomatch "
+        "when a patched release exists or renew #13180 with a new dated expiry"
+    )
+    security_md = SECURITY_MD.read_text(encoding="utf-8")
+    assert PICOMATCH_GHSA in security_md
+    assert PICOMATCH_EXPIRY in security_md
+    assert "#13180" in security_md
+    # Surfaces that currently resolve vulnerable picomatch stay present so the
+    # residual cannot silently drop out of the scanned lockfile set.
+    scenes = _lock_packages(SCENES_LOCK)
+    selector = _lock_packages(SELECTOR_LOCK)
+    jscpd = _lock_packages(JSCPD_LOCK)
+    assert scenes["node_modules/picomatch"]["version"] == "4.0.7"
+    assert selector["node_modules/picomatch"]["version"] == "4.0.7"
+    assert jscpd["node_modules/picomatch"]["version"] == "2.3.2"
+    payload = {
+        "results": [
+            {
+                "packages": [
+                    {
+                        "package": {"name": "picomatch", "version": "4.0.7"},
+                        "vulnerabilities": [
+                            {
+                                "id": PICOMATCH_GHSA,
+                                "database_specific": {"severity": "HIGH"},
+                            }
+                        ],
+                    },
+                    {
+                        "package": {"name": "other", "version": "1.0"},
+                        "vulnerabilities": [
+                            {
+                                "id": "GHSA-other-high",
+                                "database_specific": {"severity": "HIGH"},
+                            }
+                        ],
+                    },
+                ]
+            }
+        ]
+    }
+    assert policy.collect_blocking_osv_findings(payload) == [
+        "GHSA-other-high HIGH other==1.0"
+    ]
 
 
 def test_residual_osv_exception_has_not_expired() -> None:
