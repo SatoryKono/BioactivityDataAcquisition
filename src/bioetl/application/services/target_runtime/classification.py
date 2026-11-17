@@ -45,7 +45,7 @@ class TargetClassificationRunState:
         """Classify in memory; shadow leaves the original business projection intact."""
         key = self._key(context, index)
         target_id = business_data.get("target_id")
-        row_id = f"chembl.target:{target_id}:{key[1]}:{index}"
+        row_id = f"chembl.target:{target_id}"
         anchor = context.replay_timestamp_anchor or context.started_at
         result = self.classifier.classify_record(
             business_data,
