@@ -76,8 +76,8 @@ def freeze_target_inputs(
     silver, gold = _read_delta(checked["silver"]), _read_delta(checked["gold"])
     compare_target_rows(silver, silver, legacy_include_fields)
     compare_target_rows(gold, gold, legacy_include_fields)
-    if not {identity for identity, _ in _by_id(gold)}.issubset(
-        identity for identity, _ in _by_id(silver)
+    if not {identity for (identity, _), _row in _by_id(gold).items()}.issubset(
+        identity for (identity, _), _row in _by_id(silver).items()
     ):
         raise ValueError("original Gold targets have no persisted Silver source")
     _assert_candidate_cohort_closure(checked, gold)

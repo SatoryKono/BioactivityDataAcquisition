@@ -32,6 +32,7 @@ _SEMANTIC_FIELDS = (
     "decision_status",
     "conflict_codes",
 )
+_OTHER_COHORT = "pipeline proof belongs to another admitted cohort"
 
 
 @dataclass(frozen=True, slots=True)
@@ -180,10 +181,10 @@ def _bind_executed_cohort(
     expected: dict[str, PipelineExecutionBinding] = {}
     for item in execution:
         if item.input_row_id in expected:
-            raise ValueError("pipeline proof belongs to another admitted cohort")
+            raise ValueError(_OTHER_COHORT)
         expected[item.input_row_id] = item
     if set(expected) != set(found):
-        raise ValueError("pipeline proof belongs to another admitted cohort")
+        raise ValueError(_OTHER_COHORT)
     for row_id, item in expected.items():
         row = records(found[row_id]["classification.json"])[0]
         if canonical_json_bytes(row.get("raw_fields")) != canonical_json_bytes(
@@ -274,15 +275,15 @@ def verify_stored_pipeline_proof(
     if expected_execution is not None:
         bound_ids = tuple(item.input_row_id for item in expected_execution)
         if len(set(bound_ids)) != len(bound_ids):
-            raise ValueError("pipeline proof belongs to another admitted cohort")
+            raise ValueError(_OTHER_COHORT)
         if expected_row_ids is not None and set(expected_row_ids) != set(bound_ids):
-            raise ValueError("pipeline proof belongs to another admitted cohort")
+            raise ValueError(_OTHER_COHORT)
         expected_row_ids = bound_ids
     if expected_row_ids is not None and (
         len(set(expected_row_ids)) != len(expected_row_ids)
         or rows != set(expected_row_ids)
     ):
-        raise ValueError("pipeline proof belongs to another admitted cohort")
+        raise ValueError(_OTHER_COHORT)
     artifacts = _load_artifacts(path.parent, proof)
     found = _verify_rows(
         artifacts, rows=rows, run_id=run_id, profile=profile, provenance=provenance
