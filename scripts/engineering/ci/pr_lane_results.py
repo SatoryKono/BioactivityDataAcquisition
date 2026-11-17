@@ -1041,7 +1041,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
     "scripts/engineering/dev/README.md": (
-        "tests/unit/repo_backed/scripts/test_zed_portability.py",
+        "tests/integration/ide/test_zed_portability.py",
         "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
         SCRIPTS_INVENTORY_MANIFEST_TEST,
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
@@ -2092,7 +2092,7 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
     ),
     ".vscode/": (TECH_DEBT_5847_5852_CLOSEOUT_TEST,),
     "configs/ide/zed/": (
-        "tests/unit/repo_backed/scripts/test_zed_portability.py",
+        "tests/integration/ide/test_zed_portability.py",
         "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
     ),
     ".cursor/": (

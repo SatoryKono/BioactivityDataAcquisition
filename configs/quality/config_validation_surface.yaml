@@ -118,7 +118,7 @@ families:
     validation_mechanism: ide_template_contract_tests
     validation_depth: semantic
     enforcing_surfaces:
-      - tests/unit/repo_backed/scripts/test_zed_portability.py
+      - tests/integration/ide/test_zed_portability.py
       - tests/unit/repo_backed/scripts/test_zed_workspace_config.py
   - family_id: naming_exceptions
     path_prefixes:

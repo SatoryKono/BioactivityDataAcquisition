@@ -12,8 +12,8 @@ from typing import NotRequired, TypedDict, cast
 
 import pytest
 
-pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]
-ROOT = Path(__file__).resolve().parents[4]
+pytestmark = pytest.mark.integration
+ROOT = Path(__file__).resolve().parents[3]
 QUICK_LABEL = "pytest: current test file (quick; project addopts disabled)"
 PROJECT_LABEL = "pytest: current test file (project settings)"
 TEMPLATE_ROOT = ROOT / "configs/ide/zed"
