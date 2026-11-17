@@ -188,13 +188,20 @@ check, and do **not** dismiss #1294 as a false green.
 | GHSA-3h5v / 58qx / 96hv | `ws` | mermaid puppeteer | Override **8.21.3** | CI diagrams |
 | PYSEC-2026-3721 / CVE-2026-3219 | `pip==26.2.1` | `uv.lock` | Remediated 2026-08-31; `pip-audit --strict` is clean without `--ignore-vuln` | CI/dev extra; not runtime image |
 | GHSA-2v37, 337j, wrjc, jjmj, 5c6j, qj8w, w5hq | Grafana npm (`react-router` 6.x, `uuid` 9.x, …) | `grafana/plugins/*` | No React Router 7 / uuid 11 force-bump (Grafana 13 host API) | Optional monitoring (ADR-010); not BioETL runtime |
+| GHSA-fc5q-39xc-vjpf | `picomatch` | `grafana/plugins/*`, `.github/tooling/jscpd` | Remediated via local backport `4.0.8-bioetl.17` (`.github/tooling/picomatch-backport`: #194 + fail-closed ASCII-word repeated-extglob + compile-time nest bound + outer quantifier guard); **no** OSV-gate allowlist (#13180/#13181) | CI tooling / optional monitoring; not BioETL runtime |
 
-Expiry: **2026-11-30**. Owner: BioETL Team. Accepted on #9853 (closed).
-Re-triage: #9859. CI fail-closed gate:
+Expiry (mermaid/Grafana/#9853 family): **2026-11-30**. Owner: BioETL Team.
+Accepted on #9853 (closed). Re-triage: #9859. CI fail-closed gate:
 `tests/architecture/test_residual_osv_9853.py::test_residual_osv_exception_has_not_expired`.
 Upgrade mermaid-cli (keep diagram golden pins) and/or Grafana plugin majors, or
 renew the exception with a new dated issue. Scorecard Vulnerabilities **#1294**
 stays undismissed.
+
+`picomatch` (#13180/#13181) is **not** an OSV-gate residual: consumers install
+`.github/tooling/picomatch-backport/picomatch-4.0.8-bioetl.17.tgz` through npm
+`overrides` so lockfiles leave the vulnerable `<=4.0.7` range. Gate stays
+fail-closed for any remaining HIGH/CRITICAL. Do **not** add `osv-scanner.toml`
+and do **not** grow tech-debt exemptions.
 
 ### 2.3.3 GitHub supply-chain settings (#10264)
 
@@ -1163,3 +1170,14 @@ Merge-block proof: `PUT /repos/SatoryKono/BioactivityDataAcquisition/pulls/9895/
   custom branch policy `copilot/**`, zero environment secrets, disjoint from
   `protected_environments`. `#10311` DELETE superseded. Live GET `2026-09-11`.
 - Operator runbook: [`github-copilot-coding-agent.md`](../../05-operations/runbooks/github-copilot-coding-agent.md).
+
+### Migration notes (1.2.18)
+
+- #13180 / #13181: `picomatch` `GHSA-fc5q-39xc-vjpf` remediated without an
+  OSV-gate allowlist (AGENTS.md forbids growing exemptions). Local backport
+  `4.0.8-bioetl.17` from upstream `4.0.7` + micromatch/picomatch#194 plus BioETL
+  fail-closed ASCII-word + nest-bound + outer-quantifier guard (closes nested/alternation/bracket ReDoS incl. `+(@(+(a)))` / `+(a|[a]a)` / `+((a|aa))`) lands
+  in `.github/tooling/picomatch-backport` (tarball-only) and is forced through
+  npm `overrides` for jscpd + Grafana plugins. Scorecard #1294 stays
+  undismissed; no `osv-scanner.toml`. Fail-closed archive binding:
+  `tests/architecture/test_picomatch_backport.py`.
