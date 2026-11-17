@@ -9,7 +9,7 @@ import pytest
 
 import memory.query as memory_query
 from memory.query import main, query_all
-from tests.helpers.memory_manifests import write_test_rag_manifest
+from tests.helpers.memory_manifests import write_test_retrieval_layers
 
 pytestmark = pytest.mark.unit
 
@@ -19,34 +19,9 @@ pytestmark = pytest.mark.unit
 def test_all_preserves_available_layers_without_refresh(
     tmp_path: Path, rag_ready: bool, timeline_ready: bool
 ) -> None:
-    chunks = tmp_path / "rag" / "chunks.jsonl"
-    events = tmp_path / "events"
-    if rag_ready:
-        write_test_rag_manifest(
-            chunks,
-            [
-                {
-                    "id": "chunk-1",
-                    "content": "memory_subsystem",
-                    "source_path": "src/memory/query.py",
-                    "source_type": "code",
-                }
-            ],
-        )
-    if timeline_ready:
-        events.mkdir()
-        (events / "runs.jsonl").write_text(
-            json.dumps(
-                {
-                    "id": "run-1",
-                    "event_family": "run",
-                    "event_type": "run.completed",
-                    "payload": {"pipeline_name": "memory_subsystem"},
-                }
-            )
-            + "\n",
-            encoding="utf-8",
-        )
+    chunks, events = write_test_retrieval_layers(
+        tmp_path, rag_ready=rag_ready, timeline_ready=timeline_ready
+    )
     before = sorted(tmp_path.rglob("*"))
 
     payload = query_all(
@@ -91,33 +66,10 @@ def test_all_cli_reports_degradation_as_json_with_nonzero_exit(
 
 
 def test_invalid_rag_pair_does_not_hide_healthy_timeline(tmp_path: Path) -> None:
-    chunks = tmp_path / "chunks.jsonl"
-    write_test_rag_manifest(
-        chunks,
-        [
-            {
-                "id": "chunk-1",
-                "content": "memory",
-                "source_path": "src/memory/query.py",
-                "source_type": "code",
-            }
-        ],
+    chunks, events = write_test_retrieval_layers(
+        tmp_path, rag_ready=True, timeline_ready=True, query="memory"
     )
     chunks.write_text('{"content": "unverified"}\n', encoding="utf-8")
-    events = tmp_path / "events"
-    events.mkdir()
-    (events / "runs.jsonl").write_text(
-        json.dumps(
-            {
-                "id": "run-1",
-                "event_family": "run",
-                "event_type": "run.completed",
-                "payload": {"pipeline_name": "memory"},
-            }
-        )
-        + "\n",
-        encoding="utf-8",
-    )
 
     payload = query_all(query="memory", chunks_path=chunks, events_dir=events)
 
@@ -131,20 +83,13 @@ def test_invalid_rag_pair_does_not_hide_healthy_timeline(tmp_path: Path) -> None
 def test_single_layer_queries_do_not_inspect_other_layer(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, requested_layer: str
 ) -> None:
-    chunks = tmp_path / "rag" / "chunks.jsonl"
-    events = tmp_path / "events"
+    chunks, events = write_test_retrieval_layers(
+        tmp_path,
+        rag_ready=requested_layer == "rag",
+        timeline_ready=requested_layer == "timeline",
+        query="memory",
+    )
     if requested_layer == "rag":
-        write_test_rag_manifest(
-            chunks,
-            [
-                {
-                    "id": "chunk-1",
-                    "content": "memory",
-                    "source_path": "src/memory/query.py",
-                    "source_type": "code",
-                }
-            ],
-        )
         monkeypatch.setattr(
             memory_query,
             "timeline_events_ready",
@@ -154,19 +99,6 @@ def test_single_layer_queries_do_not_inspect_other_layer(
             memory_query.RagQueryOptions(query="memory", chunks_path=chunks)
         )
     else:
-        events.mkdir()
-        (events / "runs.jsonl").write_text(
-            json.dumps(
-                {
-                    "id": "run-1",
-                    "event_family": "run",
-                    "event_type": "run.completed",
-                    "payload": {"pipeline_name": "memory"},
-                }
-            )
-            + "\n",
-            encoding="utf-8",
-        )
         monkeypatch.setattr(
             memory_query,
             "rag_chunks_ready",

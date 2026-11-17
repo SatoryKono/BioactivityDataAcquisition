@@ -1,4 +1,4 @@
-"""Deterministic test helpers for RAG catalog/chunk manifest pairs."""
+"""Deterministic test helpers for local RAG and timeline retrieval artifacts."""
 
 from __future__ import annotations
 
@@ -74,3 +74,42 @@ def write_test_rag_manifest(
         encoding="utf-8",
     )
     return catalog_path, chunks_path
+
+
+def write_test_retrieval_layers(
+    root: Path,
+    *,
+    rag_ready: bool,
+    timeline_ready: bool,
+    query: str = "memory_subsystem",
+) -> tuple[Path, Path]:
+    """Materialize only the requested healthy layers for retrieval tests."""
+    chunks = root / "rag" / "chunks.jsonl"
+    events = root / "events"
+    if rag_ready:
+        write_test_rag_manifest(
+            chunks,
+            [
+                {
+                    "id": "chunk-1",
+                    "content": query,
+                    "source_path": "src/memory/query.py",
+                    "source_type": "code",
+                }
+            ],
+        )
+    if timeline_ready:
+        events.mkdir()
+        (events / "runs.jsonl").write_text(
+            json.dumps(
+                {
+                    "id": "run-1",
+                    "event_family": "run",
+                    "event_type": "run.completed",
+                    "payload": {"pipeline_name": query},
+                }
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+    return chunks, events
