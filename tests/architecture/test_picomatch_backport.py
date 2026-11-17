@@ -21,7 +21,7 @@ CONSUMERS = (
     "grafana/plugins/bioetl-scenes-app",
     "grafana/plugins/bioetl-selectorshell-panel",
 )
-ARCHIVE = BACKPORT / "picomatch-4.0.8-bioetl.10.tgz"
+ARCHIVE = BACKPORT / "picomatch-4.0.8-bioetl.11.tgz"
 
 
 @pytest.fixture
@@ -60,7 +60,7 @@ def test_picomatch_archive_matches_reviewed_source() -> None:
         expected={
             "upstream_commit": "7be3276fb8bd215a8c73fa066bcaf696c244ad88",
             "advisory": "GHSA-fc5q-39xc-vjpf",
-            "local_version": "4.0.8-bioetl.10",
+            "local_version": "4.0.8-bioetl.11",
         },
     )
 
@@ -70,7 +70,7 @@ def test_picomatch_consumers_install_verified_archive(consumer: str) -> None:
     assert_consumers_pin_archive(
         [consumer],
         package_name="picomatch",
-        version="4.0.8-bioetl.10",
+        version="4.0.8-bioetl.11",
         archive=ARCHIVE,
         forbidden_versions=(
             "2.3.2",
@@ -84,6 +84,7 @@ def test_picomatch_consumers_install_verified_archive(consumer: str) -> None:
             "4.0.8-bioetl.7",
             "4.0.8-bioetl.8",
             "4.0.8-bioetl.9",
+            "4.0.8-bioetl.10",
         ),
     )
 
@@ -120,6 +121,8 @@ def test_picomatch_consumers_install_verified_archive(consumer: str) -> None:
         ("@(a|aa)+", "a", 40),
         ("((a|aa))+", "a", 40),
         ("(a+)+", "a", 40),
+        ("{a,aa}+", "a", 40),
+        ("{+(a),b}+", "a", 40),
     ],
 )
 def test_repeated_and_nested_extglob_wildcards_finish_with_bounded_input(
@@ -208,3 +211,29 @@ def test_deep_optional_extglob_compiles_without_recursive_rescanning(
         check=True,
     )
     assert result.stdout.strip() == "compiled"
+
+
+def test_nested_at_under_negate_and_class_false_positives(
+    packed_picomatch: Path,
+) -> None:
+    code = (
+        "const p=require(process.argv[1]);"
+        "const cases=["
+        "['!(@(*.d)).ts','foo.debug.ts',true],"
+        "['!(@(*.d)).ts','foo.d.ts',false],"
+        "['!(@(a/b))','c/d',true],"
+        "['!([*(]a)','foo',true],"
+        "['!([*(]a)','*a',false],"
+        "['?([*(]a)','*a',true],"
+        "['@(\"+(a)\")','+(a)',true]"
+        "];"
+        "console.log(cases.every(([pat,input,expect])=>p.isMatch(input,pat)===expect));"
+    )
+    result = subprocess.run(
+        ["node", "-e", code, str(packed_picomatch)],
+        capture_output=True,
+        text=True,
+        timeout=3,
+        check=True,
+    )
+    assert result.stdout.strip() == "true"

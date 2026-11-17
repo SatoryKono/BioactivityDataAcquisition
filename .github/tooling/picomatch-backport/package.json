@@ -1,7 +1,7 @@
 {
   "name": "picomatch",
   "description": "BioETL local backport for GHSA-fc5q-39xc-vjpf (#194 + fail-closed ASCII-word + nest bound + outer-quantifier guard); not an upstream release.",
-  "version": "4.0.8-bioetl.10",
+  "version": "4.0.8-bioetl.11",
   "homepage": "https://github.com/micromatch/picomatch",
   "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
   "funding": "https://github.com/sponsors/jonschlinkert",
