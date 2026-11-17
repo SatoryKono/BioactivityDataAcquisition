@@ -200,17 +200,21 @@ def _stamp_named_alert_runbooks(expr: str) -> str:
 
 def _stamp_ranked_suspect_expr(panel: dict, *, summary: bool) -> None:
     if not summary:
-        panel["targets"][0].pop("expr", None)
+        # Legacy Dashboard-DS consumers inherit their donor. CURRENT detail
+        # consumers deliberately own the same query at their own current clock.
+        if "panelId" in panel["targets"][0]:
+            panel["targets"][0].pop("expr", None)
         return
     panel["targets"][0]["expr"] = (
-        "label_replace(label_replace(label_replace(label_replace(label_replace(label_replace("
+        "label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace("
         "bioetl_incident_ranked_evidence,"
         '"object","$1","object","(.*) / $"),'
         '"route_pipeline",".*","pipeline","unknown"),'
         '"owner","BioETL Team","reason","infrastructure_failed"),'
         '"next_step","Open pipeline-failure-critical.md","reason","infrastructure_failed"),'
         '"owner","See runbook","owner","^$"),'
-        '"next_step","See runbook","next_step","^$")'
+        '"next_step","See runbook","next_step","^$"),'
+        '"freshness","Not verified: no event timestamp","","")'
     )
 
 
@@ -607,6 +611,7 @@ def add_stage_source_clocks(payload: dict) -> None:
             "&${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}"
             "&${run_id:queryparam}&${__url_time_range}",
             "targetBlank": False,
+            "includeVars": False,
         }
     ]
 
@@ -627,6 +632,11 @@ def _explain_missing_samples(items: list[dict]) -> None:
         if item.get("type") in {"stat", "gauge", "bargauge"}:
             item.setdefault("fieldConfig", {}).setdefault("defaults", {})["noValue"] = (
                 "UNKNOWN · no samples"
+            )
+        if item["id"] in {9996, 9997}:
+            item["description"] = item["description"].replace(
+                ", including when an empty selected-range result is rendered through noValue",
+                " in observed counter samples; missing samples remain UNKNOWN",
             )
         _explain_missing_samples(item.get("panels", []))
 
@@ -722,11 +732,7 @@ def apply_incident_evidence_clocks(payload, panels):
         elif item["id"] == 22011:
             _configure_current_measurements(item)
     suspect = panels[2010]
-    suspect["targets"][0]["expr"] = (
-        "label_replace("
-        + suspect["targets"][0]["expr"]
-        + ',"freshness","Not verified: no event timestamp","","")'
-    )
+    _stamp_ranked_suspect_expr(suspect, summary=True)
     organize = next(t for t in suspect["transformations"] if t["id"] == "organize")
     organize["options"]["renameByName"]["freshness"] = _EVENT_FRESHNESS
     _urgency_label(suspect)
@@ -832,6 +838,7 @@ def _configure_incident_detail_rows(rows: list[dict], suspect: dict) -> None:
                         "title": "Inspect current workflow evidence",
                         "url": "/d/bioetl-incident-v1/5-incident-workspace?viewPanel=9701&${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${__url_time_range}",
                         "targetBlank": False,
+                        "includeVars": False,
                     }
                 ]
             if child["id"] == 22010:

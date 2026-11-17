@@ -24,7 +24,7 @@ def _load(name: str) -> dict:
 
 
 def test_global_alerts_retain_donor_query_and_complete_list() -> None:
-    """Keep the summary visible and the independent full list untruncated."""
+    """Keep one independent complete list, without duplicate queries or truncation."""
     overview = _load("overview-v2")
     incident = _load("incident-v1")
     panels = {p["id"]: p for p in overview["panels"]}
@@ -55,21 +55,15 @@ def test_global_alerts_retain_donor_query_and_complete_list() -> None:
     assert summary["options"]["footer"]["enablePagination"] is True
     assert summary["gridPos"] == {"x": 0, "y": 18, "w": 24, "h": 7}
     assert "repeat" not in summary
-    assert panels[32005]["collapsed"] is True
-    # A collapsed row adopts following standalone panels in Grafana Scenes.
-    # Keep the disclosure last so summary and saved-run cards remain visible.
-    assert overview["panels"][-1]["id"] == 32005
-    assert panels[32005]["gridPos"]["y"] >= max(
-        p["gridPos"]["y"] + p["gridPos"]["h"]
-        for p in overview["panels"]
-        if p["id"] != 32005
+    assert 32005 not in panels and 22005 not in panels
+    assert (
+        sum(
+            target.get("expr") == metric
+            for panel in panels.values()
+            for target in panel.get("targets", [])
+        )
+        == 1
     )
-    full = panels[32005]["panels"][0]
-    assert full["id"] == 22005
-    assert full["datasource"] == summary["datasource"]
-    assert full["targets"] == [dict(donor["targets"][0], expr=metric)]
-    assert all(t["id"] != "limit" for t in full["transformations"])
-    assert full["links"] == []
     for panel in (summary,):
         link = panel["links"][0]
         assert "/d/bioetl-incident-v1/" in link["url"]

@@ -36,7 +36,10 @@ def test_fk_comparison_uses_a_compact_paginated_band_without_a_gap(profile) -> N
         "Single-row FK evidence must not reserve a tall blank band"
     )
     assert comparison["options"]["footer"]["enablePagination"] is True
-    assert panels[32005]["gridPos"]["y"] == grid["y"] + grid["h"]
+    assert (
+        max(p["gridPos"]["y"] + p["gridPos"]["h"] for p in panels.values())
+        == grid["y"] + grid["h"]
+    )
     properties = {
         item["matcher"]["options"]: {
             prop["id"]: prop["value"] for prop in item["properties"]
@@ -107,7 +110,7 @@ def test_dashboard_rows_match_flat_and_forensic_surfaces() -> None:
         "bioetl-control-plane-v1.json": 2,
         "bioetl-dq-v2.json": 1,
         "bioetl-incident-v1.json": 9,
-        "bioetl-overview-v2.json": 1,
+        "bioetl-overview-v2.json": 0,
         "bioetl-run-explorer-v1.json": 0,
     }
     observed = {}
@@ -126,7 +129,7 @@ def test_dashboard_rows_match_flat_and_forensic_surfaces() -> None:
                 3010,
             ]
         if dashboard_path.stem == "bioetl-overview-v2":
-            assert [row["id"] for row in rows] == [32005]
+            assert rows == []
             comparison = next(
                 panel
                 for panel in get_dashboard_panels(dashboard)
@@ -173,7 +176,7 @@ def test_row_groups_materialize_expanded_for_test_stage() -> None:
         materialized = materialize_expanded(shipped)
         root_panels = materialized["panels"]
         rows = [panel for panel in root_panels if panel.get("type") == "row"]
-        if dashboard_path.stem == "bioetl-run-explorer-v1":
+        if dashboard_path.stem in {"bioetl-run-explorer-v1", "bioetl-overview-v2"}:
             assert rows == []
             assert len(get_dashboard_panels(materialized)) == shipped_total
             continue

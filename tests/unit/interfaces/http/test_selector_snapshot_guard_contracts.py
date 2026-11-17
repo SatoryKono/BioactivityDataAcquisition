@@ -76,7 +76,7 @@ async def test_snapshot_refresh_without_manifest_catalog_preserves_last_good_pag
     "changes",
     [
         {"view": "selected"},
-        {"limit": 20},
+        {"limit": snapshots.DEFAULT_RECENT_LIMIT + 1},
         {"run_id": "concrete"},
         {"lookup_run_id": "concrete"},
     ],
@@ -84,7 +84,7 @@ async def test_snapshot_refresh_without_manifest_catalog_preserves_last_good_pag
 def test_selected_or_nondefault_query_cannot_reuse_default_recent_snapshot(changes):
     query = {
         "view": "recent",
-        "limit": 10,
+        "limit": snapshots.DEFAULT_RECENT_LIMIT,
         "pipeline": "All",
         "workflow": "All",
         "run_type": "All",

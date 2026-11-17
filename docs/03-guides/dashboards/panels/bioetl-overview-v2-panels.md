@@ -122,8 +122,6 @@ Generated from the dashboard JSON. Earlier sections explain panel semantics; thi
 | 9460 | Inspect Selected Run Stages | table |
 | 9482 | Review Contract Exclusions | canvas |
 | 9483 | Review FK Comparison Scope | table |
-| 32005 | Browse Global Alerts | row |
-| 22005 | Monitor Global Alerts (Full) | table |
 <!-- END SHIPPED PANEL INVENTORY -->
 
 ## Review Run Context — LA-12 (#12946)

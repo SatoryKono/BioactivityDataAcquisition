@@ -55,17 +55,15 @@ def _reserve_alert_band(panels: list[dict[str, Any]], bottom: int) -> None:
 
 
 def embed_global_alerts(overview: dict[str, Any], incident: dict[str, Any]) -> None:
-    """Copy the global summary/full-list pair after selected-run layout builders.
+    """Embed one complete global alert list after selected-run layout builders.
 
-    The caller rebuilds the local layout before this pass. Keep the summary
-    before the collapsed full-list row: Grafana groups following standalone
-    panels under that row. Translate lower local blocks together and put the
-    disclosure last so neither alerts nor saved-run evidence gets hidden.
-    No selected-run datasource participates in either global alert query.
+    The paginated list retains every alert. Its Incident handoff exposes the
+    full diagnostic view; another identical query in a collapsed row would
+    duplicate both the evidence and its evaluation. Translate lower local
+    blocks together. No selected-run datasource participates in this query.
     """
     donors = {panel["id"]: panel for panel in incident["panels"]}
     summary = deepcopy(donors[2005])
-    full = deepcopy(donors[32005])
     panels = overview["panels"]
     navigation = next(panel for panel in panels if panel["id"] == 1000)
     note = '<div style="font-size:16px;line-height:18px">Saved run outcome and current pipeline health are separate; review global alerts below.</div>'
@@ -83,32 +81,7 @@ def embed_global_alerts(overview: dict[str, Any], incident: dict[str, Any]) -> N
         "Workspace or Browse Global Alerts for all rows."
     )
     _reserve_alert_band(panels, bottom=25)
-    full_y = max(
-        25,
-        max(
-            (panel["gridPos"]["y"] + panel["gridPos"]["h"] for panel in panels),
-            default=23,
-        ),
-    )
-    delta = full_y - full["gridPos"]["y"]
-    full["gridPos"]["y"] = full_y
-    for child in full["panels"]:
-        child["gridPos"]["y"] += delta
-        if child["id"] == 22005:
-            # A Dashboard-datasource consumer in a collapsed Scenes row can
-            # suppress its source panel. Query the same cheap recording rule
-            # independently so collapsing the full list never hides summary.
-            child["datasource"] = deepcopy(summary["datasource"])
-            child["targets"] = deepcopy(summary["targets"])
-            child["targets"][0]["expr"] = "bioetl_incident_global_alerts"
-        _apply_overview_alert_handoff(child)
-        # The always-visible summary owns the Incident handoff.
-        child["links"] = []
-    full["description"] = (
-        "GLOBAL / CURRENT · Expand for all fleet alerts, independently of "
-        "the selected Run ID. The summary above shows up to two rows."
-    )
-    panels.extend([summary, full])
+    panels.append(summary)
     panels.sort(key=lambda panel: (panel["gridPos"]["y"], panel["gridPos"]["x"]))
     overview["description"] = (
         "SELECTED RUN · Saved status, domain verdicts and identity assess only "
@@ -125,7 +98,7 @@ def embed_global_alerts(overview: dict[str, Any], incident: dict[str, Any]) -> N
         )
 
 
-def build_fleet_alert_card(panels):
+def build_fleet_alert_card():
     """Count active alerts, allowing empty zero only with an observed healthy Prometheus scrape; zero never certifies pipeline health."""
     targets = []
     for ref, state in (("A", "firing"), ("B", "pending")):
@@ -135,7 +108,7 @@ def build_fleet_alert_card(panels):
                 "instant": True,
                 "format": "time_series",
                 "legendFormat": state.upper(),
-                "expr": f'((count(ALERTS{{alertname=~"BioETL.*",alertstate="{state}"}}) or vector(0)) and on() (max(up{{job="prometheus"}}) == 1))',
+                "expr": f'((count(ALERTS{{alertname=~"BioETL.*",alertstate="{state}"}}) or (max(up{{job="prometheus"}} == 1) * 0)) and on() (max(up{{job="prometheus"}}) == 1))',
                 "datasource": {"type": "prometheus", "uid": "prometheus"},
             }
         )
@@ -153,6 +126,15 @@ def build_fleet_alert_card(panels):
                 "unit": "short",
                 "decimals": 0,
                 "noValue": "UNKNOWN",
+                "mappings": [
+                    {
+                        "type": "special",
+                        "options": {
+                            "match": "null",
+                            "result": {"text": "UNKNOWN", "color": "gray"},
+                        },
+                    }
+                ],
                 "color": {"mode": "thresholds"},
                 "thresholds": {
                     "mode": "absolute",
@@ -172,6 +154,15 @@ def build_fleet_alert_card(panels):
             "text": {"valueSize": 24, "titleSize": 14},
             "reduceOptions": {"calcs": ["last"], "fields": "", "values": False},
         },
-        "links": deepcopy(panels[2005]["links"]),
+        "links": [
+            {
+                "title": "Inspect current alert evidence",
+                "url": "/d/bioetl-overview-v2/3-run-overview?viewPanel=2005"
+                "&${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}"
+                "&${run_id:queryparam}&${__url_time_range}",
+                "includeVars": False,
+                "targetBlank": False,
+            }
+        ],
     }
     return health

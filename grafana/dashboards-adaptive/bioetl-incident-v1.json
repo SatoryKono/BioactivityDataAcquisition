@@ -2811,7 +2811,8 @@
             {
               "title": "Inspect stage snapshot clocks",
               "url": "/d/bioetl-incident-v1/5-incident-workspace?viewPanel=22012&${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
-              "targetBlank": false
+              "targetBlank": false,
+              "includeVars": false
             }
           ]
         },
@@ -5645,7 +5646,7 @@
           ],
           "title": "Track Failed Workflow Runs",
           "type": "stat",
-          "description": "TIME RANGE · Workflow only, not a single Run ID. Counts failed Workflow runs in the selected range for Workflow. Pipeline does not filter this count. Zero means no matching failures in the selected range, including when an empty selected-range result is rendered through noValue; it is neutral range evidence, not current Workflow or Pipeline Health. Use runtime localization or Trust evidence when non-zero, and use Metrics Evidence to assess telemetry confidence. TELEMETRY MISSING is not a zero and not VALID EMPTY."
+          "description": "TIME RANGE · Workflow only, not a single Run ID. Counts failed Workflow runs in the selected range for Workflow. Pipeline does not filter this count. Zero means no matching failures in the selected range in observed counter samples; missing samples remain UNKNOWN; it is neutral range evidence, not current Workflow or Pipeline Health. Use runtime localization or Trust evidence when non-zero, and use Metrics Evidence to assess telemetry confidence. TELEMETRY MISSING is not a zero and not VALID EMPTY."
         },
         {
           "datasource": {
@@ -5835,7 +5836,7 @@
           ],
           "title": "Track Failed Workflow Steps",
           "type": "stat",
-          "description": "TIME RANGE · Counts failed Workflow pipeline steps in the selected range for Workflow and Pipeline. The metric has no Stage label. Zero means no matching failures in the selected range, including when an empty selected-range result is rendered through noValue; it is neutral range evidence, not stage success or current Pipeline Health. Use runtime localization or Trust evidence when non-zero, and use Metrics Evidence to assess telemetry confidence. TELEMETRY MISSING is not a zero and not VALID EMPTY."
+          "description": "TIME RANGE · Counts failed Workflow pipeline steps in the selected range for Workflow and Pipeline. The metric has no Stage label. Zero means no matching failures in the selected range in observed counter samples; missing samples remain UNKNOWN; it is neutral range evidence, not stage success or current Pipeline Health. Use runtime localization or Trust evidence when non-zero, and use Metrics Evidence to assess telemetry confidence. TELEMETRY MISSING is not a zero and not VALID EMPTY."
         },
         {
           "datasource": {
@@ -13196,7 +13197,8 @@
             {
               "title": "Inspect current workflow evidence",
               "url": "/d/bioetl-incident-v1/5-incident-workspace?viewPanel=9701&${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${__url_time_range}",
-              "targetBlank": false
+              "targetBlank": false,
+              "includeVars": false
             }
           ]
         }

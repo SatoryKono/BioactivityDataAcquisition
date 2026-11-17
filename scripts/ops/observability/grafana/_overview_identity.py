@@ -691,7 +691,9 @@ def _ingestion_age_card() -> dict:
         "links": [
             {
                 "title": "Inspect current telemetry coverage",
-                "url": "/d/bioetl-incident-v1/5-incident-workspace?viewPanel=9491",
+                "url": "/d/bioetl-incident-v1/5-incident-workspace?viewPanel=9491"
+                "&${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}"
+                "&${run_id:queryparam}&${__url_time_range}",
                 "includeVars": False,
                 "targetBlank": False,
             }
@@ -717,7 +719,7 @@ def apply_overview_evidence_clocks(payload, panels):
     )
     place_overview_evidence(panels)
     _provider_card(panels)
-    health = build_fleet_alert_card(panels)
+    health = build_fleet_alert_card()
     payload["panels"] = [
         p for p in payload["panels"] if p["id"] not in {9605, 9606}
     ] + [health, _ingestion_age_card()]

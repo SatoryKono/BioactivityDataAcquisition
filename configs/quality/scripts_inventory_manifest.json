@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-17T09:45:00.866602+00:00",
+  "generated_at": "2026-11-17T10:35:54.053568+00:00",
   "summary": {
     "total_scripts": 753,
     "status_counts": {
@@ -24921,7 +24921,7 @@
         },
         {
           "path": "tests/integration/test_grafana_evidence_readability.py",
-          "line": 257,
+          "line": 258,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._evidence_readability import _stage_colors"
         }
@@ -25003,13 +25003,13 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ops/observability/test_evening_dashboard_queries.py",
-          "line": 139,
+          "line": 194,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._incident_explanations import ("
         },
         {
           "path": "tests/unit/repo_backed/scripts/ops/observability/test_evening_dashboard_queries.py",
-          "line": 205,
+          "line": 260,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._incident_explanations import ("
         }
@@ -26285,7 +26285,7 @@
         },
         {
           "path": "tests/integration/test_grafana_datasource_provisioning.py",
-          "line": 316,
+          "line": 329,
           "source_group": "tests",
           "text": "recover_ps1 = Path(\"scripts/ops/observability/grafana/recover_renderer.ps1\")"
         }
@@ -26353,7 +26353,7 @@
       "references": [
         {
           "path": "tests/integration/test_grafana_datasource_provisioning.py",
-          "line": 317,
+          "line": 330,
           "source_group": "tests",
           "text": "recover_sh = Path(\"scripts/ops/observability/grafana/recover_renderer.sh\")"
         }

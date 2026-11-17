@@ -16,7 +16,7 @@
   "target_counts": {
     "http": 14,
     "loki": 0,
-    "promql": 117,
+    "promql": 116,
     "tempo": 0,
     "unknown": 0
   },
@@ -3825,11 +3825,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": false,
       "empty_state": "valid_empty",
-      "formula": "((count(ALERTS{alertname=~\"BioETL.*\",alertstate=\"firing\"}) or vector(0)) and on() (max(up{job=\"prometheus\"}) == 1))",
+      "formula": "((count(ALERTS{alertname=~\"BioETL.*\",alertstate=\"firing\"}) or (max(up{job=\"prometheus\"} == 1) * 0)) and on() (max(up{job=\"prometheus\"}) == 1))",
       "kind": "promql",
       "panel_id": 9605,
       "panel_title": "Review Current Fleet Alerts",
-      "query": "((count(ALERTS{alertname=~\"BioETL.*\",alertstate=\"firing\"}) or vector(0)) and on() (max(up{job=\"prometheus\"}) == 1))",
+      "query": "((count(ALERTS{alertname=~\"BioETL.*\",alertstate=\"firing\"}) or (max(up{job=\"prometheus\"} == 1) * 0)) and on() (max(up{job=\"prometheus\"}) == 1))",
       "query_tokens": [
         "ALERTS",
         "up"
@@ -3855,11 +3855,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": false,
       "empty_state": "valid_empty",
-      "formula": "((count(ALERTS{alertname=~\"BioETL.*\",alertstate=\"pending\"}) or vector(0)) and on() (max(up{job=\"prometheus\"}) == 1))",
+      "formula": "((count(ALERTS{alertname=~\"BioETL.*\",alertstate=\"pending\"}) or (max(up{job=\"prometheus\"} == 1) * 0)) and on() (max(up{job=\"prometheus\"}) == 1))",
       "kind": "promql",
       "panel_id": 9605,
       "panel_title": "Review Current Fleet Alerts",
-      "query": "((count(ALERTS{alertname=~\"BioETL.*\",alertstate=\"pending\"}) or vector(0)) and on() (max(up{job=\"prometheus\"}) == 1))",
+      "query": "((count(ALERTS{alertname=~\"BioETL.*\",alertstate=\"pending\"}) or (max(up{job=\"prometheus\"} == 1) * 0)) and on() (max(up{job=\"prometheus\"}) == 1))",
       "query_tokens": [
         "ALERTS",
         "up"
@@ -3976,39 +3976,6 @@
         }
       ],
       "unit": "s"
-    },
-    {
-      "coverage_class": "required_current",
-      "dashboard_uid": "bioetl-overview-v2",
-      "datasource_type": "prometheus",
-      "documents_backend_down": false,
-      "documents_valid_empty": true,
-      "empty_state": "coverage_gap",
-      "formula": "bioetl_incident_global_alerts",
-      "kind": "promql",
-      "panel_id": 22005,
-      "panel_title": "Monitor Global Alerts (Full)",
-      "query": "bioetl_incident_global_alerts",
-      "query_tokens": [
-        "bioetl_incident_global_alerts"
-      ],
-      "ref_id": "A",
-      "runbook_urls": [],
-      "thresholds": [
-        {
-          "color": "text",
-          "value": null
-        },
-        {
-          "color": "#9a3412",
-          "value": 1
-        },
-        {
-          "color": "#9f1239",
-          "value": 2
-        }
-      ],
-      "unit": "none"
     },
     {
       "coverage_class": null,

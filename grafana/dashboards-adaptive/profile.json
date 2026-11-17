@@ -5,8 +5,8 @@
   "canonical_sha256": {
     "bioetl-control-plane-v1.json": "97df142a1ce5993617c8f9274c8843aa6702d7337824ee510458894e70af14af",
     "bioetl-dq-v2.json": "58c554dffae74b17ae1566283ded9f06f46bac71cded990e9a7ffc6662ed813a",
-    "bioetl-incident-v1.json": "13b3cbf19666083ef37a0734653d2f73ff3bdff3014a8cef91d6d9e812123a03",
-    "bioetl-overview-v2.json": "2d248b31febbb90b304ce46c02b53473c8de518d362685c94d4708d119dd89c4",
+    "bioetl-incident-v1.json": "5e48221ff981de52b506cb5a43deb9808260e3d57b0c9ad55a88dea38ce3e4b7",
+    "bioetl-overview-v2.json": "ccc6808b8cd759d0fc2dc7be9526962c9eb1dd90b4cc7bd17f17fa84cabd6038",
     "bioetl-run-explorer-v1.json": "2a12e9a9855e7e50b381bc66a99642db33086939b18898a8e428fadef8ae353a"
   },
   "plugin_version": "1.1.9",

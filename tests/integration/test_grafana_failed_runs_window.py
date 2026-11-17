@@ -26,7 +26,7 @@ def test_failed_runs_uses_one_selected_window_evaluation() -> None:
     assert " or " not in target["expr"]
     assert "unless on (pipeline, run_type)" in target["expr"]
     assert "count_over_time" in target["expr"]
-    assert panel["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
+    assert panel["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN · no samples"
     assert "any scope" in panel["description"]
     contracts = json.loads(
         Path("docs/03-guides/dashboards/panel-contract-inventory.json").read_text(

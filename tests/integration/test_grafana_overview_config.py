@@ -182,7 +182,7 @@ def test_first_screen_layout_matches_reviewed_progressive_disclosure_baseline() 
     assert "Monitor Scope Health" not in panels
     assert "Review First Action" not in panels
     assert panels["Review Run Domains"].get("id") == 9002
-    assert panels["Review Run Context"].get("gridPos", {}).get("y") == 2
+    assert panels["Review Run Context"].get("gridPos", {}).get("y") == 5
     assert panels["Review Selected Run Status"].get("id") == 9603
     assert panels["Review Selected Run Status"].get("gridPos", {}).get("y") == 5
     assert (
@@ -199,8 +199,7 @@ def test_first_screen_layout_matches_reviewed_progressive_disclosure_baseline() 
     assert panels["Review Provider Evidence"]["id"] == 9480
     assert panels["Inspect Selected Run Stages"]["id"] == 9460
     rows = [panel for panel in _dashboard()["panels"] if panel.get("type") == "row"]
-    assert [panel["id"] for panel in rows] == [32005]
-    assert rows[0]["collapsed"] is True
+    assert rows == []
 
 
 def test_status_and_next_action_preserve_current_status_semantics() -> None:
@@ -364,12 +363,13 @@ def test_overview_separates_saved_run_evidence_from_global_alerts() -> None:
     """LA-06: global alerts coexist with unchanged selected-run evidence."""
     panels = {panel.get("id"): panel for panel in get_dashboard_panels(_dashboard())}
     removed = {214, 215, 9601, 9031, 9010, 9011, 9003, 9007, 20215, 9701}
-    kept = {99, 9603, 9002, 9300, 9604, 9460, 9480, 9481, 9482, 2005, 32005, 22005}
+    kept = {99, 9603, 9002, 9300, 9604, 9605, 9606, 9460, 9480, 9481, 9482, 2005}
+    assert 32005 not in panels and 22005 not in panels
     for panel_id in removed:
         assert panel_id not in panels
     for panel_id in kept:
         assert panel_id in panels
     assert "including without a selected run" in str(_dashboard().get("description"))
     assert panels[9603]["gridPos"]["y"] == 5
-    assert panels[9002]["gridPos"]["y"] == 7
+    assert panels[9002]["gridPos"]["y"] == 10
     assert panels[9603]["gridPos"]["y"] < 12

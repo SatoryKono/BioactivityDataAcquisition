@@ -637,6 +637,18 @@
           "unit": "short",
           "decimals": 0,
           "noValue": "UNKNOWN",
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "text"
+                }
+              }
+            }
+          ],
           "color": {
             "mode": "thresholds"
           },
@@ -666,7 +678,7 @@
               "instant": true,
               "format": "time_series",
               "legendFormat": "FIRING",
-              "expr": "((count(ALERTS{alertname=~\"BioETL.*\",alertstate=\"firing\"}) or vector(0)) and on() (max(up{job=\"prometheus\"}) == 1))",
+              "expr": "((count(ALERTS{alertname=~\"BioETL.*\",alertstate=\"firing\"}) or (max(up{job=\"prometheus\"} == 1) * 0)) and on() (max(up{job=\"prometheus\"}) == 1))",
               "datasource": {
                 "type": "prometheus",
                 "uid": "prometheus"
@@ -677,7 +689,7 @@
               "instant": true,
               "format": "time_series",
               "legendFormat": "PENDING",
-              "expr": "((count(ALERTS{alertname=~\"BioETL.*\",alertstate=\"pending\"}) or vector(0)) and on() (max(up{job=\"prometheus\"}) == 1))",
+              "expr": "((count(ALERTS{alertname=~\"BioETL.*\",alertstate=\"pending\"}) or (max(up{job=\"prometheus\"} == 1) * 0)) and on() (max(up{job=\"prometheus\"}) == 1))",
               "datasource": {
                 "type": "prometheus",
                 "uid": "prometheus"
@@ -706,8 +718,8 @@
       },
       "links": [
         {
-          "title": "Open Incident Workspace (all global alerts)",
-          "url": "/d/bioetl-incident-v1/5-incident-workspace?var-workflow=$__all&var-pipeline=$__all&var-run_type=$__all&var-run_id=-&viewPanel=22005&${__url_time_range}",
+          "title": "Inspect current alert evidence",
+          "url": "/d/bioetl-overview-v2/3-run-overview?viewPanel=2005&${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
           "includeVars": false,
           "targetBlank": false
         }
@@ -819,7 +831,7 @@
       "links": [
         {
           "title": "Inspect current telemetry coverage",
-          "url": "/d/bioetl-incident-v1/5-incident-workspace?viewPanel=9491",
+          "url": "/d/bioetl-incident-v1/5-incident-workspace?viewPanel=9491&${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
           "includeVars": false,
           "targetBlank": false
         }
@@ -3571,387 +3583,6 @@
           }
         }
       ]
-    },
-    {
-      "id": 32005,
-      "type": "row",
-      "title": "Browse Global Alerts",
-      "collapsed": true,
-      "gridPos": {
-        "x": 0,
-        "y": 43,
-        "w": 24,
-        "h": 1
-      },
-      "panels": [
-        {
-          "id": 22005,
-          "type": "bioetl-selectorshell-panel",
-          "title": "Monitor Global Alerts (Full)",
-          "description": "GLOBAL / CURRENT · All pipelines; independent of selected Pipeline, Provider and Run ID. Provider preserves the alert label or uses an unambiguous configured pipeline mapping. Not provided means missing or ambiguous attribution, not unknown provider health. N/A — Infrastructure is not a provider. Pipeline: N/A — Docker infrastructure for the Docker probe alert without a pipeline label; Not provided for other alerts without that label. FIRING and PENDING retain their original alert state. Managed CURRENT queries use an independent clock and refresh every 30s. The timestamp is query evaluation time, not publication or event time. The historical dashboard interval does not set the current query end; current trends retain the selected duration and end at now. Timeouts, failed queries and unverified response time remain unavailable.",
-          "gridPos": {
-            "x": 0,
-            "y": 44,
-            "w": 24,
-            "h": 6
-          },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "targets": [],
-          "fieldConfig": {
-            "defaults": {
-              "noValue": "NO MATCHING SIGNALS",
-              "custom": {
-                "align": "left",
-                "cellOptions": {
-                  "type": "auto",
-                  "wrapText": false
-                },
-                "inspect": true,
-                "minWidth": 50,
-                "wrapText": false,
-                "wrapHeaderText": true
-              },
-              "color": {
-                "mode": "fixed",
-                "fixedColor": "text"
-              },
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "text",
-                    "value": null
-                  },
-                  {
-                    "color": "#9a3412",
-                    "value": 1
-                  },
-                  {
-                    "color": "#9f1239",
-                    "value": 2
-                  }
-                ]
-              },
-              "links": [],
-              "unit": "none"
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byRegexp",
-                  "options": "^(Value|#Value|Value \\(.*\\)|value)$"
-                },
-                "properties": [
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "color-text",
-                      "wrapText": false
-                    }
-                  },
-                  {
-                    "id": "custom.align",
-                    "value": "right"
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 120
-                  },
-                  {
-                    "id": "displayName",
-                    "value": "Active Alerts"
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "alertname"
-                },
-                "properties": [
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": false
-                    }
-                  },
-                  {
-                    "id": "displayName",
-                    "value": "Alert"
-                  },
-                  {
-                    "id": "links",
-                    "value": []
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "alertstate"
-                },
-                "properties": [
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "firing": {
-                            "text": "FIRING",
-                            "color": "#ff7383"
-                          },
-                          "pending": {
-                            "text": "PENDING",
-                            "color": "#ffb357"
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "color-text",
-                      "wrapText": false
-                    }
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 100
-                  },
-                  {
-                    "id": "displayName",
-                    "value": "State"
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "instance"
-                },
-                "properties": [
-                  {
-                    "id": "noValue",
-                    "value": "NOT PROVIDED"
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 145
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "job"
-                },
-                "properties": [
-                  {
-                    "id": "noValue",
-                    "value": "NOT PROVIDED"
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 185
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "severity"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 90
-                  },
-                  {
-                    "id": "displayName",
-                    "value": "Severity"
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "provider"
-                },
-                "properties": [
-                  {
-                    "id": "noValue",
-                    "value": "Not provided"
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 190
-                  },
-                  {
-                    "id": "displayName",
-                    "value": "Provider"
-                  },
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "chembl": {
-                            "text": "ChEMBL"
-                          }
-                        }
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "pipeline"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Pipeline"
-                  },
-                  {
-                    "id": "noValue",
-                    "value": "Not provided"
-                  },
-                  {
-                    "id": "links",
-                    "value": []
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "alert_runbook"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": true
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "pipeline_context"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": true
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "owner"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Owner"
-                  },
-                  {
-                    "id": "noValue",
-                    "value": "See runbook"
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "next_step"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Next step"
-                  },
-                  {
-                    "id": "noValue",
-                    "value": "See runbook"
-                  }
-                ]
-              }
-            ]
-          },
-          "options": {
-            "viewMode": "current",
-            "currentView": {
-              "pluginId": "table",
-              "queries": [
-                {
-                  "expr": "bioetl_incident_global_alerts",
-                  "format": "table",
-                  "instant": true,
-                  "refId": "A",
-                  "datasource": {
-                    "type": "prometheus",
-                    "uid": "prometheus"
-                  }
-                }
-              ],
-              "transformations": [
-                {
-                  "id": "sortBy",
-                  "options": {
-                    "fields": {},
-                    "sort": [
-                      {
-                        "field": "Value",
-                        "desc": true
-                      }
-                    ]
-                  }
-                },
-                {
-                  "id": "organize",
-                  "options": {
-                    "excludeByName": {
-                      "Time": true,
-                      "Value": true,
-                      "__name__": true
-                    },
-                    "indexByName": {
-                      "severity": 0,
-                      "alertname": 1,
-                      "pipeline": 2,
-                      "provider": 3,
-                      "alertstate": 4
-                    }
-                  }
-                }
-              ],
-              "options": {
-                "showHeader": true,
-                "footer": {
-                  "show": false,
-                  "enablePagination": true,
-                  "countRows": true
-                },
-                "cellHeight": "sm"
-              }
-            }
-          },
-          "transformations": [],
-          "links": []
-        }
-      ],
-      "description": "GLOBAL / CURRENT · Expand for all fleet alerts, independently of the selected Run ID. The summary above shows up to two rows."
     }
   ]
 }

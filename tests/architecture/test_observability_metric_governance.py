@@ -264,7 +264,9 @@ def test_typed_observability_inventory_is_bidirectional_and_source_specific() ->
         str(target["url"]).startswith(("/ops/", "/health/")) for target in http_targets
     )
     assert report["typed_target_counts"] == {
-        "promql": 117,  # + fleet alert states, ingestion age, and stage source clocks.
+        # Fleet states, ingestion age and stage clocks; one redundant Overview
+        # full-list target removed while the paginated list retains all alerts.
+        "promql": 116,
         "http": 14,
         "loki": 0,
         "tempo": 0,
@@ -276,6 +278,8 @@ def test_typed_observability_inventory_is_bidirectional_and_source_specific() ->
         for target in report["typed_targets"]
         if target["kind"] == "promql"
     }
+    assert ("bioetl-overview-v2", 2005, "A") in promql_targets
+    assert ("bioetl-overview-v2", 22005, "A") not in promql_targets
     assert {
         ("bioetl-overview-v2", 9605, "A"),
         ("bioetl-overview-v2", 9605, "B"),

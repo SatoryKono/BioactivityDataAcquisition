@@ -81,6 +81,61 @@ def test_overview_alert_list_keeps_more_than_two_firing_alerts(tmp_path):
     assert result.returncode == 0, result.stdout + result.stderr
 
 
+@pytest.mark.parametrize(
+    "panel_id,metric,labels",
+    [
+        (9996, "bioetl_workflow_runs_total", 'workflow="daily",status="failed"'),
+        (
+            9997,
+            "bioetl_workflow_step_events_total",
+            'workflow="daily",step_kind="pipeline",pipeline_context="sample",run_type_context="incremental",status="failed"',
+        ),
+    ],
+)
+@pytest.mark.parametrize("observed", [False, True])
+def test_workflow_failed_event_counters_distinguish_absence_from_zero(
+    tmp_path, panel_id, metric, labels, observed
+):
+    dashboard = json.loads(
+        Path("grafana/dashboards/bioetl-incident-v1.json").read_text()
+    )
+
+    def walk(items):
+        return [p for item in items for p in [item, *walk(item.get("panels", []))]]
+
+    panel = next(p for p in walk(dashboard["panels"]) if p["id"] == panel_id)
+    expr = panel["targets"][0]["expr"]
+    for variable in ("workflow", "pipeline", "run_type"):
+        expr = expr.replace("$" + variable, ".*")
+    expr = expr.replace("$__range", "5m")
+    result = _evaluate(
+        tmp_path,
+        {
+            "rule_files": [],
+            "tests": [
+                {
+                    "interval": "1m",
+                    "input_series": (
+                        [{"series": metric + "{" + labels + "}", "values": "4+0x5"}]
+                        if observed
+                        else []
+                    ),
+                    "promql_expr_test": [
+                        {
+                            "expr": expr,
+                            "eval_time": "5m",
+                            "exp_samples": [{"labels": "{}", "value": 0}]
+                            if observed
+                            else [],
+                        }
+                    ],
+                }
+            ],
+        },
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
 def test_signal_drilldown_evaluates_current_operands_not_selected_history(tmp_path):
     dashboard = json.loads(
         Path("grafana/dashboards/bioetl-incident-v1.json").read_text()
