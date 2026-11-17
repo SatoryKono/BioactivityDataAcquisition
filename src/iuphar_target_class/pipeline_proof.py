@@ -208,9 +208,7 @@ def _bind_executed_cohort(
         row = records(found[row_id]["classification.json"])[0]
         if canonical_json_bytes(
             _classification_input_projection(row.get("raw_fields"))
-        ) != canonical_json_bytes(
-            _classification_input_projection(item.raw_fields)
-        ):
+        ) != canonical_json_bytes(_classification_input_projection(item.raw_fields)):
             raise ValueError("pipeline proof input differs from the admitted cohort")
         for field in _SEMANTIC_FIELDS:
             if canonical_json_bytes(row.get(field)) != canonical_json_bytes(

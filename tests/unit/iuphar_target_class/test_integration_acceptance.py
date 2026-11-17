@@ -80,9 +80,9 @@ def test_classification_input_projection_ignores_csv_transport_metadata():
         "source_record": "1",
     }
     runtime_side = {"target_id": "1", "uniprot": None, "organism": "9606"}
-    assert _classification_input_projection(csv_side) == _classification_input_projection(
-        runtime_side
-    )
+    assert _classification_input_projection(
+        csv_side
+    ) == _classification_input_projection(runtime_side)
     assert "import_profile" not in _classification_input_projection(csv_side)
 
 
