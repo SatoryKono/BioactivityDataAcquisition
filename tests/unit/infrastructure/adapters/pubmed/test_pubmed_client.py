@@ -418,7 +418,14 @@ async def test_get_pmids_raises_when_repeated_page_fills_count(
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     "payload",
-    [[], {"esearchresult": None}, {"esearchresult": {"idlist": "1"}}],
+    [
+        [],
+        {"error": "upstream failure"},
+        {"esearchresult": None},
+        {"esearchresult": {}},
+        {"esearchresult": {"idlist": "1"}},
+        {"esearchresult": {"count": "2", "idlist": ["1", {}]}},
+    ],
 )
 async def test_get_pmids_rejects_malformed_esearch_payload(
     adapter, mock_http_client, payload: object

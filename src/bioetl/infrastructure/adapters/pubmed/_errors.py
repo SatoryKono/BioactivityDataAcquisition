@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
+from bioetl.domain.normalization import normalize_pmid
 from bioetl.infrastructure.adapters.common.error_bundles import (
     build_common_network_error_bundle,
 )
@@ -24,7 +25,7 @@ def parse_esearch_payload(payload: object) -> tuple[list[str], int | None]:
     if not isinstance(payload, Mapping):
         raise PubMedSearchPayloadError("ESearch payload is not an object")
     if "esearchresult" not in payload:
-        return [], None
+        raise PubMedSearchPayloadError("ESearch payload has no esearchresult")
     result = payload["esearchresult"]
     if not isinstance(result, Mapping):
         raise PubMedSearchPayloadError("ESearch esearchresult is not an object")
@@ -35,13 +36,21 @@ def parse_esearch_payload(payload: object) -> tuple[list[str], int | None]:
 
 
 def require_esearch_idlist(result: Mapping[str, object]) -> list[str]:
-    """Return PMID strings, or an empty list when ``idlist`` is absent."""
+    """Return canonical PMIDs from an ``idlist`` array."""
     if "idlist" not in result:
-        return []
+        raise PubMedSearchPayloadError("ESearch result has no idlist")
     raw_ids = result["idlist"]
     if not isinstance(raw_ids, list):
         raise PubMedSearchPayloadError("ESearch idlist is not a list")
-    return [str(item) for item in raw_ids if item is not None]
+    return [_require_esearch_pmid(item) for item in raw_ids]
+
+
+def _require_esearch_pmid(item: object) -> str:
+    """Keep only a PMID representation accepted by ``normalize_pmid``."""
+    pmid = normalize_pmid(item) if isinstance(item, str | int) else None
+    if pmid is None:
+        raise PubMedSearchPayloadError("ESearch idlist item is not a PMID")
+    return pmid
 
 
 def coerce_esearch_count(value: object) -> int | None:
