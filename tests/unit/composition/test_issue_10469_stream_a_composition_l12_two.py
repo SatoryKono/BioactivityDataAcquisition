@@ -82,7 +82,7 @@ def test_build_batch_executor_reads_dq_paths(
     monkeypatch.setattr(
         assembly,
         "extract_dq_output_paths",
-        lambda _cfg: SimpleNamespace(
+        lambda _cfg, settings=None: SimpleNamespace(
             bronze_path=None,
             silver_path=None,
             gold_path=None,

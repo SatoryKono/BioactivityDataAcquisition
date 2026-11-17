@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 import pyarrow as pa
 
@@ -44,6 +45,9 @@ from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import GoldSchemaType
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
+if TYPE_CHECKING:
+    from bioetl.infrastructure.config.settings_api import Settings
+
 
 @dataclass(frozen=True, slots=True)
 class RunnerAssemblyContext:
@@ -57,6 +61,7 @@ class RunnerAssemblyContext:
     gold_schema: GoldSchemaType
     strict_gold_validation: bool
     dq_configs_extractor: Callable[[PipelineYamlConfig | None], DQConfigsContext]
+    settings: Settings | None = None
 
 
 def build_lock_runtime_service(
@@ -94,7 +99,10 @@ def build_batch_executor(
     observer: PipelineObserver,
 ) -> BatchExecutor:
     """Build the batch executor with YAML-derived DQ output paths."""
-    dq_output_paths = extract_dq_output_paths(context.yaml_config)
+    dq_output_paths = extract_dq_output_paths(
+        context.yaml_config,
+        settings=context.settings,
+    )
     return ServicesBuilder.create_batch_executor_from_pipeline(
         BatchExecutorBuildRequest(
             pipeline=context.pipeline,

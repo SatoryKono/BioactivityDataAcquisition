@@ -141,4 +141,5 @@ def create_factory_runner_from_request(
             config,
             relaxed_dq=bool(settings.pipeline.relaxed_dq),
         ),
+        settings=concrete_settings,
     )
