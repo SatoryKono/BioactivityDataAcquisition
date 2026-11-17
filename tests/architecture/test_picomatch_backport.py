@@ -21,7 +21,7 @@ CONSUMERS = (
     "grafana/plugins/bioetl-scenes-app",
     "grafana/plugins/bioetl-selectorshell-panel",
 )
-ARCHIVE = BACKPORT / "picomatch-4.0.8-bioetl.5.tgz"
+ARCHIVE = BACKPORT / "picomatch-4.0.8-bioetl.6.tgz"
 
 
 def test_picomatch_surface_is_tarball_only() -> None:
@@ -45,7 +45,7 @@ def test_picomatch_archive_matches_reviewed_source() -> None:
         expected={
             "upstream_commit": "7be3276fb8bd215a8c73fa066bcaf696c244ad88",
             "advisory": "GHSA-fc5q-39xc-vjpf",
-            "local_version": "4.0.8-bioetl.5",
+            "local_version": "4.0.8-bioetl.6",
         },
     )
 
@@ -55,7 +55,7 @@ def test_picomatch_consumers_install_verified_archive(consumer: str) -> None:
     assert_consumers_pin_archive(
         [consumer],
         package_name="picomatch",
-        version="4.0.8-bioetl.5",
+        version="4.0.8-bioetl.6",
         archive=ARCHIVE,
         forbidden_versions=(
             "2.3.2",
@@ -64,6 +64,7 @@ def test_picomatch_consumers_install_verified_archive(consumer: str) -> None:
             "4.0.8-bioetl.2",
             "4.0.8-bioetl.3",
             "4.0.8-bioetl.4",
+            "4.0.8-bioetl.5",
         ),
     )
 
@@ -86,6 +87,11 @@ def test_picomatch_consumers_install_verified_archive(consumer: str) -> None:
         ("+(ab|abab)", "ab", 48),
         ("+(@(ab|abab))", "ab", 48),
         ("*(@(ab|abab))", "ab", 48),
+        # Nested unbounded +(...) without wildcard (not only *).
+        ("+(@(+(a)))", "a", 40),
+        ("*(@(+(a)))", "a", 40),
+        ("+(?(+(a)))", "a", 40),
+        ("+(@(*(a)))", "a", 40),
     ],
 )
 def test_repeated_and_nested_extglob_wildcards_finish_with_bounded_input(
