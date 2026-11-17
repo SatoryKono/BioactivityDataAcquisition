@@ -27,7 +27,7 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: First-window no-scroll gate (all seven UIDs)
+      - name: First-window no-scroll gate (all five UIDs)
         run: |
           uv run --frozen --no-build pytest \
             tests/integration/test_dashboard_first_window_noscroll.py \

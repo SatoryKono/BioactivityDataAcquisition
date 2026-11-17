@@ -5,13 +5,15 @@
 
 ## Scope and layout
 
-The page contains a two-line scope banner (y=0/h=3) and Inspect Recent Runs
-(last 20), y=3/h=30. Visible selectors are Ops HTTP catalog options
-(`filter-options` for Workflow, Pipeline, Run Type, Selected Run).
+Panel `1000` (`Navigate Dashboards`) is the shared navigation band at `y=0`,
+`h=3`, `w=16`, with HTML class `bioetl-nav`. Beside it, panel `1`
+(`Understand Run Scope`) is the scope banner at `y=0`, `h=3`. Inspect Recent
+Runs (last 20) is panel `3010` at `y=3`, `h=30`. Visible selectors are Ops HTTP
+catalog options (`filter-options` for Workflow, Pipeline, Run Type, Selected Run).
 Workflow=All, Pipeline=All, Run Type=All and Run ID=- are the defaults.
 The newest twenty launches are shown together without pagination,
 independently of the dashboard time range. Filters and exact Run ID lookup apply
-before the global twenty-row limit. The shared navigation band remains above the catalog.
+before the global twenty-row limit.
 The wide table retains Grafana's readable small rows (36px), with room for all
 twenty rows and wrapped headers. Scroll the page, rather than an inner table,
 to reach the last launch. The operator approved page scrolling on 2026-11-16;

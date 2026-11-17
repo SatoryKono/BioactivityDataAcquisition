@@ -208,7 +208,7 @@ def _stamp_ranked_suspect_expr(panel: dict, *, summary: bool) -> None:
     panel["targets"][0]["expr"] = (
         "label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace("
         "bioetl_incident_ranked_evidence,"
-        '"object","$1","object","(.*) / $"),'
+        '"object","$$1","object","(.*) / $"),'
         '"route_pipeline",".*","pipeline","unknown"),'
         '"owner","BioETL Team","reason","infrastructure_failed"),'
         '"next_step","Open pipeline-failure-critical.md","reason","infrastructure_failed"),'

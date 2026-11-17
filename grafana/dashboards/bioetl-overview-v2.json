@@ -547,7 +547,7 @@
                 },
                 "INCOMPLETE": {
                   "text": "INCOMPLETE",
-                  "color": "orange"
+                  "color": "gray"
                 },
                 "UNKNOWN": {
                   "text": "UNKNOWN",
@@ -2621,7 +2621,7 @@
                 },
                 "INCOMPLETE": {
                   "text": "INCOMPLETE",
-                  "color": "orange"
+                  "color": "gray"
                 },
                 "Source unavailable": {
                   "text": "Source unavailable",

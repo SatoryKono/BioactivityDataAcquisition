@@ -22,8 +22,8 @@
   "dashboard_sha256": {
     "bioetl-control-plane-v1": "97df142a1ce5993617c8f9274c8843aa6702d7337824ee510458894e70af14af",
     "bioetl-dq-v2": "58c554dffae74b17ae1566283ded9f06f46bac71cded990e9a7ffc6662ed813a",
-    "bioetl-incident-v1": "e42eab4542976182a83b5bdb3bd78421bfe648f482e8f4c37c18960ccca5f9b0",
-    "bioetl-overview-v2": "d7a9fb00dab97f476a8dff3310a0cfe7936b07623d8a6f601b01f4b889ffea6e",
+    "bioetl-incident-v1": "e9acfe7a5fcb8689eb5ba3beea9fa530c64944ce76650bd6cbc2ebf8d46a5a6d",
+    "bioetl-overview-v2": "6c75a55bc996618fbfe9b1f63d14ab5ad8100bfbb86e25cdfa54ffec30194efc",
     "bioetl-run-explorer-v1": "7181f111dbc00828794f016d02819e308e8ceb2ad552025d2b998a84fdb54ab0"
   },
   "panels": [
@@ -453,7 +453,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(bioetl_incident_ranked_evidence,\"object\",\"$1\",\"object\",\"(.*) / $\"),\"route_pipeline\",\".*\",\"pipeline\",\"unknown\"),\"owner\",\"BioETL Team\",\"reason\",\"infrastructure_failed\"),\"next_step\",\"Open pipeline-failure-critical.md\",\"reason\",\"infrastructure_failed\"),\"owner\",\"See runbook\",\"owner\",\"^$\"),\"next_step\",\"See runbook\",\"next_step\",\"^$\"),\"freshness\",\"Not verified: no event timestamp\",\"\",\"\")"
+          "label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(bioetl_incident_ranked_evidence,\"object\",\"$$1\",\"object\",\"(.*) / $\"),\"route_pipeline\",\".*\",\"pipeline\",\"unknown\"),\"owner\",\"BioETL Team\",\"reason\",\"infrastructure_failed\"),\"next_step\",\"Open pipeline-failure-critical.md\",\"reason\",\"infrastructure_failed\"),\"owner\",\"See runbook\",\"owner\",\"^$\"),\"next_step\",\"See runbook\",\"next_step\",\"^$\"),\"freshness\",\"Not verified: no event timestamp\",\"\",\"\")"
         ],
         "target_count": 1
       }
