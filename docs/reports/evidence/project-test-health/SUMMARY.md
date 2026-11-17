@@ -66,6 +66,14 @@ test run, coverage measurement, or release/acceptance decision. The historical
 2026-10-08 17-shard evidence and all prior outcomes below are unchanged; its
 remote artifacts were not re-verified by this source census.
 
+A separate source-only census on 2026-11-17 at commit
+`4837b8207d1676a7c70a8627662e968e2409a212`: the canonical source list and historical shard manifest
+remain present. The tracked tree contains 3,332 files with basenames
+matching `test_*.py` under `tests/`, counted from
+`git ls-files 'tests/**/test_*.py'`.
+This inventory check records no test execution or coverage measurement.
+The 2026-10-08 17-shard capture remains the latest measured coverage in this summary.
+
 Re-verified on 2026-11-09 at source commit
 `82b3d165d87bcb19c1d4214d9ccf7254750687b5`: the canonical source list and historical shard manifest
 remain present. The tracked tree contains 3,238 files with basenames

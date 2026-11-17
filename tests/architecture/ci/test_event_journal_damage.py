@@ -1243,8 +1243,8 @@ def test_record_redacts_nested_secrets_in_payload(tmp_path: Path) -> None:
     assert parsed["event"] == "custom_event"
     assert "nested" in parsed
     assert parsed["nested"]["safe_key"] == "safe value"
-    assert "[redacted:" in parsed["nested"]["nested_password"]
-    assert parsed["password"].startswith("[redacted:")
+    assert parsed["nested"]["nested_password"] == "[redacted]"
+    assert parsed["password"] == "[redacted]"
 
 
 def test_parametrized_assignment_nodeid_stays_reconciled(tmp_path: Path) -> None:
@@ -1270,4 +1270,4 @@ def test_parametrized_assignment_nodeid_stays_reconciled(tmp_path: Path) -> None
         for path in (tmp_path / "journal").glob("receipt_*.jsonl")
     )
     assert "swordfish" not in blob
-    assert "[redacted:" in blob
+    assert "[redacted]" in blob

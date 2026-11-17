@@ -43,7 +43,7 @@ def _evaluate(tmp_path, fixture):
     result = subprocess.run(
         command, input=stdin, capture_output=True, text=True, timeout=30
     )
-    assert result.returncode == 0, result.stdout + result.stderr
+    return result
 
 
 def test_signal_drilldown_evaluates_current_operands_not_selected_history(tmp_path):
@@ -59,7 +59,7 @@ def test_signal_drilldown_evaluates_current_operands_not_selected_history(tmp_pa
     expr = panel["targets"][0]["expr"]
     # Measurements appear only at the current clock. The same expression at a
     # selected historical end must remain empty, not synthesize evidence.
-    _evaluate(
+    result = _evaluate(
         tmp_path,
         {
             "rule_files": [],
@@ -94,6 +94,7 @@ def test_signal_drilldown_evaluates_current_operands_not_selected_history(tmp_pa
             ],
         },
     )
+    assert result.returncode == 0, result.stdout + result.stderr
 
 
 @pytest.mark.parametrize("observed", [None, 0, -1, 864001, 863600])
@@ -152,7 +153,7 @@ def test_stage_clock_does_not_replace_event_time_with_push_or_scrape(
             ],
         },
     ]
-    _evaluate(
+    result = _evaluate(
         tmp_path,
         {
             "rule_files": [],
@@ -162,6 +163,7 @@ def test_stage_clock_does_not_replace_event_time_with_push_or_scrape(
             ],
         },
     )
+    assert result.returncode == 0, result.stdout + result.stderr
 
 
 def test_stage_clock_without_gateway_or_crossing_remains_unknown_or_absent(tmp_path):
@@ -170,7 +172,7 @@ def test_stage_clock_without_gateway_or_crossing_remains_unknown_or_absent(tmp_p
     )
 
     expr = stage_clock_query()
-    _evaluate(
+    result = _evaluate(
         tmp_path,
         {
             "rule_files": [],
@@ -207,6 +209,7 @@ def test_stage_clock_without_gateway_or_crossing_remains_unknown_or_absent(tmp_p
             ],
         },
     )
+    assert result.returncode == 0, result.stdout + result.stderr
 
 
 def test_rank_score_does_not_masquerade_as_alert_severity():
@@ -299,7 +302,7 @@ def test_ingestion_age_obeys_alert_boundary_and_preserves_invalid_or_missing(
                 "exp_samples": expected,
             }
         )
-    _evaluate(
+    result = _evaluate(
         tmp_path,
         {
             "rule_files": [],
@@ -313,6 +316,7 @@ def test_ingestion_age_obeys_alert_boundary_and_preserves_invalid_or_missing(
             ],
         },
     )
+    assert result.returncode == 0, result.stdout + result.stderr
 
 
 def test_ingestion_age_deduplicates_sources_before_taking_oldest_entity(tmp_path):
@@ -348,7 +352,7 @@ def test_ingestion_age_deduplicates_sources_before_taking_oldest_entity(tmp_path
         }
         for index, target in enumerate(panel["targets"])
     ]
-    _evaluate(
+    result = _evaluate(
         tmp_path,
         {
             "rule_files": [],
@@ -358,6 +362,7 @@ def test_ingestion_age_deduplicates_sources_before_taking_oldest_entity(tmp_path
             ],
         },
     )
+    assert result.returncode == 0, result.stdout + result.stderr
 
 
 @pytest.mark.parametrize("scrape", [1, 0, None])

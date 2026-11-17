@@ -500,41 +500,13 @@
       "path": "tests/unit/interfaces/http/test_health_server.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_consume_headers"
-    },
-    {
-      "category": "helper_asserted",
-      "line": "100",
-      "path": "tests/unit/repo_backed/scripts/ops/observability/test_evening_dashboard_queries.py",
-      "rationale": "tests that delegate verification to check/validate/verify helper calls",
-      "test_name": "test_stage_clock_does_not_replace_event_time_with_push_or_scrape"
-    },
-    {
-      "category": "intentional_no_exception_contract",
-      "line": "167",
-      "path": "tests/unit/repo_backed/scripts/ops/observability/test_evening_dashboard_queries.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_stage_clock_without_gateway_or_crossing_remains_unknown_or_absent"
-    },
-    {
-      "category": "intentional_no_exception_contract",
-      "line": "259",
-      "path": "tests/unit/repo_backed/scripts/ops/observability/test_evening_dashboard_queries.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_ingestion_age_obeys_alert_boundary_and_preserves_invalid_or_missing"
-    },
-    {
-      "category": "helper_asserted",
-      "line": "318",
-      "path": "tests/unit/repo_backed/scripts/ops/observability/test_evening_dashboard_queries.py",
-      "rationale": "tests that delegate verification to check/validate/verify helper calls",
-      "test_name": "test_ingestion_age_deduplicates_sources_before_taking_oldest_entity"
     }
   ],
   "assertless_category_counts": {
     "architecture_helper_guard": 0,
     "benchmark_or_performance": 0,
-    "helper_asserted": 3,
-    "intentional_no_exception_contract": 68,
+    "helper_asserted": 1,
+    "intentional_no_exception_contract": 66,
     "weak_no_value": 0
   },
   "assertless_examples": [
@@ -823,16 +795,9 @@
       "categories": {
         "intentional_no_exception_contract": 1
       }
-    },
-    "tests/unit/repo_backed/scripts/ops/observability/test_evening_dashboard_queries.py": {
-      "assertless_tests": 4,
-      "categories": {
-        "helper_asserted": 2,
-        "intentional_no_exception_contract": 2
-      }
     }
   },
-  "assertless_total_candidates": 71,
+  "assertless_total_candidates": 67,
   "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
@@ -1006,7 +971,7 @@
       ".yml"
     ]
   },
-  "intentional_no_exception_contract": 68,
+  "intentional_no_exception_contract": 66,
   "markerless_examples": [],
   "markerless_test_functions": 0,
   "parse_errors": [],
@@ -1522,41 +1487,13 @@
         "path": "tests/unit/interfaces/http/test_health_server.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_consume_headers"
-      },
-      {
-        "category": "helper_asserted",
-        "line": "100",
-        "path": "tests/unit/repo_backed/scripts/ops/observability/test_evening_dashboard_queries.py",
-        "rationale": "tests that delegate verification to check/validate/verify helper calls",
-        "test_name": "test_stage_clock_does_not_replace_event_time_with_push_or_scrape"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "167",
-        "path": "tests/unit/repo_backed/scripts/ops/observability/test_evening_dashboard_queries.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_stage_clock_without_gateway_or_crossing_remains_unknown_or_absent"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "259",
-        "path": "tests/unit/repo_backed/scripts/ops/observability/test_evening_dashboard_queries.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_ingestion_age_obeys_alert_boundary_and_preserves_invalid_or_missing"
-      },
-      {
-        "category": "helper_asserted",
-        "line": "318",
-        "path": "tests/unit/repo_backed/scripts/ops/observability/test_evening_dashboard_queries.py",
-        "rationale": "tests that delegate verification to check/validate/verify helper calls",
-        "test_name": "test_ingestion_age_deduplicates_sources_before_taking_oldest_entity"
       }
     ],
     "assertless_category_counts": {
       "architecture_helper_guard": 0,
       "benchmark_or_performance": 0,
-      "helper_asserted": 3,
-      "intentional_no_exception_contract": 68,
+      "helper_asserted": 1,
+      "intentional_no_exception_contract": 66,
       "weak_no_value": 0
     },
     "assertless_examples": [
@@ -1586,7 +1523,7 @@
       "tests/unit/infrastructure/test_issue_10469_stream_a_infra_twenty_one.py:507",
       "tests/unit/infrastructure/test_storage_factory.py:820"
     ],
-    "assertless_total_candidates": 71,
+    "assertless_total_candidates": 67,
     "compatibility_examples": [],
     "compatibility_files": [],
     "compatibility_test_files": 0,
@@ -1821,20 +1758,20 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 3333,
-    "total_test_functions": 33371,
+    "total_test_functions": 33374,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "68b41ca566297f52faeb1771ac5c1ddbd61e682c62a5b93cc810a4a1e541ffbd",
+  "source_tree_sha256": "2f162eff4c7be5edcda4cac686228e2ef02c21c3e1bf9d09f4d154b5a0298b5a",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
-    "assertless_total_candidates": 71,
+    "assertless_total_candidates": 67,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
-    "intentional_no_exception_contract": 68,
+    "intentional_no_exception_contract": 66,
     "markerless_examples": [],
     "markerless_test_functions": 0,
     "refined_assertless_tests": 0,
@@ -1889,7 +1826,7 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 3333,
-  "total_test_functions": 33371,
+  "total_test_functions": 33374,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
