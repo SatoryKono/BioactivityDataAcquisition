@@ -339,4 +339,3 @@ def test_unclosed_bracket_body_compiles_linearly(packed_picomatch: Path) -> None
         check=True,
     )
     assert result.stdout.strip() == "compiled"
-
