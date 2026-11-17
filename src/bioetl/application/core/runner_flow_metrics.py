@@ -188,11 +188,13 @@ def _record_stage_lag_gauges(
     current_time_fn: Callable[[], datetime],
 ) -> None:
     """Project unresolved stage lag gauges using the runtime wall-clock anchor."""
+    observed_at = current_time_fn()
     started_at = getattr(getattr(host, "_context", None), "started_at", None)
-    if not isinstance(started_at, datetime):
-        lag_seconds = 0.0
-    else:
-        lag_seconds = max(0.0, (current_time_fn() - started_at).total_seconds())
+    lag_seconds = (
+        max(0.0, (observed_at - started_at).total_seconds())
+        if isinstance(started_at, datetime)
+        else 0.0
+    )
     for stage, backlog in (
         ("ingestion", ingestion_backlog),
         ("validation", validation_backlog),
@@ -202,6 +204,9 @@ def _record_stage_lag_gauges(
             run_type=run_type,
             stage=stage,
             seconds=lag_seconds if backlog > 0 else 0.0,
+        )
+        pipeline_metrics.record_stage_snapshot_observed_at(
+            run_type=run_type, stage=stage, observed_unix=observed_at.timestamp()
         )
 
 

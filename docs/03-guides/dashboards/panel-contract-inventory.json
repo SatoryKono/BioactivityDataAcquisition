@@ -16,7 +16,7 @@
   "target_counts": {
     "http": 14,
     "loki": 0,
-    "promql": 110,
+    "promql": 117,
     "tempo": 0,
     "unknown": 0
   },
@@ -173,13 +173,14 @@
       "kind": "http",
       "panel_id": 9418,
       "panel_title": "Review Selected-Run Trust",
-      "query": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
+      "query": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}&require_exact_run=1",
       "query_tokens": [
         "/ops/observability/selected-run-status",
         "pipeline",
         "run_id",
         "run_type",
-        "workflow"
+        "workflow",
+        "require_exact_run"
       ],
       "ref_id": "A",
       "runbook_urls": [],
@@ -2873,11 +2874,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": false,
       "empty_state": "coverage_gap",
-      "formula": "label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(bioetl_incident_ranked_evidence,\"object\",\"$1\",\"object\",\"(.*) / $\"),\"route_pipeline\",\".*\",\"pipeline\",\"unknown\"),\"owner\",\"BioETL Team\",\"reason\",\"infrastructure_failed\"),\"next_step\",\"Open pipeline-failure-critical.md\",\"reason\",\"infrastructure_failed\"),\"owner\",\"See runbook\",\"owner\",\"^$\"),\"next_step\",\"See runbook\",\"next_step\",\"^$\")",
+      "formula": "label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(bioetl_incident_ranked_evidence,\"object\",\"$1\",\"object\",\"(.*) / $\"),\"route_pipeline\",\".*\",\"pipeline\",\"unknown\"),\"owner\",\"BioETL Team\",\"reason\",\"infrastructure_failed\"),\"next_step\",\"Open pipeline-failure-critical.md\",\"reason\",\"infrastructure_failed\"),\"owner\",\"See runbook\",\"owner\",\"^$\"),\"next_step\",\"See runbook\",\"next_step\",\"^$\"),\"freshness\",\"Not verified: no event timestamp\",\"\",\"\")",
       "kind": "promql",
       "panel_id": 2010,
       "panel_title": "Inspect Ranked Suspects",
-      "query": "label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(bioetl_incident_ranked_evidence,\"object\",\"$1\",\"object\",\"(.*) / $\"),\"route_pipeline\",\".*\",\"pipeline\",\"unknown\"),\"owner\",\"BioETL Team\",\"reason\",\"infrastructure_failed\"),\"next_step\",\"Open pipeline-failure-critical.md\",\"reason\",\"infrastructure_failed\"),\"owner\",\"See runbook\",\"owner\",\"^$\"),\"next_step\",\"See runbook\",\"next_step\",\"^$\")",
+      "query": "label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(bioetl_incident_ranked_evidence,\"object\",\"$1\",\"object\",\"(.*) / $\"),\"route_pipeline\",\".*\",\"pipeline\",\"unknown\"),\"owner\",\"BioETL Team\",\"reason\",\"infrastructure_failed\"),\"next_step\",\"Open pipeline-failure-critical.md\",\"reason\",\"infrastructure_failed\"),\"owner\",\"See runbook\",\"owner\",\"^$\"),\"next_step\",\"See runbook\",\"next_step\",\"^$\"),\"freshness\",\"Not verified: no event timestamp\",\"\",\"\")",
       "query_tokens": [
         "bioetl_incident_ranked_evidence"
       ],
@@ -3661,6 +3662,43 @@
       "dashboard_uid": "bioetl-incident-v1",
       "datasource_type": "prometheus",
       "documents_backend_down": false,
+      "documents_valid_empty": false,
+      "empty_state": "coverage_gap",
+      "formula": "label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(bioetl_incident_ranked_evidence,\"object\",\"$1\",\"object\",\"(.*) / $\"),\"route_pipeline\",\".*\",\"pipeline\",\"unknown\"),\"owner\",\"BioETL Team\",\"reason\",\"infrastructure_failed\"),\"next_step\",\"Open pipeline-failure-critical.md\",\"reason\",\"infrastructure_failed\"),\"owner\",\"See runbook\",\"owner\",\"^$\"),\"next_step\",\"See runbook\",\"next_step\",\"^$\"),\"freshness\",\"Not verified: no event timestamp\",\"\",\"\")",
+      "kind": "promql",
+      "panel_id": 22010,
+      "panel_title": "Inspect Global Suspects (Full)",
+      "query": "label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(bioetl_incident_ranked_evidence,\"object\",\"$1\",\"object\",\"(.*) / $\"),\"route_pipeline\",\".*\",\"pipeline\",\"unknown\"),\"owner\",\"BioETL Team\",\"reason\",\"infrastructure_failed\"),\"next_step\",\"Open pipeline-failure-critical.md\",\"reason\",\"infrastructure_failed\"),\"owner\",\"See runbook\",\"owner\",\"^$\"),\"next_step\",\"See runbook\",\"next_step\",\"^$\"),\"freshness\",\"Not verified: no event timestamp\",\"\",\"\")",
+      "query_tokens": [
+        "bioetl_incident_ranked_evidence"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [
+        {
+          "color": "text",
+          "value": null
+        },
+        {
+          "color": "green",
+          "value": 0
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "unit": "none"
+    },
+    {
+      "coverage_class": "required_current",
+      "dashboard_uid": "bioetl-incident-v1",
+      "datasource_type": "prometheus",
+      "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "coverage_gap",
       "formula": "(label_join(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(max by (pipeline, run_type, stage) (max_over_time(bioetl_stage_lag_seconds[15m])) >= 300,\"signal\",\"stage_lag\",\"\",\"\"),\"window\",\"15m maximum\",\"\",\"\"),\"threshold\",\">= 300 s (15m maximum)\",\"\",\"\"),\"unit\",\"s\",\"\",\"\"),\"observation_time\",\"Not provided\",\"\",\"\"),\"publication_time\",\"Not provided\",\"\",\"\"),\"freshness\",\"Not verified: observed/published timestamps not provided\",\"\",\"\"),\"scope\",\" / \",\"pipeline\",\"run_type\",\"stage\")) or (label_join(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(max by (pipeline, run_type, stage) (bioetl_stage_backlog_records{stage!=\"validation\"}) > 0,\"signal\",\"stage_backlog\",\"\",\"\"),\"window\",\"instant\",\"\",\"\"),\"threshold\",\"> 0 records (instant)\",\"\",\"\"),\"unit\",\"records\",\"\",\"\"),\"observation_time\",\"Not provided\",\"\",\"\"),\"publication_time\",\"Not provided\",\"\",\"\"),\"freshness\",\"Not verified: observed/published timestamps not provided\",\"\",\"\"),\"scope\",\" / \",\"pipeline\",\"run_type\",\"stage\"))",
@@ -3679,16 +3717,38 @@
     },
     {
       "coverage_class": "required_current",
+      "dashboard_uid": "bioetl-incident-v1",
+      "datasource_type": "prometheus",
+      "documents_backend_down": false,
+      "documents_valid_empty": false,
+      "empty_state": "coverage_gap",
+      "formula": "(label_join(label_replace(label_replace((((max by(pipeline,run_type,stage)((bioetl_stage_snapshot_observed_timestamp_seconds > 0) <= time()) and on(pipeline,run_type,stage) group by(pipeline,run_type,stage)((max by(pipeline,run_type,stage)(max_over_time(bioetl_stage_lag_seconds[15m])) >= 300) or (max by(pipeline,run_type,stage)(bioetl_stage_backlog_records{stage!=\"validation\"}) > 0))) or (group by(pipeline,run_type,stage)((max by(pipeline,run_type,stage)(max_over_time(bioetl_stage_lag_seconds[15m])) >= 300) or (max by(pipeline,run_type,stage)(bioetl_stage_backlog_records{stage!=\"validation\"}) > 0)) * NaN)) * 1000),\"clock\",\"Latest stage projection\",\"\",\"\"),\"basis\",\"Application projection; not input-record event time\",\"\",\"\"),\"scope\",\" / \",\"pipeline\",\"run_type\",\"stage\")) or (label_join(label_replace(label_replace((((group by(pipeline,run_type,stage)((max by(pipeline,run_type,stage)(max_over_time(bioetl_stage_lag_seconds[15m])) >= 300) or (max by(pipeline,run_type,stage)(bioetl_stage_backlog_records{stage!=\"validation\"}) > 0)) * on(pipeline,run_type) group_left max by(pipeline,run_type)((push_time_seconds{job=\"bioetl\",pipeline!=\"\",run_type!=\"\"} > 0) <= time())) or (group by(pipeline,run_type,stage)((max by(pipeline,run_type,stage)(max_over_time(bioetl_stage_lag_seconds[15m])) >= 300) or (max by(pipeline,run_type,stage)(bioetl_stage_backlog_records{stage!=\"validation\"}) > 0)) * NaN)) * 1000),\"clock\",\"Gateway publication\",\"\",\"\"),\"basis\",\"Pushgateway job=bioetl; not stage observation time\",\"\",\"\"),\"scope\",\" / \",\"pipeline\",\"run_type\",\"stage\")) or (label_join(label_replace(label_replace(((group by(pipeline,run_type,stage)((max by(pipeline,run_type,stage)(max_over_time(bioetl_stage_lag_seconds[15m])) >= 300) or (max by(pipeline,run_type,stage)(bioetl_stage_backlog_records{stage!=\"validation\"}) > 0)) * NaN) * 1000),\"clock\",\"Input-record event\",\"\",\"\"),\"basis\",\"Not instrumented; no source event clock in these metrics\",\"\",\"\"),\"scope\",\" / \",\"pipeline\",\"run_type\",\"stage\"))",
+      "kind": "promql",
+      "panel_id": 22012,
+      "panel_title": "Inspect Stage Snapshot Clocks",
+      "query": "(label_join(label_replace(label_replace((((max by(pipeline,run_type,stage)((bioetl_stage_snapshot_observed_timestamp_seconds > 0) <= time()) and on(pipeline,run_type,stage) group by(pipeline,run_type,stage)((max by(pipeline,run_type,stage)(max_over_time(bioetl_stage_lag_seconds[15m])) >= 300) or (max by(pipeline,run_type,stage)(bioetl_stage_backlog_records{stage!=\"validation\"}) > 0))) or (group by(pipeline,run_type,stage)((max by(pipeline,run_type,stage)(max_over_time(bioetl_stage_lag_seconds[15m])) >= 300) or (max by(pipeline,run_type,stage)(bioetl_stage_backlog_records{stage!=\"validation\"}) > 0)) * NaN)) * 1000),\"clock\",\"Latest stage projection\",\"\",\"\"),\"basis\",\"Application projection; not input-record event time\",\"\",\"\"),\"scope\",\" / \",\"pipeline\",\"run_type\",\"stage\")) or (label_join(label_replace(label_replace((((group by(pipeline,run_type,stage)((max by(pipeline,run_type,stage)(max_over_time(bioetl_stage_lag_seconds[15m])) >= 300) or (max by(pipeline,run_type,stage)(bioetl_stage_backlog_records{stage!=\"validation\"}) > 0)) * on(pipeline,run_type) group_left max by(pipeline,run_type)((push_time_seconds{job=\"bioetl\",pipeline!=\"\",run_type!=\"\"} > 0) <= time())) or (group by(pipeline,run_type,stage)((max by(pipeline,run_type,stage)(max_over_time(bioetl_stage_lag_seconds[15m])) >= 300) or (max by(pipeline,run_type,stage)(bioetl_stage_backlog_records{stage!=\"validation\"}) > 0)) * NaN)) * 1000),\"clock\",\"Gateway publication\",\"\",\"\"),\"basis\",\"Pushgateway job=bioetl; not stage observation time\",\"\",\"\"),\"scope\",\" / \",\"pipeline\",\"run_type\",\"stage\")) or (label_join(label_replace(label_replace(((group by(pipeline,run_type,stage)((max by(pipeline,run_type,stage)(max_over_time(bioetl_stage_lag_seconds[15m])) >= 300) or (max by(pipeline,run_type,stage)(bioetl_stage_backlog_records{stage!=\"validation\"}) > 0)) * NaN) * 1000),\"clock\",\"Input-record event\",\"\",\"\"),\"basis\",\"Not instrumented; no source event clock in these metrics\",\"\",\"\"),\"scope\",\" / \",\"pipeline\",\"run_type\",\"stage\"))",
+      "query_tokens": [
+        "bioetl_stage_backlog_records",
+        "bioetl_stage_lag_seconds",
+        "bioetl_stage_snapshot_observed_timestamp_seconds"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [],
+      "unit": "none"
+    },
+    {
+      "coverage_class": "required_current",
       "dashboard_uid": "bioetl-overview-v2",
       "datasource_type": "prometheus",
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "coverage_gap",
-      "formula": "topk(2, bioetl_incident_global_alerts)",
+      "formula": "bioetl_incident_global_alerts",
       "kind": "promql",
       "panel_id": 2005,
       "panel_title": "Monitor Global Alerts",
-      "query": "topk(2, bioetl_incident_global_alerts)",
+      "query": "bioetl_incident_global_alerts",
       "query_tokens": [
         "bioetl_incident_global_alerts"
       ],
@@ -3759,6 +3819,165 @@
       "unit": "none"
     },
     {
+      "coverage_class": "event_optional",
+      "dashboard_uid": "bioetl-overview-v2",
+      "datasource_type": "prometheus",
+      "documents_backend_down": false,
+      "documents_valid_empty": false,
+      "empty_state": "valid_empty",
+      "formula": "((count(ALERTS{alertname=~\"BioETL.*\",alertstate=\"firing\"}) or vector(0)) and on() (max(up{job=\"prometheus\"}) == 1))",
+      "kind": "promql",
+      "panel_id": 9605,
+      "panel_title": "Review Current Fleet Alerts",
+      "query": "((count(ALERTS{alertname=~\"BioETL.*\",alertstate=\"firing\"}) or vector(0)) and on() (max(up{job=\"prometheus\"}) == 1))",
+      "query_tokens": [
+        "ALERTS",
+        "up"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [
+        {
+          "color": "text",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        }
+      ],
+      "unit": "short"
+    },
+    {
+      "coverage_class": "event_optional",
+      "dashboard_uid": "bioetl-overview-v2",
+      "datasource_type": "prometheus",
+      "documents_backend_down": false,
+      "documents_valid_empty": false,
+      "empty_state": "valid_empty",
+      "formula": "((count(ALERTS{alertname=~\"BioETL.*\",alertstate=\"pending\"}) or vector(0)) and on() (max(up{job=\"prometheus\"}) == 1))",
+      "kind": "promql",
+      "panel_id": 9605,
+      "panel_title": "Review Current Fleet Alerts",
+      "query": "((count(ALERTS{alertname=~\"BioETL.*\",alertstate=\"pending\"}) or vector(0)) and on() (max(up{job=\"prometheus\"}) == 1))",
+      "query_tokens": [
+        "ALERTS",
+        "up"
+      ],
+      "ref_id": "B",
+      "runbook_urls": [],
+      "thresholds": [
+        {
+          "color": "text",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        }
+      ],
+      "unit": "short"
+    },
+    {
+      "coverage_class": "required_current",
+      "dashboard_uid": "bioetl-overview-v2",
+      "datasource_type": "prometheus",
+      "documents_backend_down": false,
+      "documents_valid_empty": false,
+      "empty_state": "coverage_gap",
+      "formula": "label_replace((max((time()-max by(pipeline,entity)(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}>0))>=0)<=86400),\"freshness\",\"Within 24h (observed only)\",\"\",\"\")",
+      "kind": "promql",
+      "panel_id": 9606,
+      "panel_title": "Review Processing Anchor Age \u00b7 24h / 72h",
+      "query": "label_replace((max((time()-max by(pipeline,entity)(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}>0))>=0)<=86400),\"freshness\",\"Within 24h (observed only)\",\"\",\"\")",
+      "query_tokens": [
+        "bioetl_data_freshness_seconds"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [
+        {
+          "color": "text",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 86400.000001
+        },
+        {
+          "color": "red",
+          "value": 259200.000001
+        }
+      ],
+      "unit": "s"
+    },
+    {
+      "coverage_class": "required_current",
+      "dashboard_uid": "bioetl-overview-v2",
+      "datasource_type": "prometheus",
+      "documents_backend_down": false,
+      "documents_valid_empty": false,
+      "empty_state": "coverage_gap",
+      "formula": "label_replace((max((time()-max by(pipeline,entity)(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}>0))>=0)>86400<=259200),\"freshness\",\"STALE 24-72h (observed)\",\"\",\"\")",
+      "kind": "promql",
+      "panel_id": 9606,
+      "panel_title": "Review Processing Anchor Age \u00b7 24h / 72h",
+      "query": "label_replace((max((time()-max by(pipeline,entity)(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}>0))>=0)>86400<=259200),\"freshness\",\"STALE 24-72h (observed)\",\"\",\"\")",
+      "query_tokens": [
+        "bioetl_data_freshness_seconds"
+      ],
+      "ref_id": "B",
+      "runbook_urls": [],
+      "thresholds": [
+        {
+          "color": "text",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 86400.000001
+        },
+        {
+          "color": "red",
+          "value": 259200.000001
+        }
+      ],
+      "unit": "s"
+    },
+    {
+      "coverage_class": "required_current",
+      "dashboard_uid": "bioetl-overview-v2",
+      "datasource_type": "prometheus",
+      "documents_backend_down": false,
+      "documents_valid_empty": false,
+      "empty_state": "coverage_gap",
+      "formula": "label_replace((max((time()-max by(pipeline,entity)(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}>0))>=0)>259200),\"freshness\",\"STALE >72h (observed)\",\"\",\"\")",
+      "kind": "promql",
+      "panel_id": 9606,
+      "panel_title": "Review Processing Anchor Age \u00b7 24h / 72h",
+      "query": "label_replace((max((time()-max by(pipeline,entity)(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}>0))>=0)>259200),\"freshness\",\"STALE >72h (observed)\",\"\",\"\")",
+      "query_tokens": [
+        "bioetl_data_freshness_seconds"
+      ],
+      "ref_id": "C",
+      "runbook_urls": [],
+      "thresholds": [
+        {
+          "color": "text",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 86400.000001
+        },
+        {
+          "color": "red",
+          "value": 259200.000001
+        }
+      ],
+      "unit": "s"
+    },
+    {
       "coverage_class": "required_current",
       "dashboard_uid": "bioetl-overview-v2",
       "datasource_type": "prometheus",
@@ -3801,8 +4020,8 @@
       "formula": "",
       "kind": "http",
       "panel_id": 3010,
-      "panel_title": "Inspect Recent Runs (last 10)",
-      "query": "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=10&run_id=${run_id}&view=recent&workflow=${workflow}&run_type=${run_type:csv}&lookup_run_id=${lookup_run_id:percentencode}",
+      "panel_title": "Inspect Recent Runs (last 20)",
+      "query": "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=20&run_id=${run_id}&view=recent&workflow=${workflow}&run_type=${run_type:csv}&lookup_run_id=${lookup_run_id:percentencode}",
       "query_tokens": [
         "/ops/observability/pipeline-run-reports",
         "pipeline",

@@ -5,6 +5,9 @@ from __future__ import annotations
 from typing import Any
 
 from copy import deepcopy
+from pathlib import Path
+
+import yaml
 
 from scripts.ops.observability.grafana.dashboard_context_links import DASHBOARD_TITLES
 
@@ -219,7 +222,8 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
     _apply_run_explorer_templating(payload)
     panels = {panel["id"]: panel for panel in payload["panels"]}
     # Reserve three rows for both the navigation and scope banner side by side.
-    # Keeping them stacked would push the 13-row table beyond its first window.
+    # The catalog intentionally continues down the page; its grid must fit all
+    # twenty native 36px rows, not force an inner scrollbar or smaller text.
     if nav := panels.get(1000):
         nav["gridPos"].update(x=0, y=0, w=16, h=3)
         panels[1]["gridPos"].update(x=16, y=0, w=8, h=3)
@@ -233,14 +237,25 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
         "var-workflow=.*&amp;var-pipeline=.*&amp;var-run_type=.*"
         '&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}">'
         "<strong>Reset filters</strong></a><br>"
-        "Last 10 launches · independent of the time range"
+        "Last 20 launches · independent of the time range"
         "</div>"
     )
     panel = panels[3010]
-    panel["gridPos"].update(y=3, h=13)
+    catalog = yaml.safe_load(
+        (
+            Path(__file__).resolve().parents[4]
+            / "docs/03-guides/dashboards/contracts/run-explorer-http-catalog.yaml"
+        ).read_text(encoding="utf-8")
+    )
+    recent = next(item for item in catalog["panels"] if item["id"] == 3010)
+    panel["title"] = recent["title"]
+    panel["targets"][0]["url"] = recent["url"]
+    panel["gridPos"].update(y=3, h=30)
     panel["description"] = (
         "GLOBAL · BROWSE the launch catalog filtered by Workflow/Pipeline/Run Type. "
-        "Last 10 launches, newest Started first, independent of the time range. "
+        "Last 20 launches, newest Started first, independent of the time range. "
+        "All twenty rows fit the wide table without pagination or internal scrolling; "
+        "scroll the page to see the complete catalog. "
         "Workflow and Pipeline open passports. Run ID opens the persisted Report. "
         "Pipeline shows the entity component beside Provider; the full canonical "
         "pipeline is retained for tooltips and every handoff. "
@@ -303,7 +318,7 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
                 },
             },
         },
-        {"id": "limit", "options": {"limitField": 10}},
+        {"id": "limit", "options": {"limitField": 20}},
     ]
     defaults = panel["fieldConfig"]["defaults"]
     defaults.update(
@@ -554,7 +569,7 @@ def _apply_run_explorer_templating(payload: dict[str, Any]) -> None:
     )
     variables["lookup_run_id"]["description"] = (
         "Exact UUID within the current Workflow/Pipeline/Run Type, including "
-        "launches older than the latest ten. Does not replace Selected Run until "
+        "launches older than the latest twenty. Does not replace Selected Run until "
         "a matching row is found. Clear to browse recent launches."
     )
     provider = variables.get("provider_for_pipeline")

@@ -35,6 +35,45 @@ def enable_adaptive_catalog(dashboard: dict[str, Any]) -> None:
         viewMode="runs",
         compactFields=["Provider", "Pipeline", "Run ID", "Overview"],
     )
+    overrides = panel.get("fieldConfig", {}).get("overrides", [])
+    run_id = next(
+        (item for item in overrides if item.get("matcher", {}).get("options") == "Run ID"),
+        {},
+    )
+    actions = next(
+        (prop["value"] for prop in run_id.get("properties", []) if prop["id"] == "links"),
+        [],
+    )
+    # Native compact tables move hidden-column actions into the Run ID menu.
+    # Restoring a wide column must restore its row-bound action as well, while
+    # retaining that menu for the narrow view and full details.
+    restored_actions = {"Workflow": "Workflow passport", "Data Quality": "Data Quality"}
+    for override in panel.get("fieldConfig", {}).get("overrides", []):
+        name = override.get("matcher", {}).get("options")
+        if name in restored_actions:
+            for prop in override.get("properties", []):
+                if prop["id"] == "links":
+                    prop["value"] = deepcopy(
+                        [action for action in actions if action.get("title") == restored_actions[name]]
+                    )
+        if override.get("matcher", {}).get("options") in {
+            "Workflow",
+            "Duration",
+            "Replay Readiness",
+            "Data Quality",
+        }:
+            for prop in override.get("properties", []):
+                if prop.get("id") == "custom.hidden":
+                    prop["value"] = False
+    if "description" in panel:
+        panel["description"] = panel["description"].replace(
+            "Compact view: Pipeline, Run ID, Started, Overview and Replay Readiness. "
+            "Workflow, Provider, Duration, Saved Evidence and Data Quality remain "
+            "in the table data inspector.",
+            "Wide table: Workflow, Pipeline, Run ID, Started, Duration, Overview, "
+            "Data Quality and Replay Readiness. Compact view: Provider, Pipeline, "
+            "Run ID and Overview. Details retains all fields.",
+        )
 
 
 def _translate_label_text(item: str) -> str:
@@ -83,7 +122,7 @@ def _set_wrap(properties: list[dict[str, Any]], *, enabled: bool) -> None:
 
 
 def _stamp_run_explorer_wrap(panel: dict[str, Any]) -> None:
-    """Keep ten native rows stable; full identity stays available in Inspect."""
+    """Keep twenty native rows stable; full identity stays available in Inspect."""
     panel["options"].setdefault("footer", {})["enablePagination"] = False
     custom = panel["fieldConfig"]["defaults"]["custom"]
     custom.update(
@@ -202,7 +241,9 @@ def _expand_coverage_row(row: dict[str, Any]) -> tuple[int, int]:
     for panel in children:
         if panel.get("id") in {9102, 9491}:
             panel["gridPos"]["h"] = max(8, panel["gridPos"]["h"])
-            panel["options"]["orientation"] = "vertical"
+            # Grafana stacks named series when BigValue is horizontal (label
+            # left, value right). Vertical puts five narrow values side by side.
+            panel["options"]["orientation"] = "horizontal"
     new_bottom = max(
         (p["gridPos"]["y"] + p["gridPos"]["h"] for p in children),
         default=old_bottom,
@@ -216,6 +257,19 @@ def _expand_coverage_row(row: dict[str, Any]) -> tuple[int, int]:
 def stamp_audit_presentation(dashboard: dict[str, Any]) -> None:
     """Keep cached-provider explanations and long verdicts readable."""
     _translate_audit_labels(dashboard)
+    if dashboard.get("uid") == "bioetl-run-explorer-v1":
+        for item in [dashboard, *dashboard.get("panels", [])]:
+            if "description" in item:
+                item["description"] = item["description"].replace(
+                    "latest 10 launches", "latest 20 launches"
+                )
+    if dashboard.get("refresh") in {"60s", "1m"}:
+        dashboard["refresh"] = "1m"
+        old_note = " Saved refresh is 60s; Grafana suspends automatic refresh for an absolute time range. CURRENT managed panels use their own clock."
+        refresh_note = " Saved refresh is 1m (60 seconds), matching the refresh selector. CURRENT managed panels use their own clock."
+        description = dashboard.get("description", "").replace(old_note, "")
+        if refresh_note not in description:
+            dashboard["description"] = description + refresh_note
     if dashboard.get("uid") == "bioetl-incident-v1":
         _fit_coverage_stats(dashboard)
     for panel in dashboard.get("panels", []):
@@ -337,11 +391,19 @@ def _adapt_incident(dashboard: dict) -> None:
         return
     suspects["gridPos"].update(x=0, y=7, w=12, h=8)
     alerts["gridPos"].update(x=12, y=7, w=12, h=8)
-    suspects["type"] = "bioetl-selectorshell-panel"
-    suspects["options"].update(
-        viewMode="rows",
-        compactFields=["Rank", "Severity", "Cause verification", "Signal", "Object"],
-    )
+    fields = [
+        "Rank",
+        "Diagnostic priority",
+        "Cause verification",
+        "Event freshness",
+        "Signal",
+        "Object",
+    ]
+    if suspects["options"].get("viewMode") == "current":
+        suspects["options"]["currentView"]["compactFields"] = fields
+    else:
+        suspects["type"] = "bioetl-selectorshell-panel"
+        suspects["options"].update(viewMode="rows", compactFields=fields)
     alerts["options"]["currentView"]["compactFields"] = [
         "Severity",
         "Alert",
@@ -350,16 +412,10 @@ def _adapt_incident(dashboard: dict) -> None:
     ]
 
 
-def _adapt_overview(dashboard: dict) -> None:
-    # Keep the main answer first when Grafana stacks columns at 200%.
-    panels = {panel["id"]: panel for panel in dashboard["panels"]}
-    for panel_id in (9604, 9603, 9300):
-        panels[panel_id]["gridPos"].update(x=0, w=10)
-    for panel_id in (99, 9002):
-        panels[panel_id]["gridPos"].update(x=10, w=14)
-    panels[9604]["gridPos"]["h"] = 2
-    panels[9603]["gridPos"].update(y=4, h=4)
-    panels[9300]["gridPos"]["y"] = 8
+def _adapt_overview(_dashboard: dict) -> None:
+    # Canonical geometry now puts the saved answer first in both profiles,
+    # alongside separately scoped current-alert and ingestion-age indicators.
+    return
 
 
 def project_adaptive_dashboard(source: dict) -> dict:

@@ -46,6 +46,58 @@ def _bind_status_cache(host: MagicMock) -> MagicMock:
     return host
 
 
+@pytest.mark.parametrize("run_id", ["-", "", "All", "$__all", "__all", "*"])
+async def test_exact_workspace_never_uses_auto_cache_or_catalog(run_id):
+    host = _bind_status_cache(MagicMock())
+    host._read_required_param.side_effect = lambda q, key: q[key]
+    host._read_optional_param.side_effect = lambda q, key: q.get(key)
+    host._send_payload_response = AsyncMock()
+    host._selected_run_status_cache.read = AsyncMock()
+    await handle_selected_run_status(
+        host,
+        MagicMock(),
+        {"pipeline": ".*", "run_id": run_id, "require_exact_run": "1"},
+    )
+    payload = host._send_payload_response.call_args.args[2]
+    assert payload["verdict"] == "SELECT RUN"
+    assert payload["replay_readiness"][0]["verdict"] == "SELECT RUN"
+    assert not any(row["result"] == "pass" for row in payload["replay_checks"])
+    host._selected_run_status_cache.read.assert_not_called()
+    host._run_manifest_port.list_all.assert_not_called()
+
+
+async def test_auto_and_explicit_selection_remain_distinct_with_a_warm_cache(
+    monkeypatch,
+):
+    import bioetl.interfaces.http.selected_run_status as selected
+
+    host = _bind_status_cache(MagicMock())
+    host._read_required_param.side_effect = lambda q, key: q[key]
+    host._read_optional_param.side_effect = lambda q, key: q.get(key)
+    host._send_payload_response = AsyncMock()
+    host._forensic_endpoint_limiter = asyncio.Semaphore(2)
+    monkeypatch.setattr(selected, "_resolve_a2_run_id", lambda *a, **k: "run-a")
+    monkeypatch.setattr(
+        selected,
+        "_load_selected_with_live_fallback",
+        lambda *a, **k: {"verdict": "OK", "run_id": "run-a"},
+    )
+    for query, expected in [
+        ({"run_id": "-"}, "OK"),
+        ({"run_id": "-", "require_exact_run": "1"}, "SELECT RUN"),
+        ({"run_id": "run-a", "require_exact_run": "1"}, "OK"),
+        ({"run_id": "-"}, "OK"),
+    ]:
+        await handle_selected_run_status(host, MagicMock(), {"pipeline": ".*", **query})
+        payload = host._send_payload_response.call_args.args[2]
+        assert payload["verdict"] == expected
+        if expected == "OK":
+            assert payload["status_cache"]["state"] == "fresh"
+            assert payload["status_cache"]["fresh_seconds"] == 30
+            assert payload["status_cache"]["maximum_age_seconds"] == 90
+    await host._selected_run_status_cache.close()
+
+
 @pytest.mark.parametrize(
     "reasons,count", [("", 0), ("missing_archive\n\nmissing_lineage", 2)]
 )
@@ -263,6 +315,8 @@ async def test_http_ignores_time_and_range(tmp_path, monkeypatch, age, chart_ran
     }
     await handle_selected_run_status(host, MagicMock(), query)
     payload = host._send_payload_response.call_args.args[2]
+    metadata = payload.pop("status_cache")
+    assert metadata["state"] == "fresh" and metadata["age_seconds"] >= 0
     assert payload == read(tmp_path)
     assert payload["verdict"] == "OK"
     assert payload["replay_readiness_now"] == "INSUFFICIENT"
@@ -757,7 +811,9 @@ async def test_current_telemetry_is_not_consulted(tmp_path, monkeypatch, current
     await handle_selected_run_status(
         host, MagicMock(), {"pipeline": "chembl_activity", "run_id": "run-a"}
     )
-    assert host._send_payload_response.call_args.args[2] == read(tmp_path)
+    payload = host._send_payload_response.call_args.args[2]
+    assert payload.pop("status_cache")["state"] == "fresh"
+    assert payload == read(tmp_path)
     host._run_manifest_port.get_by_run_id.assert_not_called()
     host._run_ledger_port.list_entries_by_run_id.assert_not_called()
 

@@ -144,7 +144,7 @@ def test_compact_view_keeps_ten_data_fields_and_every_handoff():
             for t in panel["transformations"]
             if t["id"] == "limit"
         )
-        == 10
+        == 20
     )
 
 

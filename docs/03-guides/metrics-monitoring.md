@@ -72,6 +72,33 @@ BioETL предоставляет комплексную систему observab
   сохраняет стабильный нейтральный fallback (`trace_ids: []`,
   `trace_identifiers_available: False`).
 
+### Clock provenance for retained stage snapshots
+
+`bioetl_stage_lag_seconds` is elapsed run time at the terminal flow projection,
+assigned to a stage only when its backlog is positive. It is not the age of the
+oldest input record and does not keep increasing while retained in Pushgateway.
+Ingestion backlog is `max(records_fetched - records_bronze, 0)`; output backlog
+is `max(records_silver - records_gold - records_gold_excluded_by_contract, 0)`.
+
+`bioetl_stage_snapshot_observed_timestamp_seconds` records the application clock
+of that same projection, with only `pipeline`, `run_type`, and bounded `stage`
+labels. Zero is an invalid-clock sentinel. Rehydrating a report must not create
+this clock from report completion, file modification or reader startup time.
+Older retained groups without the metric remain unverified. `push_time_seconds`
+for the exact `job=bioetl` / pipeline / run type identifies publication to the
+gateway; a newer backfill publication cannot date an incremental snapshot.
+Neither clock establishes the provider's input-record event time or the producing
+run identity. Use the supported run-report and ledger detail surfaces when that
+evidence exists; do not add run IDs to metric labels.
+
+Despite its historical name, `bioetl_data_freshness_seconds` contains a Unix
+run-start processing anchor emitted by successful DQ evaluation. The processing
+anchor age and its existing 24h/72h alert bounds do not certify provider event
+freshness, completion time, complete entity coverage or current run liveness.
+Do not associate this entity-level anchor with another run type's retained stage
+snapshot. Grafana's Stage Snapshot Clocks distinguishes these clocks and keeps
+missing, invalid and future timestamps UNKNOWN.
+
 #### Observability verification QA
 
 Используйте `report-observability-metric-inventory` как canonical QA surface

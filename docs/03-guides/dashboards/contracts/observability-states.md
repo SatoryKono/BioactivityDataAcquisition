@@ -74,3 +74,78 @@ browser click, server cache load or catalog freshness. A refreshed query
 re-evaluates the displayed context. Empty
 catalogs say NO RUN; resolution failure says Context unavailable. Neither
 context provenance nor the dashboard time range proves saved-run health.
+
+
+## Portfolio status vocabulary and evidence clocks
+
+The active portfolio uses the five stable UIDs in dashboard-inventory.yaml.
+The dashboard-2.0 tag identifies the shared presentation contract; UID suffixes
+are compatibility identifiers, not competing data or presentation generations.
+The role-specific selector registry remains selector-contracts.yaml. A local
+lookup or diagnostic selector is not implicitly a filter on every panel.
+
+Overview separates the saved assessment from CURRENT fleet alert counts and
+CURRENT ingestion age. FIRING and PENDING counts include every active BioETL
+alert, independently of run selectors; zero active alerts is not pipeline OK.
+The ingestion-age card follows the visible Pipeline filter, uses the oldest
+observed successful-ingestion timestamp after max-per-pipeline/entity source
+deduplication. STALE >24h is warning and >72h is critical, matching
+BioETLDataFreshnessLagHigh/Critical; both alerts additionally need 15m pending.
+Entities with missing, invalid or future timestamps remain unverified; an empty
+valid set is UNKNOWN. Partial observed coverage never proves completeness.
+Workflow publication uses its
+separate, existing 24h display threshold. Cache TTL is neither of these clocks.
+
+Run Context displays the saved assessment timestamp and elapsed age alongside
+the read clock. It does not display a green cache state as evidence freshness.
+There is no inferred freshness SLA for the saved run or a skipped provider
+probe. Provider Check shows why a probe was skipped and marks its observation
+time N/A instead of substituting run completion.
+
+Incident's first ranked answer and alert list use CURRENT query time, even
+when the dashboard range is historical. All returned rows remain reachable;
+pagination bounds only the viewport. The heading states the returned row count.
+Diagnostic priority HIGH=2 / ELEVATED=1 is a diagnostic rank, distinct from Prometheus alert severity,
+cause verification and event freshness. Missing event timestamps remain Not
+verified. Fleet empty values say UNKNOWN / no samples and link to coverage
+details; no absent telemetry is repaired by a healthy zero.
+
+Monitor Telemetry (907), Monitor Ledger (893) and Review Stage Progress (2460)
+use CURRENT clocks for their fixed-window diagnostics. A historical dashboard
+date must not turn today's telemetry warning into UNKNOWN. The ledger-appends
+chart (8807) remains TIME RANGE and retains its selected rate interval.
+Review Stage Progress retains every observed pipeline/run-type/stage group;
+pagination limits the viewport rather than dropping all but three groups.
+Lag is sorted descending so the observed largest lag is visible first.
+
+Inspect Global Signal Measurements (22011) uses the same CURRENT clock as the
+ranked answer; its fixed 15m lag operand does not use a historical dashboard end.
+HIGH does not mean a critical Prometheus alert or a verified cause. The active
+alert list retains its own severity and pending/firing state. Neither evaluation
+time nor a retained Pushgateway sample supplies an event observation timestamp.
+
+| Surface | State interpretation |
+| --- | --- |
+| Saved run processing | SUCCESS/FAILED/RUNNING describe execution, independently of current alerts. |
+| Saved run assessment | OK/WARN/ERROR/INCOMPLETE describe the saved checks and their coverage. They never certify current pipeline health. |
+| Exact replay | READY requires the required exact-run checks; fail blocks readiness and an unknown required check is INSUFFICIENT. SELECT RUN requires explicit identity, and is not an AUTO assessment. |
+| Individual checks | pass/fail/unknown/n/a describe one named check, not the entire run. |
+| Provider Check | NOT PROBED means cached Bronze was used and the provider API was not called. It is neither a healthy probe nor missing evidence. |
+| Freshness | Cache FRESH/STALE is the HTTP snapshot age against the returned cache policy; it does not certify freshness of the saved assessment or a provider probe. |
+| Source or selection gaps | SELECT RUN, NO RUNS, VALID EMPTY, UNKNOWN and Source unavailable retain distinct meanings above; none is automatically OK. |
+
+Run Context shows the saved assessment timestamp separately from Context checked
+at and HTTP cache freshness. The selected-status cache is fresh for less than
+30 seconds and may serve stale snapshots for less than 90 seconds while refreshing.
+The API returns these policy bounds; presentation must not invent a different
+SLA. Since completed on Provider Evidence measures run completion age, not the
+age of a remote API probe. A cached-Bronze run has no current remote probe.
+A saved run does not expire into a failed run merely because wall time advances.
+No periodic-launch SLA is established by the dashboard refresh interval.
+Workflow publication evidence retains its separately documented 24h threshold.
+
+Saved refresh=1m (60 seconds) must match a value in timepicker.refresh_intervals.
+An unsupported literal such as 60s can leave the session timer Off even for a
+relative range. Legacy links with refresh=60s must select 1m in the refresh menu. Managed CURRENT panels
+retain their independent refresh clock; their evaluation timestamps are not
+publication timestamps. Use a relative range to check the dashboard timer.

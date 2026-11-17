@@ -161,6 +161,7 @@ Generated from the dashboard JSON. Earlier sections explain panel semantics; thi
 | 2003 | Inspect Provider Suspects | table |
 | 2004 | Inspect DQ Suspects | table |
 | 22011 | Inspect Global Signal Measurements | table |
+| 22012 | Inspect Stage Snapshot Clocks | table |
 | 2100 | Inspect Selected Run Summary | row |
 | 2101 | Review Selected Run Status | table |
 | 8809 | Observability Signals | row |

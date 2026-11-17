@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from math import isfinite
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -228,6 +229,18 @@ class _PipelineMetricsRecorderCore:
                 "run_type": run_type,
                 "stage": stage,
             },
+        )
+
+    def record_stage_snapshot_observed_at(
+        self, *, run_type: str, stage: str, observed_unix: float
+    ) -> None:
+        """Record the projection clock, never a scrape or input-record event clock."""
+        if self.metrics is None:
+            return
+        self.metrics.set_gauge(
+            "bioetl_stage_snapshot_observed_timestamp_seconds",
+            observed_unix if isfinite(observed_unix) and observed_unix > 0 else 0.0,
+            {"pipeline": self.pipeline, "run_type": run_type, "stage": stage},
         )
 
     def record_dq_disposition(

@@ -279,7 +279,7 @@ const AdaptiveTableView: React.FC<PanelProps<AdaptiveTableOptions>> = (props) =>
           width={Math.max(0, (bounds?.width ?? width) - 2)}
           height={Math.max(0, (bounds?.height ?? height) - 2)}
           fieldConfig={fieldConfig}
-          enablePagination={isPaged || options.enablePagination === true || options.footer?.enablePagination === true}
+          enablePagination={(isPaged && !isRuns) || options.enablePagination === true || options.footer?.enablePagination === true}
           cellHeight={options.cellHeight}
           noHeader={options.showHeader === false}
           sortBy={options.sortBy}

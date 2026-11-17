@@ -686,7 +686,7 @@ def test_dashboard_default_time_and_refresh_policy_by_uid_class() -> None:
         and isinstance(l2_uids, list)
     )
 
-    baseline = {"time_from": "now-12h", "refresh": "60s"}
+    baseline = {"time_from": "now-12h", "refresh": "1m"}
     explorer_baseline = {"time_from": "now-24h", "refresh": "1m"}
 
     for uid in [*l0_uids, *l1_uids]:

@@ -26,7 +26,7 @@ from bioetl.interfaces.http.recent_pipeline_runs import (
 )
 from bioetl.interfaces.http.run_report_index import _concrete_run_id
 
-DEFAULT_RECENT_LIMIT = 10
+DEFAULT_RECENT_LIMIT = 20
 RUN_EXPLORER_SNAPSHOT_INTERVAL_SECONDS = 1.0
 _REFRESH_ERRORS = (OSError, RuntimeError, TypeError, ValueError, KeyError)
 
@@ -106,8 +106,8 @@ def is_default_recent_browse(
     run_id: str | None,
     lookup_run_id: str | None,
 ) -> bool:
-    """Return True for the shipped All / All / All, run_id=- , limit=10 browse."""
-    if view != "recent" or limit != DEFAULT_RECENT_LIMIT:
+    """Match unscoped browse requests covered completely by the bounded snapshot."""
+    if view != "recent" or not 1 <= limit <= DEFAULT_RECENT_LIMIT:
         return False
     if _concrete_run_id(run_id) is not None or (lookup_run_id or "").strip():
         return False
@@ -138,7 +138,12 @@ def take_default_recent_snapshot(
         lookup_run_id=lookup_run_id,
     ):
         return None
-    return cache.materialize()
+    payload = cache.materialize()
+    items = payload.get("items") if payload is not None else None
+    if payload is not None and isinstance(items, list):
+        payload["items"] = items[:limit]
+        payload["count"] = min(limit, len(items))
+    return payload
 
 
 async def run_periodic_run_explorer_snapshot(

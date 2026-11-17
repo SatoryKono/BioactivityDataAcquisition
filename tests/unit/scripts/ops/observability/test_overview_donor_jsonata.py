@@ -41,22 +41,25 @@ def donor_payload(start, end):
     }
 
 
-def evaluate_donor(payload):
+def evaluate_donor(payload, expression=_OV_DONOR, *, offset_date_only=False):
     node = shutil.which("node")
     module = os.environ.get("JSONATA_MODULE")
     if not node or not module or not Path(module).exists():
         pytest.skip("Set JSONATA_MODULE to exercise the real JSONata engine")
     checked_clock = datetime(2026, 11, 11, 10, tzinfo=UTC)
-    script = "const fs=require('fs'); const q=JSON.parse(fs.readFileSync(0,'utf8')); const expr=require(q.module)(q.expr); expr.registerFunction('now',()=>q.now); expr.registerFunction('millis',()=>q.millis); expr.evaluate(q.payload).then(x=>process.stdout.write(JSON.stringify(x))).catch(e=>{console.error(e.message);process.exit(1)});"
+    # Reproduce the deployed Infinity backend's offset parsing quirk separately
+    # from standard JSONata; a JS-only run missed the live 18.5h-versus-7.8h bug.
+    script = "const fs=require('fs'); const q=JSON.parse(fs.readFileSync(0,'utf8')); const expr=require(q.module)(q.expr); expr.registerFunction('now',()=>q.now); expr.registerFunction('millis',()=>q.millis); if(q.offset_date_only) expr.registerFunction('toMillis',t=>Date.parse(/[+-]\\d\\d:?\\d\\d$/.test(t)?t.slice(0,10):t)); expr.evaluate(q.payload).then(x=>process.stdout.write(JSON.stringify(x))).catch(e=>{console.error(e.message);process.exit(1)});"
     result = subprocess.run(
         [node, "-e", script],
         input=json.dumps(
             {
                 "module": module,
-                "expr": _OV_DONOR.replace("${run_id:percentencode}", "-"),
+                "expr": expression.replace("${run_id:percentencode}", "-"),
                 "payload": payload,
                 "now": checked_clock.isoformat(),
                 "millis": checked_clock.timestamp() * 1000,
+                "offset_date_only": offset_date_only,
             }
         ),
         capture_output=True,
@@ -65,6 +68,97 @@ def evaluate_donor(payload):
         check=True,
     )
     return json.loads(result.stdout)
+
+
+@pytest.mark.parametrize("cache_state", ["fresh", "stale", "unavailable"])
+def test_context_separates_cache_freshness_from_saved_assessment_and_run_result(
+    cache_state,
+):
+    payload = donor_payload(None, None)
+    payload["summary"][0]["evaluation_at"] = "2026-11-11T08:00:00+00:00"
+    payload["status_cache"] = {"state": cache_state, "fresh_seconds": 30}
+    rows = evaluate_donor(payload)
+    context = next(r for r in rows if r["_bioetl_frame"] == "selection_context")
+    assert (
+        "Cache "
+        + {"fresh": "FRESH", "stale": "STALE", "unavailable": "UNKNOWN"}[cache_state]
+        in context["evidence_freshness"]
+    )
+    assert "2026-11-11 08:00 +00:00" in context["evidence_freshness"]
+    assert len(context["evidence_freshness"]) <= 90
+    assert context["execution_state"] == "UNFINISHED"
+
+
+@pytest.mark.parametrize(
+    ("saved", "seconds"),
+    [
+        (None, None),
+        ("2026-11-11T08:00:00Z", 7200),
+        ("2026-11-11T11:00:00+03:00", 7200),
+        ("2026-11-11T11:00:00Z", None),
+    ],
+)
+@pytest.mark.parametrize("offset_date_only", [False, True])
+def test_saved_assessment_age_uses_its_clock_not_reader_cache(
+    saved, seconds, offset_date_only
+):
+    payload = donor_payload(None, None)
+    payload["summary"][0]["evaluation_at"] = saved
+    payload["status_cache"] = {"state": "fresh", "fresh_seconds": 30}
+    rows = evaluate_donor(payload, offset_date_only=offset_date_only)
+    context = next(row for row in rows if row["_bioetl_frame"] == "selection_context")
+    assert context.get("saved_assessment_at") == saved
+    assert context["assessment_age_seconds"] == seconds
+
+
+def test_cached_bronze_note_does_not_invent_a_probe_time_from_completion():
+    payload = donor_payload("2026-11-11T07:00:00Z", "2026-11-11T08:00:00Z")
+    payload["presentation_domains"] = [
+        {"domain": "Provider", "reason": "cached_bronze_no_remote_probe"}
+    ]
+    row = next(
+        row for row in evaluate_donor(payload) if row["_bioetl_frame"] == "provider"
+    )
+    assert (
+        row["provider_check_note"]
+        == "Cached Bronze; API not called. Probe time: N/A (not performed)."
+    )
+    assert "08:00" not in row["provider_check_note"]
+
+
+def test_replay_evidence_collapses_unselected_anchors_without_inventing_a_pass():
+    from scripts.ops.observability.grafana._replay_layout import apply_replay_layout
+
+    dashboard = json.loads(
+        Path("grafana/dashboards/bioetl-control-plane-v1.json").read_text()
+    )
+    apply_replay_layout(dashboard)
+    target = next(p for p in dashboard["panels"] if p["id"] == 9408)["targets"][0]
+    expression = target["uql"].removeprefix('parse-json | jsonata "')[:-1]
+    anchors = [{"label": "Config", "present": True, "status": "PRESENT"}]
+    rows = evaluate_donor(
+        {"summary": {"overall_status": "SELECT RUN"}, "rows": anchors * 44}, expression
+    )
+    assert len(rows) == 1
+    assert rows[0]["status"] == "SELECT RUN" and rows[0]["present"] is False
+    selected = evaluate_donor(
+        {"summary": {"overall_status": "OK"}, "rows": anchors}, expression
+    )
+    assert selected == anchors
+
+
+@pytest.mark.parametrize("state", ["SELECT RUN", "NO RUNS", "QUERY ERROR"])
+def test_full_replay_donor_preserves_gap_and_error_frames_with_null_reason_count(state):
+    from bioetl.interfaces.http.selected_run_status import unavailable_status
+    from scripts.ops.observability.grafana.apply_phase25_srs_prr_budget import _CP_DONOR
+
+    payload = unavailable_status(".*", "-", state, "exact_run_required")
+    rows = evaluate_donor(payload, _CP_DONOR)
+    readiness = next(row for row in rows if row["_bioetl_frame"] == "replay_readiness")
+    trust = next(row for row in rows if row["_bioetl_frame"] == "trust")
+    assert readiness["verdict"] == state
+    assert trust["trust_status"] == state
+    assert trust["trust_action_note"] == "Not assessed"
 
 
 @pytest.mark.parametrize(
@@ -119,6 +213,26 @@ def test_full_donor_empty_catalog_keeps_explained_context():
     rows = evaluate_donor(payload)
     context = next(r for r in rows if r["_bioetl_frame"] == "selection_context")
     assert context["context"] == "NO RUN · empty scope"
+
+
+@pytest.mark.parametrize(
+    "limits,expected",
+    [
+        (None, "Limits unavailable; check config"),
+        (0.05, "Accounting incomplete; inspect stages"),
+    ],
+)
+def test_unknown_exclusions_explain_the_gap_instead_of_inventing_zero(limits, expected):
+    payload = donor_payload(None, None)
+    payload.update(
+        contract_exclusions_status="UNKNOWN",
+        contract_exclusions_soft_limit=limits,
+        contract_exclusions_hard_limit=limits,
+    )
+    rows = evaluate_donor(payload)
+    exclusions = next(row for row in rows if row["_bioetl_frame"] == "exclusions")
+    assert exclusions["status"] == "UNKNOWN"
+    assert exclusions["detail"] == expected
 
 
 def test_long_reason_preview_preserves_the_complete_saved_explanation():
@@ -186,3 +300,34 @@ def test_domain_provider_reason_alias_precedes_bounded_preview():
     assert domain["verdict"] == "WARN"
     assert domain["reason_display"] == reason
     assert domain["run_reason"] == "Provider: " + reason
+
+
+@pytest.mark.parametrize("reason", ["workflow_failed", "Parent workflow failed"])
+def test_workflow_failure_is_readable_without_changing_the_error_verdict(reason):
+    payload = donor_payload(None, None)
+    payload["presentation_summary"][0].update(
+        verdict="ERROR", execution_state="SUCCESS"
+    )
+    payload["presentation_domains"] = [
+        {
+            "domain": "Workflow",
+            "verdict": "ERROR",
+            "reason": "workflow_failed",
+            "reason_display": reason,
+        }
+    ]
+    payload["reconciliation_display"] = [
+        {
+            "step_id": "reconcile_assay_target",
+            "result": "FAILED",
+            "meaning": "ValueError: 433 unmatched source rows; mutation blocked",
+        }
+    ]
+    rows = evaluate_donor(payload)
+    domain = next(row for row in rows if row["_bioetl_frame"] == "domains")
+    failure = next(row for row in rows if row["_bioetl_frame"] == "reconciliation")
+    assert domain["run_reason_brief"] == "Workflow failed"
+    assert domain["run_verdict"] == "ERROR"
+    assert domain["execution_state"] == "SUCCESS"
+    assert failure["step_id"] == "reconcile_assay_target"
+    assert failure["meaning"] == payload["reconciliation_display"][0]["meaning"]

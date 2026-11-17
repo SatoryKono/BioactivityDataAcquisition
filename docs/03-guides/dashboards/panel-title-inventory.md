@@ -50,6 +50,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-incident-v1.json | 2003 | Inspect Provider Suspects |
 | bioetl-incident-v1.json | 2004 | Inspect DQ Suspects |
 | bioetl-incident-v1.json | 22011 | Inspect Global Signal Measurements |
+| bioetl-incident-v1.json | 22012 | Inspect Stage Snapshot Clocks |
 | bioetl-incident-v1.json | 2100 | Inspect Selected Run Summary |
 | bioetl-incident-v1.json | 2101 | Review Selected Run Status |
 | bioetl-incident-v1.json | 8809 | Observability Signals |
@@ -139,11 +140,13 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-incident-v1.json | 9460 | Inspect Selected Run Stages |
 | bioetl-incident-v1.json | 9452 | Inspect Selected Run Identity |
 | bioetl-overview-v2.json | 1000 | Navigate Dashboards |
-| bioetl-overview-v2.json | 99 | Review Run Context |
-| bioetl-overview-v2.json | 9604 | Review Overall Verdict |
-| bioetl-overview-v2.json | 9002 | Review Run Domains |
+| bioetl-overview-v2.json | 9604 | Review Saved Run Verdict |
+| bioetl-overview-v2.json | 9605 | Review Current Fleet Alerts |
+| bioetl-overview-v2.json | 9606 | Review Processing Anchor Age · 24h / 72h |
 | bioetl-overview-v2.json | 9603 | Review Selected Run Status |
+| bioetl-overview-v2.json | 99 | Review Run Context |
 | bioetl-overview-v2.json | 9300 | Review Run Identity |
+| bioetl-overview-v2.json | 9002 | Review Run Domains |
 | bioetl-overview-v2.json | 2005 | Monitor Global Alerts |
 | bioetl-overview-v2.json | 9480 | Review Provider Evidence |
 | bioetl-overview-v2.json | 9481 | Review Provider Check |
@@ -154,4 +157,4 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-overview-v2.json | 22005 | Monitor Global Alerts (Full) |
 | bioetl-run-explorer-v1.json | 1000 | Navigate Dashboards |
 | bioetl-run-explorer-v1.json | 1 | Understand Run Scope |
-| bioetl-run-explorer-v1.json | 3010 | Inspect Recent Runs (last 10) |
+| bioetl-run-explorer-v1.json | 3010 | Inspect Recent Runs (last 20) |

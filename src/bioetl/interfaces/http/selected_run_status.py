@@ -60,6 +60,10 @@ from bioetl.interfaces.http._selected_run_report_assessment import (
     _saved_trust,
     _selected_pipeline,
 )
+from bioetl.interfaces.http._selected_run_status_cache import (
+    FRESH_SECONDS,
+    MAX_AGE_SECONDS,
+)
 from bioetl.interfaces.http._selected_run_unavailable import (
     manifest_port_for_context,
     resolve_selected_run,
@@ -368,6 +372,15 @@ async def handle_selected_run_status(
     """
     pipeline = host._read_required_param(query, "pipeline")
     requested_run_id = host._read_optional_param(query, "run_id") or "-"
+    # Exact-run workspaces must not borrow an AUTO assessment from another run.
+    # Return before the shared AUTO cache: selection state performs no I/O.
+    if query.get("require_exact_run") == "1" and is_unresolved_run_id(requested_run_id):
+        await host._send_payload_response(
+            writer,
+            200,
+            unavailable_status(pipeline, "-", "SELECT RUN", "exact_run_required"),
+        )
+        return
 
     def load() -> dict[str, object]:
         run_id = requested_run_id
@@ -399,6 +412,11 @@ async def handle_selected_run_status(
 
     try:
         payload = await host._selected_run_status_cache.read(query, cached_load)
+        payload["status_cache"] = {
+            **host._selected_run_status_cache.status(query),
+            "fresh_seconds": FRESH_SECONDS,
+            "maximum_age_seconds": MAX_AGE_SECONDS,
+        }
     except ForensicEndpointUnavailable as exc:
         payload = unavailable_status(
             pipeline, requested_run_id, _QUERY_ERROR, exc.reason

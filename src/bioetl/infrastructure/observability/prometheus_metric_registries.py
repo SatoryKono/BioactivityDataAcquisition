@@ -120,6 +120,7 @@ PIPELINE_RUNTIME_REGISTRY = MetricRegistryFamily(
         "bioetl_pipeline_stage_expected": _metrics.PIPELINE_STAGE_EXPECTED,
         "bioetl_stage_backlog_records": _metrics.STAGE_BACKLOG_RECORDS,
         "bioetl_stage_lag_seconds": _metrics.STAGE_LAG_SECONDS,
+        "bioetl_stage_snapshot_observed_timestamp_seconds": _metrics.STAGE_SNAPSHOT_OBSERVED_TIMESTAMP_SECONDS,
         "bioetl_checkpoint_saved_at_seconds": _metrics.CHECKPOINT_SAVED_AT_SECONDS,
         "bioetl_replay_lag_seconds": _metrics.REPLAY_LAG_SECONDS,
         "bioetl_manifest_ledger_integrity_ratio": (

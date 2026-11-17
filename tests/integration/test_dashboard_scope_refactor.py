@@ -173,11 +173,11 @@ def test_first_window_coverage_set_range_and_refresh_copy() -> None:
     for path in get_dashboard_files():
         dashboard = _load(path)
         blob = _first_window_blob(dashboard)
-        assert dashboard["refresh"] == "60s", path.name
+        assert dashboard["refresh"] == "1m", path.name
         assert dashboard["timezone"] == "browser", path.name
         if path.stem == "bioetl-run-explorer-v1":
             assert "independent of the time range" in blob
-            assert "Last 10 launches" in blob
+            assert "Last 20 launches" in blob
         elif path.stem == "bioetl-incident-v1":
             assert "CURRENT" in blob
             assert "Run ID does not filter this card" in blob
@@ -325,7 +325,7 @@ def test_run_explorer_selects_rows_without_removed_detail_groups() -> None:
     ):
         assert token in link["url"]
     assert browse["options"]["footer"]["enablePagination"] is False
-    assert {"id": "limit", "options": {"limitField": 10}} in browse["transformations"]
+    assert {"id": "limit", "options": {"limitField": 20}} in browse["transformations"]
     assert browse["options"]["cellHeight"] == "sm"
     banner = next(p for p in roots if p["id"] == 1)
     assert "Reset filters" in banner["options"]["content"]

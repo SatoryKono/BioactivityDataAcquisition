@@ -5,6 +5,7 @@ from __future__ import annotations
 _RUN_NOT_FOUND = "Run not found"
 
 REASON_ALIASES: dict[str, str] = {
+    "workflow_failed": "Parent workflow failed",
     "no_gold_candidates": "No Gold candidates",
     "run_observation_missing": "Result not recorded",
     "archive_evidence_not_recorded": "Archive missing",

@@ -109,14 +109,16 @@ Generated from the dashboard JSON. Earlier sections explain panel semantics; thi
 
 | ID | Title | Type |
 | --- | --- | --- |
-| 99 | Review Run Context | table |
-| 9604 | Review Overall Verdict | stat |
-| 9002 | Review Run Domains | table |
+| 9604 | Review Saved Run Verdict | stat |
+| 9605 | Review Current Fleet Alerts | stat |
+| 9606 | Review Processing Anchor Age · 24h / 72h | stat |
 | 9603 | Review Selected Run Status | table |
+| 99 | Review Run Context | table |
 | 9300 | Review Run Identity | table |
+| 9002 | Review Run Domains | table |
 | 2005 | Monitor Global Alerts | table |
 | 9480 | Review Provider Evidence | table |
-| 9481 | Review Provider Check | stat |
+| 9481 | Review Provider Check | canvas |
 | 9460 | Inspect Selected Run Stages | table |
 | 9482 | Review Contract Exclusions | canvas |
 | 9483 | Review FK Comparison Scope | table |

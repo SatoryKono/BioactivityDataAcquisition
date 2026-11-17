@@ -161,7 +161,7 @@ timeseries without checking whether the panel compares multiple series.
 `DASH-COPY-003` is exclusive for non-row, non-text, non-shell content panels.
 Text/row/shell titles MAY keep `Navigate` / `Understand` / `Start` / `Assess` /
 `Explain` / `Continue`. Former pending data-panel titles were renamed to
-`Inspect Recent Runs (last 10)` and `Inspect Identity Values`.
+`Inspect Recent Runs (last 20)` and `Inspect Identity Values`.
 
 ### 3.2 Description
 
@@ -571,7 +571,7 @@ Metadata MUST follow repo policy rather than mechanical suite-wide rewrites:
 - `refresh` and default `time.from` are governed by the machine-readable contract
   in `docs/03-guides/dashboards/contracts/navigation-links.yaml`.
   Operator-facing dashboards keep the L0/L1 baseline `time.from=now-12h` and
-  `refresh=60s`; `bioetl-silver-reject-explorer` is the explicit forensic
+  `refresh=1m` (60 seconds, present in `timepicker.refresh_intervals`); `bioetl-silver-reject-explorer` is the explicit forensic
   exception with `time.from=now-24h` and `refresh=1m`.
 - `schemaVersion` MUST be `42` for canonical dashboards targeting the pinned
   Grafana `12.2.5` runtime. The FK selected-snapshot browser acceptance exposed
@@ -682,3 +682,6 @@ balance displays `ERROR` with the saved verdict and delta in the explanation.
 identifies this display guard. `NO REPORTED CONFLICT` does not prove complete
 accounting when reconciliation is absent. Neither the saved report nor the
 ledger is rewritten by this read-only check.
+
+The legacy literal `refresh=60s` is not a selectable interval in the pinned
+Grafana UI; migrate saved defaults and bookmarked URLs to `refresh=1m`.

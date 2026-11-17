@@ -19,7 +19,7 @@ jest.mock('@grafana/ui', () => {
   };
 });
 jest.mock('@grafana/ui/unstable', () => ({
-  TableNG: ({ data }: { data: { fields: Array<{ name: string; config: { displayName?: string } }> } }) => <div data-testid="native-table">{data.fields.map((f) => f.config.displayName ?? f.name).join(',')}</div>,
+  TableNG: ({ data, enablePagination }: { data: { length: number; fields: Array<{ name: string; config: { displayName?: string } }> }; enablePagination?: boolean }) => <div data-testid="native-table" data-pagination={String(enablePagination)} data-row-count={data.length}>{data.fields.map((f) => f.config.displayName ?? f.name).join(',')}</div>,
 }));
 
 const ids = [
@@ -35,6 +35,30 @@ function viewport(width: number) {
 }
 
 beforeEach(() => viewport(584));
+
+it('forwards twenty runs to the wide grid without forcing pagination and retains compact access', () => {
+  const panelProps = props();
+  const frame = panelProps.data.series[0];
+  frame.length = 20;
+  frame.fields = frame.fields.map((field) => ({
+    ...field,
+    values: Array.from({ length: 20 }, (_, index) => `${field.name}-${index}`),
+    getLinks: undefined,
+  }));
+  viewport(1543);
+  const options = { ...panelProps.options, footer: { enablePagination: false } };
+  const view = render(<AdaptiveTable {...panelProps} width={1500} options={options} />);
+  expect(screen.getByTestId('native-table')).toHaveAttribute('data-row-count', '20');
+  expect(screen.getByTestId('native-table')).toHaveAttribute('data-pagination', 'false');
+  viewport(584);
+  view.rerender(<AdaptiveTable {...panelProps} width={550} options={options} />);
+  for (let index = 0; index < 19; index++) {
+    fireEvent.click(screen.getByRole('button', { name: 'Next run' }));
+  }
+  expect(screen.getByText('20 / 20')).toBeInTheDocument();
+  expect(screen.getByText('Workflow-19')).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Next run' })).toBeDisabled();
+});
 
 function props(): PanelProps<AdaptiveTableOptions> {
   const frame: DataFrame = {

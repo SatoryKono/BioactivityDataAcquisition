@@ -1913,8 +1913,8 @@ dashboards:
         title: Monitor Ledger
         role: indicator
         tier: 3
-        scope: time_range
-        scope_class: time_range
+        scope: current
+        scope_class: current
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
@@ -1957,8 +1957,8 @@ dashboards:
         title: Monitor Telemetry
         role: indicator
         tier: 3
-        scope: time_range
-        scope_class: time_range
+        scope: current
+        scope_class: current
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
@@ -2434,8 +2434,8 @@ dashboards:
         title: Compare Ledger Appends by Type & Status
         role: trend
         tier: 3
-        scope: current
-        scope_class: current
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
@@ -2925,8 +2925,8 @@ dashboards:
         tier: 3
         scope: global
         scope_class: global
-        evidence_source: grafana_builtin
-        empty_state_class: unsupported
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - VALID_EMPTY
         - UNKNOWN
@@ -2943,6 +2943,31 @@ dashboards:
         render_profiles: *id008
       '22011':
         title: Inspect Global Signal Measurements
+        role: forensic_table
+        tier: 3
+        scope: global
+        scope_class: global
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - VALID_EMPTY
+        - UNKNOWN
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles:
+        - full_dark
+        - full_light
+        - zoom_200
+      '22012':
+        title: Inspect Stage Snapshot Clocks
         role: forensic_table
         tier: 3
         scope: global
@@ -3276,7 +3301,7 @@ dashboards:
         - backend_error
         render_profiles: *id005
       '9604':
-        title: Review Overall Verdict
+        title: Review Saved Run Verdict
         role: indicator
         tier: 3
         scope: selected_run
@@ -3300,6 +3325,59 @@ dashboards:
         - ok
         - warn
         - crit
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id011
+      '9605':
+        title: Review Current Fleet Alerts
+        role: indicator
+        tier: 1
+        scope: global
+        scope_class: global
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - OK
+        - WARN
+        - CRIT
+        - UNKNOWN
+        - INCOMPLETE
+        - ERROR
+        - VALID_EMPTY
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id011
+      '9606':
+        title: Review Processing Anchor Age · 24h / 72h
+        role: freshness
+        tier: 1
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - OK
+        - WARN
+        - CRIT
+        - UNKNOWN
+        - INCOMPLETE
+        - ERROR
+        - VALID_EMPTY
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        - next_action
+        fixture_cases:
+        - populated
         - telemetry_absent
         - backend_error
         render_profiles: *id011
@@ -3376,7 +3454,7 @@ dashboards:
         - full_light
         - zoom_200
       '3010':
-        title: Inspect Recent Runs (last 10)
+        title: Inspect Recent Runs (last 20)
         role: forensic_table
         tier: 1
         scope: global

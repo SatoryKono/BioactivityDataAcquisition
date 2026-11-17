@@ -53,6 +53,36 @@ from bioetl.infrastructure.observability.prometheus_metric_registries import (
 _FORBIDDEN_LABELS = FORBIDDEN_PROMETHEUS_LABEL_NAMES
 
 
+def test_stage_projection_clock_survives_real_metric_dispatch() -> None:
+    from bioetl.application.observability.pipeline_metrics import (
+        PipelineMetricsRecorder,
+    )
+    from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
+
+    labels = {
+        "pipeline": "chembl_assay",
+        "run_type": "incremental",
+        "stage": "ingestion",
+    }
+    recorder = PipelineMetricsRecorder(PrometheusMetrics(), labels["pipeline"])
+    try:
+        recorder.record_stage_snapshot_observed_at(
+            run_type=labels["run_type"],
+            stage=labels["stage"],
+            observed_unix=1794415191.123456,
+        )
+        assert (
+            GAUGES["bioetl_stage_snapshot_observed_timestamp_seconds"]
+            .labels(**labels)
+            ._value.get()
+            == 1794415191.123456
+        )
+    finally:
+        GAUGES["bioetl_stage_snapshot_observed_timestamp_seconds"].remove(
+            *labels.values()
+        )
+
+
 def _iter_registered_metric_labels() -> list[tuple[str, set[str]]]:
     return [
         (name, set(metric._labelnames))
@@ -173,7 +203,11 @@ def test_metric_definition_exports_remain_stable() -> None:
 @pytest.mark.unit
 def test_grouped_registry_inventory_preserves_expected_size() -> None:
     # This ratchet intentionally changes only when we add/remove public metrics.
-    assert len(REGISTERED_PROMETHEUS_METRIC_NAMES) == 179
+    assert len(REGISTERED_PROMETHEUS_METRIC_NAMES) == 180
+    assert (
+        "bioetl_stage_snapshot_observed_timestamp_seconds"
+        in REGISTERED_PROMETHEUS_METRIC_NAMES
+    )
     assert "bioetl_bronze_cleanup_files_failed_total" in COUNTERS
     assert "bioetl_workflow_expected" in REGISTERED_PROMETHEUS_METRIC_NAMES
     assert set(
@@ -471,6 +505,11 @@ def test_adapter_metrics_use_bounded_label_names_only() -> None:
         "bioetl_observability_runtime_status": {"pipeline", "component", "mode"},
         "bioetl_stage_backlog_records": {"pipeline", "run_type", "stage"},
         "bioetl_stage_lag_seconds": {"pipeline", "run_type", "stage"},
+        "bioetl_stage_snapshot_observed_timestamp_seconds": {
+            "pipeline",
+            "run_type",
+            "stage",
+        },
         "bioetl_replay_lag_seconds": {
             "pipeline",
             "run_type",

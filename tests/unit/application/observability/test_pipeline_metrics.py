@@ -321,8 +321,31 @@ def test_noop_when_metrics_missing() -> None:
         stage="output",
         seconds=0.0,
     )
+    recorder.record_stage_snapshot_observed_at(
+        run_type="incremental", stage="output", observed_unix=1.0
+    )
     recorder.record_dq_disposition(
         stage="validation",
         disposition="pass",
         terminal_status="success",
+    )
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("invalid", [0.0, -1.0, float("nan"), float("inf")])
+def test_invalid_snapshot_clock_is_not_a_fresh_event(invalid) -> None:
+    metrics = MagicMock()
+    PipelineMetricsRecorder(
+        metrics, "chembl_activity"
+    ).record_stage_snapshot_observed_at(
+        run_type="incremental", stage="ingestion", observed_unix=invalid
+    )
+    metrics.set_gauge.assert_called_once_with(
+        "bioetl_stage_snapshot_observed_timestamp_seconds",
+        0.0,
+        {
+            "pipeline": "chembl_activity",
+            "run_type": "incremental",
+            "stage": "ingestion",
+        },
     )

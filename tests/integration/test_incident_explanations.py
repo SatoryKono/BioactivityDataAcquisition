@@ -39,10 +39,14 @@ def test_global_context_and_row_action_do_not_inherit_selected_history():
     )
     for pid in (2010, 22010):
         panel = panels[pid]
-        source = panel if pid == 2010 else panels[panel["targets"][0]["panelId"]]
+        source = panel
         assert "$pipeline" not in source["targets"][0]["expr"]
         if pid == 22010:
-            assert "expr" not in panel["targets"][0]
+            # The CURRENT renderer owns a query runner: the expanded table
+            # carries the same raw query rather than a dashboard-datasource
+            # donor that would inherit the historical request clock.
+            assert panel["targets"] == panels[2010]["targets"]
+            assert panel["targets"][0]["instant"] is True
         url = _properties(panel, "Action")["links"][0]["url"]
         assert "var-run_id=-" in url
         assert "var-workflow=$__all" in url

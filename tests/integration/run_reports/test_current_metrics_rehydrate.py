@@ -139,6 +139,10 @@ def test_rehydrate_seeds_provider_universe_and_stage_series(tmp_path: Path) -> N
     )
     assert result.provider_universe_seeded == 1
     assert result.stage_series_seeded == 0
+    # A report's mtime/completion is not the original stage projection clock.
+    assert "bioetl_stage_snapshot_observed_timestamp_seconds" not in {
+        c.args[0] for c in metrics.set_gauge.call_args_list
+    }
     metrics.set_gauge.assert_any_call(
         "bioetl_provider_observed_universe",
         1.0,

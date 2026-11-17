@@ -1093,7 +1093,7 @@ def _override_novalue(panel: dict[str, object], matcher: str) -> str | None:
     return None
 
 
-def test_run_explorer_index_is_disk_last_ten_not_time_range() -> None:
+def test_run_explorer_index_is_disk_last_twenty_not_time_range() -> None:
     explorer = _load("bioetl-run-explorer-v1.json")
     banner = _panel(explorer, 1)
     content = str((banner.get("options") or {}).get("content") or "")
@@ -1103,7 +1103,7 @@ def test_run_explorer_index_is_disk_last_ten_not_time_range() -> None:
     assert "independent of the time range" in description
     target_url = str((recent.get("targets") or [{}])[0].get("url") or "")
     assert "$__range" not in target_url
-    assert "limit=10" in target_url
+    assert "limit=20" in target_url
 
 
 def test_run_explorer_recent_runs_selected_column_fits_first_window() -> None:
@@ -1139,7 +1139,7 @@ def test_run_explorer_recent_runs_selected_column_fits_first_window() -> None:
         next(t for t in recent["transformations"] if t["id"] == "limit")
         .get("options", {})
         .get("limitField")
-        == 10
+        == 20
     )
 
 

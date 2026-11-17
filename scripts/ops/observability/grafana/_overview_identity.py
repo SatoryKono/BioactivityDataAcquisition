@@ -485,7 +485,7 @@ def _place_stages_and_quality(payload: dict, row: dict, stages: dict) -> None:
                     "placement": {"left": 8, "right": 8, "top": top, "height": 70},
                     "background": {"color": {"fixed": "transparent"}},
                 }
-                for field, size, top in (("status", 40, 8), ("detail", 28, 88))
+                for field, size, top in (("status", 40, 8), ("detail", 16, 88))
             ],
         },
     }
@@ -521,7 +521,7 @@ def _apply_reconciliation_evidence(payload: dict) -> None:
                 "Missing evidence is UNKNOWN and failed requests remain QUERY ERROR. "
                 "Saved Evidence and Replay Readiness retain their independent checks."
             ),
-            "gridPos": {"x": 0, "y": 29, "w": 24, "h": 12},
+            "gridPos": {"x": 0, "y": 29, "w": 24, "h": 6},
             "datasource": {
                 "type": "yesoreyeram-infinity-datasource",
                 "uid": "bioetl-ops-http",
@@ -556,7 +556,26 @@ def _apply_reconciliation_evidence(payload: dict) -> None:
                         "cellOptions": {"type": "auto", "wrapText": True},
                     },
                 },
-                "overrides": [],
+                "overrides": [
+                    {
+                        "matcher": {"id": "byName", "options": name},
+                        "properties": [{"id": CUSTOM_WIDTH, "value": width}],
+                    }
+                    for name, width in (
+                        ("Workflow step", 240),
+                        ("Mode", 100),
+                        ("Row scope", 100),
+                        ("Compared snapshots", 150),
+                        ("Limit", 80),
+                        ("Result", 90),
+                    )
+                ]
+                + [
+                    {
+                        "matcher": {"id": "byName", "options": "Interpretation"},
+                        "properties": [{"id": "custom.minWidth", "value": 360}],
+                    }
+                ],
             },
             "options": {
                 "showHeader": True,

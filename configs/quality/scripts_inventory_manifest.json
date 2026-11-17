@@ -1,10 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-15T19:33:08.580625+00:00",
+  "generated_at": "2026-11-17T06:39:07.409849+00:00",
   "summary": {
-    "total_scripts": 753,
+    "total_scripts": 755,
     "status_counts": {
-      "active": 334,
+      "active": 335,
+      "orphan": 1,
       "supporting": 417,
       "temporary_diagnostic": 2
     },
@@ -14,9 +15,9 @@
       "ci": 77,
       "docs": 300,
       "other": 27,
-      "scripts": 646,
+      "scripts": 647,
       "skills": 13,
-      "tests": 571
+      "tests": 572
     }
   },
   "scripts": [
@@ -11352,7 +11353,7 @@
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 878,
+          "line": 880,
           "source_group": "ci",
           "text": "uv run --with packaging==26.3 --no-sync --frozen --no-build python -m scripts.engineering.ci.pr_lane_results build \\"
         },
@@ -24774,7 +24775,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2897,
+          "line": 2900,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._audit_presentation import ("
         },
@@ -24883,6 +24884,21 @@
       "next_step": "Keep empty-state witness contracts internal to the live auditor and dashboard generator. This module has no standalone CLI or deployment entrypoint."
     },
     {
+      "path": "scripts/ops/observability/grafana/_evening_audit.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ops/observability/grafana/render_nav_bus.py",
+          "line": 2897,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana._evening_audit import apply_evening_audit"
+        }
+      ]
+    },
+    {
       "path": "scripts/ops/observability/grafana/_evidence_readability.py",
       "type": "py",
       "status": "supporting",
@@ -24897,13 +24913,13 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2967,
+          "line": 2970,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._evidence_readability import ("
         },
         {
           "path": "tests/integration/test_dashboard_operator_readability.py",
-          "line": 738,
+          "line": 743,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._evidence_readability import ("
         },
@@ -24952,7 +24968,7 @@
         },
         {
           "path": "tests/integration/test_dashboard_operator_readability.py",
-          "line": 742,
+          "line": 747,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._gr_db_corrections import ("
         },
@@ -25123,7 +25139,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
@@ -25135,6 +25151,12 @@
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
           "line": 2724,
           "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana._replay_layout import apply_replay_layout"
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_overview_donor_jsonata.py",
+          "line": 130,
+          "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._replay_layout import apply_replay_layout"
         }
       ],
@@ -25179,7 +25201,7 @@
       "references": [
         {
           "path": "docs/03-guides/dashboards/panels/bioetl-run-explorer-v1-panels.md",
-          "line": 72,
+          "line": 78,
           "source_group": "docs",
           "text": "`python -m scripts.ops.observability.grafana._run_explorer_columns` applies only"
         },
@@ -25271,7 +25293,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/apply_phase25_srs_prr_budget.py",
-          "line": 1680,
+          "line": 1670,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._selected_run_panels import ("
         },
@@ -25301,7 +25323,7 @@
         },
         {
           "path": "tests/integration/test_dashboard_operator_readability.py",
-          "line": 747,
+          "line": 752,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._selected_run_panels import ("
         }
@@ -25310,6 +25332,14 @@
       "lifecycle_decision": "shared_helper_module",
       "review_by": "2026-11-30",
       "next_step": "Keep as an internal transformation invoked by render_nav_bus; no standalone command or active CLI entrypoint."
+    },
+    {
+      "path": "scripts/ops/observability/grafana/_stage_source_clocks.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/ops/observability/grafana/_table_wrapping.py",
@@ -25382,7 +25412,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2902,
+          "line": 2905,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._visual_usability import ("
         }
@@ -25515,7 +25545,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 8,
       "references": [
         {
           "path": "scripts/ops/__main__.py",
@@ -25537,7 +25567,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2941,
+          "line": 2944,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.apply_phase25_srs_prr_budget import ("
         },
@@ -25558,6 +25588,12 @@
           "line": 14,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana.apply_phase25_srs_prr_budget import _OV_DONOR"
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_overview_donor_jsonata.py",
+          "line": 153,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.grafana.apply_phase25_srs_prr_budget import _CP_DONOR"
         }
       ],
       "owner": "@bioetl-platform",
@@ -25586,7 +25622,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2948,
+          "line": 2951,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.apply_phase2_remainder import ("
         },
@@ -25654,7 +25690,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2990,
+          "line": 2993,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.apply_phase4_reflow import ("
         },
@@ -25995,7 +26031,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/_run_explorer_columns.py",
-          "line": 9,
+          "line": 12,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.dashboard_context_links import DASHBOARD_TITLES"
         },
@@ -26107,7 +26143,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 3156,
+          "line": 3159,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.generate_prometheus_only_dashboards import ("
         },
@@ -26560,7 +26596,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/test_router_candidate.py",
-          "line": 12,
+          "line": 14,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana import router_candidate as candidate"
         }

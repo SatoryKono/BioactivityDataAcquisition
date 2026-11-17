@@ -702,7 +702,7 @@ def _style_provider_check(panels: list[dict]) -> None:
     review["type"] = "stat"
     review["description"] = (
         "SELECTED RUN · Saved provider check result via check_result_display. "
-        "Cached Bronze (provider API not called) shows —. Missing evidence stays "
+        "Cached Bronze (provider API not called) shows NOT PROBED. Missing evidence stays "
         "UNKNOWN. OK/WARN/CRIT color the saved check verdict, not live fleet health."
         " SELECT RUN means no Run ID is selected. VALID EMPTY means no saved "
         "provider check. Source unavailable means backend unavailable or request failure."
@@ -743,7 +743,7 @@ def _style_provider_check(panels: list[dict]) -> None:
                         "QUERY ERROR": {"text": "Source unavailable", "color": "red"},
                         "UNKNOWN": {"text": "UNKNOWN", "color": "gray"},
                         "N/A": {"text": "N/A", "color": "gray"},
-                        "—": {"text": "—", "color": "gray"},
+                        "—": {"text": "NOT PROBED", "color": "gray"},
                         "SELECT RUN": {"text": "SELECT RUN", "color": "gray"},
                         _NO_RUNS_LABEL: {
                             "text": _NO_RUNS_LABEL,

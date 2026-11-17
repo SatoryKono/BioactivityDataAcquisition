@@ -15,12 +15,12 @@
       }
     ]
   },
-  "description": "Incident Workspace — read-only triage. First screen answers the highest-confidence active suspect. Monitor Current Alerts is on the first screen; deeper alert history and impact notes sit in collapsed Review Alert Evidence. Not a lifecycle/working record.",
+  "description": "Incident Workspace — read-only triage. First screen answers the highest-confidence active suspect. Monitor Current Alerts is on the first screen; deeper alert history and impact notes sit in collapsed Review Alert Evidence. Not a lifecycle/working record. Saved refresh is 1m (60 seconds), matching the refresh selector. CURRENT managed panels use their own clock. Canonical presentation contract: dashboard-2.0; UID v1/v2 suffixes are stable compatibility identifiers. Shared selectors are Workflow, Pipeline, Run Type and Run ID; local lookup, derived selectors and diagnostic views have role-specific scope. Saved outcomes, current alert urgency, coverage and replay readiness are distinct state vocabularies.",
   "editable": true,
   "graphTooltip": 1,
   "id": null,
   "links": [],
-  "refresh": "60s",
+  "refresh": "1m",
   "schemaVersion": 42,
   "tags": [
     "bioetl",
@@ -598,7 +598,7 @@
       "id": 2010,
       "type": "table",
       "title": "Inspect Ranked Suspects",
-      "description": "GLOBAL / TIME RANGE · All pipelines; independent of selected Pipeline, Provider and Run ID. Severity is rule urgency, not cause verification. UNVERIFIED means rule triggered; cause not confirmed. All rows use the same GLOBAL scope. Recording sample time is not event time. Missing telemetry remains UNKNOWN. Action opens the domain page named on the row. Fleet charts for pipeline signals stay on this page. Summary shows up to two rows; open all rows for complete evidence.",
+      "description": "GLOBAL / CURRENT · All pipelines; independent of selected Pipeline, Provider and Run ID. Severity is rule urgency, not cause verification. UNVERIFIED means rule triggered; cause not confirmed. All rows use the same GLOBAL scope. Recording sample time is not event time. Missing telemetry remains UNKNOWN. Action opens the domain page named on the row. Fleet charts for pipeline signals stay on this page. All returned suspects remain available through pagination; the row count includes every suspect. Severity is retained even when cause and event freshness are Not verified. Diagnostic priority HIGH=2 / ELEVATED=1 is ranking, not Prometheus alert severity. Neither this rank nor FIRING verifies a cause or an event timestamp.",
       "gridPos": {
         "h": 5,
         "w": 24,
@@ -615,7 +615,7 @@
           "instant": true,
           "range": false,
           "format": "table",
-          "expr": "label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(bioetl_incident_ranked_evidence,\"object\",\"$1\",\"object\",\"(.*) / $\"),\"route_pipeline\",\".*\",\"pipeline\",\"unknown\"),\"owner\",\"BioETL Team\",\"reason\",\"infrastructure_failed\"),\"next_step\",\"Open pipeline-failure-critical.md\",\"reason\",\"infrastructure_failed\"),\"owner\",\"See runbook\",\"owner\",\"^$\"),\"next_step\",\"See runbook\",\"next_step\",\"^$\")",
+          "expr": "label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(bioetl_incident_ranked_evidence,\"object\",\"$1\",\"object\",\"(.*) / $\"),\"route_pipeline\",\".*\",\"pipeline\",\"unknown\"),\"owner\",\"BioETL Team\",\"reason\",\"infrastructure_failed\"),\"next_step\",\"Open pipeline-failure-critical.md\",\"reason\",\"infrastructure_failed\"),\"owner\",\"See runbook\",\"owner\",\"^$\"),\"next_step\",\"See runbook\",\"next_step\",\"^$\"),\"freshness\",\"Not verified: no event timestamp\",\"\",\"\")",
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
@@ -660,12 +660,6 @@
                 "desc": true
               }
             ]
-          }
-        },
-        {
-          "id": "limit",
-          "options": {
-            "limitField": 2
           }
         },
         {
@@ -719,13 +713,14 @@
               "Rank": 0,
               "Value": 1,
               "confidence": 2,
-              "pipeline": 3,
-              "provider": 4,
-              "signal": 5,
-              "action": 6,
-              "domain": 8,
-              "object": 9,
-              "action_detail": 7
+              "freshness": 3,
+              "pipeline": 4,
+              "provider": 5,
+              "signal": 6,
+              "action": 7,
+              "action_detail": 8,
+              "domain": 9,
+              "object": 10
             },
             "renameByName": {
               "domain": "Domain",
@@ -736,7 +731,8 @@
               "object": "Object",
               "pipeline": "Pipeline",
               "provider": "Provider",
-              "action_detail": "Details"
+              "action_detail": "Details",
+              "freshness": "Event freshness"
             }
           }
         }
@@ -818,28 +814,6 @@
             },
             "properties": [
               {
-                "id": "mappings",
-                "value": [
-                  {
-                    "type": "value",
-                    "options": {
-                      "0": {
-                        "text": "UNKNOWN",
-                        "color": "text"
-                      },
-                      "1": {
-                        "text": "WARN",
-                        "color": "orange"
-                      },
-                      "2": {
-                        "text": "CRIT",
-                        "color": "red"
-                      }
-                    }
-                  }
-                ]
-              },
-              {
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "color-text",
@@ -851,12 +825,34 @@
                 "value": false
               },
               {
-                "id": "displayName",
-                "value": "Severity"
-              },
-              {
                 "id": "custom.width",
                 "value": 85
+              },
+              {
+                "id": "displayName",
+                "value": "Diagnostic priority"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "0": {
+                        "text": "UNKNOWN",
+                        "color": "text"
+                      },
+                      "1": {
+                        "text": "ELEVATED",
+                        "color": "orange"
+                      },
+                      "2": {
+                        "text": "HIGH",
+                        "color": "red"
+                      }
+                    }
+                  }
+                ]
               }
             ]
           },
@@ -1291,6 +1287,42 @@
                 "value": true
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Event freshness"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": false
+              },
+              {
+                "id": "custom.width",
+                "value": 220
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "Not verified: no event timestamp": {
+                        "text": "UNKNOWN · no event time"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            ]
           }
         ]
       },
@@ -1299,7 +1331,7 @@
         "cellHeight": "sm",
         "footer": {
           "show": false,
-          "enablePagination": false
+          "enablePagination": true
         },
         "sortBy": [
           {
@@ -1310,7 +1342,7 @@
       },
       "links": [
         {
-          "title": "Show all rows and total (summary: up to 2)",
+          "title": "Open all suspects (no row truncation)",
           "url": "/d/bioetl-incident-v1/5-incident-workspace?viewPanel=22010&from=${__from}&to=${__to}",
           "targetBlank": false,
           "includeVars": false
@@ -1642,7 +1674,7 @@
         "showHeader": true,
         "footer": {
           "show": false,
-          "enablePagination": false
+          "enablePagination": true
         },
         "cellHeight": "sm"
       },
@@ -1657,12 +1689,6 @@
                 "desc": true
               }
             ]
-          }
-        },
-        {
-          "id": "limit",
-          "options": {
-            "limitField": 2
           }
         },
         {
@@ -1684,6 +1710,12 @@
         }
       ],
       "links": [
+        {
+          "includeVars": false,
+          "title": "Open all global alerts (no row truncation)",
+          "url": "/d/bioetl-incident-v1/5-incident-workspace?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=22005&${__url_time_range}",
+          "targetBlank": false
+        },
         {
           "includeVars": false,
           "title": "Show all rows and total (summary: up to 2)",
@@ -2479,7 +2511,7 @@
           "id": 22011,
           "type": "table",
           "title": "Inspect Global Signal Measurements",
-          "description": "GLOBAL / TIME RANGE · Exact runtime rule operands at the same query evaluation time. Lag uses a 15m maximum; backlog uses the latest non-validation sample. Validation backlog is a separate signal, validation_backlog; this table does not represent the BioETLStageBacklogActive alert window. Event and publication timestamps are not provided by these gauges: freshness and current run liveness cannot be verified. Persisted gauges can outlive a finished run or exporter restart. Evaluation time is not observation time. Empty successful result means no matching threshold crossings; query failures are errors.",
+          "description": "GLOBAL / CURRENT · Exact runtime rule operands at the same query evaluation time. Lag uses a 15m maximum; backlog uses the latest non-validation sample. Validation backlog is a separate signal, validation_backlog; this table does not represent the BioETLStageBacklogActive alert window. Lag is elapsed run time sampled when backlog is nonzero, not input-record event age. Inspect Stage Snapshot Clocks for application observation and Pushgateway publication; legacy observation and source-event times remain UNKNOWN. Persisted gauges can outlive a finished run or exporter restart. Evaluation time is not observation time. Empty successful result means no matching threshold crossings; query failures are errors.",
           "gridPos": {
             "x": 0,
             "y": 37,
@@ -2558,7 +2590,8 @@
                   "type": "auto",
                   "wrapText": true
                 },
-                "wrapHeaderText": true
+                "wrapHeaderText": true,
+                "wrapText": true
               }
             },
             "overrides": [
@@ -2570,7 +2603,7 @@
                 "properties": [
                   {
                     "id": "custom.width",
-                    "value": 185
+                    "value": 320
                   }
                 ]
               },
@@ -2582,7 +2615,7 @@
                 "properties": [
                   {
                     "id": "custom.width",
-                    "value": 85
+                    "value": 140
                   }
                 ]
               },
@@ -2594,7 +2627,7 @@
                 "properties": [
                   {
                     "id": "custom.width",
-                    "value": 75
+                    "value": 90
                   }
                 ]
               },
@@ -2606,7 +2639,7 @@
                 "properties": [
                   {
                     "id": "custom.width",
-                    "value": 75
+                    "value": 90
                   }
                 ]
               },
@@ -2618,7 +2651,7 @@
                 "properties": [
                   {
                     "id": "custom.width",
-                    "value": 100
+                    "value": 220
                   }
                 ]
               },
@@ -2630,7 +2663,7 @@
                 "properties": [
                   {
                     "id": "custom.width",
-                    "value": 90
+                    "value": 140
                   }
                 ]
               },
@@ -2642,7 +2675,7 @@
                 "properties": [
                   {
                     "id": "custom.width",
-                    "value": 165
+                    "value": 130
                   }
                 ]
               },
@@ -2655,6 +2688,10 @@
                   {
                     "id": "custom.width",
                     "value": 160
+                  },
+                  {
+                    "id": "unit",
+                    "value": "time:YYYY-MM-DD HH:mm"
                   }
                 ]
               },
@@ -2693,6 +2730,27 @@
                     "value": 3
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Freshness"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "Not verified: observed/published timestamps not provided": {
+                            "text": "Not verified"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
               }
             ]
           },
@@ -2701,6 +2759,164 @@
             "cellHeight": "lg",
             "footer": {
               "enablePagination": true
+            }
+          },
+          "links": [
+            {
+              "title": "Inspect stage snapshot clocks",
+              "url": "/d/bioetl-incident-v1/5-incident-workspace?viewPanel=22012&${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+              "targetBlank": false
+            }
+          ]
+        },
+        {
+          "id": 22012,
+          "type": "table",
+          "title": "Inspect Stage Snapshot Clocks",
+          "description": "GLOBAL / CURRENT · Same threshold-crossing pipeline / run type / stage scope as Signal Measurements. Stage lag is elapsed run time sampled when backlog is nonzero, not the age of the oldest source record; retained lag does not keep increasing. Latest stage projection is the application's latest snapshot clock, only when emitted; it does not date the selected 15m maximum, which may belong to an earlier projection. Gateway publication is the retained job=bioetl push time, not event, scrape or run-start time. Input-record event time is not instrumented. Missing, zero or future clocks remain UNKNOWN; a recent publication never fills a missing observation. Do not associate a newer backfill or an entity-level processing anchor with an old incremental stage snapshot. Dates use dashboard timezone. Legacy snapshots cannot establish their producing run or input-event freshness. Cause verification remains separate.",
+          "gridPos": {
+            "x": 0,
+            "y": 47,
+            "w": 24,
+            "h": 10
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "(label_join(label_replace(label_replace((((max by(pipeline,run_type,stage)((bioetl_stage_snapshot_observed_timestamp_seconds > 0) <= time()) and on(pipeline,run_type,stage) group by(pipeline,run_type,stage)((max by(pipeline,run_type,stage)(max_over_time(bioetl_stage_lag_seconds[15m])) >= 300) or (max by(pipeline,run_type,stage)(bioetl_stage_backlog_records{stage!=\"validation\"}) > 0))) or (group by(pipeline,run_type,stage)((max by(pipeline,run_type,stage)(max_over_time(bioetl_stage_lag_seconds[15m])) >= 300) or (max by(pipeline,run_type,stage)(bioetl_stage_backlog_records{stage!=\"validation\"}) > 0)) * NaN)) * 1000),\"clock\",\"Latest stage projection\",\"\",\"\"),\"basis\",\"Application projection; not input-record event time\",\"\",\"\"),\"scope\",\" / \",\"pipeline\",\"run_type\",\"stage\")) or (label_join(label_replace(label_replace((((group by(pipeline,run_type,stage)((max by(pipeline,run_type,stage)(max_over_time(bioetl_stage_lag_seconds[15m])) >= 300) or (max by(pipeline,run_type,stage)(bioetl_stage_backlog_records{stage!=\"validation\"}) > 0)) * on(pipeline,run_type) group_left max by(pipeline,run_type)((push_time_seconds{job=\"bioetl\",pipeline!=\"\",run_type!=\"\"} > 0) <= time())) or (group by(pipeline,run_type,stage)((max by(pipeline,run_type,stage)(max_over_time(bioetl_stage_lag_seconds[15m])) >= 300) or (max by(pipeline,run_type,stage)(bioetl_stage_backlog_records{stage!=\"validation\"}) > 0)) * NaN)) * 1000),\"clock\",\"Gateway publication\",\"\",\"\"),\"basis\",\"Pushgateway job=bioetl; not stage observation time\",\"\",\"\"),\"scope\",\" / \",\"pipeline\",\"run_type\",\"stage\")) or (label_join(label_replace(label_replace(((group by(pipeline,run_type,stage)((max by(pipeline,run_type,stage)(max_over_time(bioetl_stage_lag_seconds[15m])) >= 300) or (max by(pipeline,run_type,stage)(bioetl_stage_backlog_records{stage!=\"validation\"}) > 0)) * NaN) * 1000),\"clock\",\"Input-record event\",\"\",\"\"),\"basis\",\"Not instrumented; no source event clock in these metrics\",\"\",\"\"),\"scope\",\" / \",\"pipeline\",\"run_type\",\"stage\"))",
+              "instant": true,
+              "range": false,
+              "format": "table"
+            }
+          ],
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "__name__": true,
+                  "pipeline": true,
+                  "run_type": true,
+                  "stage": true,
+                  "Time": true
+                },
+                "indexByName": {
+                  "scope": 0,
+                  "clock": 1,
+                  "Value": 2,
+                  "basis": 3
+                },
+                "renameByName": {
+                  "scope": "Scope",
+                  "clock": "Clock",
+                  "Value": "Recorded at",
+                  "basis": "Basis"
+                }
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "noValue": "UNKNOWN · not recorded",
+              "unit": "none",
+              "custom": {
+                "align": "left",
+                "minWidth": 50,
+                "wrapText": true,
+                "cellOptions": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Scope"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 360
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Clock"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 180
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Recorded at"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 230
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Basis"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 420
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Recorded at"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "time:YYYY-MM-DD HH:mm"
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "special",
+                        "options": {
+                          "match": "null+nan",
+                          "result": {
+                            "text": "UNKNOWN · not recorded",
+                            "color": "text"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "showHeader": true,
+            "cellHeight": "lg",
+            "enablePagination": false,
+            "footer": {
+              "enablePagination": false
             }
           }
         }
@@ -2937,13 +3153,13 @@
               "source": "url",
               "parser": "backend",
               "format": "table",
-              "root_selector": "($schema := {'_bioetl_frame': null, 'domain': null, 'verdict': null, 'status': null, 'detail': null, 'reason': null, 'reason_display': null, 'domain_reason_brief': null, 'run_reason_brief': null, 'status_display': null, 'run_execution': null, 'run_verdict': null, 'saved_trust': null, 'run_reason': null, 'parameter': null, 'value': null, 'provider': null, 'data_source': null, 'check_performed': null, 'check_result': null, 'check_result_display': null, 'evidence': null, 'observed_at': null, 'observed_display': null, 'report_label': null, 'stage_id': null, 'stage_name': null, 'tracking': null, 'records_in': null, 'records_out': null, 'removals': null, 'execution_state': null, 'workflow': null, 'pipeline': null, 'run_type': null, 'run_id': null, 'started_at': null, 'completed_at': null, 'reasons_count': null, 'reasons_display': null, 'trust_status': null, 'trust_reasons_action': null, 'trust_action_note': null, 'result': null, 'step_id': null, 'mode': null, 'scope': null, 'pins': null, 'limit': null, 'meaning': null, 'check_id': null, 'replay_ready': null, 'readiness': null, 'Run duration': null, 'trust': null}; $map($append($append(($issues := presentation_domains[verdict != 'OK' and verdict != 'N/A' and verdict != 'SELECT RUN' and verdict != 'NO RUNS']; [$merge([presentation_summary[0], {'saved_trust': presentation_trust[0].trust_status, 'reason_display': $count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & ($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : ((presentation_summary[0].verdict = 'OK' or presentation_summary[0].verdict = 'SELECT RUN' or presentation_summary[0].verdict = 'NO RUNS') ? (presentation_trust[0].reasons_display ? presentation_trust[0].reasons_display : presentation_summary[0].reason) : presentation_summary[0].reason), '_bioetl_frame': 'status'}])]), $map(presentation_domains, function($row){$merge([$row, {'_bioetl_frame': 'domains'}])})), ($s := summary[0]; $a := $s.started_at; $b := $s.completed_at; $secs := function($t){( $tail := $substring($t, 19); $rest := $substring($tail, 0, 1) = '.' ? $substringAfter($tail, '.') : ''; $zone := $contains($rest, 'Z') ? 'Z' : ($contains($rest, 'z') ? 'z' : ($contains($rest, '+') ? '+' : '-')); $digits := $rest != '' ? $substringBefore($rest, $zone) : ''; $frac := $digits != '' ? $number('0.' & $digits) : 0; $sign := $contains($tail, '+') ? 1 : ($contains($tail, '-') ? -1 : 0); $off := $sign = 0 ? '' : ($contains($tail, '+') ? $substringAfter($tail, '+') : $substringAfter($tail, '-')); $oh := $off != '' ? $number($substring($off, 0, 2)) : 0; $om := $length($off) >= 4 ? $number($substring($off, $contains($off, ':') ? 3 : 2, 2)) : 0; $toMillis($substring($t, 0, 10))/1000 + $number($substring($t,11,2))*3600 + $number($substring($t,14,2))*60 + $number($substring($t,17,2)) + $frac - $sign * ($oh*3600 + $om*60) )}; $start := $a ? $secs($a) : null; $end := $b ? $secs($b) : null; [{'Run duration': $start != null and $end != null ? ($end >= $start ? $end - $start : null) : null, '_bioetl_frame': 'duration'}])), function($row){$merge([$schema, $row])}))",
+              "root_selector": "($schema := {'_bioetl_frame': null, 'domain': null, 'verdict': null, 'status': null, 'detail': null, 'reason': null, 'reason_display': null, 'domain_reason_brief': null, 'run_reason_brief': null, 'status_display': null, 'run_execution': null, 'run_verdict': null, 'saved_trust': null, 'run_reason': null, 'parameter': null, 'value': null, 'provider': null, 'data_source': null, 'check_performed': null, 'check_result': null, 'check_result_display': null, 'provider_check_note': null, 'evidence': null, 'observed_at': null, 'observed_display': null, 'report_label': null, 'stage_id': null, 'stage_name': null, 'tracking': null, 'records_in': null, 'records_out': null, 'removals': null, 'execution_state': null, 'workflow': null, 'pipeline': null, 'run_type': null, 'run_id': null, 'started_at': null, 'completed_at': null, 'reasons_count': null, 'reasons_display': null, 'trust_status': null, 'trust_reasons_action': null, 'trust_action_note': null, 'result': null, 'step_id': null, 'mode': null, 'scope': null, 'pins': null, 'limit': null, 'meaning': null, 'check_id': null, 'replay_ready': null, 'readiness': null, 'Run duration': null, 'trust': null}; $map($append($append(($issues := presentation_domains[verdict != 'OK' and verdict != 'N/A' and verdict != 'SELECT RUN' and verdict != 'NO RUNS']; [$merge([presentation_summary[0], {'saved_trust': presentation_trust[0].trust_status, 'reason_display': $count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & ($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : ((presentation_summary[0].verdict = 'OK' or presentation_summary[0].verdict = 'SELECT RUN' or presentation_summary[0].verdict = 'NO RUNS') ? (presentation_trust[0].reasons_display ? presentation_trust[0].reasons_display : presentation_summary[0].reason) : presentation_summary[0].reason), '_bioetl_frame': 'status'}])]), $map(presentation_domains, function($row){$merge([$row, {'_bioetl_frame': 'domains'}])})), ($s := summary[0]; $a := $s.started_at; $b := $s.completed_at; $secs := function($t){( $tail := $substring($t, 19); $rest := $substring($tail, 0, 1) = '.' ? $substringAfter($tail, '.') : ''; $zone := $contains($rest, 'Z') ? 'Z' : ($contains($rest, 'z') ? 'z' : ($contains($rest, '+') ? '+' : '-')); $digits := $rest != '' ? $substringBefore($rest, $zone) : ''; $frac := $digits != '' ? $number('0.' & $digits) : 0; $sign := $contains($tail, '+') ? 1 : ($contains($tail, '-') ? -1 : 0); $off := $sign = 0 ? '' : ($contains($tail, '+') ? $substringAfter($tail, '+') : $substringAfter($tail, '-')); $oh := $off != '' ? $number($substring($off, 0, 2)) : 0; $om := $length($off) >= 4 ? $number($substring($off, $contains($off, ':') ? 3 : 2, 2)) : 0; $toMillis($substring($t, 0, 10))/1000 + $number($substring($t,11,2))*3600 + $number($substring($t,14,2))*60 + $number($substring($t,17,2)) + $frac - $sign * ($oh*3600 + $om*60) )}; $start := $a ? $secs($a) : null; $end := $b ? $secs($b) : null; [{'Run duration': $start != null and $end != null ? ($end >= $start ? $end - $start : null) : null, '_bioetl_frame': 'duration'}])), function($row){$merge([$schema, $row])}))",
               "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
               "url_options": {
                 "method": "GET",
                 "data": ""
               },
-              "uql": "parse-json | jsonata \"($schema := {'_bioetl_frame': null, 'domain': null, 'verdict': null, 'status': null, 'detail': null, 'reason': null, 'reason_display': null, 'domain_reason_brief': null, 'run_reason_brief': null, 'status_display': null, 'run_execution': null, 'run_verdict': null, 'saved_trust': null, 'run_reason': null, 'parameter': null, 'value': null, 'provider': null, 'data_source': null, 'check_performed': null, 'check_result': null, 'check_result_display': null, 'evidence': null, 'observed_at': null, 'observed_display': null, 'report_label': null, 'stage_id': null, 'stage_name': null, 'tracking': null, 'records_in': null, 'records_out': null, 'removals': null, 'execution_state': null, 'workflow': null, 'pipeline': null, 'run_type': null, 'run_id': null, 'started_at': null, 'completed_at': null, 'reasons_count': null, 'reasons_display': null, 'trust_status': null, 'trust_reasons_action': null, 'trust_action_note': null, 'result': null, 'step_id': null, 'mode': null, 'scope': null, 'pins': null, 'limit': null, 'meaning': null, 'check_id': null, 'replay_ready': null, 'readiness': null, 'Run duration': null, 'trust': null}; $map($append($append(($issues := presentation_domains[verdict != 'OK' and verdict != 'N/A' and verdict != 'SELECT RUN' and verdict != 'NO RUNS']; [$merge([presentation_summary[0], {'saved_trust': presentation_trust[0].trust_status, 'reason_display': $count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & ($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : ((presentation_summary[0].verdict = 'OK' or presentation_summary[0].verdict = 'SELECT RUN' or presentation_summary[0].verdict = 'NO RUNS') ? (presentation_trust[0].reasons_display ? presentation_trust[0].reasons_display : presentation_summary[0].reason) : presentation_summary[0].reason), '_bioetl_frame': 'status'}])]), $map(presentation_domains, function($row){$merge([$row, {'_bioetl_frame': 'domains'}])})), ($s := summary[0]; $a := $s.started_at; $b := $s.completed_at; $secs := function($t){( $tail := $substring($t, 19); $rest := $substring($tail, 0, 1) = '.' ? $substringAfter($tail, '.') : ''; $zone := $contains($rest, 'Z') ? 'Z' : ($contains($rest, 'z') ? 'z' : ($contains($rest, '+') ? '+' : '-')); $digits := $rest != '' ? $substringBefore($rest, $zone) : ''; $frac := $digits != '' ? $number('0.' & $digits) : 0; $sign := $contains($tail, '+') ? 1 : ($contains($tail, '-') ? -1 : 0); $off := $sign = 0 ? '' : ($contains($tail, '+') ? $substringAfter($tail, '+') : $substringAfter($tail, '-')); $oh := $off != '' ? $number($substring($off, 0, 2)) : 0; $om := $length($off) >= 4 ? $number($substring($off, $contains($off, ':') ? 3 : 2, 2)) : 0; $toMillis($substring($t, 0, 10))/1000 + $number($substring($t,11,2))*3600 + $number($substring($t,14,2))*60 + $number($substring($t,17,2)) + $frac - $sign * ($oh*3600 + $om*60) )}; $start := $a ? $secs($a) : null; $end := $b ? $secs($b) : null; [{'Run duration': $start != null and $end != null ? ($end >= $start ? $end - $start : null) : null, '_bioetl_frame': 'duration'}])), function($row){$merge([$schema, $row])}))\"",
+              "uql": "parse-json | jsonata \"($schema := {'_bioetl_frame': null, 'domain': null, 'verdict': null, 'status': null, 'detail': null, 'reason': null, 'reason_display': null, 'domain_reason_brief': null, 'run_reason_brief': null, 'status_display': null, 'run_execution': null, 'run_verdict': null, 'saved_trust': null, 'run_reason': null, 'parameter': null, 'value': null, 'provider': null, 'data_source': null, 'check_performed': null, 'check_result': null, 'check_result_display': null, 'provider_check_note': null, 'evidence': null, 'observed_at': null, 'observed_display': null, 'report_label': null, 'stage_id': null, 'stage_name': null, 'tracking': null, 'records_in': null, 'records_out': null, 'removals': null, 'execution_state': null, 'workflow': null, 'pipeline': null, 'run_type': null, 'run_id': null, 'started_at': null, 'completed_at': null, 'reasons_count': null, 'reasons_display': null, 'trust_status': null, 'trust_reasons_action': null, 'trust_action_note': null, 'result': null, 'step_id': null, 'mode': null, 'scope': null, 'pins': null, 'limit': null, 'meaning': null, 'check_id': null, 'replay_ready': null, 'readiness': null, 'Run duration': null, 'trust': null}; $map($append($append(($issues := presentation_domains[verdict != 'OK' and verdict != 'N/A' and verdict != 'SELECT RUN' and verdict != 'NO RUNS']; [$merge([presentation_summary[0], {'saved_trust': presentation_trust[0].trust_status, 'reason_display': $count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & ($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : ((presentation_summary[0].verdict = 'OK' or presentation_summary[0].verdict = 'SELECT RUN' or presentation_summary[0].verdict = 'NO RUNS') ? (presentation_trust[0].reasons_display ? presentation_trust[0].reasons_display : presentation_summary[0].reason) : presentation_summary[0].reason), '_bioetl_frame': 'status'}])]), $map(presentation_domains, function($row){$merge([$row, {'_bioetl_frame': 'domains'}])})), ($s := summary[0]; $a := $s.started_at; $b := $s.completed_at; $secs := function($t){( $tail := $substring($t, 19); $rest := $substring($tail, 0, 1) = '.' ? $substringAfter($tail, '.') : ''; $zone := $contains($rest, 'Z') ? 'Z' : ($contains($rest, 'z') ? 'z' : ($contains($rest, '+') ? '+' : '-')); $digits := $rest != '' ? $substringBefore($rest, $zone) : ''; $frac := $digits != '' ? $number('0.' & $digits) : 0; $sign := $contains($tail, '+') ? 1 : ($contains($tail, '-') ? -1 : 0); $off := $sign = 0 ? '' : ($contains($tail, '+') ? $substringAfter($tail, '+') : $substringAfter($tail, '-')); $oh := $off != '' ? $number($substring($off, 0, 2)) : 0; $om := $length($off) >= 4 ? $number($substring($off, $contains($off, ':') ? 3 : 2, 2)) : 0; $toMillis($substring($t, 0, 10))/1000 + $number($substring($t,11,2))*3600 + $number($substring($t,14,2))*60 + $number($substring($t,17,2)) + $frac - $sign * ($oh*3600 + $om*60) )}; $start := $a ? $secs($a) : null; $end := $b ? $secs($b) : null; [{'Run duration': $start != null and $end != null ? ($end >= $start ? $end - $start : null) : null, '_bioetl_frame': 'duration'}])), function($row){$merge([$schema, $row])}))\"",
               "datasource": {
                 "type": "yesoreyeram-infinity-datasource",
                 "uid": "bioetl-ops-http"
@@ -3028,7 +3244,7 @@
           "title": "Review Observability States",
           "gridPos": {
             "x": 0,
-            "y": 48,
+            "y": 58,
             "w": 12,
             "h": 2
           },
@@ -3041,7 +3257,7 @@
         {
           "gridPos": {
             "x": 12,
-            "y": 48,
+            "y": 58,
             "w": 8,
             "h": 2
           },
@@ -3254,7 +3470,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 50,
+            "y": 60,
             "w": 8,
             "h": 8
           },
@@ -3263,7 +3479,7 @@
             "colorMode": "value",
             "graphMode": "none",
             "justifyMode": "center",
-            "orientation": "vertical",
+            "orientation": "horizontal",
             "reduceOptions": {
               "calcs": [
                 "lastNotNull"
@@ -3325,7 +3541,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · CURRENT · Required telemetry coverage over 5 minutes, independent of Run ID. CRIT means at least two required groups are missing; it does not count failed runs. Inspect Telemetry Coverage below for manifest, ledger, replay-risk, integrity and publication evidence. An empty Pushgateway after restart requires a genuine new publication or verified backup, never synthetic zero counters. Counts map to 0=OK, 1=WARN, >=2=CRIT; absent evidence remains UNKNOWN.",
+          "description": "CURRENT · Required telemetry coverage over 5 minutes, independent of Run ID. CRIT means at least two required groups are missing; it does not count failed runs. Inspect Telemetry Coverage below for manifest, ledger, replay-risk, integrity and publication evidence. An empty Pushgateway after restart requires a genuine new publication or verified backup, never synthetic zero counters. Counts map to 0=OK, 1=WARN, >=2=CRIT; absent evidence remains UNKNOWN.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3385,7 +3601,7 @@
           },
           "gridPos": {
             "x": 8,
-            "y": 50,
+            "y": 60,
             "w": 7,
             "h": 3
           },
@@ -3480,7 +3696,7 @@
           },
           "gridPos": {
             "x": 15,
-            "y": 50,
+            "y": 60,
             "w": 8,
             "h": 8
           },
@@ -3489,7 +3705,7 @@
             "colorMode": "value",
             "graphMode": "none",
             "justifyMode": "auto",
-            "orientation": "vertical",
+            "orientation": "horizontal",
             "reduceOptions": {
               "calcs": [
                 "lastNotNull"
@@ -3562,7 +3778,7 @@
       ],
       "gridPos": {
         "x": 0,
-        "y": 47,
+        "y": 57,
         "w": 24,
         "h": 1
       },
@@ -3577,7 +3793,7 @@
       "collapsed": true,
       "gridPos": {
         "x": 0,
-        "y": 48,
+        "y": 58,
         "w": 24,
         "h": 1
       },
@@ -3591,7 +3807,7 @@
             "h": 3,
             "w": 8,
             "x": 0,
-            "y": 49
+            "y": 59
           },
           "datasource": {
             "type": "prometheus",
@@ -3637,7 +3853,7 @@
                   }
                 }
               ],
-              "noValue": "UNKNOWN",
+              "noValue": "UNKNOWN · no samples",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -4095,7 +4311,7 @@
             "h": 7,
             "w": 16,
             "x": 8,
-            "y": 49
+            "y": 59
           },
           "id": 9101,
           "options": {
@@ -4167,7 +4383,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "CURRENT stage snapshots and TIME RANGE-independent 5m throughput. Maximum observed value per stage across selected run types; inspect one Run Type for exact values. Missing signals remain UNKNOWN. An active blocker is not established by missing evidence. INCOMPLETE: inspect expected-stage evidence; no observed blocker is not proof of coverage.",
+          "description": "CURRENT · Stage snapshots and fixed 5m throughput; the historical dashboard range does not set this clock. One row per observed pipeline / run type / stage. All returned groups remain available through pagination, sorted by lag; missing measures stay UNKNOWN. Inspect Selected Run separately for exact-run evidence. Missing signals remain UNKNOWN. An active blocker is not established by missing evidence. INCOMPLETE: inspect expected-stage evidence; no observed blocker is not proof of coverage.",
           "fieldConfig": {
             "defaults": {
               "noValue": "UNKNOWN",
@@ -4343,7 +4559,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 56,
+            "y": 66,
             "w": 24,
             "h": 5
           },
@@ -4352,9 +4568,16 @@
             "cellHeight": "sm",
             "footer": {
               "show": false,
-              "enablePagination": false
+              "enablePagination": true
             },
-            "showHeader": true
+            "showHeader": true,
+            "sortBy": [
+              {
+                "displayName": "Lag",
+                "desc": true
+              }
+            ],
+            "enablePagination": true
           },
           "pluginVersion": "10.4.0",
           "targets": [
@@ -4379,12 +4602,6 @@
                 "columnField": "measure",
                 "valueField": "Value"
               }
-            },
-            {
-              "id": "limit",
-              "options": {
-                "limitField": 3
-              }
             }
           ],
           "links": []
@@ -4396,7 +4613,7 @@
           "description": "SELECTED RUN · Completed at minus started at, as in Run Explorer. This is the entire run, not individual stage timing. No selection stays SELECT RUN; missing timestamps stay UNKNOWN. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is Source unavailable.",
           "gridPos": {
             "x": 0,
-            "y": 61,
+            "y": 71,
             "w": 24,
             "h": 3
           },
@@ -4408,7 +4625,7 @@
             "defaults": {
               "unit": "s",
               "decimals": 2,
-              "noValue": "Not recorded",
+              "noValue": "UNKNOWN · no samples",
               "color": {
                 "mode": "thresholds"
               },
@@ -4579,7 +4796,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 64,
+            "y": 74,
             "w": 24,
             "h": 10
           },
@@ -4660,7 +4877,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 74,
+            "y": 84,
             "w": 12,
             "h": 6
           },
@@ -4756,7 +4973,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 74,
+            "y": 84,
             "w": 12,
             "h": 6
           },
@@ -4813,7 +5030,7 @@
           "title": "Review Runtime Escalation",
           "gridPos": {
             "x": 0,
-            "y": 80,
+            "y": 90,
             "w": 24,
             "h": 3
           },
@@ -4847,7 +5064,7 @@
                   }
                 }
               ],
-              "noValue": "UNKNOWN",
+              "noValue": "UNKNOWN · no samples",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -4872,7 +5089,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 83,
+            "y": 93,
             "w": 8,
             "h": 4
           },
@@ -4944,7 +5161,7 @@
                   }
                 }
               ],
-              "noValue": "UNKNOWN",
+              "noValue": "UNKNOWN · no samples",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -4965,7 +5182,7 @@
           },
           "gridPos": {
             "x": 8,
-            "y": 83,
+            "y": 93,
             "w": 8,
             "h": 4
           },
@@ -5031,7 +5248,7 @@
                   }
                 }
               ],
-              "noValue": "UNKNOWN",
+              "noValue": "UNKNOWN · no samples",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -5056,7 +5273,7 @@
           },
           "gridPos": {
             "x": 16,
-            "y": 83,
+            "y": 93,
             "w": 8,
             "h": 4
           },
@@ -5123,7 +5340,7 @@
                   }
                 }
               ],
-              "noValue": "UNKNOWN",
+              "noValue": "UNKNOWN · no samples",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -5148,7 +5365,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 87,
+            "y": 97,
             "w": 10,
             "h": 4
           },
@@ -5227,7 +5444,7 @@
                   }
                 }
               ],
-              "noValue": "0",
+              "noValue": "UNKNOWN · no samples",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -5253,7 +5470,7 @@
           },
           "gridPos": {
             "x": 10,
-            "y": 87,
+            "y": 97,
             "w": 14,
             "h": 4
           },
@@ -5313,7 +5530,7 @@
                   }
                 }
               ],
-              "noValue": "UNKNOWN",
+              "noValue": "UNKNOWN · no samples",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -5338,7 +5555,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 91,
+            "y": 101,
             "w": 10,
             "h": 4
           },
@@ -5417,7 +5634,7 @@
                   }
                 }
               ],
-              "noValue": "0",
+              "noValue": "UNKNOWN · no samples",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -5443,7 +5660,7 @@
           },
           "gridPos": {
             "x": 10,
-            "y": 91,
+            "y": 101,
             "w": 14,
             "h": 4
           },
@@ -5519,7 +5736,7 @@
                   }
                 }
               ],
-              "noValue": "UNKNOWN",
+              "noValue": "UNKNOWN · no samples",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -5544,7 +5761,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 95,
+            "y": 105,
             "w": 10,
             "h": 4
           },
@@ -5715,7 +5932,7 @@
           },
           "gridPos": {
             "x": 10,
-            "y": 95,
+            "y": 105,
             "w": 14,
             "h": 6
           },
@@ -5883,7 +6100,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 101,
+            "y": 111,
             "w": 13,
             "h": 6
           },
@@ -5982,7 +6199,7 @@
                   }
                 }
               ],
-              "noValue": "UNKNOWN",
+              "noValue": "UNKNOWN · no samples",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -6009,7 +6226,7 @@
             "h": 4,
             "w": 5,
             "x": 13,
-            "y": 101
+            "y": 111
           },
           "id": 891,
           "options": {
@@ -6093,7 +6310,7 @@
                 ]
               },
               "unit": "s",
-              "noValue": "UNKNOWN",
+              "noValue": "UNKNOWN · no samples",
               "displayName": "Track Checkpoint"
             },
             "overrides": []
@@ -6102,7 +6319,7 @@
             "h": 4,
             "w": 6,
             "x": 18,
-            "y": 101
+            "y": 111
           },
           "id": 892,
           "options": {
@@ -6168,7 +6385,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · CURRENT · Ledger uses pipeline/run type counters over 15 minutes; Run ID does not filter this card. UNKNOWN means required telemetry or publication evidence is missing, not a confirmed processing failure. Inspect Telemetry Coverage below. Selected-run Trust is assessed separately from persisted evidence. Counts map to 0=OK, 1=WARN, >=2=CRIT; absent evidence remains UNKNOWN.",
+          "description": "CURRENT · Ledger uses pipeline/run type counters over 15 minutes; Run ID does not filter this card. UNKNOWN means required telemetry or publication evidence is missing, not a confirmed processing failure. Inspect Telemetry Coverage below. Selected-run Trust is assessed separately from persisted evidence. Counts map to 0=OK, 1=WARN, >=2=CRIT; absent evidence remains UNKNOWN.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -6221,7 +6438,7 @@
                 ]
               },
               "unit": "short",
-              "noValue": "UNKNOWN",
+              "noValue": "UNKNOWN · no samples",
               "displayName": "Monitor Ledger"
             },
             "overrides": []
@@ -6230,7 +6447,7 @@
             "h": 4,
             "w": 24,
             "x": 0,
-            "y": 107
+            "y": 117
           },
           "id": 893,
           "options": {
@@ -6279,7 +6496,7 @@
           "title": "Review Cross-Domain Handoffs",
           "gridPos": {
             "x": 0,
-            "y": 111,
+            "y": 121,
             "w": 24,
             "h": 3
           },
@@ -6397,7 +6614,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 114,
+            "y": 124,
             "w": 24,
             "h": 10
           },
@@ -6456,7 +6673,7 @@
                   }
                 }
               ],
-              "noValue": "UNKNOWN",
+              "noValue": "UNKNOWN · no samples",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -6481,7 +6698,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 124,
+            "y": 134,
             "w": 8,
             "h": 4
           },
@@ -6552,7 +6769,7 @@
                   }
                 }
               ],
-              "noValue": "UNKNOWN",
+              "noValue": "UNKNOWN · no samples",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -6577,7 +6794,7 @@
           },
           "gridPos": {
             "x": 8,
-            "y": 124,
+            "y": 134,
             "w": 8,
             "h": 4
           },
@@ -6642,7 +6859,7 @@
                   }
                 }
               ],
-              "noValue": "UNKNOWN",
+              "noValue": "UNKNOWN · no samples",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -6667,7 +6884,7 @@
           },
           "gridPos": {
             "x": 16,
-            "y": 124,
+            "y": 134,
             "w": 8,
             "h": 4
           },
@@ -6725,12 +6942,12 @@
             "h": 2,
             "w": 24,
             "x": 0,
-            "y": 128
+            "y": 138
           },
           "options": {
             "mode": "html",
             "bioetlDisplayTitle": "Start Pipeline Triage",
-            "content": "<div style=\"font-size:16px;line-height:1;padding:0;margin:0;white-space:normal;overflow-wrap:anywhere\">First action: if OK continue monitoring; else open the highest-severity blocker.</div>"
+            "content": "<div style=\"font-size:16px;line-height:20px\">UNKNOWN means no matching samples or an unpublished reason. Check Observability Signals and <a href=\"/d/bioetl-incident-v1/5-incident-workspace?viewPanel=2461&amp;${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${__url_time_range}\">missing stage signals</a>. Query time is not event time.</div>"
           },
           "links": [
             {
@@ -6784,7 +7001,7 @@
                   }
                 }
               ],
-              "noValue": "UNKNOWN",
+              "noValue": "UNKNOWN · no samples",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -6809,7 +7026,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 130,
+            "y": 140,
             "w": 24,
             "h": 4
           },
@@ -6895,7 +7112,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 134,
+            "y": 144,
             "w": 24,
             "h": 4
           },
@@ -6975,7 +7192,7 @@
                   }
                 }
               ],
-              "noValue": "UNKNOWN",
+              "noValue": "UNKNOWN · no samples",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -7001,7 +7218,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 138,
+            "y": 148,
             "w": 12,
             "h": 4
           },
@@ -7099,14 +7316,14 @@
                 ]
               },
               "unit": "short",
-              "noValue": "NO OBSERVATIONS",
+              "noValue": "UNKNOWN · no samples",
               "displayName": "Track Global Read Failures"
             },
             "overrides": []
           },
           "gridPos": {
             "x": 12,
-            "y": 138,
+            "y": 148,
             "w": 12,
             "h": 3
           },
@@ -7199,14 +7416,14 @@
                 ]
               },
               "unit": "short",
-              "noValue": "NO OBSERVATIONS",
+              "noValue": "UNKNOWN · no samples",
               "displayName": "Monitor Global Read Failures (30m)"
             },
             "overrides": []
           },
           "gridPos": {
             "x": 0,
-            "y": 142,
+            "y": 152,
             "w": 14,
             "h": 3
           },
@@ -7300,14 +7517,14 @@
               },
               "unit": "short",
               "decimals": 0,
-              "noValue": "UNKNOWN",
+              "noValue": "UNKNOWN · no samples",
               "displayName": "Track Missing Lineage"
             },
             "overrides": []
           },
           "gridPos": {
             "x": 14,
-            "y": 142,
+            "y": 152,
             "w": 10,
             "h": 3
           },
@@ -7400,14 +7617,14 @@
                 ]
               },
               "unit": "short",
-              "noValue": "UNKNOWN",
+              "noValue": "UNKNOWN · no samples",
               "displayName": "Track Lineage Failures"
             },
             "overrides": []
           },
           "gridPos": {
             "x": 0,
-            "y": 145,
+            "y": 155,
             "w": 8,
             "h": 3
           },
@@ -7500,14 +7717,14 @@
                 ]
               },
               "unit": "short",
-              "noValue": "UNKNOWN",
+              "noValue": "UNKNOWN · no samples",
               "displayName": "Track Ledger Failures"
             },
             "overrides": []
           },
           "gridPos": {
             "x": 8,
-            "y": 145,
+            "y": 155,
             "w": 8,
             "h": 3
           },
@@ -7593,14 +7810,14 @@
                 ]
               },
               "unit": "short",
-              "noValue": "UNKNOWN",
+              "noValue": "UNKNOWN · no samples",
               "displayName": "Track Replay Blockers"
             },
             "overrides": []
           },
           "gridPos": {
             "x": 16,
-            "y": 145,
+            "y": 155,
             "w": 8,
             "h": 3
           },
@@ -7716,7 +7933,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 148,
+            "y": 158,
             "w": 24,
             "h": 9
           },
@@ -7915,7 +8132,7 @@
           "description": "CURRENT · Expected stage coverage for Pipeline / Run Type. Missing lag/backlog signals are listed individually. Undefined expected stages are UNKNOWN. VALID EMPTY requires a recorded complete stage catalog and every expected signal. Query failures are QUERY ERROR.",
           "gridPos": {
             "x": 0,
-            "y": 157,
+            "y": 167,
             "w": 24,
             "h": 14
           },
@@ -8046,7 +8263,7 @@
           "title": "Review Global Process Signals",
           "gridPos": {
             "x": 0,
-            "y": 171,
+            "y": 181,
             "w": 24,
             "h": 3
           },
@@ -8117,7 +8334,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 174,
+            "y": 184,
             "w": 24,
             "h": 6
           },
@@ -8201,14 +8418,14 @@
                 ]
               },
               "unit": "short",
-              "noValue": "UNKNOWN",
+              "noValue": "UNKNOWN · no samples",
               "displayName": "Track Manifest Failures"
             },
             "overrides": []
           },
           "gridPos": {
             "x": 0,
-            "y": 180,
+            "y": 190,
             "w": 8,
             "h": 3
           },
@@ -8302,14 +8519,14 @@
               },
               "unit": "short",
               "decimals": 0,
-              "noValue": "UNKNOWN",
+              "noValue": "UNKNOWN · no samples",
               "displayName": "Track Incompatibilities"
             },
             "overrides": []
           },
           "gridPos": {
             "x": 8,
-            "y": 180,
+            "y": 190,
             "w": 8,
             "h": 3
           },
@@ -8402,14 +8619,14 @@
                 ]
               },
               "unit": "short",
-              "noValue": "NO OBSERVATIONS",
+              "noValue": "UNKNOWN · no samples",
               "displayName": "Track Unreconstructable"
             },
             "overrides": []
           },
           "gridPos": {
             "x": 16,
-            "y": 180,
+            "y": 190,
             "w": 8,
             "h": 3
           },
@@ -8572,7 +8789,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 183,
+            "y": 193,
             "w": 24,
             "h": 6
           },
@@ -8672,14 +8889,14 @@
                 ]
               },
               "unit": "short",
-              "noValue": "UNKNOWN",
+              "noValue": "UNKNOWN · no samples",
               "displayName": "Track Replay Drift"
             },
             "overrides": []
           },
           "gridPos": {
             "x": 0,
-            "y": 189,
+            "y": 199,
             "w": 12,
             "h": 3
           },
@@ -8772,14 +8989,14 @@
                 ]
               },
               "unit": "short",
-              "noValue": "UNKNOWN",
+              "noValue": "UNKNOWN · no samples",
               "displayName": "Monitor Manifest (30m)"
             },
             "overrides": []
           },
           "gridPos": {
             "x": 12,
-            "y": 189,
+            "y": 199,
             "w": 12,
             "h": 3
           },
@@ -8869,7 +9086,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 192,
+            "y": 202,
             "w": 14,
             "h": 6
           },
@@ -8956,14 +9173,14 @@
                 ]
               },
               "unit": "short",
-              "noValue": "NO OBSERVATIONS",
+              "noValue": "UNKNOWN · no samples",
               "displayName": "Track Load Failures"
             },
             "overrides": []
           },
           "gridPos": {
             "x": 14,
-            "y": 192,
+            "y": 202,
             "w": 10,
             "h": 3
           },
@@ -9056,14 +9273,14 @@
                 ]
               },
               "unit": "short",
-              "noValue": "UNKNOWN",
+              "noValue": "UNKNOWN · no samples",
               "displayName": "Monitor Ledger (30m)"
             },
             "overrides": []
           },
           "gridPos": {
             "x": 0,
-            "y": 198,
+            "y": 208,
             "w": 10,
             "h": 3
           },
@@ -9153,7 +9370,7 @@
           },
           "gridPos": {
             "x": 10,
-            "y": 198,
+            "y": 208,
             "w": 14,
             "h": 6
           },
@@ -9240,14 +9457,14 @@
                 ]
               },
               "unit": "short",
-              "noValue": "NO OBSERVATIONS",
+              "noValue": "UNKNOWN · no samples",
               "displayName": "Track Save Failures"
             },
             "overrides": []
           },
           "gridPos": {
             "x": 0,
-            "y": 204,
+            "y": 214,
             "w": 24,
             "h": 3
           },
@@ -9340,14 +9557,14 @@
                 ]
               },
               "unit": "short",
-              "noValue": "UNKNOWN",
+              "noValue": "UNKNOWN · no samples",
               "displayName": "Track Global Admin Failures"
             },
             "overrides": []
           },
           "gridPos": {
             "x": 0,
-            "y": 207,
+            "y": 217,
             "w": 24,
             "h": 3
           },
@@ -9431,7 +9648,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 210,
+            "y": 220,
             "w": 24,
             "h": 10
           },
@@ -9500,7 +9717,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 220,
+            "y": 230,
             "w": 24,
             "h": 9
           },
@@ -9583,14 +9800,14 @@
                 ]
               },
               "unit": "s",
-              "noValue": "UNKNOWN",
+              "noValue": "UNKNOWN · no samples",
               "displayName": "Track Peak Replay Lag"
             },
             "overrides": []
           },
           "gridPos": {
             "x": 0,
-            "y": 229,
+            "y": 239,
             "w": 24,
             "h": 3
           },
@@ -9661,7 +9878,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 232,
+            "y": 242,
             "w": 24,
             "h": 7
           },
@@ -9732,7 +9949,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 239,
+            "y": 249,
             "w": 24,
             "h": 6
           },
@@ -9771,7 +9988,7 @@
           "description": "TIME RANGE · Shows selected-range stage lag in seconds for Pipeline, Run Type, and Stage. No data means no emitted lag samples or unavailable telemetry, never zero lag. Use Worst Stage Lag and current blockers for severity",
           "gridPos": {
             "x": 0,
-            "y": 245,
+            "y": 255,
             "w": 24,
             "h": 10
           },
@@ -9942,7 +10159,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 255,
+            "y": 265,
             "w": 24,
             "h": 6
           },
@@ -10000,7 +10217,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 261,
+            "y": 271,
             "w": 24,
             "h": 7
           },
@@ -10075,7 +10292,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 268,
+            "y": 278,
             "w": 24,
             "h": 6
           },
@@ -10112,7 +10329,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "CURRENT · TIME RANGE · Shows ledger appends over time by event type and status. This is historical evidence. Run Type does not affect this panel. TELEMETRY MISSING is not a zero and not VALID EMPTY. Empty result: UNKNOWN until producer availability, observed scope and event-family coverage are verified. Check Monitor Metrics Coverage, the selector and time window. NO OBSERVATIONS requires those witnesses; TELEMETRY MISSING requires a confirmed coverage gap. Only an actual sample can establish a measured zero.",
+          "description": "TIME RANGE · Shows ledger appends over time by event type and status. This is historical evidence. Run Type does not affect this panel. TELEMETRY MISSING is not a zero and not VALID EMPTY. Empty result: UNKNOWN until producer availability, observed scope and event-family coverage are verified. Check Monitor Metrics Coverage, the selector and time window. NO OBSERVATIONS requires those witnesses; TELEMETRY MISSING requires a confirmed coverage gap. Only an actual sample can establish a measured zero.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -10133,7 +10350,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 274,
+            "y": 284,
             "w": 24,
             "h": 12
           },
@@ -10443,7 +10660,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 286,
+            "y": 296,
             "w": 24,
             "h": 9
           },
@@ -10565,7 +10782,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 295,
+            "y": 305,
             "w": 24,
             "h": 7
           },
@@ -10662,7 +10879,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 302,
+            "y": 312,
             "w": 24,
             "h": 7
           },
@@ -10758,7 +10975,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 309,
+            "y": 319,
             "w": 24,
             "h": 7
           },
@@ -10855,7 +11072,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 316,
+            "y": 326,
             "w": 24,
             "h": 7
           },
@@ -10930,7 +11147,7 @@
               ],
               "min": 0,
               "max": 1,
-              "noValue": "UNKNOWN",
+              "noValue": "UNKNOWN · no samples",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -10955,7 +11172,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 323,
+            "y": 333,
             "w": 24,
             "h": 3
           },
@@ -11017,7 +11234,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 326,
+            "y": 336,
             "w": 24,
             "h": 6
           },
@@ -11058,7 +11275,7 @@
       "collapsed": true,
       "gridPos": {
         "x": 0,
-        "y": 49,
+        "y": 59,
         "w": 24,
         "h": 1
       },
@@ -11067,25 +11284,27 @@
           "id": 22010,
           "type": "table",
           "title": "Inspect Global Suspects (Full)",
-          "description": "GLOBAL / TIME RANGE · All pipelines; independent of selected Pipeline, Provider and Run ID. Severity is rule urgency, not cause verification. UNVERIFIED means rule triggered; cause not confirmed. All rows use the same GLOBAL scope. Recording sample time is not event time. Missing telemetry remains UNKNOWN. Action opens the domain page named on the row. Fleet charts for pipeline signals stay on this page.",
+          "description": "GLOBAL / CURRENT · All pipelines; independent of selected Pipeline, Provider and Run ID. Severity is rule urgency, not cause verification. UNVERIFIED means rule triggered; cause not confirmed. All rows use the same GLOBAL scope. Recording sample time is not event time. Missing telemetry remains UNKNOWN. Action opens the domain page named on the row. Fleet charts for pipeline signals stay on this page.",
           "gridPos": {
             "x": 0,
-            "y": 50,
+            "y": 60,
             "w": 24,
             "h": 12
           },
           "datasource": {
-            "type": "datasource",
-            "uid": "-- Dashboard --"
+            "type": "prometheus",
+            "uid": "prometheus"
           },
           "targets": [
             {
-              "panelId": 2010,
               "refId": "A",
-              "withTransforms": false,
+              "instant": true,
+              "range": false,
+              "format": "table",
+              "expr": "label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(bioetl_incident_ranked_evidence,\"object\",\"$1\",\"object\",\"(.*) / $\"),\"route_pipeline\",\".*\",\"pipeline\",\"unknown\"),\"owner\",\"BioETL Team\",\"reason\",\"infrastructure_failed\"),\"next_step\",\"Open pipeline-failure-critical.md\",\"reason\",\"infrastructure_failed\"),\"owner\",\"See runbook\",\"owner\",\"^$\"),\"next_step\",\"See runbook\",\"next_step\",\"^$\"),\"freshness\",\"Not verified: no event timestamp\",\"\",\"\")",
               "datasource": {
-                "type": "datasource",
-                "uid": "-- Dashboard --"
+                "type": "prometheus",
+                "uid": "prometheus"
               }
             }
           ],
@@ -11180,13 +11399,14 @@
                   "Rank": 0,
                   "Value": 1,
                   "confidence": 2,
-                  "pipeline": 3,
-                  "provider": 4,
-                  "signal": 5,
-                  "action": 6,
-                  "domain": 8,
-                  "object": 9,
-                  "action_detail": 7
+                  "freshness": 3,
+                  "pipeline": 4,
+                  "provider": 5,
+                  "signal": 6,
+                  "action": 7,
+                  "action_detail": 8,
+                  "domain": 9,
+                  "object": 10
                 },
                 "renameByName": {
                   "domain": "Domain",
@@ -11197,7 +11417,8 @@
                   "object": "Object",
                   "pipeline": "Pipeline",
                   "provider": "Provider",
-                  "action_detail": "Details"
+                  "action_detail": "Details",
+                  "freshness": "Event freshness"
                 }
               }
             }
@@ -11279,28 +11500,6 @@
                 },
                 "properties": [
                   {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "0": {
-                            "text": "UNKNOWN",
-                            "color": "text"
-                          },
-                          "1": {
-                            "text": "WARN",
-                            "color": "orange"
-                          },
-                          "2": {
-                            "text": "CRIT",
-                            "color": "red"
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  {
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "color-text",
@@ -11312,12 +11511,34 @@
                     "value": false
                   },
                   {
-                    "id": "displayName",
-                    "value": "Severity"
-                  },
-                  {
                     "id": "custom.width",
                     "value": 85
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Diagnostic priority"
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "0": {
+                            "text": "UNKNOWN",
+                            "color": "text"
+                          },
+                          "1": {
+                            "text": "ELEVATED",
+                            "color": "orange"
+                          },
+                          "2": {
+                            "text": "HIGH",
+                            "color": "red"
+                          }
+                        }
+                      }
+                    ]
                   }
                 ]
               },
@@ -11772,6 +11993,42 @@
                     }
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Event freshness"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": false
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 220
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "Not verified: no event timestamp": {
+                            "text": "UNKNOWN · no event time"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
+                  }
+                ]
               }
             ]
           },
@@ -11802,7 +12059,7 @@
       "collapsed": true,
       "gridPos": {
         "x": 0,
-        "y": 50,
+        "y": 60,
         "w": 24,
         "h": 1
       },
@@ -11814,7 +12071,7 @@
           "description": "GLOBAL / CURRENT · All pipelines; independent of selected Pipeline, Provider and Run ID. Provider preserves the alert label or uses an unambiguous configured pipeline mapping. Not provided means missing or ambiguous attribution, not unknown provider health. N/A — Infrastructure is not a provider. Pipeline: N/A — Docker infrastructure for the Docker probe alert without a pipeline label; Not provided for other alerts without that label. FIRING and PENDING retain their original alert state.",
           "gridPos": {
             "x": 0,
-            "y": 51,
+            "y": 61,
             "w": 24,
             "h": 6
           },
@@ -12175,7 +12432,14 @@
               }
             }
           ],
-          "links": []
+          "links": [
+            {
+              "includeVars": false,
+              "title": "Open all global alerts (no row truncation)",
+              "url": "/d/bioetl-incident-v1/5-incident-workspace?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=22005&${__url_time_range}",
+              "targetBlank": false
+            }
+          ]
         }
       ],
       "description": "Expand for the full global alert table. The first screen already shows Monitor Global Alerts."
@@ -12188,7 +12452,7 @@
       "description": "Expand for saved domain trust reasons for the selected Run ID.",
       "gridPos": {
         "x": 0,
-        "y": 51,
+        "y": 61,
         "w": 24,
         "h": 1
       },
@@ -12199,7 +12463,7 @@
           "title": "Inspect Selected Run Domains",
           "gridPos": {
             "x": 0,
-            "y": 52,
+            "y": 62,
             "w": 24,
             "h": 8
           },
@@ -12459,7 +12723,7 @@
       "collapsed": true,
       "gridPos": {
         "x": 0,
-        "y": 52,
+        "y": 62,
         "w": 24,
         "h": 1
       },
@@ -12471,7 +12735,7 @@
           "description": "CURRENT · Workflow/pipeline/run-type scope, independent of Selected Run. Published at is the gateway publication clock, not the Prometheus evaluation clock. Retained publications do not expire after 15 minutes. Reason unavailable means no diagnostic cause is exposed by this metric. Publication age is measured at query evaluation. Display threshold: 24h (86400 seconds); STALE means age > threshold, not workflow failure. Within threshold does not prove health. Missing/invalid publication time is Not verified. The heading uses the oldest scoped publication; any known stale row takes precedence over missing coverage. Retention and health status are unchanged. Refresh the dashboard to re-evaluate.",
           "gridPos": {
             "x": 0,
-            "y": 53,
+            "y": 63,
             "w": 24,
             "h": 9
           },
@@ -12731,10 +12995,9 @@
           },
           "links": [
             {
-              "title": "Show all rows and total (summary: up to 2)",
-              "url": "/d/bioetl-incident-v1/5-incident-workspace?viewPanel=22010&from=${__from}&to=${__to}",
-              "targetBlank": false,
-              "includeVars": false
+              "title": "Inspect current workflow evidence",
+              "url": "/d/bioetl-incident-v1/5-incident-workspace?viewPanel=9701&${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${__url_time_range}",
+              "targetBlank": false
             }
           ]
         }
@@ -12748,7 +13011,7 @@
       "description": "SELECTED RUN · Canonical stage table is DQ panel 9460 (rev7 §2.4).",
       "gridPos": {
         "x": 0,
-        "y": 58,
+        "y": 68,
         "w": 12,
         "h": 3
       },
@@ -12765,7 +13028,7 @@
       "description": "SELECTED RUN · Canonical identity is Overview 9300 (rev7 §2.4).",
       "gridPos": {
         "x": 12,
-        "y": 58,
+        "y": 68,
         "w": 12,
         "h": 3
       },

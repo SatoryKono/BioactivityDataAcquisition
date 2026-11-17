@@ -67,8 +67,12 @@ def embed_global_alerts(overview: dict[str, Any], incident: dict[str, Any]) -> N
     summary = deepcopy(donors[2005])
     full = deepcopy(donors[32005])
     panels = overview["panels"]
+    navigation = next(panel for panel in panels if panel["id"] == 1000)
+    note = '<div style="font-size:16px;line-height:18px">Saved run outcome and current pipeline health are separate; review global alerts below.</div>'
+    if note not in navigation["options"]["content"]:
+        navigation["options"]["content"] += note
     panels[:] = [panel for panel in panels if panel["id"] not in {2005, 32005}]
-    summary["gridPos"] = {"x": 0, "y": 18, "w": 24, "h": 5}
+    summary["gridPos"] = {"x": 0, "y": 18, "w": 24, "h": 7}
     # This existing recording rule evaluates the Incident donor expression.
     # Reuse its samples instead of recomputing the long expression on first load.
     summary["targets"][0]["expr"] = "topk(2, bioetl_incident_global_alerts)"
@@ -78,9 +82,9 @@ def embed_global_alerts(overview: dict[str, Any], incident: dict[str, Any]) -> N
         "Summary shows up to two highest-priority alerts; open Incident "
         "Workspace or Browse Global Alerts for all rows."
     )
-    _reserve_alert_band(panels, bottom=23)
+    _reserve_alert_band(panels, bottom=25)
     full_y = max(
-        23,
+        25,
         max(
             (panel["gridPos"]["y"] + panel["gridPos"]["h"] for panel in panels),
             default=23,

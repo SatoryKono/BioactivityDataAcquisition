@@ -269,3 +269,119 @@ def test_unavailable_selected_report_has_explicit_unknown_rows(tmp_path):
     )
     assert result["reconciliation_display"][0]["result"] == "UNKNOWN"
     assert result["reconciliation_display"][0]["meaning"] == "run_not_found"
+
+
+def _failed_parent():
+    parent = _parent(None)
+    parent["identity"]["status"] = "failed"
+    parent["plan"] = {
+        "steps": [
+            {
+                "step_id": step_id,
+                "kind": "transform",
+                "transform_name": "reconcile_foreign_keys",
+            }
+            for step_id in ("reconcile_assay_target", "reconcile_publication_assay")
+        ]
+    }
+    parent["execution"][1].update(
+        status="failed",
+        error_type="ValueError",
+        error_message="reference cohort is not closed: 433 unmatched source rows; mutation blocked",
+    )
+    parent["execution"].append(
+        {
+            "step_id": "reconcile_publication_assay",
+            "status": "skipped",
+            "error_type": "UpstreamStepFailed",
+            "error_message": "Upstream reconciliation failed before this step could execute.",
+        }
+    )
+    return parent
+
+
+def test_failed_and_skipped_fk_steps_explain_missing_metrics_without_fabricating_counts():
+    parent = _failed_parent()
+    original = copy.deepcopy(parent)
+    rows = reconciliation_display(parent)
+    assert [row["result"] for row in rows] == ["FAILED", "SKIPPED"]
+    assert rows[0]["step_id"] == "reconcile_assay_target"
+    assert rows[0]["meaning"] == (
+        "ValueError: reference cohort is not closed: 433 unmatched source rows; mutation blocked"
+    )
+    assert "UpstreamStepFailed" in rows[1]["meaning"]
+    assert all(row["scope"] == row["pins"] == row["limit"] == "UNKNOWN" for row in rows)
+    assert parent == original
+
+
+def test_failure_without_a_persisted_fk_plan_never_infers_a_comparison():
+    parent = _failed_parent()
+    parent.pop("plan")
+    assert reconciliation_display(parent)[0]["result"] == "UNKNOWN"
+    parent["plan"] = {"steps": [{"kind": "pipeline", "step_id": "run_assay"}]}
+    assert reconciliation_display(parent)[0]["result"] == "N/A"
+
+
+def test_foreign_parent_failure_is_not_exposed_by_an_unrelated_child(tmp_path):
+    parent = _failed_parent()
+    parent["execution"][0]["pipeline_run_id"] = "foreign-child"
+    _write_parent(tmp_path, parent)
+    rows = linked_reconciliation_display(_child(), tmp_path)
+    assert rows[0]["result"] == "UNKNOWN"
+    assert "433" not in json.dumps(rows)
+    assert "binding mismatch" in rows[0]["meaning"]
+
+
+def test_visible_workflow_failure_preserves_error_assessment_revision_and_report(
+    tmp_path,
+):
+    child = _child()
+    workflow = {
+        **child["observations"]["Workflow"],
+        "verdict": "ERROR",
+        "reason": "workflow_failed",
+    }
+    workflow["facts"]["identity"]["status"] = "failed"
+    draft = build_pipeline_run_report(
+        identity={
+            **child["identity"],
+            "status": "success",
+            "workflow_id": "chembl_core",
+            "workflow_run_id": "parent-a",
+            "workflow_step_id": "run_assay",
+        },
+        metrics={},
+    )
+    draft = replace(
+        draft,
+        observations={
+            **{
+                name: {"verdict": "OK", "reason": "checked", "facts": {}}
+                for name in DOMAINS[1:]
+            },
+            "Workflow": workflow,
+        },
+    )
+    write_pipeline_run_report(draft, root=tmp_path, store=FileRunReportStoreAdapter())
+    path = tmp_path / "pipeline/chembl_assay/child-a/pipeline-run-report.json"
+    original = path.read_bytes()
+    absent = load_selected_run_status(
+        pipeline="chembl_assay", run_id="child-a", root=tmp_path
+    )
+    _write_parent(tmp_path, _failed_parent())
+    present = load_selected_run_status(
+        pipeline="chembl_assay", run_id="child-a", root=tmp_path
+    )
+    assert present["execution_state"] == "SUCCESS"
+    assert present["verdict"] == present["checks_verdict"] == "ERROR"
+    assert present["reconciliation_display"][0]["result"] == "FAILED"
+    assert "433" in present["reconciliation_display"][0]["meaning"]
+    for field in (
+        "verdict",
+        "checks_verdict",
+        "revision",
+        "domains",
+        "replay_readiness_now",
+    ):
+        assert present[field] == absent[field]
+    assert path.read_bytes() == original

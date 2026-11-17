@@ -161,7 +161,7 @@ def test_dashboard_defaults_report_real_changes_and_are_idempotent() -> None:
         [],
         ["refresh", "time", "templating.run_type.current"],
     )
-    assert payload["refresh"] == "60s"
+    assert payload["refresh"] == "1m"
     assert payload["time"] == {"from": "now-12h", "to": "now"}
     assert payload["templating"]["list"][0]["current"] == {
         "selected": True,

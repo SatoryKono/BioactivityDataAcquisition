@@ -91,6 +91,6 @@ def test_default_browse_url_is_the_unscoped_recent_page() -> None:
     assert variables["run_type"]["multi"] is False
     assert url == (
         "/ops/observability/pipeline-run-reports"
-        "?pipeline=.*&limit=10&run_id=-&view=recent"
+        "?pipeline=.*&limit=20&run_id=-&view=recent"
         "&workflow=.*&run_type=.*&lookup_run_id="
     )
