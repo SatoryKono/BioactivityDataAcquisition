@@ -24,6 +24,34 @@ import pytest
 pytestmark = pytest.mark.integration
 
 
+@pytest.mark.parametrize("pagination", [None, False, True])
+def test_generator_restores_unpaginated_twenty_run_catalog(pagination):
+    from scripts.ops.observability.grafana._run_explorer_columns import (
+        apply_run_explorer_columns,
+    )
+
+    dashboard = json.loads(
+        Path("grafana/dashboards/bioetl-run-explorer-v1.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    panel = next(panel for panel in dashboard["panels"] if panel["id"] == 3010)
+    panel["gridPos"]["h"] = 15
+    if pagination is None:
+        panel["options"].pop("enablePagination", None)
+    else:
+        panel["options"]["enablePagination"] = pagination
+    panel["options"].setdefault("footer", {})["enablePagination"] = True
+
+    apply_run_explorer_columns(dashboard)
+
+    panel = next(panel for panel in dashboard["panels"] if panel["id"] == 3010)
+    assert panel["gridPos"]["h"] == 30
+    assert panel["options"]["enablePagination"] is False
+    assert panel["options"]["footer"]["enablePagination"] is False
+    assert "limit=20" in panel["targets"][0]["url"]
+
+
 def test_ten_columns_keep_full_identity_for_handoffs():
     dashboard = json.loads(
         Path("grafana/dashboards/bioetl-run-explorer-v1.json").read_text(
@@ -144,7 +172,7 @@ def test_compact_view_keeps_ten_data_fields_and_every_handoff():
             for t in panel["transformations"]
             if t["id"] == "limit"
         )
-        == 10
+        == 20
     )
 
 

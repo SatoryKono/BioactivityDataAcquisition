@@ -110,12 +110,10 @@ def test_incident_current_alerts_share_first_window_with_runbook() -> None:
     links = ((alert.get("fieldConfig") or {}).get("defaults") or {}).get("links") or []
     assert any("runbook" in str(item.get("title", "")).lower() for item in links)
     assert any(_RUNBOOK in str(item.get("url", "")) for item in links)
-    assert any(
-        isinstance(item, dict)
-        and item.get("id") == "limit"
-        and (item.get("options") or {}).get("limitField") == 2
-        for item in (alert.get("transformations") or [])
+    assert not any(
+        item.get("id") == "limit" for item in alert.get("transformations", [])
     )
+    assert alert["options"]["footer"]["enablePagination"] is True
     row = next(
         panel
         for panel in dashboard.get("panels") or []

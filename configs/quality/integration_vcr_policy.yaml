@@ -239,6 +239,8 @@ tracked_suite_inventory:
       docker_integration:
       - tests/integration/test_docker_compose_smoke.py
       grafana:
+      - tests/integration/observability/test_evening_dashboard_queries.py
+      - tests/integration/observability/test_overview_donor_jsonata.py
       - tests/integration/test_dashboard_navigation_contract_sync.py
       - tests/integration/test_dashboard_operator_readability.py
       - tests/integration/test_dashboard_ux_report_freshness.py

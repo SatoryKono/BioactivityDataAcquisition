@@ -31,11 +31,11 @@ def test_all_dashboards_have_bioetl_tag():
 def test_dashboard_time_refresh_by_level():
     """Every shipped dashboard retains the shared 12-hour / 60-second defaults."""
     expectations = {
-        "bioetl-overview-v2.json": ("now-12h", "60s"),
-        "bioetl-incident-v1.json": ("now-12h", "60s"),
-        "bioetl-control-plane-v1.json": ("now-12h", "60s"),
-        "bioetl-run-explorer-v1.json": ("now-12h", "60s"),
-        "bioetl-dq-v2.json": ("now-12h", "60s"),
+        "bioetl-overview-v2.json": ("now-12h", "1m"),
+        "bioetl-incident-v1.json": ("now-12h", "1m"),
+        "bioetl-control-plane-v1.json": ("now-12h", "1m"),
+        "bioetl-run-explorer-v1.json": ("now-12h", "1m"),
+        "bioetl-dq-v2.json": ("now-12h", "1m"),
     }
     assert set(expectations) == {p.name for p in get_dashboard_files()}
     for dashboard_name, (expected_time, expected_refresh) in expectations.items():
@@ -47,6 +47,9 @@ def test_dashboard_time_refresh_by_level():
         )
         refresh_obj = dashboard.get("refresh")
         assert refresh_obj is not None, f"{dashboard_name} must have refresh setting"
+        assert refresh_obj in dashboard["timepicker"]["refresh_intervals"], (
+            f"{dashboard_name} saved refresh must be selectable in Grafana"
+        )
         if isinstance(refresh_obj, str):
             assert refresh_obj == expected_refresh, (
                 f"{dashboard_name} refresh must be {expected_refresh}, got {refresh_obj}"

@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping
+import asyncio
+from collections.abc import Awaitable, Callable, Mapping
 from dataclasses import dataclass
 from typing import cast
 
@@ -20,7 +21,10 @@ from bioetl.domain.control_plane.run_evidence_location import EvidenceLocationKi
 from bioetl.domain.run_reports.selected_status import DOMAINS, RULES_VERSION
 from bioetl.domain.run_reports.stage_diagnostics import project_stage_diagnostics
 from bioetl.interfaces.http._reconciliation_display import unavailable_reconciliation
-from bioetl.interfaces.http._selected_run_a2_resolve import NO_RUNS_STATUS
+from bioetl.interfaces.http._selected_run_a2_resolve import (
+    NO_RUNS_STATUS,
+    is_unresolved_run_id,
+)
 from bioetl.interfaces.http._selected_run_presentation import (
     _readiness_fields,
     presentation_rows,
@@ -31,6 +35,24 @@ _QUERY_ERROR = "QUERY ERROR"
 _SELECT_RUN = "SELECT RUN"
 _NO_RUNS = NO_RUNS_STATUS
 _GAP_STATES = frozenset({_SELECT_RUN, _NO_RUNS})
+
+
+async def respond_exact_selection(
+    sender: Callable[[asyncio.StreamWriter, int, dict[str, object]], Awaitable[None]],
+    writer: asyncio.StreamWriter,
+    query: Mapping[str, str],
+    pipeline: str,
+    run_id: str,
+) -> bool:
+    """Return the exact-selection gap before touching AUTO cache or storage."""
+    if query.get("require_exact_run") != "1" or not is_unresolved_run_id(run_id):
+        return False
+    await sender(
+        writer,
+        200,
+        unavailable_status(pipeline, "-", _SELECT_RUN, "exact_run_required"),
+    )
+    return True
 
 
 def readiness_state_for_unavailable(state: str) -> str:

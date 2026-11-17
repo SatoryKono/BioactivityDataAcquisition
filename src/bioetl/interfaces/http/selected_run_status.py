@@ -63,6 +63,7 @@ from bioetl.interfaces.http._selected_run_report_assessment import (
 from bioetl.interfaces.http._selected_run_unavailable import (
     manifest_port_for_context,
     resolve_selected_run,
+    respond_exact_selection,
     unavailable_status,
 )
 from bioetl.interfaces.http.run_report_ops import _validated_artifact_paths
@@ -368,6 +369,10 @@ async def handle_selected_run_status(
     """
     pipeline = host._read_required_param(query, "pipeline")
     requested_run_id = host._read_optional_param(query, "run_id") or "-"
+    if await respond_exact_selection(
+        host._send_payload_response, writer, query, pipeline, requested_run_id
+    ):
+        return
 
     def load() -> dict[str, object]:
         run_id = requested_run_id
@@ -398,7 +403,7 @@ async def handle_selected_run_status(
         )
 
     try:
-        payload = await host._selected_run_status_cache.read(query, cached_load)
+        payload = await host._selected_run_status_cache.read_view(query, cached_load)
     except ForensicEndpointUnavailable as exc:
         payload = unavailable_status(
             pipeline, requested_run_id, _QUERY_ERROR, exc.reason

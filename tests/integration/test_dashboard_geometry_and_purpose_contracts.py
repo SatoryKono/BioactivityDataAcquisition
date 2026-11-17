@@ -94,7 +94,11 @@ def test_incident_coverage_reduction_survives_current_profile_projection(
     assert view["pluginId"] == "stat"
     assert view["queries"] == native["targets"]
     assert view["transformations"] == reduction
-    assert view["options"] == native["options"]
+    assert view["options"] == {
+        key: value
+        for key, value in native["options"].items()
+        if key != "bioetlCurrentPresentation"
+    }
     assert current["fieldConfig"] == native["fieldConfig"]
     assert current["targets"] == []
     assert current["transformations"] == []

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import Any
+from pathlib import Path
 
 import pytest
 
@@ -52,6 +53,33 @@ def test_unknown_without_pipeline_config() -> None:
         "contract_exclusions_soft_limit": None,
         "contract_exclusions_hard_limit": None,
     }
+
+
+def test_installed_reader_uses_mounted_configs_without_overriding_explicit_root(
+    tmp_path, monkeypatch
+):
+    from bioetl.infrastructure.config import config_root
+
+    # Model the wheel location in the real reader, with configs at its /app cwd.
+    monkeypatch.setattr(
+        config_root,
+        "__file__",
+        str(
+            tmp_path
+            / "venv/lib/python3.13/site-packages/bioetl/infrastructure/config/config_root.py"
+        ),
+    )
+    monkeypatch.chdir(Path(__file__).resolve().parents[4])
+    result = evaluate_contract_exclusions("chembl_activity", _full_funnel(excluded=5))
+    assert result["contract_exclusions_status"] == "WARN"
+    assert result["contract_exclusions_rate"] == pytest.approx(0.05)
+    explicit = evaluate_contract_exclusions(
+        "chembl_activity",
+        _full_funnel(excluded=5),
+        configs_root=tmp_path / "explicit-missing",
+    )
+    assert explicit["contract_exclusions_status"] == "UNKNOWN"
+    assert explicit["contract_exclusions_rate"] is None
 
 
 def test_path_traversal_pipeline_segments_stay_unknown() -> None:

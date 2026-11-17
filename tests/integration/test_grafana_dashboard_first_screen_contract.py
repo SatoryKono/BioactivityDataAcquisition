@@ -153,7 +153,9 @@ def test_primary_dashboards_expose_common_context_header_panels() -> None:
         panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
         for pid in ids:
             panel = panels[pid]
-            assert panel["gridPos"]["y"] == 2
+            assert panel["gridPos"]["y"] == (
+                5 if filename == "bioetl-overview-v2.json" and pid == 99 else 2
+            )
             assert panel["gridPos"]["h"] == (
                 5 if panel.get("title") == "Review Run Context" else 3
             )
@@ -452,7 +454,13 @@ def test_provider_and_dq_range_evidence_panels_are_below_first_screen() -> None:
             if p["type"] != "row" and p["gridPos"]["y"] < FIRST_WINDOW_Y
         ]
         assert first
-        assert all("expr" not in t for p in first for t in p.get("targets", []))
+        saved = [p for p in first if p["id"] not in {9605, 9606}]
+        assert all("expr" not in t for p in saved for t in p.get("targets", []))
+        if filename == "bioetl-overview-v2.json":
+            current = [p for p in first if p["id"] in {9605, 9606}]
+            assert len(current) == 2
+            assert all("CURRENT" in p["description"] for p in current)
+            assert all("run_id" not in t["expr"] for p in current for t in p["targets"])
 
 
 def test_first_screen_scope_and_cta_panels_document_role_and_scope() -> None:
@@ -468,7 +476,9 @@ def test_first_screen_scope_and_cta_panels_document_role_and_scope() -> None:
         assert badge in panel["description"]
         content = panel["options"].get("content", panel["description"])
         assert badge in content or (badge == "SELECTED RUN" and "${run_id}" in content)
-        assert panel["gridPos"]["y"] <= 4
+        assert panel["gridPos"]["y"] <= (
+            5 if filename == "bioetl-overview-v2.json" else 4
+        )
         assert "overflow:hidden" not in content
 
 
@@ -540,7 +550,7 @@ def test_current_status_headlines_use_instant_queries() -> None:
         assert all("$__range" not in t["expr"] for t in panel["targets"])
 
 
-def test_run_explorer_shows_ten_rows_and_only_the_browse_surface() -> None:
+def test_run_explorer_shows_twenty_rows_and_only_the_browse_surface() -> None:
     dashboard = load_dashboard(_DASHBOARD_DIR / "bioetl-run-explorer-v1.json")
     panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
     # Phase 2 §2.1: five-chip nav bus joins the selection leaf.
@@ -549,11 +559,12 @@ def test_run_explorer_shows_ten_rows_and_only_the_browse_surface() -> None:
     assert not ({3098, 3099, 3011, 3012, 3013, 3014, 3020, 3022, 3023} & panels.keys())
     browse = panels[3010]
     grid = browse["gridPos"]
-    assert grid["y"] + grid["h"] <= FIRST_WINDOW_Y
-    assert panel_declared_row_cap(browse) == 10
+    # The approved high panel uses page scrolling, with no table pagination.
+    assert grid["y"] == 3 and grid["h"] == 30
+    assert panel_declared_row_cap(browse) == 20
     assert browse["options"]["footer"]["enablePagination"] is False
     assert browse["options"]["cellHeight"] == "sm"
-    assert "last 10" in browse["title"]
+    assert "last 20" in browse["title"]
     nav = panels[1000]
     content = str((nav.get("options") or {}).get("content") or "")
     assert content.count("width:19.5%") == 5

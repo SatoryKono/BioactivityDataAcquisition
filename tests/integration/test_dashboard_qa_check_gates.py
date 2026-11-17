@@ -26,6 +26,7 @@ from scripts.engineering.qa.check_dashboard_performance_budgets import (
 )
 from scripts.engineering.qa.check_dashboard_visual_semantics import (
     main as visual_semantics_main,
+    _stat_unknown_mapping_error,
 )
 from scripts.engineering.qa.report_dashboard_inventory import (
     main as inventory_main,
@@ -42,6 +43,31 @@ from tests.helpers import assert_cli_succeeded, run_main_in_process
 pytestmark = pytest.mark.integration
 
 _TEST_PATH = "tests/integration/test_dashboard_qa_check_gates.py"
+
+
+def test_annotated_unknown_rejects_a_false_healthy_null_mapping() -> None:
+    from copy import deepcopy
+    import json
+
+    path = Path("grafana/dashboards/bioetl-incident-v1.json")
+    dashboard = json.loads(path.read_text(encoding="utf-8"))
+
+    def walk(items):
+        return [
+            panel for item in items for panel in [item, *walk(item.get("panels", []))]
+        ]
+
+    panel = next(p for p in walk(dashboard["panels"]) if p["id"] == 18940)
+    defaults = panel["fieldConfig"]["defaults"]
+    assert defaults["noValue"] == "UNKNOWN · no samples"
+    mappings = deepcopy(defaults["mappings"])
+    numeric = [m for m in mappings if m["type"] != "special"]
+    assert _stat_unknown_mapping_error(path, panel["title"], panel, mappings) is None
+    for mapping in mappings:
+        if mapping["type"] == "special" and mapping["options"]["match"] == "null":
+            mapping["options"]["result"] = {"text": "OK", "color": "green"}
+    assert [m for m in mappings if m["type"] != "special"] == numeric
+    assert _stat_unknown_mapping_error(path, panel["title"], panel, mappings)
 
 
 def test_incident_navigation_regeneration_preserves_saved_evidence_handoffs() -> None:

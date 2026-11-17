@@ -161,6 +161,7 @@ Generated from the dashboard JSON. Earlier sections explain panel semantics; thi
 | 2003 | Inspect Provider Suspects | table |
 | 2004 | Inspect DQ Suspects | table |
 | 22011 | Inspect Global Signal Measurements | table |
+| 22012 | Inspect Stage Snapshot Clocks · period end | table |
 | 2100 | Inspect Selected Run Summary | row |
 | 2101 | Review Selected Run Status | table |
 | 8809 | Observability Signals | row |
@@ -207,7 +208,7 @@ Generated from the dashboard JSON. Earlier sections explain panel semantics; thi
 | 2 | Track Ledger Failures | stat |
 | 130 | Track Replay Blockers | stat |
 | 242 | Inspect Active Runtime Blocker Detail | table |
-| 2461 | Inspect Current Missing Stage Signals | table |
+| 2461 | Inspect Snapshot Missing Stage Signals | table |
 | 2543 | Review Global Process Signals | text |
 | 8806 | Compare Global Reads by Store | timeseries |
 | 1 | Track Manifest Failures | stat |
@@ -246,7 +247,7 @@ Generated from the dashboard JSON. Earlier sections explain panel semantics; thi
 | 9450 | Inspect Saved Run Evidence | row |
 | 9451 | Inspect Selected Run Domains | table |
 | 9700 | Inspect Current Workflow Evidence · ${workflow_evidence_freshness} · threshold 24h | row |
-| 9701 | Review Current Workflow Evidence · ${workflow_evidence_freshness} · threshold 24h | table |
+| 9701 | Review Snapshot Workflow Evidence · ${workflow_evidence_freshness} · threshold 24h | table |
 | 9460 | Inspect Selected Run Stages | text |
 | 9452 | Inspect Selected Run Identity | text |
 <!-- END SHIPPED PANEL INVENTORY -->

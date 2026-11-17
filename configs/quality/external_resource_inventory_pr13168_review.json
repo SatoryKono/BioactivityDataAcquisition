@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "f39053c1840173e49ed64eac8a3673f70bcf9eca",
+  "source_ref": "1046790ba74e350c9ebd40880c30e675ceab9cf0",
+  "source_reviews": {
+    "src/bioetl/application/core/runner_flow_metrics.py": "Reviewed one application snapshot clock captured for the three stage gauges. It describes projection time, never source event time. No acquisition, cleanup, task or I/O ownership change.",
+    "src/bioetl/application/observability/pipeline_metrics.py": "Reviewed bounded stage observation timestamp gauge, invalid clocks remain zero, existing labels/disabled-metrics and negative-value guards retained. Existing metric emissions retain literal metric and label names. No external acquisition or cleanup change.",
+    "src/bioetl/application/observability/reason_aliases.py": "Reviewed workflow_failed presentation alias only. Saved ERROR and lifecycle outcomes remain unchanged; no acquisition or cleanup.",
+    "src/bioetl/composition/selected_run_contract_exclusions.py": "Reviewed installed-reader config root fallback only when no explicit root and repository root is absent. Existing checked YAML file reads and exception boundaries remain owned by this function. No new open client/task or cleanup obligation.",
+    "src/bioetl/infrastructure/observability/_metrics_defs_core.py": "Reviewed one bounded Prometheus Gauge declaration for stage projection time and accurate help for existing lag/processing anchor. Gauge registration is process-local metric registry work, not an external acquisition; no lifecycle qualification claimed.",
+    "src/bioetl/infrastructure/observability/metrics_definitions.py": "Reviewed export/import of the new stage projection clock metric only. Existing resource acquisition and shutdown contracts unchanged.",
+    "src/bioetl/infrastructure/observability/metrics_export_names.py": "Reviewed inclusion of the stage projection clock in the public metric export tuple. No external acquisition.",
+    "src/bioetl/infrastructure/observability/prometheus_metric_label_policy_sets.py": "Reviewed reuse of the bounded pipeline/run_type/stage label policy for the projection clock. No forensic labels or new external resources.",
+    "src/bioetl/infrastructure/observability/prometheus_metric_registries.py": "Reviewed mapping of the projection-clock name to its existing module-owned Gauge. No acquisition, closer or task ownership change.",
+    "src/bioetl/interfaces/http/_reconciliation_display.py": "Reviewed pure projection of persisted FK step failures, identified from the saved plan. It does not mutate saved verdicts, create clients, read files or acquire resources.",
+    "src/bioetl/interfaces/http/_run_explorer_snapshot.py": "Reviewed twenty-row snapshot and detached response slicing, preserving task and cleanup owners. Six old blank-line production bindings are now explicitly relocated to the real periodic call at line 158 and to_thread allocation at line 78, preserving binding metadata. No runtime qualification is claimed.",
+    "src/bioetl/interfaces/http/_selected_run_status_cache.py": "Reviewed read_view response policy metadata attached to the deep-copied read result. Existing single-flight task creation, cancellation, close timeout and capacity bounds unchanged; no new creation site.",
+    "src/bioetl/interfaces/http/_selected_run_unavailable.py": "Reviewed no-selection response helper before AUTO cache/storage. It calls the supplied sender using the existing writer and takes no writer ownership; no new client/task/open call or cleanup obligation.",
+    "src/bioetl/interfaces/http/selected_run_status.py": "Reviewed exact-selection early response and relocation of cache metadata assembly into read_view. Existing asyncio.to_thread(cached load) acquisition, selected-run budget and response writer owner remain unchanged; no runtime lifecycle evidence added."
+  },
+  "line_updates": {},
+  "reference_moves": [
+    {
+      "identity": "asyncio.default-executor",
+      "fields": [
+        "production_binding"
+      ],
+      "from": {
+        "file": "src/bioetl/interfaces/http/_run_explorer_snapshot.py",
+        "line": 142
+      },
+      "to": {
+        "file": "src/bioetl/interfaces/http/_run_explorer_snapshot.py",
+        "scope": "run_periodic_run_explorer_snapshot",
+        "segment": "await cache.refresh_once(source)"
+      }
+    },
+    {
+      "identity": "asyncio.default-executor",
+      "fields": [
+        "production_binding"
+      ],
+      "from": {
+        "file": "src/bioetl/interfaces/http/_run_explorer_snapshot.py",
+        "line": 71
+      },
+      "to": {
+        "file": "src/bioetl/interfaces/http/_run_explorer_snapshot.py",
+        "scope": "RunExplorerSnapshotCache.refresh_once",
+        "segment": "payload = await asyncio.to_thread("
+      }
+    },
+    {
+      "identity": "infrastructure.export.csv_exporter.directory-enumeration",
+      "fields": [
+        "production_binding"
+      ],
+      "from": {
+        "file": "src/bioetl/interfaces/http/_run_explorer_snapshot.py",
+        "line": 142
+      },
+      "to": {
+        "file": "src/bioetl/interfaces/http/_run_explorer_snapshot.py",
+        "scope": "run_periodic_run_explorer_snapshot",
+        "segment": "await cache.refresh_once(source)"
+      }
+    },
+    {
+      "identity": "infrastructure.export.csv_exporter.directory-enumeration",
+      "fields": [
+        "production_binding"
+      ],
+      "from": {
+        "file": "src/bioetl/interfaces/http/_run_explorer_snapshot.py",
+        "line": 71
+      },
+      "to": {
+        "file": "src/bioetl/interfaces/http/_run_explorer_snapshot.py",
+        "scope": "RunExplorerSnapshotCache.refresh_once",
+        "segment": "payload = await asyncio.to_thread("
+      }
+    },
+    {
+      "identity": "infrastructure.storage.bronze.read_cleanup_mixin.directory-enumeration",
+      "fields": [
+        "production_binding"
+      ],
+      "from": {
+        "file": "src/bioetl/interfaces/http/_run_explorer_snapshot.py",
+        "line": 142
+      },
+      "to": {
+        "file": "src/bioetl/interfaces/http/_run_explorer_snapshot.py",
+        "scope": "run_periodic_run_explorer_snapshot",
+        "segment": "await cache.refresh_once(source)"
+      }
+    },
+    {
+      "identity": "infrastructure.storage.bronze.read_cleanup_mixin.directory-enumeration",
+      "fields": [
+        "production_binding"
+      ],
+      "from": {
+        "file": "src/bioetl/interfaces/http/_run_explorer_snapshot.py",
+        "line": 71
+      },
+      "to": {
+        "file": "src/bioetl/interfaces/http/_run_explorer_snapshot.py",
+        "scope": "RunExplorerSnapshotCache.refresh_once",
+        "segment": "payload = await asyncio.to_thread("
+      }
+    }
+  ]
+}

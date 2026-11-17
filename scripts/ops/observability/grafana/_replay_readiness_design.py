@@ -8,7 +8,7 @@ def apply_trust_action_display(payload: dict) -> None:
     trust = next(p for p in payload["panels"] if p.get("id") == 9418)
     expression = (
         '[presentation_trust.($base := $sift($, function($v,$k){$k != "trust_reasons_action"}); '
-        '$merge([$base, reasons_count > 0 ? {"trust_reasons_action":"View trust reasons"} : '
+        '$merge([$base, ($type(reasons_count)="number" ? reasons_count > 0 : false) ? {"trust_reasons_action":"View trust reasons"} : '
         '{"trust_action_note": reasons_count = 0 ? "No trust issues" : "Not assessed"}]))]'
     )
     trust["targets"][0].update(
