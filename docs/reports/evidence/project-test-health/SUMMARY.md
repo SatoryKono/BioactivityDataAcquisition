@@ -58,7 +58,7 @@ coverage refresh:
 ## Freshness note
 
 Re-verified on 2026-11-17 at source commit
-`MERGE_TIP_PLACEHOLDER`: the canonical source list and historical shard manifest
+`eed011c2eafb64694b184b99b4746e4a64abd25b`: the canonical source list and historical shard manifest
 remain present. The tracked tree contains 3,362 files with basenames
 matching `test_*.py` under `tests/`, counted from
 `git ls-files 'tests/**/test_*.py'`.
