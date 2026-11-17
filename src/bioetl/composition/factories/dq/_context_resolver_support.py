@@ -5,14 +5,11 @@ from __future__ import annotations
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, cast, get_args, get_origin
+from typing import TYPE_CHECKING, Protocol, cast, get_args, get_origin
 
 from pydantic import BaseModel
 
 from bioetl.composition.bootstrap_contexts import DQConfigsContext, DQOutputPathsContext
-from bioetl.composition.factories.storage._context_resolution import (
-    rebase_local_data_path,
-)
 from bioetl.domain.value_objects.dq_report import SilverDQCheckType
 
 if TYPE_CHECKING:
@@ -36,6 +33,26 @@ from bioetl.infrastructure.schemas.dq_report_config import (
     GoldSinkConfig,
     SilverSinkConfig,
 )
+
+
+class DQLayerPathSettings(Protocol):
+    """Layer roots that place canonical DQ directories under ``data_dir``."""
+
+    bronze_path: Path
+    silver_path: Path
+    gold_path: Path
+
+
+def _rebase_local_data_path(configured: Path, layer_root: Path) -> Path:
+    """Keep canonical ``data/output/<layer>`` paths inside the runtime root.
+
+    Matches ``rebase_local_data_path`` in the storage factory. This copy stays
+    in the DQ package so the import does not cross into a private storage module.
+    """
+    prefix = ("data", "output", layer_root.name)
+    if layer_root.parent.name == "output" and configured.parts[:3] == prefix:
+        return layer_root.joinpath(*configured.parts[3:])
+    return configured
 
 
 @dataclass(frozen=True, slots=True)
@@ -237,7 +254,7 @@ def extract_dq_output_paths_impl(
 
 def rebase_dq_output_paths(
     paths: DQOutputPathsContext,
-    settings: Settings,
+    settings: DQLayerPathSettings,
 ) -> DQOutputPathsContext:
     """Place canonical ``data/output/<layer>/...`` DQ dirs under ``data_dir``.
 
@@ -257,7 +274,7 @@ def _rebase_dq_layer_path(configured: str | None, layer_root: Path) -> str | Non
     """Rebase one configured DQ directory onto its settings layer root."""
     if not configured:
         return configured
-    return str(rebase_local_data_path(Path(configured), Path(layer_root)))
+    return str(_rebase_local_data_path(Path(configured), Path(layer_root)))
 
 
 def is_dq_report_enabled_impl(config: PipelineYamlConfig) -> bool:

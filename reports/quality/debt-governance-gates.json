@@ -46,8 +46,8 @@
       "status": "pass"
     },
     {
-      "current": "9fd52743ce272fbf129e3feb88529440cd07000cd4e86fee6460eb9807c264f4",
-      "limit": "9fd52743ce272fbf129e3feb88529440cd07000cd4e86fee6460eb9807c264f4",
+      "current": "96f8e89e1c69d93ee7361d45624f660a5ffb78f28028afd562871a635b5bafb1",
+      "limit": "96f8e89e1c69d93ee7361d45624f660a5ffb78f28028afd562871a635b5bafb1",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
@@ -57,13 +57,13 @@
     {
       "current": {
         "source_module_count": 2614,
-        "source_tree_sha256": "9fd52743ce272fbf129e3feb88529440cd07000cd4e86fee6460eb9807c264f4",
+        "source_tree_sha256": "96f8e89e1c69d93ee7361d45624f660a5ffb78f28028afd562871a635b5bafb1",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
       "limit": {
         "source_module_count": 2614,
-        "source_tree_sha256": "9fd52743ce272fbf129e3feb88529440cd07000cd4e86fee6460eb9807c264f4",
+        "source_tree_sha256": "96f8e89e1c69d93ee7361d45624f660a5ffb78f28028afd562871a635b5bafb1",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },

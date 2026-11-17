@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
 
 import pyarrow as pa
 
@@ -24,7 +23,10 @@ from bioetl.application.services.medallion.medallion_lifecycle import (
     MedallionLifecycleService,
 )
 from bioetl.composition.bootstrap_contexts import DQConfigsContext
-from bioetl.composition.factories.dq.context_resolver import extract_dq_output_paths
+from bioetl.composition.factories.dq.context_resolver import (
+    DQLayerPathSettings,
+    extract_dq_output_paths,
+)
 from bioetl.composition.factories.pipeline._runner_preflight_observer import (
     build_observer as build_observer,
     build_preflight_service as build_preflight_service,
@@ -45,9 +47,6 @@ from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import GoldSchemaType
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
-if TYPE_CHECKING:
-    from bioetl.infrastructure.config.settings_api import Settings
-
 
 @dataclass(frozen=True, slots=True)
 class RunnerAssemblyContext:
@@ -61,7 +60,7 @@ class RunnerAssemblyContext:
     gold_schema: GoldSchemaType
     strict_gold_validation: bool
     dq_configs_extractor: Callable[[PipelineYamlConfig | None], DQConfigsContext]
-    settings: Settings | None = None
+    settings: DQLayerPathSettings | None = None
 
 
 def build_lock_runtime_service(

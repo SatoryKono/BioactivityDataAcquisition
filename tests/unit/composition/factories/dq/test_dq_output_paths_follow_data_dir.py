@@ -130,6 +130,36 @@ async def test_test_mode_bronze_dq_report_is_written_under_data_dir(
 
 
 @pytest.mark.unit
+def test_canonical_rebase_matches_storage_helper(tmp_path: Path) -> None:
+    from bioetl.composition.factories.storage._context_resolution import (
+        rebase_local_data_path,
+    )
+
+    data_dir = tmp_path / "runtime_data"
+    settings = _settings(data_dir)
+    paths = extract_dq_output_paths(_yaml_config(), settings=settings)
+
+    assert paths.bronze_path == str(
+        rebase_local_data_path(
+            Path("data/output/bronze/chembl/activity"),
+            settings.bronze_path,
+        )
+    )
+    assert paths.silver_path == str(
+        rebase_local_data_path(
+            Path("data/output/silver/chembl/activity"),
+            settings.silver_path,
+        )
+    )
+    assert paths.gold_path == str(
+        rebase_local_data_path(
+            Path("data/output/gold/chembl/activity"),
+            settings.gold_path,
+        )
+    )
+
+
+@pytest.mark.unit
 def test_batch_executor_uses_assembly_settings_not_global_data_dir(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,

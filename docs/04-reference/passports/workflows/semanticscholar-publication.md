@@ -5,7 +5,7 @@
 - Kind: `workflow`
 - Typed identity: `workflow:semanticscholar_publication`
 - Schema: `1.0.0`
-- Source revision: `sha256:7d8c21f0ee14b748b330299178b076645b9b0535a44d9ac8405eeb8f8142a1c4`
+- Source revision: `sha256:ba12a2b5ecd63b4a92d9bf2e4f1b9d5dfd8e379f3ae118d1fac275d9b267f774`
 
 ## Evidence
 
@@ -75,7 +75,7 @@
   "provenance": {
     "projector_version": "1.0.0",
     "semantic_content_hash": "sha256:65f474c29afce07b3499652309a4fe755f675b7abfc373364db4769da05d8c67",
-    "source_revision": "sha256:7d8c21f0ee14b748b330299178b076645b9b0535a44d9ac8405eeb8f8142a1c4"
+    "source_revision": "sha256:ba12a2b5ecd63b4a92d9bf2e4f1b9d5dfd8e379f3ae118d1fac275d9b267f774"
   },
   "source_references": [
     {
