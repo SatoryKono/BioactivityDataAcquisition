@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-11-11'
+  Last verified: '2026-11-17'
 
 ______________________________________________________________________
 
@@ -63,7 +63,7 @@ Runtime-зеркала обязательны в пределах их конт�
 | ---- | ----- | --- |
 | Hexagonal / layer boundaries | §1 | ADR-005, ADR-048 |
 | Medallion Bronze/Silver/Gold | §2 | ADR-002, ADR-014, ADR-018 |
-| Composite pipelines | §2.9 | ADR-026 |
+| Composite pipelines | §2.10 | ADR-026 |
 | DQ contracts | §2.8 | ADR-027, ADR-045 |
 | Control-plane / replay | §2.4, §6.1 | ADR-044, ADR-046, ADR-047 |
 | Quarantine aggregate constructor surface | §2.6 | ADR-051 |
@@ -101,8 +101,8 @@ Runtime-зеркала обязательны в пределах их конт�
 | `docs/02-architecture/diagrams/**/*.mmd` | diagram governance | source | ADR-040 lint |
 | Diagram `**/png/**` | diagram governance | render artifact | CI/local only (DOC-GOV-02) |
 
-**KPI / gates:** `python -m scripts.docs check-kpi` (weekly workflow
-`docs-kpi-weekly.yml`); `python -m scripts.docs check-drift --runtime-mirrors --freshness`.
+**KPI / gates:** `python -m scripts.docs check-kpi` (manual `workflow_dispatch`
+on `docs-kpi-weekly.yml`, no `schedule`); `python -m scripts.docs check-drift --runtime-mirrors --freshness`.
 New docs PRs SHOULD declare owner + type + retirement criterion (see
 `docs/03-guides/docs-verification.md`).
 
