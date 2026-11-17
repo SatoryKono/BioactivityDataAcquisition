@@ -21,7 +21,7 @@ CONSUMERS = (
     "grafana/plugins/bioetl-scenes-app",
     "grafana/plugins/bioetl-selectorshell-panel",
 )
-ARCHIVE = BACKPORT / "picomatch-4.0.8-bioetl.6.tgz"
+ARCHIVE = BACKPORT / "picomatch-4.0.8-bioetl.7.tgz"
 
 
 def test_picomatch_surface_is_tarball_only() -> None:
@@ -45,7 +45,7 @@ def test_picomatch_archive_matches_reviewed_source() -> None:
         expected={
             "upstream_commit": "7be3276fb8bd215a8c73fa066bcaf696c244ad88",
             "advisory": "GHSA-fc5q-39xc-vjpf",
-            "local_version": "4.0.8-bioetl.6",
+            "local_version": "4.0.8-bioetl.7",
         },
     )
 
@@ -55,7 +55,7 @@ def test_picomatch_consumers_install_verified_archive(consumer: str) -> None:
     assert_consumers_pin_archive(
         [consumer],
         package_name="picomatch",
-        version="4.0.8-bioetl.6",
+        version="4.0.8-bioetl.7",
         archive=ARCHIVE,
         forbidden_versions=(
             "2.3.2",
@@ -65,6 +65,7 @@ def test_picomatch_consumers_install_verified_archive(consumer: str) -> None:
             "4.0.8-bioetl.3",
             "4.0.8-bioetl.4",
             "4.0.8-bioetl.5",
+            "4.0.8-bioetl.6",
         ),
     )
 
@@ -92,6 +93,8 @@ def test_picomatch_consumers_install_verified_archive(consumer: str) -> None:
         ("*(@(+(a)))", "a", 40),
         ("+(?(+(a)))", "a", 40),
         ("+(@(*(a)))", "a", 40),
+        ("+(a|[a]a)", "a", 40),
+        ("+((a|aa))", "a", 40),
     ],
 )
 def test_repeated_and_nested_extglob_wildcards_finish_with_bounded_input(
@@ -132,3 +135,59 @@ def test_repeated_and_nested_extglob_wildcards_finish_with_bounded_input(
         check=True,
     )
     assert result.stdout.strip() == "false"
+
+
+def test_fail_closed_ignores_max_extglob_recursion_bypass(tmp_path: Path) -> None:
+    with tarfile.open(ARCHIVE) as packed:
+        for member in packed.getmembers():
+            assert member.isfile() and member.name.startswith("package/")
+            relative = Path(member.name)
+            assert ".." not in relative.parts
+            content = packed.extractfile(member)
+            assert content is not None
+            destination = tmp_path / relative
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes(content.read())
+    code = (
+        "const p=require(process.argv[1]);"
+        "const re=p.makeRe('+((a|aa))',{maxExtglobRecursion:false});"
+        "console.log(re.test('a'.repeat(40)+'!'));"
+    )
+    result = subprocess.run(
+        ["node", "-e", code, str(tmp_path / "package")],
+        capture_output=True,
+        text=True,
+        timeout=3,
+        check=True,
+    )
+    assert result.stdout.strip() == "false"
+
+
+def test_fail_closed_preserves_ascii_word_and_glob_smoke(tmp_path: Path) -> None:
+    with tarfile.open(ARCHIVE) as packed:
+        for member in packed.getmembers():
+            assert member.isfile() and member.name.startswith("package/")
+            relative = Path(member.name)
+            assert ".." not in relative.parts
+            content = packed.extractfile(member)
+            assert content is not None
+            destination = tmp_path / relative
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes(content.read())
+    code = (
+        "const p=require(process.argv[1]);"
+        "console.log(["
+        "p.makeRe('*.js').test('a.js'),"
+        "p.makeRe('*.js').test('a.md'),"
+        "p.makeRe('+(ab)').test('ababab'),"
+        "p.makeRe('+(a)').test('aaa')"
+        "].join(','));"
+    )
+    result = subprocess.run(
+        ["node", "-e", code, str(tmp_path / "package")],
+        capture_output=True,
+        text=True,
+        timeout=3,
+        check=True,
+    )
+    assert result.stdout.strip() == "true,false,true,true"
