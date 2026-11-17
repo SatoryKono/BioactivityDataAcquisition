@@ -1416,9 +1416,25 @@ def test_main_docker_validation_only_decouples_main_push_from_publish_approval()
     assert guard["id"] == "head-guard"
     assert "Skipping GHCR publish" in guard["run"]
     assert 'echo "stale=true" >> "$GITHUB_OUTPUT"' in guard["run"]
+    publish_step = next(
+        step for step in publish["steps"] if step.get("id") == "publish"
+    )
+    publish_run = str(publish_step["run"])
+    assert publish_run.index("/branches/main") < publish_run.index(
+        'docker push "${sha_ref}"'
+    )
+    assert "Skipping GHCR publish" in publish_run
+    assert 'echo "stale=true" >> "$GITHUB_OUTPUT"' in publish_run
+    saw_publish = False
     for step in publish["steps"][1:]:
         condition = str(step.get("if", ""))
         assert "steps.head-guard.outputs.stale != 'true'" in condition, step.get("name")
+        if saw_publish:
+            assert "steps.publish.outputs.stale != 'true'" in condition, step.get(
+                "name"
+            )
+        if step.get("id") == "publish":
+            saw_publish = True
 
 
 _TRUSTED_CACHE_TO = (
