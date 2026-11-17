@@ -179,7 +179,10 @@ def test_page_scroll_catalog_still_rejects_internal_overflow() -> None:
     panel = next(p for p in dashboard["panels"] if p["id"] == 3010)
     assert not _first_window_scroll_violations(path, dashboard)
     panel["options"]["overflowY"] = "scroll"
-    assert any("JSON overflow" in hit for hit in _first_window_scroll_violations(path, dashboard))
+    assert any(
+        "JSON overflow" in hit
+        for hit in _first_window_scroll_violations(path, dashboard)
+    )
 
 
 def test_twenty_row_catalog_has_native_row_capacity_without_pagination() -> None:

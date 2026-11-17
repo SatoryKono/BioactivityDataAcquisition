@@ -99,18 +99,30 @@ def test_wide_recent_run_table_exposes_decision_fields_without_changing_data():
         ]
 
     def links(panel, name):
-        override = next(o for o in panel["fieldConfig"]["overrides"] if o["matcher"]["options"] == name)
+        override = next(
+            o
+            for o in panel["fieldConfig"]["overrides"]
+            if o["matcher"]["options"] == name
+        )
         return next(p["value"] for p in override["properties"] if p["id"] == "links")
 
     # Exercise the actual compact-to-wide projection, including the generated
     # hidden identity fields. Neither action may inherit the global selector.
-    for name, title in (("Workflow", "Workflow passport"), ("Data Quality", "Data Quality")):
-        action = next(link for link in links(native, "Run ID") if link["title"] == title)
+    for name, title in (
+        ("Workflow", "Workflow passport"),
+        ("Data Quality", "Data Quality"),
+    ):
+        action = next(
+            link for link in links(native, "Run ID") if link["title"] == title
+        )
         assert links(native, name) == []
         assert links(adaptive, name) == [action]
         assert action in links(adaptive, "Run ID")
         assert action["includeVars"] is False
-    assert "${__data.fields.workflow_passport_path:raw}" in links(adaptive, "Workflow")[0]["url"]
+    assert (
+        "${__data.fields.workflow_passport_path:raw}"
+        in links(adaptive, "Workflow")[0]["url"]
+    )
     dq = links(adaptive, "Data Quality")[0]
     assert dq["targetBlank"] is False
     assert dq["url"].startswith("/d/bioetl-dq-v2/4-data-quality?")

@@ -37,11 +37,19 @@ def enable_adaptive_catalog(dashboard: dict[str, Any]) -> None:
     )
     overrides = panel.get("fieldConfig", {}).get("overrides", [])
     run_id = next(
-        (item for item in overrides if item.get("matcher", {}).get("options") == "Run ID"),
+        (
+            item
+            for item in overrides
+            if item.get("matcher", {}).get("options") == "Run ID"
+        ),
         {},
     )
     actions = next(
-        (prop["value"] for prop in run_id.get("properties", []) if prop["id"] == "links"),
+        (
+            prop["value"]
+            for prop in run_id.get("properties", [])
+            if prop["id"] == "links"
+        ),
         [],
     )
     # Native compact tables move hidden-column actions into the Run ID menu.
@@ -54,7 +62,11 @@ def enable_adaptive_catalog(dashboard: dict[str, Any]) -> None:
             for prop in override.get("properties", []):
                 if prop["id"] == "links":
                     prop["value"] = deepcopy(
-                        [action for action in actions if action.get("title") == restored_actions[name]]
+                        [
+                            action
+                            for action in actions
+                            if action.get("title") == restored_actions[name]
+                        ]
                     )
         if override.get("matcher", {}).get("options") in {
             "Workflow",

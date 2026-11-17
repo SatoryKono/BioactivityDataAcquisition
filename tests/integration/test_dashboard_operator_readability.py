@@ -449,9 +449,10 @@ def test_first_window_panels_do_not_declare_internal_scroll() -> None:
             bottom = int(grid.get("y", 0)) + int(grid.get("h", 0))
             # A governed page-scroll catalog still must not scroll internally.
             # Only its page containment differs from first-screen summaries.
-            if bottom > FIRST_WINDOW_Y and (
-                path.name, panel.get("id")
-            ) not in STRADDLE_ALLOWLIST:
+            if (
+                bottom > FIRST_WINDOW_Y
+                and (path.name, panel.get("id")) not in STRADDLE_ALLOWLIST
+            ):
                 violations.append(
                     f"{path.name}:id={panel.get('id')} first-window bottom "
                     f"{bottom} > FIRST_WINDOW_Y={FIRST_WINDOW_Y}"

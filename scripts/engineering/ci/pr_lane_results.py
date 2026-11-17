@@ -528,6 +528,22 @@ MEMORY_BASELINE_TEST_TARGETS: tuple[str, ...] = (
 
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    "docs/01-requirements/DASHBOARD_REQUIREMENTS.md": (
+        DASHBOARD_OPERATOR_READABILITY_TEST,
+        DASHBOARD_FIRST_WINDOW_NOSCROLL_TEST,
+    ),
+    "docs/03-guides/metrics-monitoring.md": (
+        "tests/architecture/test_observability_docs_drift.py",
+        "tests/unit/infrastructure/observability/test_prometheus_metadata_contract.py",
+    ),
+    "docs/04-reference/observability/metrics-catalog.md": (
+        "tests/architecture/test_observability_docs_drift.py",
+        "tests/unit/infrastructure/observability/test_prometheus_metric_registries.py",
+    ),
+    "tests/fixtures/golden/observability/prometheus_metric_inventory.json": (
+        "tests/unit/infrastructure/observability/test_metrics_golden.py",
+        "tests/unit/infrastructure/observability/test_prometheus_metric_registries.py",
+    ),
     ".gitattributes": (
         HOOK_RECEIPTS_TEST,
         "tests/architecture/test_config_discrepancy_report_drift.py",

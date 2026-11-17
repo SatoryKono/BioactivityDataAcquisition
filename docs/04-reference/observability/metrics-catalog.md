@@ -2,7 +2,7 @@
 
 Complete catalog of all Prometheus metrics defined in BioETL observability system.
 
-**Runtime Metrics: 179** (excluding aliases; derived from
+**Runtime Metrics: 180** (excluding aliases; derived from
 `REGISTERED_PROMETHEUS_METRIC_NAMES`)
 **Governed Recording/Current-State Metrics: 41**
 
@@ -12,7 +12,7 @@ Canonical reconciliation command:
 ## Table of Contents
 
 - [Adapter Metrics](#adapter-metrics) - 17 metrics
-- [Core Metrics](#core-metrics) - 45 metrics
+- [Core Metrics](#core-metrics) - 46 metrics
 - [Health Metrics](#health-metrics) - 13 metrics
 - [Pipeline Checkpoint Metrics](#pipeline-checkpoint-metrics) - 7 metrics
 - [Pipeline Composite Metrics](#pipeline-composite-metrics) - 1 metric
@@ -68,7 +68,8 @@ Canonical reconciliation command:
 | `bioetl_stage_records_total` | Counter | pipeline, run_type, stage, outcome | Total records observed in the canonical stage-model projection |
 | `bioetl_pipeline_stage_expected` | Gauge | pipeline, stage | Whether a pipeline stage is expected (1) or disabled (0) per entity config |
 | `bioetl_stage_backlog_records` | Gauge | pipeline, run_type, stage | Current bounded unresolved record backlog projected by canonical stage |
-| `bioetl_stage_lag_seconds` | Gauge | pipeline, run_type, stage | Current bounded unresolved stage lag in seconds for canonical stage backlogs |
+| `bioetl_stage_lag_seconds` | Gauge | pipeline, run_type, stage | Elapsed run time sampled at terminal projection when backlog is nonzero; not input-record event age |
+| `bioetl_stage_snapshot_observed_timestamp_seconds` | Gauge | pipeline, run_type, stage | Unix clock of the latest application stage projection; zero is invalid, not event or gateway publication time |
 | `bioetl_batch_lifecycle_events_total` | Counter | pipeline, run_type, event, stage, status | Total bounded batch lifecycle events projected by layer stage and outcome status |
 | `bioetl_batch_lifecycle_records_total` | Counter | pipeline, run_type, event, stage, status | Total records associated with bounded batch lifecycle event projections |
 | `bioetl_output_artifact_publication_events_total` | Counter | pipeline, stage, status | Total bounded output artifact publication outcomes by stage and status |
@@ -96,7 +97,7 @@ Canonical reconciliation command:
 | `bioetl_vacuum_files_removed_total` | Counter | table, layer | Total files removed by vacuum operations |
 | `bioetl_dq_validation_score` | Gauge | pipeline, entity | Data quality validation score (0.0-1.0, where 1.0 = all records valid) |
 | `bioetl_dq_validation_record_count` | Gauge | pipeline, entity | Record count associated with the latest entity-level DQ validation score |
-| `bioetl_data_freshness_seconds` | Gauge | pipeline, entity | Unix timestamp in seconds for the last successful data ingestion for pipeline/entity; consumers derive lag via time() - metric |
+| `bioetl_data_freshness_seconds` | Gauge | pipeline, entity | Unix run-start processing anchor from successful DQ evaluation; age is time() - metric, not provider input-event or completion age |
 | `bioetl_dq_anomaly_detected_total` | Counter | pipeline, metric, severity, anomaly_type | Total number of data quality anomalies detected |
 | `bioetl_dq_check_duration_ms` | Histogram | pipeline | Duration of data quality check in milliseconds |
 | `bioetl_dq_monitor_enabled` | Gauge | pipeline, entity | Whether anomaly detection is configured for the pipeline/entity (1 enabled, 0 disabled) |
@@ -422,7 +423,7 @@ separate from actual `record:` outputs and direct runtime collector families.
 
 ## Summary
 
-- **Runtime Metrics**: 179 (excluding aliases; canonical registry-backed count)
+- **Runtime Metrics**: 180 (excluding aliases; canonical registry-backed count)
 - **Governed Recording/Current-State Metrics**: 41
 - **Total Categories**: 15
 - **Metric Types Distribution**:
