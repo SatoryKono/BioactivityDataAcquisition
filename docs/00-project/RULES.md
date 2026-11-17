@@ -1210,11 +1210,14 @@ pip install -e ".[tests]"
 ```python
 # RetryConfig.calculate_delay (src/bioetl/domain/resilience.py)
 hash_input = f"{attempt}:{url}:{self.jitter_seed or 0}"
-digest = hashlib.md5(hash_input.encode(), usedforsecurity=False).hexdigest()
-jitter_factor = int(digest[:8], 16) / 0xFFFFFFFF
+jitter_digest = md5(hash_input.encode("utf-8")).hexdigest()
+jitter_factor = int(jitter_digest[:8], 16) / 0xFFFFFFFF
 ```
 
-`RetryConfig(jitter_seed=42)` задаёт воспроизводимый seed. Конструктор не принимает `deterministic`.
+В файле тот же дайджест записан как
+`hashlib.md5(hash_input.encode(), usedforsecurity=False)`: `encode()` без
+аргумента использует UTF-8. `RetryConfig(jitter_seed=42)` задаёт
+воспроизводимый seed. Конструктор не принимает `deterministic`.
 
 #### Единый Источник Времени
 
