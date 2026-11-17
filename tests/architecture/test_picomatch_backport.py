@@ -21,7 +21,7 @@ CONSUMERS = (
     "grafana/plugins/bioetl-scenes-app",
     "grafana/plugins/bioetl-selectorshell-panel",
 )
-ARCHIVE = BACKPORT / "picomatch-4.0.8-bioetl.11.tgz"
+ARCHIVE = BACKPORT / "picomatch-4.0.8-bioetl.12.tgz"
 
 
 @pytest.fixture
@@ -60,7 +60,7 @@ def test_picomatch_archive_matches_reviewed_source() -> None:
         expected={
             "upstream_commit": "7be3276fb8bd215a8c73fa066bcaf696c244ad88",
             "advisory": "GHSA-fc5q-39xc-vjpf",
-            "local_version": "4.0.8-bioetl.11",
+            "local_version": "4.0.8-bioetl.12",
         },
     )
 
@@ -70,7 +70,7 @@ def test_picomatch_consumers_install_verified_archive(consumer: str) -> None:
     assert_consumers_pin_archive(
         [consumer],
         package_name="picomatch",
-        version="4.0.8-bioetl.11",
+        version="4.0.8-bioetl.12",
         archive=ARCHIVE,
         forbidden_versions=(
             "2.3.2",
@@ -85,6 +85,7 @@ def test_picomatch_consumers_install_verified_archive(consumer: str) -> None:
             "4.0.8-bioetl.8",
             "4.0.8-bioetl.9",
             "4.0.8-bioetl.10",
+            "4.0.8-bioetl.11",
         ),
     )
 
@@ -237,3 +238,32 @@ def test_nested_at_under_negate_and_class_false_positives(
         check=True,
     )
     assert result.stdout.strip() == "true"
+
+
+@pytest.mark.parametrize(
+    ("pattern", "prefix"),
+    [
+        ("@('+(a)+(a)+(a)+(a)+(a)+(a)+(a)+(a))", "'"),
+        ("!('+(a)+(a)+(a)+(a)+(a)+(a)+(a)+(a))", "'"),
+        ("@([+(a)+(a)+(a)+(a)+(a)+(a)+(a)+(a))", "["),
+        ("!([+(a)+(a)+(a)+(a)+(a)+(a)+(a)+(a))", "["),
+    ],
+)
+def test_quote_and_unclosed_bracket_nested_repeat_bypass(
+    pattern: str,
+    prefix: str,
+    packed_picomatch: Path,
+) -> None:
+    code = (
+        "const p=require(process.argv[1]);"
+        "const re=p.makeRe(process.argv[2]);"
+        "console.log(re.test(process.argv[3]+'a'.repeat(62)+'!'));"
+    )
+    result = subprocess.run(
+        ["node", "-e", code, str(packed_picomatch), pattern, prefix],
+        capture_output=True,
+        text=True,
+        timeout=3,
+        check=True,
+    )
+    assert result.stdout.strip() == "false"

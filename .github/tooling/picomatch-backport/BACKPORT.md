@@ -1,7 +1,7 @@
 # Local picomatch security backport
 
 This is a private BioETL build, **not an upstream release**. Version
-`4.0.8-bioetl.11` identifies modified code based on upstream `4.0.7`.
+`4.0.8-bioetl.12` identifies modified code based on upstream `4.0.7`.
 
 It addresses GHSA-fc5q-39xc-vjpf / CVE-2026-112366 with a **fail-closed**
 boundary:
@@ -17,7 +17,9 @@ boundary:
    quantifiers (`@(+(a))+` / `(+(a))+`) and ambiguous finite alternatives
    (`(a|aa)+` / `@(a|aa)+` / `{a,aa}+`). Explicit `+(word)` extglobs remain supported.
 6. Nested `@(...)` body markers propagate to parent negate `inner` (`*` / `/`).
-   Bracket/quoted `+(…)` / `*(…)` are not treated as nested repeated extglobs.
+   Closed character classes and double-quoted `+(…)` / `*(…)` are not treated as
+   nested repeated extglobs; single quotes and unclosed `[` stay literal and do
+   not hide later `+(…)` / `*(…)`.
 
 Third-party sources ship **only** in the npm archive.
 **No OSV advisory is ignored or suppressed.**
