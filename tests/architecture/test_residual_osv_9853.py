@@ -50,6 +50,38 @@ def _lock_packages(path: Path) -> dict[str, Any]:
     return cast(dict[str, Any], packages)
 
 
+def _osv_scanner_scan_args(workflow_path: Path) -> str:
+    """Return executable OSV-Scanner ``scan-args`` (YAML comments already dropped)."""
+    workflow = yaml.safe_load(workflow_path.read_text(encoding="utf-8"))
+    assert isinstance(workflow, dict)
+    jobs = workflow.get("jobs")
+    assert isinstance(jobs, dict)
+    for job in jobs.values():
+        if not isinstance(job, dict):
+            continue
+        steps = job.get("steps")
+        if not isinstance(steps, list):
+            continue
+        for step in steps:
+            if not isinstance(step, dict):
+                continue
+            uses = str(step.get("uses") or "")
+            if "osv-scanner-action/osv-scanner-action@" not in uses:
+                continue
+            with_block = step.get("with") or {}
+            assert isinstance(with_block, dict)
+            scan_args = with_block.get("scan-args")
+            assert isinstance(scan_args, str) and scan_args.strip(), workflow_path.name
+            # Drop residual shell-style comments inside the multiline scalar.
+            active_lines = [
+                line
+                for line in scan_args.splitlines()
+                if line.strip() and not line.lstrip().startswith("#")
+            ]
+            return "\n".join(active_lines)
+    raise AssertionError(f"OSV-Scanner step missing in {workflow_path}")
+
+
 def test_osv_scanner_toml_must_not_exist() -> None:
     """Scorecard Vulnerabilities #1294 must not be greened via osv-scanner.toml."""
     assert not (ROOT / "osv-scanner.toml").exists()
@@ -109,9 +141,10 @@ def test_picomatch_residual_osv_is_timeboxed() -> None:
     assert PICOMATCH_GHSA in security_md
     assert PICOMATCH_EXPIRY in security_md
     assert "#13180" in security_md
-    # Residual surfaces must stay in the OSV lockfile scan set. Exact picomatch
-    # versions are not pinned here: a patched bump must not fail this gate while
-    # the GHSA id remains allowlisted until #13180 expiry/re-triage.
+    # Residual surfaces must stay in the active OSV-Scanner step args (not in
+    # YAML/shell comments). Exact picomatch versions are not pinned: a patched
+    # bump must not fail this gate while the GHSA id remains allowlisted until
+    # #13180 expiry/re-triage.
     scanned_lockfiles = (
         "grafana/plugins/bioetl-scenes-app/package-lock.json",
         "grafana/plugins/bioetl-selectorshell-panel/package-lock.json",
@@ -121,9 +154,9 @@ def test_picomatch_residual_osv_is_timeboxed() -> None:
         SECURITY_WORKFLOW,
         ROOT / ".github" / "workflows" / "pr-required.yml",
     ):
-        workflow_text = workflow_path.read_text(encoding="utf-8")
+        scan_args = _osv_scanner_scan_args(workflow_path)
         for lockfile in scanned_lockfiles:
-            assert f"--lockfile={lockfile}" in workflow_text, workflow_path.name
+            assert f"--lockfile={lockfile}" in scan_args, workflow_path.name
     for lock_path in (SCENES_LOCK, SELECTOR_LOCK, JSCPD_LOCK):
         packages = _lock_packages(lock_path)
         assert "node_modules/picomatch" in packages, lock_path.as_posix()
