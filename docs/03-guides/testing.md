@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-08-26'
+  Last verified: '2026-11-17'
 
 ______________________________________________________________________
 
@@ -364,8 +364,8 @@ Supported policy slice for issue `#2598`:
 - canonical VCR metadata catalog теперь существует как tracked artifact в `reports/quality/vcr-metadata-catalog.json`
 - canonical tooling paths активированы для enforced rollout: `scripts/engineering/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py` служит canonical repo-wide backfill entry point и check-path для managed inventory drift
 - descriptive test-health taxonomy теперь canonical-фиксируется в `configs/quality/test_health_reporting.yaml`; статусы `fully_exercised_green`, `staged_green`, `environment_limited_green` остаются informational и не заменяют merge-blocking CI status
-- monthly `contract-tests.yml` ОТКЛЮЧЁН (`KEEP-DISABLED`, #11190: Actions billing не вернётся, schedule удалён). Live-контракты в CI не исполняются; merge-истиной является offline lane `contract-confidence` из `tests.yml` (блокирующий job без `continue-on-error`, результат входит в `pr-gate-complete` через gate `tests`, а пока CI остановлен — через ручной merge gate из `.github/CONTRIBUTING.md`)
-- локальный прогон live-контрактов (не реже раза в месяц, владелец — автор релизного PR): `BIOETL_LIVE_API_TESTS=true BIOETL_NETWORK_TESTS=true pytest tests/contract/ --network -q --tb=short` (опционально `-k "<provider-или-all>"`, `-m "not slow"` для пропуска медленных); отчёт сохранить в `reports/` (ignored) и приложить к ближайшему PR; падение фиксировать отдельным issue с логом
+- `contract-tests.yml` — `KEEP-DISABLED` (#11190): только `workflow_dispatch`, без `schedule` и без ежемесячного cron. Live-контракты в CI не исполняются. Offline lane `contract-confidence` живёт в `tests.yml`; этот workflow вызывается из `nightly.yml`, а не из `pr-required.yml`. Пока CI остановлен, ручной merge gate описан в `.github/CONTRIBUTING.md`
+- локальный прогон live-контрактов (не CI и не `schedule`; владелец — автор релизного PR): `BIOETL_LIVE_API_TESTS=true BIOETL_NETWORK_TESTS=true pytest tests/contract/ --network -q --tb=short` (опционально `-k "<provider-или-all>"`, `-m "not slow"` для пропуска медленных); отчёт сохранить в `reports/` (ignored) и приложить к ближайшему PR; падение фиксировать отдельным issue с логом
 - минимальный live-contract baseline теперь полностью enforceable: `chembl`, `pubchem`, `uniprot`, `pubmed`, `crossref`, `openalex`, `semanticscholar` обязаны иметь live contract suites
 - для `semanticscholar` live governance теперь разделена:
   - `tests/contract/test_semanticscholar_contract.py` содержит promotion-grade путь;
@@ -859,7 +859,7 @@ bash scripts/engineering/dev/run_pytest_sharded.sh \
 | Integration replay         | `uv run python -m pytest tests/integration/ --vcr-record=none -m "integration and not e2e"` | `.\scripts\engineering\dev\run_pytest.ps1 tests\integration\ --vcr-record=none -m "integration and not e2e"` | `bash scripts/engineering/dev/run_pytest.sh tests/integration/ --vcr-record=none -m "integration and not e2e"` | canonical stable feedback path                              |
 | E2E replay                 | `uv run python -m pytest tests/e2e/ -m e2e --vcr-record=none -v`                            | `.\scripts\engineering\dev\run_pytest.ps1 tests\e2e\ -m e2e --vcr-record=none`                               | `bash scripts/engineering/dev/run_pytest.sh tests/e2e/ -m e2e --vcr-record=none`                               | local-only execution, no live network                       |
 | Targeted cassette refresh  | `uv run python -m pytest <target> --vcr-record=new_episodes -v`                             | `.\scripts\engineering\dev\run_pytest.ps1 <target> --vcr-record=new_episodes -v`                             | `bash scripts/engineering/dev/run_pytest.sh <target> --vcr-record=new_episodes -v`                             | supported refresh path                                      |
-| Live contract verification | `uv run pytest tests/contract/ -v --tb=short --network`                                     | n/a                                                                                                          | n/a                                                                                                            | scheduled/manual workflow path, separate from replay policy |
+| Live contract verification | `uv run pytest tests/contract/ -v --tb=short --network`                                     | n/a                                                                                                          | n/a                                                                                                            | local only; `contract-tests.yml` is `KEEP-DISABLED` (#11190), `workflow_dispatch` only, no schedule |
 
 ### 4.3. Cassette lifecycle rules
 
@@ -890,8 +890,9 @@ bash scripts/engineering/dev/run_pytest_sharded.sh \
 ### 4.4. Provider contract drift runbook
 
 `provider-contract-drift.yml` is a replay/snapshot governance gate, not a live
-API gate. It must stay network-free on pull requests and pushes; live provider
-verification remains isolated in the monthly/manual `contract-tests.yml` path.
+API gate. It must stay network-free on pull requests and pushes. Live provider
+verification is not a CI schedule: `contract-tests.yml` is `KEEP-DISABLED`
+(#11190), `workflow_dispatch` only, with no monthly cron.
 
 Run the same focused gate locally when changing provider adapters, provider
 configs, xwalk files, generated normalization artifacts, or export snapshot
@@ -1073,7 +1074,7 @@ tests.yml
 └── dq-consistency-gate
 
 contract-tests.yml
-└── scheduled/manual live contract workflow for tests/contract/
+└── KEEP-DISABLED (#11190): workflow_dispatch only, no schedule
 
 provider-contract-drift.yml
 └── replay-based provider API drift gate for provider-facing snapshots
