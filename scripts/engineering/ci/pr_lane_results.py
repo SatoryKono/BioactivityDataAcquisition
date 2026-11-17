@@ -561,6 +561,24 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "scripts/engineering/dev/setup_bioetl_wsl.ps1": (
         "tests/unit/scripts/test_wsl_uv_install_integrity.py",
     ),
+    "scripts/engineering/dev/setup_env_windows.ps1": (
+        "tests/unit/scripts/test_zed_env_doctor.py",
+        "tests/unit/repo_backed/scripts/engineering/dev/test_environment_reproducibility.py",
+    ),
+    "scripts/engineering/dev/setup_env_wsl.sh": (
+        "tests/unit/repo_backed/scripts/engineering/dev/test_setup_env_wsl_branches.py",
+    ),
+    "configs/README.md": (
+        "tests/architecture/test_config_validation_surface.py",
+        DOCUMENTATION_SYNC_TEST,
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    "scripts/engineering/dev/README.md": (
+        "tests/unit/repo_backed/scripts/test_zed_portability.py",
+        "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
+        SCRIPTS_INVENTORY_MANIFEST_TEST,
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
     "docs/05-operations/runbooks/scoped-post-change-checks.md": (
         SCOPED_CHECKS_TEST,
         HOOK_RECEIPTS_TEST,
@@ -2052,6 +2070,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
 # file mapping would need hundreds of entries. Each prefix still maps to real
 # governing tests; fail-closed semantics are unchanged for unmapped paths.
 AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
+    "configs/ide/zed/": (
+        "tests/unit/repo_backed/scripts/test_zed_portability.py",
+        "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
+    ),
     "tests/fixtures/grafana/run_explorer/": (
         "tests/integration/test_run_explorer_request_fixtures.py",
         "tests/integration/test_run_explorer_http_catalog.py",
