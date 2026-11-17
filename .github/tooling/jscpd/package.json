@@ -11,6 +11,6 @@
   },
   "devDependencies": {
     "braces": "file:../braces-backport/braces-3.0.4-bioetl.1.tgz",
-    "picomatch": "file:../picomatch-backport/picomatch-4.0.8-bioetl.9.tgz"
+    "picomatch": "file:../picomatch-backport/picomatch-4.0.8-bioetl.10.tgz"
   }
 }
