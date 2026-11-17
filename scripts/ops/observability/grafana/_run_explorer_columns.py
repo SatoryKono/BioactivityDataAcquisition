@@ -222,8 +222,8 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
     _apply_run_explorer_templating(payload)
     panels = {panel["id"]: panel for panel in payload["panels"]}
     # Reserve three rows for both the navigation and scope banner side by side.
-    # The catalog intentionally continues down the page; its grid must fit all
-    # twenty native 36px rows, not force an inner scrollbar or smaller text.
+    # Keep the catalog within the first window; pagination retains all twenty
+    # launches without an inner scrollbar or smaller text.
     if nav := panels.get(1000):
         nav["gridPos"].update(x=0, y=0, w=16, h=3)
         panels[1]["gridPos"].update(x=16, y=0, w=8, h=3)
@@ -250,12 +250,13 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
     recent = next(item for item in catalog["panels"] if item["id"] == 3010)
     panel["title"] = recent["title"]
     panel["targets"][0]["url"] = recent["url"]
-    panel["gridPos"].update(y=3, h=30)
+    panel["gridPos"].update(y=3, h=15)
+    panel["options"].setdefault("footer", {})["enablePagination"] = True
     panel["description"] = (
         "GLOBAL · BROWSE the launch catalog filtered by Workflow/Pipeline/Run Type. "
         "Last 20 launches, newest Started first, independent of the time range. "
-        "All twenty rows fit the wide table without pagination or internal scrolling; "
-        "scroll the page to see the complete catalog. "
+        "All twenty launches remain available through pagination within the first window, "
+        "without internal scrolling. "
         "Workflow and Pipeline open passports. Run ID opens the persisted Report. "
         "Pipeline shows the entity component beside Provider; the full canonical "
         "pipeline is retained for tooltips and every handoff. "

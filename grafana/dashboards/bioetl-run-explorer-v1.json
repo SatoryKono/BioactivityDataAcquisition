@@ -399,9 +399,9 @@
       "id": 3010,
       "type": "table",
       "title": "Inspect Recent Runs (last 20)",
-      "description": "GLOBAL · BROWSE the launch catalog filtered by Workflow/Pipeline/Run Type. Last 20 launches, newest Started first, independent of the time range. All twenty rows fit the wide table without pagination or internal scrolling; scroll the page to see the complete catalog. Workflow and Pipeline open passports. Run ID opens the persisted Report. Pipeline shows the entity component beside Provider; the full canonical pipeline is retained for tooltips and every handoff. The full UUID is available in the cell tooltip and cell inspection without widening the column or wrapping the row. Overview is processing status, not replay readiness. Saved Evidence, Data Quality and Replay Readiness use exact-run verified evidence. N/A means unsupported/legacy assessment. INCOMPLETE means missing required evidence. IN PROGRESS requires an explicit assessment queue/running signal and is never inferred. QUERY ERROR is a source failure; VALID EMPTY means no matching launches. Rows are artifact-backed: a tree_missing index means saved run artifacts are absent; verify backing with verify_report_bind.py. Running is a recorded state, not proof of current liveness. Missing reports have no link. Compact view: Pipeline, Run ID, Started, Overview and Replay Readiness. Workflow, Provider, Duration, Saved Evidence and Data Quality remain in the table data inspector. Their handoff actions are also in the Run ID menu. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response. F-13 workflow rule: when the row workflow label is empty/missing, handoffs omit var-workflow (do not emit null/empty workflow).",
+      "description": "GLOBAL · BROWSE the launch catalog filtered by Workflow/Pipeline/Run Type. Last 20 launches, newest Started first, independent of the time range. All twenty launches remain available through pagination within the first window, without internal scrolling. Workflow and Pipeline open passports. Run ID opens the persisted Report. Pipeline shows the entity component beside Provider; the full canonical pipeline is retained for tooltips and every handoff. The full UUID is available in the cell tooltip and cell inspection without widening the column or wrapping the row. Overview is processing status, not replay readiness. Saved Evidence, Data Quality and Replay Readiness use exact-run verified evidence. N/A means unsupported/legacy assessment. INCOMPLETE means missing required evidence. IN PROGRESS requires an explicit assessment queue/running signal and is never inferred. QUERY ERROR is a source failure; VALID EMPTY means no matching launches. Rows are artifact-backed: a tree_missing index means saved run artifacts are absent; verify backing with verify_report_bind.py. Running is a recorded state, not proof of current liveness. Missing reports have no link. Compact view: Pipeline, Run ID, Started, Overview and Replay Readiness. Workflow, Provider, Duration, Saved Evidence and Data Quality remain in the table data inspector. Their handoff actions are also in the Run ID menu. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response. F-13 workflow rule: when the row workflow label is empty/missing, handoffs omit var-workflow (do not emit null/empty workflow).",
       "gridPos": {
-        "h": 30,
+        "h": 15,
         "w": 24,
         "x": 0,
         "y": 3
@@ -1569,7 +1569,7 @@
         "showHeader": true,
         "footer": {
           "show": false,
-          "enablePagination": false,
+          "enablePagination": true,
           "countRows": false
         },
         "cellHeight": "sm",

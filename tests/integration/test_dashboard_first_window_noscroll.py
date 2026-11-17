@@ -173,8 +173,8 @@ def test_first_window_overflow_allowlists_stay_empty() -> None:
     assert HORIZONTAL_SCROLL_ALLOWLIST == {}
 
 
-def test_page_scroll_catalog_still_rejects_internal_overflow() -> None:
-    """The operator's page-scroll decision does not permit inner scroll/clip."""
+def test_paginated_catalog_still_rejects_internal_overflow() -> None:
+    """Pagination must not permit inner scroll/clip."""
     path = Path("grafana/dashboards/bioetl-run-explorer-v1.json")
     dashboard = deepcopy(load_dashboard(path))
     panel = next(p for p in dashboard["panels"] if p["id"] == 3010)
@@ -186,8 +186,8 @@ def test_page_scroll_catalog_still_rejects_internal_overflow() -> None:
     )
 
 
-def test_twenty_row_catalog_has_native_row_capacity_without_pagination() -> None:
-    """36px Grafana small rows need actual panel space, not just a limit=20 URL."""
+def test_twenty_row_catalog_fits_first_window_with_pagination() -> None:
+    """Retain twenty launches while bounding the viewport in both profiles."""
     from tests.integration._dashboard_layout_budgets import panel_declared_row_cap
 
     for profile in ("dashboards", "dashboards-adaptive"):
@@ -195,12 +195,10 @@ def test_twenty_row_catalog_has_native_row_capacity_without_pagination() -> None
         panel = next(p for p in load_dashboard(path)["panels"] if p["id"] == 3010)
         assert panel_declared_row_cap(panel) == 20
         assert panel["options"]["cellHeight"] == "sm"
-        assert not panel["options"].get("enablePagination", False)
-        assert not panel["options"].get("footer", {}).get("enablePagination", False)
-        # Grafana grid: 30px row + 8px gutter, no trailing gutter. Reserve
-        # 64px for a wrapped header and 40px for panel title/body chrome.
-        panel_px = panel["gridPos"]["h"] * 38 - 8
-        assert panel_px >= 20 * 36 + 64 + 40
+        assert panel["options"]["footer"]["enablePagination"] is True
+        grid = panel["gridPos"]
+        assert grid["y"] + grid["h"] <= FIRST_WINDOW_Y
+        assert (path.name, 3010) not in STRADDLE_ALLOWLIST
 
 
 def test_containment_types_cover_every_shipped_first_window_panel() -> None:

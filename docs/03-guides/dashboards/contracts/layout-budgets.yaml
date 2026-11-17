@@ -213,15 +213,7 @@ answer_panels:
     title: Inspect Recent Runs (last 20)
 trust_gate_panels: []
 allowlists:
-  straddle:
-  - dashboard: bioetl-run-explorer-v1.json
-    id: 3010
-    owner: '@bioetl-observability'
-    rationale: Explicit operator decision on 2026-11-16 sets panel height to 30 grid rows and permits
-      page scrolling for the twenty-run catalog. All twenty native rows must fit the tall panel
-      without internal scrolling or pagination.
-      This changes page containment only; internal overflow and horizontal-scroll gates still apply.
-    retire_when: the operator replaces the full twenty-row catalog with a first-screen summary
+  straddle: []
   first_window_overflow: []
   synthetic_zero: []
   horizontal_scroll: []
