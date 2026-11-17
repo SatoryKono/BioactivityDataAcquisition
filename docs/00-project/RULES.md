@@ -1,7 +1,7 @@
 ______________________________________________________________________
 
 Version: 6.1.13
-Last verified: 2026-09-25
+Last verified: 2026-11-17
 Status: active
 Class: published
 Owner: BioETL Team
@@ -23,11 +23,11 @@ ______________________________________________________________________
 | Удалить битые данные                   | 2.6          | `bioetl quarantine purge --pipeline ...` |
 | Подготовить staging-like local profile | 5.6.1        | Environment isolation                    |
 | Восстановление при аварии              | 5.5          | DR Runbook                               |
-| Откат релиза                           | 7.2          | Rollback Strategy                        |
+| Откат релиза                           | 8.2          | Rollback Strategy                        |
 | Безопасность                           | 5.4          | Security Policy                          |
-| Forensic retention для таблицы         | 2.1.1, App D | Config `forensic-retention`              |
+| Forensic retention для таблицы         | 2.1.3        | Config `forensic-retention`              |
 | Backfill с эксклюзивной блокировкой    | 2.4          | Lock Mechanism                           |
-| Deprecation поля                       | 7.1, App E   | Schema Evolution                         |
+| Deprecation поля                       | App E.3      | Schema Evolution                         |
 
 ### Уровни Требований (Governance)
 
@@ -399,17 +399,33 @@ Lock key включает тип запуска:
   configs, CLI, metrics, locks, paths, docs и migration aliases в одном
   change set.
 
-**Реализация:**
+**Реализация:** `clear()` не читает `run_type`. Режим задаёт
+`MedallionPolicy.for_run_type`: `INCREMENTAL` получает `ClearPolicy.NEVER`,
+`REBUILD` и `BACKFILL` — `ClearPolicy.SILVER_AND_GOLD`.
 
 ```python
-# В MedallionLifecycleService.clear()
-if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
-    await self.services.storage.clear_silver(self.config.silver_table)
-    if self.config.gold_table:
-        await self.services.storage.clear_gold(self.config.gold_table)
+# src/bioetl/application/services/medallion/medallion_lifecycle.py
+async def clear(
+    self,
+    policy: MedallionPolicy,
+    silver_table: str,
+    gold_table: str,
+    dry_run: bool = False,
+) -> ClearResult:
+    ...
 ```
 
-**Проверка:** Интеграционный тест `tests/integration/test_runner_lifecycle.py::test-incremental-skips-clear`.
+**Проверка:**
+
+- Собираемый lifecycle-узел
+  `tests/integration/test_runner_lifecycle.py::TestPipelineRunnerLifecycle::test_incremental_skips_clear`
+  проверяет, что runner не записывает `storage.clear_silver` и `storage.clear_gold`.
+  Он подменяет `prepare_for_run` и не вызывает `MedallionLifecycleService.clear`.
+- Инвариант очистки проверяет
+  `tests/architecture/test_medallion_policy.py::test_medallion_clear_policy[incremental-False]`:
+  реальный `MedallionLifecycleService.clear` с
+  `MedallionPolicy.for_run_type(RunType.INCREMENTAL)` не вызывает `clear_silver`
+  и `clear_gold`.
 
 ### 2.5. Стратегия Партиционирования
 
@@ -608,7 +624,7 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 
 - **Детекция Коллизий**: При upsert проверять `source_record_id`; если отличается — конфликт, логировать обе записи.
 
-### 2.9. Composite Pipelines
+### 2.10. Composite Pipelines
 
 См. [ADR-026](../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md) для архитектуры композитных пайплайнов.
 
@@ -619,7 +635,7 @@ Composite Pipeline объединяет данные из нескольких �
 1. **Enricher Pipelines** — обогащают данными из других источников (CrossRef, OpenAlex, PubMed)
 1. **Merge Step** — объединяет все обогащения в единую Gold-сущность
 
-#### 2.9.1. Dependency Pipelines (Chained Dependencies)
+#### 2.10.1. Dependency Pipelines (Chained Dependencies)
 
 Dependencies — пайплайны, которые запускаются **после seed, но до enrichers**. В отличие от enrichers (читают из Silver), dependencies выполняют полный цикл API→Bronze→Silver.
 
@@ -665,7 +681,7 @@ dependencies:
 | `timeout_seconds` | int     | Таймаут выполнения                           |
 | `silver_table`    | string? | Путь к Silver-таблице                        |
 
-#### 2.9.2. Merge Configuration
+#### 2.10.2. Merge Configuration
 
 | Параметр               | Описание                            | Значения                                                           |
 | ---------------------- | ----------------------------------- | ------------------------------------------------------------------ |
@@ -675,7 +691,7 @@ dependencies:
 
 Aliases в скобках эквивалентны соответствующим основным значениям. Для `explicit_rules` и `explicit` обязателен непустой `field_priorities`; проверка выполняется при загрузке схемы.
 
-#### 2.9.3. preserve_all_sources Feature
+#### 2.10.3. preserve_all_sources Feature
 
 Опция `preserve_all_sources` в `MergeConfig` контролирует обработку колонок при слиянии:
 
@@ -718,7 +734,7 @@ pubmed.publication.title        # Значение из PubMed
 - **`preserve_all_sources: true`**: Анализ качества данных, сравнение источников, ML-фичи из нескольких провайдеров
 - **`preserve_all_sources: false`**: Продакшн-витрины с единственной "лучшей" версией каждого поля
 
-#### 2.9.4. Column Groups
+#### 2.10.4. Column Groups
 
 Для контроля порядка колонок в output используется конфигурация `column_groups`:
 
@@ -733,7 +749,7 @@ merge:
       provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
 ```
 
-#### 2.9.5. Field Group Registry
+#### 2.10.5. Field Group Registry
 
 `FieldGroupRegistry` обеспечивает семантическую группировку полей для:
 
@@ -766,7 +782,7 @@ merge:
 
 **Интеграция:** Bootstrap загружает реестр из YAML и инжектит в `MergeService`. При записи Gold trash-колонки фильтруются автоматически. При отсутствии конфигурации — graceful degradation (фильтрация не применяется).
 
-#### 2.9.6. Column Renames (Layer-Specific)
+#### 2.10.6. Column Renames (Layer-Specific)
 
 `rename-fields` в `data-schema` конфигурации позволяет переименовывать колонки на уровне Silver и Gold слоёв.
 
@@ -848,8 +864,8 @@ pmid → pmid → pubmed-id
 
 - **Max Attempts**: 3
 - **Multiplier**: 2.0 (wait 1s, 2s, 4s...)
-- **Jitter**: Random(0.1s, 0.5s). Jitter **SHOULD** применяться для избежания thundering herd.
-- **Deterministic Mode**: При `RetryConfig(deterministic=True)` jitter **MUST** вычисляться через hash вместо random для воспроизводимости. См. [ADR-014](../02-architecture/decisions/ADR-014-deterministic-writes.md).
+- **Jitter**: `RetryConfig.jitter_range` по умолчанию `(0.1, 0.5)`. Jitter **SHOULD** применяться для избежания thundering herd.
+- **Deterministic jitter**: `RetryConfig.calculate_delay` **MUST** считать коэффициент как `int(digest[:8], 16) / 0xFFFFFFFF` (MD5 от `f"{attempt}:{url}:{jitter_seed or 0}"`). Поля `deterministic` у `RetryConfig` нет. См. [ADR-014](../02-architecture/decisions/ADR-014-deterministic-writes.md) и `src/bioetl/domain/resilience.py`.
 
 ### 3.1.4. Circuit Breaker (Размыкатель цепи)
 
@@ -1121,7 +1137,7 @@ class LegacyAdapter(BaseSyncAdapter):
   - **Helpers**: `create-test-context()`, `assert-bronze-files-exist()`, `assert-silver-table-has-records()`.
   - **Маркер**: `@pytest.mark.e2e` для селективного запуска.
   - **Запуск**: `pytest tests/e2e/ -v -m e2e`.
-- **Contract Tests**: Ежемесячный запуск против *реальных* API (Live) в отдельном CI workflow для обнаружения нарушения контрактов.
+- **Contract Tests**: Live-прогон против реальных API в `.github/workflows/contract-tests.yml` имеет статус `KEEP-DISABLED` (#11190): только `workflow_dispatch`, без `schedule` и без ежемесячного cron. Live-контракты в CI не исполняются.
 - **Behavior changes**: любое изменение наблюдаемого поведения **MUST**
   сопровождаться новым или обновлённым regression test. Для bug fix тест
   **MUST** воспроизводить прежний дефект и проходить после исправления.
@@ -1131,7 +1147,8 @@ class LegacyAdapter(BaseSyncAdapter):
 - **Deterministic tests**: unit/integration tests **MUST NOT** зависеть от
   uncontrolled wall-clock time, unseeded randomness или live network.
   Используются fixed/frozen time, seeded inputs, mocks, fixtures или VCR
-  cassettes. Live contract tests остаются отдельным явно маркированным workflow.
+  cassettes. Live contract tests остаются в `KEEP-DISABLED` workflow
+  `contract-tests.yml` и не исполняются в обычном CI.
 
 #### 4.2.1. Тестовые Зависимости и Установка
 
@@ -1167,7 +1184,7 @@ pip install -e ".[tests]"
 
 1. Storage writers **MUST NOT** использовать модуль `random`
 1. Timestamps **MUST** передаваться из application слоя, не создаваться в infrastructure
-1. Retry jitter **MUST** быть детерминистичным при `deterministic=True`
+1. Retry jitter **MUST** быть детерминистичным: коэффициент `int(digest[:8], 16) / 0xFFFFFFFF` в `RetryConfig.calculate_delay`. Поля `deterministic` нет
 1. `PipelineContext.started-at` — единственный источник времени для batch
 1. Application и Interfaces слои **MUST NOT** импортировать `structlog` напрямую — использовать `LoggerPort` из `domain.ports`
 1. Output artifacts **MUST** использовать stable ordering, canonical
@@ -1191,20 +1208,16 @@ pip install -e ".[tests]"
 #### Детерминистичный Jitter
 
 ```python
-# RetryConfig (src/bioetl/domain/resilience.py)
-RetryConfig(
-    deterministic=True,  # Hash-based jitter
-    jitter - seed=42,  # Reproducible seed
-)
-```
-
-При `deterministic=True` jitter вычисляется как:
-
-```python
-hash_input = f"{attempt}:{url}:{seed}"
+# RetryConfig.calculate_delay (src/bioetl/domain/resilience.py)
+hash_input = f"{attempt}:{url}:{self.jitter_seed or 0}"
 jitter_digest = md5(hash_input.encode("utf-8")).hexdigest()
-jitter_factor = (int(jitter_digest[:8], 16) % 1000) / 1000.0
+jitter_factor = int(jitter_digest[:8], 16) / 0xFFFFFFFF
 ```
+
+В файле тот же дайджест записан как
+`hashlib.md5(hash_input.encode(), usedforsecurity=False)`: `encode()` без
+аргумента использует UTF-8. `RetryConfig(jitter_seed=42)` задаёт
+воспроизводимый seed. Конструктор не принимает `deterministic`.
 
 #### Единый Источник Времени
 
@@ -1466,7 +1479,7 @@ async with services:  # --aenter-- инициализирует ресурсы
 
 1. **Randomness**: Модуль `random` **MUST NOT** использоваться в `infrastructure/storage` и других критических узлах записи. Используйте хэш-функции от входных данных или фиксированные константы.
 1. **Time Source**: `datetime.now()` **MUST NOT** вызываться в `domain` business-path и `infrastructure` слое по умолчанию. Канонический source-of-time seam для pipeline runtime — `domain/context.py` (`PipelineContext.started_at` / `_now_utc`). Все runtime timestamps (`_ingestion_ts`, `_processing_ts`, lifecycle timestamps aggregate'ов) **MUST** генерироваться в sanctioned seam/Application слое и передаваться вниз явными параметрами. Read-model вычисления длительности/возраста **MUST** использовать сохранённый terminal timestamp или explicit reference time, а не скрытый `now`. Реальные monitoring/audit exceptions допускаются только через явный allowlist в architecture tests.
-1. **Retry Jitter**: При `deterministic=True`, jitter **MUST** вычисляться детерминистично (на основе хэша попытки и URL). Реализация: `src/bioetl/domain/resilience.py` (`RetryConfig.calculate_delay`) использует MD5-based jitter.
+1. **Retry Jitter**: jitter **MUST** вычисляться детерминистично (хэш попытки, URL и `jitter_seed`). Реализация: `src/bioetl/domain/resilience.py` (`RetryConfig.calculate_delay`), коэффициент `int(digest[:8], 16) / 0xFFFFFFFF`. Поля `deterministic` нет.
 1. **Ordering**: Запись в Delta Lake **MUST** происходить после сортировки данных по Primary Keys (Silver) или Business Keys (Gold).
 1. **Content Hash**: Исключать из расчёта хэша технические мета-поля. Canonical policy: см. `docs/02-architecture/policies/content-hash-identity-policy.md`; поля с префиксом `_` исключаются из identity/hash (включая `_ingestion_ts`, `_run_id`, `_run_type`, `_source_batch_id`, `_index`, `_dq_*`, `_lookup_method`, `_original_id`, `_source`). Реализация: `domain/constants.py:META_FIELDS` + `src/bioetl/domain/transformations/hashing.py` (`_should_include_field`). Для общей программы нормализации RunManifest / RunLedger / runtime anchors / ChemBL Activity см. archived `docs/99-archive/engineering/normalization_plan_P0_P6.md`.
 
@@ -1486,12 +1499,23 @@ async with services:  # --aenter-- инициализирует ресурсы
 
 ```python
 # domain/resilience.py — MD5-based jitter для кросс-процессной стабильности
-hash_input = f"{attempt}:{url}:{seed}"
+hash_input = f"{attempt}:{url}:{self.jitter_seed or 0}"
 digest = hashlib.md5(hash_input.encode(), usedforsecurity=False).hexdigest()
 jitter_factor = int(digest[:8], 16) / 0xFFFFFFFF
 ```
 
-При `RetryConfig(deterministic=False)` выдаётся `DeprecationWarning` — рекомендуется переход на детерминистичный режим.
+Отдельного флага `deterministic` нет: `calculate_delay` всегда использует этот коэффициент.
+
+## 6.4 Политика статусов ADR
+
+Все ADR в `docs/02-architecture/decisions/ADR-*.md` MUST содержать явный статус в одном из разрешённых значений:
+
+- `Accepted` — действующее архитектурное решение, обязательное к применению.
+- `Superseded` — решение заменено более новым ADR; это ожидаемая эволюция архитектуры, а не дефект.
+- `Deprecated` — решение устарело и находится в фазе вывода без прямой замены.
+- `Added` — ADR добавлен в реестр и находится в стадии внедрения/ратификации до перехода в `Accepted`.
+
+Нормализация для quality gate: допускаются расширенные формулировки в заголовке (например, `Accepted (Revised)`), но базовый статус MUST быть одним из четырёх значений выше.
 
 ## 7. Протокол Архитектурных Обзоров
 
@@ -1501,7 +1525,7 @@ jitter_factor = int(digest[:8], 16) / 0xFFFFFFFF
 > Утверждения делались без проверки фактического состояния кода.
 
 > **⚠️ ОБЯЗАТЕЛЬНО**: Перед предложением рефакторинга **MUST** выполнить верификацию согласно
-> протоколу из `CLAUDE.md` §0, опираясь на код и активные docs в `docs/00-05`.
+> протоколу из [`docs/00-project/ai/agents/guides/CLAUDE.md`](ai/agents/guides/CLAUDE.md) §0, опираясь на код и активные docs в `docs/00-05`.
 > `docs/99-archive/refactoring-plan.md` допускается только как historical context,
 > но не как нормативный источник текущего состояния.
 
@@ -2082,17 +2106,6 @@ fields:
 - Bump major version схемы
 - ADR с обоснованием изменения
 
-## 6.4 Политика статусов ADR
-
-Все ADR в `docs/02-architecture/decisions/ADR-*.md` MUST содержать явный статус в одном из разрешённых значений:
-
-- `Accepted` — действующее архитектурное решение, обязательное к применению.
-- `Superseded` — решение заменено более новым ADR; это ожидаемая эволюция архитектуры, а не дефект.
-- `Deprecated` — решение устарело и находится в фазе вывода без прямой замены.
-- `Added` — ADR добавлен в реестр и находится в стадии внедрения/ратификации до перехода в `Accepted`.
-
-Нормализация для quality gate: допускаются расширенные формулировки в заголовке (например, `Accepted (Revised)`), но базовый статус MUST быть одним из четырёх значений выше.
-
 ## Приложение F: Реестр Architecture Decision Records (ADR)
 
 Этот appendix остаётся published summary surface, а canonical live ADR registry
@@ -2203,17 +2216,17 @@ fields:
 - **5.20** (2026-02-17): Audit Sync. Future annotations (497→501, 93.8%). Тест-функций (`def test-`): ~9,442; параметризованных кейсов (`pytest --collect-only`): ~11,985. Python-файлов (~1,114→~1,161). Исправлен .importlinter gap (infrastructure→composition). Архивирован orphaned ADR-030. TYPE-002 `Any` justification — 21 инстанс.
 - **5.19** (2026-02-16): Documentation Sync. Файлов кода (517→534), future annotations (481→497, 93.1%). ADR-034 (Schema↔Domain Configuration Pairs) добавлен в реестр. Тестов (~7,090→~11,985). Python-файлов (~1,094→~1,114). Синхронизация 00-map.md, CLAUDE.md, 00-overview.md, decisions/README.md.
 - **5.18** (2026-02-15): Statistics Update. Обновлены числовые данные по результатам аудита 2026-02-14: файлов кода (499→517), future annotations (468→481), Int→Float coercion occurrences (~34→~88), publication field groups (94→106), LOC для ChemblAdapter (517→975), GoldWriter (593→946), PreflightService (527→818).
-- **5.17** (2026-02-03): Chained Dependencies. Добавлена секция §2.9.1 "Dependency Pipelines (Chained Dependencies)" — поддержка `key-source` и `filter-field` для цепочечных зависимостей в composite pipelines. Обновлён ADR-026.
+- **5.17** (2026-02-03): Chained Dependencies. Добавлена секция §2.10.1 "Dependency Pipelines (Chained Dependencies)" — поддержка `key-source` и `filter-field` для цепочечных зависимостей в composite pipelines. Обновлён ADR-026.
 - **5.16** (2026-02-02): ADR Registry Update + Doc Sync. Добавлен ADR-032 в реестр (Приложение F): Unified HTTP Client Pattern. Синхронизация метрик с кодовой базой.
-- **5.15** (2026-01-29): Field Group Registry. Добавлена §2.9.4 "Field Group Registry" — семантическая группировка полей для Gold-фильтрации и сортировки колонок. Домен: `FieldGroupRegistry`, `FieldMapping`, `FieldGroupDefinition`. YAML-конфиг: `configs/composites/field_groups/publication.yaml`. Интеграция с `MergeService` для автоматической фильтрации TRASH-полей из Gold.
-- **5.14** (2026-01-28): Composite Pipeline Documentation. Добавлена секция §2.9 "Composite Pipelines" с документацией `preserve-all-sources` feature, column groups и merge strategies. Ссылка на ADR-026.
+- **5.15** (2026-01-29): Field Group Registry. Добавлена §2.10.5 "Field Group Registry" — семантическая группировка полей для Gold-фильтрации и сортировки колонок. Домен: `FieldGroupRegistry`, `FieldMapping`, `FieldGroupDefinition`. YAML-конфиг: `configs/composites/field_groups/publication.yaml`. Интеграция с `MergeService` для автоматической фильтрации TRASH-полей из Gold.
+- **5.14** (2026-01-28): Composite Pipeline Documentation. Добавлена секция §2.10 "Composite Pipelines" с документацией `preserve-all-sources` feature, column groups и merge strategies. Ссылка на ADR-026.
 - **5.13** (2026-01-28): ADR Registry Update. Добавлены ADR-029..031 в реестр (Приложение F): Output Metadata Unification, Publication Pagination Strategy, Loading Strategy Formalization.
 - **5.12** (2026-01-21): ADR Registry Update. Добавлены ADR-021..028 в реестр (Приложение F). Добавлены inline ссылки на новые ADR в соответствующие секции (§1.1, §2.8, §3.2, App D).
 - **5.11** (2026-01-20): Int→Float Coercion Documentation. Добавлена §2.6 "Int→Float Coercion для Nullable Integers" — документация паттерна Gold-схем с `Series[float]` + `coerce=True` для nullable integer полей (~34 occurrences на момент 5.11; актуальное число может отличаться). Это осознанное архитектурное решение для обработки nullable integers в Pandas/Polars.
 - **5.10** (2026-01-06): TTL/Heartbeat Values Correction. Исправлены значения Lock TTL (90s) и Heartbeat (30s) в §3.3 для соответствия реализации в `domain/config.py:238,241`. Синхронизация всех документов.
 - **5.9** (2026-01-01): TTL/Heartbeat Sync Fix. Добавлены явные значения Lock TTL и Heartbeat в §3.3.
 - **5.8** (2025-12-29): TTL/Heartbeat Sync. Добавлены явные значения Lock TTL и Heartbeat в §3.3 "Текущая реализация". Синхронизация с CLAUDE.md §5.
-- **5.7** (2025-12-27): Pre-Refactoring Verification Requirement. Добавлено обязательное требование в §7.1: перед предложением рефакторинга MUST сверяться с CLAUDE.md §0 и секцией "УЖЕ РЕАЛИЗОВАНО" в refactoring-plan.md.
+- **5.7** (2025-12-27): Pre-Refactoring Verification Requirement. Добавлено обязательное требование в §7.1: перед предложением рефакторинга MUST сверяться с `docs/00-project/ai/agents/guides/CLAUDE.md` §0 и секцией "УЖЕ РЕАЛИЗОВАНО" в refactoring-plan.md.
 - **5.6** (2025-12-27): Anti-False-Claims Protocol (REQ-ARCH-041). Расширена §7 с детальными правилами анализа делегирования (§7.1.6), причинами ложных утверждений (§7.1.5), контрпримерами (ChemblAdapter, GoldWriter, PreflightService). Добавлены конкретные примеры из кодовой базы в §7.1.4.
 - **5.5** (2025-12-27): Mandatory Architecture Review Verification Protocol. Добавлена §7 "Протокол Архитектурных Обзоров" с требованием двойной верификации (REQ-ARCH-040). Причина: анализ выявил ~50% ложных утверждений в планах рефакторинга.
 - **5.4** (2025-12-25): Architecture Documentation Update. Добавлены §1.1.2 (Health Check Protocol), §2.4.2 (Medallion Clear Policy), §4.4 (Python Standards), §5.3.2 (Async Cleanup). Реестр ADR расширен (011-015). Добавлено ограничение на structlog в application/interfaces (§4.3, тест `test-no-structlog-in-application-interfaces`). Добавлен deterministic mode для retry jitter (§3.1.3).

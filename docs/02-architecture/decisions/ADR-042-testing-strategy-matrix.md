@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-09-25'
+  Last verified: '2026-11-17'
 
 ______________________________________________________________________
 
@@ -103,8 +103,12 @@ ______________________________________________________________________
 - Externalized contract snapshot path is reserved at `tests/fixtures/contracts/{provider}/v{N}.json`
 - Backward-compatibility snapshot enforcement on the externalized registry is staged until that inventory exists
 - Breaking changes require explicit version bump with migration note once snapshot rollout is enabled
-- Live provider contract verification remains active today via the scheduled
-  `contract-tests.yml` workflow and must opt into outbound network access explicitly
+- Live provider contract verification in GitHub Actions is `KEEP-DISABLED`
+  (#11190). `.github/workflows/contract-tests.yml` exposes `workflow_dispatch`
+  only and has no `schedule`. `configs/quality/test_matrix.yaml` sets
+  `live_api_gate_mode: keep-disabled`. A monthly cron is not part of this
+  decision. A live run, when an operator starts one locally, must opt into
+  outbound network access explicitly.
 
 ### Live Provider Tiering
 
