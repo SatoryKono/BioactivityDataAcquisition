@@ -1410,10 +1410,8 @@ def test_pr_required_fetch_depth_keeps_class_lane_history() -> None:
     pull_request, dispatch = checkout_steps("class-lane")
     assert pull_request["if"] == "github.event_name == 'pull_request'"
     assert pull_request["with"]["persist-credentials"] is False
-    assert (
-        pull_request["with"]["ref"]
-        == "${{ needs['classify-changes'].outputs.head_sha }}"
-    )
+    assert pull_request["with"]["ref"] == "${{ github.sha }}"
+    assert "head_sha" not in str(pull_request["with"]["ref"])
     assert int(pull_request["with"]["fetch-depth"]) == 0
     assert pull_request["with"]["filter"] == "blob:none"
     assert dispatch["if"] == "github.event_name == 'workflow_dispatch'"

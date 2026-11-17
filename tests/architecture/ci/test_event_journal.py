@@ -1444,26 +1444,26 @@ def test_matrix_values_are_redacted_before_identity_and_safe_env(
         _secret_values,
     )
 
-    password = "swordfish-secret"
+    credential = "swordfish-secret"
     nested = "nested-api-key-value"
     raw = json.dumps(
         {
-            "password": password,
+            "password": credential,
             "wrapped": {"api_key": nested, "label": "public"},
-            "note": f"token = {password}",
+            "note": f"token = {nested}",
         }
     )
     monkeypatch.setenv("BIOETL_JOURNAL_MATRIX", raw)
     secrets = _secret_values()
     matrix = _identity_from_env(actual_sha=None, secrets=secrets)["matrix"]
-    assert matrix["password"] == _redaction_token(password)
+    assert matrix["password"] == "[redacted]"
     assert matrix["wrapped"]["api_key"] == _redaction_token(nested)
     assert matrix["wrapped"]["label"] == "public"
-    assert password not in matrix["note"]
+    assert credential not in matrix["note"]
     blob = _safe_env(secrets)["BIOETL_JOURNAL_MATRIX"]
-    assert password not in blob
+    assert credential not in blob
     assert nested not in blob
-    assert _redaction_token(password) in blob
+    assert "[redacted]" in blob
     assert _redaction_token(nested) in blob
 
 
@@ -1555,11 +1555,11 @@ def test_quoted_assignment_redacts_the_enclosed_value() -> None:
     assert "swordfish" not in redacted
     assert redacted.startswith('--payload={"password":"')
     assert redacted.endswith('"}')
-    assert "[redacted:" in redacted
+    assert '"[redacted]"' in redacted
     empty = "--payload={'password':''}"
     redacted_empty = _redact_text(empty, ())
     assert redacted_empty.endswith("'}")
-    assert "[redacted:" in redacted_empty
+    assert "'[redacted]'" in redacted_empty
     assert "''" not in redacted_empty
 
 

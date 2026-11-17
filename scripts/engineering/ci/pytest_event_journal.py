@@ -91,6 +91,10 @@ _SECRET_ASSIGNMENT = re.compile(
     r"authorization|credential)"
     r"""['"]?\s*[:=]\s*(?:"([^"]*)"|'([^']*)'|([^\s,;\]"']+))"""
 )
+_SEALED_REDACTION = "[redacted]"
+_PASSWORD_NAME = re.compile(
+    r"(?i)(?:^|[^A-Za-z0-9])(?:password|passwd|passphrase)(?:[^A-Za-z0-9]|$)"
+)
 _REDACTION_KEY_ENV = "BIOETL_JOURNAL_REDACTION_KEY"
 _REDACTION_KEY_MIN_LENGTH = 32
 _REDACTION_KEY: str | None = None
@@ -179,6 +183,25 @@ def _adopt_worker_redaction_key(config: Any) -> None:
         _REDACTION_KEY = key
 
 
+def _sealed_marker() -> str:
+    """Constant replacement for password-shaped fields. Not derived from the value."""
+    return _SEALED_REDACTION
+
+
+def _is_password_name(name: str) -> bool:
+    return _PASSWORD_NAME.search(name) is not None
+
+
+def _seal_tree(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {str(key): _seal_tree(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_seal_tree(item) for item in value]
+    if value is None:
+        return None
+    return _sealed_marker()
+
+
 def _redaction_token(captured: str) -> str:
     """Return a process-keyed fingerprint, not a password hash.
 
@@ -203,12 +226,20 @@ def _assigned_secret(match: re.Match[str]) -> tuple[int, str]:
 
 
 def _replace_assignment(match: re.Match[str]) -> str:
+    keyword = match.group(1)
     index, value = _assigned_secret(match)
-    if _REDACTED_ASSIGNMENT_VALUE.fullmatch(value) is not None:
+    if (
+        _REDACTED_ASSIGNMENT_VALUE.fullmatch(value) is not None
+        or value == _SEALED_REDACTION
+    ):
         return match.group(0)
     prefix = match.group(0)[: match.start(index) - match.start(0)]
     suffix = match.group(0)[match.end(index) - match.start(0) :]
-    return prefix + _redaction_token(value) + suffix
+    if _is_password_name(keyword):
+        replacement = _sealed_marker()
+    else:
+        replacement = _redaction_token(value)
+    return prefix + replacement + suffix
 
 
 def _replace_prefix(match: re.Match[str]) -> str:
@@ -360,7 +391,9 @@ def _redact_structured(value: Any, secrets: tuple[str, ...]) -> Any:
         for key, item in value.items():
             name = str(key)
             safe_name = _redact_text(name, secrets)
-            if _SECRET_KEY.search(name) is not None:
+            if _is_password_name(name):
+                redacted[safe_name] = _seal_tree(item)
+            elif _SECRET_KEY.search(name) is not None:
                 redacted[safe_name] = _redact_secret_value(item, secrets)
             else:
                 redacted[safe_name] = _redact_structured(item, secrets)

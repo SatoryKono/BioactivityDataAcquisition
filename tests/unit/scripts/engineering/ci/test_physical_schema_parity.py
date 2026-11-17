@@ -166,7 +166,7 @@ def test_one_canonical_schema_step_runs_real_matrix_and_retains_aggregation() ->
     steps = workflow["jobs"]["class-lane"]["steps"]
     checkout = next(step for step in steps if step.get("id") == "checkout")
     assert (
-        checkout["with"]["ref"] == "${{ needs['classify-changes'].outputs.head_sha }}"
+        checkout["with"]["ref"] == "${{ github.sha }}"
     )
     parity_steps = [step for step in steps if step.get("id") == "schema-parity"]
     assert len(parity_steps) == 1

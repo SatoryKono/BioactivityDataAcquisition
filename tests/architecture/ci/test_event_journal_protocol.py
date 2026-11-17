@@ -27,37 +27,37 @@ pytestmark = pytest.mark.architecture
 
 
 @pytest.fixture
-def secret_journal_identity(monkeypatch: pytest.MonkeyPatch) -> dict[str, Any]:
-    secret = "identity-secret-fixture-value"
-    monkeypatch.setenv("TEST_API_TOKEN", secret)
+def journal_identity_canary(monkeypatch: pytest.MonkeyPatch) -> dict[str, Any]:
+    marker = "identity-canary-fixture-value"
+    monkeypatch.setenv("TEST_API_TOKEN", marker)
     identity = _identity(role="controller", worker_id="controller")
     for field in identity:
         if field != "role":
-            identity[field] = f"prefix-{secret}-suffix"
-    identity["matrix"] = {"nested": [secret], "password": "matrix-password-fixture"}
+            identity[field] = f"prefix-{marker}-suffix"
+    identity["matrix"] = {"nested": [marker], "password": "matrix-password-fixture"}
     return identity
 
 
 def test_identity_is_redacted_at_the_journal_write_boundary(
-    tmp_path: Path, secret_journal_identity: dict[str, Any]
+    tmp_path: Path, journal_identity_canary: dict[str, Any]
 ) -> None:
     from scripts.engineering.ci.pytest_event_journal import EventJournalPlugin
 
     path = tmp_path / "receipt.jsonl"
-    plugin = EventJournalPlugin(None, path, secret_journal_identity)
+    plugin = EventJournalPlugin(None, path, journal_identity_canary)
     plugin.record("session_start", {})
     plugin.finalize()
     raw = path.read_text(encoding="utf-8")
-    assert "identity-secret-fixture-value" not in raw
+    assert "identity-canary-fixture-value" not in raw
     assert "matrix-password-fixture" not in raw
     identity = json.loads(raw.splitlines()[0])["identity"]
     assert identity["role"] == "controller"
     assert "[redacted:" in identity["invocation_id"]
-    assert secret_journal_identity["invocation_id"].endswith("-suffix")
+    assert journal_identity_canary["invocation_id"].endswith("-suffix")
 
 
 @pytest.mark.parametrize(
-    ("env_name", "value", "secret"),
+    ("env_name", "value", "marker"),
     [
         ("BIOETL_JOURNAL_PASS", "password=swordfish", "swordfish"),
         ("BIOETL_JOURNAL_INVOCATION_ID", "token=topsecretvalue", "topsecretvalue"),
@@ -68,7 +68,7 @@ def test_environment_identity_assignments_are_not_written_as_plaintext(
     monkeypatch: pytest.MonkeyPatch,
     env_name: str,
     value: str,
-    secret: str,
+    marker: str,
 ) -> None:
     from scripts.engineering.ci.pytest_event_journal import (
         EventJournalPlugin,
@@ -82,7 +82,7 @@ def test_environment_identity_assignments_are_not_written_as_plaintext(
     plugin = EventJournalPlugin(None, path, identity)
     plugin.record("session_start", {})
     plugin.finalize()
-    assert secret not in path.read_text(encoding="utf-8")
+    assert marker not in path.read_text(encoding="utf-8")
 
 
 def test_identity_env_strings_are_redacted(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -100,7 +100,8 @@ def test_identity_env_strings_are_redacted(monkeypatch: pytest.MonkeyPatch) -> N
     blob = json.dumps(identity, sort_keys=True)
     assert "swordfish" not in blob
     assert "topsecretvalue" not in blob
-    assert "[redacted:" in str(identity["pass_name"])
+    assert "swordfish" not in str(identity["pass_name"])
+    assert "[redacted]" in str(identity["pass_name"])
     assert "[redacted:" in str(identity["invocation_id"])
     assert identity["worker_id"] == "gw0"
     assert identity["role"] == "worker"
