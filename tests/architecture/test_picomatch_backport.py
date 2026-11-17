@@ -21,7 +21,7 @@ CONSUMERS = (
     "grafana/plugins/bioetl-scenes-app",
     "grafana/plugins/bioetl-selectorshell-panel",
 )
-ARCHIVE = BACKPORT / "picomatch-4.0.8-bioetl.4.tgz"
+ARCHIVE = BACKPORT / "picomatch-4.0.8-bioetl.5.tgz"
 
 
 def test_picomatch_surface_is_tarball_only() -> None:
@@ -45,7 +45,7 @@ def test_picomatch_archive_matches_reviewed_source() -> None:
         expected={
             "upstream_commit": "7be3276fb8bd215a8c73fa066bcaf696c244ad88",
             "advisory": "GHSA-fc5q-39xc-vjpf",
-            "local_version": "4.0.8-bioetl.4",
+            "local_version": "4.0.8-bioetl.5",
         },
     )
 
@@ -55,7 +55,7 @@ def test_picomatch_consumers_install_verified_archive(consumer: str) -> None:
     assert_consumers_pin_archive(
         [consumer],
         package_name="picomatch",
-        version="4.0.8-bioetl.4",
+        version="4.0.8-bioetl.5",
         archive=ARCHIVE,
         forbidden_versions=(
             "2.3.2",
@@ -63,29 +63,34 @@ def test_picomatch_consumers_install_verified_archive(consumer: str) -> None:
             "4.0.8-bioetl.1",
             "4.0.8-bioetl.2",
             "4.0.8-bioetl.3",
+            "4.0.8-bioetl.4",
         ),
     )
 
 
 @pytest.mark.parametrize(
-    ("pattern", "repeat"),
+    ("pattern", "unit", "repeat"),
     [
-        ("+(*)", 32),
-        ("+(*a)", 32),
-        ("*(*)", 32),
-        ("*(*a)", 32),
-        ("+(@(*a))", 32),
-        ("*(@(*a))", 32),
-        ("+(@(*))", 32),
-        ("+(@(*))b", 32),
-        ("+(*)b", 32),
-        # Nested ambiguous alternation needs a longer attack to hang pre-fix.
-        ("+(@(a|aa))", 48),
-        ("*(@(a|aa))", 48),
+        ("+(*)", "a", 32),
+        ("+(*a)", "a", 32),
+        ("*(*)", "a", 32),
+        ("*(*a)", "a", 32),
+        ("+(@(*a))", "a", 32),
+        ("*(@(*a))", "a", 32),
+        ("+(@(*))", "a", 32),
+        ("+(@(*))b", "a", 32),
+        ("+(*)b", "a", 32),
+        ("+(@(a|aa))", "a", 48),
+        ("*(@(a|aa))", "a", 48),
+        # General literal prefix-overlap (not single-char only).
+        ("+(ab|abab)", "ab", 48),
+        ("+(@(ab|abab))", "ab", 48),
+        ("*(@(ab|abab))", "ab", 48),
     ],
 )
 def test_repeated_and_nested_extglob_wildcards_finish_with_bounded_input(
     pattern: str,
+    unit: str,
     repeat: int,
     tmp_path: Path,
 ) -> None:
@@ -101,11 +106,20 @@ def test_repeated_and_nested_extglob_wildcards_finish_with_bounded_input(
             destination.write_bytes(content.read())
     code = (
         "const p=require(process.argv[1]);"
-        "const n=Number(process.argv[3]);"
-        "console.log(p.makeRe(process.argv[2]).test('a'.repeat(n)+'!'));"
+        "const unit=process.argv[3];"
+        "const n=Number(process.argv[4]);"
+        "console.log(p.makeRe(process.argv[2]).test(unit.repeat(n)+'!'));"
     )
     result = subprocess.run(
-        ["node", "-e", code, str(tmp_path / "package"), pattern, str(repeat)],
+        [
+            "node",
+            "-e",
+            code,
+            str(tmp_path / "package"),
+            pattern,
+            unit,
+            str(repeat),
+        ],
         capture_output=True,
         text=True,
         timeout=3,
