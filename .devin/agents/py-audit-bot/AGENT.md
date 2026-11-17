@@ -252,15 +252,17 @@ find src/bioetl/ -name "*.py" -exec grep -l "soft_fail_threshold\|hard_fail_thre
 
 **Supported Providers:**
 
-|| Provider        | Base URL                            | Rate Limit   | Pagination |
-|| --------------- | ----------------------------------- | ------------ | ---------- |
-|| ChEMBL          | `ebi.ac.uk/chembl/api/data`         | None         | offset     |
-|| PubChem         | `pubchem.ncbi.nlm.nih.gov/rest/pug` | 5 req/sec    | offset     |
-|| UniProt         | `rest.uniprot.org`                  | 100 req/sec  | cursor     |
-|| PubMed          | `eutils.ncbi.nlm.nih.gov`           | 3 req/sec    | offset     |
-|| CrossRef        | `api.crossref.org`                  | 50 req/sec   | cursor     |
-|| OpenAlex        | `api.openalex.org`                  | 100 req/sec  | cursor     |
-|| SemanticScholar | `api.semanticscholar.org`           | 100 req/5min | offset     |
+|| Provider        | Base URL                            | requests_per_second | with_api_key | Pagination |
+|| --------------- | ----------------------------------- | ------------------- | ------------ | ---------- |
+|| ChEMBL          | `ebi.ac.uk/chembl/api/data`         | 0.1                 | —            | offset     |
+|| PubChem         | `pubchem.ncbi.nlm.nih.gov/rest/pug` | 5.0                 | —            | offset     |
+|| UniProt         | `rest.uniprot.org`                  | 10.0                | 100          | cursor     |
+|| PubMed          | `eutils.ncbi.nlm.nih.gov`           | 3.0                 | 10           | offset     |
+|| CrossRef        | `api.crossref.org`                  | 50                  | —            | cursor     |
+|| OpenAlex        | `api.openalex.org`                  | 10                  | —            | cursor     |
+|| SemanticScholar | `api.semanticscholar.org`           | 0.01                | 1.0          | offset     |
+
+QPS-колонки повторяют литералы `rate_limit.requests_per_second` и, если ключ есть в YAML, `rate_limit.with_api_key.requests_per_second` из `configs/providers/{chembl,pubchem,uniprot,pubmed,crossref,openalex,semanticscholar}.yaml`. Прочерк значит, что яруса `with_api_key` в файле нет. Другой QPS не запоминай.
 
 ```bash
 # Find API URLs
@@ -298,23 +300,19 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-## Scoring Matrix
+## Scoring
 
-|| Category            | Weight | Max Score |
-|| ------------------- | ------ | --------- |
-|| Architecture (ARCH) | 30%    | 10        |
-|| Anti-Patterns (AP)  | 25%    | 10        |
-|| DI Violations (DI)  | 20%    | 10        |
-|| Naming (NAME)       | 10%    | 10        |
-|| Types (TYPE)        | 10%    | 10        |
-|| Testing (TEST)      | 5%     | 10        |
+В `configs/quality/` нет весов категорий аудита и нет cutoff PASS/WARN/FAIL. Не копируй шкалу в профиль и не вводи новый числовой порог. Пороги аудита, которые уже лежат в YAML, читай из файла и не переноси число в эту шкалу.
 
-|| Severity | Deduction | Score ≥8.0 = PASS | 6.0-7.9 = WARN | \<6.0 = FAIL |
-|| -------- | --------- | ----------------- | -------------- | ------------ |
-|| CRITICAL | -2.0      |                   |                |              |
-|| HIGH     | -1.0      |                   |                |              |
-|| MEDIUM   | -0.5      |                   |                |              |
-|| LOW      | -0.25     |                   |                |              |
+Вердикт и любые пороги читай из текущего checkout, а не из памяти профиля:
+
+- `configs/quality/debt_scorecard.yaml` (`score_semantics`, бюджеты, ratchet) и соседние файлы `configs/quality/`
+- границы слоёв: `.importlinter` и `tests/architecture/`
+- применённые правила: `docs/00-project/RULES.md` и accepted ADR; для смешанного аудита перечисли все фактически использованные источники в `verdict_source`.
+
+Если источники не задают обоснованный общий вердикт, укажи `status: "UNDETERMINED"` и `verdict_source: "none"`. Используй `PASS`, `WARN` или `FAIL` только при наличии применимого правила в текущем checkout.
+
+Запрет на запомненные пороги сохраняется: counts, ADR ranges, thresholds и provider inventories не восстанавливай из памяти. Увеличение `scorecard budgets`, exemption limits, hotspot thresholds или family caps остаётся blocker. Метки `PASS|WARN|FAIL` в отчёте не вычисляются по cutoff этого профиля.
 
 ______________________________________________________________________
 
@@ -325,7 +323,8 @@ code_review:
   date: "YYYY-MM-DD"
   mode: "baseline|final|targeted|review|debt|reproducibility"
   scope: "{paths}"
-  status: "PASS|WARN|FAIL"
+  status: "PASS|WARN|FAIL|UNDETERMINED"
+  verdict_source: "<configs/quality/debt_scorecard.yaml | .importlinter | tests/architecture/ | RULES.md §X.Y | ADR-0XX | none; list all applicable sources>"
 
   problems:
     - id: "AUD-001"
@@ -342,16 +341,6 @@ code_review:
         result: "<output>"
       severity: "CRITICAL|HIGH|MEDIUM|LOW"
       recommendation: "<fix strategy>"
-
-  scores:
-    architecture: { score: "X/10", weight: "30%" }
-    anti_patterns: { score: "X/10", weight: "25%" }
-    di_violations: { score: "X/10", weight: "20%" }
-    naming: { score: "X/10", weight: "10%" }
-    types: { score: "X/10", weight: "10%" }
-    testing: { score: "X/10", weight: "5%" }
-
-  weighted_total: "X.X/10"
 ```
 
 ______________________________________________________________________
