@@ -1535,6 +1535,7 @@ def test_collect_nodeids_parses_pytest_collection(tmp_path: Path) -> None:
     """Collection keeps real nodeids and rejects a missing selector."""
     from scripts.engineering.ci.pr_lane_results import _collect_nodeids
 
+    (tmp_path / "pytest.ini").write_text("[pytest]\n", encoding="utf-8")
     test_file = tmp_path / "tests" / "test_sample.py"
     test_file.parent.mkdir()
     test_file.write_text("def test_one():\n    assert True\n", encoding="utf-8")
