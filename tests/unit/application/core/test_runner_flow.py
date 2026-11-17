@@ -469,7 +469,7 @@ def test_stage_metrics_keep_order_counts_and_backlog_conditioned_lag(
 
     host = _Host(diagnostics={}, execution_metrics=execution_metrics)
     with patch(
-        "bioetl.application.observability.pipeline_metrics.PipelineMetricsRecorder"
+        "bioetl.application.core.runner_flow_metrics.PipelineMetricsRecorder"
     ) as recorder:
         record_flow_invariants(
             host, current_time_fn=lambda: datetime(2026, 4, 29, 12, 0, 10, tzinfo=UTC)

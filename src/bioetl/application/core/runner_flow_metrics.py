@@ -6,21 +6,15 @@ from collections.abc import Callable
 from datetime import datetime
 from typing import TYPE_CHECKING
 
+from bioetl.application.observability.pipeline_metrics import PipelineMetricsRecorder
 from bioetl.application.runtime_clock import current_utc_time
 
 if TYPE_CHECKING:
     from bioetl.application.core.runner_flow import _PipelineRunnerFlowHostProtocol
-    from bioetl.application.observability.pipeline_metrics import (
-        PipelineMetricsRecorder,
-    )
 
 
 def record_output_ready(host: _PipelineRunnerFlowHostProtocol) -> None:
     """Project the terminal output-ready count into the canonical stage model."""
-    from bioetl.application.observability.pipeline_metrics import (
-        PipelineMetricsRecorder,
-    )
-
     output_count = max(
         0,
         host.execution_metrics.get("records_gold", 0),
@@ -45,10 +39,6 @@ def record_flow_invariants(
     current_time_fn: Callable[[], datetime] = current_utc_time,
 ) -> None:
     """Project terminal record-flow invariants and backlog gauges."""
-    from bioetl.application.observability.pipeline_metrics import (
-        PipelineMetricsRecorder,
-    )
-
     pipeline_metrics = PipelineMetricsRecorder(
         host._services.metrics, host._config.pipeline_name
     )
