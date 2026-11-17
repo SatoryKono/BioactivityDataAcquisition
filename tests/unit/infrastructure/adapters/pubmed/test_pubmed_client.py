@@ -436,6 +436,20 @@ async def test_get_pmids_raises_when_pages_overlap(adapter, mock_http_client) ->
 
 
 @pytest.mark.asyncio
+async def test_get_pmids_rejects_duplicates_within_first_page(
+    adapter, mock_http_client
+) -> None:
+    """A duplicate within the first page cannot satisfy the reported count."""
+    mock_http_client.get = AsyncMock(
+        return_value=_esearch_page(count=2, ids=["1", "1"])
+    )
+    with pytest.raises(PaginationTruncatedError) as caught:
+        await adapter._get_pmids("cancer", 2)
+    assert caught.value.reason == "repeated_page"
+    assert mock_http_client.get.await_count == 1
+
+
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "payload",
     [

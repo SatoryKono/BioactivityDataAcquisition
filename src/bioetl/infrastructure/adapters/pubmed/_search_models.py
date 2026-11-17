@@ -135,7 +135,7 @@ def esearch_stall_reason(
     """Classify a page that cannot move ``retstart`` toward ``count``."""
     if not page_ids:
         return "empty_page"
-    if tuple(page_ids) in seen_pages:
+    if tuple(page_ids) in seen_pages or len(set(page_ids)) != len(page_ids):
         return "repeated_page"
     if collected_ids.intersection(page_ids):
         return "overlapping_page"
