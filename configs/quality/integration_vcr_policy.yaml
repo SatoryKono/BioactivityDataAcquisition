@@ -128,6 +128,7 @@ tracked_suite_inventory:
       pubchem_compound: tests/integration/test_pubchem_pipeline.py
       uniprot_protein: tests/integration/test_uniprot_pipeline.py
     normalization_and_pipeline_support:
+    - tests/integration/ide/test_zed_portability.py
     - tests/integration/application/core/test_cf_medallion_strict_wiring.py
     - tests/integration/application/core/test_postrun_compact_service.py
     - tests/integration/application/core/test_record_processor.py
