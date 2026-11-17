@@ -31,9 +31,12 @@ Local pytest defaults remain **serial** (`forbid_global_xdist_addopts`). CI enab
 6. **e2e-smoke**: advisory/nightly serial lane. `e2e-matrix-health.yml` may run
    on pull_request as a GHA-017 satellite; it is **not** GitHub-required and is
    **not** a `pr-gate-complete` owner (#10412).
-   - **Blocking e2e** (merge wall via `tests.yml` control-plane completeness):
-     `tests/e2e/test_pubchem_compound_e2e.py::test_pubchem_compound_full_cycle`
-     (PubChem compound full cycle) — the only e2e that blocks merge.
+   - **PubChem full cycle is not a merge wall.** `tests.yml` is `workflow_call`
+     only. Its only caller is `.github/workflows/nightly.yml` (`schedule`
+     `0 3 * * *` and `workflow_dispatch`). `.github/workflows/pr-required.yml`
+     does not call `tests.yml`. Job `control-plane-e2e` inside that nightly
+     caller runs
+     `tests/e2e/test_pubchem_compound_e2e.py::test_pubchem_compound_full_cycle`.
    - **Nightly/advisory only**: the full e2e matrix. Sixteen pipelines stay out
      of PR e2e-smoke via `MATRIX_REPLAY_DEFERRED_PIPELINES` selection exclusion
      (owner `@bioetl-platform`, #9729; list in
