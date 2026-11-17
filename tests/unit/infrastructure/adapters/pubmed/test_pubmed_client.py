@@ -357,6 +357,7 @@ async def test_get_pmids_keeps_filled_limit_below_count(
 
     assert await adapter._get_pmids("cancer", 2) == ["1", "2"]
     assert mock_http_client.get.await_count == 1
+    assert mock_http_client.get.await_args_list[0].kwargs["params"]["retmax"] == "2"
 
 
 @pytest.mark.asyncio
@@ -364,18 +365,21 @@ async def test_get_pmids_raises_when_next_page_is_empty(
     adapter, mock_http_client
 ) -> None:
     """An empty follow-up page must not turn a short idlist into a full result."""
-    mock_http_client.get = AsyncMock(
-        side_effect=[
-            _esearch_page(count=5, ids=["1"]),
-            _esearch_page(count=5, ids=[]),
-        ]
-    )
+    pages = {
+        0: _esearch_page(count=5, ids=["1"]),
+        1: _esearch_page(count=5, ids=[]),
+    }
+
+    async def get(_url: str, params: dict[str, str]) -> MagicMock:
+        return pages[int(params.get("retstart", "0"))]
+
+    mock_http_client.get = AsyncMock(side_effect=get)
 
     with pytest.raises(PaginationTruncatedError) as caught:
         await adapter._get_pmids("cancer", 5)
 
     assert caught.value.reason == "empty_page"
-    assert mock_http_client.get.await_count == 2
+    assert mock_http_client.get.await_args_list[1].kwargs["params"]["retstart"] == "1"
 
 
 @pytest.mark.asyncio
@@ -387,6 +391,7 @@ async def test_get_pmids_raises_when_page_repeats(adapter, mock_http_client) -> 
         await adapter._get_pmids("cancer", 5)
 
     assert caught.value.reason == "repeated_page"
+    assert mock_http_client.get.await_args_list[1].kwargs["params"]["retstart"] == "1"
 
 
 @pytest.mark.asyncio
@@ -476,6 +481,7 @@ async def test_resolve_pmids_for_fetch_signals_short_default_ceiling(
         await resolve_pmids_for_fetch(adapter, query=None, limit=None)
 
     assert caught.value.reason == "repeated_page"
+    assert mock_http_client.get.await_args_list[1].kwargs["params"]["retstart"] == "1"
 
 
 def test_xml_parser_enforces_elapsed_time_budget(monkeypatch):
