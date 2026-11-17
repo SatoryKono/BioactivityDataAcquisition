@@ -8,9 +8,7 @@ from types import SimpleNamespace
 import pytest
 import yaml
 
-from bioetl.composition.bootstrap import (
-    target_migration_binding as migration,
-)
+from bioetl.composition.bootstrap.cli import config as migration
 from bioetl.infrastructure.config.settings_api import Settings
 from bioetl.infrastructure.storage.target_classification_migration import (
     TargetMigrationPaths,

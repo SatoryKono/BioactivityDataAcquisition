@@ -27,6 +27,7 @@ from bioetl.domain.types import ContentHash, EntityID, JsonDict
 __all__ = [
     "META_FIELDS",
     "EntityIdentityGenerator",
+    "generate_content_hash",
 ]
 
 

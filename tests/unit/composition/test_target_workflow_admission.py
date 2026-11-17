@@ -21,10 +21,10 @@ from bioetl.application.services.workflow.control_plane.mutation_plan import (
     build_workflow_mutation_plan,
 )
 from bioetl.composition.runtime_builders.config_access import load_pipeline_config
-from bioetl.composition.bootstrap.target_classification_init import (
+from bioetl.composition.bootstrap.runtime.composite_control_plane_bundle import (
     preflight_workflow_target_dependencies,
 )
-from bioetl.composition.bootstrap.workflow_target_admission import (
+from bioetl.composition.bootstrap.cli.lock import (
     validate_workflow_target_mutations,
 )
 from bioetl.domain.config.target_classification import TARGET_CLASSIFICATION_FIELDS
@@ -226,7 +226,7 @@ async def test_bounded_upstream_fails_before_assay_or_manifest_write(
     target = _target_config("enrich")
     original_loader = load_pipeline_config
     monkeypatch.setattr(
-        "bioetl.composition.bootstrap.target_classification_init.load_pipeline_config",
+        "bioetl.composition.bootstrap.assembly.storage.load_pipeline_config",
         lambda name: target if name == "chembl_target" else original_loader(name),
     )
     runner = SimpleNamespace(run_workflow=AsyncMock())

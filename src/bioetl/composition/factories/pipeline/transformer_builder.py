@@ -2,15 +2,13 @@
 
 from __future__ import annotations
 
-from bioetl.application.pipelines.chembl.target_transformer import (
+from bioetl.application.core.wiring.registry import (
+    TargetClassifiedTransformer,
     TargetTransformer,
 )
 from bioetl.composition.runtime_builders.config_access import get_settings
-from bioetl.composition.bootstrap.target_classification_init import (
+from bioetl.composition.bootstrap.runtime.composite_control_plane_bundle import (
     build_target_classification_session,
-)
-from bioetl.application.pipelines.chembl.target_classified_transformer import (
-    TargetClassifiedTransformer,
 )
 
 from collections.abc import Callable

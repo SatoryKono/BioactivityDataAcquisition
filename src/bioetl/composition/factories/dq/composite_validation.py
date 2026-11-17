@@ -19,14 +19,12 @@ def create_composite_validation_service() -> CompositeValidator:
 
 from pathlib import Path
 
-from bioetl.composition.factories.storage.path_resolution import (
+from bioetl.composition.factories.storage.factory import (
     get_layer_configs,
-    resolve_flat_structure_flags,
-    resolve_storage_paths,
-)
-from bioetl.composition.factories.storage.delta_writer_paths import (
     resolve_delta_writer_base_path,
     resolve_delta_writer_flat_structure,
+    resolve_flat_structure_flags,
+    resolve_storage_paths,
 )
 from bioetl.infrastructure.config.converters import yaml_config_to_domain
 from bioetl.infrastructure.config.settings_api import Settings

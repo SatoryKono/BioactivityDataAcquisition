@@ -8,9 +8,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import cast
 
+from bioetl.domain.behavior.identity_service import generate_content_hash
 from bioetl.domain.normalization.profiles.base import NormalizationProfile
 from bioetl.domain.schemas.base import ISO8601_TIMESTAMP_REGEX
-from bioetl.domain.transformations import generate_content_hash
 
 META = frozenset({"entity_id", "content_hash"})
 GOLD_SCD_COLUMNS = frozenset({"_valid_from", "_valid_to", "_is_current", "_version"})

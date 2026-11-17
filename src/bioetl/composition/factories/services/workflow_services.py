@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING, cast
 from bioetl.composition.bootstrap.assembly.workflow_transforms import (
     build_workflow_transform_registry,
 )
-from bioetl.composition.bootstrap.target_classification_init import (
+from bioetl.composition.bootstrap.runtime.composite_control_plane_bundle import (
     preflight_workflow_target_dependencies,
 )
 from bioetl.composition.occurrence_identity import (

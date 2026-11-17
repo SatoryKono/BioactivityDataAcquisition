@@ -7,7 +7,9 @@ from collections.abc import Mapping, Sequence
 
 import pyarrow as pa
 
-from bioetl.domain.config.target_classification import TARGET_CLASSIFICATION_FIELDS
+from bioetl.infrastructure.storage.target_classification_guard import (
+    TARGET_CLASSIFICATION_FIELDS,
+)
 from iuphar_target_class.csv_io import read_csv_records
 from iuphar_target_class.stage0.io import (
     canonical_csv_bytes,

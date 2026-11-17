@@ -16,7 +16,7 @@ from bioetl.domain.medallion import WriteModePolicy
 from bioetl.domain.ports import HealthMonitorPort, LoggerPort
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.time import SystemClock
-from bioetl.composition.bootstrap.target_classification_init import (
+from bioetl.composition.bootstrap.runtime.composite_control_plane_bundle import (
     validate_target_runtime_dependency,
 )
 from bioetl.infrastructure.storage.target_classification_guard import (

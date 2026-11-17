@@ -11,7 +11,7 @@ from bioetl.composition.runtime_builders._exact_replay_cached_bronze_context imp
     bind_cached_bronze_context as _bind_cached_bronze_context,
     resolve_exact_replay_cached_bronze_context as _resolve_exact_replay_cached_bronze_context,
 )
-from bioetl.composition.runtime_builders._target_runner_config import (
+from bioetl.composition.runtime_builders._effective_config_graph_support import (
     load_target_aware_pipeline_config,
 )
 from bioetl.composition.runtime_builders._inputs_resolution_support import (

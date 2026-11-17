@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.composition.bootstrap.target_classification_init import (
+from bioetl.composition.bootstrap.runtime.composite_control_plane_bundle import (
     target_classification_contract_schema_identity,
     target_classification_normalization_identity,
 )

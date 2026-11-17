@@ -147,10 +147,10 @@ def validate_target_candidate(
     workspace: Path | None = None,
 ) -> dict[str, object]:
     """Validate admission, strict candidate schemas and both entire cohorts."""
-    from bioetl.domain.contracts.gold.chembl_target_classification import (
+    from bioetl.domain.schemas.chembl.target import TargetSchemaV31
+    from bioetl.infrastructure.config.target_classification_profile import (
         ChEMBLTargetGoldSchemaV31,
     )
-    from bioetl.domain.schemas.chembl.target import TargetSchemaV31
 
     profile = _load_candidate_profile(paths, workspace=workspace)
     v31_include_fields = _frozen_v31_hash_fields(paths, legacy_include_fields)

@@ -92,6 +92,9 @@ from bioetl.application.core.wiring.registry import (
     TargetProteinClassificationTransformer as TargetProteinClassificationTransformer,
 )
 from bioetl.application.core.wiring.registry import (
+    TargetClassifiedTransformer as TargetClassifiedTransformer,
+)
+from bioetl.application.core.wiring.registry import (
     TargetTransformer as TargetTransformer,
 )
 from bioetl.application.core.wiring.registry import (

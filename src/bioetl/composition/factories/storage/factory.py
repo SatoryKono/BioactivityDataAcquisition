@@ -14,9 +14,16 @@ from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
+from ._context_resolution import (
+    get_layer_configs,
+    resolve_flat_structure_flags,
+    resolve_storage_paths,
+)
 from ._helpers import (
     build_storage_creation_context,
     create_storage_adapter,
+    resolve_delta_writer_base_path,
+    resolve_delta_writer_flat_structure,
 )
 from .bundle import StorageBundle
 
@@ -37,6 +44,11 @@ __all__ = [
     "SilverWriter",
     "StorageContext",
     "StorageFactory",
+    "get_layer_configs",
+    "resolve_delta_writer_base_path",
+    "resolve_delta_writer_flat_structure",
+    "resolve_flat_structure_flags",
+    "resolve_storage_paths",
     "resolve_tracing_port",
 ]
 

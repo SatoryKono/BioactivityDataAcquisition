@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
-from bioetl.composition.bootstrap.target_classification_init import (
+from bioetl.infrastructure.config.pipeline_config_api import PipelineYamlConfig
+from bioetl.composition.bootstrap.runtime.composite_control_plane_bundle import (
     hydrate_target_runtime_config,
 )
 
@@ -29,7 +29,6 @@ from bioetl.infrastructure.control_plane import FileRunLedgerStore, FileRunManif
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
     from bioetl.infrastructure.config.settings_api import Settings
-    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
 def resolve_exact_replay_cached_bronze_context(

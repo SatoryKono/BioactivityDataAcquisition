@@ -7,7 +7,7 @@ from dataclasses import replace
 import pytest
 
 from bioetl.composition.runtime_builders.config_access import load_pipeline_config
-from bioetl.composition.bootstrap.target_classification_init import (
+from bioetl.composition.bootstrap.runtime.composite_control_plane_bundle import (
     apply_target_contract_identity,
     build_target_classification_session,
     load_target_runtime_profile,
@@ -96,7 +96,7 @@ def test_relative_profile_uses_actual_configs_parent_and_checks_frozen_bytes(
         }
     )
     monkeypatch.setattr(
-        "bioetl.composition.bootstrap.target_classification_init.resolve_configs_root",
+        "bioetl.composition.bootstrap.assembly.storage.resolve_configs_root",
         lambda: tmp_path / "configs",
     )
     profile = load_target_runtime_profile(config)

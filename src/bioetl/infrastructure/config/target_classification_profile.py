@@ -11,13 +11,15 @@ from bioetl.domain.config.target_classification import (
     TARGET_CLASSIFICATION_FIELDS,
     TargetClassificationConfig,
 )
-from bioetl.domain.contracts.gold import ChEMBLTargetGoldSchema
 from bioetl.domain.contracts.gold.chembl_target_classification import (
+    ChEMBLTargetGoldSchema,
     ChEMBLTargetGoldSchemaV31,
+    Target,
+    TargetSchema,
+    TargetSchemaV31,
+    TargetV31,
+    target_v31_schema_hash,
 )
-from bioetl.domain.entities.chembl_structures_foundation import Target
-from bioetl.domain.entities.chembl_target_classification import TargetV31
-from bioetl.domain.schemas.chembl.target import TargetSchema, TargetSchemaV31
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.schemas.pipeline_contract_policy import (
     PipelineContractPolicy,
@@ -191,6 +193,8 @@ def resolve_target_classification_profile(
 
 
 __all__ = [
+    "ChEMBLTargetGoldSchemaV31",
     "TargetClassificationSchemaProfile",
     "resolve_target_classification_profile",
+    "target_v31_schema_hash",
 ]
