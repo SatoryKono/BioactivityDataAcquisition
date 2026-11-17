@@ -1298,6 +1298,20 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         ),
         (GITHUB_ACTIONS_RUNTIME_POLICY_TEST,),
     ),
+    ".github/workflows/dashboard-first-window-noscroll.yml": (
+        DASHBOARD_FIRST_WINDOW_NOSCROLL_TEST,
+        GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
+    ),
+    **dict.fromkeys(
+        (
+            "docs/00-project/ai/prompts/fragments/dashboard-requirements-audit.md",
+            "docs/00-project/ai/prompts/library/audit/dashboard.md",
+        ),
+        (
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+            DASHBOARD_FIRST_WINDOW_NOSCROLL_TEST,
+        ),
+    ),
     **dict.fromkeys(
         (
             TYPE_CHECKING_WORKFLOW,
