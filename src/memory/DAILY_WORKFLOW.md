@@ -162,7 +162,8 @@ Run post-task after the source change or audit only in authorized `read-write`
 mode. In `off`/`read-only` mode, skip it and create no persistent notes:
 
 Set non-empty `BIOETL_AI_RUNTIME` and `BIOETL_AI_AGENT` first. Durable note
-writes fail closed when either value is absent or `unknown`; legacy records
+requests fail closed before retrieval or namespace creation when either value
+is absent or `unknown`; legacy records
 retain their original provenance and must not be silently relabelled.
 
 ```bash

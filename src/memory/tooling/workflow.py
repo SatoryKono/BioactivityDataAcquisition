@@ -316,6 +316,21 @@ def _default_note_path(task_id: str, *, kind: str) -> Path:
     raise ValueError(f"unsupported episodic note kind: {kind}")
 
 
+def _require_actor_identity() -> tuple[str, str]:
+    """Reject unidentified durable-note requests before retrieval or namespace I/O."""
+    runtime = os.environ.get("BIOETL_AI_RUNTIME", "").strip()
+    agent = os.environ.get("BIOETL_AI_AGENT", "").strip()
+    if not runtime or runtime.lower() == "unknown":
+        raise ValueError(
+            "BIOETL_AI_RUNTIME must identify the runtime for durable memory writes"
+        )
+    if not agent or agent.lower() == "unknown":
+        raise ValueError(
+            "BIOETL_AI_AGENT must identify the agent for durable memory writes"
+        )
+    return runtime, agent
+
+
 def _record_envelope_metadata(
     *,
     task_id: str,
@@ -323,6 +338,7 @@ def _record_envelope_metadata(
     source_refs: list[str],
 ) -> dict[str, Any]:
     """Return version-bound provenance shared by generated task notes."""
+    runtime, agent = _require_actor_identity()
     from memory.records import (
         ActorIdentity,
         RecordEnvelope,
@@ -335,16 +351,6 @@ def _record_envelope_metadata(
 
     repo_root = _discover_repo_root() or Path(__file__).resolve().parents[3]
     scope = RepositoryScope.discover(repo_root, task_id=task_id)
-    runtime = os.environ.get("BIOETL_AI_RUNTIME", "").strip()
-    agent = os.environ.get("BIOETL_AI_AGENT", "").strip()
-    if not runtime or runtime.lower() == "unknown":
-        raise ValueError(
-            "BIOETL_AI_RUNTIME must identify the runtime for durable memory writes"
-        )
-    if not agent or agent.lower() == "unknown":
-        raise ValueError(
-            "BIOETL_AI_AGENT must identify the agent for durable memory writes"
-        )
     envelope = RecordEnvelope.create(
         record_id=record_id,
         record_type=RecordType.WORKING,
@@ -569,6 +575,8 @@ def pre_task_workflow(
                 "missing_artifacts": [],
             },
         }
+    if create_session_note:
+        _require_actor_identity()
     resolved_chunks_path, resolved_events_dir, output_root, refresh_report = (
         _resolve_pre_task_surfaces(
             chunks_path=chunks_path,
@@ -755,6 +763,7 @@ def post_task_workflow(
         return _read_only_post_task_result(
             task_id, title, persistence.mode.value, validation_timeout_seconds
         )
+    _require_actor_identity()
     summary_path = _write_post_task_summary_note(
         task_id=task_id,
         title=title,

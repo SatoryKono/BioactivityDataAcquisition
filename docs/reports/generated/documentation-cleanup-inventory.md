@@ -38,6 +38,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 26 |
 | reports_workspace_entrypoint | 1 |
+| supporting_context | 1 |
 | working_report | 385 |
 
 ## GitHub Issue Drafts And Packs
@@ -92,7 +93,7 @@
 | `docs/03-guides/dashboards/archive/audit-protocols/dux5-screenshot-regression-protocol.md` | Working | 4 | archive-after-migration |
 | `docs/03-guides/dashboards/archive/audit-protocols/dux6-residual-readability.md` | Working | 3 | archive-after-migration |
 | `docs/03-guides/dashboards/migration-map-v2.md` | Working | 3 | archive-after-migration |
-| `docs/plans/memory-recovery-2026-11-17.md` | Working | 0 | archive-after-migration |
+| `docs/plans/memory-recovery-2026-11-17.md` | Working | 1 | archive-after-migration |
 | `docs/reports/audit/N1_SHADOW_STATUS.md` | Working | 0 | archive-after-migration |
 | `docs/reports/audit/github_settings_inventory.md` | Working | 0 | archive-after-migration |
 | `docs/reports/audit/pack-v2.1/evidence-collection/alertmanager_delivery_verification.md` | Working | 0 | archive-after-migration |

@@ -56,7 +56,9 @@ unqualified registry entries remain `NOT_PROVEN`.
 Combined `memory.query all` and `pre-task` preserve each available retrieval
 layer. An unavailable RAG or timeline layer produces partial results marked
 `degraded`; the CLI exits with code 1. Single-layer queries retain their strict
-missing-artifact errors. Strict read-only flags prevent recovery writes.
+missing-artifact errors. After default-path resolution, single-layer dispatch
+skips readiness probes for the unrequested layer. Strict read-only flags prevent
+recovery writes.
 
 ## Validation
 
