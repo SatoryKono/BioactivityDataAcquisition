@@ -62,7 +62,6 @@ if TYPE_CHECKING:
     from bioetl.composition.observability import ObservabilityBundle
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.types import GoldSchemaType
-    from bioetl.infrastructure.config.settings_api import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 __all__ = ["assemble_runner_impl"]

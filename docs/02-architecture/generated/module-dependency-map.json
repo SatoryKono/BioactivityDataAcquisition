@@ -1,12 +1,12 @@
 {
   "summary": {
     "scanned_modules": 2653,
-    "total_internal_imports": 8773,
+    "total_internal_imports": 8777,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 330,
     "violations": 0,
-    "source_fingerprint": "236b268ae6494efe02adc885b135fc884ac12ebcf3ef2137d273a6532fb4c139"
+    "source_fingerprint": "578d0830c12058226ba68d5affcbed0d13ccb6ed1ffbf9275952638e4a2c91c1"
   },
   "layer_edges": [
     {
@@ -30,7 +30,7 @@
     {
       "source": "composition",
       "target": "composition",
-      "imports": 684,
+      "imports": 686,
       "allowed": true
     },
     {
@@ -42,7 +42,7 @@
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 358,
+      "imports": 360,
       "allowed": true
     },
     {
@@ -180,6 +180,11 @@
       "imports": 36
     },
     {
+      "source": "composition.factories",
+      "target": "infrastructure.config",
+      "imports": 35
+    },
+    {
       "source": "infrastructure.control_plane",
       "target": "domain.control_plane",
       "imports": 35
@@ -188,11 +193,6 @@
       "source": "composition.bootstrap",
       "target": "infrastructure.storage",
       "imports": 34
-    },
-    {
-      "source": "composition.factories",
-      "target": "infrastructure.config",
-      "imports": 33
     },
     {
       "source": "interfaces.cli",

@@ -43,14 +43,6 @@ from bioetl.infrastructure.schemas.dq_report_config import (
 )
 
 
-def _rebase_local_data_path(configured: Path, layer_root: Path) -> Path:
-    """Match storage ``rebase_local_data_path`` without a private cross-import."""
-    prefix = ("data", "output", layer_root.name)
-    if layer_root.parent.name == "output" and configured.parts[:3] == prefix:
-        return layer_root.joinpath(*configured.parts[3:])
-    return configured
-
-
 @dataclass(frozen=True, slots=True)
 class DQServiceBundle:
     """Typed DQ service collaborators created by composition factories."""
@@ -269,37 +261,6 @@ def _resolved_dq_output_paths(
         gold_path=str(gold_path),
         flat_structure=True,
     )
-
-
-def _layer_root(settings: object, name: str) -> Path:
-    """Read one settings layer root without a new composition Protocol."""
-    return Path(getattr(settings, name))
-
-
-def rebase_dq_output_paths(
-    paths: DQOutputPathsContext,
-    settings: object,
-) -> DQOutputPathsContext:
-    """Place canonical ``data/output/<layer>/...`` DQ dirs under ``data_dir``."""
-    return DQOutputPathsContext(
-        bronze_path=_rebase_dq_layer_path(
-            paths.bronze_path, _layer_root(settings, "bronze_path")
-        ),
-        silver_path=_rebase_dq_layer_path(
-            paths.silver_path, _layer_root(settings, "silver_path")
-        ),
-        gold_path=_rebase_dq_layer_path(
-            paths.gold_path, _layer_root(settings, "gold_path")
-        ),
-        flat_structure=paths.flat_structure,
-    )
-
-
-def _rebase_dq_layer_path(configured: str | None, layer_root: Path) -> str | None:
-    """Rebase one configured DQ directory onto its settings layer root."""
-    if not configured:
-        return configured
-    return str(_rebase_local_data_path(Path(configured), Path(layer_root)))
 
 
 def is_dq_report_enabled_impl(config: PipelineYamlConfig) -> bool:
