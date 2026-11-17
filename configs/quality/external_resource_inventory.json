@@ -10762,7 +10762,7 @@
     "catalog_ref": "f39053c1840173e49ed64eac8a3673f70bcf9eca",
     "source_ref": "1046790ba74e350c9ebd40880c30e675ceab9cf0",
     "baseline_source_ref": "42c7eabd793aef198de2fecfedf614892aa9927c",
-    "review_sha256": "495e251d3e84a6ccd91a8e3c9e3ad68276ff97c908eb5d6cb567391f8d239ac6",
+    "review_sha256": "40e9a58564a4b60dc64bb7cce0eac19a7cc5996ae73889ee2e5c56d6f120c166",
     "production_file_count": 2614,
     "definition_count": 211,
     "creation_site_count": 559,
@@ -10926,7 +10926,7 @@
   "resource_parts": [
     {
       "file": "configs/quality/external_resource_inventory/part-01.json",
-      "sha256": "ba28823abbfe25561c0ab65176ad72dde67baf630f7b143d91a53064bc36351d",
+      "sha256": "7fd20cc6a7ad1724f742800cb14a91f5d4d8cacb7e40302ad36c065205cd98e5",
       "resource_count": 44
     },
     {
@@ -10936,12 +10936,12 @@
     },
     {
       "file": "configs/quality/external_resource_inventory/part-03.json",
-      "sha256": "0becf1f985c1f3c6941393db52653ea8398798c8401f367f0d044e1e72aa35db",
+      "sha256": "f88017cc3999b5674c440133eb7c0c671132657d799654bbd6034d9e607e2a05",
       "resource_count": 28
     },
     {
       "file": "configs/quality/external_resource_inventory/part-04.json",
-      "sha256": "64a52dd62d0342618bc71de06162c2010aabe7cc0daae5be9a4fd5372abe305c",
+      "sha256": "96a61a1f5618cbc97a3ebc30c60a5d36ca1f55697f84db80c7b217e5443e45b9",
       "resource_count": 48
     },
     {

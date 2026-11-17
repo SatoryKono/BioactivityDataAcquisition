@@ -386,7 +386,7 @@ def _expected_threshold_steps(
 def _requires_unknown_mapping(panel: JsonObject) -> bool:
     title = str(panel.get("title", ""))
     defaults = panel.get("fieldConfig", {}).get("defaults", {})
-    return defaults.get("noValue") == "UNKNOWN" or any(
+    return defaults.get("noValue") in {"UNKNOWN", UNKNOWN_NO_SAMPLES} or any(
         token in title for token in STANDARD_SEVERITY_TITLE_TOKENS
     )
 

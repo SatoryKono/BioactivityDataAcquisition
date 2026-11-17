@@ -2500,6 +2500,11 @@ def apply_to_dashboard(
     payload = json.loads(
         safe_path.read_text(encoding="utf-8")  # NOSONAR - confined under DASH_DIR
     )
+    from scripts.ops.observability.grafana._audit_presentation import (
+        restore_native_current_presentation,
+    )
+
+    restore_native_current_presentation(payload)
     if current_uid == "bioetl-overview-v2":
         payload["panels"] = [
             panel
@@ -2909,6 +2914,11 @@ def apply_to_dashboard(
     )
 
     apply_accessible_status_colors(payload)
+    from scripts.ops.observability.grafana._audit_presentation import (
+        mark_native_snapshot_clocks,
+    )
+
+    mark_native_snapshot_clocks(payload)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     current = safe_path.read_text(encoding="utf-8")
     if check:

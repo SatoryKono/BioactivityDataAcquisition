@@ -266,7 +266,7 @@ def test_typed_observability_inventory_is_bidirectional_and_source_specific() ->
     assert report["typed_target_counts"] == {
         # Fleet states, ingestion age and stage clocks; one redundant Overview
         # full-list target removed while the paginated list retains all alerts.
-        "promql": 116,
+        "promql": 115,
         "http": 14,
         "loki": 0,
         "tempo": 0,
@@ -286,7 +286,6 @@ def test_typed_observability_inventory_is_bidirectional_and_source_specific() ->
         ("bioetl-overview-v2", 9606, "A"),
         ("bioetl-overview-v2", 9606, "B"),
         ("bioetl-overview-v2", 9606, "C"),
-        ("bioetl-incident-v1", 22010, "A"),
         ("bioetl-incident-v1", 22012, "A"),
     } <= promql_targets
     assert all(target["datasource_type"] for target in report["typed_targets"])

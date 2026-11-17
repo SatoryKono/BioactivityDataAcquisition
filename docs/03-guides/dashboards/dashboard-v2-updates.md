@@ -1,7 +1,8 @@
 ## CI contract corrections — 2026-11-17
 
 Alert completeness, missing-sample semantics, repeatable CURRENT evidence and
-scope/time handoffs are covered by the [source UX check report](../../reports/dashboard-ux-checks/2026-11-17.md).
+scope/time handoffs are covered by the source UX check report
+`docs/reports/dashboard-ux-checks/2026-11-17.md` (evidence, not a normative source).
 The released host-image snapshot and the adaptive candidate have separate
 provenance. Existing acceptance statuses and saved ERROR are unchanged; this
 source report does not claim a new browser or runtime acceptance pass.

@@ -2302,15 +2302,15 @@
           "binding_relation": "prewarm_selector_options"
         },
         {
-          "file": "src/bioetl/interfaces/http/_run_explorer_snapshot.py",
+          "binding_symbol": "bioetl.interfaces.http._run_explorer_snapshot.RunExplorerSnapshotCache.refresh_once",
+          "binding_caller": "bioetl.interfaces.http._run_explorer_snapshot.run_periodic_run_explorer_snapshot",
+          "binding_relation": "cache.refresh_once",
           "source_commit": "1046790ba74e350c9ebd40880c30e675ceab9cf0",
           "source_blob": "4d8d9c87e69e2de190dbb6400a0cacd02af89a8f",
           "content_sha256": "cec035f78afba4bf827d3651d18d069f9fee2205bed8c73bf624eb7cc3588530",
-          "line": 147,
-          "source_segment": "",
-          "binding_symbol": "bioetl.interfaces.http._run_explorer_snapshot.RunExplorerSnapshotCache.refresh_once",
-          "binding_caller": "bioetl.interfaces.http._run_explorer_snapshot.run_periodic_run_explorer_snapshot",
-          "binding_relation": "cache.refresh_once"
+          "file": "src/bioetl/interfaces/http/_run_explorer_snapshot.py",
+          "line": 158,
+          "source_segment": "await cache.refresh_once(source)"
         },
         {
           "file": "src/bioetl/interfaces/http/health_server.py",
@@ -3298,13 +3298,13 @@
           "source_segment": "payload = await asyncio.to_thread("
         },
         {
-          "file": "src/bioetl/interfaces/http/_run_explorer_snapshot.py",
+          "binding_relation": "concrete allocation inside RunExplorerSnapshotCache.refresh_once",
           "source_commit": "1046790ba74e350c9ebd40880c30e675ceab9cf0",
           "source_blob": "4d8d9c87e69e2de190dbb6400a0cacd02af89a8f",
           "content_sha256": "cec035f78afba4bf827d3651d18d069f9fee2205bed8c73bf624eb7cc3588530",
-          "line": 71,
-          "binding_relation": "concrete allocation inside RunExplorerSnapshotCache.refresh_once",
-          "source_segment": ""
+          "file": "src/bioetl/interfaces/http/_run_explorer_snapshot.py",
+          "line": 78,
+          "source_segment": "payload = await asyncio.to_thread("
         },
         {
           "file": "src/bioetl/interfaces/http/_selector_catalog.py",

@@ -1328,7 +1328,8 @@
                 "displayName": "Rank",
                 "desc": false
               }
-            ]
+            ],
+            "enablePagination": true
           },
           "compactFields": [
             "Rank",
@@ -1712,7 +1713,8 @@
               "show": false,
               "enablePagination": true
             },
-            "cellHeight": "sm"
+            "cellHeight": "sm",
+            "enablePagination": true
           },
           "compactFields": [
             "Severity",
@@ -1874,9 +1876,9 @@
       "panels": [
         {
           "id": 2002,
-          "type": "bioetl-selectorshell-panel",
+          "type": "table",
           "title": "Inspect Runtime Suspects",
-          "description": "GLOBAL · CURRENT at query evaluation time (range end). Same fleet scope as Ranked Suspects; pipeline and run selectors do not filter this table. Active signals only. VALID EMPTY is not TELEMETRY MISSING or a healthy-fleet verdict. TIME RANGE · Selected pipeline may differ from row pipeline (blast radius). Runtime blockers (current topk by domain). VALID EMPTY when none. Handoff: Run Overview. Not cross-domain ranking  Managed CURRENT queries use an independent clock and refresh every 30s. The timestamp is query evaluation time, not publication or event time. The historical dashboard interval does not set the current query end; current trends retain the selected duration and end at now. Timeouts, failed queries and unverified response time remain unavailable.",
+          "description": "GLOBAL · CURRENT at query evaluation time (range end). Same fleet scope as Ranked Suspects; pipeline and run selectors do not filter this table. Active signals only. VALID EMPTY is not TELEMETRY MISSING or a healthy-fleet verdict. TIME RANGE · Selected pipeline may differ from row pipeline (blast radius). Runtime blockers (current topk by domain). VALID EMPTY when none. Handoff: Run Overview. Not cross-domain ranking ",
           "gridPos": {
             "h": 7,
             "w": 24,
@@ -1887,7 +1889,18 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "targets": [],
+          "targets": [
+            {
+              "expr": "topk(10, max by (pipeline, run_type, reason) (bioetl_runtime_current_blocker_reason) > 0)",
+              "format": "table",
+              "instant": true,
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
+            }
+          ],
           "fieldConfig": {
             "defaults": {
               "noValue": "UNKNOWN",
@@ -2070,47 +2083,28 @@
             ]
           },
           "options": {
-            "viewMode": "current",
-            "currentView": {
-              "pluginId": "table",
-              "queries": [
-                {
-                  "expr": "topk(10, max by (pipeline, run_type, reason) (bioetl_runtime_current_blocker_reason) > 0)",
-                  "format": "table",
-                  "instant": true,
-                  "refId": "A",
-                  "datasource": {
-                    "type": "prometheus",
-                    "uid": "prometheus"
-                  }
-                }
-              ],
-              "transformations": [
-                {
-                  "id": "organize",
-                  "options": {
-                    "excludeByName": {
-                      "Time": true
-                    }
-                  }
-                }
-              ],
+            "cellHeight": "sm",
+            "showHeader": true,
+            "footer": {
+              "show": false
+            }
+          },
+          "transformations": [
+            {
+              "id": "organize",
               "options": {
-                "cellHeight": "sm",
-                "showHeader": true,
-                "footer": {
-                  "show": false
+                "excludeByName": {
+                  "Time": true
                 }
               }
             }
-          },
-          "transformations": []
+          ]
         },
         {
           "id": 2003,
-          "type": "bioetl-selectorshell-panel",
+          "type": "table",
           "title": "Inspect Provider Suspects",
-          "description": "GLOBAL · CURRENT at query evaluation time (range end). Same fleet scope as Ranked Suspects; pipeline and run selectors do not filter this table. Active signals only. VALID EMPTY is not TELEMETRY MISSING or a healthy-fleet verdict. TIME RANGE · Do not put full UUIDs into Prometheus labels. Selected pipeline may differ from row pipeline (blast radius). Provider causes (current fleet topk). Empty + non-OK Status is an explainability gap. Handoff: CURRENT provider signals in Pipeline fleet and range on this page; saved Provider Evidence is in Run Overview.  Managed CURRENT queries use an independent clock and refresh every 30s. The timestamp is query evaluation time, not publication or event time. The historical dashboard interval does not set the current query end; current trends retain the selected duration and end at now. Timeouts, failed queries and unverified response time remain unavailable.",
+          "description": "GLOBAL · CURRENT at query evaluation time (range end). Same fleet scope as Ranked Suspects; pipeline and run selectors do not filter this table. Active signals only. VALID EMPTY is not TELEMETRY MISSING or a healthy-fleet verdict. TIME RANGE · Do not put full UUIDs into Prometheus labels. Selected pipeline may differ from row pipeline (blast radius). Provider causes (current fleet topk). Empty + non-OK Status is an explainability gap. Handoff: CURRENT provider signals in Pipeline fleet and range on this page; saved Provider Evidence is in Run Overview. ",
           "gridPos": {
             "h": 4,
             "w": 24,
@@ -2121,8 +2115,33 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "targets": [],
-          "transformations": [],
+          "targets": [
+            {
+              "expr": "topk(10, max by (provider, cause) (bioetl_provider_current_cause) > 0)",
+              "format": "table",
+              "instant": true,
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
+            }
+          ],
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true
+                },
+                "indexByName": {
+                  "provider": 0,
+                  "cause": 1
+                }
+              }
+            }
+          ],
           "fieldConfig": {
             "defaults": {
               "noValue": "UNKNOWN",
@@ -2272,51 +2291,18 @@
             ]
           },
           "options": {
-            "viewMode": "current",
-            "currentView": {
-              "pluginId": "table",
-              "queries": [
-                {
-                  "expr": "topk(10, max by (provider, cause) (bioetl_provider_current_cause) > 0)",
-                  "format": "table",
-                  "instant": true,
-                  "refId": "A",
-                  "datasource": {
-                    "type": "prometheus",
-                    "uid": "prometheus"
-                  }
-                }
-              ],
-              "transformations": [
-                {
-                  "id": "organize",
-                  "options": {
-                    "excludeByName": {
-                      "Time": true,
-                      "__name__": true
-                    },
-                    "indexByName": {
-                      "provider": 0,
-                      "cause": 1
-                    }
-                  }
-                }
-              ],
-              "options": {
-                "cellHeight": "sm",
-                "showHeader": true,
-                "footer": {
-                  "show": false
-                }
-              }
+            "cellHeight": "sm",
+            "showHeader": true,
+            "footer": {
+              "show": false
             }
           }
         },
         {
           "id": 2004,
-          "type": "bioetl-selectorshell-panel",
+          "type": "table",
           "title": "Inspect DQ Suspects",
-          "description": "GLOBAL · CURRENT at query evaluation time (range end). Same fleet scope as Ranked Suspects; pipeline and run selectors do not filter this table. Active signals only. VALID EMPTY is not TELEMETRY MISSING or a healthy-fleet verdict. TIME RANGE · Selected pipeline may differ from row pipeline (blast radius). DQ current reasons (NOW topk). VALID EMPTY when none. Handoff: Data Quality. Not a persistent incident record  Managed CURRENT queries use an independent clock and refresh every 30s. The timestamp is query evaluation time, not publication or event time. The historical dashboard interval does not set the current query end; current trends retain the selected duration and end at now. Timeouts, failed queries and unverified response time remain unavailable.",
+          "description": "GLOBAL · CURRENT at query evaluation time (range end). Same fleet scope as Ranked Suspects; pipeline and run selectors do not filter this table. Active signals only. VALID EMPTY is not TELEMETRY MISSING or a healthy-fleet verdict. TIME RANGE · Selected pipeline may differ from row pipeline (blast radius). DQ current reasons (NOW topk). VALID EMPTY when none. Handoff: Data Quality. Not a persistent incident record ",
           "gridPos": {
             "h": 7,
             "w": 24,
@@ -2327,8 +2313,39 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "targets": [],
-          "transformations": [],
+          "targets": [
+            {
+              "expr": "topk(10, max by (pipeline, reason) (bioetl_dq_current_reason) > 0)",
+              "format": "table",
+              "instant": true,
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
+            }
+          ],
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true
+                },
+                "indexByName": {
+                  "pipeline": 0,
+                  "reason": 1,
+                  "Value": 2
+                },
+                "renameByName": {
+                  "pipeline": "Pipeline",
+                  "reason": "Reason",
+                  "Value": "Signal"
+                }
+              }
+            }
+          ],
           "fieldConfig": {
             "defaults": {
               "noValue": "UNKNOWN",
@@ -2499,49 +2516,10 @@
             ]
           },
           "options": {
-            "viewMode": "current",
-            "currentView": {
-              "pluginId": "table",
-              "queries": [
-                {
-                  "expr": "topk(10, max by (pipeline, reason) (bioetl_dq_current_reason) > 0)",
-                  "format": "table",
-                  "instant": true,
-                  "refId": "A",
-                  "datasource": {
-                    "type": "prometheus",
-                    "uid": "prometheus"
-                  }
-                }
-              ],
-              "transformations": [
-                {
-                  "id": "organize",
-                  "options": {
-                    "excludeByName": {
-                      "Time": true,
-                      "__name__": true
-                    },
-                    "indexByName": {
-                      "pipeline": 0,
-                      "reason": 1,
-                      "Value": 2
-                    },
-                    "renameByName": {
-                      "pipeline": "Pipeline",
-                      "reason": "Reason",
-                      "Value": "Signal"
-                    }
-                  }
-                }
-              ],
-              "options": {
-                "cellHeight": "sm",
-                "showHeader": true,
-                "footer": {
-                  "show": false
-                }
-              }
+            "cellHeight": "sm",
+            "showHeader": true,
+            "footer": {
+              "show": false
             }
           }
         },
@@ -7459,7 +7437,7 @@
                   "options": {
                     "match": "null",
                     "result": {
-                      "text": "NO OBSERVATIONS",
+                      "text": "UNKNOWN",
                       "color": "text"
                     }
                   }
@@ -7559,7 +7537,7 @@
                   "options": {
                     "match": "null",
                     "result": {
-                      "text": "NO OBSERVATIONS",
+                      "text": "UNKNOWN",
                       "color": "text"
                     }
                   }
@@ -8770,7 +8748,7 @@
                   "options": {
                     "match": "null",
                     "result": {
-                      "text": "NO OBSERVATIONS",
+                      "text": "UNKNOWN",
                       "color": "text"
                     }
                   }
@@ -9324,7 +9302,7 @@
                   "options": {
                     "match": "null",
                     "result": {
-                      "text": "NO OBSERVATIONS",
+                      "text": "UNKNOWN",
                       "color": "text"
                     }
                   }
@@ -9608,7 +9586,7 @@
                   "options": {
                     "match": "null",
                     "result": {
-                      "text": "NO OBSERVATIONS",
+                      "text": "UNKNOWN",
                       "color": "text"
                     }
                   }
@@ -11467,8 +11445,8 @@
             "h": 12
           },
           "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
+            "type": "datasource",
+            "uid": "-- Dashboard --"
           },
           "targets": [],
           "transformations": [],
@@ -12218,7 +12196,7 @@
                 "cellHeight": "sm",
                 "footer": {
                   "show": false,
-                  "enablePagination": false,
+                  "enablePagination": true,
                   "countRows": false
                 },
                 "sortBy": [
@@ -12226,7 +12204,8 @@
                     "displayName": "Rank",
                     "desc": false
                   }
-                ]
+                ],
+                "enablePagination": true
               }
             }
           },
@@ -12619,7 +12598,8 @@
                   "enablePagination": true,
                   "countRows": true
                 },
-                "cellHeight": "sm"
+                "cellHeight": "sm",
+                "enablePagination": true
               }
             }
           },

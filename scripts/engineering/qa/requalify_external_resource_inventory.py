@@ -333,7 +333,19 @@ def _move_matching_references(
     for index, ref in enumerate(refs):
         if not all(ref.get(key) == value for key, value in source.items()):
             continue
-        refs[index] = _locate(new, target)
+        located = _locate(new, target)
+        binding = {
+            key: value for key, value in ref.items() if key.startswith("binding_")
+        }
+        caller = binding.get("binding_caller")
+        module = (
+            target["file"].removeprefix("src/").removesuffix(".py").replace("/", ".")
+        )
+        if caller is not None and caller != module + "." + target["scope"]:
+            raise ValueError(
+                "A reference move cannot silently change its binding caller"
+            )
+        refs[index] = {**binding, **located}
         matches += 1
     return matches
 

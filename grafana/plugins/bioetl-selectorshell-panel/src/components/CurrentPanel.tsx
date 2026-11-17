@@ -7,6 +7,7 @@ import type { AdaptiveTableOptions } from '../adaptive-types';
 
 const REFRESH_MS = 30_000;
 const TIMEOUT_MS = 15_000;
+const HEADER_HEIGHT = 20;
 
 type Snapshot = { data?: PanelData; evaluatedAt?: number; error?: string };
 
@@ -142,7 +143,7 @@ const CurrentPanelView: React.FC<PanelProps<AdaptiveTableOptions>> = (props) => 
   const rowSummary = rowCount === undefined ? null : ` · ${rowCount} ${rowUnit}`;
   return (
     <div data-bioetl-current-query="verified" style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-      <div title={'Query evaluated at ' + clock + '; publication time is separate'} style={{ fontSize: 16, lineHeight: '20px', overflowWrap: 'anywhere' }}>
+      <div title={'Query evaluated at ' + clock + (rowSummary ?? '') + '; publication time is separate'} style={{ fontSize: 16, lineHeight: `${HEADER_HEIGHT}px`, height: HEADER_HEIGHT, flexShrink: 0, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
         {clock.slice(0, 16).replace('T', ' ') + ' UTC'}
         {rowSummary}
       </div>
@@ -157,7 +158,7 @@ const CurrentPanelView: React.FC<PanelProps<AdaptiveTableOptions>> = (props) => 
           fieldConfig={props.fieldConfig}
           timeZone={props.timeZone}
           width={props.width}
-          height={Math.max(0, props.height - 20)}
+          height={Math.max(0, props.height - HEADER_HEIGHT)}
         />
       </div>
     </div>

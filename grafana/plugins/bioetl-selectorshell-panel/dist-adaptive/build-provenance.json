@@ -8,7 +8,7 @@
     "grafana/plugins/bioetl-selectorshell-panel/src/components/AdaptiveTable.test.tsx": "3b0983e3be15f8448f03e5dc0a9700407c3dd1cb2bbbd6d50bca5926d0caf62d",
     "grafana/plugins/bioetl-selectorshell-panel/src/components/AdaptiveTable.tsx": "fcc57d1e73191308909adfbc69416c6a7cc7e3649313812858e7c8c76e0ef7a5",
     "grafana/plugins/bioetl-selectorshell-panel/src/components/CurrentPanel.test.tsx": "9ab99ba650b2d9d5c683c00bfd66cae0e1ca55fcf73e90e3fe48876964fbc5b7",
-    "grafana/plugins/bioetl-selectorshell-panel/src/components/CurrentPanel.tsx": "d19f8d6c967176ecac3377577e0d5655fc49680656b734dd36b172b1bee6d057",
+    "grafana/plugins/bioetl-selectorshell-panel/src/components/CurrentPanel.tsx": "9c95bb09ca9ea0e357f241346eb1c33aab94dca697a133ea2087b36b61ac51d1",
     "grafana/plugins/bioetl-selectorshell-panel/src/components/SimplePanel.test.tsx": "124229d28dced94a525ef31452e0252716a71cb6293a2431b38d1266716fd0d1",
     "grafana/plugins/bioetl-selectorshell-panel/src/components/SimplePanel.tsx": "9f8962b1bbe000247a588fa2c1b6cb91e0ab22f96b03beb1e9dcb2ec939a5222",
     "grafana/plugins/bioetl-selectorshell-panel/src/img/logo.svg": "1defc6f7e585c67657bcfd8fddc599ee7dfa82f8674413f49fa274c2cd453ec6",
@@ -54,8 +54,8 @@
     "LICENSE": "c5accbbd8546e94c34aed24afe689a617627d18eed5a6c48277e48db57c23851",
     "README.md": "21cbe16d6e1b1efb90b085f59b265d5bef9e5f55ac39a80639645245a860a672",
     "img/logo.svg": "1defc6f7e585c67657bcfd8fddc599ee7dfa82f8674413f49fa274c2cd453ec6",
-    "module.js": "18de4077152e48cd79dbcc2252436c286a8efcb061a3c459e414299a86438101",
-    "module.js.map": "43618a2c7d504dba33bfde2e6e93a5fb4d0a19cf8d79ff056a0c1ebe84370038",
+    "module.js": "c3dbffe588a1d216cf2d35243350690a6dbdb857a6d235a846b3f3ad4670fd61",
+    "module.js.map": "79a1e6e7e07c112109059062e39c4b87151d0da1d41a66fdc5e5525f7f554fb1",
     "plugin.json": "1758dcf3cab78d8346eba6b208d14f8bd66d16b8615bcc47c31fb32a99b10d2b"
   }
 }

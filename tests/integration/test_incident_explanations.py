@@ -9,6 +9,46 @@ import yaml
 pytestmark = pytest.mark.integration
 
 
+@pytest.mark.parametrize("profile", ["dashboards", "dashboards-adaptive"])
+def test_missing_sample_mapping_and_pagination_survive_both_profiles(profile):
+    dashboard = json.loads(
+        Path(f"grafana/{profile}/bioetl-incident-v1.json").read_text(encoding="utf-8")
+    )
+
+    def walk(items):
+        return [
+            panel for item in items for panel in [item, *walk(item.get("panels", []))]
+        ]
+
+    panels = {p["id"]: p for p in walk(dashboard["panels"])}
+    for panel_id in (8804, 136, 104, 101, 102):
+        defaults = panels[panel_id]["fieldConfig"]["defaults"]
+        assert defaults["noValue"] == "UNKNOWN · no samples"
+        special = [
+            m
+            for m in defaults["mappings"]
+            if m["type"] == "special" and m["options"]["match"] == "null"
+        ]
+        assert special and all(
+            m["options"]["result"]["text"] == "UNKNOWN" for m in special
+        )
+        # The qualified foreground palette resolves neutral gray to theme text.
+        assert all(m["options"]["result"]["color"] in {"gray", "text"} for m in special)
+    for panel_id in (2005, 2010):
+        panel = panels[panel_id]
+        options = (
+            panel["options"].get("currentView", {}).get("options", panel["options"])
+        )
+        transforms = (
+            panel["options"]
+            .get("currentView", {})
+            .get("transformations", panel.get("transformations", []))
+        )
+        assert options["enablePagination"] is True
+        assert options["footer"]["enablePagination"] is True
+        assert all(transform["id"] != "limit" for transform in transforms)
+
+
 def _panels():
     dashboard = json.loads(
         Path("grafana/dashboards/bioetl-incident-v1.json").read_text(encoding="utf-8")
@@ -39,14 +79,12 @@ def test_global_context_and_row_action_do_not_inherit_selected_history():
     )
     for pid in (2010, 22010):
         panel = panels[pid]
-        source = panel
+        source = panels[2010] if pid == 22010 else panel
         assert "$pipeline" not in source["targets"][0]["expr"]
         if pid == 22010:
-            # The CURRENT renderer owns a query runner: the expanded table
-            # carries the same raw query rather than a dashboard-datasource
-            # donor that would inherit the historical request clock.
-            assert panel["targets"] == panels[2010]["targets"]
-            assert panel["targets"][0]["instant"] is True
+            assert panel["targets"][0]["panelId"] == 2010
+            assert panel["targets"][0]["withTransforms"] is False
+            assert "expr" not in panel["targets"][0]
         url = _properties(panel, "Action")["links"][0]["url"]
         assert "var-run_id=-" in url
         assert "var-workflow=$__all" in url

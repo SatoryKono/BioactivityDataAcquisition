@@ -618,7 +618,7 @@
     {
       "id": 9605,
       "type": "stat",
-      "title": "Review Current Fleet Alerts",
+      "title": "Review Snapshot Fleet Alerts",
       "gridPos": {
         "x": 5,
         "y": 2,
@@ -654,7 +654,7 @@
         }
       ],
       "transformations": [],
-      "description": "GLOBAL / CURRENT · Counts of BioETL FIRING and PENDING alerts, independent of Selected Run and all selectors. FIRING has satisfied the rule's for duration; PENDING has not. A saved SUCCESS/OK never clears these counts. A valid zero means no active alerts, not verified pipeline health. Missing Prometheus scrape or request failure is UNKNOWN/source unavailable. Zero fallback is valid only for this active-alert count, guarded by up{job=prometheus}=1. Refreshes every 30s.",
+      "description": "TIME RANGE SNAPSHOT · Evaluated at the selected period end, including absolute historical periods; not live data. Independent CURRENT clocks and the live-clock instructions below apply only in the managed adaptive profile. GLOBAL / CURRENT · Counts of BioETL FIRING and PENDING alerts, independent of Selected Run and all selectors. FIRING has satisfied the rule's for duration; PENDING has not. A saved SUCCESS/OK never clears these counts. A valid zero means no active alerts, not verified pipeline health. Missing Prometheus scrape or request failure is UNKNOWN/source unavailable. Zero fallback is valid only for this active-alert count, guarded by up{job=prometheus}=1. Refreshes every 30s.",
       "fieldConfig": {
         "defaults": {
           "unit": "short",
@@ -706,6 +706,10 @@
           ],
           "fields": "",
           "values": false
+        },
+        "bioetlCurrentPresentation": {
+          "title": "Review Current Fleet Alerts",
+          "description": "GLOBAL / CURRENT · Counts of BioETL FIRING and PENDING alerts, independent of Selected Run and all selectors. FIRING has satisfied the rule's for duration; PENDING has not. A saved SUCCESS/OK never clears these counts. A valid zero means no active alerts, not verified pipeline health. Missing Prometheus scrape or request failure is UNKNOWN/source unavailable. Zero fallback is valid only for this active-alert count, guarded by up{job=prometheus}=1. Refreshes every 30s."
         }
       },
       "links": [
@@ -720,7 +724,7 @@
     {
       "id": 9606,
       "type": "stat",
-      "title": "Review Processing Anchor Age · 24h / 72h",
+      "title": "Review Processing Anchor Age · 24h / 72h · period end",
       "gridPos": {
         "x": 10,
         "y": 2,
@@ -767,7 +771,7 @@
         }
       ],
       "transformations": [],
-      "description": "CURRENT · Visible Pipeline filter; independent of Run ID, Workflow, Run Type and the historical range. Age of the oldest observed successful-run START processing anchor, from bioetl_data_freshness_seconds (emitted by successful DQ evaluation). This is not completion time or the provider's input-record event time; source-record freshness is unverified. Per-entity duplicate sources use max timestamp, matching the alert rules. STALE >24h is warning and >72h is critical, matching BioETLDataFreshnessLagHigh/Critical; both alerts additionally require 15m pending. Within 24h applies only to observed entities and does not prove complete coverage, a live provider probe or saved-run health. Entities with missing/invalid/future timestamps are unverified; no valid entities remains UNKNOWN. Inspect Telemetry Coverage for missing entities; query time is not primary event time.",
+      "description": "TIME RANGE SNAPSHOT · Evaluated at the selected period end, including absolute historical periods; not live data. Independent CURRENT clocks and the live-clock instructions below apply only in the managed adaptive profile. CURRENT · Visible Pipeline filter; independent of Run ID, Workflow, Run Type and the historical range. Age of the oldest observed successful-run START processing anchor, from bioetl_data_freshness_seconds (emitted by successful DQ evaluation). This is not completion time or the provider's input-record event time; source-record freshness is unverified. Per-entity duplicate sources use max timestamp, matching the alert rules. STALE >24h is warning and >72h is critical, matching BioETLDataFreshnessLagHigh/Critical; both alerts additionally require 15m pending. Within 24h applies only to observed entities and does not prove complete coverage, a live provider probe or saved-run health. Entities with missing/invalid/future timestamps are unverified; no valid entities remains UNKNOWN. Inspect Telemetry Coverage for missing entities; query time is not primary event time.",
       "fieldConfig": {
         "defaults": {
           "unit": "s",
@@ -810,6 +814,10 @@
           ],
           "fields": "",
           "values": false
+        },
+        "bioetlCurrentPresentation": {
+          "title": "Review Processing Anchor Age · 24h / 72h",
+          "description": "CURRENT · Visible Pipeline filter; independent of Run ID, Workflow, Run Type and the historical range. Age of the oldest observed successful-run START processing anchor, from bioetl_data_freshness_seconds (emitted by successful DQ evaluation). This is not completion time or the provider's input-record event time; source-record freshness is unverified. Per-entity duplicate sources use max timestamp, matching the alert rules. STALE >24h is warning and >72h is critical, matching BioETLDataFreshnessLagHigh/Critical; both alerts additionally require 15m pending. Within 24h applies only to observed entities and does not prove complete coverage, a live provider probe or saved-run health. Entities with missing/invalid/future timestamps are unverified; no valid entities remains UNKNOWN. Inspect Telemetry Coverage for missing entities; query time is not primary event time."
         }
       },
       "links": [
@@ -1889,7 +1897,7 @@
       "id": 2005,
       "type": "table",
       "title": "Monitor Global Alerts",
-      "description": "GLOBAL / CURRENT · All pipelines; independent of selected Pipeline, Provider and Run ID. Provider preserves the alert label or uses an unambiguous configured pipeline mapping. Not provided means missing or ambiguous attribution, not unknown provider health. N/A — Infrastructure is not a provider. Pipeline: N/A — Docker infrastructure for the Docker probe alert without a pipeline label; Not provided for other alerts without that label. FIRING and PENDING retain their original alert state. Fleet alert urgency is independent of the saved run verdict. All returned alerts remain available through pagination; the visible row count includes every alert.",
+      "description": "TIME RANGE SNAPSHOT · Evaluated at the selected period end, including absolute historical periods; not live data. Independent CURRENT clocks and the live-clock instructions below apply only in the managed adaptive profile. GLOBAL / CURRENT · All pipelines; independent of selected Pipeline, Provider and Run ID. Provider preserves the alert label or uses an unambiguous configured pipeline mapping. Not provided means missing or ambiguous attribution, not unknown provider health. N/A — Infrastructure is not a provider. Pipeline: N/A — Docker infrastructure for the Docker probe alert without a pipeline label; Not provided for other alerts without that label. FIRING and PENDING retain their original alert state.",
       "gridPos": {
         "x": 0,
         "y": 18,
@@ -2199,7 +2207,12 @@
           "show": false,
           "enablePagination": true
         },
-        "cellHeight": "sm"
+        "cellHeight": "sm",
+        "bioetlCurrentPresentation": {
+          "title": "Monitor Global Alerts",
+          "description": "GLOBAL / CURRENT · All pipelines; independent of selected Pipeline, Provider and Run ID. Provider preserves the alert label or uses an unambiguous configured pipeline mapping. Not provided means missing or ambiguous attribution, not unknown provider health. N/A — Infrastructure is not a provider. Pipeline: N/A — Docker infrastructure for the Docker probe alert without a pipeline label; Not provided for other alerts without that label. FIRING and PENDING retain their original alert state."
+        },
+        "enablePagination": true
       },
       "transformations": [
         {

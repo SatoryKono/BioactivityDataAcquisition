@@ -43,7 +43,7 @@ dashboards:
     next_action_tokens:
     - Action opens the domain page named on the row
     basis_tokens:
-    - CURRENT
+    - TIME RANGE SNAPSHOT
     - VALID EMPTY
   bioetl-run-explorer-v1:
     question: Which pipelines ran most recently, and where are their reports?

@@ -13,6 +13,50 @@ from scripts.ops.observability.grafana._audit_presentation import (
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.parametrize(
+    "uid,panel_id",
+    [
+        ("bioetl-overview-v2", 9605),
+        ("bioetl-overview-v2", 9606),
+        ("bioetl-incident-v1", 22012),
+    ],
+)
+def test_historical_native_snapshot_and_independent_current_are_distinct(uid, panel_id):
+    import json
+    from pathlib import Path
+    from scripts.ops.observability.grafana._audit_presentation import (
+        mark_native_snapshot_clocks,
+    )
+
+    def walk(items):
+        return [
+            panel for item in items for panel in [item, *walk(item.get("panels", []))]
+        ]
+
+    source = json.loads(
+        Path(f"grafana/dashboards/{uid}.json").read_text(encoding="utf-8")
+    )
+    native = next(panel for panel in walk(source["panels"]) if panel["id"] == panel_id)
+    assert native["type"] in {"stat", "table"}
+    assert native["description"].startswith("TIME RANGE SNAPSHOT")
+    assert "not live data" in native["description"]
+    assert "Snapshot" in native["title"] or "period end" in native["title"]
+    queries = deepcopy(native["targets"])
+    # Marking the saved fallback repeatedly cannot accumulate prefixes or data.
+    before = deepcopy(source)
+    mark_native_snapshot_clocks(source)
+    assert source == before
+    adaptive = next(
+        panel for panel in walk(project(source)["panels"]) if panel["id"] == panel_id
+    )
+    assert adaptive["options"]["viewMode"] == "current"
+    assert adaptive["options"]["currentView"]["queries"] == queries
+    assert adaptive["targets"] == []
+    assert not adaptive["description"].startswith("TIME RANGE SNAPSHOT")
+    assert "independent clock" in adaptive["description"]
+    assert "bioetlCurrentPresentation" not in json.dumps(adaptive)
+
+
 def test_projection_only_changes_renderer_and_keeps_native_fallback():
     source = {
         "uid": "bioetl-run-explorer-v1",
@@ -168,7 +212,11 @@ def test_overview_verdict_is_first_when_columns_stack_without_changing_semantics
             view = after["options"]["currentView"]
             assert view["queries"] == before["targets"]
             assert view["transformations"] == before.get("transformations", [])
-            assert view["options"] == before["options"]
+            assert view["options"] == {
+                key: value
+                for key, value in before["options"].items()
+                if key != "bioetlCurrentPresentation"
+            }
             assert view["pluginId"] == before["type"]
             assert after["fieldConfig"] == before["fieldConfig"]
             assert after["targets"] == []
@@ -252,12 +300,17 @@ def test_current_consumer_uses_raw_donor_queries_and_preserves_its_own_transform
     # Fixed-window diagnostics are CURRENT even beside historical charts. A
     # historical dashboard date must not hide today's telemetry WARN as UNKNOWN.
     for panel_id in (893, 907, 2460, 22011):
-        assert "CURRENT" in before[panel_id]["description"][:45]
+        assert before[panel_id]["description"].startswith("TIME RANGE SNAPSHOT")
         current = after[panel_id]["options"]["currentView"]
         assert current["queries"] == before[panel_id]["targets"]
         assert current["transformations"] == before[panel_id].get("transformations", [])
         assert after[panel_id]["targets"] == []
         assert after[panel_id]["fieldConfig"] == before[panel_id]["fieldConfig"]
+    # A native shared frame is resolved before projection removes donor targets.
+    full = after[22010]["options"]["currentView"]
+    assert full["queries"] == before[2010]["targets"]
+    assert full["transformations"] == before[22010]["transformations"]
+    assert after[22010]["targets"] == []
     # The true rate chart keeps its historical end and selected rate interval.
     assert "currentView" not in after[8807].get("options", {})
     assert after[8807]["targets"] == before[8807]["targets"]

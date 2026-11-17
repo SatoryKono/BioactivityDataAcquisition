@@ -621,6 +621,18 @@ def preserve_evidence_rows(panel: dict) -> None:
         item for item in panel.get("transformations", []) if item["id"] != "limit"
     ]
     panel["options"].setdefault("footer", {})["enablePagination"] = True
+    panel["options"]["enablePagination"] = True
+
+
+def _mark_absent_samples(item: dict) -> None:
+    defaults = item.setdefault("fieldConfig", {}).setdefault("defaults", {})
+    defaults["noValue"] = "UNKNOWN · no samples"
+    for mapping in defaults.get("mappings", []):
+        if (
+            mapping.get("type") == "special"
+            and mapping.get("options", {}).get("match") == "null"
+        ):
+            mapping["options"]["result"] = {"text": "UNKNOWN", "color": "gray"}
 
 
 def _explain_missing_samples(items: list[dict]) -> None:
@@ -630,9 +642,7 @@ def _explain_missing_samples(items: list[dict]) -> None:
                 '<div style="font-size:16px;line-height:20px">UNKNOWN means no matching samples or an unpublished reason. Check Observability Signals and <a href="/d/bioetl-incident-v1/5-incident-workspace?viewPanel=2461&amp;${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${__url_time_range}">missing stage signals</a>. Query time is not event time.</div>'
             )
         if item.get("type") in {"stat", "gauge", "bargauge"}:
-            item.setdefault("fieldConfig", {}).setdefault("defaults", {})["noValue"] = (
-                "UNKNOWN · no samples"
-            )
+            _mark_absent_samples(item)
         if item["id"] in {9996, 9997}:
             item["description"] = item["description"].replace(
                 ", including when an empty selected-range result is rendered through noValue",
@@ -755,7 +765,7 @@ def apply_incident_evidence_clocks(payload, panels):
     fleet = panels.get(8808)
     if fleet:
         _explain_missing_samples(fleet.get("panels", []))
-    _configure_incident_detail_rows(payload["panels"], suspect)
+    _configure_incident_detail_rows(payload["panels"])
 
 
 def _walk_panels(items):
@@ -829,9 +839,11 @@ def _configure_current_measurements(item: dict) -> None:
     )
 
 
-def _configure_incident_detail_rows(rows: list[dict], suspect: dict) -> None:
+def _configure_incident_detail_rows(rows: list[dict]) -> None:
     for row in rows:
         for child in row.get("panels", []):
+            if child["id"] in {22005, 22010}:
+                preserve_evidence_rows(child)
             if child["id"] == 9701:
                 child["links"] = [
                     {
@@ -842,8 +854,18 @@ def _configure_incident_detail_rows(rows: list[dict], suspect: dict) -> None:
                     }
                 ]
             if child["id"] == 22010:
-                child["datasource"] = deepcopy(suspect["datasource"])
-                child["targets"] = deepcopy(suspect["targets"])
+                # Native shares the selected-end snapshot. The managed CURRENT
+                # projection resolves this raw donor before replacing either
+                # panel, then runs it at its independently verified current time.
+                child["datasource"] = {"type": "datasource", "uid": "-- Dashboard --"}
+                child["targets"] = [
+                    {
+                        "panelId": 2010,
+                        "refId": "A",
+                        "withTransforms": False,
+                        "datasource": {"type": "datasource", "uid": "-- Dashboard --"},
+                    }
+                ]
                 child["description"] = child["description"].replace(
                     _GLOBAL_RANGE, _GLOBAL_CURRENT
                 )

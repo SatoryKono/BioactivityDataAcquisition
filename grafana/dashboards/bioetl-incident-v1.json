@@ -446,7 +446,7 @@
       "id": 9401,
       "type": "stat",
       "title": "Monitor Scope Status",
-      "description": "CURRENT · Worst domain in the selected workflow/pipeline/run-type scope; Run ID does not filter this card. Mapping: 0=OK, 1=UNKNOWN, 2=WARN, 3=CRIT. The label identifies one highest-priority workflow and domain (ties may exist). Open the card for workflow evidence and its publication clock; a workflow-wide failure does not prove this pipeline failed.",
+      "description": "TIME RANGE SNAPSHOT · Evaluated at the selected period end, including absolute historical periods; not live data. Independent CURRENT clocks and the live-clock instructions below apply only in the managed adaptive profile. CURRENT · Worst domain in the selected workflow/pipeline/run-type scope; Run ID does not filter this card. Mapping: 0=OK, 1=UNKNOWN, 2=WARN, 3=CRIT. The label identifies one highest-priority workflow and domain (ties may exist). Open the card for workflow evidence and its publication clock; a workflow-wide failure does not prove this pipeline failed.",
       "gridPos": {
         "h": 3,
         "w": 8,
@@ -558,6 +558,10 @@
         "text": {
           "valueSize": 20,
           "titleSize": 12
+        },
+        "bioetlCurrentPresentation": {
+          "title": "Monitor Scope Status",
+          "description": "CURRENT · Worst domain in the selected workflow/pipeline/run-type scope; Run ID does not filter this card. Mapping: 0=OK, 1=UNKNOWN, 2=WARN, 3=CRIT. The label identifies one highest-priority workflow and domain (ties may exist). Open the card for workflow evidence and its publication clock; a workflow-wide failure does not prove this pipeline failed."
         }
       },
       "links": [
@@ -598,7 +602,7 @@
       "id": 2010,
       "type": "table",
       "title": "Inspect Ranked Suspects",
-      "description": "GLOBAL / CURRENT · All pipelines; independent of selected Pipeline, Provider and Run ID. Severity is rule urgency, not cause verification. UNVERIFIED means rule triggered; cause not confirmed. All rows use the same GLOBAL scope. Recording sample time is not event time. Missing telemetry remains UNKNOWN. Action opens the domain page named on the row. Fleet charts for pipeline signals stay on this page. All returned suspects remain available through pagination; the row count includes every suspect. Severity is retained even when cause and event freshness are Not verified. Diagnostic priority HIGH=2 / ELEVATED=1 is ranking, not Prometheus alert severity. Neither this rank nor FIRING verifies a cause or an event timestamp.",
+      "description": "TIME RANGE SNAPSHOT · Evaluated at the selected period end, including absolute historical periods; not live data. Independent CURRENT clocks and the live-clock instructions below apply only in the managed adaptive profile. GLOBAL / CURRENT · All pipelines; independent of selected Pipeline, Provider and Run ID. Severity is rule urgency, not cause verification. UNVERIFIED means rule triggered; cause not confirmed. All rows use the same GLOBAL scope. Recording sample time is not event time. Missing telemetry remains UNKNOWN. Action opens the domain page named on the row. Fleet charts for pipeline signals stay on this page. All returned suspects remain available through pagination; the row count includes every suspect. Severity is retained even when cause and event freshness are Not verified. Diagnostic priority HIGH=2 / ELEVATED=1 is ranking, not Prometheus alert severity. Neither this rank nor FIRING verifies a cause or an event timestamp.",
       "gridPos": {
         "h": 5,
         "w": 24,
@@ -1338,7 +1342,12 @@
             "displayName": "Rank",
             "desc": false
           }
-        ]
+        ],
+        "bioetlCurrentPresentation": {
+          "title": "Inspect Ranked Suspects",
+          "description": "GLOBAL / CURRENT · All pipelines; independent of selected Pipeline, Provider and Run ID. Severity is rule urgency, not cause verification. UNVERIFIED means rule triggered; cause not confirmed. All rows use the same GLOBAL scope. Recording sample time is not event time. Missing telemetry remains UNKNOWN. Action opens the domain page named on the row. Fleet charts for pipeline signals stay on this page. All returned suspects remain available through pagination; the row count includes every suspect. Severity is retained even when cause and event freshness are Not verified. Diagnostic priority HIGH=2 / ELEVATED=1 is ranking, not Prometheus alert severity. Neither this rank nor FIRING verifies a cause or an event timestamp."
+        },
+        "enablePagination": true
       },
       "links": [
         {
@@ -1353,7 +1362,7 @@
       "id": 2005,
       "type": "table",
       "title": "Monitor Global Alerts",
-      "description": "GLOBAL / CURRENT · All pipelines; independent of selected Pipeline, Provider and Run ID. Provider preserves the alert label or uses an unambiguous configured pipeline mapping. Not provided means missing or ambiguous attribution, not unknown provider health. N/A — Infrastructure is not a provider. Pipeline: N/A — Docker infrastructure for the Docker probe alert without a pipeline label; Not provided for other alerts without that label. FIRING and PENDING retain their original alert state.",
+      "description": "TIME RANGE SNAPSHOT · Evaluated at the selected period end, including absolute historical periods; not live data. Independent CURRENT clocks and the live-clock instructions below apply only in the managed adaptive profile. GLOBAL / CURRENT · All pipelines; independent of selected Pipeline, Provider and Run ID. Provider preserves the alert label or uses an unambiguous configured pipeline mapping. Not provided means missing or ambiguous attribution, not unknown provider health. N/A — Infrastructure is not a provider. Pipeline: N/A — Docker infrastructure for the Docker probe alert without a pipeline label; Not provided for other alerts without that label. FIRING and PENDING retain their original alert state.",
       "gridPos": {
         "h": 5,
         "w": 24,
@@ -1676,7 +1685,12 @@
           "show": false,
           "enablePagination": true
         },
-        "cellHeight": "sm"
+        "cellHeight": "sm",
+        "bioetlCurrentPresentation": {
+          "title": "Monitor Global Alerts",
+          "description": "GLOBAL / CURRENT · All pipelines; independent of selected Pipeline, Provider and Run ID. Provider preserves the alert label or uses an unambiguous configured pipeline mapping. Not provided means missing or ambiguous attribution, not unknown provider health. N/A — Infrastructure is not a provider. Pipeline: N/A — Docker infrastructure for the Docker probe alert without a pipeline label; Not provided for other alerts without that label. FIRING and PENDING retain their original alert state."
+        },
+        "enablePagination": true
       },
       "transformations": [
         {
@@ -2511,7 +2525,7 @@
           "id": 22011,
           "type": "table",
           "title": "Inspect Global Signal Measurements",
-          "description": "GLOBAL / CURRENT · Exact runtime rule operands at the same query evaluation time. Lag uses a 15m maximum; backlog uses the latest non-validation sample. Validation backlog is a separate signal, validation_backlog; this table does not represent the BioETLStageBacklogActive alert window. Lag is elapsed run time sampled when backlog is nonzero, not input-record event age. Inspect Stage Snapshot Clocks for application observation and Pushgateway publication; legacy observation and source-event times remain UNKNOWN. Persisted gauges can outlive a finished run or exporter restart. Evaluation time is not observation time. Empty successful result means no matching threshold crossings; query failures are errors.",
+          "description": "TIME RANGE SNAPSHOT · Evaluated at the selected period end, including absolute historical periods; not live data. Independent CURRENT clocks and the live-clock instructions below apply only in the managed adaptive profile. GLOBAL / CURRENT · Exact runtime rule operands at the same query evaluation time. Lag uses a 15m maximum; backlog uses the latest non-validation sample. Validation backlog is a separate signal, validation_backlog; this table does not represent the BioETLStageBacklogActive alert window. Lag is elapsed run time sampled when backlog is nonzero, not input-record event age. Inspect Stage Snapshot Clocks for application observation and Pushgateway publication; legacy observation and source-event times remain UNKNOWN. Persisted gauges can outlive a finished run or exporter restart. Evaluation time is not observation time. Empty successful result means no matching threshold crossings; query failures are errors.",
           "gridPos": {
             "x": 0,
             "y": 37,
@@ -2759,6 +2773,10 @@
             "cellHeight": "lg",
             "footer": {
               "enablePagination": true
+            },
+            "bioetlCurrentPresentation": {
+              "title": "Inspect Global Signal Measurements",
+              "description": "GLOBAL / CURRENT · Exact runtime rule operands at the same query evaluation time. Lag uses a 15m maximum; backlog uses the latest non-validation sample. Validation backlog is a separate signal, validation_backlog; this table does not represent the BioETLStageBacklogActive alert window. Lag is elapsed run time sampled when backlog is nonzero, not input-record event age. Inspect Stage Snapshot Clocks for application observation and Pushgateway publication; legacy observation and source-event times remain UNKNOWN. Persisted gauges can outlive a finished run or exporter restart. Evaluation time is not observation time. Empty successful result means no matching threshold crossings; query failures are errors."
             }
           },
           "links": [
@@ -2773,8 +2791,8 @@
         {
           "id": 22012,
           "type": "table",
-          "title": "Inspect Stage Snapshot Clocks",
-          "description": "GLOBAL / CURRENT · Same threshold-crossing pipeline / run type / stage scope as Signal Measurements. Stage lag is elapsed run time sampled when backlog is nonzero, not the age of the oldest source record; retained lag does not keep increasing. Latest stage projection is the application's latest snapshot clock, only when emitted; it does not date the selected 15m maximum, which may belong to an earlier projection. Gateway publication is the retained job=bioetl push time, not event, scrape or run-start time. Input-record event time is not instrumented. Missing, zero or future clocks remain UNKNOWN; a recent publication never fills a missing observation. Do not associate a newer backfill or an entity-level processing anchor with an old incremental stage snapshot. Dates use dashboard timezone. Legacy snapshots cannot establish their producing run or input-event freshness. Cause verification remains separate.",
+          "title": "Inspect Stage Snapshot Clocks · period end",
+          "description": "TIME RANGE SNAPSHOT · Evaluated at the selected period end, including absolute historical periods; not live data. Independent CURRENT clocks and the live-clock instructions below apply only in the managed adaptive profile. GLOBAL / CURRENT · Same threshold-crossing pipeline / run type / stage scope as Signal Measurements. Stage lag is elapsed run time sampled when backlog is nonzero, not the age of the oldest source record; retained lag does not keep increasing. Latest stage projection is the application's latest snapshot clock, only when emitted; it does not date the selected 15m maximum, which may belong to an earlier projection. Gateway publication is the retained job=bioetl push time, not event, scrape or run-start time. Input-record event time is not instrumented. Missing, zero or future clocks remain UNKNOWN; a recent publication never fills a missing observation. Do not associate a newer backfill or an entity-level processing anchor with an old incremental stage snapshot. Dates use dashboard timezone. Legacy snapshots cannot establish their producing run or input-event freshness. Cause verification remains separate.",
           "gridPos": {
             "x": 0,
             "y": 47,
@@ -2923,6 +2941,10 @@
             "enablePagination": true,
             "footer": {
               "enablePagination": true
+            },
+            "bioetlCurrentPresentation": {
+              "title": "Inspect Stage Snapshot Clocks",
+              "description": "GLOBAL / CURRENT · Same threshold-crossing pipeline / run type / stage scope as Signal Measurements. Stage lag is elapsed run time sampled when backlog is nonzero, not the age of the oldest source record; retained lag does not keep increasing. Latest stage projection is the application's latest snapshot clock, only when emitted; it does not date the selected 15m maximum, which may belong to an earlier projection. Gateway publication is the retained job=bioetl push time, not event, scrape or run-start time. Input-record event time is not instrumented. Missing, zero or future clocks remain UNKNOWN; a recent publication never fills a missing observation. Do not associate a newer backfill or an entity-level processing anchor with an old incremental stage snapshot. Dates use dashboard timezone. Legacy snapshots cannot establish their producing run or input-event freshness. Cause verification remains separate."
             }
           }
         }
@@ -3292,7 +3314,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "CURRENT · Endpoint is scrape availability; expected stage signals measure presence, not freshness. Rule age is evaluation age, not event freshness. Monitoring quality (10m) reports missing telemetry, rule failures or missed evaluations in the last 10 minutes, including recovered events. DEGRADED is a monitoring warning, not proof that the selected pipeline has incomplete stage evidence. Evidence confidence is monitoring quality, not the selected Run ID verdict.",
+          "description": "TIME RANGE SNAPSHOT · Evaluated at the selected period end, including absolute historical periods; not live data. Independent CURRENT clocks and the live-clock instructions below apply only in the managed adaptive profile. CURRENT · Endpoint is scrape availability; expected stage signals measure presence, not freshness. Rule age is evaluation age, not event freshness. Monitoring quality (10m) reports missing telemetry, rule failures or missed evaluations in the last 10 minutes, including recovered events. DEGRADED is a monitoring warning, not proof that the selected pipeline has incomplete stage evidence. Evidence confidence is monitoring quality, not the selected Run ID verdict.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3498,7 +3520,11 @@
               "valueSize": 20,
               "titleSize": 14
             },
-            "wideLayout": false
+            "wideLayout": false,
+            "bioetlCurrentPresentation": {
+              "title": "Monitor Coverage",
+              "description": "CURRENT · Endpoint is scrape availability; expected stage signals measure presence, not freshness. Rule age is evaluation age, not event freshness. Monitoring quality (10m) reports missing telemetry, rule failures or missed evaluations in the last 10 minutes, including recovered events. DEGRADED is a monitoring warning, not proof that the selected pipeline has incomplete stage evidence. Evidence confidence is monitoring quality, not the selected Run ID verdict."
+            }
           },
           "targets": [
             {
@@ -3558,7 +3584,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "CURRENT · Required telemetry coverage over 5 minutes, independent of Run ID. CRIT means at least two required groups are missing; it does not count failed runs. Inspect Telemetry Coverage below for manifest, ledger, replay-risk, integrity and publication evidence. An empty Pushgateway after restart requires a genuine new publication or verified backup, never synthetic zero counters. Counts map to 0=OK, 1=WARN, >=2=CRIT; absent evidence remains UNKNOWN.",
+          "description": "TIME RANGE SNAPSHOT · Evaluated at the selected period end, including absolute historical periods; not live data. Independent CURRENT clocks and the live-clock instructions below apply only in the managed adaptive profile. CURRENT · Required telemetry coverage over 5 minutes, independent of Run ID. CRIT means at least two required groups are missing; it does not count failed runs. Inspect Telemetry Coverage below for manifest, ledger, replay-risk, integrity and publication evidence. An empty Pushgateway after restart requires a genuine new publication or verified backup, never synthetic zero counters. Counts map to 0=OK, 1=WARN, >=2=CRIT; absent evidence remains UNKNOWN.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3646,6 +3672,10 @@
             "text": {
               "valueSize": 20,
               "titleSize": 14
+            },
+            "bioetlCurrentPresentation": {
+              "title": "Monitor Telemetry",
+              "description": "CURRENT · Required telemetry coverage over 5 minutes, independent of Run ID. CRIT means at least two required groups are missing; it does not count failed runs. Inspect Telemetry Coverage below for manifest, ledger, replay-risk, integrity and publication evidence. An empty Pushgateway after restart requires a genuine new publication or verified backup, never synthetic zero counters. Counts map to 0=OK, 1=WARN, >=2=CRIT; absent evidence remains UNKNOWN."
             }
           },
           "pluginVersion": "9.5.0",
@@ -3668,7 +3698,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "CURRENT · Worst coverage in selected pipeline/run type scope. PRESENT means series observed, not successful processing. Publication requires an original positive timestamp no later than now; age alone is informational. Run ID and dashboard time range do not change these fixed-window checks.",
+          "description": "TIME RANGE SNAPSHOT · Evaluated at the selected period end, including absolute historical periods; not live data. Independent CURRENT clocks and the live-clock instructions below apply only in the managed adaptive profile. CURRENT · Worst coverage in selected pipeline/run type scope. PRESENT means series observed, not successful processing. Publication requires an original positive timestamp no later than now; age alone is informational. Run ID and dashboard time range do not change these fixed-window checks.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3734,6 +3764,10 @@
             "text": {
               "valueSize": 20,
               "titleSize": 14
+            },
+            "bioetlCurrentPresentation": {
+              "title": "Inspect Telemetry Coverage",
+              "description": "CURRENT · Worst coverage in selected pipeline/run type scope. PRESENT means series observed, not successful processing. Publication requires an original positive timestamp no later than now; age alone is informational. Run ID and dashboard time range do not change these fixed-window checks."
             }
           },
           "pluginVersion": "9.5.0",
@@ -3841,7 +3875,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "CURRENT · Worst domain priority in the selected workflow/pipeline/run-type scope. Mapping: 0=OK, 1=UNKNOWN, 2=WARN, 3=CRIT; null is UNKNOWN. Run ID does not filter this card. A workflow-wide failure does not prove that this pipeline or the selected run failed.",
+          "description": "TIME RANGE SNAPSHOT · Evaluated at the selected period end, including absolute historical periods; not live data. Independent CURRENT clocks and the live-clock instructions below apply only in the managed adaptive profile. CURRENT · Worst domain priority in the selected workflow/pipeline/run-type scope. Mapping: 0=OK, 1=UNKNOWN, 2=WARN, 3=CRIT; null is UNKNOWN. Run ID does not filter this card. A workflow-wide failure does not prove that this pipeline or the selected run failed.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3951,6 +3985,10 @@
             "text": {
               "valueSize": 20,
               "titleSize": 14
+            },
+            "bioetlCurrentPresentation": {
+              "title": "Monitor Pipeline Status",
+              "description": "CURRENT · Worst domain priority in the selected workflow/pipeline/run-type scope. Mapping: 0=OK, 1=UNKNOWN, 2=WARN, 3=CRIT; null is UNKNOWN. Run ID does not filter this card. A workflow-wide failure does not prove that this pipeline or the selected run failed."
             }
           },
           "targets": [
@@ -3971,7 +4009,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "CURRENT snapshot · Blockers for the selected Pipeline and Run Type at evaluation time; not a Selected Run ID result. Shows up to 3 reasons. An empty list is healthy only when Pipeline Health is OK and Metrics Coverage is complete; otherwise it is inconclusive. Open the matching detection or localization panel. TELEMETRY MISSING is not a zero and not VALID EMPTY. F-13 workflow rule: when the row workflow label is empty/missing, handoffs omit var-workflow (do not emit null/empty workflow).",
+          "description": "TIME RANGE SNAPSHOT · Evaluated at the selected period end, including absolute historical periods; not live data. Independent CURRENT clocks and the live-clock instructions below apply only in the managed adaptive profile. CURRENT snapshot · Blockers for the selected Pipeline and Run Type at evaluation time; not a Selected Run ID result. Shows up to 3 reasons. An empty list is healthy only when Pipeline Health is OK and Metrics Coverage is complete; otherwise it is inconclusive. Open the matching detection or localization panel. TELEMETRY MISSING is not a zero and not VALID EMPTY. F-13 workflow rule: when the row workflow label is empty/missing, handoffs omit var-workflow (do not emit null/empty workflow).",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -4365,7 +4403,11 @@
                 "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md",
                 "targetBlank": true
               }
-            ]
+            ],
+            "bioetlCurrentPresentation": {
+              "title": "Review Runtime Blockers",
+              "description": "CURRENT snapshot · Blockers for the selected Pipeline and Run Type at evaluation time; not a Selected Run ID result. Shows up to 3 reasons. An empty list is healthy only when Pipeline Health is OK and Metrics Coverage is complete; otherwise it is inconclusive. Open the matching detection or localization panel. TELEMETRY MISSING is not a zero and not VALID EMPTY. F-13 workflow rule: when the row workflow label is empty/missing, handoffs omit var-workflow (do not emit null/empty workflow)."
+            }
           },
           "pluginVersion": "10.4.0",
           "targets": [
@@ -4411,7 +4453,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "CURRENT · Stage snapshots and fixed 5m throughput; the historical dashboard range does not set this clock. One row per observed pipeline / run type / stage. All returned groups remain available through pagination, sorted by lag; missing measures stay UNKNOWN. Inspect Selected Run separately for exact-run evidence. Missing signals remain UNKNOWN. An active blocker is not established by missing evidence. INCOMPLETE: inspect expected-stage evidence; no observed blocker is not proof of coverage.",
+          "description": "TIME RANGE SNAPSHOT · Evaluated at the selected period end, including absolute historical periods; not live data. Independent CURRENT clocks and the live-clock instructions below apply only in the managed adaptive profile. CURRENT · Stage snapshots and fixed 5m throughput; the historical dashboard range does not set this clock. One row per observed pipeline / run type / stage. All returned groups remain available through pagination, sorted by lag; missing measures stay UNKNOWN. Inspect Selected Run separately for exact-run evidence. Missing signals remain UNKNOWN. An active blocker is not established by missing evidence. INCOMPLETE: inspect expected-stage evidence; no observed blocker is not proof of coverage.",
           "fieldConfig": {
             "defaults": {
               "noValue": "UNKNOWN",
@@ -4605,7 +4647,11 @@
                 "desc": true
               }
             ],
-            "enablePagination": true
+            "enablePagination": true,
+            "bioetlCurrentPresentation": {
+              "title": "Review Stage Progress",
+              "description": "CURRENT · Stage snapshots and fixed 5m throughput; the historical dashboard range does not set this clock. One row per observed pipeline / run type / stage. All returned groups remain available through pagination, sorted by lag; missing measures stay UNKNOWN. Inspect Selected Run separately for exact-run evidence. Missing signals remain UNKNOWN. An active blocker is not established by missing evidence. INCOMPLETE: inspect expected-stage evidence; no observed blocker is not proof of coverage."
+            }
           },
           "pluginVersion": "10.4.0",
           "targets": [
@@ -5158,7 +5204,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "CURRENT · 15m count chip supporting Review Runtime Blockers (9101). This is not a second summary table. Counts active canonical runtime blockers over the last 15 minutes for Pipeline and Run Type. 0=OK only with healthy status and coverage, >=1=CRIT, null=UNKNOWN. Inspect 9101 for owning conditions. TELEMETRY MISSING is not a zero.",
+          "description": "TIME RANGE SNAPSHOT · Evaluated at the selected period end, including absolute historical periods; not live data. Independent CURRENT clocks and the live-clock instructions below apply only in the managed adaptive profile. CURRENT · 15m count chip supporting Review Runtime Blockers (9101). This is not a second summary table. Counts active canonical runtime blockers over the last 15 minutes for Pipeline and Run Type. 0=OK only with healthy status and coverage, >=1=CRIT, null=UNKNOWN. Inspect 9101 for owning conditions. TELEMETRY MISSING is not a zero.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -5237,6 +5283,10 @@
             "text": {
               "valueSize": 20,
               "titleSize": 14
+            },
+            "bioetlCurrentPresentation": {
+              "title": "Monitor Active Blocker Count",
+              "description": "CURRENT · 15m count chip supporting Review Runtime Blockers (9101). This is not a second summary table. Counts active canonical runtime blockers over the last 15 minutes for Pipeline and Run Type. 0=OK only with healthy status and coverage, >=1=CRIT, null=UNKNOWN. Inspect 9101 for owning conditions. TELEMETRY MISSING is not a zero."
             }
           },
           "targets": [
@@ -6192,7 +6242,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "CURRENT · Replay uses pipeline/run type counters over 15 minutes; Run ID does not filter this card. UNKNOWN means required telemetry or publication evidence is missing, not a confirmed processing failure. Inspect Telemetry Coverage below. Selected-run Trust is assessed separately from persisted evidence. Counts map to 0=OK, 1=WARN, >=2=CRIT; absent evidence remains UNKNOWN.",
+          "description": "TIME RANGE SNAPSHOT · Evaluated at the selected period end, including absolute historical periods; not live data. Independent CURRENT clocks and the live-clock instructions below apply only in the managed adaptive profile. CURRENT · Replay uses pipeline/run type counters over 15 minutes; Run ID does not filter this card. UNKNOWN means required telemetry or publication evidence is missing, not a confirmed processing failure. Inspect Telemetry Coverage below. Selected-run Trust is assessed separately from persisted evidence. Counts map to 0=OK, 1=WARN, >=2=CRIT; absent evidence remains UNKNOWN.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -6280,6 +6330,10 @@
             "text": {
               "valueSize": 20,
               "titleSize": 14
+            },
+            "bioetlCurrentPresentation": {
+              "title": "Monitor Replay",
+              "description": "CURRENT · Replay uses pipeline/run type counters over 15 minutes; Run ID does not filter this card. UNKNOWN means required telemetry or publication evidence is missing, not a confirmed processing failure. Inspect Telemetry Coverage below. Selected-run Trust is assessed separately from persisted evidence. Counts map to 0=OK, 1=WARN, >=2=CRIT; absent evidence remains UNKNOWN."
             }
           },
           "pluginVersion": "9.5.0",
@@ -6302,7 +6356,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "CURRENT · Last checkpoint age, informational only; age does not change readiness. Missing evidence remains UNKNOWN. Pipeline-scoped, independent of Run ID.",
+          "description": "TIME RANGE SNAPSHOT · Evaluated at the selected period end, including absolute historical periods; not live data. Independent CURRENT clocks and the live-clock instructions below apply only in the managed adaptive profile. CURRENT · Last checkpoint age, informational only; age does not change readiness. Missing evidence remains UNKNOWN. Pipeline-scoped, independent of Run ID.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -6366,6 +6420,10 @@
             "text": {
               "valueSize": 20,
               "titleSize": 14
+            },
+            "bioetlCurrentPresentation": {
+              "title": "Track Checkpoint",
+              "description": "CURRENT · Last checkpoint age, informational only; age does not change readiness. Missing evidence remains UNKNOWN. Pipeline-scoped, independent of Run ID."
             }
           },
           "pluginVersion": "9.5.0",
@@ -6413,7 +6471,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "CURRENT · Ledger uses pipeline/run type counters over 15 minutes; Run ID does not filter this card. UNKNOWN means required telemetry or publication evidence is missing, not a confirmed processing failure. Inspect Telemetry Coverage below. Selected-run Trust is assessed separately from persisted evidence. Counts map to 0=OK, 1=WARN, >=2=CRIT; absent evidence remains UNKNOWN.",
+          "description": "TIME RANGE SNAPSHOT · Evaluated at the selected period end, including absolute historical periods; not live data. Independent CURRENT clocks and the live-clock instructions below apply only in the managed adaptive profile. CURRENT · Ledger uses pipeline/run type counters over 15 minutes; Run ID does not filter this card. UNKNOWN means required telemetry or publication evidence is missing, not a confirmed processing failure. Inspect Telemetry Coverage below. Selected-run Trust is assessed separately from persisted evidence. Counts map to 0=OK, 1=WARN, >=2=CRIT; absent evidence remains UNKNOWN.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -6501,6 +6559,10 @@
             "text": {
               "valueSize": 20,
               "titleSize": 14
+            },
+            "bioetlCurrentPresentation": {
+              "title": "Monitor Ledger",
+              "description": "CURRENT · Ledger uses pipeline/run type counters over 15 minutes; Run ID does not filter this card. UNKNOWN means required telemetry or publication evidence is missing, not a confirmed processing failure. Inspect Telemetry Coverage below. Selected-run Trust is assessed separately from persisted evidence. Counts map to 0=OK, 1=WARN, >=2=CRIT; absent evidence remains UNKNOWN."
             }
           },
           "pluginVersion": "9.5.0",
@@ -7320,7 +7382,7 @@
                   "options": {
                     "match": "null",
                     "result": {
-                      "text": "NO OBSERVATIONS",
+                      "text": "UNKNOWN",
                       "color": "text"
                     }
                   }
@@ -7420,7 +7482,7 @@
                   "options": {
                     "match": "null",
                     "result": {
-                      "text": "NO OBSERVATIONS",
+                      "text": "UNKNOWN",
                       "color": "text"
                     }
                   }
@@ -8156,8 +8218,8 @@
         {
           "id": 2461,
           "type": "table",
-          "title": "Inspect Current Missing Stage Signals",
-          "description": "CURRENT · Expected stage coverage for Pipeline / Run Type. Missing lag/backlog signals are listed individually. Undefined expected stages are UNKNOWN. VALID EMPTY requires a recorded complete stage catalog and every expected signal. Query failures are QUERY ERROR.",
+          "title": "Inspect Snapshot Missing Stage Signals",
+          "description": "TIME RANGE SNAPSHOT · Evaluated at the selected period end, including absolute historical periods; not live data. Independent CURRENT clocks and the live-clock instructions below apply only in the managed adaptive profile. CURRENT · Expected stage coverage for Pipeline / Run Type. Missing lag/backlog signals are listed individually. Undefined expected stages are UNKNOWN. VALID EMPTY requires a recorded complete stage catalog and every expected signal. Query failures are QUERY ERROR.",
           "gridPos": {
             "x": 0,
             "y": 167,
@@ -8264,6 +8326,10 @@
             "footer": {
               "show": false,
               "enablePagination": true
+            },
+            "bioetlCurrentPresentation": {
+              "title": "Inspect Current Missing Stage Signals",
+              "description": "CURRENT · Expected stage coverage for Pipeline / Run Type. Missing lag/backlog signals are listed individually. Undefined expected stages are UNKNOWN. VALID EMPTY requires a recorded complete stage catalog and every expected signal. Query failures are QUERY ERROR."
             }
           },
           "transformations": [
@@ -8623,7 +8689,7 @@
                   "options": {
                     "match": "null",
                     "result": {
-                      "text": "NO OBSERVATIONS",
+                      "text": "UNKNOWN",
                       "color": "text"
                     }
                   }
@@ -9177,7 +9243,7 @@
                   "options": {
                     "match": "null",
                     "result": {
-                      "text": "NO OBSERVATIONS",
+                      "text": "UNKNOWN",
                       "color": "text"
                     }
                   }
@@ -9461,7 +9527,7 @@
                   "options": {
                     "match": "null",
                     "result": {
-                      "text": "NO OBSERVATIONS",
+                      "text": "UNKNOWN",
                       "color": "text"
                     }
                   }
@@ -11312,7 +11378,7 @@
           "id": 22010,
           "type": "table",
           "title": "Inspect Global Suspects (Full)",
-          "description": "GLOBAL / CURRENT · All pipelines; independent of selected Pipeline, Provider and Run ID. Severity is rule urgency, not cause verification. UNVERIFIED means rule triggered; cause not confirmed. All rows use the same GLOBAL scope. Recording sample time is not event time. Missing telemetry remains UNKNOWN. Action opens the domain page named on the row. Fleet charts for pipeline signals stay on this page.",
+          "description": "TIME RANGE SNAPSHOT · Evaluated at the selected period end, including absolute historical periods; not live data. Independent CURRENT clocks and the live-clock instructions below apply only in the managed adaptive profile. GLOBAL / CURRENT · All pipelines; independent of selected Pipeline, Provider and Run ID. Severity is rule urgency, not cause verification. UNVERIFIED means rule triggered; cause not confirmed. All rows use the same GLOBAL scope. Recording sample time is not event time. Missing telemetry remains UNKNOWN. Action opens the domain page named on the row. Fleet charts for pipeline signals stay on this page.",
           "gridPos": {
             "x": 0,
             "y": 60,
@@ -11320,19 +11386,17 @@
             "h": 12
           },
           "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
+            "type": "datasource",
+            "uid": "-- Dashboard --"
           },
           "targets": [
             {
+              "panelId": 2010,
               "refId": "A",
-              "instant": true,
-              "range": false,
-              "format": "table",
-              "expr": "label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(bioetl_incident_ranked_evidence,\"object\",\"$1\",\"object\",\"(.*) / $\"),\"route_pipeline\",\".*\",\"pipeline\",\"unknown\"),\"owner\",\"BioETL Team\",\"reason\",\"infrastructure_failed\"),\"next_step\",\"Open pipeline-failure-critical.md\",\"reason\",\"infrastructure_failed\"),\"owner\",\"See runbook\",\"owner\",\"^$\"),\"next_step\",\"See runbook\",\"next_step\",\"^$\"),\"freshness\",\"Not verified: no event timestamp\",\"\",\"\")",
+              "withTransforms": false,
               "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
+                "type": "datasource",
+                "uid": "-- Dashboard --"
               }
             }
           ],
@@ -12065,7 +12129,7 @@
             "cellHeight": "sm",
             "footer": {
               "show": false,
-              "enablePagination": false,
+              "enablePagination": true,
               "countRows": false
             },
             "sortBy": [
@@ -12073,7 +12137,12 @@
                 "displayName": "Rank",
                 "desc": false
               }
-            ]
+            ],
+            "bioetlCurrentPresentation": {
+              "title": "Inspect Global Suspects (Full)",
+              "description": "GLOBAL / CURRENT · All pipelines; independent of selected Pipeline, Provider and Run ID. Severity is rule urgency, not cause verification. UNVERIFIED means rule triggered; cause not confirmed. All rows use the same GLOBAL scope. Recording sample time is not event time. Missing telemetry remains UNKNOWN. Action opens the domain page named on the row. Fleet charts for pipeline signals stay on this page."
+            },
+            "enablePagination": true
           },
           "links": []
         }
@@ -12096,7 +12165,7 @@
           "id": 22005,
           "type": "table",
           "title": "Monitor Global Alerts (Full)",
-          "description": "GLOBAL / CURRENT · All pipelines; independent of selected Pipeline, Provider and Run ID. Provider preserves the alert label or uses an unambiguous configured pipeline mapping. Not provided means missing or ambiguous attribution, not unknown provider health. N/A — Infrastructure is not a provider. Pipeline: N/A — Docker infrastructure for the Docker probe alert without a pipeline label; Not provided for other alerts without that label. FIRING and PENDING retain their original alert state.",
+          "description": "TIME RANGE SNAPSHOT · Evaluated at the selected period end, including absolute historical periods; not live data. Independent CURRENT clocks and the live-clock instructions below apply only in the managed adaptive profile. GLOBAL / CURRENT · All pipelines; independent of selected Pipeline, Provider and Run ID. Provider preserves the alert label or uses an unambiguous configured pipeline mapping. Not provided means missing or ambiguous attribution, not unknown provider health. N/A — Infrastructure is not a provider. Pipeline: N/A — Docker infrastructure for the Docker probe alert without a pipeline label; Not provided for other alerts without that label. FIRING and PENDING retain their original alert state.",
           "gridPos": {
             "x": 0,
             "y": 61,
@@ -12427,7 +12496,12 @@
               "enablePagination": true,
               "countRows": true
             },
-            "cellHeight": "sm"
+            "cellHeight": "sm",
+            "bioetlCurrentPresentation": {
+              "title": "Monitor Global Alerts (Full)",
+              "description": "GLOBAL / CURRENT · All pipelines; independent of selected Pipeline, Provider and Run ID. Provider preserves the alert label or uses an unambiguous configured pipeline mapping. Not provided means missing or ambiguous attribution, not unknown provider health. N/A — Infrastructure is not a provider. Pipeline: N/A — Docker infrastructure for the Docker probe alert without a pipeline label; Not provided for other alerts without that label. FIRING and PENDING retain their original alert state."
+            },
+            "enablePagination": true
           },
           "transformations": [
             {
@@ -12759,8 +12833,8 @@
         {
           "id": 9701,
           "type": "table",
-          "title": "Review Current Workflow Evidence · ${workflow_evidence_freshness} · threshold 24h",
-          "description": "CURRENT · Workflow/pipeline/run-type scope, independent of Selected Run. Published at is the gateway publication clock, not the Prometheus evaluation clock. Retained publications do not expire after 15 minutes. Reason unavailable means no diagnostic cause is exposed by this metric. Publication age is measured at query evaluation. Display threshold: 24h (86400 seconds); STALE means age > threshold, not workflow failure. Within threshold does not prove health. Missing/invalid publication time is Not verified. The heading uses the oldest scoped publication; any known stale row takes precedence over missing coverage. Retention and health status are unchanged. Refresh the dashboard to re-evaluate.",
+          "title": "Review Snapshot Workflow Evidence · ${workflow_evidence_freshness} · threshold 24h",
+          "description": "TIME RANGE SNAPSHOT · Evaluated at the selected period end, including absolute historical periods; not live data. Independent CURRENT clocks and the live-clock instructions below apply only in the managed adaptive profile. CURRENT · Workflow/pipeline/run-type scope, independent of Selected Run. Published at is the gateway publication clock, not the Prometheus evaluation clock. Retained publications do not expire after 15 minutes. Reason unavailable means no diagnostic cause is exposed by this metric. Publication age is measured at query evaluation. Display threshold: 24h (86400 seconds); STALE means age > threshold, not workflow failure. Within threshold does not prove health. Missing/invalid publication time is Not verified. The heading uses the oldest scoped publication; any known stale row takes precedence over missing coverage. Retention and health status are unchanged. Refresh the dashboard to re-evaluate.",
           "gridPos": {
             "x": 0,
             "y": 63,
@@ -13019,6 +13093,10 @@
             "footer": {
               "show": false,
               "enablePagination": true
+            },
+            "bioetlCurrentPresentation": {
+              "title": "Review Current Workflow Evidence · ${workflow_evidence_freshness} · threshold 24h",
+              "description": "CURRENT · Workflow/pipeline/run-type scope, independent of Selected Run. Published at is the gateway publication clock, not the Prometheus evaluation clock. Retained publications do not expire after 15 minutes. Reason unavailable means no diagnostic cause is exposed by this metric. Publication age is measured at query evaluation. Display threshold: 24h (86400 seconds); STALE means age > threshold, not workflow failure. Within threshold does not prove health. Missing/invalid publication time is Not verified. The heading uses the oldest scoped publication; any known stale row takes precedence over missing coverage. Retention and health status are unchanged. Refresh the dashboard to re-evaluate."
             }
           },
           "links": [

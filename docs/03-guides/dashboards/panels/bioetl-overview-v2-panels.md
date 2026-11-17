@@ -110,8 +110,8 @@ Generated from the dashboard JSON. Earlier sections explain panel semantics; thi
 | ID | Title | Type |
 | --- | --- | --- |
 | 9604 | Review Saved Run Verdict | stat |
-| 9605 | Review Current Fleet Alerts | stat |
-| 9606 | Review Processing Anchor Age · 24h / 72h | stat |
+| 9605 | Review Snapshot Fleet Alerts | stat |
+| 9606 | Review Processing Anchor Age · 24h / 72h · period end | stat |
 | 9603 | Review Selected Run Status | table |
 | 99 | Review Run Context | table |
 | 9300 | Review Run Identity | table |

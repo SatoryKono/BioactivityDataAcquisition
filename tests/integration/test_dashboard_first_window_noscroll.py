@@ -19,6 +19,7 @@ only text/stat/table. Overflow-clip is not a fix. Allowlist must stay empty.
 from __future__ import annotations
 
 import re
+from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
@@ -175,7 +176,7 @@ def test_first_window_overflow_allowlists_stay_empty() -> None:
 def test_page_scroll_catalog_still_rejects_internal_overflow() -> None:
     """The operator's page-scroll decision does not permit inner scroll/clip."""
     path = Path("grafana/dashboards/bioetl-run-explorer-v1.json")
-    dashboard = load_dashboard(path)
+    dashboard = deepcopy(load_dashboard(path))
     panel = next(p for p in dashboard["panels"] if p["id"] == 3010)
     assert not _first_window_scroll_violations(path, dashboard)
     panel["options"]["overflowY"] = "scroll"

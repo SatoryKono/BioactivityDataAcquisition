@@ -11,7 +11,7 @@ import subprocess
 import pytest
 import yaml
 
-pytestmark = pytest.mark.repo_backed
+pytestmark = pytest.mark.integration
 
 
 def _evaluate(tmp_path, fixture):
@@ -138,7 +138,7 @@ def test_workflow_failed_event_counters_distinguish_absence_from_zero(
 
 def test_signal_drilldown_evaluates_current_operands_not_selected_history(tmp_path):
     dashboard = json.loads(
-        Path("grafana/dashboards/bioetl-incident-v1.json").read_text()
+        Path("grafana/dashboards-adaptive/bioetl-incident-v1.json").read_text()
     )
 
     def walk(items):
@@ -146,7 +146,8 @@ def test_signal_drilldown_evaluates_current_operands_not_selected_history(tmp_pa
 
     panel = next(p for p in walk(dashboard["panels"]) if p["id"] == 22011)
     assert "GLOBAL / CURRENT" in panel["description"][:45]
-    expr = panel["targets"][0]["expr"]
+    assert panel["options"]["viewMode"] == "current"
+    expr = panel["options"]["currentView"]["queries"][0]["expr"]
     # Measurements appear only at the current clock. The same expression at a
     # selected historical end must remain empty, not synthesize evidence.
     result = _evaluate(

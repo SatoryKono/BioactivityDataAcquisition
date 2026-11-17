@@ -13,15 +13,102 @@
     "src/bioetl/infrastructure/observability/prometheus_metric_label_policy_sets.py": "Reviewed reuse of the bounded pipeline/run_type/stage label policy for the projection clock. No forensic labels or new external resources.",
     "src/bioetl/infrastructure/observability/prometheus_metric_registries.py": "Reviewed mapping of the projection-clock name to its existing module-owned Gauge. No acquisition, closer or task ownership change.",
     "src/bioetl/interfaces/http/_reconciliation_display.py": "Reviewed pure projection of persisted FK step failures, identified from the saved plan. It does not mutate saved verdicts, create clients, read files or acquire resources.",
-    "src/bioetl/interfaces/http/_run_explorer_snapshot.py": "Reviewed cache bound 10 to 20 and detached response slicing for requests within that bound. Existing asyncio.to_thread in refresh_once and asyncio.create_task in stop_run_explorer_snapshot retain the same owners, cancellation and close paths. The periodic caller binding remains cache.refresh_once; blank-line binding anchors 71 and 142 were explicitly reviewed at 71 and 147. No new creation site.",
+    "src/bioetl/interfaces/http/_run_explorer_snapshot.py": "Reviewed twenty-row snapshot and detached response slicing, preserving task and cleanup owners. Six old blank-line production bindings are now explicitly relocated to the real periodic call at line 158 and to_thread allocation at line 78, preserving binding metadata. No runtime qualification is claimed.",
     "src/bioetl/interfaces/http/_selected_run_status_cache.py": "Reviewed read_view response policy metadata attached to the deep-copied read result. Existing single-flight task creation, cancellation, close timeout and capacity bounds unchanged; no new creation site.",
     "src/bioetl/interfaces/http/_selected_run_unavailable.py": "Reviewed no-selection response helper before AUTO cache/storage. It calls the supplied sender using the existing writer and takes no writer ownership; no new client/task/open call or cleanup obligation.",
     "src/bioetl/interfaces/http/selected_run_status.py": "Reviewed exact-selection early response and relocation of cache metadata assembly into read_view. Existing asyncio.to_thread(cached load) acquisition, selected-run budget and response writer owner remain unchanged; no runtime lifecycle evidence added."
   },
-  "line_updates": {
-    "src/bioetl/interfaces/http/_run_explorer_snapshot.py": {
-      "71": 71,
-      "142": 147
+  "line_updates": {},
+  "reference_moves": [
+    {
+      "identity": "asyncio.default-executor",
+      "fields": [
+        "production_binding"
+      ],
+      "from": {
+        "file": "src/bioetl/interfaces/http/_run_explorer_snapshot.py",
+        "line": 142
+      },
+      "to": {
+        "file": "src/bioetl/interfaces/http/_run_explorer_snapshot.py",
+        "scope": "run_periodic_run_explorer_snapshot",
+        "segment": "await cache.refresh_once(source)"
+      }
+    },
+    {
+      "identity": "asyncio.default-executor",
+      "fields": [
+        "production_binding"
+      ],
+      "from": {
+        "file": "src/bioetl/interfaces/http/_run_explorer_snapshot.py",
+        "line": 71
+      },
+      "to": {
+        "file": "src/bioetl/interfaces/http/_run_explorer_snapshot.py",
+        "scope": "RunExplorerSnapshotCache.refresh_once",
+        "segment": "payload = await asyncio.to_thread("
+      }
+    },
+    {
+      "identity": "infrastructure.export.csv_exporter.directory-enumeration",
+      "fields": [
+        "production_binding"
+      ],
+      "from": {
+        "file": "src/bioetl/interfaces/http/_run_explorer_snapshot.py",
+        "line": 142
+      },
+      "to": {
+        "file": "src/bioetl/interfaces/http/_run_explorer_snapshot.py",
+        "scope": "run_periodic_run_explorer_snapshot",
+        "segment": "await cache.refresh_once(source)"
+      }
+    },
+    {
+      "identity": "infrastructure.export.csv_exporter.directory-enumeration",
+      "fields": [
+        "production_binding"
+      ],
+      "from": {
+        "file": "src/bioetl/interfaces/http/_run_explorer_snapshot.py",
+        "line": 71
+      },
+      "to": {
+        "file": "src/bioetl/interfaces/http/_run_explorer_snapshot.py",
+        "scope": "RunExplorerSnapshotCache.refresh_once",
+        "segment": "payload = await asyncio.to_thread("
+      }
+    },
+    {
+      "identity": "infrastructure.storage.bronze.read_cleanup_mixin.directory-enumeration",
+      "fields": [
+        "production_binding"
+      ],
+      "from": {
+        "file": "src/bioetl/interfaces/http/_run_explorer_snapshot.py",
+        "line": 142
+      },
+      "to": {
+        "file": "src/bioetl/interfaces/http/_run_explorer_snapshot.py",
+        "scope": "run_periodic_run_explorer_snapshot",
+        "segment": "await cache.refresh_once(source)"
+      }
+    },
+    {
+      "identity": "infrastructure.storage.bronze.read_cleanup_mixin.directory-enumeration",
+      "fields": [
+        "production_binding"
+      ],
+      "from": {
+        "file": "src/bioetl/interfaces/http/_run_explorer_snapshot.py",
+        "line": 71
+      },
+      "to": {
+        "file": "src/bioetl/interfaces/http/_run_explorer_snapshot.py",
+        "scope": "RunExplorerSnapshotCache.refresh_once",
+        "segment": "payload = await asyncio.to_thread("
+      }
     }
-  }
+  ]
 }

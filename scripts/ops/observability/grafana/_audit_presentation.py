@@ -21,6 +21,8 @@ _DATA_QUALITY = "Data Quality"
 _WRAP_TEXT = "custom.wrapText"
 _CELL_OPTIONS = "custom.cellOptions"
 _CUSTOM_WIDTH = "custom.width"
+_CURRENT_PRESENTATION = "bioetlCurrentPresentation"
+_SNAPSHOT_PREFIX = "TIME RANGE SNAPSHOT · "
 
 _LABEL_TRANSLATIONS = {
     "НЕТ ЗАПУСКОВ": "NO RUNS",
@@ -297,10 +299,66 @@ def _is_current_panel(panel: dict, spec: dict) -> bool:
     if spec.get("evidence_source") not in {"prometheus", "grafana_builtin"}:
         return False
     scope = spec.get("scope")
-    if scope == "time_range":
-        return False
-    current = scope == "current" or ("CURRENT" in panel.get("description", "")[:45])
+    prefix = panel.get("description", "").split("·", 1)[0]
+    declared_current = "CURRENT" in prefix and "TIME RANGE" not in prefix
+    current = (
+        scope == "current"
+        or declared_current
+        or _CURRENT_PRESENTATION in panel.get("options", {})
+    )
     return current and panel.get("type") in {"stat", "table", "timeseries"}
+
+
+def restore_native_current_presentation(
+    dashboard: dict, *, remove: bool = False
+) -> None:
+    """Restore source presentation before a deterministic projection/rebuild."""
+    for panel in _walk_panels(dashboard.get("panels", [])):
+        options = panel.get("options", {})
+        original = options.get(_CURRENT_PRESENTATION)
+        if original is None:
+            continue
+        panel.update(title=original["title"], description=original["description"])
+        if remove:
+            options.pop(_CURRENT_PRESENTATION)
+
+
+def mark_native_snapshot_clocks(dashboard: dict) -> None:
+    """Native Grafana instant queries use the selected end, including absolute ranges.
+
+    Only the managed CURRENT renderer owns an independent clock. Native values
+    therefore remain usable historical snapshots and never claim live health.
+    Keep the original presentation as projection metadata, not a second query.
+    """
+    root = Path(__file__).resolve().parents[4]
+    contract = yaml.safe_load(
+        (
+            root / "docs/03-guides/dashboards/contracts/panel-content-contract.yaml"
+        ).read_text(encoding="utf-8")
+    )
+    specs = contract["dashboards"].get(dashboard.get("uid"), {}).get("panels", {})
+    for panel in _walk_panels(dashboard.get("panels", [])):
+        if panel.get("description", "").startswith(_SNAPSHOT_PREFIX):
+            original = panel["options"][_CURRENT_PRESENTATION]
+            panel.update(title=original["title"], description=original["description"])
+        if not _is_current_panel(panel, specs.get(str(panel["id"]), {})):
+            continue
+        panel.setdefault("options", {})[_CURRENT_PRESENTATION] = {
+            "title": panel["title"],
+            "description": panel.get("description", ""),
+        }
+        title = (
+            panel["title"].replace("Current", "Snapshot").replace("CURRENT", "SNAPSHOT")
+        )
+        if panel["id"] in {9606, 22012}:
+            title += " · period end"
+        panel["title"] = title
+        panel["description"] = (
+            _SNAPSHOT_PREFIX
+            + "Evaluated at the selected period end, including absolute historical periods; not live data. "
+            "Independent CURRENT clocks and the live-clock instructions below apply only in the managed adaptive profile. "
+            + panel["description"]
+        )
 
 
 def _current_queries(panel: dict, native_panels: dict) -> list[dict]:
@@ -349,6 +407,7 @@ def _verify_current_donors(panels: dict) -> None:
 
 def _project_current_time(dashboard: dict) -> None:
     """Use an independent query clock for source-declared CURRENT telemetry."""
+    restore_native_current_presentation(dashboard)
     root = Path(__file__).resolve().parents[4]
     contract = yaml.safe_load(
         (
@@ -364,6 +423,7 @@ def _project_current_time(dashboard: dict) -> None:
                 " · ${workflow_evidence_freshness}", ""
             )
         if _is_current_panel(panel, specs.get(str(panel_id), {})):
+            panel.get("options", {}).pop(_CURRENT_PRESENTATION, None)
             _wrap_current_panel(panel, _current_queries(panel, native_panels))
     _verify_current_donors(panels)
     if "templating" in dashboard:

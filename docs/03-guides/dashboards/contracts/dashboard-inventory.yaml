@@ -60,13 +60,13 @@ dashboards:
         type: table
         description: HTTP identity for the selected Run ID
       - id: 9605
-        title: Review Current Fleet Alerts
+        title: Review Snapshot Fleet Alerts
         type: stat
-        description: Global current FIRING and PENDING counts, independent of the saved run
+        description: Native selected-end FIRING/PENDING snapshot; adaptive CURRENT counts remain independent of the saved run
       - id: 9606
-        title: Review Processing Anchor Age · 24h / 72h
+        title: Review Processing Anchor Age · 24h / 72h · period end
         type: stat
-        description: Current oldest observed ingestion age after source deduplication with the rules' 24h/72h thresholds
+        description: Native selected-end processing-anchor age; adaptive CURRENT age uses the rules' 24h/72h thresholds
     selector_variables:
       - workflow
       - pipeline
