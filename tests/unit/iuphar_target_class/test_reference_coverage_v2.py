@@ -335,6 +335,7 @@ def test_full_v2_producer_binds_actual_replay_dependencies(
         snapshot,
         old_request.provenance,
         row_id=cohort.rows[0].input_row_id,
+        rows=cohort.rows,
     )
     report = json.loads(old_request.pipeline_report.read_bytes())
     facts = report["observations"]["Target Classification"]["facts"]
