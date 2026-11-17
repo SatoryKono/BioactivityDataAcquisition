@@ -420,7 +420,11 @@ def test_nightly_replay_checksums_use_run_root_relative_paths() -> None:
 def test_coderabbit_installer_guard_ignores_documentation_comments() -> None:
     workflow = CODERABBIT_WORKFLOW.read_text(encoding="utf-8")
     header = workflow.split("on:", maxsplit=1)[0]
+    document = _load_yaml(CODERABBIT_WORKFLOW)
+    triggers = document.get("on", document.get(True))
 
+    assert isinstance(triggers, dict)
+    assert set(triggers) == {"workflow_dispatch"}
     assert "workflow_dispatch" in header
     assert "push" not in header
     assert "cli.coderabbit.ai/install.sh" not in workflow

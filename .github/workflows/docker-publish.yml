@@ -67,11 +67,13 @@ jobs:
     environment: ghcr-publish
     env:
       TESTED_SHA: ${{ inputs.source-sha }}
-    # One queue for every main publish. cancel-in-progress stays false.
-    # The push step repeats the main HEAD check immediately before docker push.
+    # One queue for every main publish. Pending runs stay queued.
+    # cancel-in-progress stays false. The push step repeats the main HEAD
+    # check immediately before docker push.
     concurrency:
       group: docker-ghcr-push-main
       cancel-in-progress: false
+      queue: max
     permissions:
       contents: read
       actions: read
