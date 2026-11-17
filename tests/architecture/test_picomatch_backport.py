@@ -76,13 +76,25 @@ def test_consumers_install_the_verified_backport(consumer: str) -> None:
 @pytest.mark.parametrize("pattern", ["+(*)", "+(*a)", "*(*)", "*(*a)"])
 def test_repeated_single_branch_wildcards_finish_with_bounded_input(
     pattern: str,
+    tmp_path: Path,
 ) -> None:
+    archive = BACKPORT / "picomatch-4.0.8-bioetl.2.tgz"
+    with tarfile.open(archive) as packed:
+        for member in packed.getmembers():
+            assert member.isfile() and member.name.startswith("package/")
+            relative = Path(member.name)
+            assert ".." not in relative.parts
+            content = packed.extractfile(member)
+            assert content is not None
+            destination = tmp_path / relative
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes(content.read())
     code = (
         "const p=require(process.argv[1]);"
         "console.log(p.makeRe(process.argv[2]).test('a'.repeat(32)+'!'));"
     )
     result = subprocess.run(
-        ["node", "-e", code, str(BACKPORT), pattern],
+        ["node", "-e", code, str(tmp_path / "package"), pattern],
         capture_output=True,
         text=True,
         timeout=3,

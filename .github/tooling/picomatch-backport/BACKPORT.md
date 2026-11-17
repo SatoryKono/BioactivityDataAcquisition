@@ -13,7 +13,11 @@ The local amendment also rejects a top-level unbounded wildcard in every repeate
 extglob branch, including `+(*)` and `+(*a)`. The upstream mixed-wildcard
 guard alone leaves these inputs vulnerable. Package metadata uses a private
 version and description.
-The tarball is built with `npm pack`. Architecture tests bind consumer lockfiles
+As with braces-backport, the third-party implementation is shipped only in the
+archive, avoiding a second installed source tree. Each archived source file is
+bound by provenance hashes; the local amendment is retained in
+`single-branch-wildcard.patch`. Regression tests unpack and execute the actual
+archive. The tarball is built with `npm pack`. Architecture tests bind consumer lockfiles
 to the archive integrity. **No OSV advisory is ignored or suppressed.**
 
 Replace this backport when an official release incorporates the fix
