@@ -416,6 +416,26 @@ async def test_get_pmids_raises_when_repeated_page_fills_count(
 
 
 @pytest.mark.asyncio
+async def test_get_pmids_raises_when_pages_overlap(adapter, mock_http_client) -> None:
+    """Partial page overlap must not pad list length up to count."""
+    pages = {
+        0: _esearch_page(count=4, ids=["1", "2"]),
+        2: _esearch_page(count=4, ids=["2", "3"]),
+    }
+
+    async def get(_url: str, params: dict[str, str]) -> MagicMock:
+        return pages[int(params.get("retstart", "0"))]
+
+    mock_http_client.get = AsyncMock(side_effect=get)
+
+    with pytest.raises(PaginationTruncatedError) as caught:
+        await adapter._get_pmids("cancer", 4)
+
+    assert caught.value.reason == "overlapping_page"
+    assert mock_http_client.get.await_args_list[1].kwargs["params"]["retstart"] == "2"
+
+
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "payload",
     [
