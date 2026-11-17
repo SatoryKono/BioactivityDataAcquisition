@@ -201,13 +201,18 @@ def test_timeline_readiness_requires_manifest_inside_repository(
     ],
 )
 @pytest.mark.parametrize("with_manifest", [False, True])
-def test_timeline_readiness_validates_source_refs(
-    tmp_path: Path, source_refs: object, expected_ready: bool, with_manifest: bool
+@pytest.mark.parametrize("field", ["source_refs", "related_refs", "graph_node_refs"])
+def test_timeline_readiness_validates_reference_lists(
+    tmp_path: Path,
+    source_refs: object,
+    expected_ready: bool,
+    with_manifest: bool,
+    field: str,
 ) -> None:
     events = tmp_path / "events"
     events.mkdir()
     (events / "runs.jsonl").write_text(
-        json.dumps({"id": "run-1", "source_refs": source_refs}) + "\n",
+        json.dumps({"id": "run-1", field: source_refs}) + "\n",
         encoding="utf-8",
     )
     if with_manifest:

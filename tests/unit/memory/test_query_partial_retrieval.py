@@ -114,15 +114,16 @@ def test_single_layer_queries_do_not_inspect_other_layer(
 
 
 @pytest.mark.parametrize("source_refs", [1, 0, False, "ref", "", {}])
-def test_invalid_timeline_source_refs_preserves_rag_and_catalog(
-    tmp_path: Path, source_refs: object
+@pytest.mark.parametrize("field", ["source_refs", "related_refs", "graph_node_refs"])
+def test_invalid_timeline_references_preserve_rag_and_catalog(
+    tmp_path: Path, source_refs: object, field: str
 ) -> None:
     chunks, events = write_test_retrieval_layers(
         tmp_path, rag_ready=True, timeline_ready=True, query="memory"
     )
     event_path = events / "runs.jsonl"
     event = json.loads(event_path.read_text(encoding="utf-8"))
-    event["source_refs"] = source_refs
+    event[field] = source_refs
     event_path.write_text(json.dumps(event) + "\n", encoding="utf-8")
 
     payload = query_all(query="memory", chunks_path=chunks, events_dir=events)
