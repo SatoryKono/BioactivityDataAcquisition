@@ -88,4 +88,3 @@ __all__ = [
     "evaluate_contract_exclusions",
     "extract_records_in",
 ]
-
