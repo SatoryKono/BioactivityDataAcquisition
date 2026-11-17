@@ -2204,6 +2204,9 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
     "docs/02-architecture/generated/pipeline-dataflows/": (
         "tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py",
     ),
+    "docs/04-reference/passports/": (
+        "tests/unit/scripts/docs/passports/test_passport_projector.py",
+    ),
     "src/memory/episodic/": (
         "tests/architecture/test_ai_session_memory_placement.py",
         "tests/architecture/test_pretest_guardrails_memory_phase.py",

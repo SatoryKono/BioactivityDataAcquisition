@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-17T07:30:43.829312+00:00",
+  "generated_at": "2026-11-17T08:01:47.755956+00:00",
   "summary": {
     "total_scripts": 758,
     "status_counts": {
@@ -1920,7 +1920,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 66,
+      "reference_count": 65,
       "references": [
         {
           "path": "Makefile",
@@ -4096,7 +4096,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
-          "line": 957,
+          "line": 979,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.ps1\","
         }
@@ -4145,7 +4145,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
-          "line": 958,
+          "line": 980,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.sh\","
         }
@@ -5093,7 +5093,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
-          "line": 959,
+          "line": 981,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/support/exec_windows_ps1_wrapper.sh\","
         }
@@ -5512,7 +5512,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
-          "line": 960,
+          "line": 982,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/support/run_owned_stdio.ps1\","
         }
@@ -13486,7 +13486,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
-          "line": 1759,
+          "line": 1781,
           "source_group": "tests",
           "text": "[\"scripts/engineering/dev/setup_bioetl_wsl.ps1\"], repo_root=root"
         },
@@ -13746,7 +13746,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 11,
       "references": [
         {
           "path": "scripts/engineering/dev/zed_lint_imports.py",
@@ -13792,9 +13792,9 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 352,
+          "line": 381,
           "source_group": "tests",
-          "text": "assert env_verify[\"args\"] == [\"scripts/engineering/dev/zed_env_doctor.py\"]"
+          "text": "\"scripts/engineering/dev/zed_env_doctor.py\""
         }
       ],
       "owner": "@bioetl-platform",
@@ -13807,7 +13807,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/engineering/dev/zed_run.py",
@@ -13820,18 +13820,6 @@
           "line": 21,
           "source_group": "tests",
           "text": "\"zed_lint_imports.py\","
-        },
-        {
-          "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 358,
-          "source_group": "tests",
-          "text": "assert arch[\"args\"] == [\"scripts/engineering/dev/zed_lint_imports.py\"]"
-        },
-        {
-          "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 415,
-          "source_group": "tests",
-          "text": "assert \"zed_lint_imports.py\" in serialized"
         }
       ],
       "owner": "@bioetl-platform",
@@ -13895,7 +13883,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/engineering/dev/zed_run.py",
@@ -13911,15 +13899,9 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 76,
+          "line": 90,
           "source_group": "tests",
           "text": "return runpy.run_path(str(DEV_SCRIPTS / \"zed_pytest_lane.py\"))"
-        },
-        {
-          "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 285,
-          "source_group": "tests",
-          "text": "lane_script = \"scripts/engineering/dev/zed_pytest_lane.py\""
         }
       ]
     },
@@ -13928,31 +13910,13 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 1,
       "references": [
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_helper_entrypoints.py",
           "line": 24,
           "source_group": "tests",
           "text": "\"zed_run.py\","
-        },
-        {
-          "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 327,
-          "source_group": "tests",
-          "text": "\"scripts/engineering/dev/zed_run.py\","
-        },
-        {
-          "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 379,
-          "source_group": "tests",
-          "text": "\"scripts/engineering/dev/zed_run.py\","
-        },
-        {
-          "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 393,
-          "source_group": "tests",
-          "text": "\"scripts/engineering/dev/zed_run.py\","
         }
       ],
       "owner": "@bioetl-platform",
@@ -13965,7 +13929,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/engineering/dev/zed_run.py",
@@ -13978,18 +13942,6 @@
           "line": 25,
           "source_group": "tests",
           "text": "\"zed_vulture.py\","
-        },
-        {
-          "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 372,
-          "source_group": "tests",
-          "text": "assert dead_code[\"args\"] == [\"scripts/engineering/dev/zed_vulture.py\"]"
-        },
-        {
-          "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 417,
-          "source_group": "tests",
-          "text": "assert \"zed_vulture.py\" in serialized"
         }
       ],
       "owner": "@bioetl-platform",
@@ -14002,7 +13954,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 4,
       "references": [
         {
           "path": "scripts/engineering/dev/zed_run.py",
@@ -14018,27 +13970,15 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 82,
+          "line": 96,
           "source_group": "tests",
           "text": "str(ROOT / \"scripts\" / \"engineering\" / \"dev\" / \"zed_xenon.py\")"
         },
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 101,
+          "line": 115,
           "source_group": "tests",
           "text": "source = (ROOT / \"scripts\" / \"engineering\" / \"dev\" / \"zed_xenon.py\").read_text("
-        },
-        {
-          "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 365,
-          "source_group": "tests",
-          "text": "assert complexity[\"args\"] == [\"scripts/engineering/dev/zed_xenon.py\"]"
-        },
-        {
-          "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 416,
-          "source_group": "tests",
-          "text": "assert \"zed_xenon.py\" in serialized"
         }
       ],
       "owner": "@bioetl-platform",
@@ -22861,7 +22801,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
-          "line": 1741,
+          "line": 1763,
           "source_group": "tests",
           "text": "\"scripts/engineering/repo/process_supervisor.py\","
         }

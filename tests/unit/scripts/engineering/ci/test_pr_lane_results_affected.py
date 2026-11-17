@@ -323,6 +323,28 @@ def test_iuphar_batch_pipeline_keeps_a_bounded_owner(tmp_path: Path) -> None:
         assert report["covers_full_suite"] is False
 
 
+def test_passport_artifacts_keep_the_projector_owner(tmp_path: Path) -> None:
+    owner = tmp_path / "tests/unit/scripts/docs/passports/test_passport_projector.py"
+    owner.parent.mkdir(parents=True)
+    owner.write_text("def test_owner():\n    assert True\n", encoding="utf-8")
+    report = build_shadow_compare(
+        [
+            "docs/04-reference/passports/generated/pipelines/chembl_target.json",
+            "docs/04-reference/passports/workflows/chembl-target.md",
+            "docs/04-reference/passports/completeness-report.json",
+        ],
+        repo_root=tmp_path,
+    )
+    assert report["selected"] == [
+        "tests/unit/scripts/docs/passports/test_passport_projector.py"
+    ]
+    assert report["covers_full_suite"] is False
+    with pytest.raises(ValueError, match="unmapped paths"):
+        build_shadow_compare(
+            ["docs/04-reference/contracts/unowned-passport.md"], repo_root=tmp_path
+        )
+
+
 def test_iuphar_shadow_paths_keep_explicit_owners(tmp_path: Path) -> None:
     owners = (
         "tests/unit/iuphar_target_class/test_csv_io.py",
