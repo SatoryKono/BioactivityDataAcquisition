@@ -253,7 +253,7 @@ def acceptance_inputs(tmp_path):
     return request, snapshot
 
 
-def _stored_proof(tmp_path, snapshot, provenance, row_id="r1"):
+def _stored_proof(tmp_path, snapshot, provenance, row_id="r1", *, rows=None):
     """Use actual kernel outputs and the actual persistence/finalization path."""
     from bioetl.domain.entities.target_classification_boundary import (
         TargetClassificationArtifact,
@@ -264,11 +264,12 @@ def _stored_proof(tmp_path, snapshot, provenance, row_id="r1"):
     )
 
     run_id = "pipeline-fixture"
-    rows = read_bioetl_target_kernel_csv_v1(
-        (tmp_path / "frozen.csv").read_bytes(),
-        source_path="source.csv",
-        target_kind="protein",
-    )
+    if rows is None:
+        rows = read_bioetl_target_kernel_csv_v1(
+            (tmp_path / "frozen.csv").read_bytes(),
+            source_path="source.csv",
+            target_kind="protein",
+        )
     assert tuple(row.input_row_id for row in rows) == (row_id,)
     batch = classify_batch(
         rows,

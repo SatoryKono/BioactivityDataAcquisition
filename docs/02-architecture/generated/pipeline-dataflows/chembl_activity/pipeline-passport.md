@@ -5,7 +5,7 @@
 Generated: **2026-11-17**
 Generator: **1.0.0**  
 IR schema: **1.0.0**  
-Effective config SHA256: `ca50c12b1434d90fcbd17a8055a5a2dd4f6874c7e9b64414af4c43611b187b96`<br>
+Effective config SHA256: `55381d8cf6325f61a3b111816879352c735069482fb0ea57e059d358794ab65c`<br>
 Effective loader: `scripts.docs.passports.source_facts.load_effective_pipeline_facts`
 
 This passport is generated from the resolved effective configuration and live schema contracts. It describes the current runtime projection; it does not widen or repair the pipeline contract.
