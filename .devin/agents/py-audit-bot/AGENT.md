@@ -308,6 +308,9 @@ ______________________________________________________________________
 
 - `configs/quality/debt_scorecard.yaml` (`score_semantics`, бюджеты, ratchet) и соседние файлы `configs/quality/`
 - границы слоёв: `.importlinter` и `tests/architecture/`
+- применённые правила: `docs/00-project/RULES.md` и accepted ADR; для смешанного аудита перечисли все фактически использованные источники в `verdict_source`.
+
+Если источники не задают обоснованный общий вердикт, укажи `status: "UNDETERMINED"` и `verdict_source: "none"`. Используй `PASS`, `WARN` или `FAIL` только при наличии применимого правила в текущем checkout.
 
 Запрет на запомненные пороги сохраняется: counts, ADR ranges, thresholds и provider inventories не восстанавливай из памяти. Увеличение `scorecard budgets`, exemption limits, hotspot thresholds или family caps остаётся blocker. Метки `PASS|WARN|FAIL` в отчёте не вычисляются по cutoff этого профиля.
 
@@ -320,8 +323,8 @@ code_review:
   date: "YYYY-MM-DD"
   mode: "baseline|final|targeted|review|debt|reproducibility"
   scope: "{paths}"
-  status: "PASS|WARN|FAIL"
-  verdict_source: "<configs/quality/debt_scorecard.yaml | .importlinter | tests/architecture/>"
+  status: "PASS|WARN|FAIL|UNDETERMINED"
+  verdict_source: "<configs/quality/debt_scorecard.yaml | .importlinter | tests/architecture/ | RULES.md §X.Y | ADR-0XX | none; list all applicable sources>"
 
   problems:
     - id: "AUD-001"
