@@ -143,7 +143,9 @@ def test_repeated_and_nested_extglob_wildcards_finish_with_bounded_input(
     assert result.stdout.strip() == "false"
 
 
-def test_fail_closed_ignores_max_extglob_recursion_bypass(packed_picomatch: Path) -> None:
+def test_fail_closed_ignores_max_extglob_recursion_bypass(
+    packed_picomatch: Path,
+) -> None:
     code = (
         "const p=require(process.argv[1]);"
         "const re=p.makeRe('+((a|aa))',{maxExtglobRecursion:false});"
@@ -159,7 +161,9 @@ def test_fail_closed_ignores_max_extglob_recursion_bypass(packed_picomatch: Path
     assert result.stdout.strip() == "false"
 
 
-def test_fail_closed_preserves_ascii_word_and_glob_smoke(packed_picomatch: Path) -> None:
+def test_fail_closed_preserves_ascii_word_and_glob_smoke(
+    packed_picomatch: Path,
+) -> None:
     code = (
         "const p=require(process.argv[1]);"
         "console.log(["
