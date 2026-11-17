@@ -11,6 +11,7 @@ _GLOBAL_RANGE = "GLOBAL / TIME RANGE"
 _OPERATOR_TIME_UNIT = "time:YYYY-MM-DD HH:mm"
 
 _WIDTH = "custom.width"
+_CELL_OPTIONS = "custom.cellOptions"
 _CUSTOM_HIDDEN = "custom.hidden"
 _NOT_PROVIDED = "Not provided"
 _NOT_VERIFIED = "Not verified"
@@ -107,7 +108,7 @@ def _configure_confidence(panel: dict, override) -> None:
     override(
         panel,
         "Confidence",
-        "custom.cellOptions",
+        _CELL_OPTIONS,
         {"type": "color-text", "wrapText": False},
     )
     override(
@@ -130,7 +131,7 @@ def _configure_owner_next_step(panel: dict, override) -> None:
     for field, display in (("owner", "Owner"), ("next_step", "Next step")):
         override(panel, field, "displayName", display)
         override(panel, field, "noValue", _SEE_RUNBOOK)
-        override(panel, field, "custom.cellOptions", dict(_CELL_NO_WRAP))
+        override(panel, field, _CELL_OPTIONS, dict(_CELL_NO_WRAP))
         _set_field_hidden(panel, field, hidden=False, override=override)
 
 
@@ -555,7 +556,7 @@ def add_stage_source_clocks(payload: dict) -> None:
             "overrides": [
                 {
                     "matcher": {"id": "byName", "options": name},
-                    "properties": [{"id": "custom.width", "value": width}],
+                    "properties": [{"id": _WIDTH, "value": width}],
                 }
                 for name, width in (
                     ("Scope", 360),
@@ -666,7 +667,7 @@ def _urgency_label(panel: dict) -> None:
             "matcher": {"id": "byName", "options": _EVENT_FRESHNESS},
             "properties": [
                 {"id": "custom.hidden", "value": False},
-                {"id": "custom.width", "value": 140},
+                {"id": _WIDTH, "value": 140},
                 {
                     "id": "mappings",
                     "value": [
@@ -681,7 +682,7 @@ def _urgency_label(panel: dict) -> None:
                     ],
                 },
                 {
-                    "id": "custom.cellOptions",
+                    "id": _CELL_OPTIONS,
                     "value": {"type": "auto", "wrapText": True},
                 },
             ],
@@ -795,7 +796,7 @@ def _configure_current_measurements(item: dict) -> None:
         field = override.get("matcher", {}).get("options")
         if field in widths:
             for prop in override["properties"]:
-                if prop["id"] == "custom.width":
+                if prop["id"] == _WIDTH:
                     prop["value"] = widths[field]
         if field == "Evaluated":
             override["properties"].append({"id": "unit", "value": _OPERATOR_TIME_UNIT})
