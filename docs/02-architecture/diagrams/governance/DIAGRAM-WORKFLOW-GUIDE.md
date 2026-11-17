@@ -17,7 +17,7 @@ ______________________________________________________________________
 
 ## 1. Обзор системы диаграмм
 
-Проект BioETL поддерживает **495 tracked diagram source files**:
+Проект BioETL поддерживает **497 tracked diagram source files**:
 **332** `.mmd`-артефактов в source tree (`architecture/`, `class-diagrams/`,
 `foundation/`, `providers/`, `sequence/`, `state-machines/`, `_template.mmd`)
 и **165** `.mermaid` view-файлов в `views/`
