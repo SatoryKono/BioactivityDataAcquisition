@@ -234,13 +234,13 @@ function selectDetailFields(
   viewMode: AdaptiveTableOptions['viewMode'],
   isRuns: boolean,
 ): Field[] {
-  const identityNames = ['run_id', 'pipeline', 'run_type', 'workflow_scope'];
-  const runExtraLabels = ['Workflow', 'Provider', 'Duration', 'Saved Evidence', 'Data Quality'];
+  const identityNames = new Set(['run_id', 'pipeline', 'run_type', 'workflow_scope']);
+  const runExtraLabels = new Set(['Workflow', 'Provider', 'Duration', 'Saved Evidence', 'Data Quality']);
   return frame.fields.filter((field) =>
     viewMode === 'rows'
     || fields.includes(field)
-    || identityNames.includes(field.name)
-    || (isRuns && runExtraLabels.includes(label(field)))
+    || identityNames.has(field.name)
+    || (isRuns && runExtraLabels.has(label(field)))
   );
 }
 
