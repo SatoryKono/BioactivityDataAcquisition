@@ -1035,6 +1035,20 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "tests/architecture/test_root_hygiene_workflow.py",
         ),
     ),
+    "configs/README.md": (
+        "tests/architecture/test_config_validation_surface.py",
+        DOCUMENTATION_SYNC_TEST,
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    "scripts/engineering/dev/README.md": (
+        "tests/integration/ide/test_zed_portability.py",
+        "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
+        SCRIPTS_INVENTORY_MANIFEST_TEST,
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    "configs/quality/config_validation_surface.yaml": (
+        "tests/architecture/test_config_validation_surface.py",
+    ),
     ".gitleaks.toml": (
         "tests/architecture/test_secret_shape_and_operator_guide_contracts.py",
         RUNTIME_ACCEPTANCE_12553_TEST,
@@ -2078,6 +2092,10 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
         "tests/architecture/test_documentation_cleanup_inventory.py",
     ),
     ".vscode/": (TECH_DEBT_5847_5852_CLOSEOUT_TEST,),
+    "configs/ide/zed/": (
+        "tests/integration/ide/test_zed_portability.py",
+        "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
+    ),
     ".cursor/": (
         TECH_DEBT_5847_5852_CLOSEOUT_TEST,
         "tests/unit/repo_backed/cursor/test_hook_gate.py",
