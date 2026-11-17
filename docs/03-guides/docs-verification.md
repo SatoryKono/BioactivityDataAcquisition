@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-08-27'
+  Last verified: '2026-11-17'
 
 ______________________________________________________________________
 
@@ -85,10 +85,21 @@ pip install -e ".[dev,tests,tracing,docs]"
 uv run python -m scripts.docs verify
 ```
 
-Use this as the default end-to-end verification path for doc-sync changes. It
-runs link/spec/config checks, docs drift (`--ports --classes --runtime-mirrors
---freshness`), docstring inventory, documentation cleanup inventory drift, and
-a strict MkDocs build through the in-repo helper chain.
+Use this as the default end-to-end verification path for doc-sync changes.
+With no skip flags, `scripts/docs/checks/verify.py` runs these steps:
+
+1. `python -m scripts.docs.checks.check_links` (full suite; partial
+   `--links` / `--specs` / `--configs` is not the default)
+1. `python -m scripts.docs.checks.check_drift --ports --classes --runtime-mirrors --freshness --modules --ai-surfaces`
+1. `python -m scripts.docs generate-dashboard-panel-inventory --check`
+1. `python -m scripts.docs.checks.check_docstrings --summary`
+1. `python -m scripts.docs.checks.documentation_cleanup_inventory --check`
+1. `python -m scripts.docs generate-pipeline-normalization-matrix --check`
+1. `python -m mkdocs build --strict --clean`
+
+`--defer-generated-artifacts` skips the three generator `--check` steps
+(dashboard panel inventory, cleanup inventory, normalization matrix). It does
+not assign a calendar or daily owner.
 
 ### 1. Link and reference checks
 
@@ -245,8 +256,8 @@ Documentation changes trigger the `docs.yml` workflow which:
 - Validates link integrity, config parity, and architecture drift
 - Regenerates generated documentation artifacts when needed
 
-Calendar enforcement (independent of docs-path PRs) is
-`.github/workflows/docs-kpi-weekly.yml`: it runs
+`.github/workflows/docs-kpi-weekly.yml` is a manual `workflow_dispatch` lane.
+It has no `schedule` and no cron. When an operator starts it, the workflow runs
 `python -m scripts.docs check-drift --runtime-mirrors --freshness`
 and then `python -m scripts.docs check-kpi`.
 
