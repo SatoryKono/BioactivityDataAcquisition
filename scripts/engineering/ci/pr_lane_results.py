@@ -80,6 +80,7 @@ CONFIG_SCHEMA_MIGRATION_STATUS_TEST = (
 )
 RESIDUAL_OSV_TEST = "tests/architecture/test_residual_osv_9853.py"
 BRACES_BACKPORT_TEST = "tests/architecture/test_braces_backport.py"
+PICOMATCH_BACKPORT_TEST = "tests/architecture/test_picomatch_backport.py"
 MYPY_TARGET_CONTRACT_TEST = "tests/architecture/test_mypy_target_contract.py"
 DOCUMENTATION_SYNC_TEST = "tests/architecture/test_documentation_sync.py"
 RUNTIME_AGENT_DOCS_DRIFT_TEST = "tests/architecture/test_runtime_agent_docs_drift.py"
@@ -2107,6 +2108,12 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
         "tests/integration/ide/test_zed_portability.py",
         ZED_WORKSPACE_CONFIG_TEST,
     ),
+    ".github/tooling/picomatch-backport/": (PICOMATCH_BACKPORT_TEST, RESIDUAL_OSV_TEST),
+    ".github/tooling/jscpd/": (
+        BRACES_BACKPORT_TEST,
+        PICOMATCH_BACKPORT_TEST,
+        RESIDUAL_OSV_TEST,
+    ),
     "tests/fixtures/grafana/run_explorer/": (
         "tests/integration/test_run_explorer_request_fixtures.py",
         "tests/integration/test_run_explorer_http_catalog.py",
@@ -2248,11 +2255,13 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
         RESIDUAL_OSV_TEST,
     ),
     "grafana/plugins/bioetl-scenes-app/": (
+        PICOMATCH_BACKPORT_TEST,
         BRACES_BACKPORT_TEST,
         DASHBOARD_SCENES_CONTRACT_TEST,
         RESIDUAL_OSV_TEST,
     ),
     "grafana/plugins/bioetl-selectorshell-panel/": (
+        PICOMATCH_BACKPORT_TEST,
         BRACES_BACKPORT_TEST,
         RESIDUAL_OSV_TEST,
     ),
