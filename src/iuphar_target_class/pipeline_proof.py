@@ -33,6 +33,25 @@ _SEMANTIC_FIELDS = (
     "conflict_codes",
 )
 _OTHER_COHORT = "pipeline proof belongs to another admitted cohort"
+# CSV import provenance is transport-only; runtime projection omits these keys.
+_TRANSPORT_RAW_FIELDS = frozenset(
+    {"import_profile", "source_path", "source_sha256", "source_record"}
+)
+
+
+def _classification_input_projection(
+    fields: Mapping[str, object] | object,
+) -> dict[str, object]:
+    """Compare business classification inputs without CSV transport metadata."""
+    if not isinstance(fields, Mapping):
+        return {}
+    projected: dict[str, object] = {}
+    for key, value in fields.items():
+        if key in _TRANSPORT_RAW_FIELDS:
+            continue
+        # Canonical CSV keeps blanks as ""; runtime projection uses None.
+        projected[str(key)] = None if value == "" else value
+    return projected
 
 
 @dataclass(frozen=True, slots=True)
@@ -187,8 +206,10 @@ def _bind_executed_cohort(
         raise ValueError(_OTHER_COHORT)
     for row_id, item in expected.items():
         row = records(found[row_id]["classification.json"])[0]
-        if canonical_json_bytes(row.get("raw_fields")) != canonical_json_bytes(
-            dict(item.raw_fields)
+        if canonical_json_bytes(
+            _classification_input_projection(row.get("raw_fields"))
+        ) != canonical_json_bytes(
+            _classification_input_projection(item.raw_fields)
         ):
             raise ValueError("pipeline proof input differs from the admitted cohort")
         for field in _SEMANTIC_FIELDS:

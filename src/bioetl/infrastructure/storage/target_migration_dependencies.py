@@ -99,6 +99,9 @@ class _DependencyCollector:
         self.workspace = workspace
         self.dependencies: dict[str, str] = {}
         self.visited: set[tuple[Path, str]] = set()
+        # Matches snapshot_evidence._review: evidence paths are relative to the
+        # coverage directory, not the nested review file directory.
+        self._scope_evidence_root: Path | None = None
 
     def add(self, path: Path, expected: str | None = None) -> bytes:
         path = _safe_path(self.workspace, path)
@@ -169,15 +172,21 @@ class _DependencyCollector:
 
     def coverage(self, path: Path, document: Mapping[str, object]) -> None:
         _header(document, "bioetl_iuphar_coverage", (1,))
-        self.reference(path.parent, document.get("review"), "scope_review")
+        previous = self._scope_evidence_root
+        self._scope_evidence_root = path.parent
+        try:
+            self.reference(path.parent, document.get("review"), "scope_review")
+        finally:
+            self._scope_evidence_root = previous
 
     def scope_review(self, path: Path, document: Mapping[str, object]) -> None:
         _header(document, "bioetl_iuphar_scope_review", (1,))
         references = document.get("evidence_references", [])
         if not isinstance(references, list):
             raise ValueError("scope review evidence references must be a typed list")
+        evidence_root = self._scope_evidence_root or path.parent
         for reference in references:
-            self.reference(path.parent, reference)
+            self.reference(evidence_root, reference)
 
     def acceptance(self, path: Path, document: Mapping[str, object]) -> None:
         _header(document, "bioetl_iuphar_acceptance", (2,))

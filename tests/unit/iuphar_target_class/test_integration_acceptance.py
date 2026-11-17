@@ -23,6 +23,7 @@ from iuphar_target_class.pipeline_io import (
 )
 from iuphar_target_class.pipeline_proof import (
     PipelineExecutionBinding,
+    _classification_input_projection,
     execution_semantics,
 )
 from iuphar_target_class.stage0.io import (
@@ -66,6 +67,23 @@ def test_reference_conflict_codes_compare_json_collections(
     actual = replace(batch.rows[0].result, conflict_codes=tuple(codes))
     assert actual.conflict_codes == tuple(codes)
     _check_reference_case(case, actual, tmp_path, frozenset({"conflict_codes"}))
+
+
+def test_classification_input_projection_ignores_csv_transport_metadata():
+    csv_side = {
+        "target_id": "1",
+        "uniprot": "",
+        "organism": "9606",
+        "import_profile": "bioetl_target_kernel_csv_v1",
+        "source_path": "source.csv",
+        "source_sha256": "a" * 64,
+        "source_record": "1",
+    }
+    runtime_side = {"target_id": "1", "uniprot": None, "organism": "9606"}
+    assert _classification_input_projection(csv_side) == _classification_input_projection(
+        runtime_side
+    )
+    assert "import_profile" not in _classification_input_projection(csv_side)
 
 
 def test_stale_pipeline_proof_rejects_changed_cohort_semantics(acceptance_inputs):
