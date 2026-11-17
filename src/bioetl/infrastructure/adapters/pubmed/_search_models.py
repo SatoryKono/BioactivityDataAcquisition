@@ -130,12 +130,15 @@ def esearch_result_still_short(
 def esearch_stall_reason(
     page_ids: list[str],
     seen_pages: set[tuple[str, ...]],
+    collected_ids: set[str],
 ) -> str | None:
     """Classify a page that cannot move ``retstart`` toward ``count``."""
     if not page_ids:
         return "empty_page"
-    if tuple(page_ids) in seen_pages:
+    if tuple(page_ids) in seen_pages or len(set(page_ids)) != len(page_ids):
         return "repeated_page"
+    if collected_ids.intersection(page_ids):
+        return "overlapping_page"
     return None
 
 
@@ -143,6 +146,7 @@ def reject_stalled_esearch_page(
     host: SearchLogHost,
     page_ids: list[str],
     seen_pages: set[tuple[str, ...]],
+    collected: list[str],
     *,
     page_count: int,
     retstart: int,
@@ -150,8 +154,8 @@ def reject_stalled_esearch_page(
     collected_count: int,
     max_count: int,
 ) -> None:
-    """Fail when the next page is empty or repeats a previous id list."""
-    reason = esearch_stall_reason(page_ids, seen_pages)
+    """Fail when the next page is empty, repeats, or overlaps collected ids."""
+    reason = esearch_stall_reason(page_ids, seen_pages, set(collected))
     if reason is None:
         return
     raise_pubmed_search_truncated(

@@ -117,6 +117,7 @@ class PubMedSearchMixin(PubMedAdapterStateMixin):
                     self,
                     page_ids,
                     seen_pages,
+                    collected,
                     page_count=page_count,
                     retstart=retstart,
                     reported_count=reported_count,
