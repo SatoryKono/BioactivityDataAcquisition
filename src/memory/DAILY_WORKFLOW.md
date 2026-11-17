@@ -89,11 +89,19 @@ What it does:
 - validates the catalog/chunk pair before retrieval; a stale, incomplete, or
   source-mismatched pair is treated as unavailable and refreshed or reported as
   degraded
-- creates an episodic session note in `src/memory/episodic/sessions/`
+- preserves results from each ready layer when another layer is unavailable;
+  combined queries and pre-task return partial context with a nonzero CLI exit
+- creates a scope-bound session note under `src/memory/episodic/tasks/`;
+  the JSON `session_note` field reports its exact path
 
 If refresh is skipped with `--skip-refresh-if-missing`, the workflow still
 returns catalog context and creates the session note, but marks the payload as
 degraded when RAG or timeline artifacts are absent.
+
+Ready RAG or timeline results remain available in this degraded response.
+Use both strict flags above when neither recovery nor session-note writes are
+authorized. Standalone `rag` and `timeline` queries still reject unavailable
+artifacts rather than returning a successful empty search.
 
 Use `--profile` to align ranking with the task type: `general`,
 `architecture`, `implementation`, `operations`, or `audit`.
@@ -170,7 +178,8 @@ python -m memory.tooling.workflow post-task \
 
 What it does:
 
-- creates an episodic summary note in `src/memory/episodic/summaries/`
+- creates a scope-bound summary note under `src/memory/episodic/tasks/`;
+  the JSON `summary_note` field reports its exact path
 - validates the memory subsystem
 - runs validation with a bounded timeout during the workflow path and returns a
   degraded payload instead of hanging indefinitely when validation exhausts the

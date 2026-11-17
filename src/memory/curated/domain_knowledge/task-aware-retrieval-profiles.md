@@ -8,7 +8,7 @@ source_refs:
 - src/memory/DAILY_WORKFLOW.md
 - src/memory/tooling/workflow.py
 confidence: curated
-last_verified: '2026-08-04T00:00:00Z'
+last_verified: '2026-11-17T00:00:00Z'
 summary: Retrieval profiles should match the task type instead of using one generic search mode across all agent work.
 ---
 

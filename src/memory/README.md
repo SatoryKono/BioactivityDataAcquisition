@@ -12,7 +12,7 @@ The subsystem is intentionally **source-first**:
 - canonical project truth stays in `src/bioetl/`, `docs/`, `configs/`,
   `tests/`, `.github/`, and `grafana/`;
 - `src/memory/` stores memory-specific policy, catalog data, schemas,
-  retrieval/layout logic, and future derived memory artifacts;
+  retrieval/layout logic, and derived memory artifacts;
 - memory artifacts must never outrank code, configs, accepted ADRs, or active
   operational documentation.
 
@@ -30,16 +30,16 @@ External vendor conversation state is governed by
 account-backed runtime verification; unexecuted deletion and isolation tests
 remain explicitly `BLOCKED_EXTERNAL`, never silently promoted to verified.
 
-## Initial scope
+## Implemented surfaces
 
-This baseline rollout provides:
+The subsystem provides:
 
 - policy files under `policy/`
 - structured catalogs under `catalog/`
 - artifact schemas under `schemas/`
 - a validation entrypoint under `memory.tooling.validate`
 
-Future rollout waves will add:
+Implemented retrieval and lifecycle surfaces include:
 
 - deterministic graph ownership under `graph/`
 - deterministic RAG manifests under `rag/`
@@ -47,6 +47,16 @@ Future rollout waves will add:
 - curated long-term memory under `curated/`
 - episodic/session memory under `episodic/`
 - operational refresh/prune tooling under `tooling/`
+
+The versioned surface registry describes ownership and contracts. Source files
+and passing tests do not attest automatic client loading, a current index, or a
+live MCP endpoint. Runtime acceptance belongs in dated, source-bound receipts;
+unqualified registry entries remain `NOT_PROVEN`.
+
+Combined `memory.query all` and `pre-task` preserve each available retrieval
+layer. An unavailable RAG or timeline layer produces partial results marked
+`degraded`; the CLI exits with code 1. Single-layer queries retain their strict
+missing-artifact errors. Strict read-only flags prevent recovery writes.
 
 ## Validation
 
@@ -316,7 +326,8 @@ Artifact storage policy is declared in `policy/storage.yaml`.
 Current default stance:
 
 - `policy/`, `catalog/`, `schemas/`, and `curated/` are versioned
-- generated notes under `episodic/sessions/` and `episodic/summaries/` are
+- scope-bound generated notes under `episodic/tasks/`, plus legacy notes under
+  `episodic/sessions/` and `episodic/summaries/`, are
   ephemeral and prunable; `episodic/templates/` is versioned and non-prunable
 - generated RAG and timeline artifacts are rebuild-only; full RAG builds write
   to `derived/rag/manifests/`, while the legacy `rag/manifests/` lane remains a

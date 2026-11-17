@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -58,3 +59,35 @@ def test_memory_workflow_wrapper_disables_bytecode_before_first_import() -> None
     assert script.index("export PYTHONDONTWRITEBYTECODE=1") < script.index(
         'if ! "${PYTHON_BIN}" -c'
     )
+
+
+def test_workflow_task_notes_stay_out_of_git() -> None:
+    """Local scoped notes must not become shareable untracked Git inputs."""
+    root = Path(__file__).resolve().parents[2]
+    namespace = "src/memory/episodic/tasks/project/worktree/branch/account/task"
+    private_paths = [
+        f"{namespace}/{name}" for name in ("session.md", "summary.md", "scope.json")
+    ]
+    control = "src/memory/catalog/memory_registry.yaml"
+    result = subprocess.run(
+        [
+            "git",
+            "-c",
+            f"safe.directory={root.as_posix()}",
+            "check-ignore",
+            "--no-index",
+            "--verbose",
+            "--stdin",
+            "-z",
+        ],
+        input=("\0".join([*private_paths, control]) + "\0").encode("utf-8"),
+        cwd=root,
+        capture_output=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    fields = result.stdout.decode("utf-8").rstrip("\0").split("\0")
+    assert len(fields) % 4 == 0
+    records = [(fields[index], fields[index + 3]) for index in range(0, len(fields), 4)]
+    assert {path for _, path in records} == set(private_paths)
+    assert all(source == ".gitignore" for source, _ in records)
