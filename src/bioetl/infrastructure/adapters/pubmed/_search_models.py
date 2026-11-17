@@ -5,12 +5,14 @@ from __future__ import annotations
 
 __all__ = ["PubMedSearchResponse", "PubMedSearchResult"]
 
-from typing import Protocol
+from typing import TYPE_CHECKING, Protocol
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from bioetl.domain.ports.observability.logging import LoggerPort
 from bioetl.infrastructure.adapters.http.pagination import raise_pagination_truncated
+
+if TYPE_CHECKING:
+    from bioetl.domain.ports import LoggerPort
 
 
 class PubMedSearchResult(BaseModel):
