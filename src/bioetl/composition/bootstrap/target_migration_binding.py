@@ -88,7 +88,7 @@ def bind_target_deployment(
     baseline = load_pipeline_config_uncached("chembl_target", configs_root=root)
     future = baseline.model_copy(update={"target_classification": classification})
     future = resolve_target_classification_profile(future).resolved_yaml_config
-    profile = load_target_runtime_profile(future)
+    profile = load_target_runtime_profile(future, dependency_root=paths.workspace)
     if profile is None:
         raise ValueError("deployment has no admitted profile")
     active_settings = settings or get_settings()
@@ -220,7 +220,7 @@ def bind_target_rehearsal(
     )
     _protect_active_resources(checked, active)
     future = _rehearsal_future(checked, copied)
-    profile = load_target_runtime_profile(future)
+    profile = load_target_runtime_profile(future, dependency_root=paths.workspace)
     if profile is None:
         raise ValueError("rehearsal has no admitted profile")
     silver, gold = resolve_target_table_paths(settings, future)

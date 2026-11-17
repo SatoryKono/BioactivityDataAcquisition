@@ -306,6 +306,16 @@ def _shortlist(query: MatchQuery, ctx: IndexedSnapshot) -> tuple[CatalogTarget, 
     return tuple(ctx.catalog[i] for i in sorted(indexes))
 
 
+def _conflict_catalog(
+    shortlist: tuple[CatalogTarget, ...], ctx: IndexedSnapshot
+) -> tuple[CatalogTarget, ...]:
+    """Keep every species variant of a shortlisted IUPHAR id visible to conflicts."""
+    ids = {row.target_id for row in shortlist}
+    if not ids:
+        return shortlist
+    return tuple(row for row in ctx.catalog if row.target_id in ids)
+
+
 def _ancestor_records(
     ctx: IndexedSnapshot, ids: tuple[str, ...]
 ) -> tuple[FamilyNode, ...]:
@@ -416,7 +426,12 @@ def classify_target(
     )
     subset = _shortlist(query, snapshot)
     hits = collect_candidates(query, subset)
-    match = validate_identity(query, subset, hits, snapshot_complete=snapshot.complete)
+    match = validate_identity(
+        query,
+        _conflict_catalog(subset, snapshot),
+        hits,
+        snapshot_complete=snapshot.complete,
+    )
     match = _scope_match(row, match, snapshot)
     hits = _publication_hits(query, subset, hits, match)
     match = _match_complex_target(row, match, snapshot)

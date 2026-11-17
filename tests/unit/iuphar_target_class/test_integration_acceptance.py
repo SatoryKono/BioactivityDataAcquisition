@@ -17,7 +17,14 @@ from iuphar_target_class.integration_acceptance import (
 from iuphar_target_class.matching import CatalogTarget
 from iuphar_target_class.models import ProviderAnnotation, RawTargetRow, RunProvenance
 from iuphar_target_class.pipeline import IndexedSnapshot, classify_batch
-from iuphar_target_class.pipeline_io import render_batch
+from iuphar_target_class.pipeline_io import (
+    read_bioetl_target_kernel_csv_v1,
+    render_batch,
+)
+from iuphar_target_class.pipeline_proof import (
+    PipelineExecutionBinding,
+    execution_semantics,
+)
 from iuphar_target_class.stage0.io import (
     canonical_json_bytes,
     sha256_bytes,
@@ -56,6 +63,36 @@ def test_reference_conflict_codes_compare_json_collections(
     }
     actual = replace(batch.rows[0].result, conflict_codes=tuple(codes))
     _check_reference_case(case, actual, tmp_path, frozenset({"conflict_codes"}))
+
+
+def test_stale_pipeline_proof_rejects_changed_cohort_semantics(acceptance_inputs):
+    request, snapshot = acceptance_inputs
+    changed = RawTargetRow(
+        "r1",
+        {"target_id": "1", "uniprot": "P00000", "organism": "9606"},
+        "protein",
+    )
+    batch = classify_batch(
+        (changed,),
+        snapshot=snapshot,
+        provenance=request.provenance,
+        run_id="reference-fixture",
+    )
+    assert batch.rows[0].result.iuphar_class is None
+    with pytest.raises(ValueError, match="admitted"):
+        verify_pipeline_proof(
+            request.pipeline_proof,
+            request.snapshot_manifest_sha256,
+            request.pipeline_report,
+            provenance=request.provenance,
+            expected_execution=(
+                PipelineExecutionBinding(
+                    changed.input_row_id,
+                    changed.fields,
+                    execution_semantics(batch.rows[0].result),
+                ),
+            ),
+        )
 
 
 def test_pipeline_proof_for_another_cohort_is_rejected(acceptance_inputs):
@@ -227,14 +264,14 @@ def _stored_proof(tmp_path, snapshot, provenance, row_id="r1"):
     )
 
     run_id = "pipeline-fixture"
+    rows = read_bioetl_target_kernel_csv_v1(
+        (tmp_path / "frozen.csv").read_bytes(),
+        source_path="source.csv",
+        target_kind="protein",
+    )
+    assert tuple(row.input_row_id for row in rows) == (row_id,)
     batch = classify_batch(
-        (
-            RawTargetRow(
-                row_id,
-                {"target_id": "1", "uniprot": "P12345", "organism": "9606"},
-                "protein",
-            ),
-        ),
+        rows,
         snapshot=snapshot,
         provenance=provenance,
         run_id=run_id,

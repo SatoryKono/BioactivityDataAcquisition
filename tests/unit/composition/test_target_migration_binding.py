@@ -50,7 +50,7 @@ def deployment(tmp_path, monkeypatch):
     monkeypatch.setattr(
         migration,
         "load_target_runtime_profile",
-        lambda _: SimpleNamespace(profile_sha256="a" * 64),
+        lambda *_args, **_kwargs: SimpleNamespace(profile_sha256="a" * 64),
     )
     return paths, settings, document
 

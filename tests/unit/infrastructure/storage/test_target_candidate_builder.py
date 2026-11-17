@@ -70,8 +70,12 @@ def source_bundle(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, request):
     )
     write_deltalake(str(paths.assay), pa.table({"target_id": ["CHEMBL1", None]}))
     profile = _synthetic_profile(tmp_path)
-    monkeypatch.setattr(builder, "_load_candidate_profile", lambda _: profile)
-    monkeypatch.setattr(validation, "_load_candidate_profile", lambda _: profile)
+    monkeypatch.setattr(
+        builder, "_load_candidate_profile", lambda *_args, **_kwargs: profile
+    )
+    monkeypatch.setattr(
+        validation, "_load_candidate_profile", lambda *_args, **_kwargs: profile
+    )
     binding = TargetDeploymentBinding(
         str(canonical.resolve()),
         sha256_file(canonical),

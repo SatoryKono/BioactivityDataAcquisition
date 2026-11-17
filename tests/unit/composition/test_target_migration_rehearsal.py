@@ -23,6 +23,7 @@ from bioetl.infrastructure.storage.target_candidates import (
 )
 from bioetl.infrastructure.storage.target_classification_migration import (
     TargetMigrationPaths,
+    _lock,
     _tree_hashes,
     prepare_target_migration,
     promote_target_migration,
@@ -64,7 +65,7 @@ def rehearsal(tmp_path, monkeypatch):
     profile = bundle / "enrich-profile.json"
     document["pipeline"]["target_classification"] = {
         "mode": "enrich",
-        "snapshot_manifest": str(profile),
+        "snapshot_manifest": profile.relative_to(workspace).as_posix(),
         "snapshot_manifest_sha256": sha256_file(profile),
     }
     deployment = occurrence / "deployment.yaml"
@@ -160,7 +161,8 @@ def test_actual_build_prepare_promote_and_physical_rollback_on_copy(rehearsal):
         assert _tree_hashes(getattr(paths, name)) == hashes
     assert (paths.backup / "failed-silver").is_dir()
     assert (paths.backup / "failed-config").is_file()
-    assert not (paths.workspace / ".bioetl-target-migration.lock").exists()
+    with _lock(paths.workspace):
+        pass
     assert sha256_file(active_config) == active_before
 
 

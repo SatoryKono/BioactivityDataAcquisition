@@ -31,30 +31,45 @@ def verify_candidate_hashes(
             raise ValueError("candidate V31 content hash verification failed")
 
 
+def _business_without_classification(
+    row: Mapping[str, object],
+) -> dict[str, object]:
+    return {
+        key: value
+        for key, value in hash_input(row).items()
+        if key not in TARGET_CLASSIFICATION_FIELDS
+    }
+
+
 def verify_source_classifications(
     layers: Mapping[str, list[dict[str, object]]], profile: LoadedIupharProfile
 ) -> None:
-    """Reclassify original Silver inputs, then bind both candidate projections."""
+    """Reclassify Silver, then require every Gold version to carry that projection.
+
+    Historical Gold business fields are not classified again. The documented
+    migration copies the current Silver projection onto each Gold version.
+    """
     adapter = IupharTargetClassificationAdapter(profile)
-    silver_ids = {key[0] for key in by_id(layers["silver"])}
-    for layer, rows in layers.items():
-        for (target_id, version), row in by_id(rows).items():
-            if layer == "gold" and target_id not in silver_ids:
-                raise ValueError(
-                    "candidate Gold target has no classified Silver source"
-                )
-            business = {
-                key: value
-                for key, value in hash_input(row).items()
-                if key not in TARGET_CLASSIFICATION_FIELDS
-            }
-            result = adapter.classify_record(
-                business,
-                input_row_id=f"migration:{layer}:{target_id}:{version}",
-                run_id="migration-validation",
-                run_started_at="1970-01-01T00:00:00+00:00",
+    projections: dict[str, Mapping[str, str | None]] = {}
+    for (target_id, version), row in by_id(layers["silver"]).items():
+        result = adapter.classify_record(
+            _business_without_classification(row),
+            input_row_id=f"migration:silver:{target_id}:{version}",
+            run_id="migration-validation",
+            run_started_at="1970-01-01T00:00:00+00:00",
+        )
+        assert_classification_projection(row, result.projection)
+        previous = projections.get(target_id)
+        if previous is not None and dict(previous) != dict(result.projection):
+            raise ValueError(
+                "candidate Silver versions disagree on admitted classification"
             )
-            assert_classification_projection(row, result.projection)
+        projections[target_id] = result.projection
+    for (target_id, _version), row in by_id(layers["gold"]).items():
+        expected = projections.get(target_id)
+        if expected is None:
+            raise ValueError("candidate Gold target has no classified Silver source")
+        assert_classification_projection(row, expected)
 
 
 def assert_classification_projection(

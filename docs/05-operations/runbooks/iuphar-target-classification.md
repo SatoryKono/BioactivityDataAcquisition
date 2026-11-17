@@ -401,9 +401,13 @@ through preparation, promotion, and recovery.
 Silver and Gold target IDs, assay facts, and original configuration digest.
 `build-candidates` requires those exact inputs still to exist. It classifies
 every old Silver row with the admitted profile, computes V31 business hashes,
-and uses the matching Silver projection for each old Gold target. It validates
-the full candidates and publishes a completed build manifest and per-row
-classification evidence. Preserve the input manifest and build evidence.
+and uses the matching Silver projection for each old Gold target. Historical
+Gold versions keep that current Silver projection when their saved business
+fields would classify differently; validation compares those Gold rows with the
+Silver projection. A relative `snapshot_manifest` is resolved from the approved
+workspace, the same root used by the runtime loader and dependency collector.
+It validates the full candidates and publishes a completed build manifest and
+per-row classification evidence. Preserve the input manifest and build evidence.
 
 Historical tables use the migration-only physical contract
 `legacy_physical_target_v30_to_v31_v1`: candidates must contain exactly the old

@@ -22,7 +22,11 @@ from .pipeline_acceptance import (
     load_admitted_cohort,
 )
 from .pipeline_io import render_batch
-from .pipeline_proof import verify_stored_pipeline_proof
+from .pipeline_proof import (
+    PipelineExecutionBinding,
+    execution_semantics,
+    verify_stored_pipeline_proof,
+)
 from .policy import VOLUME_TEST_SECONDS
 from .reference_coverage import (
     SUPPORTED_REFERENCE_FIELDS,
@@ -207,6 +211,7 @@ def verify_pipeline_proof(
     *,
     provenance: RunProvenance | None = None,
     expected_row_ids: tuple[str, ...] | None = None,
+    expected_execution: tuple[PipelineExecutionBinding, ...] | None = None,
 ) -> str:
     """Require a verified row-store occurrence and its source-bound run report."""
     if provenance is None:
@@ -217,6 +222,7 @@ def verify_pipeline_proof(
         pipeline_report,
         provenance,
         expected_row_ids=expected_row_ids,
+        expected_execution=expected_execution,
     )
 
 
@@ -293,7 +299,7 @@ def _execute_acceptance(
     )
     for name, raw in rendered.items():
         (output_dir / name).write_bytes(raw)
-    _record_pipeline_acceptance(request, receipt, cohort)
+    _record_pipeline_acceptance(request, receipt, cohort, batch)
     if spec["schema_version"] == 2:
         receipt["artifact_references"] = _publication_references(
             request, cohort, output_dir, rendered
@@ -422,10 +428,31 @@ def _verify_batch_outputs(
     return rendered
 
 
+def _execution_bindings(
+    cohort: AdmittedCohort, batch: BatchResult
+) -> tuple[PipelineExecutionBinding, ...]:
+    """Bind each admitted input to the semantic result of this execution."""
+    by_row = {row.result.input_row_id: row.result for row in batch.rows}
+    bindings: list[PipelineExecutionBinding] = []
+    for row in cohort.rows:
+        result = by_row.get(row.input_row_id)
+        if result is None:
+            raise ValueError("pipeline proof belongs to another admitted cohort")
+        bindings.append(
+            PipelineExecutionBinding(
+                row.input_row_id,
+                dict(row.fields),
+                execution_semantics(result),
+            )
+        )
+    return tuple(bindings)
+
+
 def _record_pipeline_acceptance(
     request: IntegrationAcceptanceRequest,
     receipt: dict[str, object],
     cohort: AdmittedCohort,
+    batch: BatchResult,
 ) -> None:
     """Attach only a verified real pipeline occurrence to the receipt."""
     if request.pipeline_proof is None:
@@ -436,6 +463,7 @@ def _record_pipeline_acceptance(
         request.pipeline_report,
         provenance=request.provenance,
         expected_row_ids=tuple(row.input_row_id for row in cohort.rows),
+        expected_execution=_execution_bindings(cohort, batch),
     )
     if request.pipeline_report is not None:
         receipt["pipeline_report_sha256"] = sha256_file(request.pipeline_report)

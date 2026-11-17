@@ -200,6 +200,32 @@ def test_identity_conflict_publishes_the_cross_species_witnesses():
     assert only_mouse.rows[0].result.match_status != "matched"
 
 
+def test_shortlist_reports_cross_species_accession_conflict():
+    snapshot = pipeline.IndexedSnapshot.build(
+        snapshot_id="fixture",
+        mapping_version="fixture-release",
+        complete=True,
+        catalog=(
+            CatalogTarget("1", ("P99999",), None, None, "9606", ("Shared",), ()),
+            CatalogTarget("1", ("P12345",), None, None, "10090", ("Shared",), ()),
+        ),
+        annotations={},
+        family_nodes=(),
+        type_to_class={},
+        family_to_class={},
+    )
+    conflict = _run(
+        RawTargetRow("q", {"uniprot": "P12345", "organism": "9606"}, "protein"),
+        snapshot=snapshot,
+    )
+    assert conflict.rows[0].result.match_status == "identity_conflict"
+    matched = _run(
+        RawTargetRow("ok", {"uniprot": "P99999", "organism": "9606"}, "protein"),
+        snapshot=snapshot,
+    )
+    assert matched.rows[0].result.match_status == "matched"
+
+
 def test_confirmed_annotation_supplies_missing_taxon_without_rewriting_input():
     original = {"target_id": "1"}
     batch = _run(RawTargetRow("exact", original, "protein"))

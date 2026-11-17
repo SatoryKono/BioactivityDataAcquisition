@@ -7,8 +7,8 @@ from pathlib import Path
 
 from iuphar_target_class.policy import PLAN_VERSION
 
-from .snapshot_loader import load_snapshot_manifest
 from ._manifest import checked_document, header, referenced_path, require_sha256, text
+from .snapshot_loader import load_snapshot_manifest
 from .snapshot_models import (
     CLASSIFICATION_SCHEMA_VERSION,
     NORMALIZATION_VERSION,

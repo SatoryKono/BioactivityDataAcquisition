@@ -194,7 +194,9 @@ def prepare_target_migration(
     checked = paths.checked()
     validate_deployment_binding(checked, deployment)
     with _lock(paths.workspace):
-        validation = validate_target_candidate(checked, legacy_include_fields)
+        validation = validate_target_candidate(
+            checked, legacy_include_fields, workspace=paths.workspace
+        )
         dependencies = collect_target_dependencies(
             workspace=paths.workspace,
             configs=(checked["config"], checked["candidate_config"]),
@@ -259,7 +261,11 @@ def promote_target_migration(
         verify_target_dependencies(paths.workspace, state["dependencies"])
         verify_target_dependencies(paths.workspace, state["dependency_backups"])
         _verify_prepared_bytes(checked, state)
-        validate_target_candidate(checked, tuple(state["legacy_include_fields"]))
+        validate_target_candidate(
+            checked,
+            tuple(state["legacy_include_fields"]),
+            workspace=paths.workspace,
+        )
         if _tree_hashes(checked["assay"]) != state["assay_hashes"]:
             raise ValueError("assay reference cohort changed since preparation")
         state["phase"] = "promoting"

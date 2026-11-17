@@ -226,7 +226,7 @@ async def test_bounded_upstream_fails_before_assay_or_manifest_write(
     target = _target_config("enrich")
     original_loader = load_pipeline_config
     monkeypatch.setattr(
-        "bioetl.composition.bootstrap.runtime.publication_vocab_init.load_pipeline_config",
+        "bioetl.composition.bootstrap.target_classification_init.load_pipeline_config",
         lambda name: target if name == "chembl_target" else original_loader(name),
     )
     runner = SimpleNamespace(run_workflow=AsyncMock())

@@ -30,6 +30,10 @@ from bioetl.infrastructure.adapters.iuphar.snapshot_loader import (
     LoadedIupharSnapshot,
 )
 from bioetl.infrastructure.storage import target_migration_validation as validation
+from bioetl.infrastructure.storage.target_migration_row_ops import (
+    hash_input,
+    scoped_target_hash,
+)
 from bioetl.infrastructure.storage.target_classification_guard import (
     assert_target_table_compatibility,
 )
@@ -201,7 +205,9 @@ def admitted_candidate(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
         paths["candidate_gold"]: [_gold(new_silver[0])],
         paths["assay"]: [{"target_id": "CHEMBL1"}, {"target_id": None}],
     }
-    monkeypatch.setattr(validation, "_load_candidate_profile", lambda _: profile)
+    monkeypatch.setattr(
+        validation, "_load_candidate_profile", lambda *_args, **_kwargs: profile
+    )
     monkeypatch.setattr(validation, "_read_delta", lambda path: tables[path])
     from bioetl.infrastructure.storage import target_migration_classification_checks
 
@@ -236,6 +242,43 @@ def test_hash_verification_preserves_persisted_organism_text(organism):
     assert validation.compare_target_rows([row], [dict(row)], fields)["rows"] == 1
 
 
+def test_historical_gold_keeps_the_current_silver_projection(admitted_candidate):
+    paths, fields, tables = _as_legacy_physical(admitted_candidate)
+    silver = dict(tables[paths["silver"]][0])
+    historical_business = {**silver, "target_type": "PROTEIN FAMILY"}
+    historical_business["content_hash"] = scoped_target_hash(
+        historical_business, fields, CHEMBL_TARGET_PROFILE
+    )
+    historical = _gold(historical_business)
+    for field in ("_index", "_dq_error", "_dq_warn", "description"):
+        historical.pop(field, None)
+    historical.update(
+        _valid_from=datetime(2026, 1, 1, tzinfo=UTC),
+        _valid_to=datetime(2026, 11, 16, tzinfo=UTC),
+        _is_current=False,
+        _version=1,
+    )
+    current = tables[paths["gold"]][0]
+    current_candidate = tables[paths["candidate_gold"]][0]
+    current["_version"] = 2
+    current_candidate["_version"] = 2
+    projection = {
+        name: tables[paths["candidate_silver"]][0][name]
+        for name in TARGET_CLASSIFICATION_FIELDS
+    }
+    candidate_historical = {**historical, **projection}
+    candidate_historical["content_hash"] = scoped_target_hash(
+        candidate_historical,
+        (*fields, *TARGET_CLASSIFICATION_FIELDS),
+        target_v31_normalization_profile(),
+    )
+    tables[paths["gold"]] = [historical, current]
+    tables[paths["candidate_gold"]] = [candidate_historical, current_candidate]
+    report = validation.validate_target_candidate(paths, fields)
+    assert report["fk_closure"] == "PASS"
+    assert candidate_historical["iuphar_target_id"] == projection["iuphar_target_id"]
+
+
 def test_gold_targets_unused_by_assay_are_preserved(admitted_candidate):
     paths, fields, tables = admitted_candidate
     tables[paths["gold"]].append(_gold(tables[paths["silver"]][1]))
@@ -247,9 +290,9 @@ def test_gold_targets_unused_by_assay_are_preserved(admitted_candidate):
 
 def test_canonical_description_wins_over_legacy_alias():
     assert (
-        validation._hash_input(
-            {"target_description": "canonical", "description": "legacy"}
-        )["target_description"]
+        hash_input({"target_description": "canonical", "description": "legacy"})[
+            "target_description"
+        ]
         == "canonical"
     )
 

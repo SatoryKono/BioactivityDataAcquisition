@@ -254,7 +254,6 @@ class ChEMBLSubcellularFractionGoldSchema(StrictGoldContractSchema):
     )
 
 
-
 class ChEMBLTargetGoldSchemaV31(ChEMBLTargetGoldSchema):
     """Require the complete additive column shape while allowing no assignment."""
 
@@ -285,7 +284,7 @@ __all__ = [
     "ChEMBLTargetComponentGoldSchema",
     "ChEMBLTargetGoldSchema",
     "ChEMBLTargetGoldSchemaV31",
-    "target_v31_schema_hash",
     "ChEMBLTargetProteinClassificationGoldSchema",
     "ChEMBLTissueGoldSchema",
+    "target_v31_schema_hash",
 ]

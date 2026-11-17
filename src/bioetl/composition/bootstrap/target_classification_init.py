@@ -135,6 +135,7 @@ def load_target_runtime_profile(
     config: PipelineYamlConfig,
     *,
     require_new_admission: bool = True,
+    dependency_root: Path | None = None,
 ) -> LoadedIupharProfile | None:
     """Read and verify the exact envelope; never substitute a latest snapshot."""
     classification = config.target_classification.to_domain()
@@ -142,7 +143,12 @@ def load_target_runtime_profile(
         return None
     path = Path(classification.snapshot_manifest or "")
     if not path.is_absolute():
-        path = resolve_configs_root().parent / path
+        base = (
+            dependency_root
+            if dependency_root is not None
+            else resolve_configs_root().parent
+        )
+        path = base / path
     return load_profile(
         path.resolve(),
         classification.snapshot_manifest_sha256 or "",

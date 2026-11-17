@@ -5,18 +5,51 @@ from __future__ import annotations
 import hashlib
 import re
 from collections.abc import Mapping
+from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 
 from ._pipeline_proof_rows import (
     OUTPUT_NAMES,
     document,
     mapping,
+    records,
     require_values,
     validate_row_outputs,
     version_identity,
 )
-from .models import RunProvenance
-from .stage0.io import sha256_bytes
+from .models import ClassificationResult, RunProvenance
+from .stage0.io import canonical_json_bytes, sha256_bytes
+
+_SEMANTIC_FIELDS = (
+    "match_status",
+    "matched_target_id",
+    "candidate_target_ids",
+    "iuphar_annotation_status",
+    "iuphar_class",
+    "local_class",
+    "effective_class",
+    "effective_source",
+    "decision_status",
+    "conflict_codes",
+)
+
+
+@dataclass(frozen=True, slots=True)
+class PipelineExecutionBinding:
+    """Admitted cohort input and the semantic result acceptance just executed."""
+
+    input_row_id: str
+    raw_fields: Mapping[str, object]
+    semantic: Mapping[str, object]
+
+
+def execution_semantics(result: ClassificationResult) -> dict[str, object]:
+    """Project the fields a stored proof must share with the admitted execution."""
+    projected: dict[str, object] = {}
+    for name in _SEMANTIC_FIELDS:
+        value = getattr(result, name)
+        projected[name] = list(value) if isinstance(value, tuple) else value
+    return projected
 
 
 def _digest(value: object) -> str:
@@ -117,7 +150,7 @@ def _verify_rows(
     run_id: str,
     profile: str,
     provenance: RunProvenance,
-) -> None:
+) -> dict[str, dict[str, bytes]]:
     found: dict[str, dict[str, bytes]] = {}
     covered: set[str] = set()
     for path, content in artifacts.items():
@@ -136,6 +169,34 @@ def _verify_rows(
         covered.update(names)
     if set(found) != rows or covered != set(artifacts):
         raise ValueError("pipeline proof outputs do not cover exactly its claimed rows")
+    return found
+
+
+def _bind_executed_cohort(
+    found: Mapping[str, dict[str, bytes]],
+    execution: tuple[PipelineExecutionBinding, ...],
+) -> None:
+    """Require the stored proof to classify the admitted inputs and results."""
+    expected: dict[str, PipelineExecutionBinding] = {}
+    for item in execution:
+        if item.input_row_id in expected:
+            raise ValueError("pipeline proof belongs to another admitted cohort")
+        expected[item.input_row_id] = item
+    if set(expected) != set(found):
+        raise ValueError("pipeline proof belongs to another admitted cohort")
+    for row_id, item in expected.items():
+        row = records(found[row_id]["classification.json"])[0]
+        if canonical_json_bytes(row.get("raw_fields")) != canonical_json_bytes(
+            dict(item.raw_fields)
+        ):
+            raise ValueError("pipeline proof input differs from the admitted cohort")
+        for field in _SEMANTIC_FIELDS:
+            if canonical_json_bytes(row.get(field)) != canonical_json_bytes(
+                item.semantic[field]
+            ):
+                raise ValueError(
+                    "pipeline proof result differs from the admitted execution"
+                )
 
 
 def _report_content(
@@ -203,21 +264,31 @@ def verify_stored_pipeline_proof(
     provenance: RunProvenance,
     *,
     expected_row_ids: tuple[str, ...] | None = None,
+    expected_execution: tuple[PipelineExecutionBinding, ...] | None = None,
 ) -> str:
     """Bind bytes, rows, versions and report occurrence; allow shadow profile identity."""
     content = path.read_bytes()
     proof_hash = sha256_bytes(content)
     proof = document(content)
     run_id, profile, rows = _require_occurrence(proof, snapshot_sha256, provenance)
+    if expected_execution is not None:
+        bound_ids = tuple(item.input_row_id for item in expected_execution)
+        if len(set(bound_ids)) != len(bound_ids):
+            raise ValueError("pipeline proof belongs to another admitted cohort")
+        if expected_row_ids is not None and set(expected_row_ids) != set(bound_ids):
+            raise ValueError("pipeline proof belongs to another admitted cohort")
+        expected_row_ids = bound_ids
     if expected_row_ids is not None and (
         len(set(expected_row_ids)) != len(expected_row_ids)
         or rows != set(expected_row_ids)
     ):
         raise ValueError("pipeline proof belongs to another admitted cohort")
     artifacts = _load_artifacts(path.parent, proof)
-    _verify_rows(
+    found = _verify_rows(
         artifacts, rows=rows, run_id=run_id, profile=profile, provenance=provenance
     )
+    if expected_execution is not None:
+        _bind_executed_cohort(found, expected_execution)
     report = document(_report_content(path.parent, proof, pipeline_report))
     _check_report(report, proof, path, proof_hash)
     return proof_hash

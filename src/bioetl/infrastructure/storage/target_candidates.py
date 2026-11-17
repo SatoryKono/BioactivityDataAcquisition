@@ -235,7 +235,7 @@ def build_target_candidates(request: TargetCandidateBuildRequest) -> dict[str, o
             raise ValueError("target candidate destination is not empty")
     _safe_output(request.output_dir, request.paths, directory=True)
     frozen = _verified_inputs(request, checked)
-    profile = _load_candidate_profile(checked)
+    profile = _load_candidate_profile(checked, workspace=request.paths.workspace)
     fields = _frozen_v31_hash_fields(checked, request.legacy_include_fields)
     old_silver, old_gold = _read_delta(checked["silver"]), _read_delta(checked["gold"])
     expected_cohorts = _cohort_keys(old_silver, old_gold)
@@ -278,7 +278,9 @@ def build_target_candidates(request: TargetCandidateBuildRequest) -> dict[str, o
     _verified_inputs(request, checked)
     _write_layer(checked["candidate_silver"], checked["silver"], new_silver)
     _write_layer(checked["candidate_gold"], checked["gold"], new_gold)
-    validation = validate_target_candidate(checked, request.legacy_include_fields)
+    validation = validate_target_candidate(
+        checked, request.legacy_include_fields, workspace=request.paths.workspace
+    )
     _verified_inputs(request, checked)
     evidence = store.finalize_run(
         run_id=request.run_id, expected_row_ids=tuple(sorted(row_ids))

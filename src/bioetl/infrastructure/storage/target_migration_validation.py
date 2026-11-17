@@ -13,20 +13,33 @@ from pandera.pandas import DataFrameModel, DataFrameSchema
 
 from bioetl.domain.config.target_classification import TARGET_CLASSIFICATION_FIELDS
 from bioetl.domain.normalization.profiles.chembl_target import CHEMBL_TARGET_PROFILE
-from bioetl.infrastructure.adapters.iuphar.snapshot_loader import (
-    LoadedIupharProfile,
+from bioetl.infrastructure.adapters.iuphar.acceptance_receipt import load_profile
+from bioetl.infrastructure.adapters.iuphar.snapshot_loader import LoadedIupharProfile
+from bioetl.infrastructure.storage.target_migration_classification_checks import (
+    assert_candidate_cohort_closure as _assert_candidate_cohort_closure,
 )
-from bioetl.infrastructure.adapters.iuphar.acceptance_receipt import (
-    load_profile,
+from bioetl.infrastructure.storage.target_migration_classification_checks import (
+    verify_candidate_hashes as _verify_candidate_hashes,
 )
-
+from bioetl.infrastructure.storage.target_migration_classification_checks import (
+    verify_source_classifications as _verify_source_classifications,
+)
+from bioetl.infrastructure.storage.target_migration_dependencies import (
+    _local_path,
+)
 from bioetl.infrastructure.storage.target_migration_row_ops import (
     GOLD_SCD_COLUMNS as _GOLD_SCD_COLUMNS,
-    META as _META,
+)
+from bioetl.infrastructure.storage.target_migration_row_ops import (
     by_id as _by_id,
-    hash_input as _hash_input,
+)
+from bioetl.infrastructure.storage.target_migration_row_ops import (
     read_delta as _read_delta,
+)
+from bioetl.infrastructure.storage.target_migration_row_ops import (
     scoped_target_hash as _scoped_target_hash,
+)
+from bioetl.infrastructure.storage.target_migration_row_ops import (
     validate_scd_types as _validate_scd_types,
 )
 
@@ -69,12 +82,6 @@ def _managed_writer_command(argv: Sequence[str]) -> bool:
     return "run" in args and (
         "chembl_target" in args or "--pipeline=chembl_target" in args
     )
-
-
-
-
-
-
 
 
 def compare_target_rows(
@@ -120,8 +127,6 @@ def _assert_legacy_values(
             raise ValueError(f"candidate changed legacy {kind} field: {key}/{field}")
 
 
-
-
 def _frozen_v31_hash_fields(
     paths: dict[str, Path], legacy_include_fields: tuple[str, ...]
 ) -> tuple[str, ...]:
@@ -135,11 +140,11 @@ def _frozen_v31_hash_fields(
     return tuple(dict.fromkeys((*legacy_include_fields, *TARGET_CLASSIFICATION_FIELDS)))
 
 
-
-
 def validate_target_candidate(
     paths: dict[str, Path],
     legacy_include_fields: tuple[str, ...],
+    *,
+    workspace: Path | None = None,
 ) -> dict[str, object]:
     """Validate admission, strict candidate schemas and both entire cohorts."""
     from bioetl.domain.contracts.gold.chembl_target_classification import (
@@ -147,7 +152,7 @@ def validate_target_candidate(
     )
     from bioetl.domain.schemas.chembl.target import TargetSchemaV31
 
-    profile = _load_candidate_profile(paths)
+    profile = _load_candidate_profile(paths, workspace=workspace)
     v31_include_fields = _frozen_v31_hash_fields(paths, legacy_include_fields)
     result: dict[str, object] = {}
     layers = {}
@@ -170,17 +175,22 @@ def validate_target_candidate(
     return result
 
 
-def _load_candidate_profile(paths: dict[str, Path]) -> LoadedIupharProfile:
+def _load_candidate_profile(
+    paths: dict[str, Path], workspace: Path | None = None
+) -> LoadedIupharProfile:
     """Require the exact admitted enrich profile selected by candidate YAML."""
     config = yaml.safe_load(paths["candidate_config"].read_text(encoding="utf-8"))
     classification = config["pipeline"]["target_classification"]
     if classification["mode"] != "enrich":
         raise ValueError("candidate configuration must select admitted enrich")
-    profile_path = Path(classification["snapshot_manifest"])
-    if not profile_path.is_absolute():
-        # Entity configuration lives at configs/entities/chembl/target.yaml.
-        root = paths["config"].resolve().parents[3]
-        profile_path = root / profile_path
+    manifest = classification["snapshot_manifest"]
+    if workspace is not None:
+        profile_path = _local_path(workspace, str(manifest), base=workspace)
+    else:
+        profile_path = Path(manifest)
+        if not profile_path.is_absolute():
+            # Entity configuration lives at configs/entities/chembl/target.yaml.
+            profile_path = paths["config"].resolve().parents[3] / profile_path
     return load_profile(
         profile_path,
         classification["snapshot_manifest_sha256"],
@@ -284,14 +294,3 @@ def _validate_storage_envelope(
     for row in rows:
         _validate_scd_types(row)
     return sorted(storage)
-
-
-
-
-
-
-from bioetl.infrastructure.storage.target_migration_classification_checks import (
-    assert_candidate_cohort_closure as _assert_candidate_cohort_closure,
-    verify_candidate_hashes as _verify_candidate_hashes,
-    verify_source_classifications as _verify_source_classifications,
-)
