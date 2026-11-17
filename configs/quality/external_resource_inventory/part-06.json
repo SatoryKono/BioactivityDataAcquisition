@@ -54,7 +54,7 @@
       "lifetime": "process-scoped singleton; each acquisition lasts for one collector with block",
       "creation_sites": [
         {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
+          "source_commit": "b2958410a6a697f180242503a60b630fa57fb33e",
           "source_blob": "8fb1f5159400fefdf292f523cfc48f86b49e9b3a",
           "content_sha256": "478c162ed9cfec7fac352ff1351778312bf33f03158989c7bfcd91887c23a143",
           "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
@@ -68,7 +68,7 @@
       ],
       "production_binding": [
         {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
+          "source_commit": "b2958410a6a697f180242503a60b630fa57fb33e",
           "source_blob": "d5aa2dc103b334fc0a1fef4f03cf225aaad3212d",
           "content_sha256": "04529f6059663600e405e54b150068d4582a9033e2fc776ea5c5b85de0cac544",
           "file": "src/bioetl/composition/observability_runtime.py",
@@ -80,7 +80,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
+          "source_commit": "b2958410a6a697f180242503a60b630fa57fb33e",
           "source_blob": "8fb1f5159400fefdf292f523cfc48f86b49e9b3a",
           "content_sha256": "478c162ed9cfec7fac352ff1351778312bf33f03158989c7bfcd91887c23a143",
           "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
@@ -92,7 +92,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
+          "source_commit": "b2958410a6a697f180242503a60b630fa57fb33e",
           "source_blob": "8fb1f5159400fefdf292f523cfc48f86b49e9b3a",
           "content_sha256": "478c162ed9cfec7fac352ff1351778312bf33f03158989c7bfcd91887c23a143",
           "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
@@ -102,7 +102,7 @@
       ],
       "cleanup_sources": [
         {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
+          "source_commit": "b2958410a6a697f180242503a60b630fa57fb33e",
           "source_blob": "8fb1f5159400fefdf292f523cfc48f86b49e9b3a",
           "content_sha256": "478c162ed9cfec7fac352ff1351778312bf33f03158989c7bfcd91887c23a143",
           "file": "src/bioetl/infrastructure/observability/metric_inventory.py",
@@ -165,7 +165,7 @@
       "lifetime": "One descriptor and exclusive lock per live catalog critical section.",
       "creation_sites": [
         {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
+          "source_commit": "b2958410a6a697f180242503a60b630fa57fb33e",
           "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
           "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
           "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
@@ -177,7 +177,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
+          "source_commit": "b2958410a6a697f180242503a60b630fa57fb33e",
           "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
           "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
           "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
@@ -189,7 +189,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
+          "source_commit": "b2958410a6a697f180242503a60b630fa57fb33e",
           "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
           "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
           "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
@@ -203,7 +203,7 @@
       ],
       "production_binding": [
         {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
+          "source_commit": "b2958410a6a697f180242503a60b630fa57fb33e",
           "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
           "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
           "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
@@ -215,7 +215,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
+          "source_commit": "b2958410a6a697f180242503a60b630fa57fb33e",
           "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
           "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
           "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
@@ -227,7 +227,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
+          "source_commit": "b2958410a6a697f180242503a60b630fa57fb33e",
           "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
           "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
           "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
@@ -241,7 +241,7 @@
       ],
       "cleanup_sources": [
         {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
+          "source_commit": "b2958410a6a697f180242503a60b630fa57fb33e",
           "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
           "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
           "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
@@ -253,7 +253,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
+          "source_commit": "b2958410a6a697f180242503a60b630fa57fb33e",
           "source_blob": "397ca3efe9776678f940552561e3b012311ad4ea",
           "content_sha256": "1001e1d82a848a15bdc985a1c399f225a728c0b78b041dd0de47f26357f88884",
           "file": "src/bioetl/infrastructure/control_plane/live_run_manifest_catalog.py",
@@ -319,7 +319,7 @@
       "operation_aliases": [],
       "creation_sites": [
         {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
+          "source_commit": "b2958410a6a697f180242503a60b630fa57fb33e",
           "source_blob": "0758e43e8a3b46e5e4172cc16c59f883eecc6296",
           "content_sha256": "a00c01a4b159899b5bb7da1a96498f0924be8908bcd65f82e9183f7aade71f2b",
           "file": "src/bioetl/infrastructure/export/csv_exporter.py",
@@ -331,7 +331,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
+          "source_commit": "b2958410a6a697f180242503a60b630fa57fb33e",
           "source_blob": "549d8a4e1e000461f32aa1a7dd4811de1c27875a",
           "content_sha256": "fc717096400eaacd74b6606fa1b56e5f04e4d959ce35c9475586a50e901fe4f0",
           "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
@@ -345,7 +345,7 @@
       ],
       "production_binding": [
         {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
+          "source_commit": "b2958410a6a697f180242503a60b630fa57fb33e",
           "source_blob": "0758e43e8a3b46e5e4172cc16c59f883eecc6296",
           "content_sha256": "a00c01a4b159899b5bb7da1a96498f0924be8908bcd65f82e9183f7aade71f2b",
           "file": "src/bioetl/infrastructure/export/csv_exporter.py",
@@ -357,7 +357,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
+          "source_commit": "b2958410a6a697f180242503a60b630fa57fb33e",
           "source_blob": "549d8a4e1e000461f32aa1a7dd4811de1c27875a",
           "content_sha256": "fc717096400eaacd74b6606fa1b56e5f04e4d959ce35c9475586a50e901fe4f0",
           "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
@@ -424,7 +424,7 @@
       "operation_aliases": [],
       "creation_sites": [
         {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
+          "source_commit": "b2958410a6a697f180242503a60b630fa57fb33e",
           "source_blob": "f9c4c841dd01ee50fc83500667b30af1fcb42ec2",
           "content_sha256": "6c00ebb00f7d956c847c7156a26a000921646cf056073519d58f1c411ee12af3",
           "file": "src/bioetl/infrastructure/export/csv_exporter_pair_ops.py",
@@ -436,7 +436,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
+          "source_commit": "b2958410a6a697f180242503a60b630fa57fb33e",
           "source_blob": "f9c4c841dd01ee50fc83500667b30af1fcb42ec2",
           "content_sha256": "6c00ebb00f7d956c847c7156a26a000921646cf056073519d58f1c411ee12af3",
           "file": "src/bioetl/infrastructure/export/csv_exporter_pair_ops.py",
@@ -450,7 +450,7 @@
       ],
       "production_binding": [
         {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
+          "source_commit": "b2958410a6a697f180242503a60b630fa57fb33e",
           "source_blob": "f9c4c841dd01ee50fc83500667b30af1fcb42ec2",
           "content_sha256": "6c00ebb00f7d956c847c7156a26a000921646cf056073519d58f1c411ee12af3",
           "file": "src/bioetl/infrastructure/export/csv_exporter_pair_ops.py",
@@ -462,7 +462,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
+          "source_commit": "b2958410a6a697f180242503a60b630fa57fb33e",
           "source_blob": "f9c4c841dd01ee50fc83500667b30af1fcb42ec2",
           "content_sha256": "6c00ebb00f7d956c847c7156a26a000921646cf056073519d58f1c411ee12af3",
           "file": "src/bioetl/infrastructure/export/csv_exporter_pair_ops.py",
@@ -476,7 +476,7 @@
       ],
       "cleanup_sources": [
         {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
+          "source_commit": "b2958410a6a697f180242503a60b630fa57fb33e",
           "source_blob": "f9c4c841dd01ee50fc83500667b30af1fcb42ec2",
           "content_sha256": "6c00ebb00f7d956c847c7156a26a000921646cf056073519d58f1c411ee12af3",
           "file": "src/bioetl/infrastructure/export/csv_exporter_pair_ops.py",
@@ -542,7 +542,7 @@
       "operation_aliases": [],
       "creation_sites": [
         {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
+          "source_commit": "b2958410a6a697f180242503a60b630fa57fb33e",
           "source_blob": "f9c4c841dd01ee50fc83500667b30af1fcb42ec2",
           "content_sha256": "6c00ebb00f7d956c847c7156a26a000921646cf056073519d58f1c411ee12af3",
           "file": "src/bioetl/infrastructure/export/csv_exporter_pair_ops.py",
@@ -554,7 +554,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
+          "source_commit": "b2958410a6a697f180242503a60b630fa57fb33e",
           "source_blob": "f9c4c841dd01ee50fc83500667b30af1fcb42ec2",
           "content_sha256": "6c00ebb00f7d956c847c7156a26a000921646cf056073519d58f1c411ee12af3",
           "file": "src/bioetl/infrastructure/export/csv_exporter_pair_ops.py",
@@ -568,7 +568,7 @@
       ],
       "production_binding": [
         {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
+          "source_commit": "b2958410a6a697f180242503a60b630fa57fb33e",
           "source_blob": "f9c4c841dd01ee50fc83500667b30af1fcb42ec2",
           "content_sha256": "6c00ebb00f7d956c847c7156a26a000921646cf056073519d58f1c411ee12af3",
           "file": "src/bioetl/infrastructure/export/csv_exporter_pair_ops.py",
@@ -580,7 +580,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
+          "source_commit": "b2958410a6a697f180242503a60b630fa57fb33e",
           "source_blob": "f9c4c841dd01ee50fc83500667b30af1fcb42ec2",
           "content_sha256": "6c00ebb00f7d956c847c7156a26a000921646cf056073519d58f1c411ee12af3",
           "file": "src/bioetl/infrastructure/export/csv_exporter_pair_ops.py",
@@ -649,7 +649,7 @@
       "operation_aliases": [],
       "creation_sites": [
         {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
+          "source_commit": "b2958410a6a697f180242503a60b630fa57fb33e",
           "source_blob": "549d8a4e1e000461f32aa1a7dd4811de1c27875a",
           "content_sha256": "fc717096400eaacd74b6606fa1b56e5f04e4d959ce35c9475586a50e901fe4f0",
           "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
@@ -661,7 +661,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
+          "source_commit": "b2958410a6a697f180242503a60b630fa57fb33e",
           "source_blob": "549d8a4e1e000461f32aa1a7dd4811de1c27875a",
           "content_sha256": "fc717096400eaacd74b6606fa1b56e5f04e4d959ce35c9475586a50e901fe4f0",
           "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
@@ -673,7 +673,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
+          "source_commit": "b2958410a6a697f180242503a60b630fa57fb33e",
           "source_blob": "549d8a4e1e000461f32aa1a7dd4811de1c27875a",
           "content_sha256": "fc717096400eaacd74b6606fa1b56e5f04e4d959ce35c9475586a50e901fe4f0",
           "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
@@ -685,7 +685,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
+          "source_commit": "b2958410a6a697f180242503a60b630fa57fb33e",
           "source_blob": "549d8a4e1e000461f32aa1a7dd4811de1c27875a",
           "content_sha256": "fc717096400eaacd74b6606fa1b56e5f04e4d959ce35c9475586a50e901fe4f0",
           "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
@@ -697,7 +697,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
+          "source_commit": "b2958410a6a697f180242503a60b630fa57fb33e",
           "source_blob": "549d8a4e1e000461f32aa1a7dd4811de1c27875a",
           "content_sha256": "fc717096400eaacd74b6606fa1b56e5f04e4d959ce35c9475586a50e901fe4f0",
           "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
@@ -711,7 +711,7 @@
       ],
       "production_binding": [
         {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
+          "source_commit": "b2958410a6a697f180242503a60b630fa57fb33e",
           "source_blob": "549d8a4e1e000461f32aa1a7dd4811de1c27875a",
           "content_sha256": "fc717096400eaacd74b6606fa1b56e5f04e4d959ce35c9475586a50e901fe4f0",
           "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
@@ -723,7 +723,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
+          "source_commit": "b2958410a6a697f180242503a60b630fa57fb33e",
           "source_blob": "549d8a4e1e000461f32aa1a7dd4811de1c27875a",
           "content_sha256": "fc717096400eaacd74b6606fa1b56e5f04e4d959ce35c9475586a50e901fe4f0",
           "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
@@ -735,7 +735,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
+          "source_commit": "b2958410a6a697f180242503a60b630fa57fb33e",
           "source_blob": "549d8a4e1e000461f32aa1a7dd4811de1c27875a",
           "content_sha256": "fc717096400eaacd74b6606fa1b56e5f04e4d959ce35c9475586a50e901fe4f0",
           "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
@@ -747,7 +747,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
+          "source_commit": "b2958410a6a697f180242503a60b630fa57fb33e",
           "source_blob": "549d8a4e1e000461f32aa1a7dd4811de1c27875a",
           "content_sha256": "fc717096400eaacd74b6606fa1b56e5f04e4d959ce35c9475586a50e901fe4f0",
           "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
@@ -759,7 +759,7 @@
           "context_manager": false
         },
         {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
+          "source_commit": "b2958410a6a697f180242503a60b630fa57fb33e",
           "source_blob": "549d8a4e1e000461f32aa1a7dd4811de1c27875a",
           "content_sha256": "fc717096400eaacd74b6606fa1b56e5f04e4d959ce35c9475586a50e901fe4f0",
           "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
@@ -767,2569 +767,6 @@
           "expression": "pv.read_csv(path, parse_options=pv.ParseOptions(delimiter=delimiter))",
           "call": "pv.read_csv",
           "creator": "read_raw_table",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "cleanup_sources": []
-    },
-    {
-      "call_path": [
-        "bioetl.composition.bootstrap.cli.metrics -> _entity_document -> path.read_bytes"
-      ],
-      "closer": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
-      "configuration_predicates": [],
-      "creator": [
-        "_entity_document"
-      ],
-      "identity": "iuphar.bioetl.composition.bootstrap.cli.config.file",
-      "lifetime": "owner/operation",
-      "owner": "bioetl.composition.bootstrap.cli.metrics owns this file acquisition for opt-in IUPHAR target classification",
-      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
-      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
-      "scenarios": {
-        "cancellation": {
-          "applicability": "owning async boundary; these primitives are synchronous",
-          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
-          "observation": "Cancel the owner around the call and observe remaining handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "error": {
-          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
-          "expected": "Preserve the original failure and release any handle this function already acquired.",
-          "observation": "Inject after allocation and during close; inspect retained handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "normal": {
-          "applicability": "applicable",
-          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
-          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "retry": {
-          "applicability": "outer caller attempt; the primitive has no internal retry",
-          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
-          "observation": "Compare opened and closed identities per attempt.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "timeout": {
-          "applicability": "no intrinsic timeout on the synchronous primitive",
-          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
-          "observation": "Observe the outer deadline and whether the call returned.",
-          "runtime_result": "NOT_RUN_12553"
-        }
-      },
-      "shutdown_by_site": {},
-      "shutdown_contract": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
-      "type": "file",
-      "creation_sites": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "cabab4bad82b9582be016fe4607edcbc76b84745",
-          "content_sha256": "cdf216c1d859fb1b83653521b842b49a7c8ae67df5383937b78c3f35a8f3027a",
-          "file": "src/bioetl/composition/bootstrap/cli/metrics.py",
-          "line": 150,
-          "expression": "path.read_bytes()",
-          "call": "path.read_bytes",
-          "creator": "_entity_document",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "production_binding": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "cabab4bad82b9582be016fe4607edcbc76b84745",
-          "content_sha256": "cdf216c1d859fb1b83653521b842b49a7c8ae67df5383937b78c3f35a8f3027a",
-          "file": "src/bioetl/composition/bootstrap/cli/metrics.py",
-          "line": 150,
-          "expression": "path.read_bytes()",
-          "call": "path.read_bytes",
-          "creator": "_entity_document",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "cleanup_sources": []
-    },
-    {
-      "call_path": [
-        "bioetl.composition.bootstrap.cli.lineage -> prepare_target_fk_repair -> configuration_path.write_bytes",
-        "bioetl.composition.bootstrap.cli.lineage -> _execute_isolated_recovery -> configuration_path.read_bytes"
-      ],
-      "closer": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
-      "configuration_predicates": [],
-      "creator": [
-        "_execute_isolated_recovery",
-        "prepare_target_fk_repair"
-      ],
-      "identity": "iuphar.bioetl.composition.bootstrap.cli.lineage.file",
-      "lifetime": "owner/operation",
-      "owner": "bioetl.composition.bootstrap.cli.lineage owns these file acquisitions for opt-in IUPHAR target classification",
-      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
-      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
-      "scenarios": {
-        "cancellation": {
-          "applicability": "owning async boundary; these primitives are synchronous",
-          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
-          "observation": "Cancel the owner around the call and observe remaining handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "error": {
-          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
-          "expected": "Preserve the original failure and release any handle this function already acquired.",
-          "observation": "Inject after allocation and during close; inspect retained handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "normal": {
-          "applicability": "applicable",
-          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
-          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "retry": {
-          "applicability": "outer caller attempt; the primitive has no internal retry",
-          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
-          "observation": "Compare opened and closed identities per attempt.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "timeout": {
-          "applicability": "no intrinsic timeout on the synchronous primitive",
-          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
-          "observation": "Observe the outer deadline and whether the call returned.",
-          "runtime_result": "NOT_RUN_12553"
-        }
-      },
-      "shutdown_by_site": {},
-      "shutdown_contract": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
-      "type": "file",
-      "creation_sites": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "ab94e42177bb6ac3f91f1441082d26251088c1bc",
-          "content_sha256": "928008e8abafd853384fbb32c00926d6a6b9b2541680fccccadb92fda172d31a",
-          "file": "src/bioetl/composition/bootstrap/cli/lineage.py",
-          "line": 251,
-          "expression": "configuration_path.write_bytes(configuration_bytes + b'\\n')",
-          "call": "configuration_path.write_bytes",
-          "creator": "prepare_target_fk_repair",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "ab94e42177bb6ac3f91f1441082d26251088c1bc",
-          "content_sha256": "928008e8abafd853384fbb32c00926d6a6b9b2541680fccccadb92fda172d31a",
-          "file": "src/bioetl/composition/bootstrap/cli/lineage.py",
-          "line": 329,
-          "expression": "configuration_path.read_bytes()",
-          "call": "configuration_path.read_bytes",
-          "creator": "_execute_isolated_recovery",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "production_binding": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "ab94e42177bb6ac3f91f1441082d26251088c1bc",
-          "content_sha256": "928008e8abafd853384fbb32c00926d6a6b9b2541680fccccadb92fda172d31a",
-          "file": "src/bioetl/composition/bootstrap/cli/lineage.py",
-          "line": 251,
-          "expression": "configuration_path.write_bytes(configuration_bytes + b'\\n')",
-          "call": "configuration_path.write_bytes",
-          "creator": "prepare_target_fk_repair",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "ab94e42177bb6ac3f91f1441082d26251088c1bc",
-          "content_sha256": "928008e8abafd853384fbb32c00926d6a6b9b2541680fccccadb92fda172d31a",
-          "file": "src/bioetl/composition/bootstrap/cli/lineage.py",
-          "line": 329,
-          "expression": "configuration_path.read_bytes()",
-          "call": "configuration_path.read_bytes",
-          "creator": "_execute_isolated_recovery",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "cleanup_sources": []
-    },
-    {
-      "call_path": [
-        "bioetl.infrastructure.adapters.iuphar._manifest -> checked_bytes -> root.joinpath(*relative.parts).read_bytes"
-      ],
-      "closer": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
-      "configuration_predicates": [],
-      "creator": [
-        "checked_bytes"
-      ],
-      "identity": "iuphar.bioetl.infrastructure.adapters.iuphar._manifest.file",
-      "lifetime": "owner/operation",
-      "owner": "bioetl.infrastructure.adapters.iuphar._manifest owns these file acquisitions for opt-in IUPHAR target classification",
-      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
-      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
-      "scenarios": {
-        "cancellation": {
-          "applicability": "owning async boundary; these primitives are synchronous",
-          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
-          "observation": "Cancel the owner around the call and observe remaining handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "error": {
-          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
-          "expected": "Preserve the original failure and release any handle this function already acquired.",
-          "observation": "Inject after allocation and during close; inspect retained handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "normal": {
-          "applicability": "applicable",
-          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
-          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "retry": {
-          "applicability": "outer caller attempt; the primitive has no internal retry",
-          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
-          "observation": "Compare opened and closed identities per attempt.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "timeout": {
-          "applicability": "no intrinsic timeout on the synchronous primitive",
-          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
-          "observation": "Observe the outer deadline and whether the call returned.",
-          "runtime_result": "NOT_RUN_12553"
-        }
-      },
-      "shutdown_by_site": {},
-      "shutdown_contract": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
-      "type": "file",
-      "creation_sites": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "5433b6398e1d02b63c98b8f2e450aca5c9565392",
-          "content_sha256": "ee565494aecd558a846871a31aa8b1d0cf41551ab9d84ec20ec4e7b398dd075b",
-          "file": "src/bioetl/infrastructure/adapters/iuphar/_manifest.py",
-          "line": 47,
-          "expression": "root.joinpath(*relative.parts).read_bytes()",
-          "call": "root.joinpath(*relative.parts).read_bytes",
-          "creator": "checked_bytes",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "production_binding": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "5433b6398e1d02b63c98b8f2e450aca5c9565392",
-          "content_sha256": "ee565494aecd558a846871a31aa8b1d0cf41551ab9d84ec20ec4e7b398dd075b",
-          "file": "src/bioetl/infrastructure/adapters/iuphar/_manifest.py",
-          "line": 47,
-          "expression": "root.joinpath(*relative.parts).read_bytes()",
-          "call": "root.joinpath(*relative.parts).read_bytes",
-          "creator": "checked_bytes",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "cleanup_sources": []
-    },
-    {
-      "call_path": [
-        "bioetl.infrastructure.adapters.iuphar.cohort_projection -> export_canonical_cohort -> request.source_path.read_bytes",
-        "bioetl.infrastructure.adapters.iuphar.cohort_projection -> _publish_rejection -> (output / 'raw-source.bin').write_bytes",
-        "bioetl.infrastructure.adapters.iuphar.cohort_projection -> _publish_rejection -> (output / 'conversion-ledger.json').write_bytes",
-        "bioetl.infrastructure.adapters.iuphar.cohort_projection -> _publish_bundle -> path.open",
-        "bioetl.infrastructure.adapters.iuphar.cohort_projection -> _publish_bundle -> path.read_bytes"
-      ],
-      "closer": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
-      "configuration_predicates": [],
-      "creator": [
-        "_publish_bundle",
-        "_publish_rejection",
-        "export_canonical_cohort"
-      ],
-      "identity": "iuphar.bioetl.infrastructure.adapters.iuphar.cohort_projection.file",
-      "lifetime": "owner/operation",
-      "owner": "bioetl.infrastructure.adapters.iuphar.cohort_projection owns these file acquisitions for opt-in IUPHAR target classification",
-      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
-      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
-      "scenarios": {
-        "cancellation": {
-          "applicability": "owning async boundary; these primitives are synchronous",
-          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
-          "observation": "Cancel the owner around the call and observe remaining handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "error": {
-          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
-          "expected": "Preserve the original failure and release any handle this function already acquired.",
-          "observation": "Inject after allocation and during close; inspect retained handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "normal": {
-          "applicability": "applicable",
-          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
-          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "retry": {
-          "applicability": "outer caller attempt; the primitive has no internal retry",
-          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
-          "observation": "Compare opened and closed identities per attempt.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "timeout": {
-          "applicability": "no intrinsic timeout on the synchronous primitive",
-          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
-          "observation": "Observe the outer deadline and whether the call returned.",
-          "runtime_result": "NOT_RUN_12553"
-        }
-      },
-      "shutdown_by_site": {},
-      "shutdown_contract": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
-      "type": "file",
-      "creation_sites": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "6807a945ece39cc514e29588ba0d93fc7490bd8f",
-          "content_sha256": "dd96a687f5aac78e15002b46eddc8a2481cb64a0cd622b2d7e0e4a2fc77f3761",
-          "file": "src/bioetl/infrastructure/adapters/iuphar/cohort_projection.py",
-          "line": 27,
-          "expression": "request.source_path.read_bytes()",
-          "call": "request.source_path.read_bytes",
-          "creator": "export_canonical_cohort",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "6807a945ece39cc514e29588ba0d93fc7490bd8f",
-          "content_sha256": "dd96a687f5aac78e15002b46eddc8a2481cb64a0cd622b2d7e0e4a2fc77f3761",
-          "file": "src/bioetl/infrastructure/adapters/iuphar/cohort_projection.py",
-          "line": 78,
-          "expression": "(output / 'raw-source.bin').write_bytes(raw)",
-          "call": "(output / 'raw-source.bin').write_bytes",
-          "creator": "_publish_rejection",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "6807a945ece39cc514e29588ba0d93fc7490bd8f",
-          "content_sha256": "dd96a687f5aac78e15002b46eddc8a2481cb64a0cd622b2d7e0e4a2fc77f3761",
-          "file": "src/bioetl/infrastructure/adapters/iuphar/cohort_projection.py",
-          "line": 79,
-          "expression": "(output / 'conversion-ledger.json').write_bytes(canonical_json_bytes({'artifact': 'bioetl_target_cohort_conversion', 'schema_version': 1, 'status': 'REJECTED', 'raw_source': {'sha256': sha256_bytes(raw), 'byte_count': len(raw)}, 'diagnostic': {'code': 'duplicate_target_identity', 'source_record': error.source_record, 'canonical_row_id': error.row_id, 'reason': str(error)}, 'biological_accuracy_accepted': False}))",
-          "call": "(output / 'conversion-ledger.json').write_bytes",
-          "creator": "_publish_rejection",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "6807a945ece39cc514e29588ba0d93fc7490bd8f",
-          "content_sha256": "dd96a687f5aac78e15002b46eddc8a2481cb64a0cd622b2d7e0e4a2fc77f3761",
-          "file": "src/bioetl/infrastructure/adapters/iuphar/cohort_projection.py",
-          "line": 107,
-          "expression": "path.open('xb')",
-          "call": "path.open",
-          "creator": "_publish_bundle",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "6807a945ece39cc514e29588ba0d93fc7490bd8f",
-          "content_sha256": "dd96a687f5aac78e15002b46eddc8a2481cb64a0cd622b2d7e0e4a2fc77f3761",
-          "file": "src/bioetl/infrastructure/adapters/iuphar/cohort_projection.py",
-          "line": 109,
-          "expression": "path.read_bytes()",
-          "call": "path.read_bytes",
-          "creator": "_publish_bundle",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "production_binding": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "6807a945ece39cc514e29588ba0d93fc7490bd8f",
-          "content_sha256": "dd96a687f5aac78e15002b46eddc8a2481cb64a0cd622b2d7e0e4a2fc77f3761",
-          "file": "src/bioetl/infrastructure/adapters/iuphar/cohort_projection.py",
-          "line": 27,
-          "expression": "request.source_path.read_bytes()",
-          "call": "request.source_path.read_bytes",
-          "creator": "export_canonical_cohort",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "6807a945ece39cc514e29588ba0d93fc7490bd8f",
-          "content_sha256": "dd96a687f5aac78e15002b46eddc8a2481cb64a0cd622b2d7e0e4a2fc77f3761",
-          "file": "src/bioetl/infrastructure/adapters/iuphar/cohort_projection.py",
-          "line": 78,
-          "expression": "(output / 'raw-source.bin').write_bytes(raw)",
-          "call": "(output / 'raw-source.bin').write_bytes",
-          "creator": "_publish_rejection",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "6807a945ece39cc514e29588ba0d93fc7490bd8f",
-          "content_sha256": "dd96a687f5aac78e15002b46eddc8a2481cb64a0cd622b2d7e0e4a2fc77f3761",
-          "file": "src/bioetl/infrastructure/adapters/iuphar/cohort_projection.py",
-          "line": 79,
-          "expression": "(output / 'conversion-ledger.json').write_bytes(canonical_json_bytes({'artifact': 'bioetl_target_cohort_conversion', 'schema_version': 1, 'status': 'REJECTED', 'raw_source': {'sha256': sha256_bytes(raw), 'byte_count': len(raw)}, 'diagnostic': {'code': 'duplicate_target_identity', 'source_record': error.source_record, 'canonical_row_id': error.row_id, 'reason': str(error)}, 'biological_accuracy_accepted': False}))",
-          "call": "(output / 'conversion-ledger.json').write_bytes",
-          "creator": "_publish_rejection",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "6807a945ece39cc514e29588ba0d93fc7490bd8f",
-          "content_sha256": "dd96a687f5aac78e15002b46eddc8a2481cb64a0cd622b2d7e0e4a2fc77f3761",
-          "file": "src/bioetl/infrastructure/adapters/iuphar/cohort_projection.py",
-          "line": 107,
-          "expression": "path.open('xb')",
-          "call": "path.open",
-          "creator": "_publish_bundle",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "6807a945ece39cc514e29588ba0d93fc7490bd8f",
-          "content_sha256": "dd96a687f5aac78e15002b46eddc8a2481cb64a0cd622b2d7e0e4a2fc77f3761",
-          "file": "src/bioetl/infrastructure/adapters/iuphar/cohort_projection.py",
-          "line": 109,
-          "expression": "path.read_bytes()",
-          "call": "path.read_bytes",
-          "creator": "_publish_bundle",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "cleanup_sources": []
-    },
-    {
-      "call_path": [
-        "bioetl.infrastructure.adapters.iuphar.evidence_store -> LocalTargetClassificationEvidenceStore._collect_rows -> run_root.glob"
-      ],
-      "closer": "iterdir, glob, and rglob iterators are exhausted inside the owning function and are not retained.",
-      "configuration_predicates": [],
-      "creator": [
-        "LocalTargetClassificationEvidenceStore._collect_rows"
-      ],
-      "identity": "iuphar.bioetl.infrastructure.adapters.iuphar.evidence_store.directory-enumeration",
-      "lifetime": "owner/operation",
-      "owner": "bioetl.infrastructure.adapters.iuphar.evidence_store owns these directory-enumeration acquisitions for opt-in IUPHAR target classification",
-      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
-      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
-      "scenarios": {
-        "cancellation": {
-          "applicability": "owning async boundary; these primitives are synchronous",
-          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
-          "observation": "Cancel the owner around the call and observe remaining handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "error": {
-          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
-          "expected": "Preserve the original failure and release any handle this function already acquired.",
-          "observation": "Inject after allocation and during close; inspect retained handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "normal": {
-          "applicability": "applicable",
-          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
-          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "retry": {
-          "applicability": "outer caller attempt; the primitive has no internal retry",
-          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
-          "observation": "Compare opened and closed identities per attempt.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "timeout": {
-          "applicability": "no intrinsic timeout on the synchronous primitive",
-          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
-          "observation": "Observe the outer deadline and whether the call returned.",
-          "runtime_result": "NOT_RUN_12553"
-        }
-      },
-      "shutdown_by_site": {},
-      "shutdown_contract": "iterdir, glob, and rglob iterators are exhausted inside the owning function and are not retained.",
-      "type": "directory-enumeration",
-      "creation_sites": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "d36e3ce4ae0ea5d4cbaeacebd8992867744f09b8",
-          "content_sha256": "962c281af045acd0b514d7a7f8d617011ab423173bb136e77fa0fabb0df4f893",
-          "file": "src/bioetl/infrastructure/adapters/iuphar/evidence_store.py",
-          "line": 163,
-          "expression": "run_root.glob('batches/*/rows/*/row-manifest.json')",
-          "call": "run_root.glob",
-          "creator": "LocalTargetClassificationEvidenceStore._collect_rows",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "production_binding": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "d36e3ce4ae0ea5d4cbaeacebd8992867744f09b8",
-          "content_sha256": "962c281af045acd0b514d7a7f8d617011ab423173bb136e77fa0fabb0df4f893",
-          "file": "src/bioetl/infrastructure/adapters/iuphar/evidence_store.py",
-          "line": 163,
-          "expression": "run_root.glob('batches/*/rows/*/row-manifest.json')",
-          "call": "run_root.glob",
-          "creator": "LocalTargetClassificationEvidenceStore._collect_rows",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "cleanup_sources": []
-    },
-    {
-      "call_path": [
-        "bioetl.infrastructure.adapters.iuphar.evidence_store -> _row_manifest -> path.read_bytes",
-        "bioetl.infrastructure.adapters.iuphar.evidence_store -> _verified_artifacts -> path.read_bytes",
-        "bioetl.infrastructure.adapters.iuphar.evidence_store -> _write_same -> path.read_bytes",
-        "bioetl.infrastructure.adapters.iuphar.evidence_store -> LocalTargetClassificationEvidenceStore.publish_result -> manifest_path.read_bytes"
-      ],
-      "closer": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
-      "configuration_predicates": [],
-      "creator": [
-        "LocalTargetClassificationEvidenceStore.publish_result",
-        "_row_manifest",
-        "_verified_artifacts",
-        "_write_same"
-      ],
-      "identity": "iuphar.bioetl.infrastructure.adapters.iuphar.evidence_store.file",
-      "lifetime": "owner/operation",
-      "owner": "bioetl.infrastructure.adapters.iuphar.evidence_store owns these file acquisitions for opt-in IUPHAR target classification",
-      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
-      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
-      "scenarios": {
-        "cancellation": {
-          "applicability": "owning async boundary; these primitives are synchronous",
-          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
-          "observation": "Cancel the owner around the call and observe remaining handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "error": {
-          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
-          "expected": "Preserve the original failure and release any handle this function already acquired.",
-          "observation": "Inject after allocation and during close; inspect retained handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "normal": {
-          "applicability": "applicable",
-          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
-          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "retry": {
-          "applicability": "outer caller attempt; the primitive has no internal retry",
-          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
-          "observation": "Compare opened and closed identities per attempt.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "timeout": {
-          "applicability": "no intrinsic timeout on the synchronous primitive",
-          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
-          "observation": "Observe the outer deadline and whether the call returned.",
-          "runtime_result": "NOT_RUN_12553"
-        }
-      },
-      "shutdown_by_site": {},
-      "shutdown_contract": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
-      "type": "file",
-      "creation_sites": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "d36e3ce4ae0ea5d4cbaeacebd8992867744f09b8",
-          "content_sha256": "962c281af045acd0b514d7a7f8d617011ab423173bb136e77fa0fabb0df4f893",
-          "file": "src/bioetl/infrastructure/adapters/iuphar/evidence_store.py",
-          "line": 63,
-          "expression": "path.read_bytes()",
-          "call": "path.read_bytes",
-          "creator": "_row_manifest",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "d36e3ce4ae0ea5d4cbaeacebd8992867744f09b8",
-          "content_sha256": "962c281af045acd0b514d7a7f8d617011ab423173bb136e77fa0fabb0df4f893",
-          "file": "src/bioetl/infrastructure/adapters/iuphar/evidence_store.py",
-          "line": 87,
-          "expression": "path.read_bytes()",
-          "call": "path.read_bytes",
-          "creator": "_verified_artifacts",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "d36e3ce4ae0ea5d4cbaeacebd8992867744f09b8",
-          "content_sha256": "962c281af045acd0b514d7a7f8d617011ab423173bb136e77fa0fabb0df4f893",
-          "file": "src/bioetl/infrastructure/adapters/iuphar/evidence_store.py",
-          "line": 31,
-          "expression": "path.read_bytes()",
-          "call": "path.read_bytes",
-          "creator": "_write_same",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "d36e3ce4ae0ea5d4cbaeacebd8992867744f09b8",
-          "content_sha256": "962c281af045acd0b514d7a7f8d617011ab423173bb136e77fa0fabb0df4f893",
-          "file": "src/bioetl/infrastructure/adapters/iuphar/evidence_store.py",
-          "line": 150,
-          "expression": "manifest_path.read_bytes()",
-          "call": "manifest_path.read_bytes",
-          "creator": "LocalTargetClassificationEvidenceStore.publish_result",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "production_binding": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "d36e3ce4ae0ea5d4cbaeacebd8992867744f09b8",
-          "content_sha256": "962c281af045acd0b514d7a7f8d617011ab423173bb136e77fa0fabb0df4f893",
-          "file": "src/bioetl/infrastructure/adapters/iuphar/evidence_store.py",
-          "line": 63,
-          "expression": "path.read_bytes()",
-          "call": "path.read_bytes",
-          "creator": "_row_manifest",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "d36e3ce4ae0ea5d4cbaeacebd8992867744f09b8",
-          "content_sha256": "962c281af045acd0b514d7a7f8d617011ab423173bb136e77fa0fabb0df4f893",
-          "file": "src/bioetl/infrastructure/adapters/iuphar/evidence_store.py",
-          "line": 87,
-          "expression": "path.read_bytes()",
-          "call": "path.read_bytes",
-          "creator": "_verified_artifacts",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "d36e3ce4ae0ea5d4cbaeacebd8992867744f09b8",
-          "content_sha256": "962c281af045acd0b514d7a7f8d617011ab423173bb136e77fa0fabb0df4f893",
-          "file": "src/bioetl/infrastructure/adapters/iuphar/evidence_store.py",
-          "line": 31,
-          "expression": "path.read_bytes()",
-          "call": "path.read_bytes",
-          "creator": "_write_same",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "d36e3ce4ae0ea5d4cbaeacebd8992867744f09b8",
-          "content_sha256": "962c281af045acd0b514d7a7f8d617011ab423173bb136e77fa0fabb0df4f893",
-          "file": "src/bioetl/infrastructure/adapters/iuphar/evidence_store.py",
-          "line": 150,
-          "expression": "manifest_path.read_bytes()",
-          "call": "manifest_path.read_bytes",
-          "creator": "LocalTargetClassificationEvidenceStore.publish_result",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "cleanup_sources": []
-    },
-    {
-      "call_path": [
-        "bioetl.infrastructure.adapters.iuphar.snapshot_payload -> build_snapshot_bundle -> destination.open"
-      ],
-      "closer": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
-      "configuration_predicates": [],
-      "creator": [
-        "build_snapshot_bundle"
-      ],
-      "identity": "iuphar.bioetl.infrastructure.adapters.iuphar.snapshot_payload.file",
-      "lifetime": "owner/operation",
-      "owner": "bioetl.infrastructure.adapters.iuphar.snapshot_payload owns these file acquisitions for opt-in IUPHAR target classification",
-      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
-      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
-      "scenarios": {
-        "cancellation": {
-          "applicability": "owning async boundary; these primitives are synchronous",
-          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
-          "observation": "Cancel the owner around the call and observe remaining handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "error": {
-          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
-          "expected": "Preserve the original failure and release any handle this function already acquired.",
-          "observation": "Inject after allocation and during close; inspect retained handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "normal": {
-          "applicability": "applicable",
-          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
-          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "retry": {
-          "applicability": "outer caller attempt; the primitive has no internal retry",
-          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
-          "observation": "Compare opened and closed identities per attempt.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "timeout": {
-          "applicability": "no intrinsic timeout on the synchronous primitive",
-          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
-          "observation": "Observe the outer deadline and whether the call returned.",
-          "runtime_result": "NOT_RUN_12553"
-        }
-      },
-      "shutdown_by_site": {},
-      "shutdown_contract": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
-      "type": "file",
-      "creation_sites": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "b8fe5eeed7dfd6cc59ba1374432a9c7526eb8d84",
-          "content_sha256": "9486756207254d50fcf76d24a0ce36846cacf6ae735f2098f3e2f0570e908f6f",
-          "file": "src/bioetl/infrastructure/adapters/iuphar/snapshot_payload.py",
-          "line": 149,
-          "expression": "destination.open('xb')",
-          "call": "destination.open",
-          "creator": "build_snapshot_bundle",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "production_binding": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "b8fe5eeed7dfd6cc59ba1374432a9c7526eb8d84",
-          "content_sha256": "9486756207254d50fcf76d24a0ce36846cacf6ae735f2098f3e2f0570e908f6f",
-          "file": "src/bioetl/infrastructure/adapters/iuphar/snapshot_payload.py",
-          "line": 149,
-          "expression": "destination.open('xb')",
-          "call": "destination.open",
-          "creator": "build_snapshot_bundle",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "cleanup_sources": []
-    },
-    {
-      "call_path": [
-        "bioetl.infrastructure.storage.target_candidates -> _write_layer -> DeltaTable",
-        "bioetl.infrastructure.storage.target_candidates -> _write_layer -> write_deltalake",
-        "bioetl.infrastructure.storage.target_candidates -> _input_facts -> DeltaTable"
-      ],
-      "closer": "DeltaTable and write_deltalake finish the native table operation before return; no table handle is stored on a process-global owner.",
-      "configuration_predicates": [],
-      "creator": [
-        "_input_facts",
-        "_write_layer"
-      ],
-      "identity": "iuphar.bioetl.infrastructure.storage.target_candidates.delta",
-      "lifetime": "owner/operation",
-      "owner": "bioetl.infrastructure.storage.target_candidates owns these delta acquisitions for opt-in IUPHAR target classification",
-      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
-      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
-      "scenarios": {
-        "cancellation": {
-          "applicability": "owning async boundary; these primitives are synchronous",
-          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
-          "observation": "Cancel the owner around the call and observe remaining handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "error": {
-          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
-          "expected": "Preserve the original failure and release any handle this function already acquired.",
-          "observation": "Inject after allocation and during close; inspect retained handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "normal": {
-          "applicability": "applicable",
-          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
-          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "retry": {
-          "applicability": "outer caller attempt; the primitive has no internal retry",
-          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
-          "observation": "Compare opened and closed identities per attempt.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "timeout": {
-          "applicability": "no intrinsic timeout on the synchronous primitive",
-          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
-          "observation": "Observe the outer deadline and whether the call returned.",
-          "runtime_result": "NOT_RUN_12553"
-        }
-      },
-      "shutdown_by_site": {},
-      "shutdown_contract": "DeltaTable and write_deltalake finish the native table operation before return; no table handle is stored on a process-global owner.",
-      "type": "delta",
-      "creation_sites": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "de1fe896616d1934ce6729cabf25b5da2813ee40",
-          "content_sha256": "402b28ddf900229fa7b86fc5aecd1e076d42891fe4e664d1465bddd31471f4f7",
-          "file": "src/bioetl/infrastructure/storage/target_candidates.py",
-          "line": 209,
-          "expression": "DeltaTable(str(original))",
-          "call": "DeltaTable",
-          "creator": "_write_layer",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "de1fe896616d1934ce6729cabf25b5da2813ee40",
-          "content_sha256": "402b28ddf900229fa7b86fc5aecd1e076d42891fe4e664d1465bddd31471f4f7",
-          "file": "src/bioetl/infrastructure/storage/target_candidates.py",
-          "line": 221,
-          "expression": "write_deltalake(str(destination), output, mode='error', partition_by=table.metadata().partition_columns or None)",
-          "call": "write_deltalake",
-          "creator": "_write_layer",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "de1fe896616d1934ce6729cabf25b5da2813ee40",
-          "content_sha256": "402b28ddf900229fa7b86fc5aecd1e076d42891fe4e664d1465bddd31471f4f7",
-          "file": "src/bioetl/infrastructure/storage/target_candidates.py",
-          "line": 113,
-          "expression": "DeltaTable(str(paths[name]))",
-          "call": "DeltaTable",
-          "creator": "_input_facts",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "production_binding": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "de1fe896616d1934ce6729cabf25b5da2813ee40",
-          "content_sha256": "402b28ddf900229fa7b86fc5aecd1e076d42891fe4e664d1465bddd31471f4f7",
-          "file": "src/bioetl/infrastructure/storage/target_candidates.py",
-          "line": 209,
-          "expression": "DeltaTable(str(original))",
-          "call": "DeltaTable",
-          "creator": "_write_layer",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "de1fe896616d1934ce6729cabf25b5da2813ee40",
-          "content_sha256": "402b28ddf900229fa7b86fc5aecd1e076d42891fe4e664d1465bddd31471f4f7",
-          "file": "src/bioetl/infrastructure/storage/target_candidates.py",
-          "line": 221,
-          "expression": "write_deltalake(str(destination), output, mode='error', partition_by=table.metadata().partition_columns or None)",
-          "call": "write_deltalake",
-          "creator": "_write_layer",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "de1fe896616d1934ce6729cabf25b5da2813ee40",
-          "content_sha256": "402b28ddf900229fa7b86fc5aecd1e076d42891fe4e664d1465bddd31471f4f7",
-          "file": "src/bioetl/infrastructure/storage/target_candidates.py",
-          "line": 113,
-          "expression": "DeltaTable(str(paths[name]))",
-          "call": "DeltaTable",
-          "creator": "_input_facts",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "cleanup_sources": []
-    },
-    {
-      "call_path": [
-        "bioetl.infrastructure.storage.target_candidates -> _safe_output -> path.iterdir",
-        "bioetl.infrastructure.storage.target_candidates -> build_target_candidates -> checked[name].iterdir"
-      ],
-      "closer": "iterdir, glob, and rglob iterators are exhausted inside the owning function and are not retained.",
-      "configuration_predicates": [],
-      "creator": [
-        "_safe_output",
-        "build_target_candidates"
-      ],
-      "identity": "iuphar.bioetl.infrastructure.storage.target_candidates.directory-enumeration",
-      "lifetime": "owner/operation",
-      "owner": "bioetl.infrastructure.storage.target_candidates owns these directory-enumeration acquisitions for opt-in IUPHAR target classification",
-      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
-      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
-      "scenarios": {
-        "cancellation": {
-          "applicability": "owning async boundary; these primitives are synchronous",
-          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
-          "observation": "Cancel the owner around the call and observe remaining handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "error": {
-          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
-          "expected": "Preserve the original failure and release any handle this function already acquired.",
-          "observation": "Inject after allocation and during close; inspect retained handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "normal": {
-          "applicability": "applicable",
-          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
-          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "retry": {
-          "applicability": "outer caller attempt; the primitive has no internal retry",
-          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
-          "observation": "Compare opened and closed identities per attempt.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "timeout": {
-          "applicability": "no intrinsic timeout on the synchronous primitive",
-          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
-          "observation": "Observe the outer deadline and whether the call returned.",
-          "runtime_result": "NOT_RUN_12553"
-        }
-      },
-      "shutdown_by_site": {},
-      "shutdown_contract": "iterdir, glob, and rglob iterators are exhausted inside the owning function and are not retained.",
-      "type": "directory-enumeration",
-      "creation_sites": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "de1fe896616d1934ce6729cabf25b5da2813ee40",
-          "content_sha256": "402b28ddf900229fa7b86fc5aecd1e076d42891fe4e664d1465bddd31471f4f7",
-          "file": "src/bioetl/infrastructure/storage/target_candidates.py",
-          "line": 153,
-          "expression": "path.iterdir()",
-          "call": "path.iterdir",
-          "creator": "_safe_output",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "de1fe896616d1934ce6729cabf25b5da2813ee40",
-          "content_sha256": "402b28ddf900229fa7b86fc5aecd1e076d42891fe4e664d1465bddd31471f4f7",
-          "file": "src/bioetl/infrastructure/storage/target_candidates.py",
-          "line": 234,
-          "expression": "checked[name].iterdir()",
-          "call": "checked[name].iterdir",
-          "creator": "build_target_candidates",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "production_binding": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "de1fe896616d1934ce6729cabf25b5da2813ee40",
-          "content_sha256": "402b28ddf900229fa7b86fc5aecd1e076d42891fe4e664d1465bddd31471f4f7",
-          "file": "src/bioetl/infrastructure/storage/target_candidates.py",
-          "line": 153,
-          "expression": "path.iterdir()",
-          "call": "path.iterdir",
-          "creator": "_safe_output",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "de1fe896616d1934ce6729cabf25b5da2813ee40",
-          "content_sha256": "402b28ddf900229fa7b86fc5aecd1e076d42891fe4e664d1465bddd31471f4f7",
-          "file": "src/bioetl/infrastructure/storage/target_candidates.py",
-          "line": 234,
-          "expression": "checked[name].iterdir()",
-          "call": "checked[name].iterdir",
-          "creator": "build_target_candidates",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "cleanup_sources": []
-    },
-    {
-      "call_path": [
-        "bioetl.infrastructure.storage.target_candidates -> freeze_target_inputs -> safe_output.open",
-        "bioetl.infrastructure.storage.target_candidates -> _verified_inputs -> request.input_manifest.read_bytes",
-        "bioetl.infrastructure.storage.target_candidates -> build_target_candidates -> (request.output_dir / 'build-manifest.json').open"
-      ],
-      "closer": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
-      "configuration_predicates": [],
-      "creator": [
-        "_verified_inputs",
-        "build_target_candidates",
-        "freeze_target_inputs"
-      ],
-      "identity": "iuphar.bioetl.infrastructure.storage.target_candidates.file",
-      "lifetime": "owner/operation",
-      "owner": "bioetl.infrastructure.storage.target_candidates owns these file acquisitions for opt-in IUPHAR target classification",
-      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
-      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
-      "scenarios": {
-        "cancellation": {
-          "applicability": "owning async boundary; these primitives are synchronous",
-          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
-          "observation": "Cancel the owner around the call and observe remaining handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "error": {
-          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
-          "expected": "Preserve the original failure and release any handle this function already acquired.",
-          "observation": "Inject after allocation and during close; inspect retained handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "normal": {
-          "applicability": "applicable",
-          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
-          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "retry": {
-          "applicability": "outer caller attempt; the primitive has no internal retry",
-          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
-          "observation": "Compare opened and closed identities per attempt.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "timeout": {
-          "applicability": "no intrinsic timeout on the synchronous primitive",
-          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
-          "observation": "Observe the outer deadline and whether the call returned.",
-          "runtime_result": "NOT_RUN_12553"
-        }
-      },
-      "shutdown_by_site": {},
-      "shutdown_contract": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
-      "type": "file",
-      "creation_sites": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "de1fe896616d1934ce6729cabf25b5da2813ee40",
-          "content_sha256": "402b28ddf900229fa7b86fc5aecd1e076d42891fe4e664d1465bddd31471f4f7",
-          "file": "src/bioetl/infrastructure/storage/target_candidates.py",
-          "line": 94,
-          "expression": "safe_output.open('xb')",
-          "call": "safe_output.open",
-          "creator": "freeze_target_inputs",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "de1fe896616d1934ce6729cabf25b5da2813ee40",
-          "content_sha256": "402b28ddf900229fa7b86fc5aecd1e076d42891fe4e664d1465bddd31471f4f7",
-          "file": "src/bioetl/infrastructure/storage/target_candidates.py",
-          "line": 192,
-          "expression": "request.input_manifest.read_bytes()",
-          "call": "request.input_manifest.read_bytes",
-          "creator": "_verified_inputs",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "de1fe896616d1934ce6729cabf25b5da2813ee40",
-          "content_sha256": "402b28ddf900229fa7b86fc5aecd1e076d42891fe4e664d1465bddd31471f4f7",
-          "file": "src/bioetl/infrastructure/storage/target_candidates.py",
-          "line": 302,
-          "expression": "(request.output_dir / 'build-manifest.json').open('xb')",
-          "call": "(request.output_dir / 'build-manifest.json').open",
-          "creator": "build_target_candidates",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "production_binding": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "de1fe896616d1934ce6729cabf25b5da2813ee40",
-          "content_sha256": "402b28ddf900229fa7b86fc5aecd1e076d42891fe4e664d1465bddd31471f4f7",
-          "file": "src/bioetl/infrastructure/storage/target_candidates.py",
-          "line": 94,
-          "expression": "safe_output.open('xb')",
-          "call": "safe_output.open",
-          "creator": "freeze_target_inputs",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "de1fe896616d1934ce6729cabf25b5da2813ee40",
-          "content_sha256": "402b28ddf900229fa7b86fc5aecd1e076d42891fe4e664d1465bddd31471f4f7",
-          "file": "src/bioetl/infrastructure/storage/target_candidates.py",
-          "line": 192,
-          "expression": "request.input_manifest.read_bytes()",
-          "call": "request.input_manifest.read_bytes",
-          "creator": "_verified_inputs",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "de1fe896616d1934ce6729cabf25b5da2813ee40",
-          "content_sha256": "402b28ddf900229fa7b86fc5aecd1e076d42891fe4e664d1465bddd31471f4f7",
-          "file": "src/bioetl/infrastructure/storage/target_candidates.py",
-          "line": 302,
-          "expression": "(request.output_dir / 'build-manifest.json').open('xb')",
-          "call": "(request.output_dir / 'build-manifest.json').open",
-          "creator": "build_target_candidates",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "cleanup_sources": []
-    },
-    {
-      "call_path": [
-        "bioetl.infrastructure.storage.target_classification_guard -> _target_table_fields -> DeltaTable"
-      ],
-      "closer": "DeltaTable and write_deltalake finish the native table operation before return; no table handle is stored on a process-global owner.",
-      "configuration_predicates": [],
-      "creator": [
-        "_target_table_fields"
-      ],
-      "identity": "iuphar.bioetl.infrastructure.storage.target_classification_guard.delta",
-      "lifetime": "owner/operation",
-      "owner": "bioetl.infrastructure.storage.target_classification_guard owns these delta acquisitions for opt-in IUPHAR target classification",
-      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
-      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
-      "scenarios": {
-        "cancellation": {
-          "applicability": "owning async boundary; these primitives are synchronous",
-          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
-          "observation": "Cancel the owner around the call and observe remaining handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "error": {
-          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
-          "expected": "Preserve the original failure and release any handle this function already acquired.",
-          "observation": "Inject after allocation and during close; inspect retained handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "normal": {
-          "applicability": "applicable",
-          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
-          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "retry": {
-          "applicability": "outer caller attempt; the primitive has no internal retry",
-          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
-          "observation": "Compare opened and closed identities per attempt.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "timeout": {
-          "applicability": "no intrinsic timeout on the synchronous primitive",
-          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
-          "observation": "Observe the outer deadline and whether the call returned.",
-          "runtime_result": "NOT_RUN_12553"
-        }
-      },
-      "shutdown_by_site": {},
-      "shutdown_contract": "DeltaTable and write_deltalake finish the native table operation before return; no table handle is stored on a process-global owner.",
-      "type": "delta",
-      "creation_sites": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "c9857c5d5e13a944627ea59e785d9be2d48735ec",
-          "content_sha256": "228985b115cb6e8b0f70edf4926d51dfa8060b21311460791e4b05c6018df53e",
-          "file": "src/bioetl/infrastructure/storage/target_classification_guard.py",
-          "line": 62,
-          "expression": "DeltaTable(str(path))",
-          "call": "DeltaTable",
-          "creator": "_target_table_fields",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "production_binding": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "c9857c5d5e13a944627ea59e785d9be2d48735ec",
-          "content_sha256": "228985b115cb6e8b0f70edf4926d51dfa8060b21311460791e4b05c6018df53e",
-          "file": "src/bioetl/infrastructure/storage/target_classification_guard.py",
-          "line": 62,
-          "expression": "DeltaTable(str(path))",
-          "call": "DeltaTable",
-          "creator": "_target_table_fields",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "cleanup_sources": []
-    },
-    {
-      "call_path": [
-        "bioetl.infrastructure.storage.target_classification_guard -> _target_table_fields -> path.iterdir"
-      ],
-      "closer": "iterdir, glob, and rglob iterators are exhausted inside the owning function and are not retained.",
-      "configuration_predicates": [],
-      "creator": [
-        "_target_table_fields"
-      ],
-      "identity": "iuphar.bioetl.infrastructure.storage.target_classification_guard.directory-enumeration",
-      "lifetime": "owner/operation",
-      "owner": "bioetl.infrastructure.storage.target_classification_guard owns these directory-enumeration acquisitions for opt-in IUPHAR target classification",
-      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
-      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
-      "scenarios": {
-        "cancellation": {
-          "applicability": "owning async boundary; these primitives are synchronous",
-          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
-          "observation": "Cancel the owner around the call and observe remaining handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "error": {
-          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
-          "expected": "Preserve the original failure and release any handle this function already acquired.",
-          "observation": "Inject after allocation and during close; inspect retained handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "normal": {
-          "applicability": "applicable",
-          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
-          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "retry": {
-          "applicability": "outer caller attempt; the primitive has no internal retry",
-          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
-          "observation": "Compare opened and closed identities per attempt.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "timeout": {
-          "applicability": "no intrinsic timeout on the synchronous primitive",
-          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
-          "observation": "Observe the outer deadline and whether the call returned.",
-          "runtime_result": "NOT_RUN_12553"
-        }
-      },
-      "shutdown_by_site": {},
-      "shutdown_contract": "iterdir, glob, and rglob iterators are exhausted inside the owning function and are not retained.",
-      "type": "directory-enumeration",
-      "creation_sites": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "c9857c5d5e13a944627ea59e785d9be2d48735ec",
-          "content_sha256": "228985b115cb6e8b0f70edf4926d51dfa8060b21311460791e4b05c6018df53e",
-          "file": "src/bioetl/infrastructure/storage/target_classification_guard.py",
-          "line": 58,
-          "expression": "path.iterdir()",
-          "call": "path.iterdir",
-          "creator": "_target_table_fields",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "production_binding": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "c9857c5d5e13a944627ea59e785d9be2d48735ec",
-          "content_sha256": "228985b115cb6e8b0f70edf4926d51dfa8060b21311460791e4b05c6018df53e",
-          "file": "src/bioetl/infrastructure/storage/target_classification_guard.py",
-          "line": 58,
-          "expression": "path.iterdir()",
-          "call": "path.iterdir",
-          "creator": "_target_table_fields",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "cleanup_sources": []
-    },
-    {
-      "call_path": [
-        "bioetl.infrastructure.storage.target_classification_migration -> _tree_hashes -> path.rglob"
-      ],
-      "closer": "iterdir, glob, and rglob iterators are exhausted inside the owning function and are not retained.",
-      "configuration_predicates": [],
-      "creator": [
-        "_tree_hashes"
-      ],
-      "identity": "iuphar.bioetl.infrastructure.storage.target_classification_migration.directory-enumeration",
-      "lifetime": "owner/operation",
-      "owner": "bioetl.infrastructure.storage.target_classification_migration owns these directory-enumeration acquisitions for opt-in IUPHAR target classification",
-      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
-      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
-      "scenarios": {
-        "cancellation": {
-          "applicability": "owning async boundary; these primitives are synchronous",
-          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
-          "observation": "Cancel the owner around the call and observe remaining handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "error": {
-          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
-          "expected": "Preserve the original failure and release any handle this function already acquired.",
-          "observation": "Inject after allocation and during close; inspect retained handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "normal": {
-          "applicability": "applicable",
-          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
-          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "retry": {
-          "applicability": "outer caller attempt; the primitive has no internal retry",
-          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
-          "observation": "Compare opened and closed identities per attempt.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "timeout": {
-          "applicability": "no intrinsic timeout on the synchronous primitive",
-          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
-          "observation": "Observe the outer deadline and whether the call returned.",
-          "runtime_result": "NOT_RUN_12553"
-        }
-      },
-      "shutdown_by_site": {},
-      "shutdown_contract": "iterdir, glob, and rglob iterators are exhausted inside the owning function and are not retained.",
-      "type": "directory-enumeration",
-      "creation_sites": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "025985982a6a01047e3c8836580931af9354e71f",
-          "content_sha256": "51746cac1799475c14baf07ee51374b2a58ccedbff188323911a791b5b24ea0e",
-          "file": "src/bioetl/infrastructure/storage/target_classification_migration.py",
-          "line": 131,
-          "expression": "path.rglob('*')",
-          "call": "path.rglob",
-          "creator": "_tree_hashes",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "production_binding": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "025985982a6a01047e3c8836580931af9354e71f",
-          "content_sha256": "51746cac1799475c14baf07ee51374b2a58ccedbff188323911a791b5b24ea0e",
-          "file": "src/bioetl/infrastructure/storage/target_classification_migration.py",
-          "line": 131,
-          "expression": "path.rglob('*')",
-          "call": "path.rglob",
-          "creator": "_tree_hashes",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "cleanup_sources": []
-    },
-    {
-      "call_path": [
-        "bioetl.infrastructure.storage.target_classification_migration -> _save -> temporary.write_bytes",
-        "bioetl.infrastructure.storage.target_classification_migration -> _lock -> path.open",
-        "bioetl.infrastructure.storage.target_classification_migration -> promote_target_migration -> (checked['backup'] / _JOURNAL_JSON).read_bytes",
-        "bioetl.infrastructure.storage.target_classification_migration -> rollback_target_migration -> (checked['backup'] / _JOURNAL_JSON).read_bytes",
-        "bioetl.infrastructure.storage.target_classification_migration -> _restore_dependencies -> source.read_bytes"
-      ],
-      "closer": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
-      "configuration_predicates": [],
-      "creator": [
-        "_lock",
-        "_restore_dependencies",
-        "_save",
-        "promote_target_migration",
-        "rollback_target_migration"
-      ],
-      "identity": "iuphar.bioetl.infrastructure.storage.target_classification_migration.file",
-      "lifetime": "owner/operation",
-      "owner": "bioetl.infrastructure.storage.target_classification_migration owns these file acquisitions for opt-in IUPHAR target classification",
-      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
-      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
-      "scenarios": {
-        "cancellation": {
-          "applicability": "owning async boundary; these primitives are synchronous",
-          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
-          "observation": "Cancel the owner around the call and observe remaining handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "error": {
-          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
-          "expected": "Preserve the original failure and release any handle this function already acquired.",
-          "observation": "Inject after allocation and during close; inspect retained handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "normal": {
-          "applicability": "applicable",
-          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
-          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "retry": {
-          "applicability": "outer caller attempt; the primitive has no internal retry",
-          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
-          "observation": "Compare opened and closed identities per attempt.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "timeout": {
-          "applicability": "no intrinsic timeout on the synchronous primitive",
-          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
-          "observation": "Observe the outer deadline and whether the call returned.",
-          "runtime_result": "NOT_RUN_12553"
-        }
-      },
-      "shutdown_by_site": {},
-      "shutdown_contract": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
-      "type": "file",
-      "creation_sites": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "025985982a6a01047e3c8836580931af9354e71f",
-          "content_sha256": "51746cac1799475c14baf07ee51374b2a58ccedbff188323911a791b5b24ea0e",
-          "file": "src/bioetl/infrastructure/storage/target_classification_migration.py",
-          "line": 158,
-          "expression": "temporary.write_bytes(canonical_json_bytes(state))",
-          "call": "temporary.write_bytes",
-          "creator": "_save",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "025985982a6a01047e3c8836580931af9354e71f",
-          "content_sha256": "51746cac1799475c14baf07ee51374b2a58ccedbff188323911a791b5b24ea0e",
-          "file": "src/bioetl/infrastructure/storage/target_classification_migration.py",
-          "line": 144,
-          "expression": "path.open('a+b')",
-          "call": "path.open",
-          "creator": "_lock",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "025985982a6a01047e3c8836580931af9354e71f",
-          "content_sha256": "51746cac1799475c14baf07ee51374b2a58ccedbff188323911a791b5b24ea0e",
-          "file": "src/bioetl/infrastructure/storage/target_classification_migration.py",
-          "line": 258,
-          "expression": "(checked['backup'] / _JOURNAL_JSON).read_bytes()",
-          "call": "(checked['backup'] / _JOURNAL_JSON).read_bytes",
-          "creator": "promote_target_migration",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "025985982a6a01047e3c8836580931af9354e71f",
-          "content_sha256": "51746cac1799475c14baf07ee51374b2a58ccedbff188323911a791b5b24ea0e",
-          "file": "src/bioetl/infrastructure/storage/target_classification_migration.py",
-          "line": 326,
-          "expression": "(checked['backup'] / _JOURNAL_JSON).read_bytes()",
-          "call": "(checked['backup'] / _JOURNAL_JSON).read_bytes",
-          "creator": "rollback_target_migration",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "025985982a6a01047e3c8836580931af9354e71f",
-          "content_sha256": "51746cac1799475c14baf07ee51374b2a58ccedbff188323911a791b5b24ea0e",
-          "file": "src/bioetl/infrastructure/storage/target_classification_migration.py",
-          "line": 376,
-          "expression": "source.read_bytes()",
-          "call": "source.read_bytes",
-          "creator": "_restore_dependencies",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "production_binding": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "025985982a6a01047e3c8836580931af9354e71f",
-          "content_sha256": "51746cac1799475c14baf07ee51374b2a58ccedbff188323911a791b5b24ea0e",
-          "file": "src/bioetl/infrastructure/storage/target_classification_migration.py",
-          "line": 158,
-          "expression": "temporary.write_bytes(canonical_json_bytes(state))",
-          "call": "temporary.write_bytes",
-          "creator": "_save",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "025985982a6a01047e3c8836580931af9354e71f",
-          "content_sha256": "51746cac1799475c14baf07ee51374b2a58ccedbff188323911a791b5b24ea0e",
-          "file": "src/bioetl/infrastructure/storage/target_classification_migration.py",
-          "line": 144,
-          "expression": "path.open('a+b')",
-          "call": "path.open",
-          "creator": "_lock",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "025985982a6a01047e3c8836580931af9354e71f",
-          "content_sha256": "51746cac1799475c14baf07ee51374b2a58ccedbff188323911a791b5b24ea0e",
-          "file": "src/bioetl/infrastructure/storage/target_classification_migration.py",
-          "line": 258,
-          "expression": "(checked['backup'] / _JOURNAL_JSON).read_bytes()",
-          "call": "(checked['backup'] / _JOURNAL_JSON).read_bytes",
-          "creator": "promote_target_migration",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "025985982a6a01047e3c8836580931af9354e71f",
-          "content_sha256": "51746cac1799475c14baf07ee51374b2a58ccedbff188323911a791b5b24ea0e",
-          "file": "src/bioetl/infrastructure/storage/target_classification_migration.py",
-          "line": 326,
-          "expression": "(checked['backup'] / _JOURNAL_JSON).read_bytes()",
-          "call": "(checked['backup'] / _JOURNAL_JSON).read_bytes",
-          "creator": "rollback_target_migration",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "025985982a6a01047e3c8836580931af9354e71f",
-          "content_sha256": "51746cac1799475c14baf07ee51374b2a58ccedbff188323911a791b5b24ea0e",
-          "file": "src/bioetl/infrastructure/storage/target_classification_migration.py",
-          "line": 376,
-          "expression": "source.read_bytes()",
-          "call": "source.read_bytes",
-          "creator": "_restore_dependencies",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "cleanup_sources": []
-    },
-    {
-      "call_path": [
-        "bioetl.infrastructure.storage.target_classification_migration -> prepare_target_migration -> shutil.copytree",
-        "bioetl.infrastructure.storage.target_classification_migration -> prepare_target_migration -> shutil.copyfile"
-      ],
-      "closer": "shutil.copyfile and shutil.copytree complete before return and do not retain source or destination streams.",
-      "configuration_predicates": [],
-      "creator": [
-        "prepare_target_migration"
-      ],
-      "identity": "iuphar.bioetl.infrastructure.storage.target_classification_migration.file-copy",
-      "lifetime": "owner/operation",
-      "owner": "bioetl.infrastructure.storage.target_classification_migration owns these file-copy acquisitions for opt-in IUPHAR target classification",
-      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
-      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
-      "scenarios": {
-        "cancellation": {
-          "applicability": "owning async boundary; these primitives are synchronous",
-          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
-          "observation": "Cancel the owner around the call and observe remaining handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "error": {
-          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
-          "expected": "Preserve the original failure and release any handle this function already acquired.",
-          "observation": "Inject after allocation and during close; inspect retained handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "normal": {
-          "applicability": "applicable",
-          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
-          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "retry": {
-          "applicability": "outer caller attempt; the primitive has no internal retry",
-          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
-          "observation": "Compare opened and closed identities per attempt.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "timeout": {
-          "applicability": "no intrinsic timeout on the synchronous primitive",
-          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
-          "observation": "Observe the outer deadline and whether the call returned.",
-          "runtime_result": "NOT_RUN_12553"
-        }
-      },
-      "shutdown_by_site": {},
-      "shutdown_contract": "shutil.copyfile and shutil.copytree complete before return and do not retain source or destination streams.",
-      "type": "file-copy",
-      "creation_sites": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "025985982a6a01047e3c8836580931af9354e71f",
-          "content_sha256": "51746cac1799475c14baf07ee51374b2a58ccedbff188323911a791b5b24ea0e",
-          "file": "src/bioetl/infrastructure/storage/target_classification_migration.py",
-          "line": 217,
-          "expression": "shutil.copytree(source, target)",
-          "call": "shutil.copytree",
-          "creator": "prepare_target_migration",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "025985982a6a01047e3c8836580931af9354e71f",
-          "content_sha256": "51746cac1799475c14baf07ee51374b2a58ccedbff188323911a791b5b24ea0e",
-          "file": "src/bioetl/infrastructure/storage/target_classification_migration.py",
-          "line": 219,
-          "expression": "shutil.copyfile(source, target)",
-          "call": "shutil.copyfile",
-          "creator": "prepare_target_migration",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "production_binding": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "025985982a6a01047e3c8836580931af9354e71f",
-          "content_sha256": "51746cac1799475c14baf07ee51374b2a58ccedbff188323911a791b5b24ea0e",
-          "file": "src/bioetl/infrastructure/storage/target_classification_migration.py",
-          "line": 217,
-          "expression": "shutil.copytree(source, target)",
-          "call": "shutil.copytree",
-          "creator": "prepare_target_migration",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "025985982a6a01047e3c8836580931af9354e71f",
-          "content_sha256": "51746cac1799475c14baf07ee51374b2a58ccedbff188323911a791b5b24ea0e",
-          "file": "src/bioetl/infrastructure/storage/target_classification_migration.py",
-          "line": 219,
-          "expression": "shutil.copyfile(source, target)",
-          "call": "shutil.copyfile",
-          "creator": "prepare_target_migration",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "cleanup_sources": []
-    },
-    {
-      "call_path": [
-        "bioetl.infrastructure.storage.target_classification_migration -> _lock -> msvcrt.locking",
-        "bioetl.infrastructure.storage.target_classification_migration -> _lock -> fcntl.flock"
-      ],
-      "closer": "msvcrt.locking and fcntl.flock are paired with unlock on the same open file before the migration function returns.",
-      "configuration_predicates": [],
-      "creator": [
-        "_lock"
-      ],
-      "identity": "iuphar.bioetl.infrastructure.storage.target_classification_migration.file-lock",
-      "lifetime": "owner/operation",
-      "owner": "bioetl.infrastructure.storage.target_classification_migration owns these file-lock acquisitions for opt-in IUPHAR target classification",
-      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
-      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
-      "scenarios": {
-        "cancellation": {
-          "applicability": "owning async boundary; these primitives are synchronous",
-          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
-          "observation": "Cancel the owner around the call and observe remaining handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "error": {
-          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
-          "expected": "Preserve the original failure and release any handle this function already acquired.",
-          "observation": "Inject after allocation and during close; inspect retained handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "normal": {
-          "applicability": "applicable",
-          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
-          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "retry": {
-          "applicability": "outer caller attempt; the primitive has no internal retry",
-          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
-          "observation": "Compare opened and closed identities per attempt.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "timeout": {
-          "applicability": "no intrinsic timeout on the synchronous primitive",
-          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
-          "observation": "Observe the outer deadline and whether the call returned.",
-          "runtime_result": "NOT_RUN_12553"
-        }
-      },
-      "shutdown_by_site": {},
-      "shutdown_contract": "msvcrt.locking and fcntl.flock are paired with unlock on the same open file before the migration function returns.",
-      "type": "file-lock",
-      "creation_sites": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "025985982a6a01047e3c8836580931af9354e71f",
-          "content_sha256": "51746cac1799475c14baf07ee51374b2a58ccedbff188323911a791b5b24ea0e",
-          "file": "src/bioetl/infrastructure/storage/target_classification_migration.py",
-          "line": 150,
-          "expression": "msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)",
-          "call": "msvcrt.locking",
-          "creator": "_lock",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "025985982a6a01047e3c8836580931af9354e71f",
-          "content_sha256": "51746cac1799475c14baf07ee51374b2a58ccedbff188323911a791b5b24ea0e",
-          "file": "src/bioetl/infrastructure/storage/target_classification_migration.py",
-          "line": 152,
-          "expression": "fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)",
-          "call": "fcntl.flock",
-          "creator": "_lock",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "production_binding": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "025985982a6a01047e3c8836580931af9354e71f",
-          "content_sha256": "51746cac1799475c14baf07ee51374b2a58ccedbff188323911a791b5b24ea0e",
-          "file": "src/bioetl/infrastructure/storage/target_classification_migration.py",
-          "line": 150,
-          "expression": "msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)",
-          "call": "msvcrt.locking",
-          "creator": "_lock",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "025985982a6a01047e3c8836580931af9354e71f",
-          "content_sha256": "51746cac1799475c14baf07ee51374b2a58ccedbff188323911a791b5b24ea0e",
-          "file": "src/bioetl/infrastructure/storage/target_classification_migration.py",
-          "line": 152,
-          "expression": "fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)",
-          "call": "fcntl.flock",
-          "creator": "_lock",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "cleanup_sources": []
-    },
-    {
-      "call_path": [
-        "bioetl.infrastructure.storage.target_fk_repair -> freeze_delta -> DeltaTable",
-        "bioetl.infrastructure.storage.target_fk_repair -> _write_candidates -> write_deltalake",
-        "bioetl.infrastructure.storage.target_fk_repair -> FrozenDelta.verify_unchanged -> DeltaTable"
-      ],
-      "closer": "DeltaTable and write_deltalake finish the native table operation before return; no table handle is stored on a process-global owner.",
-      "configuration_predicates": [],
-      "creator": [
-        "FrozenDelta.verify_unchanged",
-        "_write_candidates",
-        "freeze_delta"
-      ],
-      "identity": "iuphar.bioetl.infrastructure.storage.target_fk_repair.delta",
-      "lifetime": "owner/operation",
-      "owner": "bioetl.infrastructure.storage.target_fk_repair owns these delta acquisitions for opt-in IUPHAR target classification",
-      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
-      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
-      "scenarios": {
-        "cancellation": {
-          "applicability": "owning async boundary; these primitives are synchronous",
-          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
-          "observation": "Cancel the owner around the call and observe remaining handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "error": {
-          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
-          "expected": "Preserve the original failure and release any handle this function already acquired.",
-          "observation": "Inject after allocation and during close; inspect retained handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "normal": {
-          "applicability": "applicable",
-          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
-          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "retry": {
-          "applicability": "outer caller attempt; the primitive has no internal retry",
-          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
-          "observation": "Compare opened and closed identities per attempt.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "timeout": {
-          "applicability": "no intrinsic timeout on the synchronous primitive",
-          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
-          "observation": "Observe the outer deadline and whether the call returned.",
-          "runtime_result": "NOT_RUN_12553"
-        }
-      },
-      "shutdown_by_site": {},
-      "shutdown_contract": "DeltaTable and write_deltalake finish the native table operation before return; no table handle is stored on a process-global owner.",
-      "type": "delta",
-      "creation_sites": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "4a9b59437f98f5ef399a7f98f260319453259b3d",
-          "content_sha256": "903e9f0ed7308673abb0d99e93c81f7f2fc1c24dd50813e707b6d8c8e922accb",
-          "file": "src/bioetl/infrastructure/storage/target_fk_repair.py",
-          "line": 94,
-          "expression": "DeltaTable(root)",
-          "call": "DeltaTable",
-          "creator": "freeze_delta",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "4a9b59437f98f5ef399a7f98f260319453259b3d",
-          "content_sha256": "903e9f0ed7308673abb0d99e93c81f7f2fc1c24dd50813e707b6d8c8e922accb",
-          "file": "src/bioetl/infrastructure/storage/target_fk_repair.py",
-          "line": 286,
-          "expression": "write_deltalake(path, table, partition_by=list(previous.partition_columns))",
-          "call": "write_deltalake",
-          "creator": "_write_candidates",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "4a9b59437f98f5ef399a7f98f260319453259b3d",
-          "content_sha256": "903e9f0ed7308673abb0d99e93c81f7f2fc1c24dd50813e707b6d8c8e922accb",
-          "file": "src/bioetl/infrastructure/storage/target_fk_repair.py",
-          "line": 71,
-          "expression": "DeltaTable(self.path)",
-          "call": "DeltaTable",
-          "creator": "FrozenDelta.verify_unchanged",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "production_binding": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "4a9b59437f98f5ef399a7f98f260319453259b3d",
-          "content_sha256": "903e9f0ed7308673abb0d99e93c81f7f2fc1c24dd50813e707b6d8c8e922accb",
-          "file": "src/bioetl/infrastructure/storage/target_fk_repair.py",
-          "line": 94,
-          "expression": "DeltaTable(root)",
-          "call": "DeltaTable",
-          "creator": "freeze_delta",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "4a9b59437f98f5ef399a7f98f260319453259b3d",
-          "content_sha256": "903e9f0ed7308673abb0d99e93c81f7f2fc1c24dd50813e707b6d8c8e922accb",
-          "file": "src/bioetl/infrastructure/storage/target_fk_repair.py",
-          "line": 286,
-          "expression": "write_deltalake(path, table, partition_by=list(previous.partition_columns))",
-          "call": "write_deltalake",
-          "creator": "_write_candidates",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "4a9b59437f98f5ef399a7f98f260319453259b3d",
-          "content_sha256": "903e9f0ed7308673abb0d99e93c81f7f2fc1c24dd50813e707b6d8c8e922accb",
-          "file": "src/bioetl/infrastructure/storage/target_fk_repair.py",
-          "line": 71,
-          "expression": "DeltaTable(self.path)",
-          "call": "DeltaTable",
-          "creator": "FrozenDelta.verify_unchanged",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "cleanup_sources": []
-    },
-    {
-      "call_path": [
-        "bioetl.infrastructure.storage.target_fk_repair -> _file_inventory -> root.rglob"
-      ],
-      "closer": "iterdir, glob, and rglob iterators are exhausted inside the owning function and are not retained.",
-      "configuration_predicates": [],
-      "creator": [
-        "_file_inventory"
-      ],
-      "identity": "iuphar.bioetl.infrastructure.storage.target_fk_repair.directory-enumeration",
-      "lifetime": "owner/operation",
-      "owner": "bioetl.infrastructure.storage.target_fk_repair owns these directory-enumeration acquisitions for opt-in IUPHAR target classification",
-      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
-      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
-      "scenarios": {
-        "cancellation": {
-          "applicability": "owning async boundary; these primitives are synchronous",
-          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
-          "observation": "Cancel the owner around the call and observe remaining handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "error": {
-          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
-          "expected": "Preserve the original failure and release any handle this function already acquired.",
-          "observation": "Inject after allocation and during close; inspect retained handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "normal": {
-          "applicability": "applicable",
-          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
-          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "retry": {
-          "applicability": "outer caller attempt; the primitive has no internal retry",
-          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
-          "observation": "Compare opened and closed identities per attempt.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "timeout": {
-          "applicability": "no intrinsic timeout on the synchronous primitive",
-          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
-          "observation": "Observe the outer deadline and whether the call returned.",
-          "runtime_result": "NOT_RUN_12553"
-        }
-      },
-      "shutdown_by_site": {},
-      "shutdown_contract": "iterdir, glob, and rglob iterators are exhausted inside the owning function and are not retained.",
-      "type": "directory-enumeration",
-      "creation_sites": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "4a9b59437f98f5ef399a7f98f260319453259b3d",
-          "content_sha256": "903e9f0ed7308673abb0d99e93c81f7f2fc1c24dd50813e707b6d8c8e922accb",
-          "file": "src/bioetl/infrastructure/storage/target_fk_repair.py",
-          "line": 54,
-          "expression": "root.rglob('*')",
-          "call": "root.rglob",
-          "creator": "_file_inventory",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "production_binding": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "4a9b59437f98f5ef399a7f98f260319453259b3d",
-          "content_sha256": "903e9f0ed7308673abb0d99e93c81f7f2fc1c24dd50813e707b6d8c8e922accb",
-          "file": "src/bioetl/infrastructure/storage/target_fk_repair.py",
-          "line": 54,
-          "expression": "root.rglob('*')",
-          "call": "root.rglob",
-          "creator": "_file_inventory",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "cleanup_sources": []
-    },
-    {
-      "call_path": [
-        "bioetl.infrastructure.storage.target_fk_repair -> publish_repair_candidate -> manifest.write_bytes",
-        "bioetl.infrastructure.storage.target_fk_repair -> _object -> path.read_bytes",
-        "bioetl.infrastructure.storage.target_fk_repair -> _read_acquisition -> (root / _ACQUISITION_JSON).read_bytes",
-        "bioetl.infrastructure.storage.target_fk_repair -> _sha256 -> path.read_bytes"
-      ],
-      "closer": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
-      "configuration_predicates": [],
-      "creator": [
-        "_object",
-        "_read_acquisition",
-        "_sha256",
-        "publish_repair_candidate"
-      ],
-      "identity": "iuphar.bioetl.infrastructure.storage.target_fk_repair.file",
-      "lifetime": "owner/operation",
-      "owner": "bioetl.infrastructure.storage.target_fk_repair owns these file acquisitions for opt-in IUPHAR target classification",
-      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
-      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
-      "scenarios": {
-        "cancellation": {
-          "applicability": "owning async boundary; these primitives are synchronous",
-          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
-          "observation": "Cancel the owner around the call and observe remaining handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "error": {
-          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
-          "expected": "Preserve the original failure and release any handle this function already acquired.",
-          "observation": "Inject after allocation and during close; inspect retained handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "normal": {
-          "applicability": "applicable",
-          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
-          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "retry": {
-          "applicability": "outer caller attempt; the primitive has no internal retry",
-          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
-          "observation": "Compare opened and closed identities per attempt.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "timeout": {
-          "applicability": "no intrinsic timeout on the synchronous primitive",
-          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
-          "observation": "Observe the outer deadline and whether the call returned.",
-          "runtime_result": "NOT_RUN_12553"
-        }
-      },
-      "shutdown_by_site": {},
-      "shutdown_contract": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
-      "type": "file",
-      "creation_sites": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "4a9b59437f98f5ef399a7f98f260319453259b3d",
-          "content_sha256": "903e9f0ed7308673abb0d99e93c81f7f2fc1c24dd50813e707b6d8c8e922accb",
-          "file": "src/bioetl/infrastructure/storage/target_fk_repair.py",
-          "line": 379,
-          "expression": "manifest.write_bytes(_json_bytes(document) + b'\\n')",
-          "call": "manifest.write_bytes",
-          "creator": "publish_repair_candidate",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "4a9b59437f98f5ef399a7f98f260319453259b3d",
-          "content_sha256": "903e9f0ed7308673abb0d99e93c81f7f2fc1c24dd50813e707b6d8c8e922accb",
-          "file": "src/bioetl/infrastructure/storage/target_fk_repair.py",
-          "line": 36,
-          "expression": "path.read_bytes()",
-          "call": "path.read_bytes",
-          "creator": "_object",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "4a9b59437f98f5ef399a7f98f260319453259b3d",
-          "content_sha256": "903e9f0ed7308673abb0d99e93c81f7f2fc1c24dd50813e707b6d8c8e922accb",
-          "file": "src/bioetl/infrastructure/storage/target_fk_repair.py",
-          "line": 164,
-          "expression": "(root / _ACQUISITION_JSON).read_bytes()",
-          "call": "(root / _ACQUISITION_JSON).read_bytes",
-          "creator": "_read_acquisition",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "4a9b59437f98f5ef399a7f98f260319453259b3d",
-          "content_sha256": "903e9f0ed7308673abb0d99e93c81f7f2fc1c24dd50813e707b6d8c8e922accb",
-          "file": "src/bioetl/infrastructure/storage/target_fk_repair.py",
-          "line": 28,
-          "expression": "path.read_bytes()",
-          "call": "path.read_bytes",
-          "creator": "_sha256",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "production_binding": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "4a9b59437f98f5ef399a7f98f260319453259b3d",
-          "content_sha256": "903e9f0ed7308673abb0d99e93c81f7f2fc1c24dd50813e707b6d8c8e922accb",
-          "file": "src/bioetl/infrastructure/storage/target_fk_repair.py",
-          "line": 379,
-          "expression": "manifest.write_bytes(_json_bytes(document) + b'\\n')",
-          "call": "manifest.write_bytes",
-          "creator": "publish_repair_candidate",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "4a9b59437f98f5ef399a7f98f260319453259b3d",
-          "content_sha256": "903e9f0ed7308673abb0d99e93c81f7f2fc1c24dd50813e707b6d8c8e922accb",
-          "file": "src/bioetl/infrastructure/storage/target_fk_repair.py",
-          "line": 36,
-          "expression": "path.read_bytes()",
-          "call": "path.read_bytes",
-          "creator": "_object",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "4a9b59437f98f5ef399a7f98f260319453259b3d",
-          "content_sha256": "903e9f0ed7308673abb0d99e93c81f7f2fc1c24dd50813e707b6d8c8e922accb",
-          "file": "src/bioetl/infrastructure/storage/target_fk_repair.py",
-          "line": 164,
-          "expression": "(root / _ACQUISITION_JSON).read_bytes()",
-          "call": "(root / _ACQUISITION_JSON).read_bytes",
-          "creator": "_read_acquisition",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "4a9b59437f98f5ef399a7f98f260319453259b3d",
-          "content_sha256": "903e9f0ed7308673abb0d99e93c81f7f2fc1c24dd50813e707b6d8c8e922accb",
-          "file": "src/bioetl/infrastructure/storage/target_fk_repair.py",
-          "line": 28,
-          "expression": "path.read_bytes()",
-          "call": "path.read_bytes",
-          "creator": "_sha256",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "cleanup_sources": []
-    },
-    {
-      "call_path": [
-        "bioetl.infrastructure.storage.target_fk_repair -> _freeze_input_copies -> shutil.copyfile",
-        "bioetl.infrastructure.storage.target_fk_repair -> _freeze_input_copies -> shutil.copyfile"
-      ],
-      "closer": "shutil.copyfile and shutil.copytree complete before return and do not retain source or destination streams.",
-      "configuration_predicates": [],
-      "creator": [
-        "_freeze_input_copies"
-      ],
-      "identity": "iuphar.bioetl.infrastructure.storage.target_fk_repair.file-copy",
-      "lifetime": "owner/operation",
-      "owner": "bioetl.infrastructure.storage.target_fk_repair owns these file-copy acquisitions for opt-in IUPHAR target classification",
-      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
-      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
-      "scenarios": {
-        "cancellation": {
-          "applicability": "owning async boundary; these primitives are synchronous",
-          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
-          "observation": "Cancel the owner around the call and observe remaining handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "error": {
-          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
-          "expected": "Preserve the original failure and release any handle this function already acquired.",
-          "observation": "Inject after allocation and during close; inspect retained handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "normal": {
-          "applicability": "applicable",
-          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
-          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "retry": {
-          "applicability": "outer caller attempt; the primitive has no internal retry",
-          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
-          "observation": "Compare opened and closed identities per attempt.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "timeout": {
-          "applicability": "no intrinsic timeout on the synchronous primitive",
-          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
-          "observation": "Observe the outer deadline and whether the call returned.",
-          "runtime_result": "NOT_RUN_12553"
-        }
-      },
-      "shutdown_by_site": {},
-      "shutdown_contract": "shutil.copyfile and shutil.copytree complete before return and do not retain source or destination streams.",
-      "type": "file-copy",
-      "creation_sites": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "4a9b59437f98f5ef399a7f98f260319453259b3d",
-          "content_sha256": "903e9f0ed7308673abb0d99e93c81f7f2fc1c24dd50813e707b6d8c8e922accb",
-          "file": "src/bioetl/infrastructure/storage/target_fk_repair.py",
-          "line": 314,
-          "expression": "shutil.copyfile(source.directory / name, copy_root / name)",
-          "call": "shutil.copyfile",
-          "creator": "_freeze_input_copies",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "4a9b59437f98f5ef399a7f98f260319453259b3d",
-          "content_sha256": "903e9f0ed7308673abb0d99e93c81f7f2fc1c24dd50813e707b6d8c8e922accb",
-          "file": "src/bioetl/infrastructure/storage/target_fk_repair.py",
-          "line": 306,
-          "expression": "shutil.copyfile(original.path / relative, target)",
-          "call": "shutil.copyfile",
-          "creator": "_freeze_input_copies",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "production_binding": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "4a9b59437f98f5ef399a7f98f260319453259b3d",
-          "content_sha256": "903e9f0ed7308673abb0d99e93c81f7f2fc1c24dd50813e707b6d8c8e922accb",
-          "file": "src/bioetl/infrastructure/storage/target_fk_repair.py",
-          "line": 314,
-          "expression": "shutil.copyfile(source.directory / name, copy_root / name)",
-          "call": "shutil.copyfile",
-          "creator": "_freeze_input_copies",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "4a9b59437f98f5ef399a7f98f260319453259b3d",
-          "content_sha256": "903e9f0ed7308673abb0d99e93c81f7f2fc1c24dd50813e707b6d8c8e922accb",
-          "file": "src/bioetl/infrastructure/storage/target_fk_repair.py",
-          "line": 306,
-          "expression": "shutil.copyfile(original.path / relative, target)",
-          "call": "shutil.copyfile",
-          "creator": "_freeze_input_copies",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "cleanup_sources": []
-    },
-    {
-      "call_path": [
-        "bioetl.infrastructure.storage.target_migration_dependencies -> _copy_verified -> source.read_bytes",
-        "bioetl.infrastructure.storage.target_migration_dependencies -> _DependencyCollector.add -> path.read_bytes",
-        "bioetl.infrastructure.storage.target_migration_dependencies -> _copy_verified -> destination.open",
-        "bioetl.infrastructure.storage.target_migration_dependencies -> _copy_verified -> destination.read_bytes"
-      ],
-      "closer": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
-      "configuration_predicates": [],
-      "creator": [
-        "_DependencyCollector.add",
-        "_copy_verified"
-      ],
-      "identity": "iuphar.bioetl.infrastructure.storage.target_migration_dependencies.file",
-      "lifetime": "owner/operation",
-      "owner": "bioetl.infrastructure.storage.target_migration_dependencies owns these file acquisitions for opt-in IUPHAR target classification",
-      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
-      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
-      "scenarios": {
-        "cancellation": {
-          "applicability": "owning async boundary; these primitives are synchronous",
-          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
-          "observation": "Cancel the owner around the call and observe remaining handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "error": {
-          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
-          "expected": "Preserve the original failure and release any handle this function already acquired.",
-          "observation": "Inject after allocation and during close; inspect retained handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "normal": {
-          "applicability": "applicable",
-          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
-          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "retry": {
-          "applicability": "outer caller attempt; the primitive has no internal retry",
-          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
-          "observation": "Compare opened and closed identities per attempt.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "timeout": {
-          "applicability": "no intrinsic timeout on the synchronous primitive",
-          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
-          "observation": "Observe the outer deadline and whether the call returned.",
-          "runtime_result": "NOT_RUN_12553"
-        }
-      },
-      "shutdown_by_site": {},
-      "shutdown_contract": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
-      "type": "file",
-      "creation_sites": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "9ce36895ab42d4c0e06997f68c07e2568d1dd77d",
-          "content_sha256": "b02b9c8e8648bd1ead556a21066b0d5a4a125ebb70976635677d9050fe3125bc",
-          "file": "src/bioetl/infrastructure/storage/target_migration_dependencies.py",
-          "line": 347,
-          "expression": "source.read_bytes()",
-          "call": "source.read_bytes",
-          "creator": "_copy_verified",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "9ce36895ab42d4c0e06997f68c07e2568d1dd77d",
-          "content_sha256": "b02b9c8e8648bd1ead556a21066b0d5a4a125ebb70976635677d9050fe3125bc",
-          "file": "src/bioetl/infrastructure/storage/target_migration_dependencies.py",
-          "line": 108,
-          "expression": "path.read_bytes()",
-          "call": "path.read_bytes",
-          "creator": "_DependencyCollector.add",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "9ce36895ab42d4c0e06997f68c07e2568d1dd77d",
-          "content_sha256": "b02b9c8e8648bd1ead556a21066b0d5a4a125ebb70976635677d9050fe3125bc",
-          "file": "src/bioetl/infrastructure/storage/target_migration_dependencies.py",
-          "line": 358,
-          "expression": "destination.open('xb')",
-          "call": "destination.open",
-          "creator": "_copy_verified",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "9ce36895ab42d4c0e06997f68c07e2568d1dd77d",
-          "content_sha256": "b02b9c8e8648bd1ead556a21066b0d5a4a125ebb70976635677d9050fe3125bc",
-          "file": "src/bioetl/infrastructure/storage/target_migration_dependencies.py",
-          "line": 351,
-          "expression": "destination.read_bytes()",
-          "call": "destination.read_bytes",
-          "creator": "_copy_verified",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "production_binding": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "9ce36895ab42d4c0e06997f68c07e2568d1dd77d",
-          "content_sha256": "b02b9c8e8648bd1ead556a21066b0d5a4a125ebb70976635677d9050fe3125bc",
-          "file": "src/bioetl/infrastructure/storage/target_migration_dependencies.py",
-          "line": 347,
-          "expression": "source.read_bytes()",
-          "call": "source.read_bytes",
-          "creator": "_copy_verified",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "9ce36895ab42d4c0e06997f68c07e2568d1dd77d",
-          "content_sha256": "b02b9c8e8648bd1ead556a21066b0d5a4a125ebb70976635677d9050fe3125bc",
-          "file": "src/bioetl/infrastructure/storage/target_migration_dependencies.py",
-          "line": 108,
-          "expression": "path.read_bytes()",
-          "call": "path.read_bytes",
-          "creator": "_DependencyCollector.add",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "9ce36895ab42d4c0e06997f68c07e2568d1dd77d",
-          "content_sha256": "b02b9c8e8648bd1ead556a21066b0d5a4a125ebb70976635677d9050fe3125bc",
-          "file": "src/bioetl/infrastructure/storage/target_migration_dependencies.py",
-          "line": 358,
-          "expression": "destination.open('xb')",
-          "call": "destination.open",
-          "creator": "_copy_verified",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "9ce36895ab42d4c0e06997f68c07e2568d1dd77d",
-          "content_sha256": "b02b9c8e8648bd1ead556a21066b0d5a4a125ebb70976635677d9050fe3125bc",
-          "file": "src/bioetl/infrastructure/storage/target_migration_dependencies.py",
-          "line": 351,
-          "expression": "destination.read_bytes()",
-          "call": "destination.read_bytes",
-          "creator": "_copy_verified",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "cleanup_sources": []
-    },
-    {
-      "call_path": [
-        "bioetl.infrastructure.storage.target_migration_row_ops -> read_delta -> DeltaTable"
-      ],
-      "closer": "DeltaTable and write_deltalake finish the native table operation before return; no table handle is stored on a process-global owner.",
-      "configuration_predicates": [],
-      "creator": [
-        "read_delta"
-      ],
-      "identity": "iuphar.bioetl.infrastructure.storage.target_migration_row_ops.delta",
-      "lifetime": "owner/operation",
-      "owner": "bioetl.infrastructure.storage.target_migration_row_ops owns these delta acquisitions for opt-in IUPHAR target classification",
-      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
-      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
-      "scenarios": {
-        "cancellation": {
-          "applicability": "owning async boundary; these primitives are synchronous",
-          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
-          "observation": "Cancel the owner around the call and observe remaining handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "error": {
-          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
-          "expected": "Preserve the original failure and release any handle this function already acquired.",
-          "observation": "Inject after allocation and during close; inspect retained handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "normal": {
-          "applicability": "applicable",
-          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
-          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "retry": {
-          "applicability": "outer caller attempt; the primitive has no internal retry",
-          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
-          "observation": "Compare opened and closed identities per attempt.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "timeout": {
-          "applicability": "no intrinsic timeout on the synchronous primitive",
-          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
-          "observation": "Observe the outer deadline and whether the call returned.",
-          "runtime_result": "NOT_RUN_12553"
-        }
-      },
-      "shutdown_by_site": {},
-      "shutdown_contract": "DeltaTable and write_deltalake finish the native table operation before return; no table handle is stored on a process-global owner.",
-      "type": "delta",
-      "creation_sites": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "3576b8fb537bcc1ca7e47692f0a8f85d6e56a4a8",
-          "content_sha256": "86c1253bb377d5ca9643ba947d021152c008c88a22076d1a23c1474a89b50ef1",
-          "file": "src/bioetl/infrastructure/storage/target_migration_row_ops.py",
-          "line": 141,
-          "expression": "DeltaTable(str(path))",
-          "call": "DeltaTable",
-          "creator": "read_delta",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "production_binding": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "3576b8fb537bcc1ca7e47692f0a8f85d6e56a4a8",
-          "content_sha256": "86c1253bb377d5ca9643ba947d021152c008c88a22076d1a23c1474a89b50ef1",
-          "file": "src/bioetl/infrastructure/storage/target_migration_row_ops.py",
-          "line": 141,
-          "expression": "DeltaTable(str(path))",
-          "call": "DeltaTable",
-          "creator": "read_delta",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "cleanup_sources": []
-    },
-    {
-      "call_path": [
-        "bioetl.infrastructure.storage.target_migration_validation -> _frozen_v31_hash_fields -> paths['config'].read_text",
-        "bioetl.infrastructure.storage.target_migration_validation -> _load_candidate_profile -> paths['candidate_config'].read_text"
-      ],
-      "closer": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
-      "configuration_predicates": [],
-      "creator": [
-        "_frozen_v31_hash_fields",
-        "_load_candidate_profile"
-      ],
-      "identity": "iuphar.bioetl.infrastructure.storage.target_migration_validation.file",
-      "lifetime": "owner/operation",
-      "owner": "bioetl.infrastructure.storage.target_migration_validation owns these file acquisitions for opt-in IUPHAR target classification",
-      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
-      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
-      "scenarios": {
-        "cancellation": {
-          "applicability": "owning async boundary; these primitives are synchronous",
-          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
-          "observation": "Cancel the owner around the call and observe remaining handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "error": {
-          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
-          "expected": "Preserve the original failure and release any handle this function already acquired.",
-          "observation": "Inject after allocation and during close; inspect retained handles.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "normal": {
-          "applicability": "applicable",
-          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
-          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "retry": {
-          "applicability": "outer caller attempt; the primitive has no internal retry",
-          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
-          "observation": "Compare opened and closed identities per attempt.",
-          "runtime_result": "NOT_RUN_12553"
-        },
-        "timeout": {
-          "applicability": "no intrinsic timeout on the synchronous primitive",
-          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
-          "observation": "Observe the outer deadline and whether the call returned.",
-          "runtime_result": "NOT_RUN_12553"
-        }
-      },
-      "shutdown_by_site": {},
-      "shutdown_contract": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
-      "type": "file",
-      "creation_sites": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "f32ce50a01718524403f013f2d6bd1766e2052e5",
-          "content_sha256": "ee2c6a4eb1d08235a5bf891c69ad84a07cf5cc8251aa16c3ca21d2de14ff717e",
-          "file": "src/bioetl/infrastructure/storage/target_migration_validation.py",
-          "line": 134,
-          "expression": "paths['config'].read_text(encoding='utf-8')",
-          "call": "paths['config'].read_text",
-          "creator": "_frozen_v31_hash_fields",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "f32ce50a01718524403f013f2d6bd1766e2052e5",
-          "content_sha256": "ee2c6a4eb1d08235a5bf891c69ad84a07cf5cc8251aa16c3ca21d2de14ff717e",
-          "file": "src/bioetl/infrastructure/storage/target_migration_validation.py",
-          "line": 182,
-          "expression": "paths['candidate_config'].read_text(encoding='utf-8')",
-          "call": "paths['candidate_config'].read_text",
-          "creator": "_load_candidate_profile",
-          "creation_mode": "call",
-          "context_manager": false
-        }
-      ],
-      "production_binding": [
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "f32ce50a01718524403f013f2d6bd1766e2052e5",
-          "content_sha256": "ee2c6a4eb1d08235a5bf891c69ad84a07cf5cc8251aa16c3ca21d2de14ff717e",
-          "file": "src/bioetl/infrastructure/storage/target_migration_validation.py",
-          "line": 134,
-          "expression": "paths['config'].read_text(encoding='utf-8')",
-          "call": "paths['config'].read_text",
-          "creator": "_frozen_v31_hash_fields",
-          "creation_mode": "call",
-          "context_manager": false
-        },
-        {
-          "source_commit": "de2f28ed6b68e530bb863674c46f9a5b730db060",
-          "source_blob": "f32ce50a01718524403f013f2d6bd1766e2052e5",
-          "content_sha256": "ee2c6a4eb1d08235a5bf891c69ad84a07cf5cc8251aa16c3ca21d2de14ff717e",
-          "file": "src/bioetl/infrastructure/storage/target_migration_validation.py",
-          "line": 182,
-          "expression": "paths['candidate_config'].read_text(encoding='utf-8')",
-          "call": "paths['candidate_config'].read_text",
-          "creator": "_load_candidate_profile",
           "creation_mode": "call",
           "context_manager": false
         }

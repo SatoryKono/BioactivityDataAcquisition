@@ -22,6 +22,7 @@ from bioetl.composition.factories.dq._context_resolver_support import (
     get_output_root_impl,
     has_flat_structure_impl,
     is_dq_report_enabled_impl,
+    rebase_dq_output_paths,
 )
 from bioetl.composition.factories.dq.factory import DQServicesFactory
 
@@ -101,16 +102,23 @@ def has_flat_structure(config: object) -> bool:
 
 def extract_dq_output_paths(
     yaml_config: PipelineYamlConfig | None,
-    *,
-    settings: Settings | None = None,
+    settings: object | None = None,
 ) -> DQOutputPathsContext:
-    """Extract per-layer DQ output paths and flat-structure mode."""
-    return extract_dq_output_paths_impl(
+    """Extract per-layer DQ output paths and rebase them onto ``settings``.
+
+    Convention defaults store ``data/output/<layer>/<provider>/<entity>``.
+    When ``settings`` is the same object used to build storage, DQ reports
+    follow that ``data_dir``, including test mode. Callers that omit
+    ``settings`` keep the configured path unchanged.
+    """
+    paths = extract_dq_output_paths_impl(
         yaml_config,
-        settings=settings,
         get_layer_path_fn=get_layer_path,
         has_flat_structure_fn=has_flat_structure,
     )
+    if settings is None:
+        return paths
+    return rebase_dq_output_paths(paths, settings)
 
 
 # ---- DQ service enablement queries ----
