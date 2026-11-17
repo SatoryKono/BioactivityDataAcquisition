@@ -319,6 +319,8 @@ def restore_native_current_presentation(
         if original is None:
             continue
         panel.update(title=original["title"], description=original["description"])
+        if "content" in original:
+            options["content"] = original["content"]
         if remove:
             options.pop(_CURRENT_PRESENTATION)
 
@@ -338,6 +340,27 @@ def mark_native_snapshot_clocks(dashboard: dict) -> None:
     )
     specs = contract["dashboards"].get(dashboard.get("uid"), {}).get("panels", {})
     for panel in _walk_panels(dashboard.get("panels", [])):
+        options = panel.get("options", {})
+        content = options.get("content", "")
+        if panel.get("type") == "text" and "CURRENT:" in content:
+            options[_CURRENT_PRESENTATION] = {
+                "title": panel["title"],
+                "description": panel.get("description", ""),
+                "content": content,
+            }
+            options["content"] = content.replace("CURRENT:", "PERIOD END SNAPSHOT:")
+        if panel.get("type") == "text" and "PERIOD END SNAPSHOT:" in options.get(
+            "content", ""
+        ):
+            panel["description"] = (
+                options[_CURRENT_PRESENTATION]["description"]
+                .replace("CURRENT", "PERIOD END SNAPSHOT")
+                .replace(
+                    "current fleet telemetry",
+                    "fleet telemetry at the selected period end",
+                )
+                .replace("current scope", "selected period-end scope")
+            )
         if panel.get("description", "").startswith(_SNAPSHOT_PREFIX):
             original = panel["options"][_CURRENT_PRESENTATION]
             panel.update(title=original["title"], description=original["description"])
@@ -422,8 +445,9 @@ def _project_current_time(dashboard: dict) -> None:
             panel["title"] = panel["title"].replace(
                 " · ${workflow_evidence_freshness}", ""
             )
-        if _is_current_panel(panel, specs.get(str(panel_id), {})):
-            panel.get("options", {}).pop(_CURRENT_PRESENTATION, None)
+        current = _is_current_panel(panel, specs.get(str(panel_id), {}))
+        panel.get("options", {}).pop(_CURRENT_PRESENTATION, None)
+        if current:
             _wrap_current_panel(panel, _current_queries(panel, native_panels))
     _verify_current_donors(panels)
     if "templating" in dashboard:
