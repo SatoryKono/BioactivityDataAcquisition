@@ -53,6 +53,7 @@ from bioetl.infrastructure.observability.prometheus_metric_registries import (
 _FORBIDDEN_LABELS = FORBIDDEN_PROMETHEUS_LABEL_NAMES
 
 
+@pytest.mark.unit
 def test_stage_projection_clock_survives_real_metric_dispatch() -> None:
     from bioetl.application.observability.pipeline_metrics import (
         PipelineMetricsRecorder,

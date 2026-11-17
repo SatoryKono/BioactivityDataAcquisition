@@ -11,7 +11,7 @@ import subprocess
 import pytest
 import yaml
 
-pytestmark = pytest.mark.unit
+pytestmark = pytest.mark.repo_backed
 
 
 def _evaluate(tmp_path, fixture):
@@ -100,7 +100,9 @@ def test_signal_drilldown_evaluates_current_operands_not_selected_history(tmp_pa
 def test_stage_clock_does_not_replace_event_time_with_push_or_scrape(
     tmp_path, observed
 ):
-    from scripts.ops.observability.grafana._stage_source_clocks import stage_clock_query
+    from scripts.ops.observability.grafana._incident_explanations import (
+        stage_clock_query,
+    )
 
     inputs = [
         {
@@ -163,7 +165,9 @@ def test_stage_clock_does_not_replace_event_time_with_push_or_scrape(
 
 
 def test_stage_clock_without_gateway_or_crossing_remains_unknown_or_absent(tmp_path):
-    from scripts.ops.observability.grafana._stage_source_clocks import stage_clock_query
+    from scripts.ops.observability.grafana._incident_explanations import (
+        stage_clock_query,
+    )
 
     expr = stage_clock_query()
     _evaluate(

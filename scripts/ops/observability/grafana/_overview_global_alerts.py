@@ -123,3 +123,55 @@ def embed_global_alerts(overview: dict[str, Any], incident: dict[str, Any]) -> N
             "This page assesses that run only.",
             "Saved evidence assesses that run only; GLOBAL alerts below assess the fleet.",
         )
+
+
+def build_fleet_alert_card(panels):
+    """Count active alerts, allowing empty zero only with an observed healthy Prometheus scrape; zero never certifies pipeline health."""
+    targets = []
+    for ref, state in (("A", "firing"), ("B", "pending")):
+        targets.append(
+            {
+                "refId": ref,
+                "instant": True,
+                "format": "time_series",
+                "legendFormat": state.upper(),
+                "expr": f'((count(ALERTS{{alertname=~"BioETL.*",alertstate="{state}"}}) or vector(0)) and on() (max(up{{job="prometheus"}}) == 1))',
+                "datasource": {"type": "prometheus", "uid": "prometheus"},
+            }
+        )
+    health = {
+        "id": 9605,
+        "type": "stat",
+        "title": "Review Current Fleet Alerts",
+        "gridPos": {"x": 5, "y": 2, "w": 5, "h": 3},
+        "datasource": {"type": "prometheus", "uid": "prometheus"},
+        "targets": targets,
+        "transformations": [],
+        "description": "GLOBAL / CURRENT · Counts of BioETL FIRING and PENDING alerts, independent of Selected Run and all selectors. FIRING has satisfied the rule's for duration; PENDING has not. A saved SUCCESS/OK never clears these counts. A valid zero means no active alerts, not verified pipeline health. Missing Prometheus scrape or request failure is UNKNOWN/source unavailable. Zero fallback is valid only for this active-alert count, guarded by up{job=prometheus}=1. Refreshes every 30s.",
+        "fieldConfig": {
+            "defaults": {
+                "unit": "short",
+                "decimals": 0,
+                "noValue": "UNKNOWN",
+                "color": {"mode": "thresholds"},
+                "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                        {"color": "text", "value": None},
+                        {"color": "orange", "value": 1},
+                    ],
+                },
+            },
+            "overrides": [],
+        },
+        "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "textMode": "value_and_name",
+            "orientation": "horizontal",
+            "text": {"valueSize": 24, "titleSize": 14},
+            "reduceOptions": {"calcs": ["last"], "fields": "", "values": False},
+        },
+        "links": deepcopy(panels[2005]["links"]),
+    }
+    return health

@@ -1154,6 +1154,12 @@ repo_backed_unit_test_exceptions:
     - path: tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py
       target_lane: repo-backed-unit
       protected_surface: scripts/ops/{__main__.py,observability/grafana/**}
+    - path: tests/unit/repo_backed/scripts/ops/observability/test_evening_dashboard_queries.py
+      target_lane: repo-backed-unit
+      protected_surface: grafana/dashboards/*.json + generated stage clock queries evaluated by promtool
+    - path: tests/unit/repo_backed/scripts/ops/observability/test_overview_donor_jsonata.py
+      target_lane: repo-backed-unit
+      protected_surface: grafana/dashboards/*.json donor expressions evaluated by JSONata against controlled payloads
     - path: tests/unit/repo_backed/scripts/ops/observability/test_lint_dashboard_phase2.py
       target_lane: repo-backed-unit
       protected_surface: scripts/ops/observability/grafana/lint_dashboard_phase2.py + checked-in dashboards

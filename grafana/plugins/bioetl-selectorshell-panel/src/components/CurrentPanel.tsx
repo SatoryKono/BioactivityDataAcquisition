@@ -138,11 +138,13 @@ const CurrentPanelView: React.FC<PanelProps<AdaptiveTableOptions>> = (props) => 
   const clock = new Date(snapshot.evaluatedAt ?? 0).toISOString();
   const rowCount = view.pluginId === 'table' && snapshot.data.series.length === 1
     ? snapshot.data.series[0].length : undefined;
+  const rowUnit = rowCount === 1 ? 'row' : 'rows';
+  const rowSummary = rowCount === undefined ? null : ` · ${rowCount} ${rowUnit}`;
   return (
     <div data-bioetl-current-query="verified" style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
       <div title={'Query evaluated at ' + clock + '; publication time is separate'} style={{ fontSize: 16, lineHeight: '20px', overflowWrap: 'anywhere' }}>
         {clock.slice(0, 16).replace('T', ' ') + ' UTC'}
-        {rowCount === undefined ? null : ` · ${rowCount} ${rowCount === 1 ? 'row' : 'rows'}`}
+        {rowSummary}
       </div>
       <div style={{ flex: 1, minHeight: 0 }}>
         <PanelRenderer

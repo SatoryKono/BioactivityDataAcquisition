@@ -500,13 +500,41 @@
       "path": "tests/unit/interfaces/http/test_health_server.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_consume_headers"
+    },
+    {
+      "category": "helper_asserted",
+      "line": "100",
+      "path": "tests/unit/repo_backed/scripts/ops/observability/test_evening_dashboard_queries.py",
+      "rationale": "tests that delegate verification to check/validate/verify helper calls",
+      "test_name": "test_stage_clock_does_not_replace_event_time_with_push_or_scrape"
+    },
+    {
+      "category": "intentional_no_exception_contract",
+      "line": "167",
+      "path": "tests/unit/repo_backed/scripts/ops/observability/test_evening_dashboard_queries.py",
+      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+      "test_name": "test_stage_clock_without_gateway_or_crossing_remains_unknown_or_absent"
+    },
+    {
+      "category": "intentional_no_exception_contract",
+      "line": "259",
+      "path": "tests/unit/repo_backed/scripts/ops/observability/test_evening_dashboard_queries.py",
+      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+      "test_name": "test_ingestion_age_obeys_alert_boundary_and_preserves_invalid_or_missing"
+    },
+    {
+      "category": "helper_asserted",
+      "line": "318",
+      "path": "tests/unit/repo_backed/scripts/ops/observability/test_evening_dashboard_queries.py",
+      "rationale": "tests that delegate verification to check/validate/verify helper calls",
+      "test_name": "test_ingestion_age_deduplicates_sources_before_taking_oldest_entity"
     }
   ],
   "assertless_category_counts": {
     "architecture_helper_guard": 0,
     "benchmark_or_performance": 0,
-    "helper_asserted": 1,
-    "intentional_no_exception_contract": 66,
+    "helper_asserted": 3,
+    "intentional_no_exception_contract": 68,
     "weak_no_value": 0
   },
   "assertless_examples": [
@@ -795,9 +823,16 @@
       "categories": {
         "intentional_no_exception_contract": 1
       }
+    },
+    "tests/unit/repo_backed/scripts/ops/observability/test_evening_dashboard_queries.py": {
+      "assertless_tests": 4,
+      "categories": {
+        "helper_asserted": 2,
+        "intentional_no_exception_contract": 2
+      }
     }
   },
-  "assertless_total_candidates": 67,
+  "assertless_total_candidates": 71,
   "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
@@ -971,7 +1006,7 @@
       ".yml"
     ]
   },
-  "intentional_no_exception_contract": 66,
+  "intentional_no_exception_contract": 68,
   "markerless_examples": [],
   "markerless_test_functions": 0,
   "parse_errors": [],
@@ -979,10 +1014,10 @@
   "repo_backed_unit_inventory": {
     "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
     "lane": "repo-backed-unit",
-    "marked_test_files": 80,
+    "marked_test_files": 82,
     "marker": "pytest.mark.repo_backed",
     "subtree": "tests/unit/repo_backed/",
-    "test_files": 80,
+    "test_files": 82,
     "unmarked_test_files": []
   },
   "report": {
@@ -1487,13 +1522,41 @@
         "path": "tests/unit/interfaces/http/test_health_server.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_consume_headers"
+      },
+      {
+        "category": "helper_asserted",
+        "line": "100",
+        "path": "tests/unit/repo_backed/scripts/ops/observability/test_evening_dashboard_queries.py",
+        "rationale": "tests that delegate verification to check/validate/verify helper calls",
+        "test_name": "test_stage_clock_does_not_replace_event_time_with_push_or_scrape"
+      },
+      {
+        "category": "intentional_no_exception_contract",
+        "line": "167",
+        "path": "tests/unit/repo_backed/scripts/ops/observability/test_evening_dashboard_queries.py",
+        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+        "test_name": "test_stage_clock_without_gateway_or_crossing_remains_unknown_or_absent"
+      },
+      {
+        "category": "intentional_no_exception_contract",
+        "line": "259",
+        "path": "tests/unit/repo_backed/scripts/ops/observability/test_evening_dashboard_queries.py",
+        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+        "test_name": "test_ingestion_age_obeys_alert_boundary_and_preserves_invalid_or_missing"
+      },
+      {
+        "category": "helper_asserted",
+        "line": "318",
+        "path": "tests/unit/repo_backed/scripts/ops/observability/test_evening_dashboard_queries.py",
+        "rationale": "tests that delegate verification to check/validate/verify helper calls",
+        "test_name": "test_ingestion_age_deduplicates_sources_before_taking_oldest_entity"
       }
     ],
     "assertless_category_counts": {
       "architecture_helper_guard": 0,
       "benchmark_or_performance": 0,
-      "helper_asserted": 1,
-      "intentional_no_exception_contract": 66,
+      "helper_asserted": 3,
+      "intentional_no_exception_contract": 68,
       "weak_no_value": 0
     },
     "assertless_examples": [
@@ -1523,7 +1586,7 @@
       "tests/unit/infrastructure/test_issue_10469_stream_a_infra_twenty_one.py:507",
       "tests/unit/infrastructure/test_storage_factory.py:820"
     ],
-    "assertless_total_candidates": 67,
+    "assertless_total_candidates": 71,
     "compatibility_examples": [],
     "compatibility_files": [],
     "compatibility_test_files": 0,
@@ -1703,10 +1766,10 @@
     "repo_backed_unit_inventory": {
       "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
       "lane": "repo-backed-unit",
-      "marked_test_files": 80,
+      "marked_test_files": 82,
       "marker": "pytest.mark.repo_backed",
       "subtree": "tests/unit/repo_backed/",
-      "test_files": 80,
+      "test_files": 82,
       "unmarked_test_files": []
     },
     "root": ".",
@@ -1715,8 +1778,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 3332,
-      "test_python_file_count": 3584,
+      "test_glob_file_count": 3333,
+      "test_python_file_count": 3585,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -1757,21 +1820,21 @@
       "top_level_directory_count_including_pycache": 16
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 3332,
-    "total_test_functions": 33334,
+    "total_test_files": 3333,
+    "total_test_functions": 33371,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "301b9dc60a2a35c8c8afd327225aad99cd6bfbe094d8649152c741dd61665830",
+  "source_tree_sha256": "68b41ca566297f52faeb1771ac5c1ddbd61e682c62a5b93cc810a4a1e541ffbd",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
-    "assertless_total_candidates": 67,
+    "assertless_total_candidates": 71,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
-    "intentional_no_exception_contract": 66,
+    "intentional_no_exception_contract": 68,
     "markerless_examples": [],
     "markerless_test_functions": 0,
     "refined_assertless_tests": 0,
@@ -1783,8 +1846,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 3332,
-    "test_python_file_count": 3584,
+    "test_glob_file_count": 3333,
+    "test_python_file_count": 3585,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -1825,8 +1888,8 @@
     "top_level_directory_count_including_pycache": 16
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 3332,
-  "total_test_functions": 33334,
+  "total_test_files": 3333,
+  "total_test_functions": 33371,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

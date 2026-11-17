@@ -2894,9 +2894,11 @@ def apply_to_dashboard(
         )
         embed_global_alerts(payload, incident)
     stamp_run_selection_context(payload)
-    from scripts.ops.observability.grafana._evening_audit import apply_evening_audit
+    from scripts.ops.observability.grafana._audit_presentation import (
+        apply_portfolio_evidence_contract,
+    )
 
-    apply_evening_audit(payload)
+    apply_portfolio_evidence_contract(payload)
     from scripts.ops.observability.grafana._audit_presentation import (
         stamp_audit_presentation,
     )

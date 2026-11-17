@@ -13,7 +13,7 @@ import pytest
 
 from scripts.ops.observability.grafana.apply_phase25_srs_prr_budget import _OV_DONOR
 
-pytestmark = pytest.mark.unit
+pytestmark = pytest.mark.repo_backed
 
 
 def donor_payload(start, end):

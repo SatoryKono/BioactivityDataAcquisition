@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 # Share the offset-safe parser with Incident; never compare missing dates.
+_OPERATOR_TIME_UNIT = "time:YYYY-MM-DD HH:mm"
+
 _TIMESTAMP_SECONDS = (
     "$secs := function($t){( "
     "$tail := $substring($t, 19); "
@@ -171,7 +173,7 @@ def stamp_run_selection_context(payload: dict) -> None:
                     {
                         "matcher": {"id": "byName", "options": "Context checked at"},
                         "properties": [
-                            {"id": "unit", "value": "time:YYYY-MM-DD HH:mm"},
+                            {"id": "unit", "value": _OPERATOR_TIME_UNIT},
                         ],
                     },
                 ],
@@ -270,12 +272,12 @@ def stamp_run_selection_context(payload: dict) -> None:
         [
             {
                 "matcher": {"id": "byName", "options": "Read at"},
-                "properties": [{"id": "unit", "value": "time:YYYY-MM-DD HH:mm"}],
+                "properties": [{"id": "unit", "value": _OPERATOR_TIME_UNIT}],
             },
             {
                 "matcher": {"id": "byName", "options": "Saved assessment at"},
                 "properties": [
-                    {"id": "unit", "value": "time:YYYY-MM-DD HH:mm"},
+                    {"id": "unit", "value": _OPERATOR_TIME_UNIT},
                     {"id": "noValue", "value": "Not recorded"},
                 ],
             },

@@ -204,11 +204,7 @@ class _PipelineMetricsRecorderCore:
         self.metrics.set_gauge(
             "bioetl_stage_backlog_records",
             float(count),
-            {
-                "pipeline": self.pipeline,
-                "run_type": run_type,
-                "stage": stage,
-            },
+            {"pipeline": self.pipeline, "run_type": run_type, "stage": stage},
         )
 
     def record_stage_lag_seconds(
@@ -224,11 +220,7 @@ class _PipelineMetricsRecorderCore:
         self.metrics.set_gauge(
             "bioetl_stage_lag_seconds",
             seconds,
-            {
-                "pipeline": self.pipeline,
-                "run_type": run_type,
-                "stage": stage,
-            },
+            {"pipeline": self.pipeline, "run_type": run_type, "stage": stage},
         )
 
     def record_stage_snapshot_observed_at(
