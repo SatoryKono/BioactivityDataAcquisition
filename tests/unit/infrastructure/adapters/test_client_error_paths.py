@@ -136,9 +136,7 @@ class TestUniProtAdapterErrorPaths:
             )
 
             with pytest.raises(ConnectionError, match="Network error"):
-                _ = [
-                    r async for r in adapter._fetch_proteins(query="test", limit=100)
-                ]
+                _ = [r async for r in adapter._fetch_proteins(query="test", limit=100)]
 
             mock_logger.error.assert_called()
             # Verify the error message contains expected context
