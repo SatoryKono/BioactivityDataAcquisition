@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-08-14'
+  Last verified: '2026-11-17'
 
 ______________________________________________________________________
 
@@ -33,11 +33,11 @@ ______________________________________________________________________
 || Удалить битые данные                   | 2.6             | `bioetl quarantine purge --pipeline ...` |
 || Подготовить staging-like local profile | 5.6.1           | Environment isolation                    |
 || Восстановление при аварии              | 5.5             | DR Runbook                               |
-|| Откат релиза                           | 7.2             | Rollback Strategy                        |
+|| Откат релиза                           | 8.2             | Rollback Strategy                        |
 || Безопасность                           | 5.4             | Security Policy                          |
-|| Forensic retention для таблицы         | 2.1.1, App D    | Config `forensic-retention`              |
+|| Forensic retention для таблицы         | 2.1.3           | Config `forensic-retention`              |
 || Backfill с эксклюзивной блокировкой    | 2.4             | Lock Mechanism                           |
-|| Deprecation поля                       | 7.1, App E      | Schema Evolution                         |
+|| Deprecation поля                       | App E.3         | Schema Evolution                         |
 
 ## 1. Архитектура
 

@@ -34,7 +34,7 @@ ______________________________________________________________________
 | §2.6 | NULL policy | REQ-NULL-* | `01-data-quality.mdc` | covered |
 | §2.8 | DQ Contract System | REQ-DQ-* | `01-data-quality.mdc`, `10-error-resilience.mdc` | covered |
 | §2.9 | Entity ID / content hash | REQ-ID-* | `01-data-quality.mdc`, `02-code-style.mdc` | covered |
-| §2.9 | Composite pipelines | REQ-COMP-* | `04-patterns.mdc` | covered |
+| §2.10 | Composite pipelines | REQ-COMP-* | `04-patterns.mdc` | covered |
 | §2.10 | Lineage / partitions / load strategy | REQ-LINEAGE-*, REQ-PARTITION-*, REQ-LOAD-* | `01-data-quality.mdc`, `08-operations.mdc` | covered |
 | §3.1 | Error classification / retry / CB | REQ-RETRY-*, REQ-CB-* | `04-patterns.mdc`, `10-error-resilience.mdc` | covered |
 | §3.1.2 | DQ batch thresholds | REQ-DQ-* | `10-error-resilience.mdc` | covered |

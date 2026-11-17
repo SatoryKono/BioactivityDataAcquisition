@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-11-16'
+  Last verified: '2026-11-17'
 
 ______________________________________________________________________
 
@@ -253,9 +253,9 @@ double-run it. Thresholds stay 70/60/60/60.
 | OpenSSF Scorecard | `scorecard.yml` | Monday step in `nightly.yml` + `workflow_dispatch` | required | `active` | `active` |
 | Quarterly GitHub Settings Review | `github-settings-quarterly-review.yml` | quarter-day step in `nightly.yml` + `workflow_dispatch` | required | `active` | `active` |
 | Mutation Testing | `mutation-testing.yml` | Weekly Sunday step in `nightly.yml` + `workflow_dispatch` | Sunday owner | `active` | `active` |
-| Contract Tests | `contract-tests.yml` | Monthly 1st 02:00 UTC (YAML only) | optional | `disabled_manually` | `keep-disabled` |
+| Contract Tests | `contract-tests.yml` | `workflow_dispatch` only (no schedule) | optional | `disabled_manually` | `keep-disabled` |
 | Weekly VACUUM | `vacuum.yml` | Weekly Sun 02:00 UTC (YAML only) | optional | `disabled_manually` | `keep-disabled` |
-| Docs KPI Weekly | `docs-kpi-weekly.yml` | Weekly Mon 04:30 UTC (YAML only) | optional | `disabled_manually` | `keep-disabled` |
+| Docs KPI Weekly | `docs-kpi-weekly.yml` | `workflow_dispatch` only (no schedule) | optional | `disabled_manually` | `keep-disabled` |
 | Quality Debt Weekly | `quality-debt-weekly.yml` | Weekly Mon 04:45 UTC (YAML only) | optional | `disabled_manually` | `keep-disabled` |
 | Stale | `stale.yml` | Weekly Mon 06:00 UTC (YAML only) | optional | `disabled_manually` | `keep-disabled` |
 | PR Hygiene | `pr-hygiene.yml` | Weekly Mon 06:30 UTC (YAML only) | optional | `disabled_manually` | `keep-disabled` |
