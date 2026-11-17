@@ -361,6 +361,7 @@ class TestGenericPipelineFactory:
             strict_gold_validation=False,
             yaml_config=yaml_config,
             dq_configs_extractor=ANY,
+            settings=settings,
         )
 
     @patch(
@@ -427,6 +428,7 @@ class TestGenericPipelineFactory:
             strict_gold_validation=False,
             yaml_config=config,
             dq_configs_extractor=ANY,
+            settings=settings,
         )
 
     @patch(
@@ -476,6 +478,7 @@ class TestGenericPipelineFactory:
             strict_gold_validation=True,
             yaml_config=yaml_config,
             dq_configs_extractor=ANY,
+            settings=settings,
         )
 
 

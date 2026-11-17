@@ -57,6 +57,7 @@ class RunnerAssemblyContext:
     gold_schema: GoldSchemaType
     strict_gold_validation: bool
     dq_configs_extractor: Callable[[PipelineYamlConfig | None], DQConfigsContext]
+    settings: object | None = None
 
 
 def build_lock_runtime_service(
@@ -94,7 +95,10 @@ def build_batch_executor(
     observer: PipelineObserver,
 ) -> BatchExecutor:
     """Build the batch executor with YAML-derived DQ output paths."""
-    dq_output_paths = extract_dq_output_paths(context.yaml_config)
+    dq_output_paths = extract_dq_output_paths(
+        context.yaml_config,
+        settings=context.settings,
+    )
     return ServicesBuilder.create_batch_executor_from_pipeline(
         BatchExecutorBuildRequest(
             pipeline=context.pipeline,
