@@ -21,7 +21,7 @@ CONSUMERS = (
     "grafana/plugins/bioetl-scenes-app",
     "grafana/plugins/bioetl-selectorshell-panel",
 )
-ARCHIVE = BACKPORT / "picomatch-4.0.8-bioetl.7.tgz"
+ARCHIVE = BACKPORT / "picomatch-4.0.8-bioetl.8.tgz"
 
 
 @pytest.fixture
@@ -60,7 +60,7 @@ def test_picomatch_archive_matches_reviewed_source() -> None:
         expected={
             "upstream_commit": "7be3276fb8bd215a8c73fa066bcaf696c244ad88",
             "advisory": "GHSA-fc5q-39xc-vjpf",
-            "local_version": "4.0.8-bioetl.7",
+            "local_version": "4.0.8-bioetl.8",
         },
     )
 
@@ -70,7 +70,7 @@ def test_picomatch_consumers_install_verified_archive(consumer: str) -> None:
     assert_consumers_pin_archive(
         [consumer],
         package_name="picomatch",
-        version="4.0.8-bioetl.7",
+        version="4.0.8-bioetl.8",
         archive=ARCHIVE,
         forbidden_versions=(
             "2.3.2",
@@ -81,6 +81,7 @@ def test_picomatch_consumers_install_verified_archive(consumer: str) -> None:
             "4.0.8-bioetl.4",
             "4.0.8-bioetl.5",
             "4.0.8-bioetl.6",
+            "4.0.8-bioetl.7",
         ),
     )
 
