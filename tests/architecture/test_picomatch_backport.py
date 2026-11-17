@@ -95,6 +95,7 @@ def test_picomatch_consumers_install_verified_archive(consumer: str) -> None:
         ("+(@(*(a)))", "a", 40),
         ("+(a|[a]a)", "a", 40),
         ("+((a|aa))", "a", 40),
+        ("+(a?(a))", "a", 40),
     ],
 )
 def test_repeated_and_nested_extglob_wildcards_finish_with_bounded_input(
