@@ -1018,6 +1018,12 @@ def test_duplicate_junit_paths_and_ambiguous_source_names_fail_closed(
         )
 
 
+def _isolated_pytest_command(tmp_path: Path) -> list[str]:
+    config = tmp_path / "pytest.ini"
+    config.write_text("[pytest]\n", encoding="utf-8")
+    return [sys.executable, "-m", "pytest", "-c", str(config), "-p", "no:cacheprovider"]
+
+
 def test_pytest_skip_with_teardown_error_is_not_executed(tmp_path: Path) -> None:
     test_file = tmp_path / "test_skip_teardown.py"
     test_file.write_text(
@@ -1032,7 +1038,12 @@ def test_pytest_skip_with_teardown_error_is_not_executed(tmp_path: Path) -> None
     )
     junit = tmp_path / "actual-pytest.xml"
     result = subprocess.run(
-        [sys.executable, "-m", "pytest", str(test_file), "-q", f"--junitxml={junit}"],
+        [
+            *_isolated_pytest_command(tmp_path),
+            str(test_file),
+            "-q",
+            f"--junitxml={junit}",
+        ],
         cwd=tmp_path,
         capture_output=True,
         text=True,
@@ -1073,9 +1084,7 @@ def test_pytest_double_error_aggregate_keeps_one_record(tmp_path: Path) -> None:
     env["PYTHONDONTWRITEBYTECODE"] = "1"
     result = subprocess.run(
         [
-            sys.executable,
-            "-m",
-            "pytest",
+            *_isolated_pytest_command(tmp_path),
             "-q",
             "-p",
             "no:cacheprovider",

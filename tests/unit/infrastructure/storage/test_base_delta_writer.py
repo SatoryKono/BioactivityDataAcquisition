@@ -399,6 +399,7 @@ class TestBaseDeltaWriterAsync:
         mock_dataset.scanner.return_value = mock_scanner
         mock_delta_table = MagicMock()
         mock_delta_table.to_pyarrow_dataset.return_value = mock_dataset
+        mock_delta_table.metadata.return_value.partition_columns = []
         mock_delta_table.file_uris.return_value = [
             "file:///C:/tmp/part-0.parquet",
         ]

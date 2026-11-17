@@ -108,6 +108,8 @@ def test_canonical_profile_preserves_explicit_taxid_or_blank(taxon):
         " 9606",
         "9606.0",
         "９６０６",
+        "9６06",
+        "9٦06",
     ],
 )
 def test_canonical_profile_rejects_noncanonical_taxonomy_before_matching(taxon):

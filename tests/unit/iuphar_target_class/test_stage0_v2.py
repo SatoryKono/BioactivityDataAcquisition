@@ -211,6 +211,10 @@ def test_raw_and_canonical_hashes_are_distinct_and_source_unchanged(tmp_path: Pa
     [
         {"taxonomy_id": "Homo sapiens"},
         {"taxonomy_id": "09606"},
+        {"taxonomy_id": "9６06"},
+        {"taxonomy_id": "9٦06"},
+        {"target_id": "CHEMBL１"},
+        {"target_id": "CHEMBL١"},
         {"target_type": "PROTEIN COMPLEX"},
         {"import_profile": "forged"},
         {"iuphar_class": "Enzyme"},
@@ -221,6 +225,26 @@ def test_export_refuses_unqualified_or_reserved_inputs(
 ):
     with pytest.raises(ValueError):
         _export(tmp_path, **updates)
+    assert not (tmp_path / "export").exists()
+
+
+@pytest.mark.parametrize("identity", ["1１", "1١"])
+def test_direct_iuphar_identity_rejects_mixed_unicode_digits(
+    tmp_path: Path, identity: str
+):
+    source, _ = _source(tmp_path, confirmed_iuphar_id=identity)
+    request = CohortExportRequest(
+        source,
+        sha256_file(source),
+        CSV_SOURCE_FORMAT,
+        NORMALIZED_TARGET_SCHEMA,
+        "synthetic source field mapping",
+        "unit-test",
+        direct_iuphar_id_column="confirmed_iuphar_id",
+    )
+    with pytest.raises(ValueError, match="positive ASCII text"):
+        export_canonical_cohort(request, output_dir=tmp_path / "export")
+    assert sha256_file(source) == request.source_sha256
     assert not (tmp_path / "export").exists()
 
 

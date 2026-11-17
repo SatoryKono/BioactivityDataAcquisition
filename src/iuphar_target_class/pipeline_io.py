@@ -81,7 +81,7 @@ def _bioetl_kernel_identity(raw: dict[str, str], target_kind: str) -> str:
 
 
 def _require_canonical_taxon(taxon: str) -> None:
-    if taxon and re.fullmatch(r"[1-9]\d*", taxon) is None:
+    if taxon and re.fullmatch(r"[1-9]\d*", taxon, flags=re.ASCII) is None:
         raise ValueError(
             "canonical CSV organism must be a positive ASCII TaxID or blank"
         )

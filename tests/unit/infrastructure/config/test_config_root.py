@@ -327,11 +327,11 @@ def test_repo_root_search_skips_unmarked_configs_and_preserves_layout_fallback(
     """Ignore configs-only ancestors and retain the installed-layout fallback."""
     import bioetl.infrastructure.config.config_root as config_root_module
 
-    layout_root = tmp_path / "isolated-layout"
+    layout_root = _use_synthetic_source_layout(tmp_path, monkeypatch)
     source = (
         layout_root / "src" / "bioetl" / "infrastructure" / "config" / "config_root.py"
     )
-    source.parent.mkdir(parents=True)
+    source.parent.mkdir(parents=True, exist_ok=True)
     source.write_text("# isolated source location\n", encoding="utf-8")
     # A closer configs directory is insufficient without either root marker.
     (source.parent / "configs").mkdir()

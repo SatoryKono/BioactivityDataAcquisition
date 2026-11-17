@@ -301,11 +301,11 @@ def _validate_source_row(row: Mapping[str, object]) -> None:
         raise ValueError("normalized V30 input cannot reuse classification outputs")
     if row["target_type"] != "SINGLE PROTEIN":
         raise ValueError("normalized cohort requires explicit SINGLE PROTEIN rows")
-    if re.fullmatch(r"CHEMBL\d+", str(row["target_id"])) is None:
+    if re.fullmatch(r"CHEMBL\d+", str(row["target_id"]), flags=re.ASCII) is None:
         raise ValueError("normalized cohort requires a valid ChEMBL target identity")
     if (
         type(row["taxonomy_id"]) is bool
-        or re.fullmatch(r"[1-9]\d*", str(row["taxonomy_id"])) is None
+        or re.fullmatch(r"[1-9]\d*", str(row["taxonomy_id"]), flags=re.ASCII) is None
     ):
         raise ValueError("normalized cohort requires confirmed canonical TaxID values")
 
@@ -316,7 +316,7 @@ def _direct_identity(row: Mapping[str, object], column: str) -> str | None:
     value = row[column]
     if value in (None, ""):
         return None
-    if re.fullmatch(r"[1-9]\d*", str(value)) is None:
+    if re.fullmatch(r"[1-9]\d*", str(value), flags=re.ASCII) is None:
         raise ValueError("direct IUPHAR identity must be explicit positive ASCII text")
     return str(value)
 
