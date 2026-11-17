@@ -50,10 +50,13 @@ For a new checkout, copy those two files into `.zed/`; for an existing checkout,
 review and merge instead of overwriting customizations. Do not copy the separate
 `agent-settings.json` user template into the worktree configuration.
 
-The six base tasks run `.venv-win/Scripts/python.exe` relative to
-`$ZED_WORKTREE_ROOT`. The interpreter diagnostic quotes its full Python `-c`
-payload because PowerShell otherwise treats semicolons as shell commands.
-Ruff checks use that interpreter, not a bare executable from `PATH`.
+The six base tasks invoke `.venv-win/Scripts/python.exe` through PowerShell
+`& (Join-Path $env:ZED_WORKTREE_ROOT ...)`. Zed inserts task variables without
+shell quotes, so the executable and `$env:ZED_FILE` stay single arguments when
+the checkout path contains spaces or apostrophes. The interpreter diagnostic
+quotes its full Python `-c` payload because PowerShell otherwise treats
+semicolons as shell commands. Ruff checks use that interpreter, not a bare
+executable from `PATH`.
 
 Two current-file pytest modes are intentionally distinct:
 
@@ -61,8 +64,10 @@ Two current-file pytest modes are intentionally distinct:
   addopts, including strict markers/config and importlib imports. It owns the
   `python-test` gutter tag, but is not the full CI merge gate.
 - `pytest: current test file (quick; project addopts disabled)` explicitly clears
-  addopts for diagnosis. Other ini policy, including warnings-as-errors, remains
-  active. A quick pass is not equivalent to a project-settings pass.
+  addopts for diagnosis and passes `-p no:benchmark`, because clearing addopts
+  would otherwise reload pytest-benchmark. Other ini policy, including
+  warnings-as-errors, remains active. A quick pass is not equivalent to a
+  project-settings pass.
 
 Both tasks keep the cache provider enabled and write to
 `.cache/pytest/windows`, already excluded from Git and Zed scanning. This isolates

@@ -81,7 +81,10 @@ def project_config_root(request: pytest.FixtureRequest) -> Path:
 
 
 def _project_json(root: Path, filename: str) -> Any:
-    return json.loads((root / filename).read_text(encoding="utf-8"))
+    path = root / filename
+    if root == ZED_ROOT and not path.is_file():
+        pytest.skip(f"Optional local Zed config is absent: {filename}")
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
 def _load_lane_module() -> dict[str, Any]:
@@ -338,27 +341,14 @@ def test_zed_tasks_use_venv_python_without_path_uv(project_config_root: Path) ->
     labels = [task["label"] for task in tasks]
 
     assert len(labels) == len(set(labels))
-    assert all(task["cwd"] == "$ZED_WORKTREE_ROOT" for task in tasks)
-
-    venv_python = "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe"
-    assert all(task["command"] == venv_python for task in tasks)
-    # No bare `uv` command — GUI PowerShell often has no uv on PATH.
-    assert all(task["command"] != "uv" for task in tasks)
-    assert "uv run" not in json.dumps(tasks)
 
     project_label = "pytest: current test file (project settings)"
     quick_label = "pytest: current test file (quick; project addopts disabled)"
-    tagged = [task for task in tasks if "python-test" in task.get("tags", [])]
-    assert [task["label"] for task in tagged] == [project_label]
-    assert tagged[0]["args"] == [
-        "-m",
-        "pytest",
-        "-o",
-        "cache_dir=.cache/pytest/windows",
-        "$ZED_FILE",
-    ]
-    assert tagged[0].get("env", {}).get("VCR_RECORD_MODE") == "none"
-    assert set(labels) == {
+    venv_python = (
+        "& (Join-Path $env:ZED_WORKTREE_ROOT '.venv-win\\Scripts\\python.exe')"
+    )
+    quoted_file = '"$env:ZED_FILE"'
+    base_labels = {
         "Python: active project interpreter",
         "Environment: verify",
         project_label,
@@ -366,16 +356,42 @@ def test_zed_tasks_use_venv_python_without_path_uv(project_config_root: Path) ->
         "Ruff: check current file",
         "Ruff: check formatting of current file",
     }
+    if project_config_root == TEMPLATE_ROOT:
+        assert set(labels) == base_labels
+    else:
+        assert base_labels <= set(labels)
     by_label = {task["label"]: task for task in tasks}
+    for label in base_labels:
+        assert by_label[label]["command"] == venv_python
+        assert by_label[label]["cwd"] == "$ZED_WORKTREE_ROOT"
+    # No bare `uv` command — GUI PowerShell often has no uv on PATH.
+    assert all(by_label[label]["command"] != "uv" for label in base_labels)
+    assert "uv run" not in json.dumps([by_label[label] for label in base_labels])
+
+    tagged = [task["label"] for task in tasks if "python-test" in task.get("tags", [])]
+    if project_config_root == TEMPLATE_ROOT:
+        assert tagged == [project_label]
+    else:
+        assert project_label in tagged
+    assert by_label[project_label]["args"] == [
+        "-m",
+        "pytest",
+        "-o",
+        "cache_dir=.cache/pytest/windows",
+        quoted_file,
+    ]
+    assert by_label[project_label].get("env", {}).get("VCR_RECORD_MODE") == "none"
     assert by_label[quick_label]["args"] == [
         "-m",
         "pytest",
         "-q",
         "-o",
         "addopts=",
+        "-p",
+        "no:benchmark",
         "-o",
         "cache_dir=.cache/pytest/windows",
-        "$ZED_FILE",
+        quoted_file,
     ]
     assert by_label["Environment: verify"]["args"] == [
         "scripts/engineering/dev/zed_env_doctor.py"
@@ -384,14 +400,14 @@ def test_zed_tasks_use_venv_python_without_path_uv(project_config_root: Path) ->
         "-m",
         "ruff",
         "check",
-        "$ZED_FILE",
+        quoted_file,
     ]
     assert by_label["Ruff: check formatting of current file"]["args"] == [
         "-m",
         "ruff",
         "format",
         "--check",
-        "$ZED_FILE",
+        quoted_file,
     ]
     serialized = json.dumps(tasks)
     assert "codex agent run" not in serialized
@@ -416,6 +432,16 @@ def test_zed_task_save_reveal_and_concurrency_policy(project_config_root: Path) 
         assert task.get("save") in VALID_SAVE, label
         assert task.get("reveal") in VALID_REVEAL, label
         assert task.get("hide") in VALID_HIDE, label
+        known_labels = {
+            "Python: active project interpreter",
+            "Environment: verify",
+            "pytest: current test file (project settings)",
+            "pytest: current test file (quick; project addopts disabled)",
+            "Ruff: check current file",
+            "Ruff: check formatting of current file",
+        }
+        if label not in known_labels:
+            continue
         assert task["hide"] == "never", label
         assert task.get("allow_concurrent_runs") is False, label
 
