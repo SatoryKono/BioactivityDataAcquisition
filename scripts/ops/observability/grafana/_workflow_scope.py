@@ -415,6 +415,7 @@ def _retain_selected_run_overview(payload: dict) -> None:
     _lift_overview_identity(payload)
     from scripts.ops.observability.grafana._overview_identity import (
         apply_overview_identity,
+        place_overview_evidence,
     )
 
     apply_overview_identity(payload)
@@ -423,6 +424,7 @@ def _retain_selected_run_overview(payload: dict) -> None:
     )
 
     stamp_audit_presentation(payload)
+    place_overview_evidence({p["id"]: p for p in payload["panels"]})
     domains = next(panel for panel in payload["panels"] if panel.get("id") == 9002)
     handoff = domains.get("fieldConfig", {}).get("defaults", {}).get("links") or []
     domains["links"] = [dict(link) for link in handoff]

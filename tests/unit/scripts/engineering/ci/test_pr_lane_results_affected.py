@@ -1772,6 +1772,25 @@ def test_security_inventory_reviews_route_to_source_qualification_tests(audit):
     )
 
 
+def test_dashboard_resource_review_keeps_bounded_source_qualification_routes() -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        ["configs/quality/external_resource_inventory_pr13168_review.json"],
+        repo_root=root,
+    )
+    assert {
+        "tests/architecture/test_external_resource_inventory_catalog.py",
+        "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+    } <= set(report["selected"])
+    assert report["covers_full_suite"] is False
+    assert report["activation"] == "not_applied"
+    with pytest.raises(ValueError, match="unmapped paths"):
+        build_shadow_compare(
+            ["configs/quality/external_resource_inventory_pr13168_unreviewed.json"],
+            repo_root=root,
+        )
+
+
 def test_hook_qualification_inputs_have_bounded_shadow_routes() -> None:
     root = Path(__file__).resolve().parents[5]
     expected = {

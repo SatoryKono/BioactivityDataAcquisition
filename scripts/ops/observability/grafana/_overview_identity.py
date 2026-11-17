@@ -649,6 +649,7 @@ def _ingestion_age_card() -> dict:
                 "instant": True,
                 "format": "time_series",
                 "legendFormat": "{{freshness}}",
+                "datasource": {"type": "prometheus", "uid": "prometheus"},
                 "expr": f'label_replace(({age}{condition}),"freshness","{label}","","")',
             }
             for index, (condition, label) in enumerate(branches)
@@ -698,17 +699,23 @@ def _ingestion_age_card() -> dict:
     }
 
 
+def place_overview_evidence(panels: dict) -> None:
+    """Keep the shared scope pass on the approved saved/current evidence layout."""
+    if 9604 in panels:
+        panels[9604]["gridPos"].update(x=0, y=2, w=5, h=3)
+    panels[9603]["gridPos"].update(x=0, y=5, w=10, h=5)
+    panels[9300]["gridPos"].update(x=0, y=10, w=10, h=8)
+    panels[99]["gridPos"].update(x=10, y=5, w=14, h=5)
+    panels[9002]["gridPos"].update(x=10, y=10, w=14, h=8)
+
+
 def apply_overview_evidence_clocks(payload, panels):
     """Separate saved verdicts, current alerts and complete alert evidence."""
     panels[9604]["title"] = "Review Saved Run Verdict"
     panels[9604]["description"] += (
         " This is the saved run assessment, not current fleet health or active alerts."
     )
-    panels[9604]["gridPos"].update(x=0, y=2, w=5, h=3)
-    panels[9603]["gridPos"].update(x=0, y=5, w=10, h=5)
-    panels[9300]["gridPos"].update(x=0, y=10, w=10, h=8)
-    panels[99]["gridPos"].update(x=10, y=5, w=14, h=5)
-    panels[9002]["gridPos"].update(x=10, y=10, w=14, h=8)
+    place_overview_evidence(panels)
     _provider_card(panels)
     health = build_fleet_alert_card(panels)
     payload["panels"] = [

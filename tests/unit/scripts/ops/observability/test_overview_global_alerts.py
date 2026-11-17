@@ -43,9 +43,17 @@ def test_global_alerts_retain_donor_query_and_complete_list() -> None:
         if rule.get("record") == metric
     )
     assert "".join(recorded.split()) == "".join(donor["targets"][0]["expr"].split())
-    assert summary["targets"] == [dict(donor["targets"][0], expr=f"topk(2, {metric})")]
-    assert summary["transformations"] == donor["transformations"]
-    assert summary["gridPos"] == {"x": 0, "y": 18, "w": 24, "h": 5}
+    assert summary["targets"] == [dict(donor["targets"][0], expr=metric)]
+    expected = deepcopy(donor["transformations"])
+    for transform in expected:
+        if transform["id"] == "organize":
+            transform["options"].setdefault("excludeByName", {}).update(
+                alert_runbook=True, pipeline_context=True, owner=True, next_step=True
+            )
+    assert summary["transformations"] == expected
+    assert all(t["id"] != "limit" for t in summary["transformations"])
+    assert summary["options"]["footer"]["enablePagination"] is True
+    assert summary["gridPos"] == {"x": 0, "y": 18, "w": 24, "h": 7}
     assert "repeat" not in summary
     assert panels[32005]["collapsed"] is True
     # A collapsed row adopts following standalone panels in Grafana Scenes.

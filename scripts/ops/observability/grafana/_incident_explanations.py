@@ -519,6 +519,7 @@ def add_stage_source_clocks(payload: dict) -> None:
             {
                 "refId": "A",
                 "expr": stage_clock_query(),
+                "datasource": {"type": "prometheus", "uid": "prometheus"},
                 "instant": True,
                 "range": False,
                 "format": "table",

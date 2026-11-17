@@ -768,6 +768,10 @@
               "instant": true,
               "format": "time_series",
               "legendFormat": "{{freshness}}",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
               "expr": "label_replace((max((time()-max by(pipeline,entity)(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}>0))>=0)<=86400),\"freshness\",\"Within 24h (observed only)\",\"\",\"\")"
             },
             {
@@ -775,6 +779,10 @@
               "instant": true,
               "format": "time_series",
               "legendFormat": "{{freshness}}",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
               "expr": "label_replace((max((time()-max by(pipeline,entity)(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}>0))>=0)>86400<=259200),\"freshness\",\"STALE 24-72h (observed)\",\"\",\"\")"
             },
             {
@@ -782,6 +790,10 @@
               "instant": true,
               "format": "time_series",
               "legendFormat": "{{freshness}}",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
               "expr": "label_replace((max((time()-max by(pipeline,entity)(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}>0))>=0)>259200),\"freshness\",\"STALE >72h (observed)\",\"\",\"\")"
             }
           ],

@@ -46,6 +46,41 @@ def _evaluate(tmp_path, fixture):
     return result
 
 
+def test_overview_alert_list_keeps_more_than_two_firing_alerts(tmp_path):
+    dashboard = json.loads(
+        Path("grafana/dashboards/bioetl-overview-v2.json").read_text()
+    )
+    panel = next(p for p in dashboard["panels"] if p["id"] == 2005)
+    query = panel["targets"][0]["expr"]
+    result = _evaluate(
+        tmp_path,
+        {
+            "rule_files": [],
+            "evaluation_interval": "1m",
+            "tests": [
+                {
+                    "interval": "1m",
+                    "input_series": [
+                        {
+                            "series": f'bioetl_incident_global_alerts{{alertname="BioETLTest{i}",state="FIRING"}}',
+                            "values": "1",
+                        }
+                        for i in range(3)
+                    ],
+                    "promql_expr_test": [
+                        {
+                            "expr": f"count({query})",
+                            "eval_time": "0m",
+                            "exp_samples": [{"labels": "{}", "value": 3}],
+                        }
+                    ],
+                }
+            ],
+        },
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
 def test_signal_drilldown_evaluates_current_operands_not_selected_history(tmp_path):
     dashboard = json.loads(
         Path("grafana/dashboards/bioetl-incident-v1.json").read_text()
