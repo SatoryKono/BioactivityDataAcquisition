@@ -71,6 +71,7 @@ AI_RUNTIME_GOVERNANCE_LINKS_TEST = (
     "tests/architecture/test_ai_runtime_governance_links.py"
 )
 DOCKER_RUNTIME_CONTRACT_TEST = "tests/architecture/test_docker_runtime_contracts.py"
+MEMORY_RAG_INDEXING_TEST = "tests/unit/memory/test_rag_indexing.py"
 TECH_DEBT_5847_5852_CLOSEOUT_TEST = (
     "tests/architecture/test_tech_debt_issues_5847_5852_closeout.py"
 )
@@ -206,6 +207,7 @@ EXPLICIT_SCRIPT_FALLBACK_PATHS = frozenset(
 NO_PARTIAL_TREE_TEST = "tests/unit/scripts/repo/test_check_no_partial_tree.py"
 HOOK_INSTALLATION_TEST = "tests/unit/scripts/test_hook_installation.py"
 SCOPED_CHECKS_TEST = "tests/unit/scripts/repo/test_scoped_checks.py"
+HOOK_RECEIPTS_TEST = "tests/unit/scripts/repo/test_hook_receipts.py"
 IUPHAR_STAGE0_TEST = "tests/unit/iuphar_target_class/test_stage0_manifest.py"
 
 
@@ -509,7 +511,7 @@ MEMORY_BASELINE_TEST_TARGETS: tuple[str, ...] = (
     "tests/unit/memory/test_query_facade.py",
     "tests/unit/memory/test_query_layer_ownership.py",
     "tests/unit/memory/test_rag_filters.py",
-    "tests/unit/memory/test_rag_indexing.py",
+    MEMORY_RAG_INDEXING_TEST,
     "tests/unit/memory/test_rag_validation.py",
     "tests/unit/memory/test_record_envelope.py",
     "tests/unit/memory/test_registry.py",
@@ -526,6 +528,11 @@ MEMORY_BASELINE_TEST_TARGETS: tuple[str, ...] = (
 
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    ".gitattributes": (
+        HOOK_RECEIPTS_TEST,
+        "tests/architecture/test_config_discrepancy_report_drift.py",
+        TECH_DEBT_5847_5852_CLOSEOUT_TEST,
+    ),
     "docs/03-guides/dashboards/contracts/run-explorer-http-catalog.yaml": (
         DOCUMENTATION_SYNC_TEST,
         GRAFANA_SELECTOR_CONTRACT_TEST,
@@ -539,7 +546,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "scripts/engineering/repo/scoped_checks.py": (
         SCOPED_CHECKS_TEST,
         "tests/unit/scripts/repo/test_scoped_checks_cache.py",
-        "tests/unit/scripts/repo/test_hook_receipts.py",
+        HOOK_RECEIPTS_TEST,
     ),
     "scripts/engineering/dev/pretest_guardrails.ps1": (SCOPED_CHECKS_TEST,),
     "scripts/engineering/dev/setup_bioetl_wsl.ps1": (
@@ -547,7 +554,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "docs/05-operations/runbooks/scoped-post-change-checks.md": (
         SCOPED_CHECKS_TEST,
-        "tests/unit/scripts/repo/test_hook_receipts.py",
+        HOOK_RECEIPTS_TEST,
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
     "docs/05-operations/runbooks/ai-closeout-wrapper.md": (
@@ -1403,6 +1410,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "configs/quality/external_resource_inventory_pr13113_main_f2f4_merge_review.json",
             "configs/quality/external_resource_inventory_pr13113_main_13118_review.json",
             "configs/quality/external_resource_inventory_pr13113_s5886_tip_review.json",
+            "configs/quality/external_resource_inventory_pr13133_platform_narrowing_review.json",
+            "configs/quality/external_resource_inventory_pr13133_main_66ef9357_review.json",
+            "configs/quality/external_resource_inventory_pr13133_main_c41cd6_review.json",
+            "configs/quality/external_resource_inventory_pr13133_accepted_main_review.json",
         ),
         (
             EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
@@ -1741,6 +1752,11 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         RUN_REPORT_CONTRACTS_TEST,
     ),
     ".github/workflows/docker.yml": (DOCKER_RUNTIME_CONTRACT_TEST,),
+    ".github/workflows/docker-publish.yml": (
+        DOCKER_RUNTIME_CONTRACT_TEST,
+        GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
+        GHA_DISABLED_MAP_TEST,
+    ),
     ".github/workflows/main-ghcr-publish.yml": (
         DOCKER_RUNTIME_CONTRACT_TEST,
         GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
@@ -1803,7 +1819,8 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     ".circleci/config.yml": ("tests/architecture/test_circleci_migration_contract.py",),
     "src/memory/dedup.py": ("tests/unit/memory/test_dedup.py",),
-    "src/memory/rag/chunking.py": ("tests/unit/memory/test_rag_indexing.py",),
+    "src/memory/rag/chunking.py": (MEMORY_RAG_INDEXING_TEST,),
+    "src/memory/rag/indexing.py": (MEMORY_RAG_INDEXING_TEST,),
     "configs/quality/mypy_diagnostic_baseline.json": (
         "tests/unit/scripts/engineering/ci/test_mypy_diagnostic_ratchet.py",
     ),

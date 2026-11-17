@@ -431,7 +431,7 @@ def test_github_bash_isolates_env_and_checks_identity(
         "import os,sys,json;print(json.dumps({'unrelated':'OPENAI_API_KEY' in os.environ,'github':'GITHUB_PERSONAL_ACCESS_TOKEN' in os.environ,'args':sys.argv[1:]}))",
         encoding="utf-8",
     )
-    # Exercise the synthetic native child, independent of machine-local routes.
+    # Match the PowerShell fixture: never attach the synthetic child to a user profile.
     routes = tmp_path / "github-routes.json"
     routes.write_text(json.dumps({"version": 1, "workspaces": []}), encoding="utf-8")
     env = {

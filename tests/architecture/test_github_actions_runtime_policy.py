@@ -803,7 +803,7 @@ def test_nightly_deterministic_lanes_stay_daily_until_shadow_acceptance() -> Non
 
 def test_syft_sbom_is_generated_on_release_and_ghcr_push() -> None:
     release = _load_yaml(RELEASE_WORKFLOW)
-    docker = _load_yaml(ROOT / ".github/workflows/docker.yml")
+    docker = _load_yaml(ROOT / ".github/workflows/docker-publish.yml")
     sbom_sha = "66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c"
     assert sbom_sha in policy.ALLOWED_USES["anchore/sbom-action"]
     release_uses = _step_uses(release, "build")
@@ -1314,7 +1314,7 @@ def test_scorecard_token_permissions_define_workflow_readonly_defaults() -> None
 def test_build_provenance_binds_release_files_and_published_ghcr_digest() -> None:
     """Provenance covers built files and the exact promoted manifest, with scoped OIDC."""
     release = _load_yaml(RELEASE_WORKFLOW)
-    docker = _load_yaml(ROOT / ".github/workflows/docker.yml")
+    docker = _load_yaml(ROOT / ".github/workflows/docker-publish.yml")
     action = "actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8"
     build = release["jobs"]["build"]
     publish = docker["jobs"]["docker-push"]
@@ -1338,13 +1338,13 @@ def test_build_provenance_binds_release_files_and_published_ghcr_digest() -> Non
     assert publish["steps"].index(push_step) < publish["steps"].index(image_attest)
     assert publish["environment"] == "ghcr-publish"
     assert publish["if"] == (
-        "always() && inputs.publish == true && "
         "needs.docker-publish-gate.result == 'success' && "
-        "needs.docker-publish-gate.outputs.current == 'true' && "
-        "(inputs.artifact-run-id != '' || needs.docker-complete.result == 'success')"
+        "needs.docker-publish-gate.outputs.current == 'true'"
     )
     assert release["permissions"] == docker["permissions"] == {"contents": "read"}
-    caller = _load_yaml(ROOT / ".github/workflows/main-integrity.yml")["jobs"]["docker"]
+    caller = _load_yaml(ROOT / ".github/workflows/main-ghcr-publish.yml")["jobs"][
+        "publish"
+    ]
     for permission in ("id-token", "attestations"):
         assert caller["permissions"][permission] == publish["permissions"][permission]
     for name, job in docker["jobs"].items():

@@ -53,8 +53,15 @@ def main() -> int:
     try:
         target_python = _preferred_python()
         command = [target_python, *sys.argv[1:]]
+        # A shared editable environment may point at a different worktree.
+        # Keep checks bound to this checkout while preserving caller imports.
+        child_env = os.environ.copy()
+        child_env["PYTHONPATH"] = os.pathsep.join(
+            [str(REPO_ROOT / "src"), str(REPO_ROOT)]
+            + ([child_env["PYTHONPATH"]] if child_env.get("PYTHONPATH") else [])
+        )
         completed = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv
-            ensure_safe_cli_argv(command), cwd=REPO_ROOT, check=False
+            ensure_safe_cli_argv(command), cwd=REPO_ROOT, check=False, env=child_env
         )
     except (ValueError, OSError):
         sys.stderr.write(

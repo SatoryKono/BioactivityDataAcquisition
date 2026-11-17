@@ -3,7 +3,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: mutation-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 # Push and pull_request stay omitted so a code change cannot start four

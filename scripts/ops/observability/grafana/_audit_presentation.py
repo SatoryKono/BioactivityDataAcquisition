@@ -203,6 +203,16 @@ def _expand_coverage_row(row: dict[str, Any]) -> tuple[int, int]:
         if panel.get("id") in {9102, 9491}:
             panel["gridPos"]["h"] = max(8, panel["gridPos"]["h"])
             panel["options"]["orientation"] = "vertical"
+            # Retain per-field reduction for NaN and empty fields before
+            # explicitly displaying the resulting individual signal rows.
+            reduction = {
+                "id": "reduce",
+                "options": {"reducers": ["lastNotNull"], "mode": "reduceFields"},
+            }
+            transformations = panel.setdefault("transformations", [])
+            if reduction not in transformations:
+                transformations.append(reduction)
+            panel["options"].setdefault("reduceOptions", {})["values"] = True
     new_bottom = max(
         (p["gridPos"]["y"] + p["gridPos"]["h"] for p in children),
         default=old_bottom,
@@ -357,6 +367,8 @@ def _adapt_overview(dashboard: dict) -> None:
         panels[panel_id]["gridPos"].update(x=0, w=10)
     for panel_id in (99, 9002):
         panels[panel_id]["gridPos"].update(x=10, w=14)
+    # The narrower domain column wraps reasons; keep the native height unchanged.
+    panels[9002]["gridPos"]["h"] = 9
     panels[9604]["gridPos"]["h"] = 2
     panels[9603]["gridPos"].update(y=4, h=4)
     panels[9300]["gridPos"]["y"] = 8

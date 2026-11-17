@@ -16,7 +16,10 @@ ROOT = Path(__file__).resolve().parents[3]
 
 
 @pytest.mark.parametrize("exit_code", [0, 7])
-def test_powershell_51_preserves_script_bytes_and_native_arguments(tmp_path, exit_code):
+@pytest.mark.parametrize("utf8_console", [False, True])
+def test_powershell_51_preserves_script_bytes_and_native_arguments(
+    tmp_path, exit_code, utf8_console
+):
     """Exercise the declared Windows runtime without invoking WSL or networking."""
     powershell = Path(os.environ.get("SystemRoot", "C:/Windows")) / (
         "System32/WindowsPowerShell/v1.0/powershell.exe"
@@ -34,6 +37,12 @@ def test_powershell_51_preserves_script_bytes_and_native_arguments(tmp_path, exi
     harness = tmp_path / "transport.ps1"
     harness.write_text(
         r"""$ErrorActionPreference = 'Stop'
+if ($env:AUDIT_UTF8 -eq '1') {
+    [Console]::InputEncoding = New-Object System.Text.UTF8Encoding($true)
+} else {
+    [Console]::InputEncoding = [Text.Encoding]::GetEncoding(437)
+}
+$beforeCodePage = [Console]::InputEncoding.CodePage
 Add-Type -OutputAssembly $env:AUDIT_EXE -OutputType ConsoleApplication -TypeDefinition @'
 using System;
 using System.IO;
@@ -61,6 +70,7 @@ foreach ($name in @('Convert-ToNativeArgument', 'Invoke-WslScript')) {
 }
 $Distro = $env:AUDIT_DISTRO
 $script = [IO.File]::ReadAllText($env:AUDIT_PAYLOAD, [Text.Encoding]::UTF8)
+$beforeTempFiles = @([IO.Directory]::GetFiles([IO.Path]::GetTempPath()))
 try {
     $result = Invoke-WslScript -Script $script -Executable $env:AUDIT_EXE
     if ($env:AUDIT_EXIT -ne '0') { throw 'Expected native failure' }
@@ -68,10 +78,16 @@ try {
 } catch {
     if ($env:AUDIT_EXIT -eq '0' -or $_.Exception.Message -notmatch 'exit code 7: fixture-diagnostic') { throw }
 }
+if ([Console]::InputEncoding.CodePage -ne $beforeCodePage) { throw 'Console encoding changed' }
+$leftovers = @([IO.Directory]::GetFiles([IO.Path]::GetTempPath()) |
+    Where-Object { $_ -notin $beforeTempFiles })
+if ($leftovers.Count) { throw 'Transport temporary files were not removed' }
 """,
         encoding="utf-8-sig",
     )
     distro = 'Ubuntu space "quoted" кириллица\\'
+    native_temp = tmp_path / "native-temp"
+    native_temp.mkdir()
     env = dict(
         os.environ,
         AUDIT_EXE=str(fake),
@@ -81,12 +97,22 @@ try {
         AUDIT_EXIT=str(exit_code),
         AUDIT_DISTRO=distro,
         AUDIT_PAYLOAD=str(payload_path),
+        AUDIT_UTF8="1" if utf8_console else "0",
+        TEMP=str(native_temp),
+        TMP=str(native_temp),
     )
+    # Give this encoding probe its own hidden console; never change a console
+    # shared with another agent or the caller's terminal.
+    startup = subprocess.STARTUPINFO()
+    startup.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+    startup.wShowWindow = subprocess.SW_HIDE
     result = subprocess.run(
         [str(powershell), "-NoProfile", "-NonInteractive", "-File", str(harness)],
         env=env,
         capture_output=True,
         timeout=30,
+        startupinfo=startup,
+        creationflags=subprocess.CREATE_NEW_CONSOLE,
     )
     assert result.returncode == 0, result.stderr.decode(errors="replace")
     assert (tmp_path / "stdin.bin").read_bytes() == payload.replace(

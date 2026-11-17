@@ -832,8 +832,6 @@ jobs:
       id-token: write
       attestations: write
     uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/docker.yml@84548f8bfed680b9415fc6855d6be059ffd9d1ab
-    with:
-      caller-sha: ${{ needs.classify-changes.outputs.head_sha }}
 
   pr-gate-complete:
     name: pr-gate-complete

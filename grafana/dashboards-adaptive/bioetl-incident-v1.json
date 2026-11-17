@@ -3325,7 +3325,17 @@
                   }
                 }
               ],
-              "transformations": [],
+              "transformations": [
+                {
+                  "id": "reduce",
+                  "options": {
+                    "reducers": [
+                      "lastNotNull"
+                    ],
+                    "mode": "reduceFields"
+                  }
+                }
+              ],
               "options": {
                 "colorMode": "value",
                 "graphMode": "none",
@@ -3336,7 +3346,7 @@
                     "lastNotNull"
                   ],
                   "fields": "",
-                  "values": false
+                  "values": true
                 },
                 "textMode": "value_and_name",
                 "text": {
@@ -3580,7 +3590,17 @@
                   }
                 }
               ],
-              "transformations": [],
+              "transformations": [
+                {
+                  "id": "reduce",
+                  "options": {
+                    "reducers": [
+                      "lastNotNull"
+                    ],
+                    "mode": "reduceFields"
+                  }
+                }
+              ],
               "options": {
                 "colorMode": "value",
                 "graphMode": "none",
@@ -3591,7 +3611,7 @@
                     "lastNotNull"
                   ],
                   "fields": "",
-                  "values": false
+                  "values": true
                 },
                 "textMode": "value_and_name",
                 "text": {

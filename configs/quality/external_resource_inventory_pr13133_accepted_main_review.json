@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "d1ebc8a10443c89326a2f644a4f779091f03d9a9",
+  "source_ref": "42c7eabd793aef198de2fecfedf614892aa9927c",
+  "source_reviews": {
+    "src/bioetl/infrastructure/export/csv_exporter.py": "Reviewed the complete delta from catalog source 957b1bc455ffe9430884bf1a9516956ccd002dc0 to merged immutable source 42c7eabd793aef198de2fecfedf614892aa9927c. The CSV module is byte-identical after LF normalization to accepted main 7e1cbcbd82ef156b29b12cec0947586d0d1a7b37. This is the accepted extraction of the existing table-name rejection predicate into _invalid_table_name; the complete CsvExporter class and _seed_raw_sidecar_if_missing, _export_root and _resolve_table_export_paths ASTs are identical. All resource acquisition, ownership, atomic/append operations, raw-sidecar handling, cleanup and census remain unchanged. Requalification only relocates unchanged owning references. Other product files are unchanged from the pinned catalog source. Retain all historical dispositions and runtime NOT_RUN_12553; no resource-free exclusion or new execution is claimed."
+  }
+}
