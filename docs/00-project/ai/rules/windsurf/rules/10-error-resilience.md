@@ -27,9 +27,9 @@ Non-retriable auth/validation errors **MUST NOT** retry. Temporary 429/502/504/s
 | --------- | ------- |
 | Max attempts | 3 |
 | Multiplier | 2.0 (1s, 2s, 4s…) |
-| Jitter | 0.1–0.5s SHOULD |
+| Jitter | fraction of the backoff, default range 0.1–0.5 |
 
-`RetryConfig.calculate_delay` uses hash jitter (`int(digest[:8], 16) / 0xFFFFFFFF`), not `random`. `RetryConfig` has no `deterministic` field. Jitter must not affect reproducible business output.
+`RetryConfig.calculate_delay` maps `int(digest[:8], 16) / 0xFFFFFFFF` into `jitter_range` (default 0.1–0.5, a fraction of the backoff, not seconds) and sleeps `delay * (1 + jitter_amount)`, capped by `max_delay`. A 2s backoff therefore adds 0.2–1s before that cap. `RetryConfig` has no `deterministic` field. Jitter must not affect reproducible business output.
 
 ## Circuit Breaker
 

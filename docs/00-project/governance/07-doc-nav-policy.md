@@ -130,7 +130,7 @@ Manual CI control:
   decision. The commands below are the local way to run the same checks.
 - Commands:
   - `uv run python -m scripts.docs check-drift --runtime-mirrors --freshness`
-  - `uv run python -m scripts.docs check-kpi`
+  - `uv run python -m scripts.docs check-kpi --fail-on-breach`
 - Outputs:
   - `reports/docs-kpi/docs-kpi-weekly.json`
   - `reports/docs-kpi/docs-kpi-weekly.md`
