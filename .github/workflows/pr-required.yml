@@ -19,13 +19,13 @@ name: PR Gate Complete
 # class-lane checks out github.sha on pull_request and workflow_dispatch.
 # head_sha stays a diff argument. A job output is not a checkout ref, so it
 # cannot select the tree that writes the default-branch cache.
-# fast-governance checks out the PR head and, after setup, runs the
-# repo-side pin checker. That checker is not an independent trust boundary:
-# a hostile PR can rewrite the coordinator, the checker, and the registry
-# together. The four setup-python-uv steps are pinned to trusted SHA
-# e890a12b5232f1feb50722de6433c7391bc30a7d (#12425), so a PR head cannot
-# retarget those executions. Residual risk remains until an org ruleset
-# requires workflows from the default branch. This does not close #12046.
+# fast-governance checks out the pull request tree for content gates.
+# The pin checker is copied from a checkout of the default branch, and that
+# copy is the file that runs. The pull request tree does not supply it.
+# The four setup-python-uv steps stay pinned to trusted SHA
+# e890a12b5232f1feb50722de6433c7391bc30a7d (#12425). The workflow file for
+# pull_request is still the merge ref. #12046 stays open until an org
+# ruleset requires that workflow from the default branch.
 
 on:
   pull_request:
@@ -169,10 +169,35 @@ jobs:
           python-version: "3.12"
           uv-extras: "dev docs"
 
-      # PR-head checkout. Not classify, and not the base-ref aggregate checkout.
+      # Default-branch file. The pull request checkout above stays the
+      # workspace for the content gates and is not the pin checker.
+      - name: Checkout default branch for pin gate
+        id: checkout-pin-gate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+          ref: ${{ github.event.repository.default_branch }}
+          path: .gha-default-branch-pin-gate
+          sparse-checkout: scripts/engineering/repo
+          sparse-checkout-cone-mode: true
+
       - name: Check reusable workflow pins
         id: check-pins
-        run: uv run --frozen --no-build python scripts/engineering/repo/check_github_actions_runtime_policy.py --pr-required-pins --check
+        run: |
+          set -euo pipefail
+          gate="${GITHUB_WORKSPACE}/.gha-default-branch-pin-gate"
+          checker="${RUNNER_TEMP}/check_github_actions_runtime_policy.py"
+          cleanup() {
+            rm -rf "${gate}"
+          }
+          trap cleanup EXIT
+          cp "${gate}/scripts/engineering/repo/check_github_actions_runtime_policy.py" "${checker}"
+          uv run --frozen --no-build python "${checker}" --pr-required-pins --check
+
+      - name: Remove default-branch pin gate checkout
+        if: always()
+        run: rm -rf "${GITHUB_WORKSPACE}/.gha-default-branch-pin-gate"
 
       - name: Validate repository root allowlist
         id: cleanliness

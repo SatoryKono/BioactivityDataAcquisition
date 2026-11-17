@@ -1404,7 +1404,8 @@ def test_main_docker_validation_only_decouples_main_push_from_publish_approval()
         "docker-push"
     ]
     assert publish["environment"] == "ghcr-publish"
-    assert publish["concurrency"]["group"] == "docker-ghcr-push-${{ github.run_id }}"
+    assert publish["concurrency"]["group"] == "docker-ghcr-push-main"
+    assert "github.run_id" not in str(publish["concurrency"]["group"])
     assert publish["concurrency"]["cancel-in-progress"] is False
     rendered = json.dumps(publish)
     assert "Guard publish target is current main HEAD" in rendered

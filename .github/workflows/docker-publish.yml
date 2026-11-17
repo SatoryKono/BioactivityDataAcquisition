@@ -67,8 +67,9 @@ jobs:
     environment: ghcr-publish
     env:
       TESTED_SHA: ${{ inputs.source-sha }}
+    # One queue for every main publish. cancel-in-progress stays false.
     concurrency:
-      group: docker-ghcr-push-${{ github.run_id }}
+      group: docker-ghcr-push-main
       cancel-in-progress: false
     permissions:
       contents: read
