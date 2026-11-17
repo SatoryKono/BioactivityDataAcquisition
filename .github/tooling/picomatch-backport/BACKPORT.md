@@ -1,7 +1,7 @@
 # Local picomatch security backport
 
 This is a private BioETL build, **not an upstream release**. Version
-`4.0.8-bioetl.13` identifies modified code based on upstream `4.0.7`.
+`4.0.8-bioetl.14` identifies modified code based on upstream `4.0.7`.
 
 It addresses GHSA-fc5q-39xc-vjpf / CVE-2026-112366 with a **fail-closed**
 boundary:
@@ -20,8 +20,15 @@ boundary:
    Closed character classes and double-quoted `+(…)` / `*(…)` are not treated as
    nested repeated extglobs; single quotes and unclosed `[` stay literal and do
    not hide later `+(…)` / `*(…)`.
-7. At most one compiled `+(word)` / `*(word)` per pattern; further sequential
-   copies stay literal so they cannot nest unbounded quantifiers.
+7. At most one compiled quantified extglob (`+(word)`, `*(word)`, or
+   `?(...)`) per pattern; further sequential copies stay literal. Raw `?`
+   after a parenthesized group is also literal.
+8. Patterns compiling multiple overlapping alternative-bearing groups use whole-pattern
+   literal fallback. This includes compositions of raw parentheses, `@(...)`,
+   and `{...,...}`; a single overlapping group and disjoint fixed-word alternatives stay supported.
+
+These restrictions intentionally narrow complex glob semantics. Ordinary
+file-extension and path globs remain supported; consumers are regression-tested.
 
 Third-party sources ship **only** in the npm archive.
 **No OSV advisory is ignored or suppressed.**
