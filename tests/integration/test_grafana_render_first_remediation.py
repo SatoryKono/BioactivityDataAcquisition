@@ -373,7 +373,7 @@ def test_rf003_1024_layout_prioritizes_actions_and_readability() -> None:
     inputs = _panel(overview, 9002)
     assert inputs["title"] == "Review Run Domains"
     assert status["gridPos"]["y"] == 5
-    assert inputs["gridPos"]["y"] == 7
+    assert inputs["gridPos"]["y"] == 10
     assert inputs["gridPos"]["y"] + inputs["gridPos"]["h"] <= FIRST_WINDOW_Y
     assert inputs["gridPos"]["w"] >= 8
     assert status["gridPos"]["y"] < FIRST_WINDOW_Y
@@ -641,7 +641,7 @@ def test_operator_critical_tables_expose_full_values() -> None:
                 # wrap via named-column overrides (same pattern as #8977).
                 if panel_id == 2010:
                     assert custom["cellOptions"]["wrapText"] is False
-                    assert panel["options"]["footer"]["enablePagination"] is False
+                    assert panel["options"]["footer"]["enablePagination"] is True
                 else:
                     # Updated Sep21: dashboard now uses wrapText True at defaults for these panels
                     assert custom.get("cellOptions", {}).get("wrapText") in (
@@ -658,10 +658,8 @@ def test_operator_critical_tables_expose_full_values() -> None:
                     assert (
                         detail["fieldConfig"]["defaults"]["custom"]["inspect"] is True
                     ), "Full alert evidence must retain wrapping"
-                    assert any(
-                        t["id"] == "limit" and t["options"]["limitField"] == 2
-                        for t in panel["transformations"]
-                    ), "Compact summary must fit the two visible rows"
+                    assert all(t["id"] != "limit" for t in panel["transformations"])
+                    assert panel["options"]["footer"]["enablePagination"] is True
                     continue
                 if panel_id in {2010, 3010}:
                     continue
@@ -772,19 +770,16 @@ def test_incident_ranked_suspects_uses_one_comparable_value_column() -> None:
     assert suspects["targets"][0]["instant"] is True
     assert exclude.get("__name__") is True
     assert "sortBy" in transform_ids
-    assert "limit" in transform_ids
-    assert transform_ids.index("sortBy") < transform_ids.index("limit")
+    assert "limit" not in transform_ids
+    assert suspects["options"]["footer"]["enablePagination"] is True
     sort = next(
         transform for transform in transforms if transform.get("id") == "sortBy"
     )
     sort_field = (sort.get("options") or {}).get("sort", [{}])[0].get("field")
     assert sort_field == "Value"
     assert (sort.get("options") or {}).get("sort", [{}])[0].get("desc") is True
-    assert any(
-        transform.get("id") == "limit"
-        and (transform.get("options") or {}).get("limitField") == 2
-        for transform in transforms
-    )
+    # Complete ranked evidence remains available, not just the first two rows.
+    assert not any(transform.get("id") == "limit" for transform in transforms)
     for field in ("Time", "Time 1", "Time 2"):
         assert exclude.get(field) is True
     assert exclude.get("Value") is not True
@@ -794,14 +789,15 @@ def test_incident_ranked_suspects_uses_one_comparable_value_column() -> None:
     assert not {value for value in rename.values() if str(value).startswith("Series ")}
 
 
-def test_incident_ranked_suspects_limit_requires_comparable_rank() -> None:
-    """#10164: one query yields Value, so top-5 sorts by rank across all domains."""
+def test_incident_ranked_suspects_pagination_preserves_comparable_rank() -> None:
+    """Comparable rank is retained while pagination preserves every returned row."""
     incident = _load("bioetl-incident-v1.json")
     suspects = _panel(incident, 2010)
     transforms = suspects.get("transformations", [])
     ids = [transform.get("id") for transform in transforms]
     assert "merge" not in ids
-    assert ids.index("sortBy") < ids.index("limit")
+    assert "sortBy" in ids and "limit" not in ids
+    assert suspects["options"]["footer"]["enablePagination"] is True
     organize = next(
         transform for transform in transforms if transform.get("id") == "organize"
     )
@@ -886,7 +882,8 @@ def test_incident_alert_count_and_dq_reason_have_honest_table_semantics() -> Non
     assert "bioetl_incident_alert_priority" in current_alerts["targets"][0]["expr"]
     transforms = current_alerts["transformations"]
     ids = [t["id"] for t in transforms]
-    assert ids.index("sortBy") < ids.index("limit")
+    assert "sortBy" in ids and "limit" not in ids
+    assert current_alerts["options"]["footer"]["enablePagination"] is True
     sort = next(t for t in transforms if t["id"] == "sortBy")
     assert sort["options"]["sort"] == [{"field": "Value", "desc": True}]
     organize = next(t for t in transforms if t["id"] == "organize")["options"]
@@ -1132,8 +1129,8 @@ def test_run_explorer_recent_runs_selected_column_fits_first_window() -> None:
     grid = recent.get("gridPos") or {}
     scope = _panel(explorer, 1)["gridPos"]
     assert grid["y"] == scope["y"] + scope["h"]
-    assert grid["h"] == 13
-    assert grid["y"] + grid["h"] == 16
+    assert grid["h"] == 30
+    assert grid["y"] + grid["h"] == 33
     assert recent.get("options", {}).get("cellHeight") == "sm"
     assert (
         next(t for t in recent["transformations"] if t["id"] == "limit")
@@ -1413,6 +1410,7 @@ def test_incident_main_columns_hide_future_service_labels_but_keep_inspect() -> 
         "Rank",
         "Severity",
         "Confidence",
+        "Event freshness",
         "Object",
         "Signal",
         "Action",

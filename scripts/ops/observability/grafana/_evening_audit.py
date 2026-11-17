@@ -148,7 +148,7 @@ def _urgency_label(panel: dict) -> None:
             "matcher": {"id": "byName", "options": "Event freshness"},
             "properties": [
                 {"id": "custom.hidden", "value": False},
-                {"id": "custom.width", "value": 220},
+                {"id": "custom.width", "value": 140},
                 {
                     "id": "mappings",
                     "value": [

@@ -87,6 +87,7 @@ def add_stage_source_clocks(payload: dict) -> None:
                 "custom": {
                     "align": "left",
                     "minWidth": 50,
+                    "inspect": True,
                     "wrapText": True,
                     "cellOptions": {"type": "auto", "wrapText": True},
                 },
@@ -130,8 +131,8 @@ def add_stage_source_clocks(payload: dict) -> None:
         "options": {
             "showHeader": True,
             "cellHeight": "lg",
-            "enablePagination": False,
-            "footer": {"enablePagination": False},
+            "enablePagination": True,
+            "footer": {"enablePagination": True},
         },
     }
     row = next(p for p in payload["panels"] if p["id"] == 2099)

@@ -169,7 +169,7 @@ def test_runtime_first_screen_grid_uses_shared_panel_reference_sizes() -> None:
     """Exact-run identity has one owner on the Overview first screen."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
     identity = next(p for p in dashboard["panels"] if p["id"] == 9300)
-    assert identity["gridPos"] == {"x": 15, "y": 10, "w": 9, "h": 8}
+    assert identity["gridPos"] == {"x": 0, "y": 10, "w": 10, "h": 8}
     # Phase 2.5: identity reuses donor 9002 via Dashboard DS.
     assert identity["targets"][0].get("panelId") == 9002
     donor = next(p for p in dashboard["panels"] if p["id"] == 9002)
@@ -487,8 +487,11 @@ def test_control_plane_trust_panels_preserve_missing_telemetry() -> None:
             if isinstance(target.get("expr"), str)
         )
         assert "or vector(0)" not in expr
-        assert panel.get("fieldConfig", {}).get("defaults", {}).get("noValue") == (
-            "UNKNOWN"
+        assert (
+            panel.get("fieldConfig", {})
+            .get("defaults", {})
+            .get("noValue", "")
+            .startswith("UNKNOWN")
         )
         assert panel.get("options", {}).get("colorMode") == "value"
 

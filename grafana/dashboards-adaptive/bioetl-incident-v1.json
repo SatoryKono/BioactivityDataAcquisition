@@ -1158,7 +1158,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 220
+                "value": 140
               },
               {
                 "id": "mappings",
@@ -2839,6 +2839,7 @@
               "custom": {
                 "align": "left",
                 "minWidth": 50,
+                "inspect": true,
                 "wrapText": true,
                 "cellOptions": {
                   "type": "auto",
@@ -2966,9 +2967,9 @@
               "options": {
                 "showHeader": true,
                 "cellHeight": "lg",
-                "enablePagination": false,
+                "enablePagination": true,
                 "footer": {
-                  "enablePagination": false
+                  "enablePagination": true
                 }
               }
             }
@@ -12049,7 +12050,7 @@
                   },
                   {
                     "id": "custom.width",
-                    "value": 220
+                    "value": 140
                   },
                   {
                     "id": "mappings",
