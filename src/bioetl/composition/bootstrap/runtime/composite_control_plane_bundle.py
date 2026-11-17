@@ -41,7 +41,9 @@ from bioetl.composition.factories.pipeline.assembler import (
     create_pipeline_factory,
 )
 from bioetl.composition.factories.pipeline.registry import chembl_target_factory
-from bioetl.composition.factories.dq.composite_validation import resolve_target_table_paths
+from bioetl.composition.factories.dq.composite_validation import (
+    resolve_target_table_paths,
+)
 from bioetl.composition.runtime_builders.observability_builder import (
     build_observability_bundle,
 )
@@ -62,6 +64,9 @@ from bioetl.infrastructure.config.pipeline_config_api import (
 )
 from bioetl.infrastructure.config.settings_api import ObservabilitySettings, Settings
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+from bioetl.infrastructure.schemas.pipeline_contract_policy import (
+    PipelineContractPolicy,
+)
 from bioetl.infrastructure.storage.target_fk_repair import (
     RecoveredTargetSource,
     TargetRepairBaseline,
@@ -199,12 +204,17 @@ async def prepare_target_fk_repair(request: TargetFKRepairRequest) -> Path:
     paths. It does not replace the transformer, normalizer, filters, schemas,
     identity/hash generator, or Silver/Gold writers with test doubles.
     """
+    if request.repo_root.resolve(strict=True) != Path.cwd().resolve():
+        raise ValueError("recovery repo_root must match the active contract root")
     baseline, source, destination = _prepare_inputs(request)
     config = load_pipeline_config_from_root(
         "chembl_target", configs_root=request.repo_root / "configs"
     )
     if config.target_classification.mode != "off":
         raise ValueError("V30 recovery requires classification mode off")
+    # The loader's public cache is keyed only by provider/entity. Recovery must
+    # read this root even if another root was loaded earlier in this process.
+    load_pipeline_contract_policy.cache_clear()
     contract = load_pipeline_contract_policy("chembl", "target")
     if contract.active_version != "3.0.0" or contract.write_versions != ["3.0.0"]:
         raise ValueError("V30 recovery requires the single 3.0.0 write contract")
@@ -252,7 +262,7 @@ async def _execute_isolated_recovery(
     request: TargetFKRepairRequest,
     config: PipelineYamlConfig,
     settings: Settings,
-    contract: object,
+    contract: PipelineContractPolicy,
     configuration_path: Path,
     source: RecoveredTargetSource,
     baseline: TargetRepairBaseline,

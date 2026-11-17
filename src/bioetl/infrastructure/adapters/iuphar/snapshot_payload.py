@@ -11,7 +11,8 @@ from iuphar_target_class.policy import PLAN_VERSION
 from iuphar_target_class.stage0.io import canonical_json_bytes
 
 from ._manifest import referenced_path, sha256
-from ._official_targets_csv import OfficialProjection, project_official_export
+from ._official_target_projection import project_official_export
+from ._official_targets_csv import OfficialProjection
 from .snapshot_evidence import SourceEvidence, load_source_evidence
 
 SNAPSHOT_FORMAT = "gtopdb_target_species_payload_v2"

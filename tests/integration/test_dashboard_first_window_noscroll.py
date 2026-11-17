@@ -19,6 +19,7 @@ only text/stat/table. Overflow-clip is not a fix. Allowlist must stay empty.
 from __future__ import annotations
 
 import re
+from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
@@ -29,6 +30,7 @@ from tests.integration._dashboard_layout_budgets import (
     FIRST_WINDOW_OVERFLOW_ALLOWLIST,
     FIRST_WINDOW_Y,
     HORIZONTAL_SCROLL_ALLOWLIST,
+    STRADDLE_ALLOWLIST,
     is_first_window_panel,
     select_first_window_panels,
 )
@@ -57,13 +59,10 @@ def test_bounded_incident_summary_uses_wrapped_row_pagination() -> None:
         path for path in get_dashboard_files() if path.stem == "bioetl-incident-v1"
     )
     panel = next(p for p in load_dashboard(source)["panels"] if p["id"] == 2010)
-    # Two-row summaries fit h=5; full lists remain linked without a row limit.
-    assert panel["options"]["footer"].get("enablePagination") is False
+    # Pagination bounds the viewport while retaining all current suspects.
+    assert panel["options"]["footer"].get("enablePagination") is True
     assert panel["options"]["cellHeight"] == "sm"
-    assert any(
-        t["id"] == "limit" and t["options"]["limitField"] == 2
-        for t in panel["transformations"]
-    )
+    assert not any(t["id"] == "limit" for t in panel["transformations"])
 
 
 def _html_content(panel: dict[str, Any]) -> str:
@@ -118,7 +117,7 @@ def _first_window_scroll_violations(path: Path, dashboard: dict[str, Any]) -> li
         panel_id = panel.get("id")
         grid = panel.get("gridPos") or {}
         bottom = int(grid.get("y", 0)) + int(grid.get("h", 0))
-        if bottom > FIRST_WINDOW_Y:
+        if bottom > FIRST_WINDOW_Y and (path.name, panel_id) not in STRADDLE_ALLOWLIST:
             violations.append(
                 f"{path.name}:id={panel_id} first-window bottom "
                 f"{bottom} > FIRST_WINDOW_Y={FIRST_WINDOW_Y}"
@@ -172,6 +171,36 @@ def test_first_window_has_no_internal_scroll(dashboard_path: Path) -> None:
 def test_first_window_overflow_allowlists_stay_empty() -> None:
     assert FIRST_WINDOW_OVERFLOW_ALLOWLIST == {}
     assert HORIZONTAL_SCROLL_ALLOWLIST == {}
+
+
+def test_page_scroll_catalog_still_rejects_internal_overflow() -> None:
+    """The operator's page-scroll decision does not permit inner scroll/clip."""
+    path = Path("grafana/dashboards/bioetl-run-explorer-v1.json")
+    dashboard = deepcopy(load_dashboard(path))
+    panel = next(p for p in dashboard["panels"] if p["id"] == 3010)
+    assert not _first_window_scroll_violations(path, dashboard)
+    panel["options"]["overflowY"] = "scroll"
+    assert any(
+        "JSON overflow" in hit
+        for hit in _first_window_scroll_violations(path, dashboard)
+    )
+
+
+def test_twenty_row_catalog_has_native_row_capacity_without_pagination() -> None:
+    """36px Grafana small rows need actual panel space, not just a limit=20 URL."""
+    from tests.integration._dashboard_layout_budgets import panel_declared_row_cap
+
+    for profile in ("dashboards", "dashboards-adaptive"):
+        path = Path(f"grafana/{profile}/bioetl-run-explorer-v1.json")
+        panel = next(p for p in load_dashboard(path)["panels"] if p["id"] == 3010)
+        assert panel_declared_row_cap(panel) == 20
+        assert panel["options"]["cellHeight"] == "sm"
+        assert not panel["options"].get("enablePagination", False)
+        assert not panel["options"].get("footer", {}).get("enablePagination", False)
+        # Grafana grid: 30px row + 8px gutter, no trailing gutter. Reserve
+        # 64px for a wrapped header and 40px for panel title/body chrome.
+        panel_px = panel["gridPos"]["h"] * 38 - 8
+        assert panel_px >= 20 * 36 + 64 + 40
 
 
 def test_containment_types_cover_every_shipped_first_window_panel() -> None:

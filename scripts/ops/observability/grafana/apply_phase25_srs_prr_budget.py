@@ -25,6 +25,7 @@ from typing import Any
 
 from scripts.ops.observability.grafana._run_selection_context import (
     RUN_SELECTION_CONTEXT,
+    _TIMESTAMP_SECONDS,
 )
 from scripts.ops.observability.grafana.render_nav_bus import write_dashboard_source
 
@@ -184,25 +185,6 @@ def _tag_rows(expr: str, frame: str) -> str:
     return f"$map({expr}, function($row){{$merge([$row, {{'{FRAME}': '{frame}'}}])}})"
 
 
-# Share the offset-safe parser with Incident; never compare missing dates.
-_TIMESTAMP_SECONDS = (
-    "$secs := function($t){( "
-    "$tail := $substring($t, 19); "
-    "$rest := $substring($tail, 0, 1) = '.' ? $substringAfter($tail, '.') : ''; "
-    "$zone := $contains($rest, 'Z') ? 'Z' : ($contains($rest, 'z') ? 'z' : "
-    "($contains($rest, '+') ? '+' : '-')); "
-    "$digits := $rest != '' ? $substringBefore($rest, $zone) : ''; "
-    "$frac := $digits != '' ? $number('0.' & $digits) : 0; "
-    "$sign := $contains($tail, '+') ? 1 : ($contains($tail, '-') ? -1 : 0); "
-    "$off := $sign = 0 ? '' : ($contains($tail, '+') ? $substringAfter($tail, '+') : "
-    "$substringAfter($tail, '-')); "
-    "$oh := $off != '' ? $number($substring($off, 0, 2)) : 0; "
-    "$om := $length($off) >= 4 ? $number($substring($off, $contains($off, ':') ? 3 : 2, 2)) : 0; "
-    "$toMillis($substring($t, 0, 10))/1000 + $number($substring($t,11,2))*3600 "
-    "+ $number($substring($t,14,2))*60 + $number($substring($t,17,2)) + $frac "
-    "- $sign * ($oh*3600 + $om*60) )}; "
-)
-
 # --- Overview multi-section JSONata (single SRS HTTP) ---------------------
 
 _OV_DOMAINS = (
@@ -232,7 +214,8 @@ _OV_DOMAINS = (
 # Keep the full explanation for Inspect; the verdict card has a bounded preview.
 _RUN_REASON_PREVIEW = (
     "function($reason){("
-    "$display := $reason = 'Workflow: workflow_parent_not_finalized' or "
+    "$display := $reason in ['Workflow: workflow_failed', 'Workflow: Parent workflow failed'] ? "
+    "'Workflow failed' : $reason = 'Workflow: workflow_parent_not_finalized' or "
     "$reason = 'workflow_parent_not_finalized' ? "
     "'Parent workflow completion has not been recorded' : "
     "$reason = 'Provider: run_preflight_provider_observation' ? "
@@ -312,7 +295,10 @@ _OV_PROVIDER = (
     "$label := $saved or $cached ? 'Open report' : '—'; "
     "$merge([$p, {'data_source': $source, 'check_performed': $performed, "
     "'check_result_display': $result, 'reason': $reason, "
-    "'observed_display': $observed, 'report_label': $label"
+    "'observed_display': $observed, 'report_label': $label, "
+    "'provider_check_note': $cached ? 'Cached Bronze; API not called. Probe time: N/A (not performed).' : "
+    "($reason ? $reason & '. ' : '') & 'Probe time: ' & "
+    "($p.evidence = 'PRESENT' and $p.observed_at ? $string($p.observed_at) : 'Not recorded')"
     f", '{FRAME}': 'provider'}}]) )}}))"
 )
 
@@ -342,7 +328,8 @@ _OV_EXCL = (
     f"'excluded ' & $string($round(contract_exclusions_rate*100,2)) & '%' : "
     f"(verdict='{_SELECT_RUN}' ? 'N/A — Choose a run' : "
     f"(verdict='{_NO_RUNS}' ? 'NO RECORDS — No runs in scope' : "
-    f"'NO DATA — excluded UNKNOWN')), "
+    f"(contract_exclusions_soft_limit = null or contract_exclusions_hard_limit = null "
+    f"? 'Limits unavailable; check config' : 'Accounting incomplete; inspect stages'))), "
     f"'{FRAME}': 'exclusions'}}]"
 )
 # Zero checkpoint rows are a successful empty frame. Grafana then draws a blank
@@ -415,6 +402,7 @@ _DONOR_SCHEMA = (
             "check_performed",
             "check_result",
             "check_result_display",
+            "provider_check_note",
             "evidence",
             "observed_at",
             "observed_display",
@@ -598,7 +586,7 @@ _INC_DONOR = _normalized_donor(_INC_STATUS, _INC_DOMAINS, _INC_DURATION)
 _CP_TRUST = (
     "[presentation_trust.($base := $sift($, function($v,$k)"
     "{$k != 'trust_reasons_action'}); $merge([$base, "
-    "reasons_count > 0 ? {'trust_reasons_action':'View trust reasons'} : "
+    "($type(reasons_count)='number' ? reasons_count > 0 : false) ? {'trust_reasons_action':'View trust reasons'} : "
     "{'trust_action_note': reasons_count = 0 ? 'No trust issues' : 'Not assessed'}"
     f", {{'{FRAME}': 'trust'}}]))]"
 )
@@ -1636,7 +1624,9 @@ def _stamp_overview_empty_reasons(data: dict[str, Any]) -> None:
 def apply_control_plane(data: dict[str, Any]) -> None:
     donor = _by_id(data, 9418)
     donor["datasource"] = dict(OPS)
-    donor["targets"] = [_infinity_uql(_CP_DONOR, url=RAW_SRS_URL)]
+    donor["targets"] = [
+        _infinity_uql(_CP_DONOR, url=RAW_SRS_URL + "&require_exact_run=1")
+    ]
     donor["transformations"] = _cp_trust_donor_transforms()
 
     overrides = donor.setdefault("fieldConfig", {}).setdefault("overrides", [])

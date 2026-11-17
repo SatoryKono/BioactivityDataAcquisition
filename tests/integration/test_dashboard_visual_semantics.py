@@ -37,7 +37,8 @@ def test_dq_canvas_uses_saved_exclusions_frame_without_inventing_rates() -> None
     assert "run_id=${selected_run_id}" in query["url"]
     assert "contract_exclusions_status" in query["root_selector"]
     assert "contract_exclusions_rate != null" in query["root_selector"]
-    assert "excluded UNKNOWN" in query["root_selector"]
+    assert "Limits unavailable; check config" in query["root_selector"]
+    assert "Accounting incomplete; inspect stages" in query["root_selector"]
     frame = quality["transformations"][0]
     assert frame["id"] == "filterByValue"
     assert frame["options"]["type"] == "include"

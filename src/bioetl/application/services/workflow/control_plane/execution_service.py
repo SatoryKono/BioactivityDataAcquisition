@@ -204,7 +204,7 @@ class WorkflowExecutionService:
         repair_steps: tuple[str, ...],
         prepare_incremental: bool,
         incremental: bool,
-        lock_owner_id: str,
+        lock_owner_id: RunID,
     ) -> WorkflowRunExecutionResult:
         prepared = prepare_workflow_execution(
             config=config,

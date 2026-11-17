@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from functools import partial
 from pathlib import Path
+from typing import Protocol, TypeGuard
 
 from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.preflight import (
@@ -16,13 +17,19 @@ from bioetl.domain.medallion import WriteModePolicy
 from bioetl.domain.ports import HealthMonitorPort, LoggerPort
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.time import SystemClock
-from bioetl.composition.bootstrap.runtime.publication_vocab_init import validate_target_runtime_dependency
+from bioetl.composition.bootstrap.runtime.publication_vocab_init import (
+    validate_target_runtime_dependency,
+)
 from bioetl.infrastructure.storage.target_classification_guard import (
     assert_target_table_compatibility,
 )
 
 
-def _resolves_table_path(value: object) -> bool:
+class _TablePathResolver(Protocol):
+    def _resolve_table_path(self, table_name: str) -> str: ...
+
+
+def _resolves_table_path(value: object) -> TypeGuard[_TablePathResolver]:
     return callable(getattr(value, "_resolve_table_path", None))
 
 

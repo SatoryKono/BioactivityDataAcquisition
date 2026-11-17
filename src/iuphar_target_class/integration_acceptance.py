@@ -179,7 +179,7 @@ def _check_reference_case(
     if actual is None:
         raise ValueError("reference case is outside the admitted cohort")
     for field, value in expected.items():
-        if getattr(actual, field) != value:
+        if canonical_json_bytes(getattr(actual, field)) != canonical_json_bytes(value):
             raise AssertionError(
                 f"reference mismatch: {case['input_row_id']} / {field}"
             )
@@ -206,12 +206,17 @@ def verify_pipeline_proof(
     pipeline_report: Path | None = None,
     *,
     provenance: RunProvenance | None = None,
+    expected_row_ids: tuple[str, ...] | None = None,
 ) -> str:
     """Require a verified row-store occurrence and its source-bound run report."""
     if provenance is None:
         raise ValueError("pipeline proof requires expected executed version identities")
     return verify_stored_pipeline_proof(
-        path, snapshot_sha256, pipeline_report, provenance
+        path,
+        snapshot_sha256,
+        pipeline_report,
+        provenance,
+        expected_row_ids=expected_row_ids,
     )
 
 
@@ -288,7 +293,7 @@ def _execute_acceptance(
     )
     for name, raw in rendered.items():
         (output_dir / name).write_bytes(raw)
-    _record_pipeline_acceptance(request, receipt)
+    _record_pipeline_acceptance(request, receipt, cohort)
     if spec["schema_version"] == 2:
         receipt["artifact_references"] = _publication_references(
             request, cohort, output_dir, rendered
@@ -418,7 +423,9 @@ def _verify_batch_outputs(
 
 
 def _record_pipeline_acceptance(
-    request: IntegrationAcceptanceRequest, receipt: dict[str, object]
+    request: IntegrationAcceptanceRequest,
+    receipt: dict[str, object],
+    cohort: AdmittedCohort,
 ) -> None:
     """Attach only a verified real pipeline occurrence to the receipt."""
     if request.pipeline_proof is None:
@@ -428,6 +435,7 @@ def _record_pipeline_acceptance(
         request.snapshot_manifest_sha256,
         request.pipeline_report,
         provenance=request.provenance,
+        expected_row_ids=tuple(row.input_row_id for row in cohort.rows),
     )
     if request.pipeline_report is not None:
         receipt["pipeline_report_sha256"] = sha256_file(request.pipeline_report)

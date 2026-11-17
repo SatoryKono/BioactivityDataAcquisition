@@ -85,30 +85,72 @@ def _display_row(step: dict[str, object], recon: dict[str, object]) -> dict[str,
     }
 
 
+def _fk_step_ids(plan: object) -> set[str]:
+    """Identify FK steps from the persisted plan, never from a name heuristic."""
+    steps = plan.get("steps") if isinstance(plan, dict) else None
+    if not isinstance(steps, list):
+        return set()
+    return {
+        step["step_id"]
+        for step in steps
+        if isinstance(step, dict)
+        and step.get("kind") == "transform"
+        and step.get("transform_name") == "reconcile_foreign_keys"
+        and isinstance(step.get("step_id"), str)
+    }
+
+
+def _unsuccessful_step_row(step: dict[str, object]) -> dict[str, str] | None:
+    """Explain a recorded failure without inventing comparison counts or scope."""
+    status = step.get("status")
+    if not isinstance(status, str) or status not in {"failed", "skipped", "cancelled"}:
+        return None
+    details = [
+        value
+        for key in ("error_type", "error_message")
+        if isinstance(value := step.get(key), str) and value
+    ]
+    row = unavailable_reconciliation(
+        ": ".join(details) or "Workflow step failure details not recorded"
+    )[0]
+    row.update(step_id=str(step.get("step_id") or "—"), result=str(status).upper())
+    return row
+
+
+def _comparison_row(
+    step: dict[str, object], fk_steps: set[str]
+) -> dict[str, str] | None:
+    """Keep recorded FK results and failures visible in workflow execution order."""
+    recon = step.get("reconciliation")
+    if not isinstance(recon, dict):
+        step_id = step.get("step_id")
+        if isinstance(step_id, str) and step_id in fk_steps:
+            return _unsuccessful_step_row(step)
+        return None
+    failed = _unsuccessful_step_row(step)
+    if failed is not None:
+        return failed
+    mode = recon.get("reconciliation_mode")
+    if isinstance(mode, str) and mode in {"selected-snapshot", "complete-reference"}:
+        return _display_row(step, recon)
+    row = unavailable_reconciliation("FK reconciliation mode absent or unsupported")[0]
+    row["step_id"] = str(step.get("step_id") or "—")
+    return row
+
+
 def reconciliation_display(payload: dict[str, object]) -> list[dict[str, str]]:
     """Project persisted parent transforms without exposing row membership maps."""
     execution = payload.get("execution")
     if not isinstance(execution, list):
         return unavailable_reconciliation("FK reconciliation evidence not recorded")
     rows = []
+    fk_steps = _fk_step_ids(payload.get("plan"))
     for step in execution:
         if not isinstance(step, dict):
             continue
-        recon = step.get("reconciliation")
-        if not isinstance(recon, dict):
-            continue
-        mode = recon.get("reconciliation_mode")
-        if not isinstance(mode, str) or mode not in {
-            "selected-snapshot",
-            "complete-reference",
-        }:
-            unknown = unavailable_reconciliation(
-                "FK reconciliation mode absent or unsupported"
-            )[0]
-            unknown["step_id"] = str(step.get("step_id") or "—")
-            rows.append(unknown)
-        else:
-            rows.append(_display_row(step, recon))
+        row = _comparison_row(step, fk_steps)
+        if row is not None:
+            rows.append(row)
     if rows:
         return rows
     if _plan_has_no_fk_comparison(payload.get("plan")):

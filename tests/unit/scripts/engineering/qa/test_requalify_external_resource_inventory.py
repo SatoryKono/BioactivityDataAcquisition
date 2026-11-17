@@ -31,6 +31,47 @@ def commit_source(root: Path, content: str) -> str:
     return git(root, "rev-parse", "HEAD")
 
 
+def test_reviewed_anchor_move_keeps_the_binding_edge(candidate: tuple) -> None:
+    root, review, _ = candidate
+    snapshot = producer._snapshot(root, review["source_ref"])
+    binding = {
+        "binding_caller": "bioetl.fixture.read_file",
+        "binding_symbol": "builtins.open",
+        "binding_relation": "open",
+    }
+    refs = [{"file": SOURCE, "line": 2, "source_segment": "", **binding}]
+    selector = {
+        "file": SOURCE,
+        "scope": "read_file",
+        "segment": "with open('fixture') as stream:",
+    }
+    assert (
+        producer._move_matching_references(
+            refs, {"file": SOURCE, "line": 2}, selector, snapshot
+        )
+        == 1
+    )
+    assert refs[0]["source_segment"] == "with open('fixture') as stream:"
+    assert refs[0]["line"] == 4
+    assert {key: refs[0][key] for key in binding} == binding
+    assert refs[0]["source_commit"] == review["source_ref"]
+
+
+def test_anchor_move_cannot_silently_rebind_the_caller(candidate: tuple) -> None:
+    root, review, _ = candidate
+    snapshot = producer._snapshot(root, review["source_ref"])
+    refs = [{"file": SOURCE, "line": 2, "binding_caller": "bioetl.fixture.other"}]
+    selector = {
+        "file": SOURCE,
+        "scope": "read_file",
+        "segment": "with open('fixture') as stream:",
+    }
+    with pytest.raises(ValueError, match="binding caller"):
+        producer._move_matching_references(
+            refs, {"file": SOURCE, "line": 2}, selector, snapshot
+        )
+
+
 @pytest.fixture
 def candidate(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch

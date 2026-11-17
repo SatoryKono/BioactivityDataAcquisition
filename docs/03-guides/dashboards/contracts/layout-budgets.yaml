@@ -157,15 +157,15 @@ first_window_summary_tables:
   id: 2010
   max_rows: 5
   owner: '@bioetl-observability'
-  bind: topk
+  bind: paginate
 - dashboard: bioetl-incident-v1.json
   id: 2005
   max_rows: 3
   owner: '@bioetl-observability'
-  bind: limit
+  bind: paginate
 - dashboard: bioetl-run-explorer-v1.json
   id: 3010
-  max_rows: 10
+  max_rows: 20
   owner: '@bioetl-observability'
   bind: limit
 - dashboard: bioetl-control-plane-v1.json
@@ -210,10 +210,19 @@ answer_panels:
     title: Inspect Ranked Suspects
   bioetl-run-explorer-v1.json:
   - id: 3010
-    title: Inspect Recent Runs (last 10)
+    title: Inspect Recent Runs (last 20)
 trust_gate_panels: []
 allowlists:
-  straddle: []
+  straddle:
+  - dashboard: bioetl-run-explorer-v1.json
+    id: 3010
+    owner: '@bioetl-observability'
+    rationale: Explicit operator decision on 2026-11-16 sets panel height to 30 grid rows and permits
+      page scrolling for the twenty-run catalog. All twenty native rows must fit the tall panel
+      without internal scrolling or pagination.
+      Reconfirmed by the operator on 2026-11-17 after an automated pagination change.
+      This changes page containment only; internal overflow and horizontal-scroll gates still apply.
+    retire_when: the operator replaces the full twenty-row catalog with a first-screen summary
   first_window_overflow: []
   synthetic_zero: []
   horizontal_scroll: []

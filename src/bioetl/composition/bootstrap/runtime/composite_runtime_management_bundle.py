@@ -32,8 +32,12 @@ from typing import cast
 
 import yaml
 
-from bioetl.composition.factories.dq.composite_validation import resolve_target_table_paths
-from bioetl.composition.bootstrap.runtime.publication_vocab_init import load_target_runtime_profile
+from bioetl.composition.factories.dq.composite_validation import (
+    resolve_target_table_paths,
+)
+from bioetl.composition.bootstrap.runtime.publication_vocab_init import (
+    load_target_runtime_profile,
+)
 from bioetl.infrastructure.config.config_root import resolve_configs_root
 from bioetl.infrastructure.config.pipeline_config_api import (
     load_pipeline_config_uncached,
@@ -115,6 +119,10 @@ def bind_target_deployment(
     silver, gold = resolve_target_table_paths(active_settings, future)
     if (silver.resolve(), gold.resolve()) != (checked["silver"], checked["gold"]):
         raise ValueError("deployment resolves different physical target destinations")
+    assay = load_pipeline_config_uncached("chembl_assay", configs_root=root)
+    assay_gold = resolve_target_table_paths(active_settings, assay)[1].resolve()
+    if assay_gold != checked["assay"]:
+        raise ValueError("deployment resolves a different physical assay destination")
     settings_digest = sha256_bytes(
         canonical_json_bytes(
             {
@@ -122,6 +130,7 @@ def bind_target_deployment(
                 "configs_root": str(root),
                 "silver": str(silver.resolve()),
                 "gold": str(gold.resolve()),
+                "assay": str(assay_gold),
             }
         )
     )

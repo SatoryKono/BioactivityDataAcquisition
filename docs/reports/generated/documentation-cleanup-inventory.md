@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 4197 |
-| Tracked doc-like files | 4197 |
+| Doc-like files | 4199 |
+| Tracked doc-like files | 4199 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 80 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 4197 |
+| tracked | 4199 |
 
 ## Lifecycle Counts
 
@@ -28,7 +28,7 @@
 | active_quality_baseline | 126 |
 | closeout_evidence | 168 |
 | docs_reports_curated_entrypoint | 2 |
-| docs_reports_curated_or_historical_report | 44 |
+| docs_reports_curated_or_historical_report | 45 |
 | docs_reports_generated_or_route_owned | 8 |
 | docs_reports_retention_sensitive_evidence | 29 |
 | generated_skill_reference_mirror | 19 |
@@ -56,7 +56,7 @@
 | Archived | 1554 |
 | Canonical | 77 |
 | Generated | 1067 |
-| Working | 725 |
+| Working | 726 |
 
 ## Surface Families
 
@@ -66,13 +66,13 @@
 | archive | 1554 |
 | canonical | 77 |
 | generated | 1067 |
-| working | 725 |
+| working | 726 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-migration | 431 |
+| archive-after-migration | 432 |
 | generate-automatically | 1067 |
 | keep | 2700 |
 
@@ -128,6 +128,7 @@
 | `docs/reports/dashboard-ux-checks/2026-11-11.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-11-13.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-11-15.md` | Working | 0 | archive-after-migration |
+| `docs/reports/dashboard-ux-checks/2026-11-17.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/README.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/accepted-event-age.json` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/accepted-final-tests.txt` | Working | 0 | archive-after-migration |
@@ -159,7 +160,6 @@
 | `reports/audit-runs/12107-r07-history/6b39eef8bf65aacb/handoff.md` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07-history/6b39eef8bf65aacb/scan-manifest.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07-history/KIT-MANIFEST-acceptance.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/12107-r07-history/KIT-MANIFEST-behavior.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
@@ -296,11 +296,11 @@
 | `docs/reports/dashboard-ux-checks/2026-11-11.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-11-13.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-11-15.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
+| `docs/reports/dashboard-ux-checks/2026-11-17.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/README.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/accepted-event-age.json` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/accepted-final-tests.txt` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/final-dashboard-suite.txt` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/post-main-runtime-receipt.json` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 
 ## Generated Route Registry
 

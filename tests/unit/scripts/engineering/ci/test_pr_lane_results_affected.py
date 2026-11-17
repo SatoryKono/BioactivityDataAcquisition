@@ -23,6 +23,49 @@ HEAD = "a" * 40
 
 
 @pytest.mark.parametrize(
+    ("changed", "owner"),
+    [
+        (
+            "docs/01-requirements/DASHBOARD_REQUIREMENTS.md",
+            "tests/integration/test_dashboard_first_window_noscroll.py",
+        ),
+        (
+            "docs/03-guides/metrics-monitoring.md",
+            "tests/architecture/test_observability_docs_drift.py",
+        ),
+        (
+            "docs/04-reference/observability/metrics-catalog.md",
+            "tests/architecture/test_observability_docs_drift.py",
+        ),
+        (
+            "tests/fixtures/golden/observability/prometheus_metric_inventory.json",
+            "tests/unit/infrastructure/observability/test_metrics_golden.py",
+        ),
+    ],
+)
+def test_dashboard_audit_inputs_select_real_owners_in_both_modes(changed, owner):
+    repo_root = Path(__file__).resolve().parents[5]
+    assert owner in affected_pytest_targets([changed], repo_root=repo_root)
+    report = build_shadow_compare([changed], repo_root=repo_root)
+    assert owner in report["selected"]
+    assert not report["covers_full_suite"]
+
+
+@pytest.mark.parametrize(
+    "unknown",
+    [
+        "docs/03-guides/metrics-monitoring-unknown.md",
+        "tests/fixtures/golden/observability/unregistered.json",
+    ],
+)
+def test_unknown_observability_peers_still_fail_closed(unknown):
+    repo_root = Path(__file__).resolve().parents[5]
+    assert affected_pytest_targets([unknown], repo_root=repo_root) == []
+    with pytest.raises(ValueError, match="unmapped paths"):
+        build_shadow_compare([unknown], repo_root=repo_root)
+
+
+@pytest.mark.parametrize(
     "changed",
     [
         "scripts/engineering/ci/nightly_shadow_archive.py",
@@ -1801,6 +1844,25 @@ def test_security_inventory_reviews_route_to_source_qualification_tests(audit):
         "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py"
         in json.dumps(report)
     )
+
+
+def test_dashboard_resource_review_keeps_bounded_source_qualification_routes() -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        ["configs/quality/external_resource_inventory_pr13168_review.json"],
+        repo_root=root,
+    )
+    assert {
+        "tests/architecture/test_external_resource_inventory_catalog.py",
+        "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+    } <= set(report["selected"])
+    assert report["covers_full_suite"] is False
+    assert report["activation"] == "not_applied"
+    with pytest.raises(ValueError, match="unmapped paths"):
+        build_shadow_compare(
+            ["configs/quality/external_resource_inventory_pr13168_unreviewed.json"],
+            repo_root=root,
+        )
 
 
 def test_hook_qualification_inputs_have_bounded_shadow_routes() -> None:

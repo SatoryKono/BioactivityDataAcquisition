@@ -16,15 +16,16 @@ from iuphar_target_class.stage0.io import (
 )
 
 from ._input_projection import project_target_fields
-from .cohort_projection import (
-    ARROW_SOURCE_FORMAT,
-    CohortConversionError,
-    CohortExportRequest,
+from .cohort_contract import (
     _COLUMNS,
     _REQUIRED,
     _RESERVED,
+    ARROW_SOURCE_FORMAT,
+    CohortConversionError,
+    CohortExportRequest,
     _validate_request,
 )
+
 
 def _source_rows(raw: bytes, source_format: str) -> tuple[Mapping[str, object], ...]:
     if source_format == ARROW_SOURCE_FORMAT:
@@ -125,5 +126,3 @@ def _direct_identity(row: Mapping[str, object], column: str) -> str | None:
     if re.fullmatch(r"[1-9]\d*", str(value), flags=re.ASCII) is None:
         raise ValueError("direct IUPHAR identity must be explicit positive ASCII text")
     return str(value)
-
-

@@ -264,12 +264,30 @@ def test_typed_observability_inventory_is_bidirectional_and_source_specific() ->
         str(target["url"]).startswith(("/ops/", "/health/")) for target in http_targets
     )
     assert report["typed_target_counts"] == {
-        "promql": 110,  # LA-06 summary/full-list reads + LA-07 freshness targets.
+        # Fleet states, ingestion age and stage clocks; one redundant Overview
+        # full-list target removed while the paginated list retains all alerts.
+        "promql": 115,
         "http": 14,
         "loki": 0,
         "tempo": 0,
         "unknown": 0,
     }
+    # Keep the new evidence reads classified as PromQL, never HTTP/unknown.
+    promql_targets = {
+        (target["dashboard_uid"], target["panel_id"], target["ref_id"])
+        for target in report["typed_targets"]
+        if target["kind"] == "promql"
+    }
+    assert ("bioetl-overview-v2", 2005, "A") in promql_targets
+    assert ("bioetl-overview-v2", 22005, "A") not in promql_targets
+    assert {
+        ("bioetl-overview-v2", 9605, "A"),
+        ("bioetl-overview-v2", 9605, "B"),
+        ("bioetl-overview-v2", 9606, "A"),
+        ("bioetl-overview-v2", 9606, "B"),
+        ("bioetl-overview-v2", 9606, "C"),
+        ("bioetl-incident-v1", 22012, "A"),
+    } <= promql_targets
     assert all(target["datasource_type"] for target in report["typed_targets"])
     assert all(
         target["datasource_type"] == "yesoreyeram-infinity-datasource"

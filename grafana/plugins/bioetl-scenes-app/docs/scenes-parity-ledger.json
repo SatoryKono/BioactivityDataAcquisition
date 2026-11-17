@@ -20,11 +20,11 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "05165e9fd2b24e72547823aa4705ed1f721af3d68172cfb1960138ae0a899f12",
-    "bioetl-dq-v2": "7ccac353e685d1ae68a0efbcb62f451f2c0677d998a0ca5eff79eaa19fef96da",
-    "bioetl-incident-v1": "affdd192e8a5fe652624cff4d838b7cc9e31b03cc0492d52f41f527ca4c6f4a6",
-    "bioetl-overview-v2": "3d9e4becbe39177181d9c16ce273544488ad1df1575a1757878b6f8bbbc70b58",
-    "bioetl-run-explorer-v1": "2e656533634eb5c67d430ce822acdb3830de68624a429a5bd39438429ca4f7ed"
+    "bioetl-control-plane-v1": "97df142a1ce5993617c8f9274c8843aa6702d7337824ee510458894e70af14af",
+    "bioetl-dq-v2": "58c554dffae74b17ae1566283ded9f06f46bac71cded990e9a7ffc6662ed813a",
+    "bioetl-incident-v1": "e42eab4542976182a83b5bdb3bd78421bfe648f482e8f4c37c18960ccca5f9b0",
+    "bioetl-overview-v2": "d7a9fb00dab97f476a8dff3310a0cfe7936b07623d8a6f601b01f4b889ffea6e",
+    "bioetl-run-explorer-v1": "7181f111dbc00828794f016d02819e308e8ceb2ad552025d2b998a84fdb54ab0"
   },
   "panels": [
     {
@@ -128,7 +128,7 @@
         "datasource_type": "yesoreyeram-infinity-datasource",
         "datasource_uid": "bioetl-ops-http",
         "expressions": [
-          "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
+          "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}&require_exact_run=1"
         ],
         "target_count": 1
       }
@@ -453,7 +453,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(bioetl_incident_ranked_evidence,\"object\",\"$1\",\"object\",\"(.*) / $\"),\"route_pipeline\",\".*\",\"pipeline\",\"unknown\"),\"owner\",\"BioETL Team\",\"reason\",\"infrastructure_failed\"),\"next_step\",\"Open pipeline-failure-critical.md\",\"reason\",\"infrastructure_failed\"),\"owner\",\"See runbook\",\"owner\",\"^$\"),\"next_step\",\"See runbook\",\"next_step\",\"^$\")"
+          "label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(bioetl_incident_ranked_evidence,\"object\",\"$1\",\"object\",\"(.*) / $\"),\"route_pipeline\",\".*\",\"pipeline\",\"unknown\"),\"owner\",\"BioETL Team\",\"reason\",\"infrastructure_failed\"),\"next_step\",\"Open pipeline-failure-critical.md\",\"reason\",\"infrastructure_failed\"),\"owner\",\"See runbook\",\"owner\",\"^$\"),\"next_step\",\"See runbook\",\"next_step\",\"^$\"),\"freshness\",\"Not verified: no event timestamp\",\"\",\"\")"
         ],
         "target_count": 1
       }
@@ -585,6 +585,25 @@
         "datasource_uid": "prometheus",
         "expressions": [
           "(label_join(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(max by (pipeline, run_type, stage) (max_over_time(bioetl_stage_lag_seconds[15m])) >= 300,\"signal\",\"stage_lag\",\"\",\"\"),\"window\",\"15m maximum\",\"\",\"\"),\"threshold\",\">= 300 s (15m maximum)\",\"\",\"\"),\"unit\",\"s\",\"\",\"\"),\"observation_time\",\"Not provided\",\"\",\"\"),\"publication_time\",\"Not provided\",\"\",\"\"),\"freshness\",\"Not verified: observed/published timestamps not provided\",\"\",\"\"),\"scope\",\" / \",\"pipeline\",\"run_type\",\"stage\")) or (label_join(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(max by (pipeline, run_type, stage) (bioetl_stage_backlog_records{stage!=\"validation\"}) > 0,\"signal\",\"stage_backlog\",\"\",\"\"),\"window\",\"instant\",\"\",\"\"),\"threshold\",\"> 0 records (instant)\",\"\",\"\"),\"unit\",\"records\",\"\",\"\"),\"observation_time\",\"Not provided\",\"\",\"\"),\"publication_time\",\"Not provided\",\"\",\"\"),\"freshness\",\"Not verified: observed/published timestamps not provided\",\"\",\"\"),\"scope\",\" / \",\"pipeline\",\"run_type\",\"stage\"))"
+        ],
+        "target_count": 1
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "JSON fallback",
+      "dashboard_uid": "bioetl-incident-v1",
+      "disposition": "advanced-evidence",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-incident-v1",
+      "panel_id": 22012,
+      "panel_title": "Inspect Stage Snapshot Clocks · period end",
+      "route": "incident-console",
+      "source": {
+        "datasource_type": "prometheus",
+        "datasource_uid": "prometheus",
+        "expressions": [
+          "(label_join(label_replace(label_replace((((max by(pipeline,run_type,stage)((bioetl_stage_snapshot_observed_timestamp_seconds > 0) <= time()) and on(pipeline,run_type,stage) group by(pipeline,run_type,stage)((max by(pipeline,run_type,stage)(max_over_time(bioetl_stage_lag_seconds[15m])) >= 300) or (max by(pipeline,run_type,stage)(bioetl_stage_backlog_records{stage!=\"validation\"}) > 0))) or (group by(pipeline,run_type,stage)((max by(pipeline,run_type,stage)(max_over_time(bioetl_stage_lag_seconds[15m])) >= 300) or (max by(pipeline,run_type,stage)(bioetl_stage_backlog_records{stage!=\"validation\"}) > 0)) * NaN)) * 1000),\"clock\",\"Latest stage projection\",\"\",\"\"),\"basis\",\"Application projection; not input-record event time\",\"\",\"\"),\"scope\",\" / \",\"pipeline\",\"run_type\",\"stage\")) or (label_join(label_replace(label_replace((((group by(pipeline,run_type,stage)((max by(pipeline,run_type,stage)(max_over_time(bioetl_stage_lag_seconds[15m])) >= 300) or (max by(pipeline,run_type,stage)(bioetl_stage_backlog_records{stage!=\"validation\"}) > 0)) * on(pipeline,run_type) group_left max by(pipeline,run_type)((push_time_seconds{job=\"bioetl\",pipeline!=\"\",run_type!=\"\"} > 0) <= time())) or (group by(pipeline,run_type,stage)((max by(pipeline,run_type,stage)(max_over_time(bioetl_stage_lag_seconds[15m])) >= 300) or (max by(pipeline,run_type,stage)(bioetl_stage_backlog_records{stage!=\"validation\"}) > 0)) * NaN)) * 1000),\"clock\",\"Gateway publication\",\"\",\"\"),\"basis\",\"Pushgateway job=bioetl; not stage observation time\",\"\",\"\"),\"scope\",\" / \",\"pipeline\",\"run_type\",\"stage\")) or (label_join(label_replace(label_replace(((group by(pipeline,run_type,stage)((max by(pipeline,run_type,stage)(max_over_time(bioetl_stage_lag_seconds[15m])) >= 300) or (max by(pipeline,run_type,stage)(bioetl_stage_backlog_records{stage!=\"validation\"}) > 0)) * NaN) * 1000),\"clock\",\"Input-record event\",\"\",\"\"),\"basis\",\"Not instrumented; no source event clock in these metrics\",\"\",\"\"),\"scope\",\" / \",\"pipeline\",\"run_type\",\"stage\"))"
         ],
         "target_count": 1
       }
@@ -1421,7 +1440,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-incident-v1",
       "panel_id": 2461,
-      "panel_title": "Inspect Current Missing Stage Signals",
+      "panel_title": "Inspect Snapshot Missing Stage Signals",
       "route": "incident-console",
       "source": {
         "datasource_type": "prometheus",
@@ -2087,7 +2106,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-incident-v1",
       "panel_id": 9701,
-      "panel_title": "Review Current Workflow Evidence · ${workflow_evidence_freshness} · threshold 24h",
+      "panel_title": "Review Snapshot Workflow Evidence · ${workflow_evidence_freshness} · threshold 24h",
       "route": "incident-console",
       "source": {
         "datasource_type": "prometheus",
@@ -2160,6 +2179,81 @@
       "disposition": "advanced-evidence",
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-overview-v2",
+      "panel_id": 9604,
+      "panel_title": "Review Saved Run Verdict",
+      "route": "dependency-health",
+      "source": {
+        "datasource_type": "datasource",
+        "datasource_uid": "-- Dashboard --",
+        "expressions": [],
+        "target_count": 1
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "JSON fallback",
+      "dashboard_uid": "bioetl-overview-v2",
+      "disposition": "advanced-evidence",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-overview-v2",
+      "panel_id": 9605,
+      "panel_title": "Review Snapshot Fleet Alerts",
+      "route": "dependency-health",
+      "source": {
+        "datasource_type": "prometheus",
+        "datasource_uid": "prometheus",
+        "expressions": [
+          "((count(ALERTS{alertname=~\"BioETL.*\",alertstate=\"firing\"}) or (max(up{job=\"prometheus\"} == 1) * 0)) and on() (max(up{job=\"prometheus\"}) == 1))",
+          "((count(ALERTS{alertname=~\"BioETL.*\",alertstate=\"pending\"}) or (max(up{job=\"prometheus\"} == 1) * 0)) and on() (max(up{job=\"prometheus\"}) == 1))"
+        ],
+        "target_count": 2
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "JSON fallback",
+      "dashboard_uid": "bioetl-overview-v2",
+      "disposition": "advanced-evidence",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-overview-v2",
+      "panel_id": 9606,
+      "panel_title": "Review Processing Anchor Age · 24h / 72h · period end",
+      "route": "dependency-health",
+      "source": {
+        "datasource_type": "prometheus",
+        "datasource_uid": "prometheus",
+        "expressions": [
+          "label_replace((max((time()-max by(pipeline,entity)(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}>0))>=0)<=86400),\"freshness\",\"Within 24h (observed only)\",\"\",\"\")",
+          "label_replace((max((time()-max by(pipeline,entity)(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}>0))>=0)>86400<=259200),\"freshness\",\"STALE 24-72h (observed)\",\"\",\"\")",
+          "label_replace((max((time()-max by(pipeline,entity)(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}>0))>=0)>259200),\"freshness\",\"STALE >72h (observed)\",\"\",\"\")"
+        ],
+        "target_count": 3
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "JSON fallback",
+      "dashboard_uid": "bioetl-overview-v2",
+      "disposition": "advanced-evidence",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-overview-v2",
+      "panel_id": 9603,
+      "panel_title": "Review Selected Run Status",
+      "route": "dependency-health",
+      "source": {
+        "datasource_type": "datasource",
+        "datasource_uid": "-- Dashboard --",
+        "expressions": [],
+        "target_count": 1
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "JSON fallback",
+      "dashboard_uid": "bioetl-overview-v2",
+      "disposition": "advanced-evidence",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-overview-v2",
       "panel_id": 99,
       "panel_title": "Review Run Context",
       "route": "dependency-health",
@@ -2177,8 +2271,8 @@
       "disposition": "advanced-evidence",
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-overview-v2",
-      "panel_id": 9604,
-      "panel_title": "Review Overall Verdict",
+      "panel_id": 9300,
+      "panel_title": "Review Run Identity",
       "route": "dependency-health",
       "source": {
         "datasource_type": "datasource",
@@ -2213,40 +2307,6 @@
       "disposition": "advanced-evidence",
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-overview-v2",
-      "panel_id": 9603,
-      "panel_title": "Review Selected Run Status",
-      "route": "dependency-health",
-      "source": {
-        "datasource_type": "datasource",
-        "datasource_uid": "-- Dashboard --",
-        "expressions": [],
-        "target_count": 1
-      }
-    },
-    {
-      "basis": "preserved-from-json",
-      "component": "JSON fallback",
-      "dashboard_uid": "bioetl-overview-v2",
-      "disposition": "advanced-evidence",
-      "empty_semantics": "preserved-from-json",
-      "json_fallback": "/d/bioetl-overview-v2",
-      "panel_id": 9300,
-      "panel_title": "Review Run Identity",
-      "route": "dependency-health",
-      "source": {
-        "datasource_type": "datasource",
-        "datasource_uid": "-- Dashboard --",
-        "expressions": [],
-        "target_count": 1
-      }
-    },
-    {
-      "basis": "preserved-from-json",
-      "component": "JSON fallback",
-      "dashboard_uid": "bioetl-overview-v2",
-      "disposition": "advanced-evidence",
-      "empty_semantics": "preserved-from-json",
-      "json_fallback": "/d/bioetl-overview-v2",
       "panel_id": 2005,
       "panel_title": "Monitor Global Alerts",
       "route": "dependency-health",
@@ -2254,7 +2314,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "topk(2, bioetl_incident_global_alerts)"
+          "bioetl_incident_global_alerts"
         ],
         "target_count": 1
       }
@@ -2349,25 +2409,6 @@
     {
       "basis": "preserved-from-json",
       "component": "JSON fallback",
-      "dashboard_uid": "bioetl-overview-v2",
-      "disposition": "advanced-evidence",
-      "empty_semantics": "preserved-from-json",
-      "json_fallback": "/d/bioetl-overview-v2",
-      "panel_id": 22005,
-      "panel_title": "Monitor Global Alerts (Full)",
-      "route": "dependency-health",
-      "source": {
-        "datasource_type": "prometheus",
-        "datasource_uid": "prometheus",
-        "expressions": [
-          "bioetl_incident_global_alerts"
-        ],
-        "target_count": 1
-      }
-    },
-    {
-      "basis": "preserved-from-json",
-      "component": "JSON fallback",
       "dashboard_uid": "bioetl-run-explorer-v1",
       "disposition": "fallback-only",
       "empty_semantics": "preserved-from-json",
@@ -2407,13 +2448,13 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-run-explorer-v1",
       "panel_id": 3010,
-      "panel_title": "Inspect Recent Runs (last 10)",
+      "panel_title": "Inspect Recent Runs (last 20)",
       "route": "run-explorer",
       "source": {
         "datasource_type": "yesoreyeram-infinity-datasource",
         "datasource_uid": "bioetl-ops-http",
         "expressions": [
-          "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=10&run_id=${run_id}&view=recent&workflow=${workflow}&run_type=${run_type:csv}&lookup_run_id=${lookup_run_id:percentencode}"
+          "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=20&run_id=${run_id}&view=recent&workflow=${workflow}&run_type=${run_type:csv}&lookup_run_id=${lookup_run_id:percentencode}"
         ],
         "target_count": 1
       }
@@ -2425,7 +2466,7 @@
     "dashboard_uid_count": 5,
     "hidden_datasources": [],
     "missing_dashboard_uids": [],
-    "panel_disposition_count": 128,
+    "panel_disposition_count": 130,
     "parity_status": "pass",
     "route_count": 6,
     "run_id_prometheus_violations": [],

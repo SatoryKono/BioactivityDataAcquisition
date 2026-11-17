@@ -10,23 +10,24 @@ from iuphar_target_class.stage0.io import canonical_json_bytes
 
 from ._manifest import sha256
 from ._official_targets_csv import (
-    SPECIES_COLUMNS,
-    SOURCE_FORMAT,
-    OfficialProjection,
     _FAMILY_ID,
     _FAMILY_NAME,
-    _StringList,
     _TARGET_ID,
     _TARGET_NAME,
+    SOURCE_FORMAT,
+    SPECIES_COLUMNS,
+    OfficialProjection,
     _consistent,
     _groups,
     _one,
     _read_export,
     _selection,
+    _StringList,
     _tokens,
 )
 from ._snapshot_payloads import identifier
 from .snapshot_evidence import SourceEvidence
+
 
 def _variant(row: Mapping[str, str], taxon: str) -> dict[str, object] | None:
     prefix, symbol = SPECIES_COLUMNS[taxon]

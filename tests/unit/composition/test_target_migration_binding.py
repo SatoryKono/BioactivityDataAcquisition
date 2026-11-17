@@ -1,13 +1,16 @@
 """Deployment admission uses real YAML loading and real writer destinations."""
 
 from pathlib import Path
+from dataclasses import replace
 from shutil import copytree, ignore_patterns
 from types import SimpleNamespace
 
 import pytest
 import yaml
 
-from bioetl.composition import target_migration as migration
+from bioetl.composition.bootstrap.runtime import (
+    composite_runtime_management_bundle as migration,
+)
 from bioetl.infrastructure.config.settings_api import Settings
 from bioetl.infrastructure.storage.target_classification_migration import (
     TargetMigrationPaths,
@@ -78,4 +81,14 @@ def test_environment_cannot_resolve_a_different_physical_table(deployment):
     with pytest.raises(ValueError, match="physical target destinations"):
         migration.bind_target_deployment(
             paths, settings=other, configs_root=paths.workspace / "configs"
+        )
+
+
+def test_deployment_rejects_an_inactive_assay_copy(deployment):
+    paths, settings, _ = deployment
+    with pytest.raises(ValueError, match="physical assay destination"):
+        migration.bind_target_deployment(
+            replace(paths, assay=paths.workspace / "assay-copy"),
+            settings=settings,
+            configs_root=paths.workspace / "configs",
         )

@@ -275,7 +275,7 @@ default_time_refresh_policy:
     dashboards:
     - bioetl-overview-v2
     time_from: now-12h
-    refresh: 60s
+    refresh: 1m
   L1:
     dashboards:
     - bioetl-control-plane-v1
@@ -283,11 +283,11 @@ default_time_refresh_policy:
     - bioetl-incident-v1
     - bioetl-run-explorer-v1
     time_from: now-12h
-    refresh: 60s
+    refresh: 1m
   Alerts:
     dashboards: []
     time_from: now-24h
-    refresh: 60s
+    refresh: 1m
   L2:
     dashboards: []
     time_from: now-24h

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import replace
-from typing import cast
 
 from bioetl.domain.config.target_classification import TARGET_CLASSIFICATION_FIELDS
 from bioetl.domain.normalization.profiles.base import FieldRule, NormalizationProfile
@@ -34,8 +33,6 @@ def target_v31_normalization_profile() -> NormalizationProfile:
             for name in TARGET_CLASSIFICATION_FIELDS
         }
     )
-    profile = cast(
-        NormalizationProfile, replace(CHEMBL_TARGET_PROFILE, field_rules=rules)
-    )
+    profile = replace(CHEMBL_TARGET_PROFILE, field_rules=rules)
     profile.assert_covers_schema(tuple(TargetSchemaV31.to_schema().columns))
     return profile

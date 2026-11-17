@@ -12,6 +12,7 @@ from iuphar_target_class.integration_acceptance import (
     IntegrationAcceptanceRequest,
     run_integration_acceptance,
     verify_pipeline_proof,
+    _check_reference_case,
 )
 from iuphar_target_class.matching import CatalogTarget
 from iuphar_target_class.models import ProviderAnnotation, RawTargetRow, RunProvenance
@@ -27,6 +28,46 @@ from iuphar_target_class.stage0.io import (
 def _write(path, document):
     path.write_bytes(canonical_json_bytes(document))
     return sha256_file(path)
+
+
+@pytest.mark.parametrize("codes", [[], ["conflicting_sources"]])
+def test_reference_conflict_codes_compare_json_collections(
+    tmp_path, acceptance_inputs, codes
+):
+    request, snapshot = acceptance_inputs
+    batch = classify_batch(
+        (
+            RawTargetRow(
+                "r1",
+                {"target_id": "1", "uniprot": "P12345", "organism": "9606"},
+                "protein",
+            ),
+        ),
+        snapshot=snapshot,
+        provenance=request.provenance,
+        run_id="reference-fixture",
+    )
+    source = tmp_path / "reviewed-source.json"
+    source.write_bytes(b"reviewed source")
+    case = {
+        "input_row_id": "r1",
+        "source_references": [{"path": source.name, "sha256": sha256_file(source)}],
+        "expected": {"conflict_codes": codes},
+    }
+    actual = replace(batch.rows[0].result, conflict_codes=tuple(codes))
+    _check_reference_case(case, actual, tmp_path, frozenset({"conflict_codes"}))
+
+
+def test_pipeline_proof_for_another_cohort_is_rejected(acceptance_inputs):
+    request, _ = acceptance_inputs
+    with pytest.raises(ValueError, match="another admitted cohort"):
+        verify_pipeline_proof(
+            request.pipeline_proof,
+            request.snapshot_manifest_sha256,
+            request.pipeline_report,
+            provenance=request.provenance,
+            expected_row_ids=("another-row",),
+        )
 
 
 @pytest.fixture
@@ -175,7 +216,7 @@ def acceptance_inputs(tmp_path):
     return request, snapshot
 
 
-def _stored_proof(tmp_path, snapshot, provenance):
+def _stored_proof(tmp_path, snapshot, provenance, row_id="r1"):
     """Use actual kernel outputs and the actual persistence/finalization path."""
     from bioetl.domain.entities.target_classification_boundary import (
         TargetClassificationArtifact,
@@ -189,7 +230,7 @@ def _stored_proof(tmp_path, snapshot, provenance):
     batch = classify_batch(
         (
             RawTargetRow(
-                "r1",
+                row_id,
                 {"target_id": "1", "uniprot": "P12345", "organism": "9606"},
                 "protein",
             ),
@@ -208,7 +249,7 @@ def _stored_proof(tmp_path, snapshot, provenance):
         classification_schema_version=provenance.schema_version,
     )
     result = TargetClassificationResult(
-        "r1",
+        row_id,
         {"target_class_profile_sha256": "b" * 64},
         tuple(
             TargetClassificationArtifact(name, raw)
@@ -216,7 +257,7 @@ def _stored_proof(tmp_path, snapshot, provenance):
         ),
     )
     store.publish_result(result, run_id=run_id, batch_id="batch-0")
-    store.finalize_run(run_id=run_id, expected_row_ids=("r1",))
+    store.finalize_run(run_id=run_id, expected_row_ids=(row_id,))
     return tmp_path / "actual-store" / run_id / "manifest.json"
 
 

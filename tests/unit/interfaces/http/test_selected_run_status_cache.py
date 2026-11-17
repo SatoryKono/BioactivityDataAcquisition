@@ -58,6 +58,34 @@ async def test_fresh_hit_skips_loader(monkeypatch: pytest.MonkeyPatch) -> None:
     assert loader.await_count == 1
 
 
+async def test_response_metadata_does_not_mutate_saved_error_or_cached_payload(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    now = [100.0]
+    monkeypatch.setattr(module, "monotonic", lambda: now[0])
+    cache = module.SelectedRunStatusCache()
+    loader = AsyncMock(return_value={**PAYLOAD, "verdict": "ERROR"})
+    try:
+        first = await cache.read_view(QUERY, loader)
+        first["verdict"] = "OK"
+        first["status_cache"]["state"] = "unavailable"
+        now[0] += 5
+        second = await cache.read_view(QUERY, loader)
+        assert second["verdict"] == "ERROR"
+        assert second["status_cache"] == {
+            "state": "fresh",
+            "age_seconds": 5.0,
+            "refresh_in_progress": False,
+            "last_refresh_error": None,
+            "fresh_seconds": 30.0,
+            "maximum_age_seconds": 90.0,
+        }
+        assert "status_cache" not in await cache.read(QUERY, loader)
+        loader.assert_awaited_once()
+    finally:
+        await cache.close()
+
+
 async def test_stale_returns_immediately_and_refreshes(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

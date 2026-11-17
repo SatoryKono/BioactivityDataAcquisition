@@ -88,13 +88,35 @@ def _hash_input(row: Mapping[str, object]) -> dict[str, object]:
     return record
 
 
-def _by_id(rows: Sequence[Mapping[str, object]]) -> dict[str, Mapping[str, object]]:
-    indexed: dict[str, Mapping[str, object]] = {}
+def _by_id(
+    rows: Sequence[Mapping[str, object]],
+) -> dict[tuple[str, int | None], Mapping[str, object]]:
+    indexed: dict[tuple[str, int | None], Mapping[str, object]] = {}
+    current_ids: set[str] = set()
+    scd = any(_GOLD_SCD_COLUMNS.intersection(row) for row in rows)
     for row in rows:
         identity = row.get("target_id")
-        if not isinstance(identity, str) or not identity or identity in indexed:
+        if not isinstance(identity, str) or not identity:
             raise ValueError("target migration needs unique, nonempty target IDs")
-        indexed[identity] = row
+        version: int | None = None
+        if scd:
+            if not _GOLD_SCD_COLUMNS.issubset(row):
+                raise ValueError(
+                    "invalid legacy technical field: incomplete target SCD history envelope"
+                )
+            try:
+                _validate_scd_types(row)
+            except ValueError as error:
+                raise ValueError(f"invalid legacy technical field: {error}") from error
+            version = cast(int, row["_version"])
+            if row["_is_current"]:
+                if identity in current_ids:
+                    raise ValueError("target migration needs unique current target IDs")
+                current_ids.add(identity)
+        key = identity, version
+        if key in indexed:
+            raise ValueError("target migration needs unique target ID/version pairs")
+        indexed[key] = row
     if not indexed:
         raise ValueError("empty target cohort cannot replace a canonical table")
     return indexed
@@ -113,7 +135,7 @@ def compare_target_rows(
         raise ValueError("candidate target IDs differ from the full canonical cohort")
     for key, previous in old.items():
         current = new[key]
-        _assert_legacy_values(key, previous, current)
+        _assert_legacy_values(str(key), previous, current)
         old_hash = _scoped_target_hash(
             previous, legacy_include_fields, CHEMBL_TARGET_PROFILE
         )
@@ -391,25 +413,25 @@ def _verify_source_classifications(
 ) -> None:
     """Reclassify original Silver inputs, then bind both candidate projections."""
     adapter = IupharTargetClassificationAdapter(profile)
-    expected: dict[str, Mapping[str, str | None]] = {}
-    for target_id, row in _by_id(layers["silver"]).items():
-        business = {
-            key: value
-            for key, value in _business(row).items()
-            if key not in TARGET_CLASSIFICATION_FIELDS
-        }
-        result = adapter.classify_record(
-            business,
-            input_row_id="migration:" + target_id,
-            run_id="migration-validation",
-            run_started_at="1970-01-01T00:00:00+00:00",
-        )
-        _assert_classification_projection(row, result.projection)
-        expected[target_id] = result.projection
-    for target_id, row in _by_id(layers["gold"]).items():
-        if target_id not in expected:
-            raise ValueError("candidate Gold target has no classified Silver source")
-        _assert_classification_projection(row, expected[target_id])
+    silver_ids = {key[0] for key in _by_id(layers["silver"])}
+    for layer, rows in layers.items():
+        for (target_id, version), row in _by_id(rows).items():
+            if layer == "gold" and target_id not in silver_ids:
+                raise ValueError(
+                    "candidate Gold target has no classified Silver source"
+                )
+            business = {
+                key: value
+                for key, value in _hash_input(row).items()
+                if key not in TARGET_CLASSIFICATION_FIELDS
+            }
+            result = adapter.classify_record(
+                business,
+                input_row_id=f"migration:{layer}:{target_id}:{version}",
+                run_id="migration-validation",
+                run_started_at="1970-01-01T00:00:00+00:00",
+            )
+            _assert_classification_projection(row, result.projection)
 
 
 def _assert_classification_projection(
@@ -434,7 +456,10 @@ def _assert_candidate_cohort_closure(
     assay_targets = {
         row["target_id"]
         for row in _read_delta(paths["assay"])
-        if row.get("target_id") is not None
+        if row.get("target_id") is not None and row.get("_is_current", True)
     }
-    if not assay_targets.issubset(_by_id(gold_rows)):
+    current_target_ids = {
+        key[0] for key, row in _by_id(gold_rows).items() if row.get("_is_current", True)
+    }
+    if not assay_targets.issubset(current_target_ids):
         raise ValueError("baseline assay/target foreign-key closure failed")

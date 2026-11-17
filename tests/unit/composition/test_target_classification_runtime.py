@@ -54,7 +54,8 @@ def shadow_config(tmp_path: Path, monkeypatch) -> PipelineYamlConfig:
         test_mode=True, data_dir=tmp_path / "workflow-data", _env_file=None
     )
     monkeypatch.setattr(
-        "bioetl.composition.bootstrap.runtime.publication_vocab_init.get_settings", lambda: settings
+        "bioetl.composition.bootstrap.runtime.publication_vocab_init.get_settings",
+        lambda: settings,
     )
 
     def write(name: str, payload: object) -> dict[str, str]:

@@ -10,12 +10,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import cast
 
-from iuphar_target_class.iuphar_mapping import approved_class_mappings
-from iuphar_target_class.stage0.io import canonical_json_bytes
-
-from ._manifest import sha256
 from ._snapshot_payloads import identifier
-from .snapshot_evidence import SourceEvidence
 
 SOURCE_FORMAT = "gtopdb_targets_csv_v1"
 _FAMILY_ID = "Family id"
@@ -139,6 +134,3 @@ def _one(value: str) -> str | None:
     if len(parts) > 1:
         raise ValueError("multivalued species gene identity needs explicit resolution")
     return parts[0] if parts else None
-
-
-from ._official_target_projection import project_official_export

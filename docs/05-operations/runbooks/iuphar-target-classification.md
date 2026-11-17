@@ -523,8 +523,8 @@ acceptance evidence are available and reviewed.
 ## Source owners
 
 - [Profile and snapshot admission](../../../src/bioetl/infrastructure/adapters/iuphar/snapshot_loader.py)
-- [Official snapshot builder](../../../src/bioetl/infrastructure/adapters/iuphar/snapshot_builder.py)
-- [Canonical cohort exporter](../../../src/bioetl/infrastructure/adapters/iuphar/cohort_builder.py)
+- [Official snapshot builder](../../../src/bioetl/infrastructure/adapters/iuphar/snapshot_payload.py)
+- [Canonical cohort exporter](../../../src/bioetl/infrastructure/adapters/iuphar/cohort_projection.py)
 - [Stage0 V2 roles and immutable copies](../../../src/iuphar_target_class/stage0/v2.py)
 - [Bounded reference coverage contract](../../../src/iuphar_target_class/reference_coverage.py)
 - [Workflow/runtime dependency binding](../../../src/bioetl/composition/bootstrap/runtime/publication_vocab_init.py)
@@ -533,6 +533,6 @@ acceptance evidence are available and reviewed.
 - [Acceptance implementation](../../../src/iuphar_target_class/integration_acceptance.py)
 - [Acceptance CLI](../../../scripts/engineering/qa/iuphar_target_acceptance.py)
 - [Physical migration and journal](../../../src/bioetl/infrastructure/storage/target_classification_migration.py)
-- [Full persisted-cohort candidate builder](../../../src/bioetl/infrastructure/storage/target_candidate_builder.py)
+- [Full persisted-cohort candidate builder](../../../src/bioetl/infrastructure/storage/target_candidates.py)
 - [Deployment configuration binding](../../../src/bioetl/composition/bootstrap/runtime/composite_runtime_management_bundle.py)
 - [Physical migration CLI](../../../scripts/ops/target_classification_migration.py)

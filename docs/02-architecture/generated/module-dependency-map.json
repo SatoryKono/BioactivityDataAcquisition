@@ -1,66 +1,66 @@
 {
   "summary": {
-    "scanned_modules": 2612,
-    "total_internal_imports": 8564,
+    "scanned_modules": 2650,
+    "total_internal_imports": 8758,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
-    "cross_layer_group_edges_total": 330,
+    "cross_layer_group_edges_total": 340,
     "violations": 0,
-    "source_fingerprint": "ce227e0e694f7e4a28886ca51400a451f11f081ac83792522e65124bd46a00d5"
+    "source_fingerprint": "34dd5cfcea38b5fc077c662cb5ac18861d336d70de27d8853f7de5275aa1c5e8"
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1677,
+      "imports": 1686,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 1150,
+      "imports": 1156,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "application",
-      "imports": 244,
+      "imports": 253,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "composition",
-      "imports": 660,
+      "imports": 686,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "domain",
-      "imports": 328,
+      "imports": 340,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 317,
+      "imports": 357,
       "allowed": true
     },
     {
       "source": "domain",
       "target": "domain",
-      "imports": 1316,
+      "imports": 1327,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "domain",
-      "imports": 806,
+      "imports": 829,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "infrastructure",
-      "imports": 1319,
+      "imports": 1377,
       "allowed": true
     },
     {
@@ -92,7 +92,7 @@
     {
       "source": "application.services",
       "target": "domain.control_plane",
-      "imports": 159
+      "imports": 160
     },
     {
       "source": "infrastructure.adapters",
@@ -112,7 +112,7 @@
     {
       "source": "application.services",
       "target": "domain.types",
-      "imports": 88
+      "imports": 89
     },
     {
       "source": "infrastructure.storage",
@@ -132,17 +132,17 @@
     {
       "source": "application.pipelines",
       "target": "domain.types",
-      "imports": 57
+      "imports": 58
+    },
+    {
+      "source": "composition.bootstrap",
+      "target": "application.services",
+      "imports": 56
     },
     {
       "source": "application.composite",
       "target": "domain.ports",
       "imports": 55
-    },
-    {
-      "source": "composition.bootstrap",
-      "target": "application.services",
-      "imports": 51
     },
     {
       "source": "composition.factories",
@@ -170,19 +170,34 @@
       "imports": 36
     },
     {
+      "source": "composition.bootstrap",
+      "target": "domain.ports",
+      "imports": 36
+    },
+    {
       "source": "infrastructure.storage",
       "target": "domain.models",
       "imports": 36
     },
     {
       "source": "composition.bootstrap",
-      "target": "domain.ports",
+      "target": "infrastructure.storage",
       "imports": 35
     },
     {
       "source": "infrastructure.control_plane",
       "target": "domain.control_plane",
       "imports": 35
+    },
+    {
+      "source": "composition.factories",
+      "target": "infrastructure.config",
+      "imports": 34
+    },
+    {
+      "source": "composition.bootstrap",
+      "target": "infrastructure.config",
+      "imports": 33
     },
     {
       "source": "interfaces.cli",
@@ -210,19 +225,9 @@
       "imports": 29
     },
     {
-      "source": "composition.bootstrap",
-      "target": "infrastructure.storage",
-      "imports": 29
-    },
-    {
       "source": "composition.factories",
       "target": "infrastructure.adapters",
       "imports": 27
-    },
-    {
-      "source": "composition.factories",
-      "target": "infrastructure.config",
-      "imports": 26
     },
     {
       "source": "infrastructure.adapters",
@@ -250,6 +255,11 @@
       "imports": 24
     },
     {
+      "source": "application.pipelines",
+      "target": "domain.entities",
+      "imports": 23
+    },
+    {
       "source": "application.services",
       "target": "domain.exceptions",
       "imports": 23
@@ -270,11 +280,6 @@
       "imports": 22
     },
     {
-      "source": "application.pipelines",
-      "target": "domain.entities",
-      "imports": 22
-    },
-    {
       "source": "application.services",
       "target": "domain.normalization",
       "imports": 22
@@ -291,6 +296,11 @@
     },
     {
       "source": "composition.factories",
+      "target": "infrastructure.storage",
+      "imports": 22
+    },
+    {
+      "source": "composition.factories",
       "target": "application.services",
       "imports": 21
     },
@@ -300,16 +310,6 @@
       "imports": 21
     },
     {
-      "source": "composition.bootstrap",
-      "target": "infrastructure.config",
-      "imports": 20
-    },
-    {
-      "source": "composition.factories",
-      "target": "infrastructure.storage",
-      "imports": 20
-    },
-    {
       "source": "composition.runtime_builders",
       "target": "application.services",
       "imports": 20
@@ -317,6 +317,11 @@
     {
       "source": "application.core",
       "target": "domain.exceptions",
+      "imports": 19
+    },
+    {
+      "source": "infrastructure.schemas",
+      "target": "domain.config",
       "imports": 19
     },
     {
@@ -340,8 +345,8 @@
       "imports": 17
     },
     {
-      "source": "infrastructure.schemas",
-      "target": "domain.config",
+      "source": "application.services",
+      "target": "domain.workflow",
       "imports": 17
     },
     {
@@ -353,11 +358,6 @@
       "source": "interfaces.http",
       "target": "domain.ports",
       "imports": 17
-    },
-    {
-      "source": "application.services",
-      "target": "domain.workflow",
-      "imports": 16
     },
     {
       "source": "infrastructure.control_plane",

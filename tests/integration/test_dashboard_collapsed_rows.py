@@ -23,6 +23,46 @@ from tests.integration._grafana_test_support import (
 pytestmark = pytest.mark.integration
 
 
+@pytest.mark.parametrize("profile", ["dashboards", "dashboards-adaptive"])
+def test_fk_comparison_uses_a_compact_paginated_band_without_a_gap(profile) -> None:
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[2]
+    dashboard = load_dashboard(root / "grafana" / profile / "bioetl-overview-v2.json")
+    panels = {panel["id"]: panel for panel in dashboard["panels"]}
+    comparison = panels[9483]
+    grid = comparison["gridPos"]
+    assert 5 <= grid["h"] <= 6, (
+        "Single-row FK evidence must not reserve a tall blank band"
+    )
+    assert comparison["options"]["footer"]["enablePagination"] is True
+    assert (
+        max(p["gridPos"]["y"] + p["gridPos"]["h"] for p in panels.values())
+        == grid["y"] + grid["h"]
+    )
+    properties = {
+        item["matcher"]["options"]: {
+            prop["id"]: prop["value"] for prop in item["properties"]
+        }
+        for item in comparison["fieldConfig"]["overrides"]
+    }
+    fixed_width = sum(
+        properties[name]["custom.width"]
+        for name in (
+            "Workflow step",
+            "Mode",
+            "Row scope",
+            "Compared snapshots",
+            "Limit",
+            "Result",
+        )
+    )
+    # Leave the error a readable remainder at the operator's 1374px viewport;
+    # minWidth alone lets Grafana allocate equal wide columns and push it offscreen.
+    assert fixed_width + properties["Interpretation"]["custom.minWidth"] <= 1250
+    assert "custom.width" not in properties["Interpretation"]
+
+
 def test_dashboard_rows_follow_progressive_disclosure_shape() -> None:
     """Expanded rows keep children at root; collapsed forensic rows nest them."""
     collapsed_rows = 0
@@ -70,7 +110,7 @@ def test_dashboard_rows_match_flat_and_forensic_surfaces() -> None:
         "bioetl-control-plane-v1.json": 2,
         "bioetl-dq-v2.json": 1,
         "bioetl-incident-v1.json": 9,
-        "bioetl-overview-v2.json": 1,
+        "bioetl-overview-v2.json": 0,
         "bioetl-run-explorer-v1.json": 0,
     }
     observed = {}
@@ -89,7 +129,7 @@ def test_dashboard_rows_match_flat_and_forensic_surfaces() -> None:
                 3010,
             ]
         if dashboard_path.stem == "bioetl-overview-v2":
-            assert [row["id"] for row in rows] == [32005]
+            assert rows == []
             comparison = next(
                 panel
                 for panel in get_dashboard_panels(dashboard)
@@ -136,7 +176,7 @@ def test_row_groups_materialize_expanded_for_test_stage() -> None:
         materialized = materialize_expanded(shipped)
         root_panels = materialized["panels"]
         rows = [panel for panel in root_panels if panel.get("type") == "row"]
-        if dashboard_path.stem == "bioetl-run-explorer-v1":
+        if dashboard_path.stem in {"bioetl-run-explorer-v1", "bioetl-overview-v2"}:
             assert rows == []
             assert len(get_dashboard_panels(materialized)) == shipped_total
             continue

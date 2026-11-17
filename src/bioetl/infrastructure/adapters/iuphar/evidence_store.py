@@ -10,6 +10,9 @@ from bioetl.domain.entities.target_classification_boundary import (
     TargetClassificationArtifactReference,
     TargetClassificationResult,
 )
+from bioetl.infrastructure.control_plane._evidence_location_publish import (
+    publish_bytes_if_absent,
+)
 from iuphar_target_class.stage0.io import canonical_json_bytes
 
 from ._evidence_validation import validate_row_artifacts
@@ -24,13 +27,9 @@ def _segment(value: str) -> str:
 
 
 def _write_same(path: Path, payload: bytes) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    try:
-        with path.open("xb") as stream:
-            stream.write(payload)
-    except FileExistsError:
+    if not publish_bytes_if_absent(path, payload, trusted_base=path.parent):
         if path.read_bytes() != payload:
-            raise ValueError("conflicting immutable classification artifact") from None
+            raise ValueError("conflicting immutable classification artifact")
 
 
 def _row_root(

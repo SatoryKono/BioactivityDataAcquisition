@@ -74,22 +74,6 @@ MODULE_GROUP_OVERRIDES = {
     "bioetl.composition.evidence_location_registration": (
         _COMPOSITION_RUNTIME_BUILDERS_GROUP
     ),
-    # IUPHAR target wiring stays in the existing runtime_builders group so the
-    # new modules do not add cross-layer group edges.
-    "bioetl.composition.bootstrap.cli.lineage": _COMPOSITION_RUNTIME_BUILDERS_GROUP,
-    "bioetl.composition.bootstrap.cli.lock": _COMPOSITION_RUNTIME_BUILDERS_GROUP,
-    "bioetl.composition.bootstrap.runtime.composite_control_plane_bundle": (
-        _COMPOSITION_RUNTIME_BUILDERS_GROUP
-    ),
-    "bioetl.composition.bootstrap.runtime.composite_runtime_management_bundle": (
-        _COMPOSITION_RUNTIME_BUILDERS_GROUP
-    ),
-    "bioetl.composition.bootstrap.runtime.publication_vocab_init": (
-        _COMPOSITION_RUNTIME_BUILDERS_GROUP
-    ),
-    "bioetl.composition.factories.dq.composite_validation": (
-        _COMPOSITION_RUNTIME_BUILDERS_GROUP
-    ),
 }
 TYPE_CHECKING_NAME = "TYPE_CHECKING"
 _FRONTMATTER_DELIMITER = "---"

@@ -8,9 +8,21 @@ from pathlib import Path
 import yaml
 from typing import Any
 
+from scripts.ops.observability.grafana._incident_explanations import (
+    apply_incident_evidence_clocks,
+)
+from scripts.ops.observability.grafana._overview_identity import (
+    apply_overview_evidence_clocks,
+)
+
+_RUN_ID = "Run ID"
+_DATA_QUALITY = "Data Quality"
+
 _WRAP_TEXT = "custom.wrapText"
 _CELL_OPTIONS = "custom.cellOptions"
 _CUSTOM_WIDTH = "custom.width"
+_CURRENT_PRESENTATION = "bioetlCurrentPresentation"
+_SNAPSHOT_PREFIX = "TIME RANGE SNAPSHOT · "
 
 _LABEL_TRANSLATIONS = {
     "НЕТ ЗАПУСКОВ": "NO RUNS",
@@ -33,8 +45,39 @@ def enable_adaptive_catalog(dashboard: dict[str, Any]) -> None:
     panel["type"] = "bioetl-selectorshell-panel"
     panel["options"].update(
         viewMode="runs",
-        compactFields=["Provider", "Pipeline", "Run ID", "Overview"],
+        compactFields=["Provider", "Pipeline", _RUN_ID, "Overview"],
     )
+    overrides = panel.get("fieldConfig", {}).get("overrides", [])
+    run_id = next(
+        (
+            item
+            for item in overrides
+            if item.get("matcher", {}).get("options") == _RUN_ID
+        ),
+        {},
+    )
+    actions = next(
+        (
+            prop["value"]
+            for prop in run_id.get("properties", [])
+            if prop["id"] == "links"
+        ),
+        [],
+    )
+    # Native compact tables move hidden-column actions into the Run ID menu.
+    # Restoring a wide column must restore its row-bound action as well, while
+    # retaining that menu for the narrow view and full details.
+    for override in panel.get("fieldConfig", {}).get("overrides", []):
+        _restore_catalog_field(override, actions)
+    if "description" in panel:
+        panel["description"] = panel["description"].replace(
+            "Compact view: Pipeline, Run ID, Started, Overview and Replay Readiness. "
+            "Workflow, Provider, Duration, Saved Evidence and Data Quality remain "
+            "in the table data inspector.",
+            "Wide table: Workflow, Pipeline, Run ID, Started, Duration, Overview, "
+            "Data Quality and Replay Readiness. Compact view: Provider, Pipeline, "
+            "Run ID and Overview. Details retains all fields.",
+        )
 
 
 def _translate_label_text(item: str) -> str:
@@ -83,7 +126,7 @@ def _set_wrap(properties: list[dict[str, Any]], *, enabled: bool) -> None:
 
 
 def _stamp_run_explorer_wrap(panel: dict[str, Any]) -> None:
-    """Keep ten native rows stable; full identity stays available in Inspect."""
+    """Keep twenty native rows stable; full identity stays available in Inspect."""
     panel["options"].setdefault("footer", {})["enablePagination"] = False
     custom = panel["fieldConfig"]["defaults"]["custom"]
     custom.update(
@@ -97,7 +140,7 @@ def _stamp_run_explorer_wrap(panel: dict[str, Any]) -> None:
         # TableRT can apply one field's wrap option to every cell in a row.
         _set_wrap(properties, enabled=False)
     run_id = next(
-        item for item in overrides if item.get("matcher", {}).get("options") == "Run ID"
+        item for item in overrides if item.get("matcher", {}).get("options") == _RUN_ID
     )
     _set_wrap(run_id["properties"], enabled=False)
 
@@ -202,9 +245,9 @@ def _expand_coverage_row(row: dict[str, Any]) -> tuple[int, int]:
     for panel in children:
         if panel.get("id") in {9102, 9491}:
             panel["gridPos"]["h"] = max(8, panel["gridPos"]["h"])
-            panel["options"]["orientation"] = "vertical"
-            # Retain per-field reduction for NaN and empty fields before
-            # explicitly displaying the resulting individual signal rows.
+            # Preserve the main branch's explicit per-field reduction while
+            # stacking readable named rows in the narrower coverage panel.
+            panel["options"]["orientation"] = "horizontal"
             reduction = {
                 "id": "reduce",
                 "options": {"reducers": ["lastNotNull"], "mode": "reduceFields"},
@@ -226,6 +269,19 @@ def _expand_coverage_row(row: dict[str, Any]) -> tuple[int, int]:
 def stamp_audit_presentation(dashboard: dict[str, Any]) -> None:
     """Keep cached-provider explanations and long verdicts readable."""
     _translate_audit_labels(dashboard)
+    if dashboard.get("uid") == "bioetl-run-explorer-v1":
+        for item in [dashboard, *dashboard.get("panels", [])]:
+            if "description" in item:
+                item["description"] = item["description"].replace(
+                    "latest 10 launches", "latest 20 launches"
+                )
+    if dashboard.get("refresh") in {"60s", "1m"}:
+        dashboard["refresh"] = "1m"
+        old_note = " Saved refresh is 60s; Grafana suspends automatic refresh for an absolute time range. CURRENT managed panels use their own clock."
+        refresh_note = " Saved refresh is 1m (60 seconds), matching the refresh selector. CURRENT managed panels use their own clock."
+        description = dashboard.get("description", "").replace(old_note, "")
+        if refresh_note not in description:
+            dashboard["description"] = description + refresh_note
     if dashboard.get("uid") == "bioetl-incident-v1":
         _fit_coverage_stats(dashboard)
     for panel in dashboard.get("panels", []):
@@ -243,10 +299,66 @@ def _is_current_panel(panel: dict, spec: dict) -> bool:
     if spec.get("evidence_source") not in {"prometheus", "grafana_builtin"}:
         return False
     scope = spec.get("scope")
-    if scope == "time_range":
-        return False
-    current = scope == "current" or ("CURRENT" in panel.get("description", "")[:45])
+    prefix = panel.get("description", "").split("·", 1)[0]
+    declared_current = "CURRENT" in prefix and "TIME RANGE" not in prefix
+    current = (
+        scope == "current"
+        or declared_current
+        or _CURRENT_PRESENTATION in panel.get("options", {})
+    )
     return current and panel.get("type") in {"stat", "table", "timeseries"}
+
+
+def restore_native_current_presentation(
+    dashboard: dict, *, remove: bool = False
+) -> None:
+    """Restore source presentation before a deterministic projection/rebuild."""
+    for panel in _walk_panels(dashboard.get("panels", [])):
+        options = panel.get("options", {})
+        original = options.get(_CURRENT_PRESENTATION)
+        if original is None:
+            continue
+        panel.update(title=original["title"], description=original["description"])
+        if remove:
+            options.pop(_CURRENT_PRESENTATION)
+
+
+def mark_native_snapshot_clocks(dashboard: dict) -> None:
+    """Native Grafana instant queries use the selected end, including absolute ranges.
+
+    Only the managed CURRENT renderer owns an independent clock. Native values
+    therefore remain usable historical snapshots and never claim live health.
+    Keep the original presentation as projection metadata, not a second query.
+    """
+    root = Path(__file__).resolve().parents[4]
+    contract = yaml.safe_load(
+        (
+            root / "docs/03-guides/dashboards/contracts/panel-content-contract.yaml"
+        ).read_text(encoding="utf-8")
+    )
+    specs = contract["dashboards"].get(dashboard.get("uid"), {}).get("panels", {})
+    for panel in _walk_panels(dashboard.get("panels", [])):
+        if panel.get("description", "").startswith(_SNAPSHOT_PREFIX):
+            original = panel["options"][_CURRENT_PRESENTATION]
+            panel.update(title=original["title"], description=original["description"])
+        if not _is_current_panel(panel, specs.get(str(panel["id"]), {})):
+            continue
+        panel.setdefault("options", {})[_CURRENT_PRESENTATION] = {
+            "title": panel["title"],
+            "description": panel.get("description", ""),
+        }
+        title = (
+            panel["title"].replace("Current", "Snapshot").replace("CURRENT", "SNAPSHOT")
+        )
+        if panel["id"] in {9606, 22012}:
+            title += " · period end"
+        panel["title"] = title
+        panel["description"] = (
+            _SNAPSHOT_PREFIX
+            + "Evaluated at the selected period end, including absolute historical periods; not live data. "
+            "Independent CURRENT clocks and the live-clock instructions below apply only in the managed adaptive profile. "
+            + panel["description"]
+        )
 
 
 def _current_queries(panel: dict, native_panels: dict) -> list[dict]:
@@ -295,6 +407,7 @@ def _verify_current_donors(panels: dict) -> None:
 
 def _project_current_time(dashboard: dict) -> None:
     """Use an independent query clock for source-declared CURRENT telemetry."""
+    restore_native_current_presentation(dashboard)
     root = Path(__file__).resolve().parents[4]
     contract = yaml.safe_load(
         (
@@ -310,6 +423,7 @@ def _project_current_time(dashboard: dict) -> None:
                 " · ${workflow_evidence_freshness}", ""
             )
         if _is_current_panel(panel, specs.get(str(panel_id), {})):
+            panel.get("options", {}).pop(_CURRENT_PRESENTATION, None)
             _wrap_current_panel(panel, _current_queries(panel, native_panels))
     _verify_current_donors(panels)
     if "templating" in dashboard:
@@ -347,11 +461,19 @@ def _adapt_incident(dashboard: dict) -> None:
         return
     suspects["gridPos"].update(x=0, y=7, w=12, h=8)
     alerts["gridPos"].update(x=12, y=7, w=12, h=8)
-    suspects["type"] = "bioetl-selectorshell-panel"
-    suspects["options"].update(
-        viewMode="rows",
-        compactFields=["Rank", "Severity", "Cause verification", "Signal", "Object"],
-    )
+    fields = [
+        "Rank",
+        "Diagnostic priority",
+        "Cause verification",
+        "Event freshness",
+        "Signal",
+        "Object",
+    ]
+    if suspects["options"].get("viewMode") == "current":
+        suspects["options"]["currentView"]["compactFields"] = fields
+    else:
+        suspects["type"] = "bioetl-selectorshell-panel"
+        suspects["options"].update(viewMode="rows", compactFields=fields)
     alerts["options"]["currentView"]["compactFields"] = [
         "Severity",
         "Alert",
@@ -361,17 +483,16 @@ def _adapt_incident(dashboard: dict) -> None:
 
 
 def _adapt_overview(dashboard: dict) -> None:
-    # Keep the main answer first when Grafana stacks columns at 200%.
+    # The native saved verdict/current cards already lead the answer. Preserve
+    # main's extra domain-row height and move later evidence out of its way.
     panels = {panel["id"]: panel for panel in dashboard["panels"]}
-    for panel_id in (9604, 9603, 9300):
-        panels[panel_id]["gridPos"].update(x=0, w=10)
-    for panel_id in (99, 9002):
-        panels[panel_id]["gridPos"].update(x=10, w=14)
-    # The narrower domain column wraps reasons; keep the native height unchanged.
-    panels[9002]["gridPos"]["h"] = 9
-    panels[9604]["gridPos"]["h"] = 2
-    panels[9603]["gridPos"].update(y=4, h=4)
-    panels[9300]["gridPos"]["y"] = 8
+    domains = panels[9002]
+    bottom = domains["gridPos"]["y"] + domains["gridPos"]["h"]
+    delta = max(0, 9 - domains["gridPos"]["h"])
+    domains["gridPos"]["h"] += delta
+    for panel in dashboard["panels"]:
+        if panel is not domains and panel["gridPos"]["y"] >= bottom:
+            _shift_panel(panel, delta)
 
 
 def project_adaptive_dashboard(source: dict) -> dict:
@@ -389,3 +510,48 @@ def project_adaptive_dashboard(source: dict) -> dict:
     if projector is not None:
         projector(result)
     return result
+
+
+def apply_portfolio_evidence_contract(payload: dict) -> None:
+    """Apply only confirmed presentation fixes after older layout migrations."""
+    uid = payload.get("uid")
+    note = (
+        " Canonical presentation contract: dashboard-2.0; UID v1/v2 suffixes are stable compatibility identifiers. "
+        "Shared selectors are Workflow, Pipeline, Run Type and Run ID; local lookup, derived selectors and diagnostic views have role-specific scope. "
+        "Saved outcomes, current alert urgency, coverage and replay readiness are distinct state vocabularies."
+    )
+    if note not in payload.get("description", ""):
+        payload["description"] = payload.get("description", "") + note
+    panels = {p["id"]: p for p in payload.get("panels", [])}
+    if uid == "bioetl-run-explorer-v1":
+        panels[1]["description"] = (
+            panels[1].get("description", "").replace("latest 10", "latest 20")
+        )
+    if uid == "bioetl-dq-v2":
+        payload["description"] = payload.get("description", "").replace(
+            "Run ID is always selected",
+            "Run ID '-' resolves AUTO to the latest run in scope; an explicit UUID stays selected",
+        )
+    if uid == "bioetl-incident-v1":
+        apply_incident_evidence_clocks(payload, panels)
+    if uid == "bioetl-overview-v2":
+        apply_overview_evidence_clocks(payload, panels)
+
+
+def _restore_catalog_field(override: dict, actions: list[dict]) -> None:
+    restored_actions = {"Workflow": "Workflow passport", _DATA_QUALITY: _DATA_QUALITY}
+    name = override.get("matcher", {}).get("options")
+    for prop in override.get("properties", []):
+        if name in restored_actions and prop["id"] == "links":
+            prop["value"] = deepcopy(
+                [
+                    action
+                    for action in actions
+                    if action.get("title") == restored_actions[name]
+                ]
+            )
+        if (
+            name in {"Workflow", "Duration", "Replay Readiness", _DATA_QUALITY}
+            and prop.get("id") == "custom.hidden"
+        ):
+            prop["value"] = False

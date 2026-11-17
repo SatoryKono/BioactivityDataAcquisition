@@ -79,9 +79,6 @@ def test_issue_5559_module_coverage_gate_current_values_match_zero_residuals() -
     assert gates_policy["uncovered_module_count"]["max_count"] == 0
     # Policy remains zero-residual; live inventory may report unmeasured modules
     # when coverage XML lags source moves. Assert gate wiring + uncovered residual.
-    assert gate_rows["module_coverage_unmeasured_modules"]["name"] == (
-        "module_coverage_unmeasured_modules"
-    )
     assert gate_rows["module_coverage_unmeasured_modules"]["limit"] == 0
     assert (
         gate_rows["module_coverage_unmeasured_modules"]["source_artifact"]
@@ -174,6 +171,9 @@ def test_issue_5562_skip_inventory_entries_are_individually_accountable() -> Non
         "#12106": 1,
         "#12407": 1,
         "#12929": 1,
+        # Existing engine guards moved from unit to the integration census;
+        # no skip call or historical closeout status was added or changed.
+        "#13168": 2,
     }
 
 

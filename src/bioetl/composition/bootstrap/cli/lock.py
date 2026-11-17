@@ -33,26 +33,21 @@ def bootstrap_lock_service() -> LockService:
 
     return LockService(lock_port=lock_port, logger=noop_logger)
 
+
 from collections.abc import Callable, Mapping
-from dataclasses import dataclass
 from pathlib import Path
 
 from bioetl.application.services.workflow.control_plane.mutation_plan import (
     WorkflowMutationSpec,
 )
-from bioetl.composition.factories.dq.composite_validation import resolve_target_table_paths
 from bioetl.domain.workflow import (
     TransformStepConfig,
     WorkflowConfig,
-    WorkflowStepConfig,
 )
-from bioetl.infrastructure.config.converters import yaml_config_to_domain
 from bioetl.infrastructure.config.settings_api import Settings
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
-from bioetl.infrastructure.storage.delta.table_ops import resolve_delta_table_path
 from bioetl.infrastructure.storage.target_classification_guard import (
     assert_target_table_compatibility,
-    get_target_table_profile,
 )
 
 PipelineConfigLoader = Callable[[str], PipelineYamlConfig]
@@ -266,6 +261,7 @@ def _has_bound_producer(
     return any(
         item.step.step_id in upstream and item.paths[index] == path for item in intents
     )
+
 
 from bioetl.composition.bootstrap.cli.lineage import (
     _PipelineIntent,

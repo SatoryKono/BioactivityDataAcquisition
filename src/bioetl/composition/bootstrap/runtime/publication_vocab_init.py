@@ -17,6 +17,7 @@ def initialize_publication_controlled_vocabulary(configs_root: Path) -> None:
 
     initialize_registry(load_publication_controlled_vocabulary(configs_root))
 
+
 from bioetl.domain.contracts.gold.chembl_target_classification import (
     target_v31_schema_hash,
 )
@@ -26,8 +27,7 @@ from bioetl.domain.normalization.profiles.chembl_target_classification import (
 
 from collections.abc import Mapping
 from dataclasses import replace
-from pathlib import Path
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from bioetl.application.services.target_runtime.classification import (
     TargetClassificationRunState,
@@ -134,16 +134,13 @@ def apply_target_contract_identity(
         return identity
     normalization = target_classification_normalization_identity(config)
     assert normalization is not None
-    return cast(
-        RunManifestContractIdentity,
-        replace(
-            identity,
-            contract_version=schema_identity[0],
-            contract_schema_hash=schema_identity[1],
-            normalization_profile_ref=normalization[0],
-            normalization_profile_version=normalization[1],
-            normalization_profile_hash=normalization[2],
-        ),
+    return replace(
+        identity,
+        contract_version=schema_identity[0],
+        contract_schema_hash=schema_identity[1],
+        normalization_profile_ref=normalization[0],
+        normalization_profile_version=normalization[1],
+        normalization_profile_hash=normalization[2],
     )
 
 

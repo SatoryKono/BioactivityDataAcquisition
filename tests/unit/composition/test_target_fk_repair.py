@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from datetime import datetime, UTC
 from pathlib import Path
+from shutil import copytree, ignore_patterns
 from uuid import uuid4
 
 import pyarrow as pa
@@ -66,15 +67,11 @@ def repair_request(tmp_path, monkeypatch):
         pa.Table.from_pylist([{"target_id": "CHEMBL3"}]),
     )
     source = make_source(tmp_path / "synthetic-source", ["CHEMBL3"], [_raw_record()])
-    # Only config root location is redirected; all pipeline behavior is real.
-    import bioetl.composition.bootstrap.runtime.composite_control_plane_bundle as module
-
-    original = module.load_pipeline_config_from_root
-    monkeypatch.setattr(
-        module,
-        "load_pipeline_config_from_root",
-        lambda name, **kwargs: original(name, configs_root=repo / "configs"),
+    # Both pipeline and contract policy must come from the same explicit root.
+    copytree(
+        repo / "configs", root / "configs", ignore=ignore_patterns(".env*", "*.env")
     )
+    monkeypatch.chdir(root)
     return TargetFKRepairRequest(
         root,
         source,

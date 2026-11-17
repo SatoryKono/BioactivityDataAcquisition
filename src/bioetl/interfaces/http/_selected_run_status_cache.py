@@ -106,6 +106,18 @@ class SelectedRunStatusCache:
             "last_refresh_error": entry.error,
         }
 
+    async def read_view(
+        self, query: Mapping[str, str], loader: StatusLoader
+    ) -> dict[str, object]:
+        """Attach the cache owner's policy to a detached response snapshot."""
+        payload = await self.read(query, loader)
+        payload["status_cache"] = {
+            **self.status(query),
+            "fresh_seconds": FRESH_SECONDS,
+            "maximum_age_seconds": MAX_AGE_SECONDS,
+        }
+        return payload
+
     def _entry(self, key: StatusKey) -> _Entry:
         if key not in self._entries:
             if len(self._entries) >= MAX_ENTRIES:

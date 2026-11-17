@@ -45,9 +45,22 @@ def test_private_host_delivery_binds_source_and_survives_data_volume() -> None:
     assert manifest["grafana_version"] == "13.2.3"
     assert manifest["router_version"] == "7.18.4"
     assert manifest["upstream_sha"] == "6193dc03311b631b9727b560d24369e683dc396e"
+    # This immutable host image is a released snapshot. The adaptive plugin
+    # candidate has its own build-provenance and is not installed by this test.
+    binding = manifest["ci_source_revalidations"][-1]
+    source = binding["source_commit"]
+    assert binding["qualification"] == "image_artifact_parity"
+    assert binding["browser_acceptance_claimed"] is False
+    assert (
+        subprocess.check_output(
+            ["git", "rev-parse", source + "^{tree}"], text=True
+        ).strip()
+        == binding["source_tree"]
+    )
     for relative, digest in manifest["artifact_sha256"].items():
         if "/dist/" not in relative:
-            assert hashlib.sha256(Path(relative).read_bytes()).hexdigest() == digest
+            data = subprocess.check_output(["git", "show", source + ":" + relative])
+            assert hashlib.sha256(data).hexdigest() == digest
     recipe = (owner / "Dockerfile.host").read_text(encoding="utf-8")
     assert "FROM " + manifest["base_image"] in recipe
     assert "runtime-probe" not in recipe

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import replace
-from typing import cast
 
 from bioetl.domain.entities.target_classification_boundary import (
     TargetClassificationArtifact,
@@ -134,25 +133,22 @@ def _project_rows(
     results: dict[str, TargetClassificationResult] = {}
     for row in classified.rows:
         invalid = row.result.input_validation_status == "invalid_input"
-        one = cast(
-            BatchResult,
-            replace(
-                classified,
-                rows=(row,),
-                diagnostics=tuple(
-                    (key, value)
-                    for key, value in classified.diagnostics
-                    if key == row.result.input_row_id
-                ),
-                components=(),
-                metrics={
-                    "rows": 1,
-                    "invalid_rows": int(invalid),
-                    "classified_rows": int(bool(row.result.effective_class)),
-                    "class_null": int(row.result.effective_class is None),
-                },
-                status="rejected" if invalid else "processed",
+        one = replace(
+            classified,
+            rows=(row,),
+            diagnostics=tuple(
+                (key, value)
+                for key, value in classified.diagnostics
+                if key == row.result.input_row_id
             ),
+            components=(),
+            metrics={
+                "rows": 1,
+                "invalid_rows": int(invalid),
+                "classified_rows": int(bool(row.result.effective_class)),
+                "class_null": int(row.result.effective_class is None),
+            },
+            status="rejected" if invalid else "processed",
         )
         results[row.result.input_row_id] = _row_result(one, profile_sha256)
     return results

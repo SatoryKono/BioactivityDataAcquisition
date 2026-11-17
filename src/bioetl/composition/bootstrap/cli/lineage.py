@@ -33,14 +33,16 @@ def bootstrap_lineage_service() -> LineageInspectionService:
         ),
     )
 
-from collections.abc import Callable, Mapping
+
+from collections.abc import Callable
 from dataclasses import dataclass
-from pathlib import Path
 
 from bioetl.application.services.workflow.control_plane.mutation_plan import (
     WorkflowMutationSpec,
 )
-from bioetl.composition.factories.dq.composite_validation import resolve_target_table_paths
+from bioetl.composition.factories.dq.composite_validation import (
+    resolve_target_table_paths,
+)
 from bioetl.domain.workflow import (
     TransformStepConfig,
     WorkflowConfig,
@@ -51,7 +53,6 @@ from bioetl.infrastructure.config.settings_api import Settings
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.storage.delta.table_ops import resolve_delta_table_path
 from bioetl.infrastructure.storage.target_classification_guard import (
-    assert_target_table_compatibility,
     get_target_table_profile,
 )
 
@@ -238,6 +239,7 @@ def _transform_path(settings: Settings, layer: str, table: str) -> Path:
             base_path=str(base), table_name=table, flat_structure=False
         )
     ).resolve()
+
 
 from bioetl.composition.bootstrap.cli.lock import (
     _bounded_destructive_upstream,

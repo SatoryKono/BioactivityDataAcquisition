@@ -70,6 +70,7 @@ from bioetl.infrastructure.observability._metrics_defs_core import (
     STAGE_BACKLOG_RECORDS,
     STAGE_LAG_SECONDS,
     STAGE_RECORDS_TOTAL,
+    STAGE_SNAPSHOT_OBSERVED_TIMESTAMP_SECONDS,
     VACUUM_FILES_REMOVED_TOTAL,
 )
 from bioetl.infrastructure.observability._metrics_defs_health import (
@@ -341,6 +342,7 @@ __all__ = [
     "STAGE_BACKLOG_RECORDS",
     "STAGE_LAG_SECONDS",
     "STAGE_RECORDS_TOTAL",
+    "STAGE_SNAPSHOT_OBSERVED_TIMESTAMP_SECONDS",
     "STORAGE_OPTIMIZATION_TOTAL",
     "STRUCTURAL_POLICY_EVENTS_TOTAL",
     "STRUCTURAL_POLICY_SHADOW_COMPARISONS_TOTAL",

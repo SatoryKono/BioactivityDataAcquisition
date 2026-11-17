@@ -43,7 +43,13 @@ def apply_replay_layout(payload: dict) -> None:
     target.update(
         parser="uql",
         root_selector="",
-        uql='parse-json | jsonata "rows^(present ? 1 : 0, priority, name)"',
+        uql=(
+            "parse-json | jsonata \"summary.overall_status='SELECT RUN' ? "
+            "[{'label':'Run selection','priority':'—','present':false,"
+            "'status':'SELECT RUN','value_full':'Choose a Run ID',"
+            "'why':'No exact-run evidence has been requested.'}] : "
+            '[rows^(present ? 1 : 0, priority, name)]"'
+        ),
     )
     names = ["label", "priority", "present", "status", "value_full", "why"]
     evidence["transformations"] = [

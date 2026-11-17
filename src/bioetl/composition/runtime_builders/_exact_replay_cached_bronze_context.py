@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
-from bioetl.composition.bootstrap.runtime.publication_vocab_init import hydrate_target_runtime_config
+from bioetl.composition.bootstrap.runtime.publication_vocab_init import (
+    hydrate_target_runtime_config,
+)
 
 from pathlib import Path
 from typing import TYPE_CHECKING, overload

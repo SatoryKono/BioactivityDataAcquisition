@@ -17,7 +17,6 @@ from bioetl.infrastructure.control_plane.file_run_manifest_store import (
 from bioetl.infrastructure.control_plane.file_workflow_manifest_store import (
     FileWorkflowManifestStore,
 )
-from scripts.engineering.common.repo_paths import REPO_ROOT
 from scripts.ops.runtime.migrate_evidence_locations import (
     MigrationTarget,
     execute_migration,

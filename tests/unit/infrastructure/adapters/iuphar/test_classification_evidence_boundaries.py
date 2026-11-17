@@ -153,3 +153,28 @@ def test_store_refuses_a_projection_from_another_profile_before_publishing(
     with pytest.raises(ValueError, match="another profile"):
         store.publish_result(changed, run_id="run-a", batch_id="batch-1")
     assert not root.exists()
+
+
+def test_interrupted_artifact_publication_leaves_no_final_partial_file(
+    classification_boundary, monkeypatch
+):
+    from bioetl.infrastructure.control_plane import _evidence_location_publish as atomic
+
+    _, store, result, _, root = classification_boundary
+    publish = atomic._publish_new_file_exclusive
+    seen = []
+
+    def interrupted(source, target):
+        seen.append(target)
+        assert source.read_bytes()
+        assert not target.exists()
+        raise OSError("interrupted publication")
+
+    with monkeypatch.context() as patch:
+        patch.setattr(atomic, "_publish_new_file_exclusive", interrupted)
+        with pytest.raises(OSError, match="interrupted publication"):
+            store.publish_result(result, run_id="run-a", batch_id="batch-1")
+    assert seen and all(not path.exists() for path in seen)
+    monkeypatch.setattr(atomic, "_publish_new_file_exclusive", publish)
+    store.publish_result(result, run_id="run-a", batch_id="batch-1")
+    assert list(root.rglob("row-manifest.json"))

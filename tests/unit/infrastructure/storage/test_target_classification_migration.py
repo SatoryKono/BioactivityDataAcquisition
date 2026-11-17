@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 from dataclasses import replace
+import subprocess
+import sys
 
 import pytest
 import yaml
@@ -160,3 +162,73 @@ def test_full_cohort_required_and_new_class_does_not_change_legacy_hash():
         compare_target_rows([old, {**old, "target_id": "CHEMBL2"}], [candidate], fields)
     with pytest.raises(ValueError, match="legacy business field"):
         compare_target_rows([old], [{**candidate, "pref_name": "changed"}], fields)
+
+
+@pytest.mark.parametrize("changed", [False, True])
+def test_rollback_restores_missing_dependency_and_rejects_changed_bytes(
+    paths, monkeypatch, changed
+):
+    dependency = paths.workspace / "old-profile.json"
+    dependency.write_bytes(b"pinned dependency")
+    digest = migration.sha256_file(dependency)
+    monkeypatch.setattr(
+        migration, "collect_target_dependencies", lambda **_: {dependency.name: digest}
+    )
+    migration.prepare_target_migration(paths, legacy_include_fields=("target_id",))
+    migration.promote_target_migration(paths)
+    dependency.unlink()
+    if changed:
+        dependency.write_bytes(b"another legitimate profile")
+        with pytest.raises(ValueError, match="digest mismatch"):
+            migration.rollback_target_migration(paths)
+        assert dependency.read_bytes() == b"another legitimate profile"
+        assert (paths.silver / "part.parquet").read_bytes() == b"candidate_silver"
+    else:
+        state = migration.rollback_target_migration(paths)
+        assert dependency.read_bytes() == b"pinned dependency"
+        assert state["restored_dependencies"] == [dependency.name]
+
+
+def test_migration_lock_is_released_after_process_exit(paths):
+    script = (
+        "import os, sys\nfrom pathlib import Path\n"
+        "from bioetl.infrastructure.storage import target_classification_migration as m\n"
+        "m.assert_no_managed_writers = lambda: None\n"
+        "with m._lock(Path(sys.argv[1])):\n    os._exit(0)\n"
+    )
+    subprocess.run(
+        [sys.executable, "-c", script, str(paths.workspace)], check=True, timeout=30
+    )
+    with migration._lock(paths.workspace):
+        with pytest.raises(OSError):
+            with migration._lock(paths.workspace):
+                pytest.fail("a concurrent migration acquired the lock")
+
+
+def test_scd_history_is_preserved_and_duplicate_current_versions_are_rejected():
+    fields = ("target_id", "pref_name")
+    identity = EntityIdentityGenerator(content_hash_include_fields=set(fields))
+    base = {"target_id": "CHEMBL1", "pref_name": "Fixture"}
+    base["content_hash"] = identity.compute_content_hash("chembl", base)
+    old = [
+        {
+            **base,
+            "_version": 1,
+            "_is_current": False,
+            "_valid_from": "2025-01-01T00:00:00Z",
+            "_valid_to": "2026-01-01T00:00:00Z",
+        },
+        {
+            **base,
+            "_version": 2,
+            "_is_current": True,
+            "_valid_from": "2026-01-01T00:00:00Z",
+            "_valid_to": None,
+        },
+    ]
+    new = [{**row, "iuphar_class": "Receptor", "content_hash": "v31"} for row in old]
+    assert compare_target_rows(old, new, fields)["legacy_hashes_verified"] == 2
+    with pytest.raises(ValueError, match="unique current"):
+        compare_target_rows(old, [{**row, "_is_current": True} for row in new], fields)
+    with pytest.raises(ValueError, match="full canonical cohort"):
+        compare_target_rows(old, new[1:], fields)

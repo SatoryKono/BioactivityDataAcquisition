@@ -15,11 +15,11 @@ from .snapshot_loader import (
 )
 
 __all__ = [
-    "decode_json",
     "IupharTargetClassificationAdapter",
     "LoadedIupharProfile",
     "LoadedIupharSnapshot",
     "LocalTargetClassificationEvidenceStore",
+    "decode_json",
     "load_profile",
     "load_snapshot_manifest",
     "parse_target_payloads",

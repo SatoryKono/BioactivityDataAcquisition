@@ -10,13 +10,13 @@ from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.ports import (
-        TargetClassificationEvidencePort,
-        TargetClassificationPort,
-    )
     from bioetl.domain.entities.target_classification_boundary import (
         TargetClassificationArtifactReference,
         TargetClassificationResult,
+    )
+    from bioetl.domain.ports import (
+        TargetClassificationEvidencePort,
+        TargetClassificationPort,
     )
 
 

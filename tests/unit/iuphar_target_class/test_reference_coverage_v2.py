@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+import json
 from dataclasses import replace
 from pathlib import Path
 
@@ -27,6 +28,7 @@ from iuphar_target_class.stage0.io import (
 from tests.unit.iuphar_target_class.test_stage0_v2 import _bundle
 from tests.unit.iuphar_target_class.test_integration_acceptance import (
     acceptance_inputs as acceptance_inputs,
+    _stored_proof,
 )
 
 pytestmark = pytest.mark.unit
@@ -323,16 +325,32 @@ def test_full_v2_producer_binds_actual_replay_dependencies(
     from iuphar_target_class.integration_acceptance import run_integration_acceptance
 
     old_request, snapshot = acceptance_inputs
-    _, _, spec = reference_inputs
+    cohort, _, spec = reference_inputs
     stage0 = tmp_path / "stage0/manifest.json"
     spec["snapshot_manifest_sha256"] = old_request.snapshot_manifest_sha256
     labels = tmp_path / "labels-v2.json"
     labels.write_bytes(canonical_json_bytes(spec))
+    proof = _stored_proof(
+        tmp_path / "v2-proof",
+        snapshot,
+        old_request.provenance,
+        row_id=cohort.rows[0].input_row_id,
+    )
+    report = json.loads(old_request.pipeline_report.read_bytes())
+    facts = report["observations"]["Target Classification"]["facts"]
+    facts.update(
+        evidence_manifest_uri=proof.as_uri(),
+        evidence_manifest_sha256=sha256_file(proof),
+    )
+    report_path = tmp_path / "v2-report.json"
+    report_path.write_bytes(canonical_json_bytes(report))
     request = replace(
         old_request,
         stage0_manifest=stage0,
         expected_labels=labels,
         expected_labels_sha256=sha256_file(labels),
+        pipeline_proof=proof,
+        pipeline_report=report_path,
     )
     output = tmp_path / "reference-v2-output"
     receipt = run_integration_acceptance(request, snapshot=snapshot, output_dir=output)

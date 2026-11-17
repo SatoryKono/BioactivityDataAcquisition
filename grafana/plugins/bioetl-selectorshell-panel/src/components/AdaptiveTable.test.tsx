@@ -19,7 +19,7 @@ jest.mock('@grafana/ui', () => {
   };
 });
 jest.mock('@grafana/ui/unstable', () => ({
-  TableNG: ({ data }: { data: { fields: Array<{ name: string; config: { displayName?: string } }> } }) => <div data-testid="native-table">{data.fields.map((f) => f.config.displayName ?? f.name).join(',')}</div>,
+  TableNG: ({ data, enablePagination }: { data: { length: number; fields: Array<{ name: string; config: { displayName?: string } }> }; enablePagination?: boolean }) => <div data-testid="native-table" data-pagination={String(enablePagination)} data-row-count={data.length}>{data.fields.map((f) => f.config.displayName ?? f.name).join(',')}</div>,
 }));
 
 const ids = [
@@ -35,6 +35,30 @@ function viewport(width: number) {
 }
 
 beforeEach(() => viewport(584));
+
+it('forwards twenty runs to the wide grid without forcing pagination and retains compact access', () => {
+  const panelProps = props();
+  const frame = panelProps.data.series[0];
+  frame.length = 20;
+  frame.fields = frame.fields.map((field) => ({
+    ...field,
+    values: Array.from({ length: 20 }, (_, index) => `${field.name}-${index}`),
+    getLinks: undefined,
+  }));
+  viewport(1543);
+  const options = { ...panelProps.options, footer: { enablePagination: false } };
+  const view = render(<AdaptiveTable {...panelProps} width={1500} options={options} />);
+  expect(screen.getByTestId('native-table')).toHaveAttribute('data-row-count', '20');
+  expect(screen.getByTestId('native-table')).toHaveAttribute('data-pagination', 'false');
+  viewport(584);
+  view.rerender(<AdaptiveTable {...panelProps} width={550} options={options} />);
+  for (let index = 0; index < 19; index++) {
+    fireEvent.click(screen.getByRole('button', { name: 'Next run' }));
+  }
+  expect(screen.getByText('20 / 20')).toBeInTheDocument();
+  expect(screen.getByText('Workflow-19')).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Next run' })).toBeDisabled();
+});
 
 function props(): PanelProps<AdaptiveTableOptions> {
   const frame: DataFrame = {
@@ -187,6 +211,25 @@ it('clears an old page and full detail when the dashboard scope changes', () => 
   view.rerender(<AdaptiveTable {...panelProps} replaceVariables={() => 'scope-b'} />);
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   expect(screen.getByText('1 / 3')).toBeInTheDocument();
+});
+
+it('closes details when evidence without run_id is replaced or reordered', () => {
+  const panel = props();
+  panel.options = { ...panel.options, viewMode: 'rows' };
+  const frame: DataFrame = { length: 2, fields: [{
+    name: 'Signal', type: 'string' as FieldType, config: {}, values: ['lag', 'backlog'],
+  }] };
+  const view = render(<AdaptiveTable {...panel} data={{ ...panel.data, series: [frame] }} />);
+  fireEvent.click(screen.getByRole('button', { name: 'Details' }));
+  expect(within(screen.getByRole('dialog')).getByText('lag')).toBeInTheDocument();
+  const refreshed = { ...frame, fields: frame.fields.map((field) => ({ ...field, values: ['backlog', 'lag'] })) };
+  view.rerender(<AdaptiveTable {...panel} data={{ ...panel.data, series: [refreshed] }} />);
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  expect(screen.getByText('backlog')).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Details' }));
+  expect(within(screen.getByRole('dialog')).getByText('backlog')).toBeInTheDocument();
+  view.rerender(<AdaptiveTable {...panel} data={{ ...panel.data, series: [frame] }} />);
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 });
 
 it('replaces previous successful data with a visible source error and removes old details', () => {

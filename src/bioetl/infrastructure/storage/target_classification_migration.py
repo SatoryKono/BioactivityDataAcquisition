@@ -7,15 +7,24 @@ tables/configuration. It never promotes an unvalidated limit-1000 subset.
 
 from __future__ import annotations
 
-import orjson
-import os
 import shutil
+import sys
 from collections.abc import Iterator, Mapping
 from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 from typing import NotRequired, TypedDict, cast
 
+import orjson
+
+if sys.platform == "win32":
+    import msvcrt
+else:
+    import fcntl
+
+from bioetl.infrastructure.control_plane._evidence_location_publish import (
+    publish_bytes_if_absent,
+)
 from bioetl.infrastructure.storage.target_deployment_binding import (
     TargetDeploymentBinding,
     validate_deployment_binding,
@@ -52,6 +61,7 @@ class TargetMigrationJournal(TypedDict):
     deployment_binding: dict[str, str]
     dependencies: dict[str, str]
     dependency_backups: dict[str, str]
+    restored_dependencies: NotRequired[list[str]]
 
 
 @dataclass(frozen=True, slots=True)
@@ -129,12 +139,18 @@ def _tree_hashes(path: Path) -> dict[str, str]:
 def _lock(root: Path) -> Iterator[None]:
     assert_no_managed_writers()
     path = root.resolve(strict=True) / ".bioetl-target-migration.lock"
-    with path.open("x", encoding="utf-8") as handle:
-        handle.write(str(os.getpid()))
-    try:
+    # Keep the inode stable: closing the descriptor releases the kernel lock,
+    # including after process termination. A leftover file is not a live owner.
+    with path.open("a+b") as handle:
+        if not path.stat().st_size:
+            handle.write(b"\0")
+            handle.flush()
+        handle.seek(0)
+        if sys.platform == "win32":
+            msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
+        else:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
         yield
-    finally:
-        path.unlink()
 
 
 def _save(backup: Path, state: Mapping[str, object]) -> None:
@@ -308,6 +324,7 @@ def rollback_target_migration(paths: TargetMigrationPaths) -> TargetMigrationJou
         if state["paths"] != {k: str(v) for k, v in checked.items()}:
             raise ValueError("rollback paths differ from the prepared bundle")
         verify_target_dependencies(paths.workspace, state["dependency_backups"])
+        _restore_dependencies(paths, state)
         for name in state["moved"]:
             original = checked["backup"] / ("original-" + name)
             if name in state.get("restored", []) or not original.exists():
@@ -322,3 +339,37 @@ def rollback_target_migration(paths: TargetMigrationPaths) -> TargetMigrationJou
                 raise ValueError("original rollback bytes changed")
         _restore_pairs(checked, state)
         return state
+
+
+def _restore_dependencies(
+    paths: TargetMigrationPaths, state: TargetMigrationJournal
+) -> None:
+    """Restore pinned dependency bytes before reactivating their configuration."""
+    restored = state.setdefault("restored_dependencies", [])
+    workspace = paths.workspace.resolve(strict=True)
+    for relative, digest in state["dependencies"].items():
+        destination = workspace / relative
+        if destination == paths.config.resolve():
+            # The promoted config legitimately differs; its verified original
+            # is restored by the journaled pair operation below.
+            continue
+        source = paths.backup / "dependencies" / relative
+        if (
+            state["dependency_backups"].get(source.relative_to(workspace).as_posix())
+            != digest
+        ):
+            raise ValueError("dependency backup identity differs from the original")
+        verify_target_dependencies(
+            workspace, {source.relative_to(workspace).as_posix(): digest}
+        )
+        if destination.exists():
+            verify_target_dependencies(workspace, {relative: digest})
+        else:
+            # Exclusive publication never overwrites a concurrent replacement.
+            if not publish_bytes_if_absent(
+                destination, source.read_bytes(), trusted_base=workspace
+            ):
+                verify_target_dependencies(workspace, {relative: digest})
+        if relative not in restored:
+            restored.append(relative)
+            _save(paths.backup, state)

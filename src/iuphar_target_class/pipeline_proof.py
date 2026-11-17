@@ -201,12 +201,19 @@ def verify_stored_pipeline_proof(
     snapshot_sha256: str,
     pipeline_report: Path | None,
     provenance: RunProvenance,
+    *,
+    expected_row_ids: tuple[str, ...] | None = None,
 ) -> str:
     """Bind bytes, rows, versions and report occurrence; allow shadow profile identity."""
     content = path.read_bytes()
     proof_hash = sha256_bytes(content)
     proof = document(content)
     run_id, profile, rows = _require_occurrence(proof, snapshot_sha256, provenance)
+    if expected_row_ids is not None and (
+        len(set(expected_row_ids)) != len(expected_row_ids)
+        or rows != set(expected_row_ids)
+    ):
+        raise ValueError("pipeline proof belongs to another admitted cohort")
     artifacts = _load_artifacts(path.parent, proof)
     _verify_rows(
         artifacts, rows=rows, run_id=run_id, profile=profile, provenance=provenance
