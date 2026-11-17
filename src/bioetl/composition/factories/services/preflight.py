@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from functools import partial
 from pathlib import Path
-from typing import Protocol, cast
 
 from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.preflight import (
@@ -25,16 +24,13 @@ from bioetl.infrastructure.storage.target_classification_guard import (
 )
 
 
-class _TablePathWriter(Protocol):
-    def _resolve_table_path(self, table_name: str) -> object: ...
-
-
 def _resolves_table_path(value: object) -> bool:
     return callable(getattr(value, "_resolve_table_path", None))
 
 
 def _table_path(writer: object, table_name: str) -> str:
-    return str(cast(_TablePathWriter, writer)._resolve_table_path(table_name))
+    resolver_name = "_resolve_table_path"
+    return str(getattr(writer, resolver_name)(table_name))
 
 
 def build_preflight_service(

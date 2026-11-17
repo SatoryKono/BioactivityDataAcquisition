@@ -114,23 +114,6 @@ def _resolve_effective_context(
     return _bind_cached_bronze_context(ctx, cached_bronze), cached_bronze
 
 
-def _load_runner_yaml_config(
-    *,
-    pipeline_name: str,
-    load_pipeline_config_fn: Callable[[str], PipelineYamlConfig],
-    validate_pk_contract_fn: Callable[[PipelineYamlConfig], None],
-    ctx: PipelineRunContext | None = None,
-    settings: Settings | None = None,
-) -> PipelineYamlConfig:
-    return load_target_aware_pipeline_config(
-        pipeline_name,
-        load_pipeline_config_fn,
-        validate_pk_contract_fn,
-        ctx=ctx,
-        settings=settings,
-    )
-
-
 def _build_runner_observability(
     *,
     ctx: PipelineRunContext,
@@ -177,10 +160,10 @@ def prepare_runner_context(
         settings=settings,
         assemble_cached_bronze_context_fn=assemble_cached_bronze_context_fn,
     )
-    yaml_config = _load_runner_yaml_config(
-        pipeline_name=ctx.pipeline_name,
-        load_pipeline_config_fn=load_pipeline_config_fn,
-        validate_pk_contract_fn=validate_pk_contract_fn,
+    yaml_config = load_target_aware_pipeline_config(
+        ctx.pipeline_name,
+        load_pipeline_config_fn,
+        validate_pk_contract_fn,
         ctx=effective_ctx,
         settings=settings,
     )
