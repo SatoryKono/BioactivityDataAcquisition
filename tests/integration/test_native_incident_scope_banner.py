@@ -1,5 +1,7 @@
 """Validate the shipped native incident banner and adaptive restoration."""
 
+from __future__ import annotations
+
 from copy import deepcopy
 
 import pytest
@@ -22,7 +24,6 @@ def test_native_scope_banner_matches_period_end_queries_and_restores_live_profil
         Path("grafana/dashboards/bioetl-incident-v1.json").read_text(encoding="utf-8")
     )
     queries = deepcopy(next(p for p in source["panels"] if p["id"] == 9401)["targets"])
-    mark_native_snapshot_clocks(source)
     banner = next(p for p in source["panels"] if p["id"] == 9400)
     assert "PERIOD END SNAPSHOT:" in banner["options"]["content"]
     assert "CURRENT:" not in banner["options"]["content"]
