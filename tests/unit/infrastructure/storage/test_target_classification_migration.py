@@ -41,7 +41,9 @@ def paths(tmp_path, monkeypatch):
     # independent loader/resolver regressions.
     monkeypatch.setattr(migration, "validate_deployment_binding", lambda *_: None)
     monkeypatch.setattr(
-        migration, "validate_target_candidate", lambda *_: {"synthetic_test": True}
+        migration,
+        "validate_target_candidate",
+        lambda *_, **__: {"synthetic_test": True},
     )
     return migration.TargetMigrationPaths(
         tmp_path,

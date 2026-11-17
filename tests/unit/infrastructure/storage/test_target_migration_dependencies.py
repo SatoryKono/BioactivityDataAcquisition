@@ -380,3 +380,42 @@ def test_scope_review_includes_only_declared_evidence_and_verifies_bytes(tmp_pat
     evidence.write_bytes(b"replaced eligibility")
     with pytest.raises(ValueError, match="digest mismatch"):
         _DependencyCollector(tmp_path).document(review, "scope_review", _sha(review))
+
+
+def test_nested_scope_review_resolves_evidence_from_coverage_directory(tmp_path):
+    """Evidence paths match snapshot_evidence._review (coverage root, not review dir)."""
+    coverage_dir = tmp_path / "sources" / "coverage"
+    reviews = coverage_dir / "reviews"
+    reviews.mkdir(parents=True)
+    evidence = coverage_dir / "eligibility.txt"
+    evidence.write_text("reviewed eligibility\n", encoding="utf-8")
+    review = reviews / "review.json"
+    write_fixture_json(
+        review,
+        {
+            "artifact": "bioetl_iuphar_scope_review",
+            "schema_version": 1,
+            "evidence_references": [
+                {"path": "eligibility.txt", "sha256": _sha(evidence)}
+            ],
+        },
+    )
+    coverage = coverage_dir / "coverage.json"
+    write_fixture_json(
+        coverage,
+        {
+            "artifact": "bioetl_iuphar_coverage",
+            "schema_version": 1,
+            "review": {
+                "path": "reviews/review.json",
+                "sha256": _sha(review),
+            },
+        },
+    )
+    collector = _DependencyCollector(tmp_path)
+    collector.document(coverage, "coverage", _sha(coverage))
+    assert set(collector.dependencies) == {
+        "sources/coverage/coverage.json",
+        "sources/coverage/reviews/review.json",
+        "sources/coverage/eligibility.txt",
+    }
