@@ -402,14 +402,17 @@ def _resolve_query_paths(
     retrieval_query: str | None = None,
     require_chunks: bool = True,
     require_events: bool = True,
+    allow_partial: bool = False,
 ) -> tuple[Path, Path, Path | None, dict[str, Any] | None]:
-    chunks_ready = rag_chunks_ready(chunks_path)
-    events_ready = timeline_events_ready(events_dir)
+    chunks_ready = not require_chunks or rag_chunks_ready(chunks_path)
+    events_ready = not require_events or timeline_events_ready(events_dir)
     required_chunks_ready = not require_chunks or chunks_ready
     required_events_ready = not require_events or events_ready
     if required_chunks_ready and required_events_ready:
         return chunks_path, events_dir, None, None
     if not auto_refresh:
+        if allow_partial:
+            return chunks_path, events_dir, None, None
         _require_ready_or_raise(
             chunks_path=chunks_path,
             events_dir=events_dir,
@@ -1034,7 +1037,7 @@ def query_all(
     expanded_graph_path: Path | None = None,
     file_context_depth: int = 1,
 ) -> dict[str, Any]:
-    """Run a lightweight local search across catalog, RAG, and timeline."""
+    """Search available layers and report unavailable ones without losing context."""
     resolved_chunks_path, resolved_events_dir, output_root, refresh_report = (
         _resolve_query_paths(
             chunks_path=chunks_path,
@@ -1043,6 +1046,7 @@ def query_all(
             refresh_output_root=refresh_output_root,
             refresh_repo_root=refresh_repo_root,
             retrieval_query=query,
+            allow_partial=True,
         )
     )
     missing_artifacts: list[dict[str, str]] = []
@@ -1417,7 +1421,7 @@ def _build_parser() -> argparse.ArgumentParser:
 
 
 def _payload_exit_code(payload: dict[str, Any]) -> int:
-    return 0 if payload.get("ok", True) else 1
+    return 0 if payload.get("ok", True) and not payload.get("degraded", False) else 1
 
 
 def _emit_json_payload(payload: dict[str, Any]) -> None:

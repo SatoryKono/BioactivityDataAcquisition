@@ -54,11 +54,11 @@ def _query_defaults() -> tuple[Path, Path]:
     return default_rag_chunks_path(), default_timeline_dir()
 
 
-def _query_runtime() -> tuple[Any, Any, Any]:
-    from memory.query import query_all, query_catalog
+def _query_runtime() -> tuple[Any, Any]:
+    from memory.query import query_all
     from memory.rag.retrieval import TASK_PROFILES
 
-    return TASK_PROFILES, query_all, query_catalog
+    return TASK_PROFILES, query_all
 
 
 def _rag_max_sources() -> int:
@@ -316,6 +316,21 @@ def _default_note_path(task_id: str, *, kind: str) -> Path:
     raise ValueError(f"unsupported episodic note kind: {kind}")
 
 
+def _require_actor_identity() -> tuple[str, str]:
+    """Reject unidentified durable-note requests before retrieval or namespace I/O."""
+    runtime = os.environ.get("BIOETL_AI_RUNTIME", "").strip()
+    agent = os.environ.get("BIOETL_AI_AGENT", "").strip()
+    if not runtime or runtime.lower() == "unknown":
+        raise ValueError(
+            "BIOETL_AI_RUNTIME must identify the runtime for durable memory writes"
+        )
+    if not agent or agent.lower() == "unknown":
+        raise ValueError(
+            "BIOETL_AI_AGENT must identify the agent for durable memory writes"
+        )
+    return runtime, agent
+
+
 def _record_envelope_metadata(
     *,
     task_id: str,
@@ -323,6 +338,7 @@ def _record_envelope_metadata(
     source_refs: list[str],
 ) -> dict[str, Any]:
     """Return version-bound provenance shared by generated task notes."""
+    runtime, agent = _require_actor_identity()
     from memory.records import (
         ActorIdentity,
         RecordEnvelope,
@@ -335,16 +351,6 @@ def _record_envelope_metadata(
 
     repo_root = _discover_repo_root() or Path(__file__).resolve().parents[3]
     scope = RepositoryScope.discover(repo_root, task_id=task_id)
-    runtime = os.environ.get("BIOETL_AI_RUNTIME", "").strip()
-    agent = os.environ.get("BIOETL_AI_AGENT", "").strip()
-    if not runtime or runtime.lower() == "unknown":
-        raise ValueError(
-            "BIOETL_AI_RUNTIME must identify the runtime for durable memory writes"
-        )
-    if not agent or agent.lower() == "unknown":
-        raise ValueError(
-            "BIOETL_AI_AGENT must identify the agent for durable memory writes"
-        )
     envelope = RecordEnvelope.create(
         record_id=record_id,
         record_type=RecordType.WORKING,
@@ -522,66 +528,6 @@ def _resolve_pre_task_surfaces(
     return resolved_chunks_path, resolved_events_dir, output_root, refresh_report
 
 
-def _pre_task_missing_artifacts(
-    chunks_path: Path, events_dir: Path
-) -> list[dict[str, str]]:
-    missing: list[dict[str, str]] = []
-    if not _rag_chunks_ready(chunks_path):
-        missing.append(
-            {
-                "kind": "rag_chunks",
-                "path": str(chunks_path),
-                "reason": "missing_or_empty_rag_chunk_manifest",
-            }
-        )
-    if not _timeline_events_ready(events_dir):
-        missing.append(
-            {
-                "kind": "timeline_events",
-                "path": str(events_dir),
-                "reason": "missing_or_empty_timeline_event_projections",
-            }
-        )
-    return missing
-
-
-def _empty_pre_task_retrieval(
-    *,
-    query: str,
-    profile: str,
-    chunks_path: Path,
-    events_dir: Path,
-    missing_artifacts: list[dict[str, str]],
-) -> dict[str, Any]:
-    catalog_hits: list[dict[str, Any]] = []
-    _, _, query_catalog_fn = _query_runtime()
-    lowered_query = query.lower()
-    for view in ("sources", "owners", "zones", "placement"):
-        payload = query_catalog_fn(view)
-        haystack = json.dumps(
-            payload["payload"], sort_keys=True, ensure_ascii=True
-        ).lower()
-        if lowered_query in haystack:
-            catalog_hits.append(payload)
-    return {
-        "kind": "all",
-        "query": query,
-        "profile": profile,
-        "chunks_path": str(chunks_path),
-        "events_dir": str(events_dir),
-        "refresh_output_root": None,
-        "refresh_report": None,
-        "results": {
-            "catalog": catalog_hits,
-            "rag": [],
-            "timeline": [],
-        },
-        "file_relation_context": None,
-        "degraded": True,
-        "missing_artifacts": missing_artifacts,
-    }
-
-
 def pre_task_workflow(
     *,
     task_id: str,
@@ -629,6 +575,8 @@ def pre_task_workflow(
                 "missing_artifacts": [],
             },
         }
+    if create_session_note:
+        _require_actor_identity()
     resolved_chunks_path, resolved_events_dir, output_root, refresh_report = (
         _resolve_pre_task_surfaces(
             chunks_path=chunks_path,
@@ -640,21 +588,17 @@ def pre_task_workflow(
         )
     )
 
-    task_profiles, query_all_fn, _ = _query_runtime()
+    task_profiles, query_all_fn = _query_runtime()
     if profile not in task_profiles:
         raise ValueError(f"unsupported task profile: {profile}")
 
-    missing_artifacts = _pre_task_missing_artifacts(
-        resolved_chunks_path, resolved_events_dir
-    )
-    retrieval = _retrieve_pre_task_context(
-        missing_artifacts,
-        retrieval_query,
-        profile,
-        resolved_chunks_path,
-        resolved_events_dir,
-        limit,
-        query_all_fn,
+    retrieval = query_all_fn(
+        query=retrieval_query,
+        profile=profile,
+        chunks_path=resolved_chunks_path,
+        events_dir=resolved_events_dir,
+        limit=limit,
+        auto_refresh=False,
     )
     session_path: Path | None = None
     if create_session_note:
@@ -819,6 +763,7 @@ def post_task_workflow(
         return _read_only_post_task_result(
             task_id, title, persistence.mode.value, validation_timeout_seconds
         )
+    _require_actor_identity()
     summary_path = _write_post_task_summary_note(
         task_id=task_id,
         title=title,
@@ -1423,34 +1368,6 @@ def _read_only_post_task_result(
         "degraded": False,
         "ok": not validation_result.get("issues"),
     }
-
-
-def _retrieve_pre_task_context(
-    missing_artifacts: list[dict[str, str]],
-    retrieval_query: str,
-    profile: str,
-    resolved_chunks_path: Path,
-    resolved_events_dir: Path,
-    limit: int,
-    query_all_fn: Any,
-) -> dict[str, Any]:
-    if missing_artifacts:
-        retrieval = _empty_pre_task_retrieval(
-            query=retrieval_query,
-            profile=profile,
-            chunks_path=resolved_chunks_path,
-            events_dir=resolved_events_dir,
-            missing_artifacts=missing_artifacts,
-        )
-    else:
-        retrieval = query_all_fn(
-            query=retrieval_query,
-            chunks_path=resolved_chunks_path,
-            events_dir=resolved_events_dir,
-            limit=limit,
-            profile=profile,
-        )
-    return retrieval
 
 
 if __name__ == "__main__":

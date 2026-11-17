@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 4195 |
-| Tracked doc-like files | 4195 |
+| Doc-like files | 4196 |
+| Tracked doc-like files | 4196 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 80 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 4195 |
+| tracked | 4196 |
 
 ## Lifecycle Counts
 
@@ -38,6 +38,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 26 |
 | reports_workspace_entrypoint | 1 |
+| supporting_context | 1 |
 | working_report | 385 |
 
 ## GitHub Issue Drafts And Packs
@@ -55,7 +56,7 @@
 | Archived | 1554 |
 | Canonical | 77 |
 | Generated | 1067 |
-| Working | 724 |
+| Working | 725 |
 
 ## Surface Families
 
@@ -65,13 +66,13 @@
 | archive | 1554 |
 | canonical | 77 |
 | generated | 1067 |
-| working | 724 |
+| working | 725 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-migration | 430 |
+| archive-after-migration | 431 |
 | generate-automatically | 1067 |
 | keep | 2698 |
 
@@ -92,6 +93,7 @@
 | `docs/03-guides/dashboards/archive/audit-protocols/dux5-screenshot-regression-protocol.md` | Working | 4 | archive-after-migration |
 | `docs/03-guides/dashboards/archive/audit-protocols/dux6-residual-readability.md` | Working | 3 | archive-after-migration |
 | `docs/03-guides/dashboards/migration-map-v2.md` | Working | 3 | archive-after-migration |
+| `docs/plans/memory-recovery-2026-11-17.md` | Working | 1 | archive-after-migration |
 | `docs/reports/audit/N1_SHADOW_STATUS.md` | Working | 0 | archive-after-migration |
 | `docs/reports/audit/github_settings_inventory.md` | Working | 0 | archive-after-migration |
 | `docs/reports/audit/pack-v2.1/evidence-collection/alertmanager_delivery_verification.md` | Working | 0 | archive-after-migration |
@@ -158,7 +160,6 @@
 | `reports/audit-runs/12107-r07-history/6b39eef8bf65aacb/scan-manifest.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07-history/KIT-MANIFEST-acceptance.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12107-r07-history/KIT-MANIFEST-behavior.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/12107-r07-history/KIT-MANIFEST.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 

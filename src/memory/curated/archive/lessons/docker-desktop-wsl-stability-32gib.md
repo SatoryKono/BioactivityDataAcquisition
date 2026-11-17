@@ -1,20 +1,22 @@
-______________________________________________________________________
-
+---
 id: docker-desktop-wsl-stability-32gib
 title: Docker Desktop / WSL stability on 32 GiB Windows hosts
 kind: lesson
 source_refs:
-
 - docs/DOCKER_QUICKSTART.md
 - docs/DOCKER_SETUP.md
 - scripts/ops/runtime/docker/ensure-stable.ps1
 - configs/quality/docker_helper_contracts.yaml
 - ADR-010 Local-Only deployment
-  confidence: curated
-  last_verified: '2026-07-24T00:00:00Z'
-  summary: Prefer ensure-stable, modest WSL memory, no-build main-only stacks; thrash and high WSL caps kill the engine pipe.
-
-______________________________________________________________________
+confidence: curated
+last_verified: '2026-07-24T00:00:00Z'
+summary: Prefer ensure-stable, modest WSL memory, no-build main-only stacks; thrash
+  and high WSL caps kill the engine pipe.
+archived_at: '2026-11-17T06:23:21Z'
+archived_reason: Historical host observations were not revalidated; use current optional-runtime
+  runbooks.
+archived_from: src/memory/curated/lessons/docker-desktop-wsl-stability-32gib.md
+---
 
 # Lesson
 

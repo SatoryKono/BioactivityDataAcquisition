@@ -1,3 +1,5 @@
+# Static ownership/contract inventory; no dated client or store receipts are embedded.
+# Record observed runtime acceptance separately, bound to its source and client.
 schema_version: 1
 _surface_defaults: &surface_defaults
   load_trigger: agent-or-tool-explicit-load
@@ -29,9 +31,9 @@ surfaces:
     lifetime: durable
     retention_policy: git-history-and-supersession
     cleanup_policy: never-delete-without-governance
-    runtime_usage_proven: true
+    runtime_usage_proven: false
     evidence: [AGENTS.md, docs/00-project/NORMATIVE_SOURCES.md]
-    status: PASS
+    status: NOT_PROVEN
   - memory_id: MEM-CODEX-RUNTIME
     <<: *surface_defaults
     agent_or_runtime: codex
@@ -48,9 +50,9 @@ surfaces:
     lifetime: durable
     retention_policy: git-history
     cleanup_policy: reviewed-retirement
-    runtime_usage_proven: true
+    runtime_usage_proven: false
     evidence: [AGENTS.md, .codex/agents/CODEX-RUNTIME.md]
-    status: PASS
+    status: NOT_PROVEN
   - memory_id: MEM-JUNIE-RUNTIME
     <<: *surface_defaults
     agent_or_runtime: junie
@@ -67,14 +69,14 @@ surfaces:
     lifetime: durable
     retention_policy: git-history
     cleanup_policy: reviewed-retirement
-    runtime_usage_proven: true
+    runtime_usage_proven: false
     evidence:
       - AGENTS.md
       - .junie/agents/JUNIE-RUNTIME.md
       - .junie/guidelines.md
       - scripts/ai/junie/check_junie_mirror.sh
       - docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md
-    status: PASS
+    status: NOT_PROVEN
   - memory_id: MEM-DEVIN-RUNTIME
     <<: *surface_defaults
     agent_or_runtime: devin
@@ -93,13 +95,13 @@ surfaces:
     lifetime: durable
     retention_policy: git-history
     cleanup_policy: regenerate-or-retire
-    runtime_usage_proven: true
+    runtime_usage_proven: false
     evidence:
       - .devin/agents/DEVIN-RUNTIME.md
       - .devin/config.json
       - .github/workflows/skills-consistency.yml
       - docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md
-    status: PASS
+    status: NOT_PROVEN
   - memory_id: MEM-DOCS-AI-MIRROR
     <<: *surface_defaults
     agent_or_runtime: all
@@ -116,9 +118,9 @@ surfaces:
     lifetime: durable
     retention_policy: git-history
     cleanup_policy: regenerate-or-archive
-    runtime_usage_proven: true
+    runtime_usage_proven: false
     evidence: [AGENTS.md, .github/workflows/skills-consistency.yml]
-    status: WARN
+    status: NOT_PROVEN
   - memory_id: MEM-PROJECT-CATALOG
     <<: *surface_defaults
     agent_or_runtime: all
@@ -135,9 +137,9 @@ surfaces:
     lifetime: durable
     retention_policy: git-history
     cleanup_policy: reviewed-update
-    runtime_usage_proven: true
+    runtime_usage_proven: false
     evidence: [src/memory/resources.py, src/memory/validation.py]
-    status: PASS
+    status: NOT_PROVEN
   - memory_id: MEM-CURATED
     <<: *surface_defaults
     agent_or_runtime: all
@@ -154,10 +156,10 @@ surfaces:
     lifetime: durable-reviewed
     retention_policy: src/memory/policy/retention.yaml
     cleanup_policy: archive-superseded
-    runtime_usage_proven: true
+    runtime_usage_proven: false
     evidence:
       [src/memory/tooling/promote_note.py, src/memory/tooling/review_curated.py]
-    status: PASS
+    status: NOT_PROVEN
   - memory_id: MEM-EPISODIC
     <<: *surface_defaults
     agent_or_runtime: all
@@ -174,9 +176,9 @@ surfaces:
     lifetime: 14-days
     retention_policy: src/memory/policy/retention.yaml
     cleanup_policy: explicit-prune
-    runtime_usage_proven: true
+    runtime_usage_proven: false
     evidence: [src/memory/tooling/workflow.py, src/memory/tooling/prune.py]
-    status: PASS
+    status: NOT_PROVEN
   - memory_id: MEM-RAG
     <<: *surface_defaults
     agent_or_runtime: all
@@ -193,9 +195,9 @@ surfaces:
     lifetime: rebuildable
     retention_policy: src/memory/policy/retention.yaml
     cleanup_policy: delete-and-rebuild
-    runtime_usage_proven: true
+    runtime_usage_proven: false
     evidence: [src/memory/rag/indexing.py, src/memory/rag/validation.py]
-    status: PASS
+    status: NOT_PROVEN
   - memory_id: MEM-GRAPH
     <<: *surface_defaults
     agent_or_runtime: all
@@ -212,13 +214,13 @@ surfaces:
     lifetime: rebuildable
     retention_policy: src/memory/policy/retention.yaml
     cleanup_policy: delete-and-rebuild
-    runtime_usage_proven: true
+    runtime_usage_proven: false
     evidence:
       - src/memory/graph/sync.py
       - src/memory/graph/query.py
       - src/memory/tooling/check_freshness.py
       - tests/unit/memory/test_check_freshness.py
-    status: PASS
+    status: NOT_PROVEN
   - memory_id: MEM-TIMELINE
     <<: *surface_defaults
     agent_or_runtime: all
@@ -235,7 +237,7 @@ surfaces:
     lifetime: rebuildable
     retention_policy: src/memory/policy/retention.yaml
     cleanup_policy: delete-and-rebuild
-    runtime_usage_proven: true
+    runtime_usage_proven: false
     evidence:
       - src/memory/timeline/ingest_runs.py
       - src/memory/timeline/ingest_ci.py
@@ -243,7 +245,7 @@ surfaces:
       - src/memory/artifact_readiness.py
       - tests/integration/memory/test_timeline_ingest.py
       - tests/unit/memory/test_query_facade.py
-    status: PASS
+    status: NOT_PROVEN
   - memory_id: MEM-MCP-FILE
     <<: *surface_defaults
     agent_or_runtime: mcp-clients
@@ -260,7 +262,7 @@ surfaces:
     lifetime: durable
     retention_policy: commit-scope-lifetime
     cleanup_policy: safe-delete-and-reseed
-    runtime_usage_proven: true
+    runtime_usage_proven: false
     evidence:
       - scripts/ai/mcp/mcp_memory_wrapper.sh
       - scripts/ai/mcp/mcp_memory_wrapper.ps1
@@ -268,7 +270,7 @@ surfaces:
       - src/memory/mcp_server.py
       - tests/unit/memory/test_mcp_scope.py
       - tests/integration/memory/test_mcp_server_isolation.py
-    status: PASS
+    status: NOT_PROVEN
   - memory_id: MEM-MCP-NEO4J
     <<: *surface_defaults
     agent_or_runtime: mcp-clients
@@ -324,9 +326,9 @@ surfaces:
     lifetime: durable
     retention_policy: classification-bound
     cleanup_policy: archive-by-reviewed-policy
-    runtime_usage_proven: true
+    runtime_usage_proven: false
     evidence: [src/memory/evidence.py, tests/unit/memory/test_evidence_store.py]
-    status: PASS
+    status: NOT_PROVEN
   - memory_id: MEM-DECISION-STORE
     <<: *surface_defaults
     agent_or_runtime: all
@@ -343,9 +345,9 @@ surfaces:
     lifetime: durable
     retention_policy: supersession-history
     cleanup_policy: archive-never-silent-overwrite
-    runtime_usage_proven: true
+    runtime_usage_proven: false
     evidence: [src/memory/evidence.py, src/memory/replay.py]
-    status: PASS
+    status: NOT_PROVEN
   - memory_id: MEM-MUTATION-LEDGER
     <<: *surface_defaults
     agent_or_runtime: all
@@ -362,9 +364,9 @@ surfaces:
     lifetime: durable
     retention_policy: classification-bound
     cleanup_policy: governed-archive
-    runtime_usage_proven: true
+    runtime_usage_proven: false
     evidence: [src/memory/ledger.py, tests/unit/memory/test_mutation_ledger.py]
-    status: PASS
+    status: NOT_PROVEN
   - memory_id: MEM-USER-REPOSITORY
     <<: *surface_defaults
     agent_or_runtime: repository-memory-api
@@ -381,9 +383,9 @@ surfaces:
     lifetime: consent-bound
     retention_policy: revoke-correct-export-delete
     cleanup_policy: tombstone-or-explicit-delete
-    runtime_usage_proven: true
+    runtime_usage_proven: false
     evidence: [src/memory/user_memory.py, tests/unit/memory/test_user_memory.py]
-    status: PASS
+    status: NOT_PROVEN
   - memory_id: MEM-PYTHON-CACHE
     <<: *surface_defaults
     agent_or_runtime: python
@@ -400,6 +402,6 @@ surfaces:
     lifetime: disposable
     retention_policy: none
     cleanup_policy: safe-delete-and-rebuild
-    runtime_usage_proven: true
+    runtime_usage_proven: false
     evidence: [src/memory/validation.py]
-    status: WARN
+    status: NOT_PROVEN

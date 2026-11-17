@@ -1,10 +1,8 @@
-______________________________________________________________________
-
+---
 id: run-reports-and-governance-hash-refresh
 title: Pipeline/workflow run reports and governance hash closeouts
 kind: lesson
 source_refs:
-
 - docs/04-reference/reports/run-reports.md
 - configs/contracts/reports/pipeline_run_report.v1.json
 - configs/contracts/reports/workflow_run_report.v1.json
@@ -13,11 +11,16 @@ source_refs:
 - docs/reports/evidence/project-package-topology/SUMMARY.md
 - configs/quality/technical_debt_audit_registry.yaml
 - configs/quality/test_telemetry_baseline.yaml
-  confidence: curated
-  last_verified: '2026-07-24T00:00:00Z'
-  summary: Run reports are ledger/accounting projections; after src/bioetl changes refresh inventory, topology SUMMARY, debt evidence surface, and test-telemetry source_tree_sha256 together.
-
-______________________________________________________________________
+confidence: curated
+last_verified: '2026-07-24T00:00:00Z'
+summary: Run reports are ledger/accounting projections; after src/bioetl changes refresh
+  inventory, topology SUMMARY, debt evidence surface, and test-telemetry source_tree_sha256
+  together.
+archived_at: '2026-11-17T06:23:21Z'
+archived_reason: Historical refresh procedure superseded by current owner-generated
+  closeout rules.
+archived_from: src/memory/curated/lessons/run-reports-and-governance-hash-refresh.md
+---
 
 # Lesson
 
