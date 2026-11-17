@@ -95,6 +95,11 @@ def _run_requested_checks() -> dict[str, str]:
     root = Path(__file__).resolve().parents[3]
     env = os.environ.copy()
     env["PYTHONPATH"] = str(root / "src")
+    plugins = (
+        ["-p", "pytest_asyncio.plugin", "-p", "pytest_timeout"]
+        if env.get("PYTEST_DISABLE_PLUGIN_AUTOLOAD")
+        else []
+    )
     with TemporaryDirectory(prefix="iuphar-acceptance-") as directory:
         receipt = Path(directory) / "junit.xml"
         completed = subprocess.run(
@@ -102,6 +107,7 @@ def _run_requested_checks() -> dict[str, str]:
                 sys.executable,
                 "-m",
                 "pytest",
+                *plugins,
                 *_NODE_IDS,
                 "-q",
                 "--tb=line",
@@ -178,9 +184,11 @@ def _trace_child_results(
     return observed, reported
 
 
+@pytest.mark.parametrize("plugin_autoload", ("", "1"))
 def test_filtered_child_cannot_publish_unexecuted_passes(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, plugin_autoload: str
 ) -> None:
+    monkeypatch.setenv("PYTEST_DISABLE_PLUGIN_AUTOLOAD", plugin_autoload)
     monkeypatch.setenv("PYTEST_ADDOPTS", "-k snapshot_immutability")
     observed, reported = _trace_child_results(tmp_path, monkeypatch)
     test_acceptance_report_marks_only_executed_checks()
@@ -192,9 +200,11 @@ def test_filtered_child_cannot_publish_unexecuted_passes(
     assert passed == requested
 
 
+@pytest.mark.parametrize("plugin_autoload", ("", "1"))
 def test_deselected_child_is_not_reported_as_pass(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, plugin_autoload: str
 ) -> None:
+    monkeypatch.setenv("PYTEST_DISABLE_PLUGIN_AUTOLOAD", plugin_autoload)
     monkeypatch.setenv("PYTEST_ADDOPTS", f"--deselect={_NODE_IDS[0]}")
     observed, reported = _trace_child_results(tmp_path, monkeypatch)
     with pytest.raises(AssertionError, match="test_resolution_matrix"):

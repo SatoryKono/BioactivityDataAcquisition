@@ -193,6 +193,69 @@ def test_commit_message_does_not_run_tree_and_budget_checks(tmp_path):
     assert hook_runtime._guard_commands(tmp_path, "commit-msg", b"") == []
 
 
+@pytest.mark.parametrize("inherited", [False, True])
+def test_shared_runtime_binds_legacy_launcher_to_current_checkout(
+    tmp_path, monkeypatch, inherited
+):
+    repo = tmp_path / "current checkout"
+    foreign = tmp_path / "foreign checkout"
+    (repo / "src").mkdir(parents=True)
+    foreign.mkdir()
+    module = "legacy_hook_import_probe"
+    (repo / "src" / f"{module}.py").write_text("print('current-checkout')\n")
+    (foreign / f"{module}.py").write_text("print('foreign-checkout')\n")
+    legacy = repo / "legacy_launcher.py"
+    legacy.write_text(
+        "import os, subprocess, sys\n"
+        "raise SystemExit(subprocess.run("
+        "[os.environ['BIOETL_HOOK_PROJECT_PYTHON'], *sys.argv[1:]]"
+        ").returncode)\n"
+    )
+    if inherited:
+        monkeypatch.setenv("PYTHONPATH", str(foreign))
+    else:
+        monkeypatch.delenv("PYTHONPATH", raising=False)
+    monkeypatch.setenv("PYTHONDONTWRITEBYTECODE", "1")
+    parent_env = dict(os.environ)
+    hooks = tmp_path / "hooks"
+    hooks.mkdir()
+    monkeypatch.setattr(installer, "_git", lambda *args: str(repo))
+    monkeypatch.setattr(installer, "locations", lambda path: (tmp_path, hooks))
+    monkeypatch.setattr(
+        installer,
+        "_state",
+        lambda path: {
+            "pre_commit_home": str(tmp_path / "cache"),
+            "hooks": {"commit-msg": {}},
+        },
+    )
+    monkeypatch.setattr(
+        installer, "inspect_installation", lambda path: {"status": "PASS"}
+    )
+    monkeypatch.setattr(hook_runtime.hook_receipts, "protected_state", lambda *args: {})
+    monkeypatch.setattr(hook_runtime, "_foreign_command", lambda *args: None)
+    monkeypatch.setattr(hook_runtime, "_validate_final_state", lambda *args: 0)
+
+    def execute(commands, cwd, hooks, kind, payload, env, start):
+        result = subprocess.run(
+            [sys.executable, "-B", str(legacy), "-m", module],
+            cwd=cwd,
+            env=env,
+            capture_output=True,
+            text=True,
+            timeout=15,
+        )
+        assert result.stdout.strip() == "current-checkout", result.stderr
+        assert env["BIOETL_HOOK_PROJECT_PYTHON"] == sys.executable
+        if inherited:
+            assert env["PYTHONPATH"].split(os.pathsep)[-1] == str(foreign)
+        return result.returncode
+
+    monkeypatch.setattr(hook_runtime, "_execute_commands", execute)
+    assert hook_runtime.run("commit-msg", hooks, ["message.txt"]) == 0
+    assert dict(os.environ) == parent_env
+
+
 def _assert_callback_budget_rejected(repo, env, git, sha):
     (repo / "fixture.txt").write_text("changed")
     git("add", "fixture.txt")

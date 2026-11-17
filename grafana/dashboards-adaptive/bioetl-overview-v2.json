@@ -1577,7 +1577,7 @@
         "x": 10,
         "y": 10,
         "w": 14,
-        "h": 8
+        "h": 9
       },
       "datasource": {
         "type": "yesoreyeram-infinity-datasource",
@@ -1884,7 +1884,7 @@
       "description": "GLOBAL / CURRENT · All pipelines; independent of selected Pipeline, Provider and Run ID. Provider preserves the alert label or uses an unambiguous configured pipeline mapping. Not provided means missing or ambiguous attribution, not unknown provider health. N/A — Infrastructure is not a provider. Pipeline: N/A — Docker infrastructure for the Docker probe alert without a pipeline label; Not provided for other alerts without that label. FIRING and PENDING retain their original alert state. Fleet alert urgency is independent of the saved run verdict. All returned alerts remain available through pagination; the visible row count includes every alert. Managed CURRENT queries use an independent clock and refresh every 30s. The timestamp is query evaluation time, not publication or event time. The historical dashboard interval does not set the current query end; current trends retain the selected duration and end at now. Timeouts, failed queries and unverified response time remain unavailable.",
       "gridPos": {
         "x": 0,
-        "y": 18,
+        "y": 19,
         "w": 24,
         "h": 7
       },
@@ -2251,7 +2251,7 @@
       "title": "Review Provider Evidence",
       "gridPos": {
         "x": 0,
-        "y": 25,
+        "y": 26,
         "w": 15,
         "h": 5
       },
@@ -2454,7 +2454,7 @@
       "title": "Review Provider Check",
       "gridPos": {
         "x": 15,
-        "y": 25,
+        "y": 26,
         "w": 9,
         "h": 5
       },
@@ -2698,7 +2698,7 @@
       "title": "Inspect Selected Run Stages",
       "gridPos": {
         "x": 0,
-        "y": 30,
+        "y": 31,
         "w": 15,
         "h": 6
       },
@@ -3165,7 +3165,7 @@
       "title": "Review Contract Exclusions",
       "gridPos": {
         "x": 15,
-        "y": 30,
+        "y": 31,
         "w": 9,
         "h": 6
       },
@@ -3371,7 +3371,7 @@
       "description": "SELECTED RUN · Persisted FK comparison in the exact parent workflow. selected-snapshot means absence only inside the pinned reference, not absence from the complete provider. Expiry can affect all selected rows while execution succeeds; remaining rows and scope stay explicit. Missing evidence is UNKNOWN and failed requests remain QUERY ERROR. Saved Evidence and Replay Readiness retain their independent checks. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response. An empty comparison is not a blank table: N/A means no Run ID is selected, NO RECORDS means no runs are in scope, NO DATA means FK comparison rows were not returned.",
       "gridPos": {
         "x": 0,
-        "y": 36,
+        "y": 37,
         "w": 24,
         "h": 6
       },
@@ -3567,7 +3567,7 @@
       "collapsed": true,
       "gridPos": {
         "x": 0,
-        "y": 42,
+        "y": 43,
         "w": 24,
         "h": 1
       },
@@ -3579,7 +3579,7 @@
           "description": "GLOBAL / CURRENT · All pipelines; independent of selected Pipeline, Provider and Run ID. Provider preserves the alert label or uses an unambiguous configured pipeline mapping. Not provided means missing or ambiguous attribution, not unknown provider health. N/A — Infrastructure is not a provider. Pipeline: N/A — Docker infrastructure for the Docker probe alert without a pipeline label; Not provided for other alerts without that label. FIRING and PENDING retain their original alert state. Managed CURRENT queries use an independent clock and refresh every 30s. The timestamp is query evaluation time, not publication or event time. The historical dashboard interval does not set the current query end; current trends retain the selected duration and end at now. Timeouts, failed queries and unverified response time remain unavailable.",
           "gridPos": {
             "x": 0,
-            "y": 43,
+            "y": 44,
             "w": 24,
             "h": 6
           },

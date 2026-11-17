@@ -242,8 +242,14 @@ class CandidateQualification(unittest.TestCase):
                         candidate.inputs(mode, host, managed)
 
     def test_declared_delivery_defaults_and_distinct_owned_candidates(self):
-        candidate.inputs("declared_delivery", "", "")
-        candidate.inputs("candidate", HOST, MANAGED)
+        with patch.object(
+            candidate.native,
+            "inspect",
+            side_effect=AssertionError("Input validation must not inspect Docker"),
+        ) as inspect:
+            candidate.inputs("declared_delivery", "", "")
+            candidate.inputs("candidate", HOST, MANAGED)
+        inspect.assert_not_called()
 
     def test_full_filesystem_changes_never_pass(self):
         for defect in ["bytes", "owner", "mode", "symlink", "extra", "missing_map"]:
@@ -556,8 +562,9 @@ class ProducerExport(unittest.TestCase):
                         )
                     ):
                         exec(code, {"__name__": "synthetic_export"})
-                    self.assertFalse((out / "build-products.json").exists())
-                    return
+                    receipt_exists = (out / "build-products.json").exists()
+                    self.assertFalse(receipt_exists)
+                    return receipt_exists
                 exec(code, {"__name__": "synthetic_export"})
             receipt = json.loads((out / "build-products.json").read_text())
             self.assertEqual(receipt["state"], "BUILT_UNQUALIFIED")
@@ -574,11 +581,13 @@ class ProducerExport(unittest.TestCase):
                 )
             self.assertEqual(head_calls, 2)
             self.assertTrue(calls)
+            return receipt
 
     def test_complete_unqualified_export_preserves_hashes_and_boundaries(self):
         for key in ("containerimage.config.digest", "containerimage.digest"):
             with self.subTest(metadata_key=key):
-                self.run_export(metadata_key=key)
+                receipt = self.run_export(metadata_key=key)
+                self.assertEqual(receipt["state"], "BUILT_UNQUALIFIED")
 
     def test_bad_source_build_or_product_never_writes_success_receipt(self):
         for defect in (
@@ -598,7 +607,7 @@ class ProducerExport(unittest.TestCase):
             "missing_package",
         ):
             with self.subTest(defect=defect):
-                self.run_export(defect)
+                assert self.run_export(defect) is False
 
     def test_unqualified_receipt_is_rejected_even_when_renamed_to_parity(self):
         import io

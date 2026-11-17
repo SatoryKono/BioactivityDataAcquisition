@@ -933,16 +933,32 @@ def _sha_from_ref(gitdir: Path, ref: str) -> str | None:
 
 
 def _common_gitdir(gitdir: Path) -> Path:
+    """Accept only a relative ``.``/``..`` pointer to a parent named ``.git``.
+
+    Absolute or otherwise free-form commondir text is ignored. The rejected
+    path is not statted, so the file cannot answer whether an arbitrary
+    location exists.
+    """
     pointer = gitdir / "commondir"
     if not pointer.is_file():
         return gitdir
     try:
-        raw = Path(pointer.read_text(encoding="utf-8").strip())
+        text = pointer.read_text(encoding="utf-8").strip()
     except (OSError, UnicodeError):
         return gitdir
-    resolved = raw if raw.is_absolute() else gitdir / raw
-    resolved = resolved.resolve(strict=False)
-    return resolved if resolved.is_dir() else gitdir
+    if not text or "\x00" in text or "\\" in text or text.startswith(("/", "~")):
+        return gitdir
+    parts = Path(text).parts
+    if not parts or any(part not in {".", ".."} for part in parts):
+        return gitdir
+    resolved = (gitdir.joinpath(*parts)).resolve(strict=False)
+    try:
+        gitdir.resolve(strict=False).relative_to(resolved)
+    except ValueError:
+        return gitdir
+    if resolved.name != ".git":
+        return gitdir
+    return resolved
 
 
 def read_checkout_sha(repo: Path) -> str | None:

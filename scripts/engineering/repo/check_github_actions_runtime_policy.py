@@ -708,14 +708,51 @@ _SECRET_DIAGNOSTIC = re.compile(r"(?i)secrets?[._]")
 _REDACTED_DIAGNOSTIC = "[redacted-diagnostic]"
 
 
+_DIAGNOSTIC_CODES: tuple[str, ...] = (
+    "missing path",
+    "unreadable path",
+    "empty YAML",
+    "malformed YAML",
+    "malformed registry pin",
+    "malformed registry",
+    "ambiguous duplicate registry entry",
+    "duplicate registry entry",
+    "is not pinned to a full 40-hex commit SHA",
+    "is not pinned with a single @ref",
+    "unknown",
+    "local action must be a ./ path",
+    "local action must not carry a ref",
+    "local action escapes the repository",
+    "local action must live under ./.github/actions/",
+    "local action escapes .github/actions",
+    "has no action.yml or action.yaml",
+    "uses is not a non-empty string",
+    "step uses a reusable workflow",
+    "steps must be a list",
+    "must be a mapping",
+    "uses is not a reusable workflow path",
+    "mixes reusable uses with steps",
+    "has neither uses nor steps",
+    "malformed workflow",
+    "jobs must be a mapping",
+    "is absent from ALLOWED_USES",
+    "is not an ALLOWED_USES pin",
+    "no workflow paths to check",
+    "SHA",
+)
+
+
 def _public_diagnostic(error: str) -> str:
-    """Keep stderr free of workflow secret expressions."""
-    if _SECRET_DIAGNOSTIC.search(error):
+    """Return a fixed code. The logged value is never the input string."""
+    if (
+        _SECRET_DIAGNOSTIC.search(error) is not None
+        or _PUBLIC_DIAGNOSTIC.fullmatch(error) is None
+    ):
         return _REDACTED_DIAGNOSTIC
-    match = _PUBLIC_DIAGNOSTIC.fullmatch(error)
-    if match is None:
-        return _REDACTED_DIAGNOSTIC
-    return match.group(0)
+    for code in _DIAGNOSTIC_CODES:
+        if code in error:
+            return code
+    return _REDACTED_DIAGNOSTIC
 
 
 def _emit_pin_errors(errors: list[str]) -> None:

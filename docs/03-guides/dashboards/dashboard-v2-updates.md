@@ -509,3 +509,37 @@ values. Empty monitoring series still require review; they are not healthy zeros
 ## 2026-11-11 — аудит контрактов и первого экрана
 
 Таблицы контекста сохраняют AUTO/EXPLICIT и общий donor; ширины адаптируются к доступной области, inspect включён. DQ больше не оставляет пустой промежуток перед Run Identity и подробностями. Overview ограничивает запрос краткой сводки двумя приоритетными предупреждениями, полный список сохраняет все строки. Отчёт аудита `docs/reports/dashboard-ux-checks/2026-11-11.md` отдельно фиксирует ограничения работающей среды.
+
+## Incident coverage: сохранение вычислений — 2026-11-16 (2026-11-15 UTC)
+
+Карточки `9102` и `9491` явно показывают отдельные результаты после стандартного
+`reduceFields:lastNotNull`. Запросы, mappings и высоты 8 сохранены; adaptive
+CURRENT stat получает то же преобразование ровно один раз. Источники, 14
+библиотечных случаев и ограничения описаны в
+UX-отчёте `docs/reports/dashboard-ux-checks/2026-11-15.md`. Live browser/render acceptance
+остаётся `NOT_RUN`; полный integration и итоговый CI ещё требуются.
+
+
+## 2026-11-17 — saved outcomes, current signals and clock provenance
+
+All five active dashboards expose the same ordered navigation bus. Run Explorer
+keeps twenty launches in a wide, unpaginated table with a 30-unit panel; compact
+row details remain available. Workflow passports and Data Quality actions use
+the clicked row's context. Replay requires an explicit run instead of borrowing
+an AUTO assessment. Workflow failure details and FK comparison scope retain the
+saved verdict while making its evidence readable.
+
+Overview separates saved run assessment from complete CURRENT fleet alert
+counts and processing-anchor age. The historical name
+`bioetl_data_freshness_seconds` identifies a successful-DQ run-start anchor,
+not a provider input-event or completion clock. Incident retains complete
+suspect/alert lists, distinguishes diagnostic priority from alert severity and
+cause verification, and exposes exact-scope stage snapshot clocks. Legacy
+missing projection and input-event times remain UNKNOWN; gateway publication
+is not substituted for either.
+
+The bounded stage-projection timestamp emitter is implemented and tested for
+future runner integration. Existing retained snapshots cannot be retrospectively
+assigned a producing run or primary event clock. Local visual evidence covers
+pinned runtime overlays (Overview 241 / Incident 165), rather than deployment of
+the whole PR candidate. Existing acceptance statuses remain unchanged.

@@ -3485,7 +3485,7 @@
                 "lastNotNull"
               ],
               "fields": "",
-              "values": false
+              "values": true
             },
             "textMode": "value_and_name",
             "text": {
@@ -3533,6 +3533,17 @@
               "title": "Open observability runbook",
               "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md",
               "targetBlank": true
+            }
+          ],
+          "transformations": [
+            {
+              "id": "reduce",
+              "options": {
+                "reducers": [
+                  "lastNotNull"
+                ],
+                "mode": "reduceFields"
+              }
             }
           ]
         },
@@ -3711,7 +3722,7 @@
                 "lastNotNull"
               ],
               "fields": "",
-              "values": false
+              "values": true
             },
             "textMode": "value_and_name",
             "text": {
@@ -3773,7 +3784,18 @@
             }
           ],
           "title": "Inspect Telemetry Coverage",
-          "type": "stat"
+          "type": "stat",
+          "transformations": [
+            {
+              "id": "reduce",
+              "options": {
+                "reducers": [
+                  "lastNotNull"
+                ],
+                "mode": "reduceFields"
+              }
+            }
+          ]
         }
       ],
       "gridPos": {

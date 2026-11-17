@@ -22,7 +22,7 @@
   "dashboard_sha256": {
     "bioetl-control-plane-v1": "97df142a1ce5993617c8f9274c8843aa6702d7337824ee510458894e70af14af",
     "bioetl-dq-v2": "58c554dffae74b17ae1566283ded9f06f46bac71cded990e9a7ffc6662ed813a",
-    "bioetl-incident-v1": "019c2e1be8ad2deb3a2517e1f27b60afc89f9bf9d7906b810fe62b304e102daa",
+    "bioetl-incident-v1": "9456a278356c2d301424ba14d67471418e8bfaa2180f7fcf44d3ede69d445240",
     "bioetl-overview-v2": "b3ddbe3609067587d789d1c769be3e87e8f147aaedfc75da841c1e64715b96ad",
     "bioetl-run-explorer-v1": "2a12e9a9855e7e50b381bc66a99642db33086939b18898a8e428fadef8ae353a"
   },

@@ -241,9 +241,17 @@ def _expand_coverage_row(row: dict[str, Any]) -> tuple[int, int]:
     for panel in children:
         if panel.get("id") in {9102, 9491}:
             panel["gridPos"]["h"] = max(8, panel["gridPos"]["h"])
-            # Grafana stacks named series when BigValue is horizontal (label
-            # left, value right). Vertical puts five narrow values side by side.
+            # Preserve the main branch's explicit per-field reduction while
+            # stacking readable named rows in the narrower coverage panel.
             panel["options"]["orientation"] = "horizontal"
+            reduction = {
+                "id": "reduce",
+                "options": {"reducers": ["lastNotNull"], "mode": "reduceFields"},
+            }
+            transformations = panel.setdefault("transformations", [])
+            if reduction not in transformations:
+                transformations.append(reduction)
+            panel["options"].setdefault("reduceOptions", {})["values"] = True
     new_bottom = max(
         (p["gridPos"]["y"] + p["gridPos"]["h"] for p in children),
         default=old_bottom,
@@ -412,10 +420,17 @@ def _adapt_incident(dashboard: dict) -> None:
     ]
 
 
-def _adapt_overview(_dashboard: dict) -> None:
-    # Canonical geometry now puts the saved answer first in both profiles,
-    # alongside separately scoped current-alert and ingestion-age indicators.
-    return
+def _adapt_overview(dashboard: dict) -> None:
+    # The native saved verdict/current cards already lead the answer. Preserve
+    # main's extra domain-row height and move later evidence out of its way.
+    panels = {panel["id"]: panel for panel in dashboard["panels"]}
+    domains = panels[9002]
+    bottom = domains["gridPos"]["y"] + domains["gridPos"]["h"]
+    delta = max(0, 9 - domains["gridPos"]["h"])
+    domains["gridPos"]["h"] += delta
+    for panel in dashboard["panels"]:
+        if panel is not domains and panel["gridPos"]["y"] >= bottom:
+            _shift_panel(panel, delta)
 
 
 def project_adaptive_dashboard(source: dict) -> dict:

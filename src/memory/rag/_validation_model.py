@@ -98,15 +98,7 @@ def normalize_rag_source_path(
         if "#" in fragment or not VIRTUAL_FRAGMENT_PATTERN.fullmatch(fragment):
             raise ValueError("virtual source fragment must be a canonical slug")
 
-    pure_path = PurePosixPath(base_path)
-    if pure_path.is_absolute() or ".." in pure_path.parts:
-        raise ValueError("source path must stay inside the repository")
-    if not pure_path.parts or any(":" in part for part in pure_path.parts):
-        raise ValueError("source path is not repository-relative")
-    normalized = pure_path.as_posix()
-    if normalized in {"", "."} or normalized != base_path:
-        raise ValueError("source path must use canonical POSIX normalization")
-    return normalized
+    return _normalize_rag_base_path(base_path)
 
 
 def calculate_source_surface_sha256(
@@ -205,3 +197,15 @@ def capture_rag_source_identity(
         **capture_rag_git_identity(root),
         "source_surface_sha256": calculate_source_surface_sha256(root, source_paths),
     }
+
+
+def _normalize_rag_base_path(base_path: str) -> str:
+    pure_path = PurePosixPath(base_path)
+    if pure_path.is_absolute() or ".." in pure_path.parts:
+        raise ValueError("source path must stay inside the repository")
+    if not pure_path.parts or any(":" in part for part in pure_path.parts):
+        raise ValueError("source path is not repository-relative")
+    normalized = pure_path.as_posix()
+    if normalized in {"", "."} or normalized != base_path:
+        raise ValueError("source path must use canonical POSIX normalization")
+    return normalized

@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "66ef93573d4d8292b0cdd150533cb76fcf910c32",
+  "source_ref": "85a9b7cd1a1b3523570893d6fa6f79b7db229d10",
+  "source_reviews": {
+    "src/bioetl/infrastructure/quarantine/write_lock.py": "Reviewed the source delta from the accepted main catalog to the published merge. This file is byte-identical in Git to the previously reviewed 8eacd16b9eea8a3ab0d8270ad5f08039b3df9650 platform component. Explicit platform else branches retain the existing Windows helper and POSIX flock calls, descriptor arguments, lock/unlock modes, retry behavior, exception propagation and enclosing cleanup. The complete call multiset is unchanged against catalog source b942d2d19e3dbadbe5b6bb692b33044c925d0b69; no acquisition or cleanup is added or removed. References are relocated mechanically against this immutable published snapshot. Earlier Windows/Linux component executions remain historical evidence, not a current whole-runtime qualification. Static source review only; runtime inventory qualification remains NOT_RUN_12553.",
+    "src/bioetl/infrastructure/control_plane/file_lineage_store.py": "Reviewed the source delta from the accepted main catalog to the published merge. This file is byte-identical in Git to the previously reviewed 8eacd16b9eea8a3ab0d8270ad5f08039b3df9650 platform component. Explicit platform else branches retain the existing Windows helper and POSIX flock calls, descriptor arguments, lock/unlock modes, retry behavior, exception propagation and enclosing cleanup. The complete call multiset is unchanged against catalog source b942d2d19e3dbadbe5b6bb692b33044c925d0b69; no acquisition or cleanup is added or removed. References are relocated mechanically against this immutable published snapshot. Earlier Windows/Linux component executions remain historical evidence, not a current whole-runtime qualification. Static source review only; runtime inventory qualification remains NOT_RUN_12553."
+  }
+}

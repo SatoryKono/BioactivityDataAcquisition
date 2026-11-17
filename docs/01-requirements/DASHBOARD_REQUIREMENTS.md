@@ -86,7 +86,7 @@ size option.
 | `DASH-STATE-002` | Operator states MUST use the canonical `OK/WARN/CRIT/UNKNOWN` palette; documented trust gates MAY add `INCOMPLETE`. Color MUST NOT be the only carrier of meaning. |
 | `DASH-NAV-001` | Every dashboard MUST expose its declared navigation surface in `navigation-links.yaml`: the ordered header bus on all five active dashboards, with additional exact-run table actions on Run Explorer. Header links omit self-links; all routes preserve time, explicitly serialize target-allowlisted variables, and disable implicit variable copying. Row actions MUST carry the clicked row identity. |
 | `DASH-SCOPE-001` | A data-bearing panel with `scope=selected_run` MUST use `evidence_source=ops_http`. Prometheus MUST NOT claim exact UUID scope (`DASH-DATA-002`). |
-| `DASH-SCOPE-002` | `bioetl-overview-v2` first window MUST show `Review Selected Run Status` (`9603`) and `Review Run Domains` (`9002`). `-` resolves AUTO; an explicit UUID retains that exact run. Saved verdicts MUST remain separate from labelled CURRENT fleet alert counts and ingestion age; those signals never attest the selected run. |
+| `DASH-SCOPE-002` | `bioetl-overview-v2` first window MUST show `Review Selected Run Status` (`9603`) and `Review Run Domains` (`9002`). `-` resolves AUTO; an explicit UUID retains that exact run. Saved verdicts MUST remain separate from labelled CURRENT fleet alert counts and processing-anchor age; those signals never attest the selected run. |
 | `DASH-ACTION-001` | Critical operator panels MUST expose an actionable dashboard or runbook CTA without duplicate or conflicting handoffs. |
 | `DASH-LAYOUT-001` | Top-level panels MUST NOT overlap or leave unexplained gaps. Additional diagnostics MUST use progressive disclosure. |
 

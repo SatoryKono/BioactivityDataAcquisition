@@ -13,12 +13,14 @@ from __future__ import annotations
 import pytest
 
 import json
+import runpy
 from pathlib import Path
 
 import yaml
 
 from scripts.engineering.qa import __main__ as qa_router
 from scripts.engineering.qa import report_dashboard_inventory as inventory
+from scripts.engineering.common import repo_paths
 from tests.helpers import run_main_in_process
 
 
@@ -407,6 +409,46 @@ def test_sync_contract_preserves_reviewed_fields_and_is_idempotent(
     before = path.read_bytes()
     inventory.sync_inventory_panel_counts([{"uid": "sample", "panel_count": 3}])
     assert path.read_bytes() == before
+
+
+@pytest.mark.parametrize("shadow_contract", [False, True])
+def test_sync_contract_uses_repository_path_outside_repo(
+    tmp_path, monkeypatch, shadow_contract
+):
+    repo_root = tmp_path / "repo"
+    foreign_cwd = tmp_path / "foreign"
+    relative = Path("docs/03-guides/dashboards/contracts/dashboard-inventory.yaml")
+    target = repo_root / relative
+    target.parent.mkdir(parents=True)
+    target.write_text(
+        "# Reviewed contract\ndashboards:\n"
+        "  - uid: sample\n    owner: team\n    panel_count: 1\n",
+        encoding="utf-8",
+    )
+    foreign_cwd.mkdir()
+    shadow = foreign_cwd / relative
+    if shadow_contract:
+        shadow.parent.mkdir(parents=True)
+        shadow.write_text(
+            "dashboards:\n  - uid: foreign\n    panel_count: 7\n",
+            encoding="utf-8",
+        )
+    monkeypatch.setattr(repo_paths, "REPO_ROOT", repo_root)
+    monkeypatch.chdir(foreign_cwd)
+    module = runpy.run_path(inventory.__file__)
+
+    module["sync_inventory_panel_counts"]([{"uid": "sample", "panel_count": 3}])
+
+    assert target.read_text(encoding="utf-8") == (
+        "# Reviewed contract\ndashboards:\n"
+        "  - uid: sample\n    owner: team\n    panel_count: 3\n"
+    )
+    if shadow_contract:
+        assert yaml.safe_load(shadow.read_text(encoding="utf-8")) == {
+            "dashboards": [{"uid": "foreign", "panel_count": 7}]
+        }
+    else:
+        assert not shadow.exists()
 
 
 @pytest.mark.parametrize(

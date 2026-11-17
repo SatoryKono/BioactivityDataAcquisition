@@ -89,39 +89,12 @@ def resolve_neo4j_connection(
     default_host = _default_neo4j_host(env)
 
     if audit_mode:
-        username = env.get("NEO4J_AUDIT_USERNAME")
-        password = env.get("NEO4J_AUDIT_PASSWORD")
-        database = (
-            env.get("NEO4J_AUDIT_DATABASE")
-            or env.get("NEO4J_DATABASE")
-            or _DEFAULT_NEO4J_AUDIT_DATABASE
-        )
-        auth_username, auth_password = _parse_auth_pair(env.get("NEO4J_AUDIT_AUTH"))
-        username = username or auth_username or _DEFAULT_NEO4J_AUDIT_USERNAME
-        password = password or auth_password
-        if not password:
-            raise RuntimeError(
-                "Neo4j audit password not found in NEO4J_AUDIT_PASSWORD or NEO4J_AUDIT_AUTH"
-            )
-        http_uri = (
-            explicit_http_uri
-            or env.get("NEO4J_AUDIT_HTTP_URI")
-            or f"http://{default_host}:7475"  # NOSONAR - local Neo4j browser port
+        http_uri, username, password, database = _audit_neo4j_connection(
+            env, default_host, explicit_http_uri
         )
     else:
-        bolt_uri = env.get("NEO4J_URI", "bolt://localhost:7687")
-        username = env.get("NEO4J_USERNAME") or env.get("NEO4J_AUTH_USERNAME")
-        password = env.get("NEO4J_PASSWORD") or env.get("NEO4J_AUTH_PASSWORD")
-        database = env.get("NEO4J_DATABASE", "neo4j")
-        auth_username, auth_password = _parse_auth_pair(env.get("NEO4J_AUTH"))
-        username = username or auth_username or "neo4j"
-        password = password or auth_password
-        if not password:
-            raise RuntimeError(
-                "Neo4j password not found in NEO4J_PASSWORD, NEO4J_AUTH_PASSWORD, or NEO4J_AUTH"
-            )
-        http_uri = (
-            explicit_http_uri or env.get("NEO4J_HTTP_URI") or derive_http_uri(bolt_uri)
+        http_uri, username, password, database = _default_neo4j_connection(
+            env, explicit_http_uri
         )
     return http_uri.rstrip("/"), username, password, database
 
@@ -392,3 +365,48 @@ class Neo4jHttpClient:
             if isinstance(payload, dict) and isinstance(payload.get("errors"), list):
                 detail = payload["errors"]
         return f"{prefix}query/runtime error (HTTP {exc.code}): {detail}"
+
+
+def _audit_neo4j_connection(
+    env: dict[str, str], default_host: str, explicit_http_uri: str | None
+) -> tuple[str, str, str, str]:
+    username = env.get("NEO4J_AUDIT_USERNAME")
+    password = env.get("NEO4J_AUDIT_PASSWORD")
+    database = (
+        env.get("NEO4J_AUDIT_DATABASE")
+        or env.get("NEO4J_DATABASE")
+        or _DEFAULT_NEO4J_AUDIT_DATABASE
+    )
+    auth_username, auth_password = _parse_auth_pair(env.get("NEO4J_AUDIT_AUTH"))
+    username = username or auth_username or _DEFAULT_NEO4J_AUDIT_USERNAME
+    password = password or auth_password
+    if not password:
+        raise RuntimeError(
+            "Neo4j audit password not found in NEO4J_AUDIT_PASSWORD or NEO4J_AUDIT_AUTH"
+        )
+    http_uri = (
+        explicit_http_uri
+        or env.get("NEO4J_AUDIT_HTTP_URI")
+        or f"http://{default_host}:7475"  # NOSONAR - local Neo4j browser port
+    )
+    return http_uri, username, password, database
+
+
+def _default_neo4j_connection(
+    env: dict[str, str], explicit_http_uri: str | None
+) -> tuple[str, str, str, str]:
+    bolt_uri = env.get("NEO4J_URI", "bolt://localhost:7687")
+    username = env.get("NEO4J_USERNAME") or env.get("NEO4J_AUTH_USERNAME")
+    password = env.get("NEO4J_PASSWORD") or env.get("NEO4J_AUTH_PASSWORD")
+    database = env.get("NEO4J_DATABASE", "neo4j")
+    auth_username, auth_password = _parse_auth_pair(env.get("NEO4J_AUTH"))
+    username = username or auth_username or "neo4j"
+    password = password or auth_password
+    if not password:
+        raise RuntimeError(
+            "Neo4j password not found in NEO4J_PASSWORD, NEO4J_AUTH_PASSWORD, or NEO4J_AUTH"
+        )
+    http_uri = (
+        explicit_http_uri or env.get("NEO4J_HTTP_URI") or derive_http_uri(bolt_uri)
+    )
+    return http_uri, username, password, database

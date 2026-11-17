@@ -32,11 +32,7 @@ def _storage_surface_state(
 ) -> tuple[str, str | None, str | None, list[str], list[str], str, str | None]:
     key = NodeKey("storage_surface", spec.ref)
     existing = snapshot.nodes.get(key)
-    inferred_layer, inferred_provider, inferred_entity = _storage_ref_identity(spec.ref)
-    provider = spec.scope.provider or inferred_provider
-    entity = spec.scope.entity or inferred_entity
-    pipeline_name = spec.scope.pipeline_name
-    layer = spec.layer or inferred_layer or ""
+    layer, provider, entity, pipeline_name = _storage_surface_identity(spec)
 
     existing_roles_raw = (
         existing.properties.get("storage_roles") if existing is not None else None
@@ -139,3 +135,14 @@ def _scd_config_columns(layer_config: dict[str, object]) -> dict[str, str | None
         "valid_from_column": _optional_text(scd_config.get("valid_from_col")),
         "valid_to_column": _optional_text(scd_config.get("valid_to_col")),
     }
+
+
+def _storage_surface_identity(
+    spec: StorageSurfaceSpec,
+) -> tuple[str, str | None, str | None, str | None]:
+    inferred_layer, inferred_provider, inferred_entity = _storage_ref_identity(spec.ref)
+    provider = spec.scope.provider or inferred_provider
+    entity = spec.scope.entity or inferred_entity
+    pipeline_name = spec.scope.pipeline_name
+    layer = spec.layer or inferred_layer or ""
+    return layer, provider, entity, pipeline_name

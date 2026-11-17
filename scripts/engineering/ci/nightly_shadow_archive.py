@@ -8,6 +8,7 @@ decide which weekly job should run.
 from __future__ import annotations
 
 import argparse
+import base64
 import hashlib
 import json
 import os
@@ -16,8 +17,10 @@ import sys
 from collections.abc import Mapping, Sequence
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 from urllib.parse import quote, urlencode
+
+import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 if __package__ in {None, ""}:
@@ -42,15 +45,40 @@ from scripts.engineering.repo.github_settings_review import (
 
 SCHEMA_VERSION = 1
 ARCHIVE_INDEX_NAME = "index.json"
+RAW_NAME = "raw.json"
+OUTCOMES_NAME = "outcomes.json"
+MANIFEST_NAME = "manifest.json"
 PARTITION_NAME = "generated-artifact-daily-partition.json"
 WORKFLOW_PATH = ".github/workflows/nightly.yml"
 ACTIONS_RETENTION_CAP_DAYS = 90
 SUCCESS_RETENTION_DAYS = 7
 DIAGNOSTIC_RETENTION_DAYS = 90
+PILOT_DURATION_MINUTES = 48
+PILOT_DECISION_DATE = "2026-11-15"
+PILOT_DECISION_UTC = "2026-11-15T00:00:00Z"
+PILOT_CONFIGURATION_ID = "daily-deterministic-plus-existing-weekly-security"
+PILOT_SUCCESS_RETENTION_FLOOR_DAYS = 30
+PILOT_DIAGNOSTIC_RETENTION_FLOOR_DAYS = 90
+PILOT_VERIFIED_ARCHIVE_FLOOR_DAYS = 90
+PILOT_RECORD_NAME = "pilot-48min.json"
+PILOT_ISSUE = 12362
+PARENT_ACCEPTANCE_ISSUE = 12349
+MISSING_PILOT_FAILURES = "pilot facts are missing cited failure runs"
+_SYNTHETIC_EVENTS = frozenset({"synthetic", "fabricated"})
+_EXTERNAL_OBSERVATION = frozenset({"external_state", "external_state_security"})
+REQUIRED_EXTERNAL_JOBS = (
+    "security",
+    "zizmor",
+    "codeql",
+    "scorecard",
+    "branch-hygiene",
+    "github-settings",
+)
 RUN_ID_LABEL = "run id"
 RUN_ATTEMPT_LABEL = "run attempt"
 UTC_OFFSET_SUFFIX = "+00:00"
 WEEKDAYS = frozenset({"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"})
+UTC_WEEKDAY_NAMES = ("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
 QUARTER_MONTHS = frozenset({"01", "04", "07", "10"})
 JOB_KINDS: dict[str, str] = {
     "clock": "clock",
@@ -67,6 +95,48 @@ JOB_KINDS: dict[str, str] = {
     "mutation": "weekly_sunday",
     "github-settings": "quarterly",
 }
+CHECK_CLASS: dict[str, str] = {
+    "clock": "clock",
+    "tests": "deterministic",
+    "e2e": "deterministic",
+    "duplication": "deterministic",
+    "import-linter": "deterministic",
+    "generated-artifact-daily": "deterministic",
+    "mutation": "deterministic",
+    "security": "external_state_security",
+    "zizmor": "external_state_security",
+    "codeql": "external_state_security",
+    "scorecard": "external_state_security",
+    "branch-hygiene": "external_state",
+    "github-settings": "external_state",
+}
+_CADENCE_LABEL = {
+    "clock": "every_scheduled_nightly",
+    "deterministic": "every_scheduled_nightly",
+    "security_daily": "every_scheduled_nightly",
+    "weekly_monday": "weekly_monday",
+    "weekly_sunday": "weekly_sunday",
+    "quarterly": "quarterly",
+}
+_CADENCE_CONDITIONS = {
+    "weekly_monday": "needs.clock.outputs.dow == 'Mon'",
+    "weekly_sunday": "needs.clock.outputs.dow == 'Sun'",
+    "quarterly": (
+        "needs.clock.outputs.dom == '01' && "
+        "(needs.clock.outputs.month == '01' || needs.clock.outputs.month == '04' || "
+        "needs.clock.outputs.month == '07' || needs.clock.outputs.month == '10')"
+    ),
+}
+_WORKFLOW_DRIFT_SNIPPETS = (
+    'cron: "0 3 * * *"',
+    "fetch-depth: 0",
+    "scripts.engineering.ci.generated_artifact_checks",
+    "needs.clock.outputs.dow == 'Mon'",
+    "needs.clock.outputs.dow == 'Sun'",
+    "retention-days: 7",
+    "retention-days: 90",
+    "if-no-files-found: warn",
+)
 _SUCCESS_TOKENS = frozenset({"success"})
 _FAILURE_TOKENS = frozenset({"failure"})
 _CANCELLED_TOKENS = frozenset({"cancelled"})
@@ -286,7 +356,8 @@ def assess_shadow_window(
     elif len(shas) != 1:
         reasons.append("mixed_tested_sha")
     if any(
-        not isinstance(run.get("head_sha"), str) or not run["head_sha"].strip()
+        not isinstance(run.get("head_sha"), str)
+        or not cast(str, run["head_sha"]).strip()
         for run in runs
     ):
         reasons.append("missing_tested_sha")
@@ -333,9 +404,9 @@ def write_snapshot(
         root,
     )
     files = {
-        "raw.json": canonical_bytes(raw),
-        "outcomes.json": canonical_bytes(outcomes),
-        "manifest.json": canonical_bytes(manifest),
+        RAW_NAME: canonical_bytes(raw),
+        OUTCOMES_NAME: canonical_bytes(outcomes),
+        MANIFEST_NAME: canonical_bytes(manifest),
     }
     existing = [destination / name for name in files if (destination / name).exists()]
     if existing and not _same_snapshot(destination, files):
@@ -386,10 +457,75 @@ def require_accepted(ledger: Mapping[str, Any]) -> None:
         raise ArchiveError("durable archive has not aged 90 days")
 
 
+def _collect_pilot_configuration(
+    client: JsonGitHubClient, repository: str, raw: Mapping[str, Any]
+) -> dict[str, Any]:
+    """Keep the actual workflow source separately from the unmodified API run."""
+
+    head = raw.get("head_sha")
+    if not isinstance(head, str) or raw.get("path") != WORKFLOW_PATH:
+        raise ArchiveError("pilot collection requires a Nightly code SHA")
+    _require_commit_sha(head)
+    endpoint = f"repos/{repository}/contents/{WORKFLOW_PATH}?{urlencode({'ref': head})}"
+    payload = client.json(["api", endpoint])
+    if not isinstance(payload, Mapping) or payload.get("encoding") != "base64":
+        raise ArchiveError("pilot workflow source is unavailable")
+    try:
+        content = "".join(payload["content"].splitlines())
+        source = base64.b64decode(content, validate=True).decode("utf-8")
+    except (KeyError, AttributeError, ValueError, UnicodeError) as exc:
+        raise ArchiveError("pilot workflow source is malformed") from exc
+    configuration = {
+        "configuration_id": PILOT_CONFIGURATION_ID,
+        "workflow_path": WORKFLOW_PATH,
+        "workflow_code_sha": head,
+        "workflow_blob_sha": payload.get("sha"),
+        "workflow_source": source,
+    }
+    _pilot_configuration_jobs(raw, {"pilot_configuration": configuration})
+    return configuration
+
+
+def _pilot_configuration_jobs(
+    raw: Mapping[str, Any], outcomes: Mapping[str, Any]
+) -> dict[str, Any]:
+    head = raw.get("head_sha")
+    if not isinstance(head, str) or raw.get("path") != WORKFLOW_PATH:
+        raise ArchiveError("pilot configuration has no Nightly code SHA")
+    _require_commit_sha(head)
+    configuration = outcomes.get("pilot_configuration")
+    if not isinstance(configuration, Mapping):
+        raise ArchiveError(
+            "pilot configuration evidence is missing; collect with --pilot"
+        )
+    expected = {
+        "configuration_id": PILOT_CONFIGURATION_ID,
+        "workflow_path": WORKFLOW_PATH,
+        "workflow_code_sha": raw.get("head_sha"),
+    }
+    if any(configuration.get(key) != value for key, value in expected.items()):
+        raise ArchiveError("pilot workflow configuration identity mismatch")
+    source = configuration.get("workflow_source")
+    if not isinstance(source, str):
+        raise ArchiveError("pilot workflow source is missing")
+    encoded = source.encode("utf-8")
+    blob = hashlib.sha1(
+        f"blob {len(encoded)}\0".encode() + encoded, usedforsecurity=False
+    ).hexdigest()
+    if blob != configuration.get("workflow_blob_sha"):
+        raise ArchiveError("pilot workflow source checksum mismatch")
+    jobs = _validated_workflow_jobs(source)
+    if any(snippet not in source for snippet in _WORKFLOW_DRIFT_SNIPPETS):
+        raise ArchiveError("pilot workflow configuration drifted")
+    return jobs
+
+
 def build_attempt_archive(
     client: JsonGitHubClient,
     repository: str,
     run: Mapping[str, Any],
+    *,
+    pilot: bool = False,
 ) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
     """Collect one attempt through the shared timing collector."""
 
@@ -401,7 +537,11 @@ def build_attempt_archive(
         run_id,
         attempt,
     )
-    raw = dict(run.get("raw_api") if isinstance(run.get("raw_api"), Mapping) else run)
+    raw = dict(
+        cast(Mapping[str, Any], run.get("raw_api"))
+        if isinstance(run.get("raw_api"), Mapping)
+        else run
+    )
     raw["run_attempt"] = attempt
     pagination_status = oracle_pagination(
         observation["jobs_fetched"],
@@ -429,6 +569,10 @@ def build_attempt_archive(
             "status": pagination_status,
         },
     }
+    if pilot:
+        outcomes["pilot_configuration"] = _collect_pilot_configuration(
+            client, repository, raw
+        )
     base_sha, tested_sha = pull_request_shas(dict(raw))
     head_sha = raw.get("head_sha") if isinstance(raw.get("head_sha"), str) else None
     manifest = {
@@ -466,6 +610,7 @@ def archive_runs(
     event: str | None,
     limit: int,
     output: Path,
+    pilot: bool = False,
 ) -> dict[str, Any]:
     """Write immutable attempt snapshots and a derived index."""
 
@@ -485,7 +630,9 @@ def archive_runs(
     )
     index_path = ensure_path_within_root(output / ARCHIVE_INDEX_NAME, output)
     index, previous_index_bytes = _existing_archive_index(output, index_path)
-    index, snapshots = _collect_archive_snapshots(client, repository, runs, index)
+    index, snapshots = _collect_archive_snapshots(
+        client, repository, runs, index, pilot=pilot
+    )
     _persist_archive_snapshots(
         output, index_path, index, previous_index_bytes, snapshots
     )
@@ -509,6 +656,8 @@ def _collect_archive_snapshots(
     repository: str,
     runs: Sequence[Mapping[str, Any]],
     existing_index: Sequence[dict[str, Any]],
+    *,
+    pilot: bool = False,
 ) -> tuple[
     list[dict[str, Any]],
     list[tuple[Mapping[str, Any], Mapping[str, Any], dict[str, Any]]],
@@ -530,7 +679,9 @@ def _collect_archive_snapshots(
         # can change even when this completed attempt has not changed.
         if key in index_by_key:
             continue
-        raw, outcomes, manifest = build_attempt_archive(client, repository, run)
+        raw, outcomes, manifest = build_attempt_archive(
+            client, repository, run, **({"pilot": True} if pilot else {})
+        )
         _bind_hashes(raw, outcomes, manifest)
         row = _index_row(manifest)
         key = _snapshot_key(row)
@@ -816,8 +967,8 @@ def _verify_one(manifest_path: Path) -> dict[str, Any]:
     destination = manifest_path.parent
     try:
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-        raw_bytes = (destination / "raw.json").read_bytes()
-        outcomes_bytes = (destination / "outcomes.json").read_bytes()
+        raw_bytes = (destination / RAW_NAME).read_bytes()
+        outcomes_bytes = (destination / OUTCOMES_NAME).read_bytes()
         raw = json.loads(raw_bytes.decode("utf-8"))
         outcomes = json.loads(outcomes_bytes.decode("utf-8"))
     except (OSError, UnicodeError, json.JSONDecodeError) as exc:
@@ -827,9 +978,9 @@ def _verify_one(manifest_path: Path) -> dict[str, Any]:
     if manifest.get("schema_version") != SCHEMA_VERSION:
         raise ArchiveError(f"schema mismatch: {destination}")
     if oracle_sha256(raw_bytes) != manifest.get("raw_sha256"):
-        raise ArchiveError(f"checksum mismatch: {destination / 'raw.json'}")
+        raise ArchiveError(f"checksum mismatch: {destination / RAW_NAME}")
     if oracle_sha256(outcomes_bytes) != manifest.get("outcomes_sha256"):
-        raise ArchiveError(f"checksum mismatch: {destination / 'outcomes.json'}")
+        raise ArchiveError(f"checksum mismatch: {destination / OUTCOMES_NAME}")
     _verify_identity(destination, manifest, raw, outcomes)
     return _index_row(manifest)
 
@@ -875,6 +1026,1326 @@ def _verify_identity(
         "pagination_status"
     ):
         raise ArchiveError(f"pagination mismatch: {destination}")
+
+
+def _parse_utc(value: object) -> datetime | None:
+    """Parse a timezone-aware UTC timestamp. Naive text stays unknown."""
+
+    if not isinstance(value, str) or not value:
+        return None
+    try:
+        stamp = datetime.fromisoformat(value.replace("Z", UTC_OFFSET_SUFFIX))
+    except ValueError:
+        return None
+    if stamp.tzinfo is None:
+        return None
+    return stamp.astimezone(UTC)
+
+
+def _is_synthetic_observation(observation: Mapping[str, object]) -> bool:
+    if observation.get("synthetic") is True:
+        return True
+    event = observation.get("event")
+    return isinstance(event, str) and event in _SYNTHETIC_EVENTS
+
+
+def _observation_sha(observation: Mapping[str, object]) -> str | None:
+    for key in ("tested_sha", "head_sha"):
+        value = observation.get(key)
+        if isinstance(value, str) and value.strip():
+            return value
+    return None
+
+
+def _observation_run_id(observation: Mapping[str, object]) -> int | None:
+    value = observation.get("run_id")
+    if isinstance(value, bool) or not isinstance(value, int) or value < 1:
+        return None
+    return value
+
+
+def _conclusion_name(observation: Mapping[str, object]) -> str:
+    """Map one conclusion. Blank and unknown stay distinct from success."""
+
+    if _is_synthetic_observation(observation):
+        return "synthetic"
+    conclusion = observation.get("conclusion")
+    if conclusion is None or conclusion == "" or conclusion == "missing":
+        return "missing"
+    if not isinstance(conclusion, str):
+        return "unknown"
+    if conclusion in _SUCCESS_TOKENS:
+        return "success"
+    if conclusion in _FAILURE_TOKENS:
+        return "failure"
+    if conclusion in _CANCELLED_TOKENS:
+        return "cancelled"
+    if conclusion in _SKIPPED_TOKENS:
+        return "skipped"
+    return "unknown"
+
+
+def _job_block_reason(observation: Mapping[str, object]) -> str | None:
+    """Return why job evidence cannot count as success. None means no block."""
+
+    results = observation.get("job_conclusions")
+    if results is None:
+        return None
+    if not isinstance(results, Mapping) or not results:
+        return "outcomes_missing"
+    force = observation["force_weekly"] if "force_weekly" in observation else False
+    blocked: str | None = None
+    for name, result in results.items():
+        if not isinstance(name, str):
+            return "outcomes_missing"
+        duty = job_duty(
+            name,
+            dow=observation.get("dow"),
+            dom=observation.get("dom"),
+            month=observation.get("month"),
+            force_weekly=force,
+        )
+        judged = judge_job(result, duty)
+        if judged["reason"] == "mandatory_skipped":
+            return "mandatory_skipped"
+        if judged["status"] != "success" and blocked is None:
+            blocked = judged["reason"]
+    return blocked
+
+
+def _sample_counts(
+    observations: Sequence[Mapping[str, object]],
+) -> dict[str, int]:
+    counts = {
+        "success": 0,
+        "failure": 0,
+        "cancelled": 0,
+        "missing": 0,
+        "unknown": 0,
+        "skipped": 0,
+        "synthetic": 0,
+    }
+    for observation in observations:
+        bucket = _conclusion_name(observation)
+        if bucket not in counts:
+            bucket = "unknown"
+        counts[bucket] += 1
+    return counts
+
+
+def _span_covers_48_minutes(runs: Sequence[Mapping[str, object]]) -> bool:
+    """True when the wall-clock span is at least 48 minutes.
+
+    Two runs do not satisfy this by themselves. The clock does.
+    """
+
+    start, end = _created_bounds(runs)
+    if start is None or end is None:
+        return False
+    opened = _parse_utc(start)
+    closed = _parse_utc(end)
+    if opened is None or closed is None:
+        return False
+    return (closed - opened) >= timedelta(minutes=PILOT_DURATION_MINUTES)
+
+
+def _pilot_latest_stamp(observation: Mapping[str, object]) -> datetime | None:
+    stamps = [_parse_utc(observation.get("created_at"))]
+    execution = observation.get("attempt_execution")
+    if isinstance(execution, Mapping):
+        stamps.append(_parse_utc(execution.get("completed_at")))
+    return max((stamp for stamp in stamps if stamp is not None), default=None)
+
+
+def _pilot_duration_elapsed(
+    start: datetime,
+    observations: Sequence[Mapping[str, object]],
+) -> bool:
+    """True when a non-synthetic stamp reaches start plus 48 minutes."""
+
+    latest = start
+    seen = False
+    for observation in observations:
+        if _is_synthetic_observation(observation):
+            continue
+        stamp = _pilot_latest_stamp(observation)
+        if stamp is None or stamp < start:
+            continue
+        seen = True
+        if stamp > latest:
+            latest = stamp
+    if not seen:
+        return False
+    return (latest - start) >= timedelta(minutes=PILOT_DURATION_MINUTES)
+
+
+def _inside_pilot_window(
+    observation: Mapping[str, object],
+    *,
+    configuration_id: str,
+    start: datetime,
+    close: datetime,
+) -> bool:
+    if _is_synthetic_observation(observation):
+        return False
+    if observation.get("configuration_id") != configuration_id:
+        return False
+    stamp = _parse_utc(observation.get("created_at"))
+    if stamp is None or stamp < start or stamp > close:
+        return False
+    return _observation_run_id(
+        observation
+    ) is not None and _attempt_execution_in_window(observation, start, close)
+
+
+def _attempt_execution_in_window(
+    observation: Mapping[str, object], start: datetime, close: datetime
+) -> bool:
+    if "attempt_execution" not in observation:
+        # Legacy direct assessments may lack archive evidence; the archive gate
+        # always reconstructs this field and never uses this compatibility path.
+        return observation.get("run_attempt", 1) == 1
+    execution = observation.get("attempt_execution")
+    if not isinstance(execution, Mapping):
+        return False
+    actual_start = _parse_utc(execution.get("started_at"))
+    actual_end = _parse_utc(execution.get("completed_at"))
+    return (
+        actual_start is not None
+        and actual_end is not None
+        and start <= actual_start <= actual_end <= close
+    )
+
+
+def _pair_observation_eligible(observation: Mapping[str, object]) -> bool:
+    # Unknown results must reach the negative pair assessment, not disappear.
+    return _observation_sha(observation) is not None
+
+
+def _pilot_pair_arms(
+    observations: Sequence[Mapping[str, object]],
+    *,
+    configuration_id: str,
+    start: datetime,
+    close: datetime,
+) -> dict[str, list[Mapping[str, object]]]:
+    """Collect unique observations in a stable order, including failed runs."""
+
+    arms: dict[str, dict[bytes, Mapping[str, object]]] = {
+        "baseline": {},
+        "candidate": {},
+    }
+    for observation in observations:
+        arm = observation.get("arm")
+        if (
+            not isinstance(arm, str)
+            or arm not in arms
+            or not _pair_observation_eligible(observation)
+        ):
+            continue
+        if not _inside_pilot_window(
+            observation,
+            configuration_id=configuration_id,
+            start=start,
+            close=close,
+        ):
+            continue
+        arms[arm][canonical_bytes(observation)] = observation
+    return {
+        arm: [by_bytes[key] for key in sorted(by_bytes)]
+        for arm, by_bytes in arms.items()
+    }
+
+
+def _find_comparable_pairs(
+    arms: Mapping[str, Sequence[Mapping[str, object]]],
+) -> tuple[list[tuple[Mapping[str, object], Mapping[str, object]]], bool]:
+    """Return every distinct baseline/candidate pair, regardless of input order."""
+
+    baseline_ids = {_observation_run_id(item) for item in arms["baseline"]}
+    candidate_ids = {_observation_run_id(item) for item in arms["candidate"]}
+    pairs = [
+        (left, right)
+        for left in arms["baseline"]
+        for right in arms["candidate"]
+        if _observation_run_id(left) != _observation_run_id(right)
+        and _observation_sha(left) == _observation_sha(right)
+    ]
+    return pairs, bool(baseline_ids & candidate_ids)
+
+
+def _retention_reason_codes(
+    *,
+    successful_evidence_days: int,
+    diagnostic_retention_days: int,
+    verified_archive_days: int,
+    actions_retention_cap_days: int,
+    retention_reduced: bool,
+) -> list[str]:
+    reasons: list[str] = []
+    if retention_reduced:
+        reasons.append("retention_reduced")
+    if successful_evidence_days < PILOT_SUCCESS_RETENTION_FLOOR_DAYS:
+        reasons.append(f"success_retention_below_{PILOT_SUCCESS_RETENTION_FLOOR_DAYS}")
+    if diagnostic_retention_days < PILOT_DIAGNOSTIC_RETENTION_FLOOR_DAYS:
+        reasons.append(
+            f"diagnostic_retention_below_{PILOT_DIAGNOSTIC_RETENTION_FLOOR_DAYS}"
+        )
+    if verified_archive_days < PILOT_VERIFIED_ARCHIVE_FLOOR_DAYS:
+        reasons.append(
+            f"verified_archive_retention_below_{PILOT_VERIFIED_ARCHIVE_FLOOR_DAYS}"
+        )
+    if actions_retention_cap_days < ACTIONS_RETENTION_CAP_DAYS:
+        reasons.append("actions_retention_cap_below_90")
+    return reasons
+
+
+def _scheduled_start_reason(
+    observation: Mapping[str, object], configuration_id: str, decision: datetime
+) -> str | None:
+    if observation.get("configuration_id") != configuration_id:
+        return "configuration_mismatch"
+    block = _job_block_reason(observation)
+    if block is not None:
+        return block
+    if _observation_sha(observation) is None:
+        return "missing_tested_sha"
+    if _observation_run_id(observation) is None:
+        return "missing_run_id"
+    stamp = _parse_utc(observation.get("created_at"))
+    if stamp is None:
+        return "created_at_unknown"
+    if stamp < decision:
+        return "backdated_start"
+    if not _attempt_execution_in_window(
+        observation, stamp, stamp + timedelta(minutes=PILOT_DURATION_MINUTES)
+    ):
+        return "attempt_execution_not_in_window"
+    return None
+
+
+def _suitable_scheduled_successes(
+    observations: Sequence[Mapping[str, object]],
+    *,
+    configuration_id: str,
+    reasons: list[str],
+) -> list[Mapping[str, object]]:
+    """Manual runs can be candidates but can never start the window."""
+
+    decision = _parse_utc(PILOT_DECISION_UTC)
+    if decision is None:
+        raise ArchiveError("pilot decision instant is not UTC")
+    suitable: list[Mapping[str, object]] = []
+    excluded: list[str] = []
+    for observation in observations:
+        if _is_synthetic_observation(observation):
+            reasons.append("synthetic_event")
+            continue
+        if (
+            observation.get("event") != "schedule"
+            or observation.get("conclusion") != "success"
+        ):
+            continue
+        reason = _scheduled_start_reason(observation, configuration_id, decision)
+        if reason is None:
+            suitable.append(observation)
+        else:
+            excluded.append(reason)
+    if suitable:
+        return suitable
+    reasons.extend(excluded)
+    if any(
+        item.get("event") == "workflow_dispatch" and item.get("conclusion") == "success"
+        for item in observations
+    ):
+        reasons.append("manual_event_not_a_start")
+    return suitable
+
+
+def _pair_equivalence(
+    left: Mapping[str, object],
+    right: Mapping[str, object],
+    reasons: list[str],
+) -> str:
+    """Compare stored job conclusions. A mandatory skip is not success."""
+
+    if left.get("conclusion") != "success" or right.get("conclusion") != "success":
+        reasons.append("pair_not_success")
+        return "not_passed"
+    left_jobs = left.get("job_conclusions")
+    right_jobs = right.get("job_conclusions")
+    if not isinstance(left_jobs, Mapping) or not isinstance(right_jobs, Mapping):
+        reasons.append("outcomes_missing")
+        return "not_passed"
+    if _job_block_reason(left) is not None or _job_block_reason(right) is not None:
+        reasons.append("mandatory_or_unknown_job")
+        return "not_passed"
+    names = sorted(set(JOB_KINDS) | set(left_jobs) | set(right_jobs))
+    compared = oracle_equivalent(left_jobs, right_jobs, job_names=names)
+    if compared["equivalent"] is True and _pilot_api_jobs_equivalent(left, right):
+        return "passed"
+    reasons.append("pair_not_equivalent")
+    return "not_passed"
+
+
+def _pilot_api_jobs_equivalent(
+    left: Mapping[str, object], right: Mapping[str, object]
+) -> bool:
+    left_jobs = left.get("api_job_conclusions")
+    right_jobs = right.get("api_job_conclusions")
+    if left_jobs is None and right_jobs is None:
+        return True
+    if not isinstance(left_jobs, Mapping) or not isinstance(right_jobs, Mapping):
+        return False
+    return (
+        oracle_equivalent(
+            left_jobs, right_jobs, job_names=sorted(set(left_jobs) | set(right_jobs))
+        )["equivalent"]
+        is True
+    )
+
+
+def _pilot_success_total(
+    total: int | None,
+    suitable: Sequence[Mapping[str, object]],
+    reasons: list[str],
+) -> int | None:
+    if isinstance(total, bool) or (
+        total is not None and (not isinstance(total, int) or total < 0)
+    ):
+        reasons.append("successful_scheduled_count_unknown")
+        total = None
+    if total == 0:
+        reasons.append("no_suitable_successful_scheduled_nightly")
+        if suitable:
+            reasons.append("success_count_contradiction")
+    elif total is None and not suitable:
+        reasons.append("successful_scheduled_count_unknown")
+    elif total is not None and not suitable:
+        reasons.append("successful_scheduled_observations_missing")
+    return total
+
+
+def _pilot_observation_binding(observation: Mapping[str, object]) -> dict[str, Any]:
+    fields = (
+        "run_id",
+        "run_attempt",
+        "head_sha",
+        "configuration_id",
+        "configuration_sha256",
+        "created_at",
+        "event",
+        "conclusion",
+        "job_conclusions",
+        "api_job_conclusions",
+        "calendar_source",
+        "attempt_execution",
+        "dow",
+        "dom",
+        "month",
+        "force_weekly",
+        "raw_sha256",
+        "outcomes_sha256",
+    )
+    binding = {key: observation.get(key) for key in fields}
+    binding["run_id"] = _observation_run_id(observation)
+    binding["tested_sha"] = _observation_sha(observation)
+    binding["force_weekly"] = parse_force(observation.get("force_weekly"))
+    return binding
+
+
+def _assess_pilot_pairs(
+    observations: Sequence[Mapping[str, object]],
+    suitable: Sequence[Mapping[str, object]],
+    configuration_id: str,
+    reasons: list[str],
+) -> dict[str, Any]:
+    result: dict[str, Any] = {
+        "window_start_utc": None,
+        "window_end_utc": None,
+        "window_start_observation": None,
+        "comparable_pair_count": 0,
+        "evaluated_pairs": [],
+        "equivalence": "not_passed",
+    }
+    if not suitable:
+        reasons.append("no_comparable_pair")
+        return result
+    opener = min(
+        suitable,
+        key=lambda item: (_parse_utc(item["created_at"]), canonical_bytes(item)),
+    )
+    start = _parse_utc(opener["created_at"])
+    if start is None:
+        raise ArchiveError("pilot start is not UTC")
+    close = start + timedelta(minutes=PILOT_DURATION_MINUTES)
+    result["window_start_utc"] = start.strftime("%Y-%m-%dT%H:%M:%SZ")
+    result["window_end_utc"] = close.strftime("%Y-%m-%dT%H:%M:%SZ")
+    result["window_start_observation"] = _pilot_observation_binding(opener)
+    elapsed = _pilot_duration_elapsed(start, observations)
+    if not elapsed:
+        reasons.append("shorter_than_48_minutes")
+    arms = _pilot_pair_arms(
+        [
+            item
+            for item in observations
+            if _observation_sha(item) == _observation_sha(opener)
+        ],
+        configuration_id=configuration_id,
+        start=start,
+        close=close,
+    )
+    pairs, self_oracle = _find_comparable_pairs(arms)
+    if self_oracle:
+        reasons.append("run_is_own_oracle")
+    if not pairs:
+        reasons.append("no_comparable_pair")
+        return result
+    result["comparable_pair_count"] = len(pairs)
+    result["evaluated_pairs"] = [
+        {
+            "baseline": _pilot_observation_binding(left),
+            "candidate": _pilot_observation_binding(right),
+        }
+        for left, right in pairs
+    ]
+    # Evaluate every pair; a short-circuiting all(generator) would hide later reasons.
+    outcomes = [_pair_equivalence(left, right, reasons) for left, right in pairs]
+    if (
+        elapsed
+        and "synthetic_event" not in reasons
+        and all(item == "passed" for item in outcomes)
+    ):
+        result["equivalence"] = "passed"
+    return result
+
+
+def assess_reduced_pilot_window(
+    observations: Sequence[Mapping[str, object]],
+    *,
+    configuration_id: str,
+    scheduled_success_total_count: int | None,
+    successful_evidence_days: int,
+    diagnostic_retention_days: int,
+    verified_archive_days: int,
+    actions_retention_cap_days: int,
+    cadence_changed: bool,
+    retention_reduced: bool,
+    shallow_checkout: bool,
+    independent_review: bool,
+    independent_restore: bool,
+    observation_totals: Mapping[str, int | None] | None = None,
+) -> dict[str, Any]:
+    """Judge the 48-minute pilot. This is not the 48-hour historical judge."""
+
+    reasons: list[str] = []
+    if cadence_changed:
+        reasons.append("cadence_changed")
+    if shallow_checkout:
+        reasons.append("shallow_checkout")
+    reasons.extend(
+        _retention_reason_codes(
+            successful_evidence_days=successful_evidence_days,
+            diagnostic_retention_days=diagnostic_retention_days,
+            verified_archive_days=verified_archive_days,
+            actions_retention_cap_days=actions_retention_cap_days,
+            retention_reduced=retention_reduced,
+        )
+    )
+    suitable = _suitable_scheduled_successes(
+        observations,
+        configuration_id=configuration_id,
+        reasons=reasons,
+    )
+    api_success = _pilot_success_total(scheduled_success_total_count, suitable, reasons)
+    opened = (
+        bool(suitable)
+        and api_success != 0
+        and "success_count_contradiction" not in reasons
+    )
+    window = _assess_pilot_pairs(
+        observations, suitable if opened else [], configuration_id, reasons
+    )
+    status = "not_opened"
+    if opened:
+        status = (
+            "complete"
+            if window["equivalence"] == "passed" and not reasons
+            else "unacceptable"
+        )
+    equivalence = "passed" if status == "complete" else "not_passed"
+    totals = {} if observation_totals is None else observation_totals
+    n2_blocked = not (
+        independent_review is True
+        and independent_restore is True
+        and status == "complete"
+        and equivalence == "passed"
+    )
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "decision_date": PILOT_DECISION_DATE,
+        "duration_minutes": PILOT_DURATION_MINUTES,
+        "configuration_id": configuration_id,
+        "status": status,
+        "equivalence": equivalence,
+        "reason_codes": sorted(set(reasons)),
+        "window_start_utc": window["window_start_utc"],
+        "window_end_utc": window["window_end_utc"],
+        "window_start_observation": window["window_start_observation"],
+        "comparable_pair_count": window["comparable_pair_count"],
+        "sample_size_pairs": window["comparable_pair_count"]
+        if status == "complete"
+        else 0,
+        "evaluated_pairs": window["evaluated_pairs"],
+        "counts": {
+            "api": {
+                "success": api_success,
+                "failure": totals.get("failure"),
+                "cancelled": totals.get("cancelled"),
+                "missing": totals.get("missing"),
+                "unknown": totals.get("unknown"),
+            },
+            "sample": _sample_counts(observations),
+        },
+        "independent_review": independent_review,
+        "independent_restore": independent_restore,
+        "n2_blocked": n2_blocked,
+        "cancellation_upload": "best_effort",
+        "cadence_changed": cadence_changed,
+        "retention_reduced": retention_reduced,
+        "shallow_checkout": shallow_checkout,
+    }
+
+
+def _workflow_job_names(text: str) -> list[str]:
+    names: list[str] = []
+    in_jobs = False
+    for line in text.splitlines():
+        if line.startswith("jobs:"):
+            in_jobs = True
+            continue
+        if not in_jobs:
+            continue
+        if line and not line.startswith(" "):
+            break
+        if (
+            line.startswith("  ")
+            and not line.startswith("   ")
+            and line.rstrip().endswith(":")
+        ):
+            names.append(line.strip()[:-1])
+    return names
+
+
+def _called_workflow_paths(text: str) -> list[str]:
+    prefix = "uses: ./.github/workflows/"
+    found: list[str] = []
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped.startswith(prefix):
+            continue
+        relative = ".github/workflows/" + stripped.removeprefix(prefix).split()[0]
+        if relative not in found:
+            found.append(relative)
+    return found
+
+
+def _normalized_job_condition(value: object) -> str:
+    if value is None:
+        return ""
+    if not isinstance(value, str):
+        raise ArchiveError("nightly job condition is not a string")
+    text = value.strip()
+    if text.startswith("${{") != text.endswith("}}"):
+        raise ArchiveError("nightly job condition has unbalanced expression delimiters")
+    text = text.removeprefix("${{").removesuffix("}}")
+    quoted = False
+    normalized = []
+    for character in text:
+        if character == "'":
+            quoted = not quoted
+        if quoted or not character.isspace():
+            normalized.append(character)
+    if quoted:
+        raise ArchiveError("nightly job condition has an unterminated string")
+    return "".join(normalized)
+
+
+class _UniqueWorkflowLoader(yaml.SafeLoader):
+    """Reject duplicate keys, including keys introduced by YAML merges."""
+
+    def construct_mapping(self, node: yaml.MappingNode, deep: bool = False) -> dict:
+        self.flatten_mapping(node)
+        mapping = super().construct_mapping(node, deep=deep)
+        if len(mapping) != len(node.value):
+            raise yaml.YAMLError("duplicate nightly workflow mapping key")
+        return mapping
+
+
+def _load_unique_workflow(text: str) -> Any:
+    loader = _UniqueWorkflowLoader(text)
+    try:
+        return loader.get_single_data()
+    finally:
+        loader.dispose()
+
+
+def _validated_workflow_jobs(text: str) -> dict[str, Any]:
+    try:
+        workflow = _load_unique_workflow(text)
+    except yaml.YAMLError as exc:
+        raise ArchiveError("malformed nightly workflow") from exc
+    jobs = workflow.get("jobs") if isinstance(workflow, Mapping) else None
+    if not isinstance(jobs, dict) or set(jobs) != set(JOB_KINDS):
+        raise ArchiveError("JOB_KINDS drifted from nightly.yml")
+    for name, job in jobs.items():
+        if not isinstance(job, Mapping):
+            raise ArchiveError(f"nightly job is not a mapping: {name}")
+        expected = _CADENCE_CONDITIONS.get(JOB_KINDS[name], "")
+        if _normalized_job_condition(job.get("if")) != _normalized_job_condition(
+            expected
+        ):
+            raise ArchiveError(f"nightly cadence drifted: {name}")
+        needs = job.get("needs", [])
+        if expected and "clock" not in ([needs] if isinstance(needs, str) else needs):
+            raise ArchiveError(f"nightly clock dependency drifted: {name}")
+    return jobs
+
+
+def _workflow_artifact_retention(job: Mapping[str, Any], artifact: str) -> int:
+    steps = job.get("steps", [])
+    matches = [
+        step.get("with", {})
+        for step in steps
+        if isinstance(step, Mapping)
+        and isinstance(step.get("with"), Mapping)
+        and step["with"].get("name") == artifact
+    ]
+    if len(matches) != 1:
+        raise ArchiveError(f"nightly artifact drifted: {artifact}")
+    return _positive_int(matches[0].get("retention-days"), "artifact retention days")
+
+
+def _check_inventory_sources(root: Path) -> tuple[list[str], list[str]]:
+    check_dir = root / "scripts/engineering/ci"
+    check_paths = sorted(
+        path.relative_to(root).as_posix()
+        for path in check_dir.glob("generated_artifact_checks*")
+        if path.is_file()
+    )
+    if not check_paths:
+        raise ArchiveError("generated_artifact_checks sources are missing")
+    joined = "\n".join(
+        (root / relative).read_text(encoding="utf-8") for relative in check_paths
+    )
+    for mode in ("daily", "validators"):
+        if mode not in joined:
+            raise ArchiveError(f"generated_artifact_checks missing mode {mode}")
+    return check_paths, ["daily", "validators"]
+
+
+def nightly_check_inventory(repo_root: Path | None = None) -> dict[str, Any]:
+    """Classify nightly jobs and fail when the workflow inventory drifts."""
+
+    root = REPO_ROOT if repo_root is None else repo_root
+    workflow_path = root / WORKFLOW_PATH
+    if not workflow_path.is_file():
+        raise ArchiveError(f"nightly workflow unavailable: {workflow_path}")
+    text = workflow_path.read_text(encoding="utf-8")
+    jobs = _validated_workflow_jobs(text)
+    job_names = _workflow_job_names(text)
+    if set(job_names) != set(JOB_KINDS) or set(CHECK_CLASS) != set(JOB_KINDS):
+        raise ArchiveError(
+            "JOB_KINDS drifted from nightly.yml: "
+            f"workflow={sorted(job_names)} kinds={sorted(JOB_KINDS)}"
+        )
+    for snippet in _WORKFLOW_DRIFT_SNIPPETS:
+        if snippet not in text:
+            raise ArchiveError(f"nightly workflow drifted: missing {snippet}")
+    called = _called_workflow_paths(text)
+    if not called:
+        raise ArchiveError("nightly.yml calls no workflows")
+    for relative in called:
+        if not (root / relative).is_file():
+            raise ArchiveError(f"called workflow missing: {relative}")
+    check_paths, modes = _check_inventory_sources(root)
+    missing_external = [
+        name for name in REQUIRED_EXTERNAL_JOBS if name not in job_names
+    ]
+    if missing_external:
+        raise ArchiveError(
+            f"security or external check dropped: {sorted(missing_external)}"
+        )
+    rows = []
+    for name in job_names:
+        kind = JOB_KINDS[name]
+        rows.append(
+            {
+                "name": name,
+                "schedule_kind": kind,
+                "observation_class": CHECK_CLASS[name],
+                "cadence": _CADENCE_LABEL[kind],
+            }
+        )
+    external = [
+        name for name, klass in CHECK_CLASS.items() if klass in _EXTERNAL_OBSERVATION
+    ]
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "workflow_path": WORKFLOW_PATH,
+        "owner": "CI",
+        "reviewers": [
+            "security",
+            "test-subject-owner",
+            "evidence-keeper",
+        ],
+        "jobs": rows,
+        "called_workflows": called,
+        "generated_artifact_checks": check_paths,
+        "generated_artifact_modes": modes,
+        "cron": "0 3 * * *",
+        "fetch_depth": 0,
+        "shallow_checkout": False,
+        "security_and_external_jobs": sorted(external),
+        "cancellation_upload": "best_effort",
+        "workflow_success_artifact_retention_days": _workflow_artifact_retention(
+            jobs["generated-artifact-daily"], "generated-artifact-daily-success"
+        ),
+        "workflow_diagnostic_artifact_retention_days": _workflow_artifact_retention(
+            jobs["generated-artifact-daily"], "generated-artifact-daily-diagnostics"
+        ),
+    }
+
+
+def verified_scheduled_nightly_facts() -> dict[str, Any]:
+    """Actions API facts re-verified on 2026-11-15. Failures are not a start."""
+
+    return {
+        "workflow": "nightly.yml",
+        "branch": "main",
+        "event": "schedule",
+        "successful_total_count": 0,
+        "failure_total_count": 36,
+        "cancelled_total_count": 1,
+        "missing_total_count": None,
+        "unknown_total_count": None,
+        "actions_permissions_http": "403",
+        "actions_permissions_source": (
+            "historical ledger observation; not re-probed and not changed"
+        ),
+        "cited_failure_runs": [
+            {
+                "run_id": 43670936545,
+                "run_attempt": 1,
+                "created_at": "2026-11-15T03:07:49Z",
+                "head_sha": "f6f924bd6d3cf362e14a20206bd611179ca800a3",
+                "event": "schedule",
+                "conclusion": "failure",
+                "branch": "main",
+                "configuration_id": PILOT_CONFIGURATION_ID,
+            },
+            {
+                "run_id": 43549950171,
+                "run_attempt": 1,
+                "created_at": "2026-11-14T03:07:22Z",
+                "head_sha": "f6f924bd6d3cf362e14a20206bd611179ca800a3",
+                "event": "schedule",
+                "conclusion": "failure",
+                "branch": "main",
+                "configuration_id": PILOT_CONFIGURATION_ID,
+            },
+            {
+                "run_id": 43356852695,
+                "run_attempt": 1,
+                "created_at": "2026-11-13T03:07:44Z",
+                "head_sha": "2657f30e8adaf04c0cb58ed38118da235b6a4b51",
+                "event": "schedule",
+                "conclusion": "failure",
+                "branch": "main",
+                "configuration_id": PILOT_CONFIGURATION_ID,
+            },
+        ],
+        "cited_cancelled_run": {
+            "run_id": 40175268711,
+            "run_attempt": 1,
+            "created_at": "2026-10-25T08:05:34Z",
+            "head_sha": "af5036c3d0ea68b556dd0f7053ab75f85585d871",
+            "event": "schedule",
+            "conclusion": "cancelled",
+            "branch": "main",
+            "configuration_id": PILOT_CONFIGURATION_ID,
+        },
+    }
+
+
+def _pilot_limitations(facts: Mapping[str, Any]) -> list[str]:
+    failures = facts["cited_failure_runs"]
+    if not isinstance(failures, Sequence) or len(failures) < 3:
+        raise ArchiveError(MISSING_PILOT_FAILURES)
+    first, second, third = failures[0], failures[1], failures[2]
+    if not all(isinstance(item, Mapping) for item in (first, second, third)):
+        raise ArchiveError(MISSING_PILOT_FAILURES)
+    cancelled = facts["cited_cancelled_run"]
+    if not isinstance(cancelled, Mapping):
+        raise ArchiveError("pilot facts are missing the cited cancelled run")
+    return [
+        (
+            "Zero successful scheduled Nightly runs on main "
+            "(event=schedule, conclusion=success, "
+            f"total_count={facts['successful_total_count']}). "
+            "The 48-minute window is not open and equivalence is not passed."
+        ),
+        (
+            "Cited scheduled failures are not the window start: "
+            f"{first['run_id']} at {first['created_at']} "
+            f"head {first['head_sha']}; "
+            f"{second['run_id']} at {second['created_at']}; "
+            f"{third['run_id']} at {third['created_at']}."
+        ),
+        (f"The pilot does not replace acceptance of #{PARENT_ACCEPTANCE_ISSUE}."),
+        "Cadence, retention, and shallow checkout are unchanged.",
+        (
+            "No synthetic events were substituted. "
+            "The committed gap ledger is not the shadow window."
+        ),
+        (
+            "Successful evidence floor is 30 days, failed or cancelled "
+            "diagnostics floor is 90 days, verified archive floor is 90 days, "
+            "and the Actions cap is 90 days. nightly.yml success artifact "
+            "retention remains 7 days and was not retuned. Actions permissions "
+            "were not changed (historical observation 403)."
+        ),
+        (
+            "Cancelled scheduled total_count is "
+            f"{facts['cancelled_total_count']} "
+            f"(run {cancelled['run_id']}) and is not success and not a window "
+            "start. Missing and unknown API counts were not observed and stay "
+            "null, not zero."
+        ),
+    ]
+
+
+def _require_commit_sha(value: str) -> None:
+    if len(value) != 40 or any(char not in "0123456789abcdef" for char in value):
+        raise ArchiveError("baseline sha must be a full lowercase git sha")
+
+
+def pilot_record_sha256(record: Mapping[str, Any]) -> str:
+    """Hash the canonical record without its own sha256 field."""
+
+    body = {key: value for key, value in record.items() if key != "sha256"}
+    return oracle_sha256(canonical_bytes(body))
+
+
+def build_reduced_pilot_record(
+    *,
+    baseline_sha: str,
+    inventory: Mapping[str, Any],
+    facts: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Build the pilot record. The historical ledger baseline is not rewritten."""
+
+    _require_commit_sha(baseline_sha)
+    observed = verified_scheduled_nightly_facts() if facts is None else dict(facts)
+    cited = observed["cited_failure_runs"]
+    if not isinstance(cited, list):
+        raise ArchiveError(MISSING_PILOT_FAILURES)
+    observations: list[dict[str, Any]] = [dict(item) for item in cited]
+    cancelled = observed.get("cited_cancelled_run")
+    if isinstance(cancelled, Mapping):
+        observations.append(dict(cancelled))
+    assessment = assess_reduced_pilot_window(
+        observations,
+        configuration_id=PILOT_CONFIGURATION_ID,
+        scheduled_success_total_count=observed["successful_total_count"],
+        observation_totals={
+            name: observed[f"{name}_total_count"]
+            for name in ("failure", "cancelled", "missing", "unknown")
+        },
+        successful_evidence_days=inventory["workflow_success_artifact_retention_days"],
+        diagnostic_retention_days=inventory[
+            "workflow_diagnostic_artifact_retention_days"
+        ],
+        verified_archive_days=PILOT_VERIFIED_ARCHIVE_FLOOR_DAYS,
+        actions_retention_cap_days=ACTIONS_RETENTION_CAP_DAYS,
+        cadence_changed=False,
+        retention_reduced=False,
+        shallow_checkout=False,
+        independent_review=False,
+        independent_restore=False,
+    )
+    record: dict[str, Any] = {
+        "schema_version": SCHEMA_VERSION,
+        "record_kind": "reduced_pilot_48min",
+        "issue": PILOT_ISSUE,
+        "parent_issue": PARENT_ACCEPTANCE_ISSUE,
+        "replaces_parent_acceptance": False,
+        "decision_date": PILOT_DECISION_DATE,
+        "decision_owner": "CI",
+        "duration_minutes": PILOT_DURATION_MINUTES,
+        "duration_unit": "wall_clock_minutes",
+        "configuration_id": PILOT_CONFIGURATION_ID,
+        "baseline_sha": baseline_sha,
+        "baseline_ref": "origin/main",
+        "status": assessment["status"],
+        "equivalence": assessment["equivalence"],
+        "reason_codes": assessment["reason_codes"],
+        "sample": {
+            "definition": (
+                "Reduced pilot. One wall-clock window of 48 minutes, not 48 "
+                "hours and not two runs. It starts only at the first successful "
+                "scheduled Nightly (event=schedule, conclusion=success) on "
+                f"configuration {PILOT_CONFIGURATION_ID} at or after "
+                f"{PILOT_DECISION_UTC}. No backdating. A comparable pair is two "
+                "different run ids on that same tested SHA and same "
+                "configuration inside the window, one baseline arm and one "
+                "candidate arm. A run is not its own oracle. Sample size is "
+                "the number of such suitable pairs."
+            ),
+            "duration_minutes": PILOT_DURATION_MINUTES,
+            "sample_size_pairs": assessment["sample_size_pairs"],
+            "successful_scheduled_nightly_total_count": observed[
+                "successful_total_count"
+            ],
+            "limits": [
+                "Synthetic events fail closed.",
+                "workflow_dispatch does not start the window.",
+                "missing, unknown, cancelled, and failure are not success and are not zero.",
+                "Mandatory skipped is not success. Expected skip of a non-mandatory weekly job can be success. Unknown duty plus skip stays unknown.",
+                "Cancellation upload stays best-effort.",
+                "Archive errors block the next stage.",
+                f"This pilot does not replace acceptance of #{PARENT_ACCEPTANCE_ISSUE}.",
+                "Cadence, retention, and shallow checkout stay unchanged.",
+                "N2 stays blocked. independent_review and independent_restore stay false.",
+            ],
+        },
+        "limitations": _pilot_limitations(observed),
+        "retention_floors": {
+            "successful_evidence_days": PILOT_SUCCESS_RETENTION_FLOOR_DAYS,
+            "failed_or_cancelled_diagnostics_days": (
+                PILOT_DIAGNOSTIC_RETENTION_FLOOR_DAYS
+            ),
+            "verified_archive_days": PILOT_VERIFIED_ARCHIVE_FLOOR_DAYS,
+            "actions_cap_days": ACTIONS_RETENTION_CAP_DAYS,
+        },
+        "retention_changed": False,
+        "cadence_changed": False,
+        "shallow_checkout": False,
+        "workflow_success_artifact_retention_days_unchanged": inventory.get(
+            "workflow_success_artifact_retention_days"
+        ),
+        "workflow_success_artifacts_meet_floor": False,
+        "actions_permissions_http": observed["actions_permissions_http"],
+        "actions_permissions_source": observed["actions_permissions_source"],
+        "n2_blocked": True,
+        "independent_review": False,
+        "independent_restore": False,
+        "synthetic_events": False,
+        "committed_gap_ledger_is_the_shadow_window": False,
+        "cancellation_upload": "best_effort",
+        "archive": {
+            "status": "unavailable",
+            "verified": False,
+            "blocks_next_stage": True,
+            "path": None,
+        },
+        "cited_failure_runs": cited,
+        "cited_cancelled_run": observed["cited_cancelled_run"],
+        "api_counts": assessment["counts"]["api"],
+        "inventory": dict(inventory),
+        "assessment": assessment,
+    }
+    record["sha256"] = pilot_record_sha256(record)
+    return record
+
+
+def _pilot_job_id(name: str, jobs: Mapping[str, Any]) -> str:
+    matches = [
+        job_id
+        for job_id, job in jobs.items()
+        if name == (alias := job.get("name", job_id))
+        or ("uses" in job and name.startswith(f"{alias} / "))
+    ]
+    if len(matches) != 1:
+        raise ArchiveError(
+            f"pilot archive job identity is ambiguous or unknown: {name}"
+        )
+    return matches[0]
+
+
+def _pilot_job_group_result(conclusions: Sequence[object]) -> str:
+    for token in ("failure", "cancelled", "timed_out", "action_required", "stale"):
+        if token in conclusions:
+            return token
+    if not conclusions or any(
+        value not in {"success", "skipped"} for value in conclusions
+    ):
+        return "unknown"
+    return "success" if "success" in conclusions else "skipped"
+
+
+def _pilot_archive_job_results(
+    outcomes: Mapping[str, Any], jobs: Mapping[str, Any]
+) -> tuple[dict[str, object], dict[str, object]]:
+    pagination = outcomes.get("pagination")
+    if not isinstance(pagination, Mapping) or pagination.get("status") != "complete":
+        raise ArchiveError("pilot archive pagination is not complete")
+    results: dict[str, object] = {}
+    grouped: dict[str, list[object]] = {}
+    for job in outcomes.get("jobs", []):
+        if not isinstance(job, Mapping) or not isinstance(job.get("name"), str):
+            raise ArchiveError("pilot archive job identity is missing")
+        name = job["name"]
+        if name in results or job.get("status") != "completed":
+            raise ArchiveError("pilot archive job is duplicate or incomplete")
+        results[name] = job.get("conclusion")
+        grouped.setdefault(_pilot_job_id(name, jobs), []).append(job.get("conclusion"))
+    return {
+        name: _pilot_job_group_result(grouped.get(name, [])) for name in jobs
+    }, results
+
+
+def _pilot_archive_binding(
+    archive_root: Path, snapshot: Mapping[str, Any]
+) -> dict[str, Any]:
+    run_id, attempt = _snapshot_key(snapshot)
+    destination = archive_root / f"run-{run_id}" / f"attempt-{attempt}"
+    # Recheck against the verified identity before reading the evaluated bytes.
+    if _verify_one(destination / MANIFEST_NAME) != snapshot:
+        raise ArchiveError("pilot snapshot changed after verification")
+    raw_bytes = (destination / RAW_NAME).read_bytes()
+    outcomes_bytes = (destination / OUTCOMES_NAME).read_bytes()
+    manifest = json.loads((destination / MANIFEST_NAME).read_text(encoding="utf-8"))
+    raw = json.loads(raw_bytes)
+    outcomes = json.loads(outcomes_bytes)
+    if raw.get("path") != WORKFLOW_PATH:
+        raise ArchiveError("pilot snapshot is not a Nightly run")
+    if manifest.get("tested_sha") not in {None, raw.get("head_sha")}:
+        raise ArchiveError("pilot Nightly tested SHA does not match its code SHA")
+    if oracle_sha256(raw_bytes) != manifest.get("raw_sha256") or oracle_sha256(
+        outcomes_bytes
+    ) != manifest.get("outcomes_sha256"):
+        raise ArchiveError("pilot snapshot checksum changed after verification")
+    if _parse_utc(raw.get("created_at")) is None:
+        raise ArchiveError("pilot snapshot timestamp is unknown")
+    jobs = _pilot_configuration_jobs(raw, outcomes)
+    configuration = outcomes["pilot_configuration"]
+    normalized_jobs, api_jobs = _pilot_archive_job_results(outcomes, jobs)
+    observation = {
+        **raw,
+        "run_id": run_id,
+        "run_attempt": attempt,
+        "tested_sha": manifest.get("tested_sha"),
+        "configuration_id": configuration["configuration_id"],
+        "configuration_sha256": oracle_sha256(
+            configuration["workflow_source"].encode("utf-8")
+        ),
+        **_pilot_attempt_calendar(outcomes, jobs),
+        "attempt_execution": _pilot_attempt_execution(outcomes),
+        "job_conclusions": normalized_jobs,
+        "api_job_conclusions": api_jobs,
+        "raw_sha256": oracle_sha256(raw_bytes),
+        "outcomes_sha256": oracle_sha256(outcomes_bytes),
+    }
+    return _pilot_observation_binding(observation)
+
+
+def _pilot_attempt_execution(outcomes: Mapping[str, Any]) -> dict[str, str] | None:
+    """Bound the actual attempt by every executed job; missing timing stays unknown."""
+
+    intervals = []
+    for job in outcomes["jobs"]:
+        if job.get("conclusion") == "skipped":
+            continue
+        start = _parse_utc(job.get("started_at"))
+        end = _parse_utc(job.get("completed_at"))
+        if start is None or end is None or end < start:
+            return None
+        intervals.append((start, end))
+    if not intervals:
+        return None
+    return {
+        "started_at": min(start for start, _ in intervals)
+        .isoformat()
+        .replace(UTC_OFFSET_SUFFIX, "Z"),
+        "completed_at": max(end for _, end in intervals)
+        .isoformat()
+        .replace(UTC_OFFSET_SUFFIX, "Z"),
+    }
+
+
+def _pilot_attempt_calendar(
+    outcomes: Mapping[str, Any], jobs: Mapping[str, Any]
+) -> dict[str, Any]:
+    """A clock job wholly within one UTC day proves its calendar; otherwise unknown.
+
+    Run creation time belongs to the original run, not necessarily this attempt.
+    The jobs API does not expose clock outputs. Never substitute the run date.
+    """
+
+    clocks = [
+        job for job in outcomes["jobs"] if _pilot_job_id(job["name"], jobs) == "clock"
+    ]
+    calendar: dict[str, Any] = {
+        "dow": None,
+        "dom": None,
+        "month": None,
+        "calendar_source": "unknown",
+    }
+    if len(clocks) != 1 or clocks[0].get("conclusion") != "success":
+        return calendar
+    start = _parse_utc(clocks[0].get("started_at"))
+    end = _parse_utc(clocks[0].get("completed_at"))
+    if start is None or end is None or end < start or start.date() != end.date():
+        return calendar
+    return {
+        "dow": UTC_WEEKDAY_NAMES[start.weekday()],
+        "dom": start.strftime("%d"),
+        "month": start.strftime("%m"),
+        "calendar_source": "clock_job_utc_interval",
+    }
+
+
+def pilot_observation_from_archive(
+    archive_root: Path, *, run_id: int, run_attempt: int, arm: str
+) -> dict[str, Any]:
+    """Use the same verified configuration and job mapping for assessment and restore."""
+
+    if arm not in {"baseline", "candidate"}:
+        raise ArchiveError("pilot arm must be baseline or candidate")
+    verified = verify_archive(archive_root)
+    snapshots = {_snapshot_key(row): row for row in verified["snapshots"]}
+    snapshot = snapshots.get((run_id, run_attempt))
+    if snapshot is None:
+        raise ArchiveError("pilot snapshot is missing")
+    return {**_pilot_archive_binding(archive_root, snapshot), "arm": arm}
+
+
+def _require_pilot_member_in_window(
+    binding: Mapping[str, Any], assessment: Mapping[str, Any]
+) -> None:
+    if binding.get("configuration_id") != assessment.get("configuration_id"):
+        raise ArchiveError("pilot snapshot configuration mismatch")
+    start = _parse_utc(assessment.get("window_start_utc"))
+    close = _parse_utc(assessment.get("window_end_utc"))
+    if (
+        start is None
+        or close is None
+        or close - start != timedelta(minutes=PILOT_DURATION_MINUTES)
+    ):
+        raise ArchiveError("pilot window bounds are missing or invalid")
+    if not _inside_pilot_window(
+        binding,
+        configuration_id=assessment["configuration_id"],
+        start=start,
+        close=close,
+    ):
+        raise ArchiveError("pilot snapshot is outside the evaluated window")
+    opener = assessment.get("window_start_observation")
+    if not isinstance(opener, Mapping) or _observation_sha(binding) != _observation_sha(
+        opener
+    ):
+        raise ArchiveError("pilot snapshot does not match the window start SHA")
+
+
+def _require_pilot_pair(
+    pair: Mapping[str, Any],
+    assessment: Mapping[str, Any],
+    archived: Mapping[tuple[int, int], Mapping[str, Any]],
+    archive_root: Path,
+) -> None:
+    members = []
+    for arm in ("baseline", "candidate"):
+        binding = pair.get(arm)
+        if not isinstance(binding, Mapping):
+            raise ArchiveError("pilot pair binding is missing")
+        snapshot = archived.get(_snapshot_key(binding))
+        if snapshot is None:
+            raise ArchiveError("pilot snapshot missing from the verified archive")
+        if binding != _pilot_archive_binding(archive_root, snapshot):
+            raise ArchiveError("pilot snapshot does not match evaluated evidence")
+        _require_pilot_member_in_window(binding, assessment)
+        members.append(binding)
+    left, right = members
+    if _observation_run_id(left) == _observation_run_id(right) or _observation_sha(
+        left
+    ) != _observation_sha(right):
+        raise ArchiveError("pilot archive pair is not comparable")
+    reasons: list[str] = []
+    if _pair_equivalence(left, right, reasons) != "passed":
+        raise ArchiveError("pilot archived outcomes are not equivalent")
+
+
+def _require_pilot_archive_pairs(
+    assessment: Mapping[str, Any],
+    verified: Mapping[str, Any],
+    archive_root: Path,
+) -> None:
+    pairs = assessment.get("evaluated_pairs")
+    if not isinstance(pairs, list) or not pairs:
+        raise ArchiveError("pilot evaluated pair bindings are missing")
+    if len(pairs) != assessment.get("comparable_pair_count") or len(
+        pairs
+    ) != assessment.get("sample_size_pairs"):
+        raise ArchiveError("pilot pair count does not match evaluated evidence")
+    archived = {_snapshot_key(row): row for row in verified["snapshots"]}
+    _require_pilot_opener(assessment, archived, archive_root)
+    for pair in pairs:
+        if not isinstance(pair, Mapping):
+            raise ArchiveError("pilot evaluated pair is malformed")
+        _require_pilot_pair(pair, assessment, archived, archive_root)
+
+
+def _require_pilot_opener(
+    assessment: Mapping[str, Any],
+    archived: Mapping[tuple[int, int], Mapping[str, Any]],
+    archive_root: Path,
+) -> None:
+    opener = assessment.get("window_start_observation")
+    if not isinstance(opener, Mapping):
+        raise ArchiveError("pilot window start evidence is missing")
+    snapshot = archived.get(_snapshot_key(opener))
+    if snapshot is None or opener != _pilot_archive_binding(archive_root, snapshot):
+        raise ArchiveError("pilot window start is not in the verified archive")
+    if (
+        opener.get("event") != "schedule"
+        or opener.get("conclusion") != "success"
+        or opener.get("created_at") != assessment.get("window_start_utc")
+        or _job_block_reason(opener) is not None
+    ):
+        raise ArchiveError("pilot window start is not a successful scheduled run")
+    _require_pilot_member_in_window(opener, assessment)
+
+
+def require_pilot_advance(
+    assessment: Mapping[str, Any],
+    archive_root: Path,
+) -> None:
+    """Block the next stage. Archive errors come from verify_archive."""
+
+    verified = verify_archive(archive_root)
+    if assessment.get("n2_blocked") is not False:
+        raise ArchiveError("N2 stays blocked")
+    if assessment.get("independent_review") is not True:
+        raise ArchiveError("independent review is not granted")
+    if assessment.get("independent_restore") is not True:
+        raise ArchiveError("independent restore is not granted")
+    if (
+        assessment.get("equivalence") != "passed"
+        or assessment.get("status") != "complete"
+    ):
+        raise ArchiveError("pilot window is not accepted")
+    _require_pilot_archive_pairs(assessment, verified, archive_root)
+
+
+def _write_canonical_record(destination: Path, record: Mapping[str, Any]) -> None:
+    encoded = canonical_bytes(record)
+    if destination.exists() and destination.read_bytes() != encoded:
+        raise ArchiveError(f"refusing to overwrite {destination}")
+    if destination.exists():
+        return
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    _atomic_create(destination, encoded, root=REPO_ROOT)
 
 
 def _emit_github_output(name: str, value: str) -> None:
@@ -998,6 +2469,11 @@ def _command_archive(argv: Sequence[str]) -> int:
     parser.add_argument("--event", default="schedule")
     parser.add_argument("--limit", type=int, default=40)
     parser.add_argument("--output", required=True)
+    parser.add_argument(
+        "--pilot",
+        action="store_true",
+        help="bind the Nightly workflow at the run SHA for 48-minute pilot evidence",
+    )
     args = parser.parse_args(argv)
     output = resolve_cli_path(args.output, root=REPO_ROOT)
     output.mkdir(parents=True, exist_ok=True)
@@ -1010,6 +2486,7 @@ def _command_archive(argv: Sequence[str]) -> int:
         event=args.event or None,
         limit=args.limit,
         output=output,
+        pilot=args.pilot,
     )
     print(json.dumps(report, sort_keys=True))
     return 0
@@ -1052,6 +2529,23 @@ def _window_protocol() -> dict[str, Any]:
             "Cadence or retention of the fixed configuration changes during the window.",
         ],
     }
+
+
+def _command_record_pilot(argv: Sequence[str]) -> int:
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument("--baseline-sha", required=True)
+    parser.add_argument("--output", required=True)
+    args = parser.parse_args(argv)
+    destination = resolve_cli_path(args.output, root=REPO_ROOT)
+    if destination.name != PILOT_RECORD_NAME:
+        raise ArchiveError(f"pilot record must be named {PILOT_RECORD_NAME}")
+    record = build_reduced_pilot_record(
+        baseline_sha=args.baseline_sha,
+        inventory=nightly_check_inventory(REPO_ROOT),
+    )
+    _write_canonical_record(destination, record)
+    print(record["status"])
+    return 0
 
 
 def _command_record_window(argv: Sequence[str]) -> int:
@@ -1159,10 +2653,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         "require-accepted",
         "archive",
         "record-window",
+        "record-pilot",
     }:
         print(
             "usage: nightly-shadow {partition|aggregate|verify-archive|"
-            "require-accepted|archive|record-window}",
+            "require-accepted|archive|record-window|record-pilot}",
             file=sys.stderr,
         )
         return 2
@@ -1178,6 +2673,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _command_require_accepted(rest)
         if command == "archive":
             return _command_archive(rest)
+        if command == "record-pilot":
+            return _command_record_pilot(rest)
         return _command_record_window(rest)
     except (ArchiveError, GitHubReviewError, OSError, ValueError) as exc:
         print(f"error: {exc}", file=sys.stderr)

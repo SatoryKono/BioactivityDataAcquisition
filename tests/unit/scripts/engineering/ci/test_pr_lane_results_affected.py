@@ -22,6 +22,52 @@ pytestmark = pytest.mark.unit
 HEAD = "a" * 40
 
 
+@pytest.mark.parametrize(
+    "changed",
+    [
+        "scripts/engineering/ci/nightly_shadow_archive.py",
+        "reports/governance/n1-shadow-window/pilot-48min.json",
+        "reports/governance/n1-shadow-window-status.md",
+        "docs/reports/audit/N1_SHADOW_STATUS.md",
+    ],
+)
+def test_nightly_shadow_changes_keep_both_archive_and_inventory_owners(
+    changed: str,
+) -> None:
+    repo_root = Path(__file__).resolve().parents[5]
+    owners = {
+        "tests/unit/scripts/engineering/ci/test_nightly_shadow_archive.py",
+        "tests/unit/scripts/engineering/ci/test_nightly_shadow_inventory.py",
+    }
+    assert owners <= set(affected_pytest_targets([changed], repo_root=repo_root))
+    report = build_shadow_compare([changed], repo_root=repo_root)
+    assert owners <= set(report["selected"])
+    assert report["covers_full_suite"] is False
+
+
+def test_nightly_historical_fixture_selects_its_owner_in_both_impact_paths() -> None:
+    repo_root = Path(__file__).resolve().parents[5]
+    fixture = "tests/unit/scripts/engineering/ci/fixtures/n1_historical_baseline.json"
+    owner = "tests/unit/scripts/engineering/ci/test_nightly_shadow_archive.py"
+    assert affected_pytest_targets([fixture], repo_root=repo_root) == [owner]
+    report = build_shadow_compare([fixture], repo_root=repo_root)
+    assert report["selected"] == [owner]
+    assert report["selected_count"] == 1
+    assert report["covers_full_suite"] is False
+
+
+@pytest.mark.parametrize("peer", ["unknown.json", "n1_historical_baseline-copy.json"])
+def test_unknown_nightly_fixture_still_fails_shadow_compare_closed(peer: str) -> None:
+    repo_root = Path(__file__).resolve().parents[5]
+    unknown = f"tests/unit/scripts/engineering/ci/fixtures/{peer}"
+    known = "tests/unit/scripts/engineering/ci/fixtures/n1_historical_baseline.json"
+    assert affected_pytest_targets([unknown], repo_root=repo_root) == []
+    with pytest.raises(ValueError, match="unmapped paths"):
+        build_shadow_compare([unknown], repo_root=repo_root)
+    with pytest.raises(ValueError, match="unmapped paths"):
+        build_shadow_compare([known, unknown], repo_root=repo_root)
+
+
 def test_scroll_capture_has_bounded_route_and_unknown_peer_stays_rejected() -> None:
     repo_root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare(
@@ -674,6 +720,18 @@ def test_affected_targets_map_memory_source_without_test_diff() -> None:
     repo_root = Path(__file__).resolve().parents[5]
     targets = affected_pytest_targets(
         ["src/memory/rag/chunking.py", "src/memory/rag/chunking.py"],
+        repo_root=repo_root,
+    )
+
+    assert targets == ["tests/unit/memory/test_rag_indexing.py"]
+    assert all((repo_root / target).is_file() for target in targets)
+
+
+def test_affected_targets_map_memory_rag_indexing_source() -> None:
+    """Indexing edits select the same RAG regression suite as chunking."""
+    repo_root = Path(__file__).resolve().parents[5]
+    targets = affected_pytest_targets(
+        ["src/memory/rag/indexing.py"],
         repo_root=repo_root,
     )
 
@@ -1669,6 +1727,44 @@ def test_security_inventory_reviews_route_to_source_qualification_tests(audit):
         "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py"
         in json.dumps(report)
     )
+
+
+def test_hook_qualification_inputs_have_bounded_shadow_routes() -> None:
+    root = Path(__file__).resolve().parents[5]
+    expected = {
+        ".gitattributes": {
+            "tests/unit/scripts/repo/test_hook_receipts.py",
+            "tests/architecture/test_config_discrepancy_report_drift.py",
+            "tests/architecture/test_tech_debt_issues_5847_5852_closeout.py",
+        },
+        "configs/quality/external_resource_inventory_pr13133_platform_narrowing_review.json": {
+            "tests/architecture/test_external_resource_inventory_catalog.py",
+            "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+        },
+        "configs/quality/external_resource_inventory_pr13133_main_66ef9357_review.json": {
+            "tests/architecture/test_external_resource_inventory_catalog.py",
+            "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+        },
+        "configs/quality/external_resource_inventory_pr13133_main_c41cd6_review.json": {
+            "tests/architecture/test_external_resource_inventory_catalog.py",
+            "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+        },
+        "configs/quality/external_resource_inventory_pr13133_accepted_main_review.json": {
+            "tests/architecture/test_external_resource_inventory_catalog.py",
+            "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+        },
+    }
+    for path, owning_tests in expected.items():
+        report = build_shadow_compare([path], repo_root=root)
+        assert owning_tests <= set(report["selected"]), path
+        assert report["covers_full_suite"] is False
+    for unknown in (
+        ".gitattributes.unreviewed",
+        "configs/quality/external_resource_inventory_pr99999_unreviewed_review.json",
+        "configs/quality/external_resource_inventory_pr13133_main_unreviewed_review.json",
+    ):
+        with pytest.raises(ValueError, match="unmapped paths"):
+            build_shadow_compare([unknown], repo_root=root)
 
 
 def test_branch_hygiene_runbook_routes_only_to_owned_checks():

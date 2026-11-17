@@ -143,29 +143,7 @@ def split_python_symbols(text: str) -> list[ChunkSection]:
         )
         index += 1
 
-    for node in top_level_nodes:
-        start = max(node.lineno - 1, 0)
-        end = getattr(node, "end_lineno", node.lineno)
-        content = "\n".join(lines[start:end]).strip()
-        if not content:
-            continue
-        if isinstance(node, ast.ClassDef):
-            symbol_kind = "class"
-        elif isinstance(node, ast.AsyncFunctionDef):
-            symbol_kind = "async_function"
-        else:
-            symbol_kind = "function"
-        sections.append(
-            ChunkSection(
-                index=index,
-                title=node.name,
-                level=1,
-                content=content,
-                symbol_kind=symbol_kind,
-            )
-        )
-        index += 1
-    return sections
+    return _append_python_symbol_sections(top_level_nodes, lines, sections, index)
 
 
 def _json_ready_config_value(value: object) -> object:
@@ -175,14 +153,7 @@ def _json_ready_config_value(value: object) -> object:
         return [_json_ready_config_value(item) for item in value]
     if isinstance(value, tuple):
         return [_json_ready_config_value(item) for item in value]
-    if isinstance(value, set):
-        normalized = (_json_ready_config_value(item) for item in value)
-        return sorted(normalized, key=lambda item: json.dumps(item, sort_keys=True))
-    if isinstance(value, (date, datetime)):
-        return value.isoformat()
-    if isinstance(value, Path):
-        return value.as_posix()
-    return value
+    return _json_ready_config_scalar(value)
 
 
 def _serialize_config_value(value: object) -> str:
@@ -347,3 +318,45 @@ def infer_domain(path: Path) -> str:
     if normalized.startswith("configs/"):
         return "configuration"
     return "project"
+
+
+def _json_ready_config_scalar(value: object) -> object:
+    if isinstance(value, set):
+        normalized = (_json_ready_config_value(item) for item in value)
+        return sorted(normalized, key=lambda item: json.dumps(item, sort_keys=True))
+    if isinstance(value, (date, datetime)):
+        return value.isoformat()
+    if isinstance(value, Path):
+        return value.as_posix()
+    return value
+
+
+def _append_python_symbol_sections(
+    top_level_nodes: list[ast.ClassDef | ast.FunctionDef | ast.AsyncFunctionDef],
+    lines: list[str],
+    sections: list[ChunkSection],
+    index: int,
+) -> list[ChunkSection]:
+    for node in top_level_nodes:
+        start = max(node.lineno - 1, 0)
+        end = getattr(node, "end_lineno", node.lineno)
+        content = "\n".join(lines[start:end]).strip()
+        if not content:
+            continue
+        if isinstance(node, ast.ClassDef):
+            symbol_kind = "class"
+        elif isinstance(node, ast.AsyncFunctionDef):
+            symbol_kind = "async_function"
+        else:
+            symbol_kind = "function"
+        sections.append(
+            ChunkSection(
+                index=index,
+                title=node.name,
+                level=1,
+                content=content,
+                symbol_kind=symbol_kind,
+            )
+        )
+        index += 1
+    return sections

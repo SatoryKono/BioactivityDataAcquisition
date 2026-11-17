@@ -25,6 +25,7 @@ import sys
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
+from types import ModuleType
 
 import yaml
 
@@ -106,6 +107,7 @@ class FamilyFreezeRule:
     include_path_prefixes: tuple[str, ...]
     match_regex: str
     allowed_symbols: tuple[AllowedSymbol, ...]
+    canonical_symbols: tuple[CanonicalFamilySymbol, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -160,7 +162,7 @@ class LayerAwareNamingPolicy:
     family_freeze_rules: tuple[FamilyFreezeRule, ...]
 
 
-def _load_naming_audit_module(repo_root: Path):
+def _load_naming_audit_module(repo_root: Path) -> ModuleType:
     script = repo_root / CANONICAL_NAMING_AUDIT_PATH
     spec = importlib.util.spec_from_file_location(
         "bioetl_naming_audit_runtime",
@@ -588,7 +590,47 @@ def _suffix_boundary_rule_from_config(item: object) -> SuffixBoundaryRule | None
     )
 
 
-def _family_freeze_rule_from_config(item: object) -> FamilyFreezeRule | None:
+def _freeze_canonical_symbols(
+    *,
+    rule_id: str,
+    canonical_family_id: str,
+    canonical_family_registry: tuple[CanonicalFamilyRegistryEntry, ...],
+    include_path_prefixes: tuple[str, ...],
+    match_regex: str,
+) -> tuple[CanonicalFamilySymbol, ...]:
+    """Resolve exact canonical owners without bypassing temporary metadata checks."""
+    if not canonical_family_id:
+        return ()
+    family = next(
+        (
+            entry
+            for entry in canonical_family_registry
+            if entry.family_id == canonical_family_id
+        ),
+        None,
+    )
+    if family is None:
+        raise ValueError(
+            f"{rule_id} references unknown canonical family {canonical_family_id}"
+        )
+    canonical_symbols = tuple(
+        symbol
+        for symbol in family.canonical_symbols
+        if _matches_any_prefix(symbol.path, include_path_prefixes)
+        and re.match(match_regex, symbol.symbol) is not None
+    )
+    if not canonical_symbols:
+        raise ValueError(
+            f"{rule_id} canonical family has no matching registered symbols"
+        )
+    return canonical_symbols
+
+
+def _family_freeze_rule_from_config(
+    item: object,
+    *,
+    canonical_family_registry: tuple[CanonicalFamilyRegistryEntry, ...] = (),
+) -> FamilyFreezeRule | None:
     if not isinstance(item, dict):
         return None
     rule_id = str(item.get("rule_id", "")).strip()
@@ -600,12 +642,20 @@ def _family_freeze_rule_from_config(item: object) -> FamilyFreezeRule | None:
     allowed_symbols = _load_allowed_symbols(item.get("allowed_symbols", []))
     if not (rule_id and description and include_path_prefixes and match_regex):
         return None
+    canonical_symbols = _freeze_canonical_symbols(
+        rule_id=rule_id,
+        canonical_family_id=str(item.get("canonical_family_id", "")).strip(),
+        canonical_family_registry=canonical_family_registry,
+        include_path_prefixes=include_path_prefixes,
+        match_regex=match_regex,
+    )
     return FamilyFreezeRule(
         rule_id=rule_id,
         description=description,
         include_path_prefixes=include_path_prefixes,
         match_regex=match_regex,
         allowed_symbols=allowed_symbols,
+        canonical_symbols=canonical_symbols,
     )
 
 
@@ -641,17 +691,27 @@ def _validate_loaded_suffix_rule_metadata(
     suffix_rules: list[SuffixBoundaryRule],
     family_rules: list[FamilyFreezeRule],
 ) -> None:
-    for rule in function_rules:
-        _validate_allowed_symbol_metadata(rule.rule_id, rule.allowed_symbols)
-    for rule in suffix_rules:
-        _validate_allowed_symbol_metadata(rule.rule_id, rule.allowed_symbols)
-        _validate_allowed_module_metadata(rule.rule_id, rule.allowed_modules)
-    for rule in family_rules:
-        _validate_allowed_symbol_metadata(rule.rule_id, rule.allowed_symbols)
+    for function_rule in function_rules:
+        _validate_allowed_symbol_metadata(
+            function_rule.rule_id, function_rule.allowed_symbols
+        )
+    for suffix_rule in suffix_rules:
+        _validate_allowed_symbol_metadata(
+            suffix_rule.rule_id, suffix_rule.allowed_symbols
+        )
+        _validate_allowed_module_metadata(
+            suffix_rule.rule_id, suffix_rule.allowed_modules
+        )
+    for family_rule in family_rules:
+        _validate_allowed_symbol_metadata(
+            family_rule.rule_id, family_rule.allowed_symbols
+        )
 
 
 def _load_suffix_rule_lists(
     payload: dict[str, object],
+    *,
+    canonical_family_registry: tuple[CanonicalFamilyRegistryEntry, ...] = (),
 ) -> tuple[
     list[FunctionSuffixRule],
     list[SuffixBoundaryRule],
@@ -662,27 +722,32 @@ def _load_suffix_rule_lists(
     family_rules_payload = payload.get("family_freeze_rules")
     function_rules = (
         [
-            rule
+            function_rule
             for item in function_rules_payload
-            if (rule := _function_suffix_rule_from_config(item)) is not None
+            if (function_rule := _function_suffix_rule_from_config(item)) is not None
         ]
         if isinstance(function_rules_payload, list)
         else []
     )
     suffix_rules = (
         [
-            rule
+            suffix_rule
             for item in suffix_rules_payload
-            if (rule := _suffix_boundary_rule_from_config(item)) is not None
+            if (suffix_rule := _suffix_boundary_rule_from_config(item)) is not None
         ]
         if isinstance(suffix_rules_payload, list)
         else []
     )
     family_rules = (
         [
-            rule
+            family_rule
             for item in family_rules_payload
-            if (rule := _family_freeze_rule_from_config(item)) is not None
+            if (
+                family_rule := _family_freeze_rule_from_config(
+                    item, canonical_family_registry=canonical_family_registry
+                )
+            )
+            is not None
         ]
         if isinstance(family_rules_payload, list)
         else []
@@ -704,7 +769,9 @@ def _load_layer_aware_suffix_policy(repo_root: Path) -> LayerAwareNamingPolicy:
     canonical_family_registry = _load_canonical_family_registry(
         payload.get("canonical_family_registry", [])
     )
-    function_rules, suffix_rules, family_rules = _load_suffix_rule_lists(payload)
+    function_rules, suffix_rules, family_rules = _load_suffix_rule_lists(
+        payload, canonical_family_registry=canonical_family_registry
+    )
 
     _validate_layer_suffix_matrix(layer_suffix_matrix)
     _validate_canonical_family_registry(canonical_family_registry)
@@ -974,6 +1041,11 @@ def _family_freeze_rule_violation(
     if not _matches_any_prefix(relative_path, rule.include_path_prefixes):
         return None
     if re.match(rule.match_regex, symbol_name) is None:
+        return None
+    if any(
+        item.symbol == symbol_name and item.path == relative_path
+        for item in rule.canonical_symbols
+    ):
         return None
     if _is_allowed_symbol(
         symbol=symbol_name,

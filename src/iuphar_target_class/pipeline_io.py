@@ -68,27 +68,67 @@ def read_chembl_target_csv_v1(
         raise ValueError("invalid chembl_target_csv_v1 header")
     digest = hashlib.sha256(content).hexdigest()
     identity = hashlib.sha256(source_path.encode("utf-8")).hexdigest()
-    rows = []
-    for record, raw in enumerate(reader, 1):
-        if None in raw or any(value is None for value in raw.values()):
-            raise ValueError("invalid CSV row width")
-        names = tuple(
-            name.strip() for name in raw["target_names"].split("|") if name.strip()
-        )
-        fields = {
-            **raw,
-            "uniprot": raw["primaryAccession"],
-            "name": names[0] if names else None,
-            "synonyms": "|".join(names[1:]),
-            "import_profile": "chembl_target_csv_v1",
-            "source_path": source_path,
-            "source_sha256": digest,
-            "source_record": str(record),
-        }
-        rows.append(
-            RawTargetRow(f"stage0:{identity}:{digest}:{record}", fields, target_kind)
-        )
+    rows = [
+        _chembl_target_row(raw, record, source_path, target_kind, digest, identity)
+        for record, raw in enumerate(reader, 1)
+    ]
     return tuple(rows)
+
+
+def _chembl_target_row(
+    raw: dict[str, str],
+    record: int,
+    source_path: str,
+    target_kind: str,
+    digest: str,
+    identity: str,
+) -> RawTargetRow:
+    """Preserve source columns and record identity after strict width checks."""
+    if None in raw or any(value is None for value in raw.values()):
+        raise ValueError("invalid CSV row width")
+    names = tuple(
+        name.strip() for name in raw["target_names"].split("|") if name.strip()
+    )
+    fields = {
+        **raw,
+        "uniprot": raw["primaryAccession"],
+        "name": names[0] if names else None,
+        "synonyms": "|".join(names[1:]),
+        "import_profile": "chembl_target_csv_v1",
+        "source_path": source_path,
+        "source_sha256": digest,
+        "source_record": str(record),
+    }
+    return RawTargetRow(f"stage0:{identity}:{digest}:{record}", fields, target_kind)
+
+
+def _component_id_projection(raw: Mapping[str, str | None]) -> list[str]:
+    return sorted(
+        {
+            item.strip()
+            for item in re.split(r"[;|]", raw.get("component_ids") or "")
+            if item.strip()
+        }
+    )
+
+
+def _classification_context_fields(
+    output: RowResult, is_valid: bool
+) -> dict[str, object]:
+    """Keep local inference and valid-only input projections in source order."""
+    return {
+        "local_candidates": output.local.local_candidates if output.local else (),
+        "ec_categories": output.local.ec_categories if output.local else None,
+        "multiple_ec_categories": output.local.multiple_ec_categories
+        if output.local
+        else None,
+        "ec_numbers": [asdict(number) for number in output.validated.ec_numbers]
+        if is_valid
+        else None,
+        "upstream_confidence": _source_confidence(output.validated.raw_fields)
+        if is_valid
+        else None,
+    }
 
 
 def _classification_row(output: RowResult) -> dict[str, object]:
@@ -108,13 +148,7 @@ def _classification_row(output: RowResult) -> dict[str, object]:
         target_kind=output.validated.target_kind,
         taxon_id=output.validated.taxon,
         uniprot_accessions=output.validated.uniprot_accessions,
-        component_ids=sorted(
-            {
-                item.strip()
-                for item in re.split(r"[;|]", raw.get("component_ids") or "")
-                if item.strip()
-            }
-        ),
+        component_ids=_component_id_projection(raw),
         name=output.validated.name,
         isoform_id=output.validated.isoform_id,
         isoform_suffix=output.validated.isoform_suffix,
@@ -127,15 +161,7 @@ def _classification_row(output: RowResult) -> dict[str, object]:
         iuphar_family_paths=[asdict(path) for path in output.direct.paths]
         if output.direct
         else [],
-        local_candidates=output.local.local_candidates if output.local else (),
-        ec_categories=output.local.ec_categories if output.local else None,
-        multiple_ec_categories=output.local.multiple_ec_categories
-        if output.local
-        else None,
-        ec_numbers=[asdict(number) for number in output.validated.ec_numbers]
-        if is_valid
-        else None,
-        upstream_confidence=_source_confidence(raw) if is_valid else None,
+        **_classification_context_fields(output, is_valid),
     )
     return entry
 

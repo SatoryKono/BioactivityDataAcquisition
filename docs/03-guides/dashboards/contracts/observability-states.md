@@ -85,11 +85,12 @@ The role-specific selector registry remains selector-contracts.yaml. A local
 lookup or diagnostic selector is not implicitly a filter on every panel.
 
 Overview separates the saved assessment from CURRENT fleet alert counts and
-CURRENT ingestion age. FIRING and PENDING counts include every active BioETL
+CURRENT processing-anchor age. FIRING and PENDING counts include every active BioETL
 alert, independently of run selectors; zero active alerts is not pipeline OK.
 The ingestion-age card follows the visible Pipeline filter, uses the oldest
-observed successful-ingestion timestamp after max-per-pipeline/entity source
-deduplication. STALE >24h is warning and >72h is critical, matching
+observed successful-DQ run-start processing anchor after max-per-pipeline/entity
+source deduplication. This is not run completion or input-record event time;
+provider/source-event freshness remains unverified. STALE >24h is warning and >72h is critical, matching
 BioETLDataFreshnessLagHigh/Critical; both alerts additionally need 15m pending.
 Entities with missing, invalid or future timestamps remain unverified; an empty
 valid set is UNKNOWN. Partial observed coverage never proves completeness.

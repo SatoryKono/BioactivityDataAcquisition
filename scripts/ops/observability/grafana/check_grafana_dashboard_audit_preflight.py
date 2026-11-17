@@ -1924,11 +1924,20 @@ def _check_bioetl_control_plane_source(
 
 
 def _immutable_acceptance(args: argparse.Namespace) -> int:
+    from scripts.engineering.common.repo_paths import read_bytes_confined
     from scripts.ops.observability.grafana.capture_provenance import verify_capture
 
-    manifest_bytes = args.immutable_manifest.read_bytes()
+    # Make relative --immutable-manifest absolute against CWD without
+    # following symlinks, so mutable pointer names stay visible to
+    # manifest_identity_errors while PNG/attachments use the same parent.
+    presented = args.immutable_manifest.expanduser()
+    manifest_path = presented if presented.is_absolute() else Path.cwd() / presented
+    manifest_bytes = read_bytes_confined(
+        manifest_path,
+        allow_external_absolute=True,
+    )
     result = verify_capture(
-        args.immutable_manifest,
+        manifest_path,
         repo_root=_REPO_ROOT,
         expected_sha256=args.manifest_sha256,
         expected_commit=args.expected_commit,

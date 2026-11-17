@@ -44,12 +44,7 @@ class HandoffRecord:
             raise ValueError("handoff envelope must use record_type=working")
         if not self.objective.strip():
             raise ValueError("objective must not be empty")
-        if not self.constraints:
-            raise ValueError("handoff must declare at least one constraint")
-        if not all(item.strip() for item in self.constraints):
-            raise ValueError("constraints must not contain empty values")
-        if len(self.constraints) != len(set(self.constraints)):
-            raise ValueError("constraints must be unique")
+        _validate_handoff_constraints(self.constraints)
         if len(self.evidence_digests) != len(set(self.evidence_digests)):
             raise ValueError("evidence_digests must be unique")
         for digest in self.evidence_digests:
@@ -87,3 +82,12 @@ class HandoffRecord:
         if size > max_bytes:
             raise ValueError(f"handoff exceeds byte budget: {size} > {max_bytes}")
         return rendered
+
+
+def _validate_handoff_constraints(constraints: tuple[str, ...]) -> None:
+    if not constraints:
+        raise ValueError("handoff must declare at least one constraint")
+    if not all(item.strip() for item in constraints):
+        raise ValueError("constraints must not contain empty values")
+    if len(constraints) != len(set(constraints)):
+        raise ValueError("constraints must be unique")
