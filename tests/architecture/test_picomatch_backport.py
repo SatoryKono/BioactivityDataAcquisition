@@ -21,7 +21,7 @@ CONSUMERS = (
     "grafana/plugins/bioetl-scenes-app",
     "grafana/plugins/bioetl-selectorshell-panel",
 )
-ARCHIVE = BACKPORT / "picomatch-4.0.8-bioetl.14.tgz"
+ARCHIVE = BACKPORT / "picomatch-4.0.8-bioetl.15.tgz"
 
 
 @pytest.fixture
@@ -60,7 +60,7 @@ def test_picomatch_archive_matches_reviewed_source() -> None:
         expected={
             "upstream_commit": "7be3276fb8bd215a8c73fa066bcaf696c244ad88",
             "advisory": "GHSA-fc5q-39xc-vjpf",
-            "local_version": "4.0.8-bioetl.14",
+            "local_version": "4.0.8-bioetl.15",
         },
     )
 
@@ -70,7 +70,7 @@ def test_picomatch_consumers_install_verified_archive(consumer: str) -> None:
     assert_consumers_pin_archive(
         [consumer],
         package_name="picomatch",
-        version="4.0.8-bioetl.14",
+        version="4.0.8-bioetl.15",
         archive=ARCHIVE,
         forbidden_versions=(
             "2.3.2",
@@ -198,16 +198,19 @@ def test_fail_closed_preserves_ascii_word_and_glob_smoke(
     assert result.stdout.strip() == "true,false,true,true,true"
 
 
+@pytest.mark.parametrize("depth", [800, 6000])
 def test_deep_optional_extglob_compiles_without_recursive_rescanning(
+    depth: int,
     packed_picomatch: Path,
 ) -> None:
     code = (
         "const p=require(process.argv[1]);"
-        "p.makeRe('?(a'.repeat(800)+'b'+')'.repeat(800));"
+        "const depth=Number(process.argv[2]);"
+        "p.makeRe('?(a'.repeat(depth)+'b'+')'.repeat(depth));"
         "console.log('compiled');"
     )
     result = subprocess.run(
-        ["node", "-e", code, str(packed_picomatch)],
+        ["node", "-e", code, str(packed_picomatch), str(depth)],
         capture_output=True,
         text=True,
         timeout=3,
@@ -216,7 +219,7 @@ def test_deep_optional_extglob_compiles_without_recursive_rescanning(
     assert result.stdout.strip() == "compiled"
 
 
-def test_nested_at_under_negate_and_class_false_positives(
+def test_nested_negate_class_and_literal_fallback_compatibility(
     packed_picomatch: Path,
 ) -> None:
     code = (
@@ -228,7 +231,13 @@ def test_nested_at_under_negate_and_class_false_positives(
         "['!([*(]a)','foo',true],"
         "['!([*(]a)','*a',false],"
         "['?([*(]a)','*a',true],"
-        "['@(\"+(a)\")','+(a)',true]"
+        "['@(\"+(a)\")','+(a)',true],"
+        "['+(a)+(b)','aaa+(b)',true],"
+        "['+(a)+(b)','aaa+b',false],"
+        "['+(a)*(b)','aaa*(b)',true],"
+        "['+(a)*(b)','aaa*b',false],"
+        "['+(a)?(b)','aaa?(b)',true],"
+        "['+(a)?(b)','aaa?b',false]"
         "];"
         "console.log(cases.every(([pat,input,expect])=>p.isMatch(input,pat)===expect));"
     )
