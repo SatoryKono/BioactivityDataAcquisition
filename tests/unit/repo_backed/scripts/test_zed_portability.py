@@ -18,6 +18,8 @@ QUICK_LABEL = "pytest: current test file (quick; project addopts disabled)"
 PROJECT_LABEL = "pytest: current test file (project settings)"
 TEMPLATE_ROOT = ROOT / "configs/ide/zed"
 CACHE_OPTION = "cache_dir=.cache/pytest/windows"
+PYTHON_COMMAND = "& (Join-Path $env:ZED_WORKTREE_ROOT '.venv-win\\Scripts\\python.exe')"
+QUOTED_FILE = '"$env:ZED_FILE"'
 
 
 @pytest.fixture(params=("template", "local"))
@@ -50,13 +52,25 @@ def _tasks(zed_root: Path = TEMPLATE_ROOT) -> list[ZedTask]:
     )
 
 
+def _powershell() -> str:
+    shell = shutil.which("pwsh") or shutil.which("powershell")
+    if shell is None:
+        pytest.skip("PowerShell is not installed")
+    return shell
+
+
+def _shell_command(task: ZedTask) -> str:
+    """Join command and args the way Zed's no-quote task spawn does."""
+    return " ".join([task["command"], *task["args"]])
+
+
 def test_repo_backed_task_commands_are_bound_to_the_current_checkout(
     zed_config_root: Path,
 ) -> None:
     tasks = _tasks(zed_config_root)
     assert len({task["label"] for task in tasks}) == len(tasks)
     for task in tasks:
-        assert task["command"] == "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe"
+        assert task["command"] == PYTHON_COMMAND
         assert task["cwd"] == "$ZED_WORKTREE_ROOT"
         assert task["allow_concurrent_runs"] is False
         assert task["hide"] == "never"
@@ -68,9 +82,6 @@ def test_repo_backed_interpreter_task_preserves_python_code_in_powershell(
 ) -> None:
     if os.name != "nt":
         pytest.skip("Project Zed tasks target native Windows .venv-win")
-    shell = shutil.which("pwsh")
-    if shell is None:
-        pytest.skip("PowerShell 7 is not installed")
     executable = ROOT / ".venv-win/Scripts/python.exe"
     if not executable.is_file():
         pytest.skip("Optional local Windows project environment is absent")
@@ -79,12 +90,13 @@ def test_repo_backed_interpreter_task_preserves_python_code_in_powershell(
         for task in _tasks(zed_config_root)
         if task["label"] == "Python: active project interpreter"
     )
-    command = task["command"].replace("$ZED_WORKTREE_ROOT", str(ROOT))
+    env = os.environ.copy()
+    env["ZED_WORKTREE_ROOT"] = str(ROOT)
     # Exercise shell parsing, not subprocess argv: semicolons must stay in -c.
-    command_line = f"& '{command}' " + " ".join(task["args"])
     result = subprocess.run(
-        [shell, "-NoProfile", "-Command", command_line],
+        [_powershell(), "-NoProfile", "-Command", _shell_command(task)],
         cwd=ROOT,
+        env=env,
         capture_output=True,
         text=True,
         check=False,
@@ -109,11 +121,13 @@ def test_repo_backed_pytest_tasks_distinguish_quick_and_project_settings(
         "-q",
         "-o",
         "addopts=",
+        "-p",
+        "no:benchmark",
         "-o",
         CACHE_OPTION,
-        "$ZED_FILE",
+        QUOTED_FILE,
     ]
-    assert project["args"] == ["-m", "pytest", "-o", CACHE_OPTION, "$ZED_FILE"]
+    assert project["args"] == ["-m", "pytest", "-o", CACHE_OPTION, QUOTED_FILE]
     for task in (quick, project):
         assert task["save"] == "current"
         assert task.get("env") == {
@@ -136,14 +150,14 @@ def test_repo_backed_ruff_tasks_use_the_project_python_module(
         "-m",
         "ruff",
         "check",
-        "$ZED_FILE",
+        QUOTED_FILE,
     ]
     assert tasks["Ruff: check formatting of current file"]["args"] == [
         "-m",
         "ruff",
         "format",
         "--check",
-        "$ZED_FILE",
+        QUOTED_FILE,
     ]
 
 
@@ -182,16 +196,16 @@ def _run_task(root: Path, label: str, source: str) -> subprocess.CompletedProces
     path = root / "test file with spaces.py"
     path.write_text(source, encoding="utf-8")
     task = next(task for task in _tasks() if task["label"] == label)
-    command = task["command"].replace("$ZED_WORKTREE_ROOT", str(root))
-    args = [arg.replace("$ZED_FILE", str(path)) for arg in task["args"]]
     env = os.environ.copy()
     env.update(task.get("env", {}))
+    env["ZED_WORKTREE_ROOT"] = str(root)
+    env["ZED_FILE"] = str(path)
     # Reuse installed pytest read-only; the disposable venv installs no packages.
     env["PYTHONPATH"] = str(Path(pytest.__file__).resolve().parents[1])
     env["PYTEST_DISABLE_PLUGIN_AUTOLOAD"] = "1"
     env.pop("PYTEST_ADDOPTS", None)
     return subprocess.run(
-        [command, *args],
+        [_powershell(), "-NoProfile", "-Command", _shell_command(task)],
         cwd=root,
         env=env,
         capture_output=True,
