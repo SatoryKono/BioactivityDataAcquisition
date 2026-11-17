@@ -3,11 +3,11 @@ id: sonar-nosonar
 title: Close outstanding Sonar NOSONAR markers in neo4j sync script
 kind: incident
 source_refs:
-- scripts/ops/neo4j_memory_sync.py
+- src/memory/graph/sync.py
 - src/memory/README.md
 - src/memory/graph/sync_pkg/_core.py
 confidence: curated
-last_verified: '2026-08-04T00:00:00Z'
+last_verified: '2026-11-17T00:00:00Z'
 summary: Pair each Sonar NOSONAR suppression with a task-specific issue record and automated verification, then schedule periodic cleanup of transient suppressions.
 promoted_from: unspecified
 ---
@@ -17,7 +17,10 @@ promoted_from: unspecified
 ## Trigger pattern
 
 - Sonar findings accumulate on neo4j memory sync surfaces when suppressions drift out of sync with the canonical implementation path.
-- The compatibility shim `scripts/ops/neo4j_memory_sync.py` delegates to `memory.graph.sync`; durable logic lives under `src/memory/graph/`.
+- The supported sync entrypoint is `src/memory/graph/sync.py`; durable logic lives under `src/memory/graph/sync_pkg/`. The former `scripts/ops/neo4j_memory_sync.py` path is no longer present.
+
+This review verifies the current source locations and guidance, not the outcome
+of the historical Sonar cleanup.
 
 ## Response guidance
 

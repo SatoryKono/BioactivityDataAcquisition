@@ -10,13 +10,13 @@ rules:
     target_dir: "src/memory/schemas"
     allowed_extensions: [".json"]
   - artifact_class: rag_manifest
-    target_dir: "src/memory/rag/manifests"
+    target_dir: "src/memory/derived/rag/manifests"
     allowed_extensions: [".json", ".jsonl"]
   - artifact_class: graph_export
     target_dir: "src/memory/graph/exports"
     allowed_extensions: [".json", ".graphml"]
   - artifact_class: timeline_event
-    target_dir: "src/memory/timeline/events"
+    target_dir: "src/memory/derived/timeline/events"
     allowed_extensions: [".jsonl"]
   - artifact_class: curated_note
     target_dir: "src/memory/curated"

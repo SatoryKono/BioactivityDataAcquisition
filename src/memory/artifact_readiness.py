@@ -154,6 +154,10 @@ def _valid_timeline_jsonl(path: Path) -> bool:
             row = json.loads(line)
             if not isinstance(row, dict) or not isinstance(row.get("id"), str):
                 return False
+            for field in ("source_refs", "related_refs", "graph_node_refs"):
+                references = row.get(field)
+                if references is not None and not isinstance(references, list):
+                    return False
     except (OSError, UnicodeError, json.JSONDecodeError):
         return False
     return True

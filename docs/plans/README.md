@@ -1,7 +1,7 @@
 # Plans Directory
 
 *Status: Working planning artifacts (non-normative)*
-*Last updated: 2026-09-22 (migration plan removed)*
+*Last updated: 2026-11-17 (memory recovery context registered)*
 
 This directory holds **active** planning surfaces only. Completed plans live in
 `docs/99-archive/plans/`.
@@ -51,7 +51,14 @@ Protocol:
 
 - [consolidated-open-tasks-plan-2026-03-21.md](consolidated-open-tasks-plan-2026-03-21.md)
 
-This is the only active execution/backlog document in `docs/plans/`.
+This is the only document with lifecycle `active_backlog` in `docs/plans/`.
+
+### Current implementation context
+
+- [Memory recovery implementation](memory-recovery-2026-11-17.md) records the
+  approved recovery sequence and qualification checkpoints as `supporting_context`.
+  Its dated receipts govern acceptance; the primary backlog remains the queue
+  for cross-project work.
 
 
 ### Archived context (DOC-GOV-08)

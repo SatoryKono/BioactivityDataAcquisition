@@ -145,6 +145,7 @@ tracked_suite_inventory:
     - tests/integration/memory/test_decision_replay.py
     - tests/integration/memory/test_mcp_server_isolation.py
     - tests/integration/memory/test_timeline_ingest.py
+    - tests/integration/memory/test_workflow_partial_retrieval.py
     - tests/integration/memory/test_workflow_tooling.py
     - tests/integration/normalization/test_chembl_edge_observed_values.py
     - tests/integration/normalization/test_non_chembl_edge_observed_values.py

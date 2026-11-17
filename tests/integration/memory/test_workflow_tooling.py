@@ -68,6 +68,11 @@ def test_pre_task_rejects_missing_actor_identity_before_durable_write(
     missing_variable: str,
 ) -> None:
     monkeypatch.delenv(missing_variable)
+    monkeypatch.setattr(
+        workflow,
+        "_resolve_pre_task_surfaces",
+        lambda **_: pytest.fail("missing actor must fail before retrieval"),
+    )
 
     with pytest.raises(ValueError, match=missing_variable):
         workflow.pre_task_workflow(
@@ -80,6 +85,29 @@ def test_pre_task_rejects_missing_actor_identity_before_durable_write(
         )
 
     assert not (tmp_path / "session.md").exists()
+
+
+@pytest.mark.parametrize("missing_variable", ["BIOETL_AI_RUNTIME", "BIOETL_AI_AGENT"])
+def test_post_task_rejects_missing_actor_before_namespace_creation(
+    monkeypatch: pytest.MonkeyPatch,
+    missing_variable: str,
+) -> None:
+    monkeypatch.delenv(missing_variable)
+    monkeypatch.setattr(
+        workflow,
+        "_default_note_path",
+        lambda *args, **kwargs: pytest.fail(
+            "missing actor must not create a namespace"
+        ),
+    )
+    with pytest.raises(ValueError, match=missing_variable):
+        workflow.post_task_workflow(
+            task_id="missing-actor",
+            title="Missing actor",
+            summary="Must fail before any persistent write.",
+            source_refs=["src/memory/README.md"],
+            run_refresh=False,
+        )
 
 
 def test_pre_task_workflow_creates_session_note_and_uses_local_surfaces(
