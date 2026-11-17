@@ -31,7 +31,7 @@ class NewAdapter(BaseHttpAdapter):
 
 - **TokenBucket**: per-provider rate limiting; backpressure when queue >80%
 - **Circuit Breaker**: 5 consecutive connection/timeout errors → open 5 min; half-open 1 probe; alert if open >10 min
-- **Retry**: max 3, multiplier 2.0; jitter 0.1–0.5s SHOULD (deterministic mode via hash when `RetryConfig(deterministic=True)`)
+- **Retry**: max 3, multiplier 2.0; jitter 0.1–0.5s SHOULD (deterministic jitter is `int(digest[:8], 16) / 0xFFFFFFFF` in `RetryConfig.calculate_delay`; `RetryConfig` has no `deterministic` field)
 - **Metrics**: via `MetricsPort` (`bioetl_` prefix, bounded labels)
 
 ## Provider Health States

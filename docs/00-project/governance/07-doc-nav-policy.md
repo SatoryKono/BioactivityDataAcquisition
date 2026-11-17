@@ -123,7 +123,11 @@ Current KPI model for docs outside nav:
 Manual CI control:
 
 - Workflow: `.github/workflows/docs-kpi-weekly.yml`
-- Trigger: `workflow_dispatch` only. No `schedule` and no cron.
+- Trigger in YAML: `workflow_dispatch` only. No `schedule` and no cron.
+- GitHub state: `disabled_manually`, decision `keep-disabled`
+  (`docs/00-project/governance/05-github-policy.md`). While that state holds,
+  `workflow_dispatch` does not start the workflow. Enabling it is a separate
+  decision. The commands below are the local way to run the same checks.
 - Commands:
   - `uv run python -m scripts.docs check-drift --runtime-mirrors --freshness`
   - `uv run python -m scripts.docs check-kpi`

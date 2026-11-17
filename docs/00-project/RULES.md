@@ -415,8 +415,17 @@ async def clear(
     ...
 ```
 
-**Проверка:** собираемый узел
-`tests/integration/test_runner_lifecycle.py::TestPipelineRunnerLifecycle::test_incremental_skips_clear`.
+**Проверка:**
+
+- Собираемый lifecycle-узел
+  `tests/integration/test_runner_lifecycle.py::TestPipelineRunnerLifecycle::test_incremental_skips_clear`
+  проверяет, что runner не записывает `storage.clear_silver` и `storage.clear_gold`.
+  Он подменяет `prepare_for_run` и не вызывает `MedallionLifecycleService.clear`.
+- Инвариант очистки проверяет
+  `tests/architecture/test_medallion_policy.py::test_medallion_clear_policy[incremental-False]`:
+  реальный `MedallionLifecycleService.clear` с
+  `MedallionPolicy.for_run_type(RunType.INCREMENTAL)` не вызывает `clear_silver`
+  и `clear_gold`.
 
 ### 2.5. Стратегия Партиционирования
 

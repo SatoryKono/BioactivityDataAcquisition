@@ -26,7 +26,7 @@ Non-retriable auth/validation errors **MUST NOT** retry. Temporary 429/502/504/s
 | Multiplier | 2.0 (1s, 2s, 4s…) |
 | Jitter | 0.1–0.5s SHOULD |
 
-`RetryConfig(deterministic=True)` → jitter via hash, not `random` — must not affect reproducible business output.
+`RetryConfig.calculate_delay` uses hash jitter (`int(digest[:8], 16) / 0xFFFFFFFF`), not `random`. `RetryConfig` has no `deterministic` field. Jitter must not affect reproducible business output.
 
 ## Circuit Breaker
 
