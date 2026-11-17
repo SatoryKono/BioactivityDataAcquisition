@@ -1,0 +1,8 @@
+{
+  "catalog_ref": "1c62cc1be69d08ff699e7f1f29ce89e4f688b11a",
+  "schema_version": 1,
+  "source_ref": "1c62cc1be69d08ff699e7f1f29ce89e4f688b11a",
+  "source_reviews": {
+    "src/bioetl/infrastructure/adapters/iuphar/canonical_target_rows.py": "Reviewed the Silver schema binding for the opt-in IUPHAR CSV cohort. TARGET_CLASSIFICATION_FIELDS stays imported through the storage guard so the adapter does not add an infrastructure-to-domain.config edge. CHEMBL_TARGET_SCHEMA is the existing infrastructure Silver schema. No new client, task, or file lifecycle."
+  }
+}
