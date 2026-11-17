@@ -76,7 +76,9 @@ def freeze_target_inputs(
     silver, gold = _read_delta(checked["silver"]), _read_delta(checked["gold"])
     compare_target_rows(silver, silver, legacy_include_fields)
     compare_target_rows(gold, gold, legacy_include_fields)
-    if not {key[0] for key in _by_id(gold)}.issubset(key[0] for key in _by_id(silver)):
+    if not {identity for identity, _ in _by_id(gold)}.issubset(
+        identity for identity, _ in _by_id(silver)
+    ):
         raise ValueError("original Gold targets have no persisted Silver source")
     _assert_candidate_cohort_closure(checked, gold)
     if _input_facts(checked) != before:
@@ -85,13 +87,23 @@ def freeze_target_inputs(
         "artifact": "bioetl_target_candidate_inputs",
         "schema_version": 1,
         "inputs": before,
-        "cohorts": {"silver": sorted(_by_id(silver)), "gold": sorted(_by_id(gold))},
+        "cohorts": _cohort_keys(silver, gold),
         "legacy_include_fields": list(legacy_include_fields),
     }
     safe_output.parent.mkdir(parents=True, exist_ok=True)
     with safe_output.open("xb") as handle:
         handle.write(canonical_json_bytes(document))
     return document
+
+
+def _cohort_keys(
+    silver: list[dict[str, object]], gold: list[dict[str, object]]
+) -> dict[str, list[list[object]]]:
+    """Retain per-layer versions in the JSON representation used by the freeze."""
+    return {
+        name: [list(key) for key in sorted(_by_id(rows))]
+        for name, rows in (("silver", silver), ("gold", gold))
+    }
 
 
 def _input_facts(paths: dict[str, Path]) -> dict[str, object]:
@@ -226,13 +238,8 @@ def build_target_candidates(request: TargetCandidateBuildRequest) -> dict[str, o
     profile = _load_candidate_profile(checked)
     fields = _frozen_v31_hash_fields(checked, request.legacy_include_fields)
     old_silver, old_gold = _read_delta(checked["silver"]), _read_delta(checked["gold"])
-    expected_cohorts = {
-        "silver": sorted(_by_id(old_silver)),
-        "gold": sorted(_by_id(old_gold)),
-    }
-    if canonical_json_bytes(frozen["cohorts"]) != canonical_json_bytes(
-        expected_cohorts
-    ):
+    expected_cohorts = _cohort_keys(old_silver, old_gold)
+    if frozen["cohorts"] != expected_cohorts:
         raise ValueError("target frozen cohort identity differs")
     request.output_dir.mkdir(parents=True, exist_ok=True)
     adapter = IupharTargetClassificationAdapter(profile)

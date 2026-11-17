@@ -1,6 +1,7 @@
 """Frozen candidate construction preserves each layer and refuses input drift."""
 
 from dataclasses import replace
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pyarrow as pa
@@ -58,7 +59,7 @@ def source_bundle(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, request):
     gold_row = _gold(rows[0])
     if request.param:
         gold_row.update(
-            _valid_from="2026-11-16T00:00:00Z",
+            _valid_from=datetime(2026, 11, 16, tzinfo=UTC),
             _valid_to=None,
             _is_current=True,
             _version=1,

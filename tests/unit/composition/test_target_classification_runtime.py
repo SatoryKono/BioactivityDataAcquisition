@@ -303,6 +303,7 @@ async def test_shadow_preserves_old_output_and_staged_direct_parity(
     assert evidence["input_row_ids"] == ["chembl.target:CHEMBL1"]
     assert evidence["mode"] == "shadow"
     assert evidence["artifact_sha256"]
+    assert evidence["input_row_ids"] == ["chembl.target:CHEMBL1"]
 
 
 @pytest.mark.parametrize("dry_run", [False, True])
