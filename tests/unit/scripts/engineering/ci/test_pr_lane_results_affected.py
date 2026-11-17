@@ -1869,7 +1869,7 @@ def test_branch_hygiene_runbook_routes_only_to_owned_checks():
         ".github/tooling/jscpd/package-lock.json",
         ".github/tooling/jscpd/package.json",
         ".github/tooling/picomatch-backport/BACKPORT.md",
-        ".github/tooling/picomatch-backport/picomatch-4.0.8-bioetl.8.tgz",
+        ".github/tooling/picomatch-backport/picomatch-4.0.8-bioetl.9.tgz",
         ".github/tooling/picomatch-backport/provenance.json",
         ".github/tooling/picomatch-backport/test.cjs",
         "grafana/plugins/bioetl-scenes-app/package-lock.json",
