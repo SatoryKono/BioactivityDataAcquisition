@@ -57,6 +57,7 @@ if TYPE_CHECKING:
     from bioetl.composition.observability import ObservabilityBundle
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.types import GoldSchemaType
+    from bioetl.infrastructure.config.settings_api import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 __all__ = ["assemble_runner_impl"]
@@ -199,6 +200,7 @@ def assemble_runner_impl(
         DQConfigsContext,
     ],
     yaml_config: PipelineYamlConfig | None = None,
+    settings: Settings | None = None,
 ) -> PipelineRunner:
     """Assemble the fully wired PipelineRunner for one configured pipeline."""
     assembly_context = _RunnerAssemblyContext(
@@ -210,6 +212,7 @@ def assemble_runner_impl(
         gold_schema=gold_schema,
         strict_gold_validation=strict_gold_validation,
         dq_configs_extractor=dq_configs_extractor,
+        settings=settings,
     )
     assembly_parts = _assemble_runner_parts(assembly_context)
     constructor_payload = _build_runner_constructor_payload(
