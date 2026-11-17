@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+from bioetl.composition.bootstrap.runtime.publication_vocab_init import hydrate_target_runtime_config
+
 from pathlib import Path
 from typing import TYPE_CHECKING, overload
 from uuid import UUID
@@ -119,7 +122,6 @@ def restore_target_replay_config(
         getattr(ctx, "exact_replay", False)
     ):
         return current_config
-    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
     if not isinstance(current_config, PipelineYamlConfig):
         return current_config
@@ -134,7 +136,6 @@ def restore_target_replay_config(
         raise ValueError("target replay parent pipeline mismatch")
     if not parent.resolved_config:
         raise ValueError("target replay parent has no pinned resolved configuration")
-    from bioetl.composition.target_classification import hydrate_target_runtime_config
 
     return hydrate_target_runtime_config(parent.resolved_config)
 

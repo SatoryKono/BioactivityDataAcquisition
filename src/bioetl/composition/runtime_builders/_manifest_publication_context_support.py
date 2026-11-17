@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from bioetl.composition.bootstrap.runtime.publication_vocab_init import (
+    apply_target_contract_identity,
+)
+
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, TypedDict
 
@@ -126,10 +130,6 @@ def resolve_manifest_publication_context(
             ),
         )
     if ctx.pipeline_name == "chembl_target":
-        from bioetl.composition.target_classification import (
-            apply_target_contract_identity,
-        )
-
         contract_identity = apply_target_contract_identity(
             inputs.yaml_config, contract_identity
         )
@@ -172,10 +172,6 @@ def ensure_manifest_publication_identity(
             ),
         )
     if ctx.pipeline_name == "chembl_target":
-        from bioetl.composition.target_classification import (
-            apply_target_contract_identity,
-        )
-
         contract_identity = apply_target_contract_identity(
             inputs.yaml_config, contract_identity
         )

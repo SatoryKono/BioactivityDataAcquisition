@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import hashlib
-import json
 import re
 from collections.abc import Mapping
 from pathlib import Path
@@ -12,7 +11,7 @@ from urllib.request import url2pathname
 
 import yaml
 
-from bioetl.infrastructure.adapters.iuphar import load_profile
+from bioetl.infrastructure.adapters.iuphar import decode_json, load_profile
 from bioetl.infrastructure.adapters.iuphar.snapshot_loader import OUTPUT_NAMES
 
 
@@ -86,13 +85,13 @@ def _local_path(workspace: Path, value: str, *, base: Path) -> Path:
     return _safe_path(workspace, path)
 
 
-def _unique_pairs(pairs: list[tuple[str, object]]) -> dict[str, object]:
-    result: dict[str, object] = {}
-    for key, value in pairs:
-        if key in result:
-            raise ValueError("duplicate target dependency JSON key")
-        result[key] = value
-    return result
+def _dependency_document(raw: bytes) -> Mapping[str, object]:
+    try:
+        return _mapping(decode_json(raw))
+    except ValueError as exc:
+        if str(exc) == "duplicate JSON key":
+            raise ValueError("duplicate target dependency JSON key") from exc
+        raise
 
 
 class _DependencyCollector:
@@ -119,7 +118,7 @@ class _DependencyCollector:
         if identity in self.visited:
             return
         self.visited.add(identity)
-        document = _mapping(json.loads(raw, object_pairs_hook=_unique_pairs))
+        document = _dependency_document(raw)
         handlers = {
             "profile": self.profile,
             "snapshot": self.snapshot,

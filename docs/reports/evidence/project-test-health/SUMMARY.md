@@ -1,6 +1,6 @@
 ---
 status: active-non-canonical
-last_verified: "2026-11-09"
+last_verified: "2026-11-17"
 freshness_window_days: 7
 owner: quality
 canonical_sources:
@@ -56,6 +56,14 @@ coverage refresh:
 2. Add security regression coverage for HTML output and recursive redaction.
 
 ## Freshness note
+
+Re-verified on 2026-11-17 at source commit
+`362ca1bfd73a907a1a4185f05ce0cc6dc3864dd5`: the canonical source list and historical shard manifest
+remain present. The tracked tree contains 3,355 files with basenames
+matching `test_*.py` under `tests/`, counted from
+`git ls-tree -r --name-only 362ca1bfd73a907a1a4185f05ce0cc6dc3864dd5 -- tests`.
+This inventory check records no test execution or coverage measurement.
+The 2026-10-08 17-shard capture remains the latest measured coverage in this summary.
 
 Re-verified on 2026-11-09 at source commit
 `82b3d165d87bcb19c1d4214d9ccf7254750687b5`: the canonical source list and historical shard manifest

@@ -10,12 +10,12 @@ from typing import TYPE_CHECKING, cast, get_args, get_origin
 from pydantic import BaseModel
 
 from bioetl.composition.bootstrap_contexts import DQConfigsContext, DQOutputPathsContext
-from bioetl.composition.factories.storage._context_resolution import (
+from bioetl.composition.factories.dq.composite_validation import (
     get_layer_configs,
     resolve_flat_structure_flags,
     resolve_storage_paths,
+    resolve_target_table_paths,
 )
-from bioetl.composition.factories.storage.target_paths import resolve_target_table_paths
 from bioetl.domain.value_objects.dq_report import SilverDQCheckType
 
 if TYPE_CHECKING:

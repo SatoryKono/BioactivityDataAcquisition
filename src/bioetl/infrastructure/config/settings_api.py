@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
-from bioetl.infrastructure.config._base import Settings, get_settings
+from bioetl.infrastructure.config._base import (
+    ObservabilitySettings,
+    Settings,
+    get_settings,
+)
 
-__all__ = ["Settings", "get_settings"]
+__all__ = ["ObservabilitySettings", "Settings", "get_settings"]

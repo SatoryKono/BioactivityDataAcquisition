@@ -30,6 +30,7 @@
 from __future__ import annotations
 
 import json
+import re
 import runpy
 import sys
 from pathlib import Path
@@ -43,6 +44,7 @@ pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]
 
 ROOT = Path(__file__).resolve().parents[4]
 ZED_ROOT = ROOT / ".zed"
+TEMPLATE_ROOT = ROOT / "configs" / "ide" / "zed"
 DEV_SCRIPTS = ROOT / "scripts" / "engineering" / "dev"
 TEST_MATRIX = ROOT / "configs" / "quality" / "test_matrix.yaml"
 
@@ -68,6 +70,18 @@ def _load_json(relative_path: str) -> Any:
     if not path.is_file():
         pytest.skip(f"Optional local Zed config is absent: {relative_path}")
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+@pytest.fixture(params=("template", "local"))
+def project_config_root(request: pytest.FixtureRequest) -> Path:
+    root = TEMPLATE_ROOT if request.param == "template" else ZED_ROOT
+    if request.param == "local" and not (root / "settings.json").is_file():
+        pytest.skip("Optional local Zed settings are absent")
+    return root
+
+
+def _project_json(root: Path, filename: str) -> Any:
+    return json.loads((root / filename).read_text(encoding="utf-8"))
 
 
 def _load_lane_module() -> dict[str, Any]:
@@ -126,55 +140,32 @@ def test_zed_task_picker_shortcut_spawns_tasks() -> None:
     assert keymap["bindings"]["ctrl-shift-t"] == "task::Spawn"
 
 
-def test_zed_language_settings_delegate_to_project_sources_of_truth() -> None:
-    """Zed should use current settings shapes and avoid duplicating tool config."""
-    settings = _load_json("settings.json")
+def test_zed_language_settings_delegate_to_project_sources_of_truth(
+    project_config_root: Path,
+) -> None:
+    """The base profile delegates tool policy, not personal save/format choices."""
+    settings = _project_json(project_config_root, "settings.json")
     python_settings = settings["languages"]["Python"]
-
-    assert settings["autosave"] == "on_focus_change"
     assert "autosave_delay_ms" not in settings
-    assert settings["format_on_save"] == "off"
-    assert settings["tab_size"] == 4
-    assert settings["file_scan_inclusions"] == []
-    assert settings["redact_private_values"] is True
-    assert python_settings["hard_tabs"] is False
-    assert python_settings["tab_size"] == 4
-    assert python_settings["format_on_save"] == "on"
     assert "indent_style" not in python_settings
-    assert "source.fixAll.ruff" not in python_settings["code_actions_on_format"]
-    assert python_settings["language_servers"] == [
-        "basedpyright",
-        "ruff",
-        "!pylsp",
-    ]
-    assert python_settings["formatter"] == {"language_server": {"name": "ruff"}}
-    assert settings["lsp"]["ruff"] == {
-        "initialization_options": {
-            "settings": {"configurationPreference": "filesystemFirst"}
-        }
-    }
-
-    basedpyright = settings["lsp"]["basedpyright"]
-    analysis = basedpyright["settings"]["basedpyright.analysis"]
-    assert "initialization_options" not in basedpyright
-    assert analysis["typeCheckingMode"] == "strict"
-    assert analysis["diagnosticMode"] == "openFilesOnly"
-    assert "stubPath" not in analysis
-    assert "PYTHONPATH" not in settings["terminal"]["env"]
-
-    yaml_settings = settings["languages"]["YAML"]
-    json_settings = settings["languages"]["JSON"]
-    jsonc_settings = settings["languages"]["JSONC"]
-    assert yaml_settings["tab_size"] == 2
-    assert json_settings["tab_size"] == 2
-    assert jsonc_settings["tab_size"] == 2
-    assert yaml_settings["format_on_save"] == "on"
-    assert json_settings["format_on_save"] == "on"
+    assert "source.fixAll.ruff" not in python_settings.get("code_actions_on_format", {})
+    assert python_settings["language_servers"] == ["basedpyright", "ruff"]
+    for server in ("basedpyright", "ruff"):
+        assert "binary" not in settings.get("lsp", {}).get(server, {})
+    assert settings["terminal"]["env"]["PYTHONPATH"] == ""
+    assert "agent" not in settings, "User Agent policy is a separate opt-in template"
+    assert "context_servers" not in settings
+    assert (ROOT / ".editorconfig").is_file()
+    assert (ROOT / "pyproject.toml").is_file()
 
 
-def test_zed_file_scan_exclusions_cover_local_caches_and_debug_exports() -> None:
+def test_zed_file_scan_exclusions_cover_local_caches_and_debug_exports(
+    project_config_root: Path,
+) -> None:
     """Scan exclusions hide local-only/heavy surfaces without hiding all data/."""
-    exclusions = set(_load_json("settings.json")["file_scan_exclusions"])
+    exclusions = set(
+        _project_json(project_config_root, "settings.json")["file_scan_exclusions"]
+    )
     for pattern in (
         "**/.venv-win",
         "**/.venv-wsl",
@@ -191,6 +182,10 @@ def test_zed_file_scan_exclusions_cover_local_caches_and_debug_exports() -> None
 def test_zed_docker_compose_language_server_covers_repo_compose_files() -> None:
     """Compose manifests should use the dedicated Compose language service."""
     settings = _load_json("settings.json")
+    if "Docker Compose" not in settings.get("languages", {}):
+        pytest.skip(
+            "Dedicated Compose IDE settings are optional in the base Zed profile"
+        )
     compose_settings = settings["languages"]["Docker Compose"]
     compose_file_types = settings["file_types"]["Docker Compose"]
 
@@ -206,8 +201,8 @@ def test_zed_docker_compose_language_server_covers_repo_compose_files() -> None:
 
 
 def test_zed_agent_permissions_preserve_secret_boundaries() -> None:
-    """Agent terminal and file tools should preserve the repository secret policy."""
-    settings = _load_json("settings.json")
+    """The opt-in user template retains secret guards; this is not runtime proof."""
+    settings = _project_json(TEMPLATE_ROOT, "agent-settings.json")
     agent = settings["agent"]
     permissions = agent["tool_permissions"]
     terminal_permissions = permissions["tools"]["terminal"]
@@ -221,31 +216,44 @@ def test_zed_agent_permissions_preserve_secret_boundaries() -> None:
         rule["pattern"] for rule in terminal_permissions["always_deny"]
     )
     assert "Remove-Item" in deny_patterns
-    assert "git\\s+clean" in deny_patterns or "git\\s+clean" in deny_patterns
+    assert "git\\s+clean" in deny_patterns
     assert "reset\\s+--hard" in deny_patterns
 
-    for tool_name in ("edit_file", "write_file", "delete_path", "move_path"):
+    for tool_name in (
+        "edit_file",
+        "write_file",
+        "delete_path",
+        "move_path",
+        "copy_path",
+    ):
         tool_cfg = permissions["tools"][tool_name]
         assert tool_cfg["default"] == "confirm"
         rules = tool_cfg["always_deny"]
         assert any("\\.env" in rule["pattern"] for rule in rules)
         assert any("pem|key|cert|crt" in rule["pattern"] for rule in rules)
 
-    for read_tool in (
-        "diagnostics",
-        "fetch",
-        "find_path",
-        "grep",
-        "list_directory",
-        "read_file",
-        "search_web",
-    ):
-        assert permissions["tools"][read_tool]["default"] == "allow"
+    for external_tool in ("fetch", "search_web", "skill"):
+        assert permissions["tools"][external_tool]["default"] == "confirm"
 
     ask_profile = agent["profiles"]["bioetl-ask"]
     write_profile = agent["profiles"]["bioetl-write"]
     assert agent["default_profile"] == "bioetl-ask"
-    assert ask_profile["tools"]["terminal"] is False
+    for tool in (
+        "terminal",
+        "edit_file",
+        "write_file",
+        "delete_path",
+        "move_path",
+        "copy_path",
+        "create_directory",
+        "spawn_agent",
+        "skill",
+        "fetch",
+        "search_web",
+    ):
+        assert ask_profile["tools"][tool] is False
+    for tool in ("read_file", "grep", "find_path", "list_directory", "diagnostics"):
+        assert ask_profile["tools"][tool] is True
     assert ask_profile["tools"]["spawn_agent"] is False
     assert write_profile["tools"]["spawn_agent"] is False
     assert write_profile["enable_all_context_servers"] is False
@@ -259,6 +267,62 @@ def test_zed_agent_permissions_preserve_secret_boundaries() -> None:
     assert set(write_profile.get("context_servers") or {}) == set()
 
 
+@pytest.mark.parametrize(
+    "tool",
+    [
+        "edit_file",
+        "write_file",
+        "delete_path",
+        "move_path",
+        "copy_path",
+        "create_directory",
+    ],
+)
+@pytest.mark.parametrize(
+    "path",
+    [
+        ".env",
+        ".env.local",
+        "config/.env.production",
+        r"D:\repo\.env",
+        r"D:\repo\.env.local",
+    ],
+)
+def test_zed_user_template_blocks_env_mutations(tool: str, path: str) -> None:
+    settings = _project_json(TEMPLATE_ROOT, "agent-settings.json")
+    rules = settings["agent"]["tool_permissions"]["tools"][tool]["always_deny"]
+    assert any(re.search(rule["pattern"], path, re.IGNORECASE) for rule in rules)
+    for harmless in ("src/environment.py", "docs/environment.md", "config/env.yaml"):
+        assert not any(
+            re.search(rule["pattern"], harmless, re.IGNORECASE) for rule in rules
+        )
+
+
+@pytest.mark.parametrize(
+    "tool", ["edit_file", "write_file", "delete_path", "move_path", "copy_path"]
+)
+@pytest.mark.parametrize(
+    "path", ["private.pem", "private.KEY", "server.cert", "server.crt"]
+)
+def test_zed_user_template_blocks_private_key_mutations(tool: str, path: str) -> None:
+    settings = _project_json(TEMPLATE_ROOT, "agent-settings.json")
+    rules = settings["agent"]["tool_permissions"]["tools"][tool]["always_deny"]
+    assert any(re.search(rule["pattern"], path, re.IGNORECASE) for rule in rules)
+
+
+@pytest.mark.parametrize(
+    "command", ["Remove-Item data", "git clean -fd", "git reset --hard HEAD"]
+)
+def test_zed_user_template_blocks_destructive_terminal_commands(command: str) -> None:
+    settings = _project_json(TEMPLATE_ROOT, "agent-settings.json")
+    rules = settings["agent"]["tool_permissions"]["tools"]["terminal"]["always_deny"]
+    assert any(re.search(rule["pattern"], command, re.IGNORECASE) for rule in rules)
+    assert not any(
+        re.search(rule["pattern"], "git status --short", re.IGNORECASE)
+        for rule in rules
+    )
+
+
 def test_zed_runtime_mcp_servers_are_a_generated_manifest_subset() -> None:
     """Agent-attached MCP set is empty; inventory may still list shared servers."""
     settings_servers = set(_load_json("settings.json").get("context_servers") or {})
@@ -268,9 +332,9 @@ def test_zed_runtime_mcp_servers_are_a_generated_manifest_subset() -> None:
     assert settings_servers == set()
 
 
-def test_zed_tasks_use_venv_python_without_path_uv() -> None:
-    """Tasks must call .venv-win tools directly so Zed PowerShell works without uv PATH."""
-    tasks = _load_json("tasks.json")
+def test_zed_tasks_use_venv_python_without_path_uv(project_config_root: Path) -> None:
+    """The reviewed base catalog uses the checkout interpreter, never PATH uv."""
+    tasks = _project_json(project_config_root, "tasks.json")
     labels = [task["label"] for task in tasks]
 
     assert len(labels) == len(set(labels))
@@ -282,55 +346,60 @@ def test_zed_tasks_use_venv_python_without_path_uv() -> None:
     assert all(task["command"] != "uv" for task in tasks)
     assert "uv run" not in json.dumps(tasks)
 
-    lane_script = "scripts/engineering/dev/zed_pytest_lane.py"
+    project_label = "pytest: current test file (project settings)"
+    quick_label = "pytest: current test file (quick; project addopts disabled)"
     tagged = [task for task in tasks if "python-test" in task.get("tags", [])]
-    assert [task["label"] for task in tagged] == ["Test: current file"]
-    assert tagged[0]["command"] == venv_python
-    assert tagged[0]["args"][:2] == [lane_script, "file"]
-    assert "$ZED_FILE" in tagged[0]["args"]
-    assert tagged[0].get("env", {}).get("VCR_RECORD_MODE") == "none"
-
-    required_labels = {
-        "Environment: verify",
-        "Test: current file",
-        "Test: nearest symbol",
-        "Test: smoke",
-        "Test: unit-fast",
-        "Test: architecture-fast",
-        "Coverage: local estimate (85%)",
-        "Check: architecture imports",
-        "Check: MCP manifests",
-        "Generate: MCP tracked manifests",
-    }
-    assert required_labels <= set(labels)
-
-    # Marker expressions with spaces must not appear in task args: PowerShell -C
-    # re-tokenizes them into bare paths (``and`` / ``not``), breaking pytest.
-    for task in tasks:
-        if task["label"].startswith("Test:") or task["label"].startswith("Coverage:"):
-            assert lane_script in task["args"]
-            for arg in task["args"]:
-                if arg.startswith("$"):
-                    continue
-                assert " and " not in arg
-                assert " or " not in arg
-
-    nearest = next(task for task in tasks if task["label"] == "Test: nearest symbol")
-    assert nearest["args"][:2] == [lane_script, "nearest"]
-    assert "$ZED_FILE" in nearest["args"]
-    assert "$ZED_SYMBOL" in nearest["args"]
-
-    dependencies = next(
-        task for task in tasks if task["label"] == "Audit: dependencies"
-    )
-    assert dependencies["args"] == [
-        "scripts/engineering/dev/zed_run.py",
+    assert [task["label"] for task in tagged] == [project_label]
+    assert tagged[0]["args"] == [
         "-m",
-        "pip_audit",
-        "--skip-editable",
-        "--cache-dir",
-        ".cache/pip-audit",
+        "pytest",
+        "-o",
+        "cache_dir=.cache/pytest/windows",
+        "$ZED_FILE",
     ]
+    assert tagged[0].get("env", {}).get("VCR_RECORD_MODE") == "none"
+    assert set(labels) == {
+        "Python: active project interpreter",
+        "Environment: verify",
+        project_label,
+        quick_label,
+        "Ruff: check current file",
+        "Ruff: check formatting of current file",
+    }
+    by_label = {task["label"]: task for task in tasks}
+    assert by_label[quick_label]["args"] == [
+        "-m",
+        "pytest",
+        "-q",
+        "-o",
+        "addopts=",
+        "-o",
+        "cache_dir=.cache/pytest/windows",
+        "$ZED_FILE",
+    ]
+    assert by_label["Environment: verify"]["args"] == [
+        "scripts/engineering/dev/zed_env_doctor.py"
+    ]
+    assert by_label["Ruff: check current file"]["args"] == [
+        "-m",
+        "ruff",
+        "check",
+        "$ZED_FILE",
+    ]
+    assert by_label["Ruff: check formatting of current file"]["args"] == [
+        "-m",
+        "ruff",
+        "format",
+        "--check",
+        "$ZED_FILE",
+    ]
+    serialized = json.dumps(tasks)
+    assert "codex agent run" not in serialized
+    assert "devin skill invoke" not in serialized
+
+
+def test_security_workflow_preserves_dependency_advisory_checks() -> None:
+    """Security policy is independent of the optional IDE task catalog."""
     security_workflow = (ROOT / ".github" / "workflows" / "security.yml").read_text(
         encoding="utf-8"
     )
@@ -338,89 +407,10 @@ def test_zed_tasks_use_venv_python_without_path_uv() -> None:
     assert "--ignore-vuln CVE-2026-3219" not in security_workflow
     assert "--ignore-vuln PYSEC-2026-3721" not in security_workflow
 
-    architecture = next(
-        task for task in tasks if task["label"] == "Test: architecture-fast"
-    )
-    assert architecture["args"] == [lane_script, "architecture-fast"]
 
-    coverage = next(
-        task for task in tasks if task["label"] == "Coverage: local estimate (85%)"
-    )
-    assert coverage["args"] == [lane_script, "coverage-local"]
-
-    env_verify = next(task for task in tasks if task["label"] == "Environment: verify")
-    assert env_verify["args"] == ["scripts/engineering/dev/zed_env_doctor.py"]
-
-    arch = next(
-        task for task in tasks if task["label"] == "Check: architecture imports"
-    )
-    assert arch["command"] == venv_python
-    assert arch["args"] == ["scripts/engineering/dev/zed_lint_imports.py"]
-    # Must not point import-linter at pyproject.toml (contracts live in .importlinter).
-    assert "pyproject.toml" not in arch["args"]
-    assert "lint-imports.exe" not in arch["command"]
-
-    complexity = next(task for task in tasks if task["label"] == "Audit: complexity")
-    assert complexity["command"] == venv_python
-    assert complexity["args"] == ["scripts/engineering/dev/zed_xenon.py"]
-    # Raw xenon without excludes is not the project gate (see exemption registry).
-    assert "-m" not in complexity["args"]
-    assert "xenon" not in complexity["args"]
-
-    dead_code = next(task for task in tasks if task["label"] == "Audit: dead code")
-    assert dead_code["command"] == venv_python
-    assert dead_code["args"] == ["scripts/engineering/dev/zed_vulture.py"]
-    # Bare vulture at conf 60 floods Pandera schema fields as false positives.
-    assert "vulture" not in dead_code["args"]
-
-    security = next(task for task in tasks if task["label"] == "Audit: security")
-    assert security["command"] == venv_python
-    assert security["args"] == [
-        "scripts/engineering/dev/zed_run.py",
-        "-m",
-        "bandit",
-        "-c",
-        "pyproject.toml",
-        "-r",
-        "src/bioetl",
-    ]
-    # Bare ``bandit -r src/`` ignores [tool.bandit] skips and scans non-product trees.
-    assert "src/" not in security["args"]
-
-    type_check = next(task for task in tasks if task["label"] == "Check: types")
-    assert type_check["command"] == venv_python
-    assert type_check["args"] == [
-        "scripts/engineering/dev/zed_run.py",
-        "-m",
-        "mypy",
-        "--config-file",
-        "pyproject.toml",
-        "src/bioetl",
-    ]
-    # Full ``mypy src/`` pulls memory tooling; CI product gate is src/bioetl.
-    assert type_check["args"][-1] == "src/bioetl"
-
-    mcp_check = next(task for task in tasks if task["label"] == "Check: MCP manifests")
-    assert "--check" in mcp_check["args"]
-    mcp_gen = next(
-        task for task in tasks if task["label"] == "Generate: MCP tracked manifests"
-    )
-    assert "--check" not in mcp_gen["args"]
-    assert "setup_mcp.py" in mcp_gen["args"][0]
-
-    serialized = json.dumps(tasks)
-    assert "codex agent run" not in serialized
-    assert "devin skill invoke" not in serialized
-    assert '"import-linter"' not in serialized
-    assert "zed_lint_imports.py" in serialized
-    assert "zed_xenon.py" in serialized
-    assert "zed_vulture.py" in serialized
-    assert "zed_env_doctor.py" in serialized
-
-
-def test_zed_task_save_reveal_and_concurrency_policy() -> None:
-    """Every task has explicit save/reveal/hide/concurrency behavior."""
-    tasks = _load_json("tasks.json")
+def test_zed_task_save_reveal_and_concurrency_policy(project_config_root: Path) -> None:
+    """Current-file tasks save only that file; diagnostics do not save buffers."""
+    tasks = _project_json(project_config_root, "tasks.json")
     for task in tasks:
         label = task["label"]
         assert task.get("save") in VALID_SAVE, label
@@ -429,12 +419,11 @@ def test_zed_task_save_reveal_and_concurrency_policy() -> None:
         assert task["hide"] == "never", label
         assert task.get("allow_concurrent_runs") is False, label
 
-        if label in {"Test: current file", "Test: nearest symbol"}:
-            assert task["save"] == "current"
-        elif label == "Environment: verify":
+        if label in {"Python: active project interpreter", "Environment: verify"}:
             assert task["save"] == "none"
         else:
-            assert task["save"] == "all"
+            assert task["save"] == "current"
+        assert task["reveal"] == "always", label
 
         if label.startswith(NON_CONCURRENT_LABEL_PREFIXES):
             assert task["allow_concurrent_runs"] is False
@@ -518,19 +507,19 @@ def test_zed_pytest_lane_rejects_overlapping_runs(tmp_path: Path) -> None:
                 pytest.fail("overlapping lane unexpectedly acquired the lock")
 
 
-def test_zed_terminal_prefers_windows_venv_and_offline_vcr() -> None:
-    """Terminal should prefer dual-OS venvs and keep local VCR offline-safe."""
-    settings = _load_json("settings.json")
+def test_zed_terminal_prefers_windows_venv_and_offline_vcr(
+    project_config_root: Path,
+) -> None:
+    """The Windows profile never activates a potentially Linux-owned venv."""
+    settings = _project_json(project_config_root, "settings.json")
     terminal = settings["terminal"]
     detect = terminal["detect_venv"]["on"]["directories"]
 
-    assert detect[0] == ".venv-win"
-    assert ".venv" in detect
-    assert ".venv-wsl" in detect
+    assert detect == [".venv-win"]
+    assert terminal["detect_venv"]["on"]["activate_script"] == "power_shell"
     assert terminal["env"]["VCR_RECORD_MODE"] == "none"
     assert terminal["env"]["PYTHONDONTWRITEBYTECODE"] == "1"
-    assert terminal["env"]["VIRTUAL_ENV"] == ".venv-win"
-    assert settings["gutter"]["runnables"] is True
+    assert "VIRTUAL_ENV" not in terminal["env"], "Let activation set an absolute path"
 
 
 def test_zed_snippets_follow_current_bioetl_contracts() -> None:

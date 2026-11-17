@@ -106,15 +106,10 @@ _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
     ),
     "bioetl.domain.ports.pii": ("PiiHasherPort",),
     "bioetl.domain.ports.publication_strategy": (
-        "DataExtractorStrategy",
-        "IdentifierResolverStrategy",
-        "PublicationMetadataStrategy",
+        "DataExtractorStrategy", "IdentifierResolverStrategy", "PublicationMetadataStrategy",
     ),
     "bioetl.domain.ports.protein_classification": ("ProteinClassificationPort",),
-    "bioetl.domain.ports.target_classification": (
-        "TargetClassificationPort",
-        "TargetClassificationEvidencePort",
-    ),
+    "bioetl.domain.ports.target_classification": ("TargetClassificationEvidencePort", "TargetClassificationPort"),
     "bioetl.domain.ports.quality": (
         "BronzeDQAnalyzerPort",
         "BronzeDQConfigPort",

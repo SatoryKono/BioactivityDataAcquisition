@@ -6,7 +6,7 @@ import argparse
 import json
 from pathlib import Path
 
-from bioetl.infrastructure.adapters.iuphar.cohort_builder import (
+from bioetl.infrastructure.adapters.iuphar.cohort_projection import (
     ARROW_SOURCE_FORMAT,
     CSV_SOURCE_FORMAT,
     NORMALIZED_TARGET_SCHEMA,

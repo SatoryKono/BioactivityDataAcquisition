@@ -17,6 +17,9 @@ from typing import TYPE_CHECKING, cast
 from bioetl.composition.bootstrap.assembly.workflow_transforms import (
     build_workflow_transform_registry,
 )
+from bioetl.composition.bootstrap.runtime.publication_vocab_init import (
+    preflight_workflow_target_dependencies,
+)
 from bioetl.composition.occurrence_identity import (
     create_runtime_occurrence_id,
     create_runtime_occurrence_run_id,
@@ -275,9 +278,7 @@ def get_workflow_execution_service(
                 "workflow_execution"
             ),
             dependency_preflight=lambda config, launch_context, mutation_plan: (
-                import_module(
-                    "bioetl.composition.target_classification"
-                ).preflight_workflow_target_dependencies(
+                preflight_workflow_target_dependencies(
                     config, launch_context, mutation_plan, settings=settings
                 )
             ),

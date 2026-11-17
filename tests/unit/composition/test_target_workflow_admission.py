@@ -17,14 +17,14 @@ from bioetl.application.services.workflow.control_plane.execution_service import
     WorkflowExecutionService,
 )
 from bioetl.application.services.workflow.control_plane.mutation_plan import (
-    WorkflowMutationPlan,
+    WorkflowMutationSpec,
     build_workflow_mutation_plan,
 )
 from bioetl.composition.runtime_builders.config_access import load_pipeline_config
-from bioetl.composition.target_classification import (
+from bioetl.composition.bootstrap.runtime.publication_vocab_init import (
     preflight_workflow_target_dependencies,
 )
-from bioetl.composition.target_workflow_mutation import (
+from bioetl.composition.bootstrap.cli.lineage import (
     validate_workflow_target_mutations,
 )
 from bioetl.domain.config.target_classification import TARGET_CLASSIFICATION_FIELDS
@@ -226,7 +226,7 @@ async def test_bounded_upstream_fails_before_assay_or_manifest_write(
     target = _target_config("enrich")
     original_loader = load_pipeline_config
     monkeypatch.setattr(
-        "bioetl.composition.target_classification.load_pipeline_config",
+        "bioetl.composition.bootstrap.runtime.publication_vocab_init.load_pipeline_config",
         lambda name: target if name == "chembl_target" else original_loader(name),
     )
     runner = SimpleNamespace(run_workflow=AsyncMock())
@@ -333,7 +333,7 @@ def test_scoped_selected_snapshot_requires_both_declared_producers(physical_targ
             _fk(mode="selected-snapshot", closed=False, depends_on=("assay", "target")),
         ),
     )
-    plan = WorkflowMutationPlan(frozenset({"reconcile"}), resumed=True)
+    plan = WorkflowMutationSpec(frozenset({"reconcile"}), resumed=True)
     assert validate_workflow_target_mutations(
         config, _target_config("enrich"), physical_target, plan, load_pipeline_config
     ).pending_writes
@@ -552,7 +552,7 @@ async def test_admitted_scoped_fk_preserves_unrelated_and_historical_target_rows
             _fk(mode="selected-snapshot", closed=False, depends_on=("target", "assay")),
         ),
     )
-    plan = WorkflowMutationPlan(frozenset({"reconcile"}), resumed=True)
+    plan = WorkflowMutationSpec(frozenset({"reconcile"}), resumed=True)
     assert validate_workflow_target_mutations(
         config, _target_config("enrich"), physical_target, plan, load_pipeline_config
     ).pending_writes

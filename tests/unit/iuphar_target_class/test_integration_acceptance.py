@@ -177,7 +177,7 @@ def acceptance_inputs(tmp_path):
 
 def _stored_proof(tmp_path, snapshot, provenance):
     """Use actual kernel outputs and the actual persistence/finalization path."""
-    from bioetl.domain.target_classification import (
+    from bioetl.domain.entities.target_classification_boundary import (
         TargetClassificationArtifact,
         TargetClassificationResult,
     )

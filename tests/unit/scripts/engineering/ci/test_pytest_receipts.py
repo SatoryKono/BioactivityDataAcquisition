@@ -519,7 +519,15 @@ def test_redact_secrets_covers_auth_and_urls() -> None:
     assert "[REDACTED]" in text
 
 
-def test_git_status_failure_is_not_a_clean_tree(tmp_path: Path) -> None:
+def test_git_status_failure_is_not_a_clean_tree(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(
+        "scripts.engineering.ci.pytest_receipts.subprocess.run",
+        lambda argv, **_kwargs: subprocess.CompletedProcess(
+            argv, 128, "", "fatal: not a git repository"
+        ),
+    )
     snapshot = source_snapshot(tmp_path)
     assert snapshot["head"] == "unknown"
     assert snapshot["clean"] is None

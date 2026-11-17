@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-import json
 from dataclasses import dataclass
 from pathlib import Path
 from typing import cast
 
+import orjson
 import pyarrow as pa
 from deltalake import DeltaTable, write_deltalake
 
@@ -161,7 +161,7 @@ def _verified_inputs(
 ) -> dict[str, object]:
     if sha256_file(request.input_manifest) != request.input_manifest_sha256:
         raise ValueError("target input manifest digest mismatch")
-    document = json.loads(request.input_manifest.read_bytes())
+    document = orjson.loads(request.input_manifest.read_bytes())
     if (
         document.get("artifact") != "bioetl_target_candidate_inputs"
         or document.get("schema_version") != 1

@@ -1384,7 +1384,9 @@ def test_build_baseline_payload_uses_fallback_coverage_and_junit(
     assert payload["coverage"]["actual_percent"] == pytest.approx(92.81)
     assert payload["coverage"]["threshold_satisfied"] is True
     assert payload["duration_telemetry"]["total_cases"] == 2
-    assert payload["artifact_inputs"]["junit_inputs"] == [str(junit_path)]
+    assert [
+        Path(item).resolve() for item in payload["artifact_inputs"]["junit_inputs"]
+    ] == [junit_path.resolve()]
 
 
 def test_build_branch_telemetry_reports_preserves_baseline_snapshot() -> None:

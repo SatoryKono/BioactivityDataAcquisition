@@ -15,7 +15,7 @@ from bioetl.application.core.record_normalization_processor import (
     RecordNormalizationProcessor,
 )
 from bioetl.application.pipelines.chembl.target_transformer import TargetTransformer
-from bioetl.application.services.target_classification_scope import (
+from bioetl.application.services.target_runtime.scope import (
     TARGET_CLASSIFICATION_DEPENDENCY_KEY,
     bind_target_classification_dependency,
     reset_target_classification_dependency,
@@ -29,7 +29,7 @@ from bioetl.composition.factories.services._record_processor_policy_support impo
     extract_hash_policy_by_version,
 )
 from bioetl.composition.runtime_builders.config_access import load_pipeline_config
-from bioetl.composition.target_classification import (
+from bioetl.composition.bootstrap.runtime.publication_vocab_init import (
     preflight_workflow_target_dependencies,
     resolve_target_runtime_config,
     target_classification_config_source_refs,
@@ -54,7 +54,7 @@ def shadow_config(tmp_path: Path, monkeypatch) -> PipelineYamlConfig:
         test_mode=True, data_dir=tmp_path / "workflow-data", _env_file=None
     )
     monkeypatch.setattr(
-        "bioetl.composition.target_classification.get_settings", lambda: settings
+        "bioetl.composition.bootstrap.runtime.publication_vocab_init.get_settings", lambda: settings
     )
 
     def write(name: str, payload: object) -> dict[str, str]:
@@ -180,7 +180,7 @@ async def test_enrich_uses_v31_schema_and_identical_direct_staged_hash(
     from bioetl.composition.factories.storage._layer_writers import (
         load_contract_rollout_policy,
     )
-    from bioetl.composition.target_classification import (
+    from bioetl.composition.bootstrap.runtime.publication_vocab_init import (
         target_classification_normalization_identity,
     )
 
@@ -378,7 +378,7 @@ def test_workflow_resume_restores_and_forbids_replacing_pinned_dependency(
     )
 
     monkeypatch.setattr(
-        "bioetl.composition.target_classification.load_pipeline_config",
+        "bioetl.composition.bootstrap.runtime.publication_vocab_init.load_pipeline_config",
         lambda _: shadow_config,
     )
     config = WorkflowConfig(
@@ -449,7 +449,7 @@ def test_workflow_dependency_pins_profile_and_rechecks_bytes(
     shadow_config, monkeypatch, tmp_path
 ):
     monkeypatch.setattr(
-        "bioetl.composition.target_classification.load_pipeline_config",
+        "bioetl.composition.bootstrap.runtime.publication_vocab_init.load_pipeline_config",
         lambda _: shadow_config,
     )
     workflow = WorkflowConfig(
@@ -489,7 +489,7 @@ def test_workflow_resume_rejects_changed_dependency_identity(
     shadow_config, monkeypatch
 ):
     monkeypatch.setattr(
-        "bioetl.composition.target_classification.load_pipeline_config",
+        "bioetl.composition.bootstrap.runtime.publication_vocab_init.load_pipeline_config",
         lambda _: shadow_config,
     )
     workflow = WorkflowConfig(
@@ -505,7 +505,7 @@ def test_completed_resume_verifies_legacy_pin_without_new_enrich_admission(
     shadow_config, monkeypatch
 ):
     from bioetl.application.services.workflow.control_plane.mutation_plan import (
-        WorkflowMutationPlan,
+        WorkflowMutationSpec,
     )
 
     config = shadow_config.model_copy(
@@ -519,10 +519,10 @@ def test_completed_resume_verifies_legacy_pin_without_new_enrich_admission(
         "historic", steps=(WorkflowStepConfig("target", "chembl_target"),)
     )
     monkeypatch.setattr(
-        "bioetl.composition.target_classification.load_pipeline_config",
+        "bioetl.composition.bootstrap.runtime.publication_vocab_init.load_pipeline_config",
         lambda _: config,
     )
-    plan = WorkflowMutationPlan(frozenset(), resumed=True)
+    plan = WorkflowMutationSpec(frozenset(), resumed=True)
     binding = preflight_workflow_target_dependencies(workflow, {}, plan)
     assert (
         binding[TARGET_CLASSIFICATION_DEPENDENCY_KEY]["profile_sha256"]
@@ -756,7 +756,7 @@ async def test_real_runner_persists_both_layers_and_completes_evidence(
         from bioetl.domain.workflow import WorkflowRunOptionsConfig
 
         monkeypatch.setattr(
-            "bioetl.composition.target_classification.load_pipeline_config",
+            "bioetl.composition.bootstrap.runtime.publication_vocab_init.load_pipeline_config",
             lambda name: (
                 config if name == "chembl_target" else load_pipeline_config(name)
             ),

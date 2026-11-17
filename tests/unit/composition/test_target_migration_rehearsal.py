@@ -9,14 +9,14 @@ import pytest
 import yaml
 from deltalake import DeltaTable, write_deltalake
 
-from bioetl.composition.target_migration import (
+from bioetl.composition.bootstrap.runtime.composite_runtime_management_bundle import (
     bind_target_deployment,
     bind_target_rehearsal,
 )
 from bioetl.infrastructure.config.settings_api import Settings
 from bioetl.infrastructure.schemas.silver_chembl_core import CHEMBL_TARGET_SCHEMA
 from bioetl.infrastructure.storage.delta.schema_ops import coerce_null_types_for_delta
-from bioetl.infrastructure.storage.target_candidate_builder import (
+from bioetl.infrastructure.storage.target_candidates import (
     TargetCandidateBuildRequest,
     build_target_candidates,
     freeze_target_inputs,

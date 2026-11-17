@@ -1,0 +1,39 @@
+{
+    "terminal": {
+        "detect_venv": {
+            "on": {
+                "directories": [
+                    ".venv-win"
+                ],
+                "activate_script": "power_shell"
+            }
+        },
+        "env": {
+            "PYTHONPATH": "",
+                        "VCR_RECORD_MODE": "none",
+                        "PYTHONDONTWRITEBYTECODE": "1",
+            "PYTHONUTF8": "1",
+            "PYTHONIOENCODING": "utf-8"
+        }
+    },
+    "languages": {
+        "Python": {
+            "language_servers": [
+                "basedpyright",
+                "ruff"
+            ]
+        }
+    },
+    "file_scan_exclusions": [
+        "...",
+        "**/.venv-win",
+                "**/.venv-wsl",
+                "**/.worktrees",
+                "**/data/debug_exports",
+                "**/reports/coverage",
+                "**/.cache",
+        "**/.hypothesis",
+        "**/.uv-cache-*",
+        "**/test-output"
+    ]
+}

@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from bioetl.infrastructure.config.target_classification_profile import (
+    resolve_target_classification_profile,
+)
+
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -44,10 +48,6 @@ def load_contract_rollout_policy(config: PipelineYamlConfig) -> ContractRolloutP
         config.entity_type,
     )
     if (config.provider, config.entity_type) == ("chembl", "target"):
-        from bioetl.infrastructure.config.target_classification_profile import (
-            resolve_target_classification_profile,
-        )
-
         resolved_policy = resolve_target_classification_profile(
             config, policy
         ).contract_policy

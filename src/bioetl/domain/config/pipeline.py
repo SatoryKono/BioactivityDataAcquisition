@@ -123,6 +123,7 @@ class PipelineConfig:
             ("fields", "column_groups", "field_policy", "transform_steps"),
         )
         self._resolve_loading_strategy()
+        self._validate_target_classification_scope()
         self._validate_config()
 
     def _resolve_loading_strategy(self) -> None:
@@ -130,14 +131,17 @@ class PipelineConfig:
         resolved = resolve_loading_strategy(self.loading_strategy)
         object.__setattr__(self, "loading_strategy", resolved)
 
-    def _validate_config(self) -> None:
-        """Validate configuration values."""
-        if self.target_classification.enabled and (
-            self.provider != "chembl" or self.entity_type != "target"
-        ):
+    def _validate_target_classification_scope(self) -> None:
+        """Reject enabled classification outside the chembl target pipeline."""
+        if not self.target_classification.enabled:
+            return
+        if self.provider != "chembl" or self.entity_type != "target":
             raise ValueError(
                 "target classification is supported only for chembl_target"
             )
+
+    def _validate_config(self) -> None:
+        """Validate configuration values."""
         validations = [
             (not self.pipeline_name, "pipeline_name cannot be empty"),
             (not self.provider, "provider cannot be empty"),

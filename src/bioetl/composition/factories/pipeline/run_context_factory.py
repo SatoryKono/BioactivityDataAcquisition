@@ -2,6 +2,11 @@
 
 from __future__ import annotations
 
+from bioetl.composition.bootstrap.runtime.publication_vocab_init import (
+    target_classification_contract_schema_identity,
+    target_classification_normalization_identity,
+)
+
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
@@ -111,11 +116,6 @@ class RunContextFactory:
             strict=strict_contract_identity,
         )
         if self.pipeline_name == "chembl_target":
-            from bioetl.composition.target_classification import (
-                target_classification_contract_schema_identity,
-                target_classification_normalization_identity,
-            )
-
             target_identity = target_classification_contract_schema_identity(
                 yaml_config
             )

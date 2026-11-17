@@ -376,7 +376,10 @@ class TestDeltaReaderAndTableOpsLeftovers:
 
         pq.write_table(pa.table({"id": ["1"]}), first)
         pq.write_table(pa.table({"id": ["2"]}), second)
-        table = SimpleNamespace(file_uris=lambda: [str(first), str(second)])
+        table = SimpleNamespace(
+            file_uris=lambda: [str(first), str(second)],
+            metadata=lambda: SimpleNamespace(partition_columns=[]),
+        )
         rows = _read_records_from_active_parquet_files(table)
         assert [row["id"] for row in rows] == ["1", "2"]
 

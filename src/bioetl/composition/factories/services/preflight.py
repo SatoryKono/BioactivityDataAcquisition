@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from functools import partial
 from pathlib import Path
-from typing import Protocol, runtime_checkable
 
 from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.preflight import (
@@ -17,15 +16,14 @@ from bioetl.domain.medallion import WriteModePolicy
 from bioetl.domain.ports import HealthMonitorPort, LoggerPort
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.time import SystemClock
-from bioetl.composition.target_classification import validate_target_runtime_dependency
+from bioetl.composition.bootstrap.runtime.publication_vocab_init import validate_target_runtime_dependency
 from bioetl.infrastructure.storage.target_classification_guard import (
     assert_target_table_compatibility,
 )
 
 
-@runtime_checkable
-class _TablePathResolver(Protocol):
-    def _resolve_table_path(self, table_name: str) -> str: ...
+def _resolves_table_path(value: object) -> bool:
+    return callable(getattr(value, "_resolve_table_path", None))
 
 
 def build_preflight_service(
@@ -73,9 +71,7 @@ def _validate_target_dependencies(
     storage = pipeline.services.storage
     silver = getattr(storage, "silver", None)
     gold = getattr(storage, "gold", None)
-    if not isinstance(silver, _TablePathResolver) or not isinstance(
-        gold, _TablePathResolver
-    ):
+    if not _resolves_table_path(silver) or not _resolves_table_path(gold):
         raise TypeError(
             "target preflight requires actual Silver and Gold table path resolvers"
         )

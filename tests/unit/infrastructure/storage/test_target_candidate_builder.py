@@ -8,7 +8,7 @@ import pytest
 import yaml
 from deltalake import write_deltalake
 
-from bioetl.infrastructure.storage import target_candidate_builder as builder
+from bioetl.infrastructure.storage import target_candidates as builder
 from bioetl.infrastructure.storage import target_migration_validation as validation
 from bioetl.infrastructure.storage.delta.schema_ops import coerce_null_types_for_delta
 from bioetl.infrastructure.storage.target_classification_migration import (

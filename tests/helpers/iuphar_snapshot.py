@@ -8,7 +8,7 @@ from pathlib import Path
 
 from bioetl.infrastructure.adapters.iuphar._manifest import sha256
 from bioetl.infrastructure.adapters.iuphar._official_targets_csv import SPECIES_COLUMNS
-from bioetl.infrastructure.adapters.iuphar.snapshot_builder import build_snapshot_bundle
+from bioetl.infrastructure.adapters.iuphar.snapshot_payload import build_snapshot_bundle
 from iuphar_target_class.stage0.io import canonical_json_bytes
 
 

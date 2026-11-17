@@ -6,7 +6,7 @@ from collections.abc import Mapping
 from dataclasses import replace
 from typing import cast
 
-from bioetl.domain.target_classification import (
+from bioetl.domain.entities.target_classification_boundary import (
     TargetClassificationArtifact,
     TargetClassificationBatch,
     TargetClassificationInput,

@@ -110,6 +110,9 @@ INCIDENT_RUNBOOK_ALERT_SEMANTICS_TEST = (
 DOCUMENTATION_CLEANUP_INVENTORY_TEST = (
     "tests/architecture/test_documentation_cleanup_inventory.py"
 )
+TECH_DEBT_ISSUE_6038_GOVERNANCE_TAXONOMY_TEST = (
+    "tests/architecture/test_tech_debt_issue_6038_governance_taxonomy.py"
+)
 NIGHTLY_SHADOW_ARCHIVE_TEST = (
     "tests/unit/scripts/engineering/ci/test_nightly_shadow_archive.py"
 )
@@ -693,7 +696,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             CODEX_NATIVE_RUNTIME_TEST,
             JUNIE_RUNTIME_CI_TEST,
             "tests/architecture/test_gitignore_secret_and_agents_policy.py",
-            "tests/architecture/test_tech_debt_issue_6038_governance_taxonomy.py",
+            TECH_DEBT_ISSUE_6038_GOVERNANCE_TAXONOMY_TEST,
             *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
         ),
     ),
@@ -777,7 +780,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "docs/04-reference/contracts/gold-schemas.md": (
         "tests/architecture/test_gold_strict_validation_policy.py",
         "tests/architecture/test_issue_12029_remaining_parity_gates.py",
-        "tests/architecture/test_tech_debt_issue_6038_governance_taxonomy.py",
+        TECH_DEBT_ISSUE_6038_GOVERNANCE_TAXONOMY_TEST,
         "tests/integration/config/test_semantic_field_unification_contract.py",
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
@@ -816,7 +819,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/architecture/test_grok_subagent_least_privilege.py",
     ),
     "docs/00-project/NORMATIVE_SOURCES.md": (
-        "tests/architecture/test_tech_debt_issue_6038_governance_taxonomy.py",
+        TECH_DEBT_ISSUE_6038_GOVERNANCE_TAXONOMY_TEST,
         AI_RUNTIME_GOVERNANCE_LINKS_TEST,
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),

@@ -17,7 +17,7 @@ from bioetl.domain.workflow import (
 
 
 @dataclass(frozen=True, slots=True)
-class WorkflowMutationPlan:
+class WorkflowMutationSpec:
     """Which configured steps can execute, without trusting caller launch metadata."""
 
     pending_step_ids: frozenset[str]
@@ -30,10 +30,10 @@ def build_workflow_mutation_plan(
     *,
     force_steps: tuple[str, ...] = (),
     repair_steps: tuple[str, ...] = (),
-) -> WorkflowMutationPlan:
+) -> WorkflowMutationSpec:
     """Use the runner's persisted success/selector/fingerprint skip semantics."""
     if state is None:
-        return WorkflowMutationPlan(frozenset(config.step_ids))
+        return WorkflowMutationSpec(frozenset(config.step_ids))
     skipped = resolve_skipped_step_ids(
         state=state, force_steps=force_steps, repair_steps=repair_steps
     )
@@ -49,6 +49,6 @@ def build_workflow_mutation_plan(
         and completed.get(step.step_id)
         == WorkflowTransformSpec.from_step(step).fingerprint
     }
-    return WorkflowMutationPlan(
+    return WorkflowMutationSpec(
         frozenset(config.step_ids).difference(skipped, cached_transforms), resumed=True
     )

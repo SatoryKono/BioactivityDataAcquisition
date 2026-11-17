@@ -7,12 +7,15 @@ import re
 from collections.abc import Mapping, Sequence
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, cast
+from typing import cast
 
+import pandas as pd
 import psutil
 import yaml
+from pandera.pandas import DataFrameModel, DataFrameSchema
 
 from bioetl.domain.config.target_classification import TARGET_CLASSIFICATION_FIELDS
+from bioetl.domain.normalization.profiles.base import NormalizationProfile
 from bioetl.domain.normalization.profiles.chembl_target import CHEMBL_TARGET_PROFILE
 from bioetl.domain.normalization.profiles.chembl_target_classification import (
     target_v31_normalization_profile,
@@ -22,16 +25,10 @@ from bioetl.domain.transformations import generate_content_hash
 from bioetl.infrastructure.adapters.iuphar.adapter import (
     IupharTargetClassificationAdapter,
 )
-from bioetl.infrastructure.adapters.iuphar.snapshot_loader import load_profile
-
-if TYPE_CHECKING:
-    from pandas import DataFrame
-    from pandera.pandas import DataFrameModel, DataFrameSchema
-
-    from bioetl.domain.normalization.profiles.base import NormalizationProfile
-    from bioetl.infrastructure.adapters.iuphar.snapshot_loader import (
-        LoadedIupharProfile,
-    )
+from bioetl.infrastructure.adapters.iuphar.snapshot_loader import (
+    LoadedIupharProfile,
+    load_profile,
+)
 
 _META = frozenset({"entity_id", "content_hash"})
 _LEGACY_PHYSICAL_POLICY = "legacy_physical_target_v30_to_v31_v1"
@@ -295,8 +292,6 @@ def _validate_physical_projection(
     nullable description is represented as unknown in the validation view,
     never materialized into the preserved rows or used as invented provenance.
     """
-    import pandas as pd
-
     previous, current = _physical_columns(old), _physical_columns(new)
     if previous.intersection(TARGET_CLASSIFICATION_FIELDS):
         raise ValueError("physical target migration requires a legacy V30 cohort")
@@ -328,7 +323,7 @@ def _validate_physical_projection(
 
 
 def _logical_nullable_absences(
-    layer: str, previous: set[str], schema: DataFrameSchema, frame: DataFrame
+    layer: str, previous: set[str], schema: DataFrameSchema, frame: pd.DataFrame
 ) -> list[str]:
     if layer != "gold" or "description" in previous:
         return []

@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from bioetl.composition.bootstrap.runtime.publication_vocab_init import (
+    target_classification_source_refs,
+)
+
 from collections.abc import Callable
 
 from dataclasses import dataclass
@@ -95,10 +99,6 @@ def build_manifest_source_refs(
         required_persistence_profile=required_persistence_profile,
     )
     if ctx.pipeline_name == "chembl_target":
-        from bioetl.composition.target_classification import (
-            target_classification_source_refs,
-        )
-
         refs += target_classification_source_refs(inputs.yaml_config)
     return refs
 

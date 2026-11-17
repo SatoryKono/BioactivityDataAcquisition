@@ -14,14 +14,14 @@ if TYPE_CHECKING:
         TargetClassificationEvidencePort,
         TargetClassificationPort,
     )
-    from bioetl.domain.target_classification import (
+    from bioetl.domain.entities.target_classification_boundary import (
         TargetClassificationArtifactReference,
         TargetClassificationResult,
     )
 
 
 @dataclass(slots=True)
-class TargetClassificationSession:
+class TargetClassificationRunState:
     """Keep filesystem effects out of transformer classification callbacks."""
 
     classifier: TargetClassificationPort
@@ -94,4 +94,4 @@ class TargetClassificationSession:
         return reference
 
 
-__all__ = ["TargetClassificationSession"]
+__all__ = ["TargetClassificationRunState"]

@@ -11,7 +11,7 @@ from urllib.request import url2pathname
 
 import pytest
 
-from bioetl.domain.target_classification import (
+from bioetl.domain.entities.target_classification_boundary import (
     TargetClassificationArtifact,
     TargetClassificationInput,
 )

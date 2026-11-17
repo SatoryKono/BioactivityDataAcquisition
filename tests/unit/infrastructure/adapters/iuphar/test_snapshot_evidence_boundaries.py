@@ -7,7 +7,7 @@ import json
 import pytest
 
 from bioetl.infrastructure.adapters.iuphar._manifest import sha256
-from bioetl.infrastructure.adapters.iuphar.snapshot_builder import build_snapshot_bundle
+from bioetl.infrastructure.adapters.iuphar.snapshot_payload import build_snapshot_bundle
 from iuphar_target_class.stage0.io import canonical_json_bytes
 from tests.helpers.iuphar_snapshot import (
     synthetic_snapshot_sources,

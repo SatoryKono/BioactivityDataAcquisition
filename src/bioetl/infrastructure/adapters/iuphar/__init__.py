@@ -1,5 +1,8 @@
 """Offline IUPHAR adapter; loading and artifact publication are explicit."""
 
+from __future__ import annotations
+
+from ._manifest import decode_json
 from .adapter import IupharTargetClassificationAdapter
 from .evidence_store import LocalTargetClassificationEvidenceStore
 from .snapshot_loader import (
@@ -12,6 +15,7 @@ from .snapshot_loader import (
 )
 
 __all__ = [
+    "decode_json",
     "IupharTargetClassificationAdapter",
     "LoadedIupharProfile",
     "LoadedIupharSnapshot",

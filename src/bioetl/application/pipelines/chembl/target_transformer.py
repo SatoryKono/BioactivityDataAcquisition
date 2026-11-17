@@ -24,8 +24,8 @@ from bioetl.application.pipelines.chembl.target_helpers import (
     SynonymHelper,
     XrefHelper,
 )
-from bioetl.application.services.target_classification import (
-    TargetClassificationSession,
+from bioetl.application.services.target_runtime.classification import (
+    TargetClassificationRunState,
 )
 from bioetl.domain.entities import Target
 from bioetl.domain.types import GoldRecord, JsonDict
@@ -42,10 +42,10 @@ class TargetTransformer(BaseChemblTransformer):
     entity_class = Target
     primary_id_field = "target_id"
     _PROVIDER_ALIASES: ClassVar[dict[str, str]] = {"target_id": "target_chembl_id"}
-    _target_classification_session: TargetClassificationSession | None = None
+    _target_classification_session: TargetClassificationRunState | None = None
 
     def configure_target_classification(
-        self, session: TargetClassificationSession
+        self, session: TargetClassificationRunState
     ) -> None:
         """Bind the run-owned collaborator exactly once from Composition."""
         if self._target_classification_session is not None:

@@ -6,7 +6,7 @@ import re
 from pathlib import Path
 from threading import RLock
 
-from bioetl.domain.target_classification import (
+from bioetl.domain.entities.target_classification_boundary import (
     TargetClassificationArtifactReference,
     TargetClassificationResult,
 )

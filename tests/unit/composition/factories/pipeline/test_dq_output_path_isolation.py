@@ -13,7 +13,7 @@ from bioetl.application.pipelines.chembl.target_transformer import TargetTransfo
 from bioetl.composition.factories.dq.context_resolver import extract_dq_output_paths
 from bioetl.composition.factories.pipeline.assembler import create_pipeline_factory
 from bioetl.composition.factories.pipeline.registry import chembl_target_factory
-from bioetl.composition.factories.storage.target_paths import resolve_target_table_paths
+from bioetl.composition.factories.dq.composite_validation import resolve_target_table_paths
 from bioetl.composition.runtime_builders.config_access import load_pipeline_config
 from bioetl.domain.config import RuntimeConfig
 from bioetl.domain.ports import PipelineCreateRunnerRequest

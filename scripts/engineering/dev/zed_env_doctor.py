@@ -2,7 +2,7 @@
 """Zed environment doctor (stdlib-only).
 
 Validates the native-Windows project interpreter (``.venv-win``) and the
-import surface required by tracked Zed tasks. Emits actionable recovery
+import surface used by local Zed helpers. Emits actionable recovery
 guidance instead of raw ``ModuleNotFoundError`` traces.
 
 Does not install or upgrade dependencies.
@@ -13,9 +13,12 @@ from __future__ import annotations
 import importlib.util
 import os
 import sys
+import tomllib
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
+from importlib import metadata
 from pathlib import Path
+from typing import cast
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 VENV_DIRNAME = ".venv-win"
@@ -24,7 +27,7 @@ VENV_PYTHON_REL = Path(VENV_DIRNAME) / "Scripts" / "python.exe"
 # Supported product Python floor for BioETL local Zed work.
 MIN_PYTHON = (3, 12)
 
-# Modules required by tracked `.zed/tasks.json` quality/test surfaces.
+# Modules required by the local Zed quality/test helpers.
 DEFAULT_REQUIRED_MODULES: tuple[str, ...] = (
     "pytest",
     "pytest_cov",
@@ -46,6 +49,16 @@ MODULE_LABELS: dict[str, str] = {
 }
 
 SETUP_HINT = r".\scripts\engineering\dev\setup_env_windows.ps1"
+
+# Explicit scope avoids requiring unrelated optional tools for a single-tool task.
+LOCKED_TOOLS: tuple[str, ...] = (
+    "ruff",
+    "mypy",
+    "basedpyright",
+    "pyrefly",
+    "ty",
+    "pytest",
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -144,6 +157,78 @@ def check_modules(modules: Iterable[str]) -> list[Finding]:
     return findings
 
 
+def _locked_tool_versions(lock_path: Path, tools: Sequence[str]) -> dict[str, str]:
+    with lock_path.open("rb") as stream:
+        document = cast(dict[str, object], tomllib.load(stream))
+    raw_packages = document.get("package", [])
+    if not isinstance(raw_packages, list):
+        raise ValueError("expected uv.lock package tables")
+    packages: list[dict[str, object]] = []
+    for package in cast(list[object], raw_packages):
+        if not isinstance(package, dict):
+            raise ValueError("expected uv.lock package tables")
+        packages.append(cast(dict[str, object], package))
+    versions: dict[str, str] = {}
+    for tool in tools:
+        matches: set[str] = set()
+        for package in packages:
+            if package.get("name") == tool:
+                version = package.get("version")
+                if not isinstance(version, str):
+                    raise ValueError(f"expected a locked version for {tool}")
+                matches.add(version)
+        if len(matches) != 1:
+            raise ValueError(f"expected one locked version for {tool}")
+        versions[tool] = matches.pop()
+    return versions
+
+
+def check_locked_versions(
+    modules: Iterable[str] = LOCKED_TOOLS,
+    *,
+    repo_root: Path | None = None,
+) -> list[Finding]:
+    """Compare selected tool distributions to uv.lock without importing tools."""
+    tools = tuple(dict.fromkeys(module for module in modules if module in LOCKED_TOOLS))
+    if not tools:
+        return []
+    root = REPO_ROOT if repo_root is None else repo_root
+    try:
+        expected_versions = _locked_tool_versions(root / "uv.lock", tools)
+    except (OSError, UnicodeError, ValueError) as exc:
+        return [
+            Finding(
+                code="invalid_lockfile",
+                message=f"Cannot verify tool versions from uv.lock: {exc}",
+                recovery="Restore or explicitly regenerate uv.lock, then run "
+                + SETUP_HINT,
+            )
+        ]
+
+    findings: list[Finding] = []
+    for tool, expected in expected_versions.items():
+        try:
+            installed = metadata.version(tool)
+        except metadata.PackageNotFoundError:
+            findings.append(
+                Finding(
+                    code="missing_distribution",
+                    message=f"Required tool distribution is missing: {tool}",
+                    recovery=f"Install locked project tools with: {SETUP_HINT}",
+                )
+            )
+            continue
+        if installed != expected:
+            findings.append(
+                Finding(
+                    code="locked_version_mismatch",
+                    message=f"{tool} {installed} is installed; uv.lock requires {expected}.",
+                    recovery=f"Sync the existing project environment with: {SETUP_HINT}",
+                )
+            )
+    return findings
+
+
 def check_workdir(
     *, repo_root: Path | None = None, cwd: Path | None = None
 ) -> list[Finding]:
@@ -178,6 +263,11 @@ def diagnose(
         findings.extend(check_interpreter(repo_root=repo_root, executable=executable))
     findings.extend(check_workdir(repo_root=repo_root, cwd=cwd))
     findings.extend(check_modules(required))
+    findings.extend(
+        check_locked_versions(
+            LOCKED_TOOLS if modules is None else required, repo_root=repo_root
+        )
+    )
     return findings
 
 
@@ -186,7 +276,7 @@ def format_report(findings: Sequence[Finding]) -> str:
     if not findings:
         return (
             "[zed_env_doctor] ok: .venv-win interpreter and required "
-            "task imports are available\n"
+            "task imports and locked tool versions are available\n"
         )
 
     lines = [
@@ -235,7 +325,7 @@ def main(argv: list[str] | None = None) -> int:
         sys.stdout.write(
             "Usage: python scripts/engineering/dev/zed_env_doctor.py "
             "[--require MODULE ...]\n"
-            "Validates .venv-win and imports used by Zed tasks. "
+            "Validates .venv-win, task imports, and tool versions from uv.lock. "
             "Does not install packages.\n"
         )
         return 0

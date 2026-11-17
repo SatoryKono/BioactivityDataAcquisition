@@ -100,12 +100,14 @@ def test_rag_readiness_rejects_workflow_pair_when_full_is_required(
     )
 
 
-def test_timeline_readiness_rejects_tampered_projection(tmp_path: Path) -> None:
-    events_dir = tmp_path / "events"
+def test_timeline_readiness_rejects_tampered_projection(
+    memory_local_tmp_path: Path,
+) -> None:
+    events_dir = memory_local_tmp_path / "events"
     events_dir.mkdir()
     events = events_dir / "ci.jsonl"
     events.write_text('{"id":"ci::one"}\n', encoding="utf-8")
-    write_timeline_manifest(tmp_path, events_dir)
+    write_timeline_manifest(memory_local_tmp_path, events_dir)
 
     assert timeline_events_ready(events_dir) is True
 

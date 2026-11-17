@@ -12,7 +12,7 @@ from bioetl.domain.ports import (
     TargetClassificationEvidencePort,
     TargetClassificationPort,
 )
-from bioetl.domain.target_classification import (
+from bioetl.domain.entities.target_classification_boundary import (
     TargetClassificationArtifact,
     TargetClassificationInput,
 )

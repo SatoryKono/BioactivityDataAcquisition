@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Protocol, runtime_checkable
 
-from bioetl.domain.target_classification import (
+from bioetl.domain.entities.target_classification_boundary import (
     TargetClassificationArtifactReference,
     TargetClassificationBatch,
     TargetClassificationInput,
@@ -29,7 +29,15 @@ class TargetClassificationPort(Protocol):
         input_row_id: str,
         run_id: str,
         run_started_at: str,
-    ) -> TargetClassificationResult: ...
+    ) -> TargetClassificationResult:
+        """Classify one normalized row.
+
+        Args:
+            business_data: Normalized business fields.
+            input_row_id: Stable source-row identity.
+            run_id: Owning pipeline run.
+            run_started_at: UTC start timestamp for the run.
+        """
 
     def classify_batch(
         self,
@@ -37,7 +45,14 @@ class TargetClassificationPort(Protocol):
         *,
         run_id: str,
         run_started_at: str,
-    ) -> TargetClassificationBatch: ...
+    ) -> TargetClassificationBatch:
+        """Classify one immutable batch.
+
+        Args:
+            inputs: Normalized rows for this batch.
+            run_id: Owning pipeline run.
+            run_started_at: UTC start timestamp for the run.
+        """
 
 
 @runtime_checkable
@@ -50,11 +65,24 @@ class TargetClassificationEvidencePort(Protocol):
         *,
         run_id: str,
         batch_id: str,
-    ) -> TargetClassificationArtifactReference: ...
+    ) -> TargetClassificationArtifactReference:
+        """Publish one classified row without replacing a conflicting artifact.
+
+        Args:
+            result: Classified row to persist.
+            run_id: Owning pipeline run.
+            batch_id: Source batch that produced the row.
+        """
 
     def finalize_run(
         self, *, run_id: str, expected_row_ids: tuple[str, ...]
-    ) -> TargetClassificationArtifactReference: ...
+    ) -> TargetClassificationArtifactReference:
+        """Close the run only when every expected row is present.
+
+        Args:
+            run_id: Owning pipeline run.
+            expected_row_ids: Row identities the run must have published.
+        """
 
 
 __all__ = ["TargetClassificationEvidencePort", "TargetClassificationPort"]

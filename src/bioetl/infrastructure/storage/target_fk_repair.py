@@ -7,7 +7,6 @@ New target rows must first pass the actual pipeline in an isolated data root.
 from __future__ import annotations
 
 import hashlib
-import json
 import shutil
 from collections.abc import Mapping
 from dataclasses import dataclass
@@ -15,6 +14,7 @@ from pathlib import Path
 from typing import cast
 from urllib.parse import urlparse
 
+import orjson
 import pyarrow as pa
 from deltalake import DeltaTable, write_deltalake
 
@@ -29,13 +29,11 @@ def _sha256(path: Path) -> str:
 
 
 def _json_bytes(value: object) -> bytes:
-    return json.dumps(
-        value, sort_keys=True, separators=(",", ":"), default=str, allow_nan=False
-    ).encode("utf-8")
+    return orjson.dumps(value, default=str, option=orjson.OPT_SORT_KEYS)
 
 
 def _object(path: Path) -> dict[str, object]:
-    value = json.loads(path.read_bytes())
+    value = orjson.loads(path.read_bytes())
     if not isinstance(value, dict):
         raise ValueError(f"Expected JSON object: {path}")
     return cast(dict[str, object], value)
@@ -163,7 +161,7 @@ def _check_receipt(entry: Mapping[str, object], path: Path) -> None:
 
 
 def _read_acquisition(root: Path) -> dict[str, dict[str, object]]:
-    receipts = json.loads((root / _ACQUISITION_JSON).read_bytes())
+    receipts = orjson.loads((root / _ACQUISITION_JSON).read_bytes())
     if not isinstance(receipts, list) or len(receipts) != 2:
         raise ValueError("Expected exactly targets/status acquisition receipts")
     by_role = {

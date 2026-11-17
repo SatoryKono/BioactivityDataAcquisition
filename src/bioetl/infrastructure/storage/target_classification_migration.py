@@ -7,7 +7,7 @@ tables/configuration. It never promotes an unvalidated limit-1000 subset.
 
 from __future__ import annotations
 
-import json
+import orjson
 import os
 import shutil
 from collections.abc import Iterator, Mapping
@@ -237,7 +237,7 @@ def promote_target_migration(
     with _lock(paths.workspace):
         state = cast(
             "TargetMigrationJournal",
-            json.loads((checked["backup"] / _JOURNAL_JSON).read_bytes()),
+            orjson.loads((checked["backup"] / _JOURNAL_JSON).read_bytes()),
         )
         _assert_prepared_identity(checked, state, deployment)
         verify_target_dependencies(paths.workspace, state["dependencies"])
@@ -301,7 +301,7 @@ def rollback_target_migration(paths: TargetMigrationPaths) -> TargetMigrationJou
     with _lock(paths.workspace):
         state = cast(
             "TargetMigrationJournal",
-            json.loads((checked["backup"] / _JOURNAL_JSON).read_bytes()),
+            orjson.loads((checked["backup"] / _JOURNAL_JSON).read_bytes()),
         )
         if state["phase"] not in {"promoted", "promoting"}:
             raise ValueError("migration has no activated bundle to restore")

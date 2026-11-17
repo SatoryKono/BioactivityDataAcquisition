@@ -18,7 +18,7 @@ from bioetl.application.services.run_reports.observations import (
     bind_run_observations,
     reset_run_observations,
 )
-from bioetl.application.services.target_classification_scope import (
+from bioetl.application.services.target_runtime.scope import (
     TARGET_CLASSIFICATION_DEPENDENCY_KEY,
     bind_target_classification_dependency,
     reset_target_classification_dependency,
@@ -45,7 +45,7 @@ from bioetl.application.services.workflow.control_plane.execution_recording impo
     record_workflow_started,
 )
 from bioetl.application.services.workflow.control_plane.mutation_plan import (
-    WorkflowMutationPlan,
+    WorkflowMutationSpec,
     build_workflow_mutation_plan,
 )
 from bioetl.application.services.workflow.control_plane.selected_snapshot_resume import (
@@ -97,7 +97,7 @@ class WorkflowExecutionService:
     run_id_factory: Callable[[], RunID] = _missing_run_id_factory
     dependency_preflight: (
         Callable[
-            [WorkflowConfig, dict[str, object], WorkflowMutationPlan], dict[str, object]
+            [WorkflowConfig, dict[str, object], WorkflowMutationSpec], dict[str, object]
         ]
         | None
     ) = None
@@ -169,42 +169,17 @@ class WorkflowExecutionService:
                 dependency_token = bind_target_classification_dependency(
                     binding if isinstance(binding, dict) else None
                 )
-                prepared = prepare_workflow_execution(
+                return await self._run_bound_workflow(
                     config=config,
-                    launch_context=resolved_launch_context,
+                    resolved_launch_context=resolved_launch_context,
                     resume_last=resume_last,
                     resume_manifest_id=resume_manifest_id,
                     resume_run_id=resume_run_id,
                     force_steps=force_steps,
                     repair_steps=repair_steps,
-                    manifest_service=self.manifest_service,
-                    workflow_state_port=self.workflow_state_port,
-                    now_factory=self.now_factory,
-                    run_id_factory=lambda: lock_owner_id,
-                    incremental=prepare_incremental,
-                )
-                ledger = self.workflow_ledger_factory(
-                    self.workflow_ledger_port,
-                    prepared.manifest,
-                )
-                return await _run_locked_workflow(
-                    runner=self.workflow_runner,
-                    recorder=WorkflowExecutionRecorder(
-                        ledger=ledger,
-                        state_port=self.workflow_state_port,
-                        state=prepared.state,
-                    ),
-                    prepared_manifest=prepared.manifest,
-                    completed_step_ids=prepared.completed_step_ids,
-                    completed_transform_fingerprints=(
-                        prepared.completed_transform_fingerprints
-                    ),
-                    config=prepared.config,
-                    resumed=prepared.resumed,
-                    repair_steps=repair_steps,
-                    force_steps=force_steps,
-                    now_factory=self.now_factory,
+                    prepare_incremental=prepare_incremental,
                     incremental=incremental,
+                    lock_owner_id=lock_owner_id,
                 )
             finally:
                 if dependency_token is not None:
@@ -216,6 +191,58 @@ class WorkflowExecutionService:
                 lock_owner_id,
                 exclusive=True,
             )
+
+    async def _run_bound_workflow(
+        self,
+        *,
+        config: WorkflowConfig,
+        resolved_launch_context: dict[str, object],
+        resume_last: bool,
+        resume_manifest_id: str | None,
+        resume_run_id: RunID | str | None,
+        force_steps: tuple[str, ...],
+        repair_steps: tuple[str, ...],
+        prepare_incremental: bool,
+        incremental: bool,
+        lock_owner_id: str,
+    ) -> WorkflowRunExecutionResult:
+        prepared = prepare_workflow_execution(
+            config=config,
+            launch_context=resolved_launch_context,
+            resume_last=resume_last,
+            resume_manifest_id=resume_manifest_id,
+            resume_run_id=resume_run_id,
+            force_steps=force_steps,
+            repair_steps=repair_steps,
+            manifest_service=self.manifest_service,
+            workflow_state_port=self.workflow_state_port,
+            now_factory=self.now_factory,
+            run_id_factory=lambda: lock_owner_id,
+            incremental=prepare_incremental,
+        )
+        ledger = self.workflow_ledger_factory(
+            self.workflow_ledger_port,
+            prepared.manifest,
+        )
+        return await _run_locked_workflow(
+            runner=self.workflow_runner,
+            recorder=WorkflowExecutionRecorder(
+                ledger=ledger,
+                state_port=self.workflow_state_port,
+                state=prepared.state,
+            ),
+            prepared_manifest=prepared.manifest,
+            completed_step_ids=prepared.completed_step_ids,
+            completed_transform_fingerprints=(
+                prepared.completed_transform_fingerprints
+            ),
+            config=prepared.config,
+            resumed=prepared.resumed,
+            repair_steps=repair_steps,
+            force_steps=force_steps,
+            now_factory=self.now_factory,
+            incremental=incremental,
+        )
 
     def record_expected_pipeline_metrics(self, config: WorkflowConfig) -> None:
         """Record planned pipeline scopes for workflow-backed selectors."""

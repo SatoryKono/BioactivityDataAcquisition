@@ -45,11 +45,12 @@ if ((Test-Path (Join-Path $RepoRoot ".venv")) -and -not (Test-Path (Join-Path $R
 }
 
 if (Get-Command uv -ErrorAction SilentlyContinue) {
+    Invoke-CheckedCommand -Command { uv lock --check } -ErrorMessage "[setup_env_windows][error] uv.lock is stale or unavailable; update it explicitly before setup."
     Invoke-CheckedCommand -Command { uv venv $VenvDir --python 3.13 --allow-existing } -ErrorMessage "[setup_env_windows][error] uv venv failed."
 
     $env:VIRTUAL_ENV = $VenvDir
     $env:PATH = "$VenvDir\Scripts;$env:PATH"
-    & uv sync --active --extra dev --extra tests --extra tracing
+    & uv sync --active --frozen --extra dev --extra tests --extra tracing
     if ($LASTEXITCODE -ne 0) {
         Write-Error "[setup_env_windows][error] uv sync failed."
         Write-Host "[setup_env_windows][hint] Retry with the same command; UV_HTTP_TIMEOUT defaults to $env:UV_HTTP_TIMEOUT seconds."

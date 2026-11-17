@@ -32,7 +32,6 @@ class _PreSilverFinalizationFlowMixin:
         return business_data
 
     def _publish_business_evidence(self, context: PipelineContext, index: int) -> None:
-        """Keep evidence I/O in the injected application observer."""
         observer = getattr(self, "_business_evidence_observer", None)
         if observer is not None:
             observer(context, index)

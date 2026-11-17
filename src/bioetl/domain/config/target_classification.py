@@ -7,6 +7,32 @@ from dataclasses import dataclass
 from typing import Literal
 
 TargetClassificationMode = Literal["off", "shadow", "enrich"]
+_TARGET_CLASSIFICATION_MODES = frozenset({"off", "shadow", "enrich"})
+
+
+def _validate_target_classification_mode(mode: str) -> None:
+    if mode not in _TARGET_CLASSIFICATION_MODES:
+        raise ValueError("target classification mode must be off, shadow or enrich")
+
+
+def _validate_manifest_hash(digest: str | None) -> None:
+    if digest is not None and re.fullmatch(r"[0-9a-f]{64}", digest) is None:
+        raise ValueError("target classification manifest hash must be SHA-256 hex")
+
+
+def _validate_target_classification_manifest(
+    mode: str,
+    manifest: str | None,
+    digest: str | None,
+) -> None:
+    if manifest is not None and not manifest.strip():
+        raise ValueError("target classification manifest must not be blank")
+    _validate_manifest_hash(digest)
+    if (manifest is not None) != (digest is not None):
+        raise ValueError("target classification manifest and hash must be paired")
+    if mode != "off" and manifest is None:
+        raise ValueError("enabled target classification requires a pinned manifest")
+
 
 TARGET_CLASSIFICATION_FIELDS: tuple[str, ...] = (
     "iuphar_target_id",
@@ -34,19 +60,12 @@ class TargetClassificationConfig:
     snapshot_manifest_sha256: str | None = None
 
     def __post_init__(self) -> None:
-        if self.mode not in {"off", "shadow", "enrich"}:
-            raise ValueError("target classification mode must be off, shadow or enrich")
-        if self.snapshot_manifest is not None and not self.snapshot_manifest.strip():
-            raise ValueError("target classification manifest must not be blank")
-        if self.snapshot_manifest_sha256 is not None and not re.fullmatch(
-            r"[0-9a-f]{64}", self.snapshot_manifest_sha256
-        ):
-            raise ValueError("target classification manifest hash must be SHA-256 hex")
-        supplied = self.snapshot_manifest is not None
-        if supplied != (self.snapshot_manifest_sha256 is not None):
-            raise ValueError("target classification manifest and hash must be paired")
-        if self.mode != "off" and not supplied:
-            raise ValueError("enabled target classification requires a pinned manifest")
+        _validate_target_classification_mode(self.mode)
+        _validate_target_classification_manifest(
+            self.mode,
+            self.snapshot_manifest,
+            self.snapshot_manifest_sha256,
+        )
 
     @property
     def enabled(self) -> bool:

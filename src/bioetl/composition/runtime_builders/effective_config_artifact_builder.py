@@ -26,7 +26,7 @@ from bioetl.composition.runtime_builders._effective_config_artifact_builder_supp
 from bioetl.domain.control_plane.effective_config_artifact import (
     ConfigResolutionPolicy,
 )
-from bioetl.composition.target_classification import (
+from bioetl.composition.bootstrap.runtime.publication_vocab_init import (
     target_classification_config_source_refs,
 )
 

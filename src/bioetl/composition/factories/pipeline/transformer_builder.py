@@ -2,6 +2,17 @@
 
 from __future__ import annotations
 
+from bioetl.application.pipelines.chembl.target_transformer import (
+    TargetTransformer,
+)
+from bioetl.composition.runtime_builders.config_access import get_settings
+from bioetl.composition.bootstrap.runtime.publication_vocab_init import (
+    build_target_classification_session,
+)
+from bioetl.application.pipelines.chembl.target_classified_transformer import (
+    TargetClassifiedTransformer,
+)
+
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
@@ -104,14 +115,6 @@ class TransformerBuilder:
             **publication_vocabulary_kwargs(transformer_class),
         )
         if target_profile is not None and target_profile.config.enabled:
-            from bioetl.application.pipelines.chembl.target_transformer import (
-                TargetTransformer,
-            )
-            from bioetl.composition.runtime_builders.config_access import get_settings
-            from bioetl.composition.target_classification import (
-                build_target_classification_session,
-            )
-
             if not isinstance(transformer, TargetTransformer):
                 raise TypeError("target classification requires a TargetTransformer")
             session = build_target_classification_session(
@@ -150,10 +153,6 @@ class TransformerBuilder:
         )
         selected = transformer_class
         if target_profile.config.mode == "enrich":
-            from bioetl.application.pipelines.chembl.target_classified_transformer import (
-                TargetClassifiedTransformer,
-            )
-
             selected = TargetClassifiedTransformer
         return (
             selected,

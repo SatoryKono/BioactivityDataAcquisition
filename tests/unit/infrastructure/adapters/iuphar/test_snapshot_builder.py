@@ -8,7 +8,7 @@ import pytest
 
 from bioetl.infrastructure.adapters.iuphar import load_profile, load_snapshot_manifest
 from bioetl.infrastructure.adapters.iuphar._manifest import sha256
-from bioetl.infrastructure.adapters.iuphar.snapshot_builder import build_snapshot_bundle
+from bioetl.infrastructure.adapters.iuphar.snapshot_payload import build_snapshot_bundle
 from iuphar_target_class.models import RawTargetRow, RunProvenance
 from iuphar_target_class.pipeline import classify_batch
 from iuphar_target_class.stage0.io import canonical_json_bytes

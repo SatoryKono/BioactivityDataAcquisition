@@ -6,10 +6,10 @@ import argparse
 import json
 from pathlib import Path
 
-from bioetl.composition.target_migration import bind_target_deployment
+from bioetl.composition.bootstrap.runtime.composite_runtime_management_bundle import bind_target_deployment
 from bioetl.infrastructure.config.config_root import resolve_configs_root
 from scripts.engineering.common.repo_paths import confined_io_path
-from bioetl.infrastructure.storage.target_candidate_builder import (
+from bioetl.infrastructure.storage.target_candidates import (
     TargetCandidateBuildRequest,
     build_target_candidates,
     freeze_target_inputs,
@@ -104,4 +104,4 @@ def main(argv: list[str] | None = None) -> None:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    main()

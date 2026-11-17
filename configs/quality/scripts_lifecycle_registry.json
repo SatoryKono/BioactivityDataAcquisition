@@ -1,6 +1,36 @@
 {
   "description": "Lifecycle and supporting-taxonomy decisions for non-active scripts.",
   "entries": {
+    "scripts/engineering/qa/iuphar_snapshot_build.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain behind python -m scripts.engineering.qa so active_script_count_max stays unchanged.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-10"
+    },
+    "scripts/engineering/qa/iuphar_target_acceptance.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain behind python -m scripts.engineering.qa so active_script_count_max stays unchanged.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-10"
+    },
+    "scripts/ops/iuphar_target_cohort.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain behind python -m scripts.ops so active_script_count_max stays unchanged.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-10"
+    },
+    "scripts/ops/target_classification_migration.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain behind python -m scripts.ops so active_script_count_max stays unchanged.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-10"
+    },
+    "scripts/ops/target_fk_repair.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain behind python -m scripts.ops so active_script_count_max stays unchanged.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-10"
+    },
     "scripts/ops/observability/grafana/_audit_presentation.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as presentation transformations imported by the existing render_nav_bus owner and its adaptive projection; no standalone command surface.",

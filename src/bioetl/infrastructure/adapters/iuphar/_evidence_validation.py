@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.domain.target_classification import TargetClassificationResult
+from bioetl.domain.entities.target_classification_boundary import TargetClassificationResult
 
 from ._manifest import decode_json
 

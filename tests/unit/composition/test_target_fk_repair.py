@@ -11,7 +11,7 @@ import pyarrow as pa
 import pytest
 from deltalake import DeltaTable, write_deltalake
 
-from bioetl.composition.target_fk_repair import (
+from bioetl.composition.bootstrap.runtime.composite_control_plane_bundle import (
     TargetFKRepairRequest,
     _verify_isolated_paths,
     isolate_recovery_config,
@@ -67,7 +67,7 @@ def repair_request(tmp_path, monkeypatch):
     )
     source = make_source(tmp_path / "synthetic-source", ["CHEMBL3"], [_raw_record()])
     # Only config root location is redirected; all pipeline behavior is real.
-    import bioetl.composition.target_fk_repair as module
+    import bioetl.composition.bootstrap.runtime.composite_control_plane_bundle as module
 
     original = module.load_pipeline_config_from_root
     monkeypatch.setattr(

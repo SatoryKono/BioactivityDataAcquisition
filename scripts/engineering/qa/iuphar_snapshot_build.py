@@ -5,7 +5,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from bioetl.infrastructure.adapters.iuphar.snapshot_builder import build_snapshot_bundle
+from bioetl.infrastructure.adapters.iuphar.snapshot_payload import build_snapshot_bundle
 
 
 def main(argv: list[str] | None = None) -> int:

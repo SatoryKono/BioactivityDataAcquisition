@@ -2,6 +2,13 @@
 
 from __future__ import annotations
 
+from bioetl.composition.bootstrap.runtime.publication_vocab_init import (
+    resolve_target_runtime_config,
+)
+from bioetl.composition.runtime_builders._exact_replay_cached_bronze_context import (
+    restore_target_replay_config,
+)
+
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Literal
@@ -121,13 +128,6 @@ def _load_runner_yaml_config(
 ) -> PipelineYamlConfig:
     yaml_config = load_pipeline_config_fn(pipeline_name)
     if pipeline_name == "chembl_target":
-        from bioetl.composition.target_classification import (
-            resolve_target_runtime_config,
-        )
-        from bioetl.composition.runtime_builders._exact_replay_cached_bronze_context import (
-            restore_target_replay_config,
-        )
-
         if ctx is not None and settings is not None:
             yaml_config = restore_target_replay_config(
                 ctx=ctx, settings=settings, current_config=yaml_config

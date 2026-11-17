@@ -14,7 +14,7 @@ import pytest
 from bioetl.infrastructure.adapters.iuphar._input_projection import (
     project_target_fields,
 )
-from bioetl.infrastructure.adapters.iuphar.cohort_builder import (
+from bioetl.infrastructure.adapters.iuphar.cohort_projection import (
     ARROW_SOURCE_FORMAT,
     CSV_SOURCE_FORMAT,
     NORMALIZED_TARGET_SCHEMA,
