@@ -394,10 +394,15 @@ def _redact_secret_value(value: Any, secrets: tuple[str, ...]) -> Any:
     if isinstance(value, str):
         return _redaction_token(value)
     if isinstance(value, dict):
-        return {
-            _redact_text(str(key), secrets): _redact_secret_value(item, secrets)
-            for key, item in value.items()
-        }
+        redacted: dict[str, Any] = {}
+        for key, item in value.items():
+            name = str(key)
+            safe_name = _redact_text(name, secrets)
+            if _is_password_name(name):
+                redacted[safe_name] = _seal_tree(item, secrets)
+            else:
+                redacted[safe_name] = _redact_secret_value(item, secrets)
+        return redacted
     if isinstance(value, (list, tuple)):
         return [_redact_secret_value(item, secrets) for item in value]
     if value is None:

@@ -180,6 +180,23 @@ def test_password_assignments_stay_sealed_across_a_second_pass() -> None:
             assert "[redacted]]" not in once
 
 
+def test_password_nested_in_another_secret_uses_the_constant_marker() -> None:
+    from scripts.engineering.ci.pytest_event_journal import (
+        _redact_structured,
+        _redaction_token,
+    )
+
+    redacted = _redact_structured(
+        {"authorization": {"password": "hunter2", "token": "other-secret"}},
+        (),
+    )
+    nested = redacted["authorization"]
+    assert nested["password"] == "[redacted]"
+    assert nested["token"] == _redaction_token("other-secret")
+    assert "hunter2" not in json.dumps(redacted)
+    assert "other-secret" not in json.dumps(redacted)
+
+
 def test_nested_password_keys_do_not_keep_secret_text() -> None:
     from scripts.engineering.ci.pytest_event_journal import _redact_structured
 
