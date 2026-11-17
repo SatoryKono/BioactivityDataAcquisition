@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-17T13:29:45.608417+00:00",
+  "generated_at": "2026-11-17T18:21:49.933298+00:00",
   "summary": {
     "total_scripts": 753,
     "status_counts": {
@@ -12,7 +12,7 @@
       "agents": 12,
       "build": 18,
       "ci": 77,
-      "docs": 300,
+      "docs": 304,
       "other": 27,
       "scripts": 646,
       "skills": 13,
@@ -8957,7 +8957,7 @@
         "ORCHESTRATION",
         "py-doc-bot"
       ],
-      "reference_count": 220,
+      "reference_count": 222,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -9107,8 +9107,14 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
+        {
+          "path": "docs/03-guides/docs-verification.md",
+          "line": 95,
+          "source_group": "docs",
+          "text": "1. `python -m scripts.docs.checks.check_docstrings --summary`"
+        },
         {
           "path": "scripts/docs/README.md",
           "line": 50,
@@ -9138,8 +9144,14 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 8,
       "references": [
+        {
+          "path": "docs/03-guides/docs-verification.md",
+          "line": 93,
+          "source_group": "docs",
+          "text": "1. `python -m scripts.docs.checks.check_drift --ports --classes --runtime-mirrors --freshness --modules --ai-surfaces`"
+        },
         {
           "path": "scripts/docs/README.md",
           "line": 49,
@@ -9195,7 +9207,7 @@
       "agent_usage": [
         "py-doc-bot"
       ],
-      "reference_count": 40,
+      "reference_count": 41,
       "references": [
         {
           "path": ".codex/skills/py-doc-bot/SKILL.md",
@@ -9223,7 +9235,7 @@
         },
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1447,
+          "line": 1460,
           "source_group": "docs",
           "text": "автоматические docs-проверки (`python -m scripts.docs check-links` и"
         },
@@ -9252,8 +9264,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
+        {
+          "path": "docs/03-guides/docs-verification.md",
+          "line": 96,
+          "source_group": "docs",
+          "text": "1. `python -m scripts.docs.checks.documentation_cleanup_inventory --check`"
+        },
         {
           "path": "scripts/docs/README.md",
           "line": 52,
@@ -9340,8 +9358,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
+        {
+          "path": "docs/03-guides/docs-verification.md",
+          "line": 89,
+          "source_group": "docs",
+          "text": "With no skip flags, `scripts/docs/checks/verify.py` runs these steps:"
+        },
         {
           "path": "scripts/docs/README.md",
           "line": 46,
@@ -12511,7 +12535,7 @@
       "references": [
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1810,
+          "line": 1834,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.dev run-tests cov"
         },
@@ -13318,13 +13342,13 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 939,
+          "line": 940,
           "source_group": "docs",
           "text": "| 5   | `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream` | Выполнить ускоренный coverage/sharded прогон |"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 940,
+          "line": 941,
           "source_group": "docs",
           "text": "| 6   | `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=term-missing` | В"
         }
@@ -16079,13 +16103,13 @@
       "references": [
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1545,
+          "line": 1569,
           "source_group": "docs",
           "text": "| **Файл:строки**      | Точная ссылка на код (`runner.py:116-123`)    |"
         },
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1557,
+          "line": 1581,
           "source_group": "docs",
           "text": "- **Файл**: `runner.py:116-123` (175 строк, 9 методов)"
         },
@@ -16545,7 +16569,7 @@
         },
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1668,
+          "line": 1692,
           "source_group": "docs",
           "text": "- `python scripts/engineering/qa/generate_architecture_dependency_map.py --update`"
         },
@@ -18665,7 +18689,7 @@
         },
         {
           "path": "docs/02-architecture/decisions/ADR-042-testing-strategy-matrix.md",
-          "line": 178,
+          "line": 182,
           "source_group": "docs",
           "text": "- [Module coverage inventory generator](../../../scripts/engineering/qa/report_module_coverage_inventory.py)"
         },
@@ -24752,7 +24776,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 10,
+      "reference_count": 11,
       "references": [
         {
           "path": "scripts/ops/observability/grafana/_workflow_scope.py",
