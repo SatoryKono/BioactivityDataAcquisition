@@ -63,7 +63,7 @@ def test_picomatch_consumers_install_verified_archive(consumer: str) -> None:
 
 @pytest.mark.parametrize(
     "pattern",
-    ["+(*)", "+(*a)", "*(*)", "*(*a)", "+(@(*a))", "*(@(*a))", "+(@(*))"],
+    ["+(*)", "+(*a)", "*(*)", "*(*a)", "+(@(*a))", "*(@(*a))", "+(@(*))", "+(@(*))b", "+(*)b"],
 )
 def test_repeated_and_nested_extglob_wildcards_finish_with_bounded_input(
     pattern: str,
