@@ -99,6 +99,22 @@ allowed_categories:
   - snapshot_refresh_write_mode
   - temporary_known_failure
 entries:
+  - path: tests/integration/ide/test_zed_portability.py
+    suite: integration
+    category: conditional_environment_guard
+    owner: "@bioetl-platform"
+    linked_issue: "#13170"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 10
+    vcr_related: false
+    review_date: "2026-11-17"
+    rationale: >
+      Ten existing guarded skip calls moved unchanged from the unit suite.
+      Native-Windows task execution needs Windows, PowerShell, the local project
+      interpreter, and the benchmark probe's installed plugin and junction support.
+      Optional local Zed settings are checked only when present. These guards
+      add no new suppression; available Windows runtimes execute all task probes
+      without provider requests or credentials.
   - path: tests/integration/observability/test_evening_dashboard_queries.py
     suite: integration
     category: conditional_environment_guard
