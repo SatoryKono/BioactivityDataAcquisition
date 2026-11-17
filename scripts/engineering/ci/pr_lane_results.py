@@ -849,6 +849,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/unit/infrastructure/config/test_contract_registry_loader.py",
         "tests/integration/config/test_non_chembl_contract_registry_coverage.py",
     ),
+    "configs/field_registry/generic_field_ownership.yaml": (
+        "tests/integration/config/test_generic_field_ownership.py",
+    ),
     "docs/05-operations/runbooks/index.md": (
         "tests/architecture/test_doc_crossref_integrity.py",
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,

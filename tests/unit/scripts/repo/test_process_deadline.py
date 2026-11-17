@@ -219,9 +219,7 @@ def test_linux_facilities_accept_libc_pidfd_when_interpreter_omits_bindings(
     from scripts.engineering.repo import process_supervisor as supervisor
 
     monkeypatch.delattr(os, "pidfd_open", raising=False)
-    monkeypatch.setattr(
-        __import__("signal"), "pidfd_send_signal", None, raising=False
-    )
+    monkeypatch.setattr(__import__("signal"), "pidfd_send_signal", None, raising=False)
     api = supervisor._linux_facilities()
     fd = api["open"](os.getpid(), 0)
     try:
