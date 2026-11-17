@@ -157,6 +157,20 @@ def check_modules(modules: Iterable[str]) -> list[Finding]:
     return findings
 
 
+def _locked_package_version(packages: Sequence[dict[str, object]], tool: str) -> str:
+    """Return the single uv.lock version recorded for one tool."""
+    matches: set[str] = set()
+    for package in packages:
+        if package.get("name") == tool:
+            version = package.get("version")
+            if not isinstance(version, str):
+                raise ValueError(f"expected a locked version for {tool}")
+            matches.add(version)
+    if len(matches) != 1:
+        raise ValueError(f"expected one locked version for {tool}")
+    return matches.pop()
+
+
 def _locked_tool_versions(lock_path: Path, tools: Sequence[str]) -> dict[str, str]:
     with lock_path.open("rb") as stream:
         document = cast(dict[str, object], tomllib.load(stream))
@@ -170,16 +184,7 @@ def _locked_tool_versions(lock_path: Path, tools: Sequence[str]) -> dict[str, st
         packages.append(cast(dict[str, object], package))
     versions: dict[str, str] = {}
     for tool in tools:
-        matches: set[str] = set()
-        for package in packages:
-            if package.get("name") == tool:
-                version = package.get("version")
-                if not isinstance(version, str):
-                    raise ValueError(f"expected a locked version for {tool}")
-                matches.add(version)
-        if len(matches) != 1:
-            raise ValueError(f"expected one locked version for {tool}")
-        versions[tool] = matches.pop()
+        versions[tool] = _locked_package_version(packages, tool)
     return versions
 
 
