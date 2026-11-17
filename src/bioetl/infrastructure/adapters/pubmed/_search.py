@@ -87,19 +87,20 @@ class PubMedSearchMixin(PubMedAdapterStateMixin):
             )
             if page_count_value is not None:
                 reported_count = page_count_value
+            if _esearch_result_still_short(len(collected), max_count, reported_count):
+                PubMedSearchMixin._reject_stalled_esearch_page(
+                    self,
+                    page_ids,
+                    seen_pages,
+                    page_count=page_count,
+                    retstart=retstart,
+                    reported_count=reported_count,
+                    collected_count=len(collected),
+                    max_count=max_count,
+                )
             if _esearch_page_completes(collected, page_ids, max_count, reported_count):
                 _append_completed_page(collected, page_ids, max_count, reported_count)
                 break
-            PubMedSearchMixin._reject_stalled_esearch_page(
-                self,
-                page_ids,
-                seen_pages,
-                page_count=page_count,
-                retstart=retstart,
-                reported_count=reported_count,
-                collected_count=len(collected),
-                max_count=max_count,
-            )
             seen_pages.add(tuple(page_ids))
             collected.extend(page_ids)
             retstart += len(page_ids)
@@ -308,6 +309,16 @@ def _esearch_target(max_count: int, reported_count: int | None) -> int | None:
     if reported_count is None:
         return None
     return min(max_count, max(reported_count, 0))
+
+
+def _esearch_result_still_short(
+    collected_count: int,
+    max_count: int,
+    reported_count: int | None,
+) -> bool:
+    """Return True while ``count`` is known and not yet covered."""
+    target = _esearch_target(max_count, reported_count)
+    return target is not None and collected_count < target
 
 
 def _esearch_stall_reason(

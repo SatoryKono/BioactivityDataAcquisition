@@ -392,6 +392,27 @@ async def test_get_pmids_raises_when_page_repeats(adapter, mock_http_client) -> 
 
 
 @pytest.mark.asyncio
+async def test_get_pmids_raises_when_repeated_page_fills_count(
+    adapter, mock_http_client
+) -> None:
+    """A duplicate page must not satisfy count by length alone."""
+    pages = {
+        0: _esearch_page(count=4, ids=["1", "2"]),
+        2: _esearch_page(count=4, ids=["1", "2"]),
+    }
+
+    async def get(_url: str, params: dict[str, str]) -> MagicMock:
+        return pages[int(params.get("retstart", "0"))]
+
+    mock_http_client.get = AsyncMock(side_effect=get)
+
+    with pytest.raises(PaginationTruncatedError) as caught:
+        await adapter._get_pmids("cancer", 4)
+
+    assert caught.value.reason == "repeated_page"
+
+
+@pytest.mark.asyncio
 async def test_resolve_pmids_for_fetch_pages_above_default_ceiling(
     adapter, mock_http_client
 ) -> None:
