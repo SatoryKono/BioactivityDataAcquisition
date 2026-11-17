@@ -493,7 +493,9 @@ jobs:
           echo "$changed_diagrams"
 
           changed_rendered=$(
-            git diff --name-only "${base_ref}"...HEAD -- \
+            # --no-renames: a deleted sibling SVG must remain visible when git
+            # would otherwise pair it with a newly rendered diagram.
+            git diff --name-only --no-renames "${base_ref}"...HEAD -- \
               ':(glob)docs/**/svg/*.svg' \
               ':(glob)docs/**/png/*.png' || true
           )
