@@ -253,6 +253,28 @@ class ProvenanceControls(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Existing promotion conflicts"):
             promotion.build_release_files(second, *case[1:-1], "e" * 64)
 
+    def test_requalification_checks_archived_capture_identity(self):
+        case = list(release_case())
+        first = promotion.build_release_files(*case)
+        later = {**case[1], "id": 12, "head_sha": "c" * 40}
+        second = promotion.build_release_files(first, later, *case[2:])
+        with self.assertRaisesRegex(ValueError, "Existing promotion conflicts"):
+            promotion.build_release_files(second, *case[1:-1], "e" * 64)
+        # Reusing the identical capture is allowed; changing its attempt is new.
+        restored = promotion.build_release_files(second, *case[1:])
+        self.assertEqual(
+            json.loads(restored[promotion.HOST_PATH])["release_promotion"],
+            json.loads(first[promotion.HOST_PATH])["release_promotion"],
+        )
+        new_attempt = {**case[1], "run_attempt": case[1]["run_attempt"] + 1}
+        third = promotion.build_release_files(second, new_attempt, *case[2:])
+        self.assertEqual(
+            json.loads(third[promotion.HOST_PATH])["release_promotion"][
+                "ci_run_attempt"
+            ],
+            new_attempt["run_attempt"],
+        )
+
     def test_release_promotion_preserves_history_and_all_coupled_pins(self):
         case = release_case()
         outputs = promotion.build_release_files(*case)

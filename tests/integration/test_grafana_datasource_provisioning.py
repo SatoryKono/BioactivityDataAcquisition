@@ -66,6 +66,9 @@ def test_private_host_delivery_binds_source_and_survives_data_volume() -> None:
         if "/dist/" not in relative:
             data = subprocess.check_output(["git", "show", source + ":" + relative])
             assert hashlib.sha256(data).hexdigest() == digest
+    patch = "grafana/tooling/router-v7-bridge/grafana-alert-instance-link.patch"
+    assert patch in manifest["artifact_sha256"]
+    assert patch in manifest["delivery_source"]["inputs"]
     recipe = (owner / "Dockerfile.host").read_text(encoding="utf-8")
     assert "FROM " + manifest["base_image"] in recipe
     assert "runtime-probe" not in recipe

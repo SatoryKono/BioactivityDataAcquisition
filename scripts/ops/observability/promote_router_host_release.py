@@ -151,6 +151,24 @@ def _validate_release_inventory(
     )
 
 
+def _validate_capture_history(host: JsonObject, promotion: JsonObject) -> None:
+    """Reject conflicting metadata for a capture, including archived releases."""
+    manifests = [host] + [
+        provenance.json_object(provenance.json_object(entry)["host_manifest"])
+        for entry in provenance.json_list(host.get("release_history", []))
+    ]
+    identity = (promotion["ci_run_id"], promotion["ci_run_attempt"])
+    for manifest in manifests:
+        previous = manifest.get("release_promotion")
+        if previous is None:
+            continue
+        capture = provenance.json_object(previous)
+        if (capture["ci_run_id"], capture["ci_run_attempt"]) == identity:
+            require(
+                capture == promotion, "Existing promotion conflicts with this capture"
+            )
+
+
 def _prepare_release_history(
     result: JsonObject,
     host: JsonObject,
@@ -161,19 +179,13 @@ def _prepare_release_history(
     managed_image: str,
 ) -> bool:
     """Validate existing pins and archive a new qualification without altering it."""
+    _validate_capture_history(host, promotion)
     image_changed = host["image"] != image
     if not image_changed:
         require(
             managed["image"] == managed_image and managed["parent_image"] == image,
             "Existing managed release differs",
         )
-        previous = provenance.json_object(host.get("release_promotion"))
-        if previous != promotion:
-            require(
-                (previous["ci_run_id"], previous["ci_run_attempt"])
-                != (promotion["ci_run_id"], promotion["ci_run_attempt"]),
-                "Existing promotion conflicts with this capture",
-            )
     if not image_changed and host.get("release_promotion") == promotion:
         return False
     history = provenance.json_list(copy.deepcopy(host.get("release_history", [])))
