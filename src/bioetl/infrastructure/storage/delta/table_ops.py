@@ -107,6 +107,51 @@ def _align_table_to_schema(
     return result.select(target)
 
 
+def _physical_columns_for_read(
+    columns: list[str] | None,
+    partition_columns: frozenset[str],
+    available: set[str],
+) -> list[str]:
+    """Select readable non-partition columns present in the active Parquet file."""
+    if columns is None:
+        return list(available)
+    return [
+        name
+        for name in columns
+        if name not in partition_columns and name in available
+    ]
+
+
+def _empty_row_table(row_count: int) -> pa.Table:
+    """Build a zero-column Arrow table with a fixed row count for typed null fills."""
+    return pa.table(
+        {"__bioetl_row_pad__": pa.nulls(row_count, type=pa.null())}
+    ).drop_columns(["__bioetl_row_pad__"])
+
+
+def _append_partition_columns(
+    result: pa.Table,
+    *,
+    path: str,
+    partition_info: _PartitionInfo,
+    columns: list[str] | None,
+    schema: pa.Schema,
+) -> pa.Table:
+    """Restore partition fields from Delta add-actions with Delta-native types."""
+    relative = Path(path).resolve().relative_to(partition_info.root).as_posix()
+    values = partition_info.values[relative]
+    for name in partition_info.columns:
+        if columns is not None and name not in columns:
+            continue
+        if name in result.column_names:
+            continue
+        value = pa.scalar(values[name]).cast(schema.field(name).type)
+        result = result.append_column(
+            name, pa.array([value.as_py()] * result.num_rows, type=value.type)
+        )
+    return result
+
+
 def _read_active_file(
     file_uri: str,
     columns: list[str] | None,
@@ -122,38 +167,23 @@ def _read_active_file(
     """
     path = resolve_parquet_file_uri(file_uri)
     partition_columns = frozenset(partition_info.columns if partition_info else [])
-    available = set(pq.read_schema(path).names)
-    if columns is None:
-        physical_columns = [name for name in available]
-    else:
-        physical_columns = [
-            name
-            for name in columns
-            if name not in partition_columns and name in available
-        ]
+    physical_columns = _physical_columns_for_read(
+        columns, partition_columns, set(pq.read_schema(path).names)
+    )
     if physical_columns:
         result = pq.read_table(path, columns=physical_columns, use_threads=False)
     else:
-        # No readable physical columns (partition-only or schema-evolved-only
-        # projection). Keep the row count so typed null fills stay aligned.
-        row_count = pq.read_metadata(path).num_rows
-        result = pa.table(
-            {"__bioetl_row_pad__": pa.nulls(row_count, type=pa.null())}
-        ).drop_columns(["__bioetl_row_pad__"])
+        # Partition-only or schema-evolved-only projection: keep row count.
+        result = _empty_row_table(pq.read_metadata(path).num_rows)
 
     if partition_info is not None:
-        root = partition_info.root
-        relative = Path(path).resolve().relative_to(root).as_posix()
-        values = partition_info.values[relative]
-        for name in partition_info.columns:
-            if columns is not None and name not in columns:
-                continue
-            if name in result.column_names:
-                continue
-            value = pa.scalar(values[name]).cast(schema.field(name).type)
-            result = result.append_column(
-                name, pa.array([value.as_py()] * result.num_rows, type=value.type)
-            )
+        result = _append_partition_columns(
+            result,
+            path=path,
+            partition_info=partition_info,
+            columns=columns,
+            schema=schema,
+        )
     return _align_table_to_schema(result, schema, columns)
 
 
