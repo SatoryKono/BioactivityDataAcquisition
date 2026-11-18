@@ -9,7 +9,8 @@ from collections import defaultdict
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
-from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+from scripts.engineering.common.repo_paths import REPO_ROOT
+from scripts.engineering.common.report_outputs import write_report_outputs
 from scripts.engineering.qa._tracked_glob import tracked_files
 
 DEFAULT_ROOT = Path("tests/architecture")
@@ -140,13 +141,13 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     result = scan((REPO_ROOT / args.arch_root).resolve())
     report = build_report(result)
-    json_out = resolve_output_path(args.json_out, root=REPO_ROOT)
-    md_out = resolve_output_path(args.md_out, root=REPO_ROOT)
-    json_out.parent.mkdir(parents=True, exist_ok=True)
-    json_out.write_text(
-        json.dumps(report, indent=2, ensure_ascii=False) + chr(10), encoding="utf-8"
+    json_out, md_out = write_report_outputs(
+        report,
+        json_out=args.json_out,
+        md_out=args.md_out,
+        markdown=render_md(report),
+        root=REPO_ROOT,
     )
-    md_out.write_text(render_md(report), encoding="utf-8")
     print("Wrote", json_out)
     print("Wrote", md_out)
     print("files=", result["file_count"], "loc=", result["approx_loc"])

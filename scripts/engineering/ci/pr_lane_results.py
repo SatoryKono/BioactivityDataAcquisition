@@ -2053,6 +2053,11 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         ),
         (REQUIRED_CHECKS_PROSE_TEST,),
     ),
+    "reports/codex/review_py-audit-bot_20261118_1200_review.md": (
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        "tests/architecture/test_scripts_lifecycle_registry.py",
+        "tests/unit/scripts/qa/test_lifecycle_review_output_destinations.py",
+    ),
 }
 
 # Directory-level edges for generated artifacts and diagrams where an exact
