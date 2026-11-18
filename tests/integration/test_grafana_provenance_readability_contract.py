@@ -32,7 +32,12 @@ _SPECS = {
     "bioetl-incident-v1.json": (
         9400,
         "Understand Incident Scope",
-        ("CURRENT", "GLOBAL", "not verified causes", "Run ID does not filter"),
+        (
+            "PERIOD END SNAPSHOT",
+            "GLOBAL",
+            "not verified causes",
+            "Run ID does not filter",
+        ),
     ),
     "bioetl-run-explorer-v1.json": (
         1,

@@ -434,7 +434,7 @@ def test_runtime_blockers_preserves_unknown_without_inline_conditions() -> None:
     assert "== 0" in expr
     assert "bioetl_runtime_alert_condition_" not in expr
     defaults = blockers_panel.get("fieldConfig", {}).get("defaults", {})
-    assert defaults.get("noValue") == "UNKNOWN"
+    assert defaults.get("noValue") == "UNKNOWN · no samples"
 
 
 def test_runtime_current_panels_use_scoped_recording_rules_for_workflow_aliases() -> (
@@ -584,8 +584,10 @@ def test_runtime_first_action_cta_contract() -> None:
     )
     content = str(first_action_panel.get("options", {}).get("content", ""))
     description = str(first_action_panel.get("description", ""))
-    assert "continue monitoring" in content
-    assert "highest-severity blocker" in content
+    assert "UNKNOWN means no matching samples or an unpublished reason" in content
+    assert "missing stage signals" in content
+    assert "Query time is not event time" in content
+    assert "continue monitoring" not in content
     assert "SCRAPING" not in content
     assert "verify coverage" in description.lower()
     assert "scraping is telemetry confidence" in description.lower()
