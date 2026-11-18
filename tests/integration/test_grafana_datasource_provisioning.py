@@ -624,7 +624,10 @@ OPS_READY_URL=http://bioetl:8000/ops/control-plane/ready
 mkdir -p "${LATE_RECOVERY_ROOT}"
 printf '%s' "${LATE_RECOVERY_LEASE_VALUE}" > "${LATE_RECOVERY_LEASE}"
 case "${SCENARIO}" in
-  claimed|full|full_unhealthy|full_health_delayed|full_health_flap) mkdir "${LATE_RECOVERY_CLAIM}" ;;
+  claimed|full|full_unhealthy|full_health_delayed|full_health_flap)
+    mkdir "${LATE_RECOVERY_CLAIM}"
+    : > "${LATE_RECOVERY_CLAIM}/owner"
+    ;;
 esac
 case "${SCENARIO}" in
   full|full_unhealthy|full_health_delayed|full_health_flap) LATE_RECOVERY_STATE=confirming_full; OPS_HTTP_STATE=ready; DASHBOARD_PROFILE=full ;;

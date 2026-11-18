@@ -66,12 +66,13 @@ status. An explicitly requested monitoring start still requires full recovery.
 
 The recovery directory is `/var/lib/grafana/bioetl-late-cutover`. Its
 `<expected-source-id>.lease` describes activity for one process incarnation;
-`<expected-source-id>.claim` is an atomic, persistent restart claim shared with
-the runtime manager. The claim is cleared only after full bootstrap, local
+`<expected-source-id>.claim` is a persistent restart claim shared with the
+runtime manager. The `owner` file inside that directory is the exclusive
+ownership marker. The claim is cleared only after full bootstrap, local
 Grafana health and matching identity are confirmed. A failed recovery retains
 the claim to prevent restart loops. Inspect the bootstrap reason, main
 readiness, source identity and container logs before an operator explicitly
-resets that empty claim directory. Do not remove volumes or reset claims as
+removes that claim directory. Do not remove volumes or reset claims as
 part of routine startup.
 
 Validate the exact deployed dashboard profile explicitly. Native deployments

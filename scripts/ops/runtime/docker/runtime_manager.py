@@ -1861,6 +1861,8 @@ _GRAFANA_TIMEOUT_RETRY_REASON = "identity_timeout_or_unreachable"
 # Keep this lease/claim protocol aligned with bootstrap-datasources.sh. The
 # process start time and boot ID prevent a lease surviving a container restart
 # from blocking recovery. The persistent claim prevents a restart loop.
+# Plain mkdir is not an exclusive claim on Ubuntu 26.04 uutils coreutils
+# 0.10.0: two racers can both exit 0. The owner file is the exclusive create.
 _GRAFANA_LATE_CUTOVER_CLAIM = r"""
 mode="${1:-claim}"
 source_id="${BIOETL_EXPECTED_RUNTIME_SOURCE_ID:-}"
@@ -1869,6 +1871,7 @@ case "$source_id" in ''|*[!0-9a-f]*) exit 1 ;; esac
 status_file="${BIOETL_GRAFANA_BOOTSTRAP_STATUS_FILE:-/var/lib/grafana/bioetl-bootstrap-status.json}"
 recovery_root="$(dirname "$status_file")/bioetl-late-cutover"
 claim="$recovery_root/$source_id.claim"
+claim_owner="$claim/owner"
 lease="$recovery_root/$source_id.lease"
 already_full() {
   payload="$(cat "$status_file" 2>/dev/null)" || return 1
@@ -1887,7 +1890,7 @@ already_full() {
     [ "$instance_ticks" = "$actual_ticks" ] || return 1
     [ "$instance_boot" = "$(cat /proc/sys/kernel/random/boot_id)" ] || return 1
     if printf '%s' "$payload" | grep -Eq '"late_recovery_state"[[:space:]]*:[[:space:]]*"confirming_full"'; then
-      [ -d "$claim" ] || return 1
+      [ -f "$claim_owner" ] || return 1
     fi
   fi
   wget -qO- -T 3 http://127.0.0.1:3000/api/health >/dev/null 2>&1 || return 1
@@ -1913,8 +1916,17 @@ if [ -d "$claim" ]; then printf 'claimed\n'; exit 0; fi
 if lease_is_active; then printf 'active\n'; exit 0; fi
 [ "$mode" = "claim" ] || { printf 'inactive\n'; exit 0; }
 mkdir -p "$recovery_root" || exit 1
+# Directory creation may report success for every racer. Elect one owner.
 if mkdir "$claim" 2>/dev/null; then
+  :
+fi
+if [ ! -d "$claim" ]; then
+  printf 'claimed\n'
+  exit 0
+fi
+if (set -C; : > "$claim_owner") 2>/dev/null; then
   if already_full; then
+    rm -f "$claim_owner" || exit 1
     rmdir "$claim" || exit 1
     printf 'full\n'
   else

@@ -1180,6 +1180,108 @@ def test_late_cutover_claim_has_one_owner_across_concurrent_processes(
     ], results
 
 
+@pytest.mark.parametrize("other_actor", ["manager", "watcher"])
+def test_late_cutover_claim_elects_one_owner_when_mkdir_is_not_exclusive(
+    tmp_path: Path,
+    other_actor: str,
+) -> None:
+    """Ubuntu 26.04 uutils mkdir can return success to every concurrent creator."""
+    shell = shutil.which("sh")
+    real_mkdir = shutil.which("mkdir")
+    if shell is None or real_mkdir is None:
+        pytest.skip("POSIX sh and mkdir are required for the recovery claim test")
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    shim = fake_bin / "mkdir"
+    real_mkdir = Path(real_mkdir).as_posix()
+    shim.write_text(
+        f"""#!/bin/sh
+real="{real_mkdir}"
+if [ "$1" = "-p" ]; then
+  exec "$real" "$@"
+fi
+target="$1"
+arrived="$(dirname "$target")/mkdir-arrived"
+printf '%s\\n' "$$" >> "$arrived"
+i=0
+while [ "$i" -lt 50 ]; do
+  count="$(wc -l < "$arrived" 2>/dev/null || printf '0')"
+  [ "$count" -ge 2 ] && break
+  i=$((i + 1))
+  sleep 0.05
+done
+"$real" "$target" 2>/dev/null
+exit 0
+""",
+        encoding="utf-8",
+        newline="\n",
+    )
+    shim.chmod(0o755)
+    recovery_root = tmp_path / "bioetl-late-cutover"
+    recovery_root.mkdir()
+    env = {
+        **os.environ,
+        "PATH": str(fake_bin) + os.pathsep + os.environ.get("PATH", ""),
+        "BIOETL_EXPECTED_RUNTIME_SOURCE_ID": "a" * 64,
+        "BIOETL_GRAFANA_BOOTSTRAP_STATUS_FILE": str(tmp_path / "bootstrap-status.json"),
+        "TEST_BIN": str(fake_bin),
+    }
+    manager_script = runtime_manager._GRAFANA_LATE_CUTOVER_CLAIM
+    source = (
+        runtime_manager.ROOT / "grafana/scripts/bootstrap-datasources.sh"
+    ).read_text(encoding="utf-8")
+    watcher_script = (
+        source.split("# --- Always provision Prometheus first", 1)[0]
+        + r"""
+now=100
+LATE_RECOVERY_FOREGROUND=424242
+LATE_RECOVERY_STATE=waiting
+LATE_RECOVERY_LEASE_VALUE=test
+LATE_RECOVERY_DEADLINE=580
+late_recovery_now() { printf '%s\n' "$now"; }
+late_recovery_alive() { return 0; }
+late_recovery_identity() { return 0; }
+late_recovery_health() { return 0; }
+sleep() { now=$((now + $1)); }
+write_bootstrap_status() {
+  [ "$LATE_RECOVERY_STATE" != blocked ] || printf 'claimed\n'
+}
+kill() { printf 'acquired\n'; }
+late_recovery_watch
+"""
+    )
+    scripts = [
+        manager_script,
+        manager_script if other_actor == "manager" else watcher_script,
+    ]
+    script_paths = []
+    for index, script in enumerate(scripts):
+        path = tmp_path / f"claim-{index}.sh"
+        path.write_text(
+            'PATH="$(cd "$TEST_BIN" && pwd):$PATH"\n' + script,
+            encoding="utf-8",
+            newline="\n",
+        )
+        script_paths.append(path)
+    processes = [
+        subprocess.Popen(
+            [shell, str(path)],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            env=env,
+        )
+        for path in script_paths
+    ]
+    results = [process.communicate(timeout=10) for process in processes]
+    assert all(process.returncode == 0 for process in processes), results
+    assert len((recovery_root / "mkdir-arrived").read_text().splitlines()) == 2
+    assert sorted(stdout.strip() for stdout, _stderr in results) == [
+        "acquired",
+        "claimed",
+    ], results
+
+
 @pytest.mark.parametrize("current_source", [True, False])
 def test_late_cutover_claim_rechecks_full_profile_after_acquisition(
     tmp_path: Path, current_source: bool
@@ -1591,19 +1693,20 @@ def test_monitoring_start_credits_only_one_confirmed_watcher_restart(
 
 
 @pytest.mark.parametrize(
-    ("state", "ticks", "boot", "current_source", "claimed", "expected"),
+    ("state", "ticks", "boot", "current_source", "claimed", "owned", "expected"),
     [
-        ("complete", "200", "1234-abcd", True, False, "full"),
-        ("confirming_full", "200", "1234-abcd", True, True, "full"),
-        ("confirming_full", "200", "1234-abcd", True, False, "inactive"),
-        ("disabled", "200", "1234-abcd", True, False, "inactive"),
-        ("complete", "201", "1234-abcd", True, False, "inactive"),
-        ("complete", "200", "aaaa-bbbb", True, False, "inactive"),
-        ("complete", "200", "1234-abcd", False, False, "inactive"),
+        ("complete", "200", "1234-abcd", True, False, False, "full"),
+        ("confirming_full", "200", "1234-abcd", True, True, True, "full"),
+        ("confirming_full", "200", "1234-abcd", True, True, False, "inactive"),
+        ("confirming_full", "200", "1234-abcd", True, False, False, "inactive"),
+        ("disabled", "200", "1234-abcd", True, False, False, "inactive"),
+        ("complete", "201", "1234-abcd", True, False, False, "inactive"),
+        ("complete", "200", "aaaa-bbbb", True, False, False, "inactive"),
+        ("complete", "200", "1234-abcd", False, False, False, "inactive"),
     ],
 )
 def test_watcher_restart_ack_requires_current_claim_source_and_process(
-    tmp_path: Path, state, ticks, boot, current_source, claimed, expected
+    tmp_path: Path, state, ticks, boot, current_source, claimed, owned, expected
 ) -> None:
     shell = shutil.which("sh")
     if shell is None:
@@ -1638,6 +1741,8 @@ def test_watcher_restart_ack_requires_current_claim_source_and_process(
     claim = tmp_path / "bioetl-late-cutover" / f"{source_id}.claim"
     if claimed:
         claim.mkdir(parents=True)
+    if owned:
+        (claim / "owner").write_text("", encoding="utf-8")
     command = (
         'PATH="$(cd "$TEST_BIN" && pwd):$PATH"\n'
         + runtime_manager._GRAFANA_LATE_CUTOVER_CLAIM
@@ -1658,6 +1763,7 @@ def test_watcher_restart_ack_requires_current_claim_source_and_process(
     assert result.returncode == 0, result.stderr
     assert result.stdout.strip() == expected
     assert claim.is_dir() == claimed
+    assert (claim / "owner").exists() == owned
 
 
 def test_readiness_accepts_matching_repo_digest_when_config_reference_differs() -> None:

@@ -63,6 +63,7 @@ DASHBOARD_PROFILE="not_selected"
 BOOTSTRAP_ERRORS=0
 LATE_RECOVERY_ROOT="$(dirname "${STATUS_FILE}")/bioetl-late-cutover"
 LATE_RECOVERY_CLAIM="${LATE_RECOVERY_ROOT}/${EXPECTED_RUNTIME_SOURCE_ID}.claim"
+LATE_RECOVERY_OWNER="${LATE_RECOVERY_CLAIM}/owner"
 LATE_RECOVERY_LEASE="${LATE_RECOVERY_ROOT}/${EXPECTED_RUNTIME_SOURCE_ID}.lease"
 LATE_RECOVERY_STATE="disabled"
 LATE_RECOVERY_INSTANCE=""
@@ -389,6 +390,8 @@ late_recovery_watch() {
           [ "${_late_now}" -lt "${LATE_RECOVERY_DEADLINE}" ] || break
           late_recovery_alive || { late_recovery_finish stopped; return; }
           if [ "${LATE_RECOVERY_STATE}" = "confirming_full" ]; then
+            # owner is the exclusive claim marker; the directory must be empty to clear.
+            rm -f "${LATE_RECOVERY_OWNER}"
             if rmdir "${LATE_RECOVERY_CLAIM}" 2>/dev/null; then
               late_recovery_finish complete
             else
@@ -396,7 +399,8 @@ late_recovery_watch() {
             fi
             return
           fi
-          if ! mkdir "${LATE_RECOVERY_CLAIM}" 2>/dev/null; then
+          if ! mkdir "${LATE_RECOVERY_CLAIM}" 2>/dev/null ||
+             ! (set -C; : > "${LATE_RECOVERY_OWNER}") 2>/dev/null; then
             late_recovery_finish blocked
             return
           fi
@@ -424,7 +428,7 @@ start_late_recovery() {
   [ "${REQUIRE_OPS_HTTP}" = "0" ] && [ "${IDENTITY_VALID}" -eq 1 ] &&
     [ "${OPS_HTTP_URL_VALID}" -eq 1 ] || return 0
   if [ "${OPS_HTTP_STATE}" = "ready" ] && [ "${DASHBOARD_PROFILE}" = "full" ] &&
-    [ "${BOOTSTRAP_ERRORS}" -eq 0 ] && [ -d "${LATE_RECOVERY_CLAIM}" ]; then
+    [ "${BOOTSTRAP_ERRORS}" -eq 0 ] && [ -f "${LATE_RECOVERY_OWNER}" ]; then
     LATE_RECOVERY_STATE="confirming_full"
   elif [ "${OPS_HTTP_REASON}" = "identity_timeout_or_unreachable" ] &&
     [ "${DASHBOARD_PROFILE}" = "prometheus_only" ]; then
