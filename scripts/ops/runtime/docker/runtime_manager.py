@@ -1897,7 +1897,13 @@ already_full() {
   ops_base="${BIOETL_OPS_HTTP_URL:-}"
   [ -n "$ops_base" ] || ops_base="http://bioetl:8000"
   ops_base="${ops_base%/}"
-  printf '%s' "$ops_base" | grep -Eq '^https?://[A-Za-z0-9._:-]+$' || ops_base="http://bioetl:8000"
+  # Same acceptance as is_valid_ops_http_url: host or bracketed IPv6, optional port and path.
+  if printf '%s' "$ops_base" | grep -Eq '[[:space:]]' \
+    || printf '%s' "$ops_base" | grep -Eq '^https?://[^/]*@' \
+    || ! printf '%s' "$ops_base" | grep -Eq \
+      '^https?://([A-Za-z0-9._-]+|\[[0-9a-fA-F:.]+\])(:[0-9]{1,5})?(/[^[:space:]]*)?$'; then
+    ops_base="http://bioetl:8000"
+  fi
   ready="$(wget -qO- -T 3 "$ops_base/ops/control-plane/ready" 2>/dev/null)" || return 1
   printf '%s' "$ready" | grep -Eq "\"runtime_source_id\"[[:space:]]*:[[:space:]]*\"$source_id\""
 }
@@ -2060,13 +2066,21 @@ def _grafana_expected_runtime_source_id(runner: Runner, *, timeout: float) -> st
     return ""
 
 
-_OPS_READY_BASE_RE = re.compile(r"https?://[A-Za-z0-9._:-]+\Z")
+_OPS_READY_BASE_RE = re.compile(
+    r"https?://(?:[A-Za-z0-9._-]+|\[[0-9a-fA-F:.]+\])"
+    r"(?::[0-9]{1,5})?(?:/[^\s]*)?\Z"
+)
 
 
 def _grafana_ops_ready_url() -> str:
     """Ops ready URL from BIOETL_OPS_HTTP_URL, otherwise the compose default."""
     raw = os.environ.get("BIOETL_OPS_HTTP_URL", "").strip().rstrip("/")
-    if _OPS_READY_BASE_RE.fullmatch(raw) is None:
+    if (
+        not raw
+        or any(char.isspace() for char in raw)
+        or re.match(r"https?://[^/]*@", raw) is not None
+        or _OPS_READY_BASE_RE.fullmatch(raw) is None
+    ):
         raw = "http://bioetl:8000"
     return f"{raw}/ops/control-plane/ready"
 

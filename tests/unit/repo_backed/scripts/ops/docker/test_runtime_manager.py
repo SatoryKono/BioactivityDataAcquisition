@@ -1890,7 +1890,15 @@ def test_full_profile_wait_requires_live_health(health_response: str) -> None:
             "http://host.docker.internal:8000",
             "http://host.docker.internal:8000/ops/control-plane/ready",
         ),
-        ("http://evil.example/path", "http://bioetl:8000/ops/control-plane/ready"),
+        (
+            "http://[fd00::10]:8000",
+            "http://[fd00::10]:8000/ops/control-plane/ready",
+        ),
+        (
+            "http://proxy:8000/bioetl",
+            "http://proxy:8000/bioetl/ops/control-plane/ready",
+        ),
+        ("http://user:secret@host", "http://bioetl:8000/ops/control-plane/ready"),
         ("not a url", "http://bioetl:8000/ops/control-plane/ready"),
     ],
 )

@@ -678,3 +678,71 @@ def test_status_grafana_bootstrap_ignored_when_grafana_stopped() -> None:
         grafana_running=False,
     )
     assert findings == []
+
+
+@pytest.mark.parametrize(
+    ("ops_url", "expected_ready_url"),
+    [
+        (
+            "http://[fd00::10]:8000/bioetl",
+            "http://[fd00::10]:8000/bioetl/ops/control-plane/ready",
+        ),
+        (
+            "http://user:secret@host",
+            "http://bioetl:8000/ops/control-plane/ready",
+        ),
+    ],
+)
+def test_late_cutover_claim_uses_bootstrap_ops_url_rules(
+    tmp_path: Path, ops_url: str, expected_ready_url: str
+) -> None:
+    shell = shutil.which("sh")
+    if shell is None:
+        pytest.skip("POSIX sh is required for the recovery claim test")
+    source_id = "a" * 64
+    status = tmp_path / "bootstrap-status.json"
+    status.write_text(
+        json.dumps(
+            {
+                "ops_http": "ready",
+                "dashboard_profile": "full",
+                "late_recovery_source_id": source_id,
+            }
+        ),
+        encoding="utf-8",
+    )
+    seen = tmp_path / "wget-urls"
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    shim = fake_bin / "wget"
+    shim.write_text(
+        "#!/bin/sh\n"
+        f"printf '%s\\n' \"$*\" >> '{seen}'\n"
+        'case "$*" in\n'
+        "  *api/health*) printf '%s\\n' '{\"database\":\"ok\"}' ;;\n"
+        "  *control-plane/ready*) printf '%s\\n' "
+        f'\'{{"runtime_source_id":"{source_id}"}}\' ;;\n'
+        "  *) exit 1 ;;\n"
+        "esac\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    shim.chmod(0o755)
+    env = {
+        **os.environ,
+        "PATH": str(fake_bin) + os.pathsep + os.environ.get("PATH", ""),
+        "BIOETL_EXPECTED_RUNTIME_SOURCE_ID": source_id,
+        "BIOETL_GRAFANA_BOOTSTRAP_STATUS_FILE": str(status),
+        "BIOETL_OPS_HTTP_URL": ops_url,
+    }
+    result = subprocess.run(
+        [shell, "-c", runtime_manager._GRAFANA_LATE_CUTOVER_CLAIM],
+        capture_output=True,
+        text=True,
+        env=env,
+        check=False,
+        timeout=10,
+    )
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.strip() == "full"
+    assert expected_ready_url in seen.read_text(encoding="utf-8")
