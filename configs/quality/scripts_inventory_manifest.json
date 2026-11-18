@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-18T12:19:44.441515+00:00",
+  "generated_at": "2026-11-18T13:17:09.408561+00:00",
   "summary": {
     "total_scripts": 759,
     "status_counts": {
@@ -11378,7 +11378,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 42,
+      "reference_count": 43,
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
@@ -11676,7 +11676,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pytest_receipts.py",
-          "line": 972,
+          "line": 1022,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.pytest_receipts import write_runner_terminal_receipt"
         }

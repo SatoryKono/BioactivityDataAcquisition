@@ -317,6 +317,56 @@ def test_xdist_workers_do_not_double_count(receipts: Path, tmp_path: Path) -> No
         assert collection["selected"] == len(item["results"])
 
 
+def test_xdist_waits_for_slow_worker_receipt_finalization(
+    receipts: Path, tmp_path: Path
+) -> None:
+    pytest.importorskip("xdist")
+    test_file = tmp_path / "test_dist_slow.py"
+    _write(test_file, "def test_one():\n    assert True\n")
+    _write(
+        tmp_path / "slow_worker_receipt.py",
+        """
+import time
+import pytest
+from scripts.engineering.ci import pytest_receipts
+
+@pytest.hookimpl(trylast=True)
+def pytest_configure(config):
+    if not hasattr(config, 'workerinput'):
+        return
+    original = pytest_receipts.write_receipt_file
+    def delayed_write(directory, payload):
+        time.sleep(12)
+        return original(directory, payload)
+    pytest_receipts.write_receipt_file = delayed_write
+""",
+    )
+    env = os.environ.copy()
+    env["PYTHONPATH"] = os.pathsep.join([str(tmp_path), env.get("PYTHONPATH", "")])
+    completed = _pytest(
+        test_file,
+        receipts,
+        "-n",
+        "2",
+        "--dist",
+        "load",
+        "-p",
+        "slow_worker_receipt",
+        "--basetemp",
+        str(tmp_path / "nested-base"),
+        env=env,
+    )
+    assert completed.returncode == 0, completed.stdout + completed.stderr
+    files = list(receipts.rglob("receipt.json"))
+    assert len(files) == 2, completed.stdout + completed.stderr
+    payloads = [json.loads(path.read_text(encoding="utf-8")) for path in files]
+    assert all(item["role"] == "worker" for item in payloads)
+    assert all(item["worker"] != "master" for item in payloads)
+    assert all(item["completeness"] == "complete" for item in payloads)
+    nodeids = [nodeid for item in payloads for nodeid in item["results"]]
+    assert len(nodeids) == len(set(nodeids)) == 1
+
+
 @pytest.mark.parametrize("dist_args", [("--dist", "load"), ("--dist=load",)])
 def test_dist_without_workers_still_writes_receipt(
     receipts: Path,
