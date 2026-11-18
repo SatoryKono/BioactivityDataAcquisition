@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-18T08:24:15.490467+00:00",
+  "generated_at": "2026-11-18T14:18:08.128004+00:00",
   "summary": {
-    "total_scripts": 753,
+    "total_scripts": 762,
     "status_counts": {
       "active": 334,
-      "supporting": 417,
+      "supporting": 426,
       "temporary_diagnostic": 2
     },
     "reference_group_coverage": {
@@ -14,9 +14,9 @@
       "ci": 77,
       "docs": 304,
       "other": 27,
-      "scripts": 646,
+      "scripts": 655,
       "skills": 13,
-      "tests": 573
+      "tests": 580
     }
   },
   "scripts": [
@@ -1151,6 +1151,37 @@
       ]
     },
     {
+      "path": "scripts/ai/codex/local_mcp_routes.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "scripts/ai/codex/native_session.py",
+          "line": 81,
+          "source_group": "scripts",
+          "text": "from scripts.ai.codex.local_mcp_routes import apply_local_routes, common_directory"
+        },
+        {
+          "path": "scripts/ai/codex/setup_mcp.py",
+          "line": 28,
+          "source_group": "scripts",
+          "text": "from scripts.ai.codex.local_mcp_routes import apply_local_routes"
+        },
+        {
+          "path": "tests/unit/scripts/test_native_mcp_local_routes.py",
+          "line": 9,
+          "source_group": "tests",
+          "text": "from scripts.ai.codex.local_mcp_routes import apply_local_routes"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-12-18",
+      "next_step": "Retain as the local transport-binding library of setup_mcp.py; the existing setup entrypoint owns configuration writes and portable projections remain independent."
+    },
+    {
       "path": "scripts/ai/codex/local_state_audit.py",
       "type": "py",
       "status": "active",
@@ -1545,6 +1576,31 @@
       "next_step": "Retain as the static validation library behind doctor.py and the optional setup validators; keep .codex as the only project-scoped discovery surface."
     },
     {
+      "path": "scripts/ai/codex/native_session.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/ai/mcp/__main__.py",
+          "line": 38,
+          "source_group": "scripts",
+          "text": "\"codex-session\": module_command(\"scripts.ai.codex.native_session\"),"
+        },
+        {
+          "path": "tests/unit/scripts/test_mcp_native_session.py",
+          "line": 10,
+          "source_group": "tests",
+          "text": "from scripts.ai.codex.native_session import qualified_binary, ref_environment, session_overrides, validate_ref"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-12-18",
+      "next_step": "Retain as the qualified native session implementation behind the existing MCP operational entrypoint's codex-session command; do not modify global Windows/WSL launchers or add an independent public entrypoint."
+    },
+    {
       "path": "scripts/ai/codex/profile_benchmark.py",
       "type": "py",
       "status": "active",
@@ -1676,13 +1732,13 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 194,
+          "line": 200,
           "source_group": "docs",
           "text": "bash scripts/ai/codex/run-codex.sh mcp-setup"
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 197,
+          "line": 203,
           "source_group": "docs",
           "text": "bash scripts/ai/codex/run-codex.sh mcp-static"
         },
@@ -1920,7 +1976,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 66,
+      "reference_count": 69,
       "references": [
         {
           "path": "Makefile",
@@ -1966,7 +2022,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 34,
+          "line": 40,
           "source_group": "docs",
           "text": "| `.mcp.json` | yes | tracked exact-root workspace MCP entrypoint | generated from `scripts/ai/codex/setup_mcp.py`; MUST stay repo-relative and must not embed machine-local absolute paths; tracked JSO"
         }
@@ -3228,7 +3284,7 @@
         },
         {
           "path": "scripts/ai/mcp/__main__.py",
-          "line": 29,
+          "line": 32,
           "source_group": "scripts",
           "text": "\"check\": shell_command(\"check.sh\"),"
         },
@@ -3302,6 +3358,68 @@
       ]
     },
     {
+      "path": "scripts/ai/mcp/converter_runner.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 4,
+      "references": [
+        {
+          "path": "scripts/ai/mcp/converter_snapshot.py",
+          "line": 92,
+          "source_group": "scripts",
+          "text": "runner = Path(__file__).with_name(\"converter_runner.py\")"
+        },
+        {
+          "path": "scripts/ai/mcp/converter_snapshot.py",
+          "line": 93,
+          "source_group": "scripts",
+          "text": "shutil.copyfile(runner, staging / \"converter_runner.py\")"
+        },
+        {
+          "path": "scripts/ai/mcp/safe_markdownify.py",
+          "line": 83,
+          "source_group": "scripts",
+          "text": "HERE / \"converter_snapshot.py\", HERE / \"converter_runner.py\", HOST / \"project-memory-runtime.py\","
+        },
+        {
+          "path": "scripts/ai/mcp/safe_markdownify.py",
+          "line": 218,
+          "source_group": "scripts",
+          "text": "child = subprocess.Popen([str(PYTHON), \"-I\", \"-S\", \"-B\", str(Path(spec[\"converter\"]) / \"converter_runner.py\"), str(snapshot)], cwd=job, env=env,"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-12-18",
+      "next_step": "Retain as the private isolated conversion worker invoked only with an owner-private snapshot by the governed Markdownify implementation; no separate public CLI."
+    },
+    {
+      "path": "scripts/ai/mcp/converter_snapshot.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/ai/mcp/safe_markdownify.py",
+          "line": 40,
+          "source_group": "scripts",
+          "text": "snapshots = module(\"markdownify_converter_snapshot\", HERE / \"converter_snapshot.py\")"
+        },
+        {
+          "path": "scripts/ai/mcp/safe_markdownify.py",
+          "line": 83,
+          "source_group": "scripts",
+          "text": "HERE / \"converter_snapshot.py\", HERE / \"converter_runner.py\", HOST / \"project-memory-runtime.py\","
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-12-18",
+      "next_step": "Retain as the installed-dependency closure and integrity library used by the existing MCP operational entrypoint's Markdownify command."
+    },
+    {
       "path": "scripts/ai/mcp/export_mcp_env_from_dotenv.ps1",
       "type": "ps1",
       "status": "supporting",
@@ -3310,7 +3428,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 248,
+          "line": 254,
           "source_group": "docs",
           "text": "`scripts/ai/mcp/export_mcp_env_from_dotenv.ps1` can export already configured"
         },
@@ -4864,6 +4982,62 @@
       ]
     },
     {
+      "path": "scripts/ai/mcp/memory_reconciliation.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/ai/mcp/memory_versions.py",
+          "line": 201,
+          "source_group": "scripts",
+          "text": "source = Path(__file__).with_name(\"memory_reconciliation.py\")"
+        },
+        {
+          "path": "tests/unit/scripts/test_memory_reconciliation.py",
+          "line": 12,
+          "source_group": "tests",
+          "text": "from scripts.ai.mcp import memory_reconciliation as recovery"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-12-18",
+      "next_step": "Retain as the single recovery decision and grant-state library bundled by the Memory owner; public administration routes through python -m scripts.ai.mcp memory-runtime."
+    },
+    {
+      "path": "scripts/ai/mcp/memory_versions.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "scripts/ai/mcp/__main__.py",
+          "line": 36,
+          "source_group": "scripts",
+          "text": "\"memory-runtime\": module_command(\"scripts.ai.mcp.memory_versions\"),"
+        },
+        {
+          "path": "scripts/ai/mcp/session_client.py",
+          "line": 65,
+          "source_group": "scripts",
+          "text": "version_spec = importlib.util.spec_from_file_location(\"session_memory_versions\", Path(__file__).with_name(\"memory_versions.py\"))"
+        },
+        {
+          "path": "tests/unit/scripts/test_memory_versions.py",
+          "line": 8,
+          "source_group": "tests",
+          "text": "from scripts.ai.mcp import memory_versions as versions"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-12-18",
+      "next_step": "Retain as the Memory bundle, dispatch and migration implementation behind the existing scripts.ai.mcp entrypoint's memory-runtime command; do not introduce a second public command surface."
+    },
+    {
       "path": "scripts/ai/mcp/neo4j_memory_mcp_adapter.py",
       "type": "py",
       "status": "active",
@@ -4905,7 +5079,7 @@
       "references": [
         {
           "path": "scripts/ai/mcp/__main__.py",
-          "line": 28,
+          "line": 31,
           "source_group": "scripts",
           "text": "\"smoke-neo4j-memory\": python_command(\"neo4j_memory_mcp_smoke.py\"),"
         },
@@ -4959,6 +5133,105 @@
       "lifecycle_decision": "shared_helper_module",
       "review_by": "2026-10-15",
       "next_step": "Retain as the bounded MCP initialize/tools-list readiness helper behind frontend checks; keep it supporting and do not restore persistent stdio Compose servers."
+    },
+    {
+      "path": "scripts/ai/mcp/safe_file.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "scripts/ai/mcp/safe_markdownify.py",
+          "line": 39,
+          "source_group": "scripts",
+          "text": "files = module(\"markdownify_safe_file\", HERE / \"safe_file.py\")"
+        },
+        {
+          "path": "scripts/ai/mcp/safe_markdownify.py",
+          "line": 82,
+          "source_group": "scripts",
+          "text": "paths = [HERE / \"safe_markdownify.py\", HERE / \"safe_file.py\", HOST / \"supervisor.py\","
+        },
+        {
+          "path": "tests/unit/scripts/test_mcp_safe_file.py",
+          "line": 8,
+          "source_group": "tests",
+          "text": "from scripts.ai.mcp.safe_file import read_confined"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-12-18",
+      "next_step": "Retain as the Windows handle-based bounded-read library shared by the Markdownify owner and its filesystem regression controls; no standalone command."
+    },
+    {
+      "path": "scripts/ai/mcp/safe_markdownify.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/ai/mcp/__main__.py",
+          "line": 37,
+          "source_group": "scripts",
+          "text": "\"markdownify\": module_command(\"scripts.ai.mcp.safe_markdownify\"),"
+        },
+        {
+          "path": "tests/unit/scripts/test_safe_markdownify_client.py",
+          "line": 7,
+          "source_group": "tests",
+          "text": "from scripts.ai.mcp import safe_markdownify as markdownify"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-12-18",
+      "next_step": "Retain as the private owner, HTTP and stdio implementation of the existing MCP operational entrypoint's markdownify command; generated native configuration invokes only its private client mode."
+    },
+    {
+      "path": "scripts/ai/mcp/session_client.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 5,
+      "references": [
+        {
+          "path": "scripts/ai/codex/native_session.py",
+          "line": 97,
+          "source_group": "scripts",
+          "text": "or Path(args[3]).name != \"session_client.py\" or args[4] != name):"
+        },
+        {
+          "path": "tests/unit/scripts/test_mcp_native_session.py",
+          "line": 62,
+          "source_group": "tests",
+          "text": "name: {\"command\": \"python\", \"args\": [\"-I\", \"-S\", \"-B\", str(tmp_path / \"session_client.py\"), name]}"
+        },
+        {
+          "path": "tests/unit/scripts/test_native_mcp_local_routes.py",
+          "line": 10,
+          "source_group": "tests",
+          "text": "from scripts.ai.mcp.session_client import session_root"
+        },
+        {
+          "path": "tests/unit/scripts/test_native_mcp_local_routes.py",
+          "line": 21,
+          "source_group": "tests",
+          "text": "\"memory\": {\"command\": \"python\", \"args\": [\"session_client.py\", \"memory\"]}"
+        },
+        {
+          "path": "tests/unit/scripts/test_native_mcp_local_routes.py",
+          "line": 45,
+          "source_group": "tests",
+          "text": "assert 'session_client.py' in text"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-12-18",
+      "next_step": "Retain as the private stdio session selector installed by setup_mcp.py; it inherits cwd and has no administrative root override or independent public CLI."
     },
     {
       "path": "scripts/ai/mcp/support/docker_cli_resolver.ps1",
@@ -5302,7 +5575,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 245,
+          "line": 251,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/support/load_repo_env.ps1`"
         },
@@ -5531,7 +5804,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 281,
+          "line": 287,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/support/token_validation.ps1`"
         },
@@ -5588,7 +5861,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 280,
+          "line": 286,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/support/token_validation.sh`"
         },
@@ -5755,7 +6028,7 @@
         },
         {
           "path": "scripts/ai/mcp/__main__.py",
-          "line": 31,
+          "line": 34,
           "source_group": "scripts",
           "text": "\"test-env-loading\": shell_command(\"test_env_loading.sh\"),"
         },
@@ -5782,13 +6055,13 @@
       "references": [
         {
           "path": "scripts/ai/codex/setup_mcp.py",
-          "line": 25,
+          "line": 27,
           "source_group": "scripts",
           "text": "from scripts.ai.mcp.wrappers import load_wrapper_specs"
         },
         {
           "path": "scripts/ai/mcp/__main__.py",
-          "line": 32,
+          "line": 35,
           "source_group": "scripts",
           "text": "\"wrappers\": module_command(\"scripts.ai.mcp.wrappers\"),"
         },
@@ -12304,7 +12577,7 @@
       "references": [
         {
           "path": "scripts/ai/mcp/__main__.py",
-          "line": 20,
+          "line": 23,
           "source_group": "scripts",
           "text": "from scripts.engineering.common.cli_dispatch import ("
         },
@@ -12404,7 +12677,7 @@
         },
         {
           "path": "scripts/ai/codex/setup_mcp.py",
-          "line": 26,
+          "line": 29,
           "source_group": "scripts",
           "text": "from scripts.engineering.common.platform import detect_platform"
         },
@@ -27446,7 +27719,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 208,
+          "line": 214,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\apply-docker-stable-mcp.ps1 -Profile stable -WithNeo4j"
         },
@@ -27520,13 +27793,13 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 210,
+          "line": 216,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\cleanup-mcp-orphans.ps1 -IncludeGatewayHint"
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 230,
+          "line": 236,
           "source_group": "docs",
           "text": "after reconnects run `cleanup-mcp-orphans.ps1` or `ensure-stable.ps1`."
         },
@@ -27677,7 +27950,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 230,
+          "line": 236,
           "source_group": "docs",
           "text": "after reconnects run `cleanup-mcp-orphans.ps1` or `ensure-stable.ps1`."
         },
@@ -28273,7 +28546,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 231,
+          "line": 237,
           "source_group": "docs",
           "text": "Alternatively run the **shared HTTP plane** (`start-shared.ps1` +"
         },
@@ -28845,7 +29118,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 244,
+          "line": 250,
           "source_group": "docs",
           "text": "- `scripts/ops/support/load_repo_env.sh`"
         },

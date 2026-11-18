@@ -10,6 +10,8 @@ import re
 import shutil
 import subprocess
 import sys
+import tomllib
+import uuid
 from collections.abc import Sequence
 from copy import deepcopy
 from pathlib import Path
@@ -23,6 +25,7 @@ if _REPO_ROOT_STR not in sys.path:
     sys.path.insert(0, _REPO_ROOT_STR)
 
 from scripts.ai.mcp.wrappers import load_wrapper_specs
+from scripts.ai.codex.local_mcp_routes import apply_local_routes
 from scripts.engineering.common.platform import detect_platform
 
 MANAGED_BLOCK_BEGIN = "# === BEGIN MANAGED MCP SERVERS ==="
@@ -616,7 +619,7 @@ def _codex_runtime_servers(
         fetch_env["UV_TOOL_DIR"] = str(runtime_cache_root / "uv-tools")
     _add_startup_timeouts(servers)
 
-    return servers
+    return apply_local_routes(servers, workspace_root)
 
 
 def _write_json(
@@ -930,11 +933,32 @@ def _render_one_mcp_server_toml(name: str, server: dict[str, Any]) -> list[str]:
     lines.extend(_render_server_transport_lines(server))
     if "startup_timeout_sec" in server:
         lines.append(f"startup_timeout_sec = {int(server['startup_timeout_sec'])}")
+    if "tool_timeout_sec" in server:
+        lines.append(f"tool_timeout_sec = {int(server['tool_timeout_sec'])}")
+    for field in ("enabled_tools", "disabled_tools"):
+        if field in server:
+            lines.append(f"{field} = {_toml_array(server[field])}")
     env_http_headers = server.get("env_http_headers")
     if env_http_headers:
         lines.append(
             f"env_http_headers = {_toml_inline_string_table(env_http_headers)}"
         )
+    if "tools" in server:
+        tools = server["tools"]
+        if not isinstance(tools, dict):
+            raise ValueError("Invalid existing MCP tool policy")
+        rendered_tools = []
+        for tool, policy in tools.items():
+            if not isinstance(policy, dict) or set(policy) - {"enabled", "approval_mode"}:
+                raise ValueError("Unsupported existing MCP tool policy; preserve config")
+            fields = []
+            for field, value in policy.items():
+                if not isinstance(value, (bool, str)):
+                    raise ValueError("Invalid existing MCP tool policy value")
+                literal = str(value).lower() if isinstance(value, bool) else _toml_string(value)
+                fields.append(f"{_toml_key(field)} = {literal}")
+            rendered_tools.append(f"{_toml_key(tool)} = {{ " + ", ".join(fields) + " }")
+        lines.append("tools = { " + ", ".join(rendered_tools) + " }")
     env = server.get("env")
     if env:
         lines.extend(_render_server_env_section(key, env))
@@ -956,7 +980,7 @@ def _render_codex_mcp_toml(servers: dict[str, dict[str, Any]]) -> str:
 
 
 def _strip_managed_mcp_blocks(content: str, managed_server_names: set[str]) -> str:
-    section_re = re.compile(r"^\[mcp_servers\.([A-Za-z0-9_-]+)(?:\.env)?\]\s*$")
+    section_re = re.compile(r"^\[mcp_servers\.([A-Za-z0-9_-]+)(?:\.[^\]\r\n]+)?\]\s*$")
     kept: list[str] = []
     skip = False
     skip_marker_block = False
@@ -986,6 +1010,26 @@ def _strip_managed_mcp_blocks(content: str, managed_server_names: set[str]) -> s
     return "\n".join(kept)
 
 
+def _write_user_toml(path: Path, rendered: str, *, before: bytes | None) -> None:
+    """Publish complete valid TOML and refuse a detected concurrent edit."""
+    payload = rendered.encode("utf-8")
+    tomllib.loads(rendered)
+    if payload == before:
+        return
+    pending = path.with_name(path.name + "." + uuid.uuid4().hex + ".pending")
+    try:
+        with pending.open("xb") as stream:
+            stream.write(payload)
+            stream.flush()
+            os.fsync(stream.fileno())
+        current = path.read_bytes() if path.exists() else None
+        if current != before:
+            raise ValueError("Concurrent Codex config edit; existing settings preserved")
+        os.replace(pending, path)
+    finally:
+        pending.unlink(missing_ok=True)
+
+
 def _write_codex_config(
     workspace_root: Path,
     *,
@@ -1000,7 +1044,18 @@ def _write_codex_config(
     os.chmod(config_dir, 0o700)
     config_path = config_dir / "config.toml"
 
-    existing = config_path.read_text(encoding="utf-8") if config_path.exists() else ""
+    before = config_path.read_bytes() if config_path.exists() else None
+    existing = before.decode("utf-8") if before is not None else ""
+    existing_servers = tomllib.loads(existing).get("mcp_servers", {})
+    for name, server in servers.items():
+        previous = existing_servers.get(name, {})
+        known = {"command", "args", "url", "cwd", "env", "env_http_headers", "startup_timeout_sec",
+                 "enabled", "enabled_tools", "disabled_tools", "tools", "tool_timeout_sec"}
+        if set(previous) - known:
+            raise ValueError("Unsupported existing MCP settings; config preserved for explicit review")
+        for field in ("enabled", "enabled_tools", "disabled_tools", "tools", "startup_timeout_sec", "tool_timeout_sec"):
+            if field in previous:
+                server[field] = deepcopy(previous[field])
     managed_or_retired_names = set(
         _canonical_servers(workspace_root, profile="full")
     ) | set(REMOVED_MCP_SERVER_NAMES)
@@ -1012,7 +1067,7 @@ def _write_codex_config(
     else:
         rendered = managed_block
 
-    config_path.write_text(rendered, encoding="utf-8")
+    _write_user_toml(config_path, rendered, before=before)
     os.chmod(config_path, 0o600)
     return config_path
 

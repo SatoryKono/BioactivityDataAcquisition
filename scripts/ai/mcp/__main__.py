@@ -11,6 +11,9 @@ Commands:
     check-neo4j-memory  Run the Neo4j memory MCP + backend verification
     test-env-loading    Run the repo env loader smoke check for MCP wrappers
     wrappers            Validate, run, or generate wrappers from the MCP catalog
+    memory-runtime      Build, inspect or reconcile scoped Memory runtime versions
+    markdownify         Administer the independent safe local-file profile
+    codex-session       Start a qualified native project session with Ref auth
 """
 
 from __future__ import annotations
@@ -30,6 +33,9 @@ COMMAND_SPECS = {
     "check-neo4j-memory": shell_command("check_neo4j_memory.sh"),
     "test-env-loading": shell_command("test_env_loading.sh"),
     "wrappers": module_command("scripts.ai.mcp.wrappers"),
+    "memory-runtime": module_command("scripts.ai.mcp.memory_versions"),
+    "markdownify": module_command("scripts.ai.mcp.safe_markdownify"),
+    "codex-session": module_command("scripts.ai.codex.native_session"),
 }
 
 _DIR = Path(__file__).parent

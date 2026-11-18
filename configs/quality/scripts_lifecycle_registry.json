@@ -1,6 +1,60 @@
 {
   "description": "Lifecycle and supporting-taxonomy decisions for non-active scripts.",
   "entries": {
+    "scripts/ai/codex/native_session.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the qualified native session implementation behind the existing MCP operational entrypoint's codex-session command; do not modify global Windows/WSL launchers or add an independent public entrypoint.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-18"
+    },
+    "scripts/ai/codex/local_mcp_routes.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the local transport-binding library of setup_mcp.py; the existing setup entrypoint owns configuration writes and portable projections remain independent.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-18"
+    },
+    "scripts/ai/mcp/converter_runner.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the private isolated conversion worker invoked only with an owner-private snapshot by the governed Markdownify implementation; no separate public CLI.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-18"
+    },
+    "scripts/ai/mcp/converter_snapshot.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the installed-dependency closure and integrity library used by the existing MCP operational entrypoint's Markdownify command.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-18"
+    },
+    "scripts/ai/mcp/memory_reconciliation.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the single recovery decision and grant-state library bundled by the Memory owner; public administration routes through python -m scripts.ai.mcp memory-runtime.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-18"
+    },
+    "scripts/ai/mcp/memory_versions.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the Memory bundle, dispatch and migration implementation behind the existing scripts.ai.mcp entrypoint's memory-runtime command; do not introduce a second public command surface.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-18"
+    },
+    "scripts/ai/mcp/safe_file.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the Windows handle-based bounded-read library shared by the Markdownify owner and its filesystem regression controls; no standalone command.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-18"
+    },
+    "scripts/ai/mcp/safe_markdownify.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the private owner, HTTP and stdio implementation of the existing MCP operational entrypoint's markdownify command; generated native configuration invokes only its private client mode.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-18"
+    },
+    "scripts/ai/mcp/session_client.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the private stdio session selector installed by setup_mcp.py; it inherits cwd and has no administrative root override or independent public CLI.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-18"
+    },
     "scripts/ops/observability/grafana/_audit_presentation.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as presentation transformations imported by the existing render_nav_bus owner and its adaptive projection; no standalone command surface.",
