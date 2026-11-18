@@ -18,6 +18,21 @@ CONTRACT = ROOT / "scripts/ai/npm_runtime_contract.cjs"
 NODE = shutil.which("node")
 
 
+def _powershell_fixture_path(path: Path, powershell: str) -> str:
+    """Convert fixture paths only when WSL invokes a Windows executable."""
+    converter = shutil.which("wslpath")
+    if os.name == "nt" or not powershell.lower().endswith(".exe") or not converter:
+        return str(path)
+    result = subprocess.run(
+        [converter, "-w", str(path)],
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=8,
+    )
+    return result.stdout.strip()
+
+
 def _isolated_windows_owner_env(tmp_path: Path) -> dict[str, str]:
     """Keep Windows owner lookups inside the temp fixture across WSL interop."""
     local_appdata = str(tmp_path)
@@ -220,7 +235,7 @@ def test_powershell_filesystem_fails_closed(tmp_path: Path) -> None:
     script = ROOT / "scripts/ai/mcp/mcp_filesystem_wrapper.ps1"
     code = (
         "function global:npx { Write-Output '__NPX_CALLED__'; $global:LASTEXITCODE=0 }; $global:LASTEXITCODE=0; & '"
-        + str(script).replace("'", "''")
+        + _powershell_fixture_path(script, powershell).replace("'", "''")
         + "'"
     )
     result = subprocess.run(
@@ -405,7 +420,17 @@ def test_powershell_resolves_only_engine_compatible_toolchain(
     setup = (
         ROOT / "scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.ps1"
     )
-    script = r"""
+    fixture_values = {
+        "FIXTURE_SETUP": _powershell_fixture_path(setup, powershell),
+        "FIXTURE_ROOT": _powershell_fixture_path(tmp_path, powershell),
+        "FIXTURE_MODE": mode,
+    }
+    script = (
+        "\n".join(
+            "$env:" + name + " = '" + value.replace("'", "''") + "'"
+            for name, value in fixture_values.items()
+        )
+        + r"""
 $ErrorActionPreference = 'Stop'
 $tokens = $null; $errors = $null
 $ast = [System.Management.Automation.Language.Parser]::ParseFile($env:FIXTURE_SETUP, [ref]$tokens, [ref]$errors)
@@ -418,14 +443,9 @@ function fixture-portable-node { $global:LASTEXITCODE = if ($env:FIXTURE_MODE -e
 function Resolve-PortableNodeToolchain { return @{NodeExe='fixture-portable-node';NpmCmd='fixture-npm';Source='portable-nodejs';InstallDir=$env:FIXTURE_ROOT} }
 try { $selected = Resolve-NodeToolchain; Write-Output ('SELECTED=' + $selected.Source) } catch { Write-Output $_.Exception.Message; exit 1 }
 """
+    )
     result = subprocess.run(
         [powershell, "-NoProfile", "-NonInteractive", "-Command", script],
-        env={
-            **os.environ,
-            "FIXTURE_SETUP": str(setup),
-            "FIXTURE_ROOT": str(tmp_path),
-            "FIXTURE_MODE": mode,
-        },
         capture_output=True,
         text=True,
         check=False,
