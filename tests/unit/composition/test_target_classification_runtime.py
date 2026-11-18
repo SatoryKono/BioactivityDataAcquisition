@@ -971,3 +971,188 @@ async def test_real_runner_persists_both_layers_and_completes_evidence(
             observability=observability,
             monkeypatch=monkeypatch,
         )
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("mode", ["shadow", "enrich"])
+@pytest.mark.parametrize(
+    "rejection", ["structural_drop", "structural_error", "filter_error", "build_error"]
+)
+async def test_rejected_target_releases_pending_evidence_across_batches(
+    shadow_config, tmp_path, mode, rejection
+):
+    from dataclasses import replace
+    from bioetl.application.core.base_transformer.errors import FilteredOutError
+
+    config = (
+        shadow_config if mode == "shadow" else _admitted_synthetic_config(shadow_config)
+    )
+    transformer = _transformer(config, tmp_path / "rejected")
+    session = transformer._target_classification_session
+    normalizer = RecordNormalizationProcessor("chembl", "target")
+
+    def reject(*args):
+        raise ValueError("rejected fixture row")
+
+    for batch in range(3):
+        context = replace(_context(), source_batch_id=f"batch-{batch}")
+        payload = await transformer.transform_pre_silver(
+            context,
+            {
+                "target_chembl_id": "CHEMBL1",
+                "pref_name": "synthetic target",
+                "target_type": "SINGLE PROTEIN",
+                "organism": "Homo sapiens",
+                "tax_id": 9606,
+                "species_group_flag": False,
+                "target_components": [],
+            },
+            0,
+        )
+        if rejection == "structural_drop":
+            payload = replace(payload, apply_structural_policy=lambda *args: None)
+            assert normalizer.finalize_pre_silver(payload, context, 0) is None
+        elif rejection == "structural_error":
+            payload = replace(
+                payload,
+                business_data={
+                    k: v for k, v in payload.business_data.items() if k != "pref_name"
+                },
+            )
+            with pytest.raises(FilteredOutError, match="pref_name"):
+                normalizer.finalize_pre_silver(payload, context, 0)
+        else:
+            callback = (
+                "apply_silver_filter"
+                if rejection == "filter_error"
+                else "build_silver_record"
+            )
+            payload = replace(payload, **{callback: reject})
+            with pytest.raises(ValueError, match="rejected fixture row"):
+                normalizer.finalize_pre_silver(payload, context, 0)
+        assert session._pending == {}
+        assert session._published == {}
+    assert not list((tmp_path / "rejected").rglob("*.json"))
+
+
+@pytest.mark.parametrize("parent_mode", ["off", "shadow"])
+def test_exact_replay_keeps_parent_with_current_workflow_binding(
+    shadow_config, parent_mode
+):
+    from bioetl.composition.bootstrap.assembly.target_classification_identity import (
+        load_target_aware_pipeline_config,
+    )
+
+    off = load_pipeline_config("chembl_target")
+    parent_config = shadow_config if parent_mode == "shadow" else off
+    current = off if parent_mode == "shadow" else shadow_config
+    token = bind_target_classification_dependency(
+        {"target_config": current.model_dump(mode="json")}
+    )
+    try:
+        restored = load_target_aware_pipeline_config(
+            "chembl_target",
+            lambda _: current,
+            lambda _: None,
+            ctx=SimpleNamespace(
+                pipeline_name="chembl_target",
+                exact_replay=True,
+                replay_of_manifest_id="parent-manifest",
+            ),
+            settings=SimpleNamespace(),
+            resolve_parent=lambda **kwargs: SimpleNamespace(
+                pipeline_name="chembl_target",
+                resolved_config=parent_config.model_dump(mode="json"),
+            ),
+        )
+        assert restored.target_classification == parent_config.target_classification
+    finally:
+        reset_target_classification_dependency(token)
+
+
+def test_workflow_preflight_pins_exact_replay_parent(
+    shadow_config, monkeypatch, tmp_path
+):
+    from bioetl.domain.workflow import WorkflowRunOptionsConfig
+    from bioetl.infrastructure.config.settings_api import Settings
+
+    off = load_pipeline_config("chembl_target")
+    monkeypatch.setattr(
+        "bioetl.composition.bootstrap.assembly.storage.load_pipeline_config",
+        lambda _: off,
+    )
+    monkeypatch.setattr(
+        "bioetl.composition.runtime_builders._exact_replay_cached_bronze_context.resolve_replay_parent_manifest_refs",
+        lambda **kwargs: SimpleNamespace(
+            pipeline_name="chembl_target",
+            resolved_config=shadow_config.model_dump(mode="json"),
+        ),
+    )
+    workflow = WorkflowConfig(
+        "replay",
+        steps=(
+            WorkflowStepConfig(
+                "target",
+                "chembl_target",
+                run_options=WorkflowRunOptionsConfig(
+                    exact_replay=True, replay_of_manifest_id="parent-manifest"
+                ),
+            ),
+        ),
+    )
+    binding = preflight_workflow_target_dependencies(
+        workflow,
+        {},
+        settings=Settings(test_mode=True, data_dir=tmp_path / "data", _env_file=None),
+    )[TARGET_CLASSIFICATION_DEPENDENCY_KEY]
+    assert binding["target_config"]["target_classification"]["mode"] == "shadow"
+    assert (
+        binding["profile_sha256"]
+        == shadow_config.target_classification.snapshot_manifest_sha256
+    )
+    token = bind_target_classification_dependency(binding)
+    try:
+        validate_target_runtime_dependency(shadow_config)
+    finally:
+        reset_target_classification_dependency(token)
+
+
+def test_workflow_preflight_rejects_conflicting_replay_dependencies(
+    shadow_config, monkeypatch, tmp_path
+):
+    from bioetl.domain.workflow import WorkflowRunOptionsConfig
+    from bioetl.infrastructure.config.settings_api import Settings
+
+    off = load_pipeline_config("chembl_target")
+    monkeypatch.setattr(
+        "bioetl.composition.bootstrap.assembly.storage.load_pipeline_config",
+        lambda _: off,
+    )
+    monkeypatch.setattr(
+        "bioetl.composition.runtime_builders._exact_replay_cached_bronze_context.resolve_replay_parent_manifest_refs",
+        lambda **kwargs: SimpleNamespace(
+            pipeline_name="chembl_target",
+            resolved_config=shadow_config.model_dump(mode="json"),
+        ),
+    )
+    workflow = WorkflowConfig(
+        "conflict",
+        steps=(
+            WorkflowStepConfig(
+                "replay",
+                "chembl_target",
+                run_options=WorkflowRunOptionsConfig(
+                    exact_replay=True, replay_of_run_id="parent-run"
+                ),
+            ),
+            WorkflowStepConfig("current", "chembl_target"),
+        ),
+    )
+    with pytest.raises(ValueError, match="conflicting classification dependencies"):
+        preflight_workflow_target_dependencies(
+            workflow,
+            {},
+            settings=Settings(
+                test_mode=True, data_dir=tmp_path / "data", _env_file=None
+            ),
+        )

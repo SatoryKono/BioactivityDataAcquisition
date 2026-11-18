@@ -33,10 +33,25 @@ def resolve_replay_parent_manifest(
     settings: Settings,
 ) -> RunManifest:
     """Load the persisted parent run manifest for an exact-replay request."""
+    return resolve_replay_parent_manifest_refs(
+        replay_of_manifest_id=_optional_text(
+            getattr(ctx, "replay_of_manifest_id", None)
+        ),
+        replay_of_run_id=_optional_text(getattr(ctx, "replay_of_run_id", None)),
+        settings=settings,
+    )
+
+
+def resolve_replay_parent_manifest_refs(
+    *,
+    replay_of_manifest_id: str | None,
+    replay_of_run_id: str | None,
+    settings: Settings,
+) -> RunManifest:
+    """Resolve persisted replay selectors without manufacturing a child run identity."""
     manifest_store = FileRunManifestStore(
         base_path=control_plane_root(settings, "run_manifest")
     )
-    replay_of_manifest_id = _optional_text(getattr(ctx, "replay_of_manifest_id", None))
     if replay_of_manifest_id is not None:
         manifest = manifest_store.get(replay_of_manifest_id)
         if manifest is None:
@@ -46,7 +61,6 @@ def resolve_replay_parent_manifest(
             )
         return manifest
 
-    replay_of_run_id = _optional_text(getattr(ctx, "replay_of_run_id", None))
     if replay_of_run_id is None:
         raise RuntimeError(
             "Exact replay without --use-cached-bronze requires replay_of_run_id "
