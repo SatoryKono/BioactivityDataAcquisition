@@ -836,5 +836,181 @@
     "run_id": "epic-13056-closeout-20261118",
     "schema_version": 1
   },
-  "proof_scope": "Pre-refresh documentation working tree. No completed or CI-qualified claim; subsequent source changes require fresh binding."
+  "proof_scope": "Pre-refresh documentation working tree. No completed or CI-qualified claim; subsequent source changes require fresh binding.",
+  "host_follow_up": {
+    "observed_at": "2026-11-18T14:45:54.170661+00:00",
+    "claim": "partial_not_epic_admission",
+    "host_source_sha": "2b59d3e23cf09b614bde74377bc9ea5caeb82625",
+    "accepted_main_sha": "f444a6b8061965e7075bea10d64322fa4c4aac42",
+    "source_comparison": {
+      "changed_paths": [
+        "docs/reports/generated/documentation-cleanup-inventory.json",
+        "docs/reports/generated/documentation-cleanup-inventory.md",
+        "reports/quality/config-surface-backlog.json",
+        "reports/quality/debt-governance-gates.json",
+        "reports/quality/debt-governance-gates.md",
+        "reports/quality/hotspot-family-baseline.json",
+        "reports/quality/hotspot-family-baseline.md",
+        "reports/review/ai-rules-epic-13056-acceptance.md",
+        "reports/review/ai-rules-epic-13056-evidence.json"
+      ],
+      "runtime_guards_config_and_tests_identical": true
+    },
+    "windows": {
+      "status": "INCOMPLETE_NOT_QUALIFIED",
+      "commit": {
+        "name": "nonempty-commit",
+        "argv": [
+          "git",
+          "commit",
+          "-m",
+          "test(hooks): qualify installed Windows callbacks"
+        ],
+        "exit_code": 0,
+        "seconds": 14.201122400001623,
+        "controlled_messages": []
+      },
+      "push": {
+        "name": "local-push",
+        "argv": [
+          "git",
+          "push",
+          "D:\\github\\BioactivityDataAcquisition\\reports\\local\\epic-13056-host-acceptance-20261118\\windows-accepted-main\\host-push-remote.git",
+          "HEAD:refs/heads/qualification"
+        ],
+        "exit_code": 1,
+        "seconds": 180.5750570000091,
+        "controlled_messages": [
+          "BioETL hook ERROR: timeout; inspect with hook doctor and scoped checks."
+        ]
+      },
+      "rollback_original_absence_restored": true,
+      "foreign_callbacks_preserved": true,
+      "env_bytes_unchanged": true,
+      "reinstall_positive_sequence": "NOT_REACHED"
+    },
+    "wsl": {
+      "status": "INCOMPLETE_NOT_QUALIFIED",
+      "layout": "independent full clone in approved D:/github worktree root",
+      "env_permission_scope": "user-authorized checkout of .env.example only; other env mutations not authorized",
+      "install_doctor_idempotence": "PASS_INSTALLATION_IDENTITY_ONLY",
+      "nonempty_commit": {
+        "exit_code": 1,
+        "seconds": 41.13031996898644,
+        "stderr_tail": "BioETL hook ERROR: timeout; inspect with hook doctor and scoped checks.\n"
+      },
+      "invalid_message_control": "NOT_REACHED_COMMIT_MSG; timed out at pre-commit, not a header validation PASS",
+      "rollback_original_absence_restored": true,
+      "env_bytes_unchanged": true,
+      "push_and_positive_reinstall_sequence": "NOT_REACHED",
+      "direct_framework": {
+        "exit_code": 0,
+        "seconds": 79.05012384300062,
+        "scope": "Diagnostic only; not 30-second Git event admission"
+      },
+      "git_diff_profile": {
+        "preloads": 9,
+        "lstat_per_preload": 14779,
+        "preload_seconds": [
+          7.039198,
+          8.024864,
+          7.607953,
+          7.436478,
+          6.760338,
+          7.818854,
+          7.550206,
+          7.405638,
+          7.477431
+        ],
+        "index_refresh_rows": [
+          {
+            "argv": [
+              "diff",
+              "--no-ext-diff",
+              "--no-textconv",
+              "--ignore-submodules"
+            ],
+            "seconds": 11.371540776002803,
+            "exit_code": 0,
+            "stdout_bytes": 0,
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "update-index",
+              "--refresh"
+            ],
+            "seconds": 14.43434608700045,
+            "exit_code": 0,
+            "stdout_bytes": 0,
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "diff",
+              "--no-ext-diff",
+              "--no-textconv",
+              "--ignore-submodules"
+            ],
+            "seconds": 18.658792279005866,
+            "exit_code": 0,
+            "stdout_bytes": 0,
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "-c",
+              "core.preloadindex=false",
+              "diff",
+              "--no-ext-diff",
+              "--no-textconv",
+              "--ignore-submodules"
+            ],
+            "seconds": 80.9971075939975,
+            "exit_code": 0,
+            "stdout_bytes": 0,
+            "stderr": ""
+          }
+        ],
+        "staged_semantics_unchanged": true
+      },
+      "environment_probes": {
+        "healthy_with_project_path": true,
+        "checks": 46,
+        "distinct_environments": 6,
+        "all_seconds": 2.749,
+        "distinct_seconds": 0.282,
+        "initial_wrong_path_probe": "INVALID_DIAGNOSTIC_CONTEXT_NOT_EVENT_CACHE_FAILURE"
+      }
+    },
+    "ci": {
+      "run_id": 44323116672,
+      "head_sha": "f444a6b8061965e7075bea10d64322fa4c4aac42",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/44323116672",
+      "artifact_name": "ai-runtime-proof-44323116672-1",
+      "artifact_id": 14434164931,
+      "outcome": "ADMIT",
+      "task_id": "epic-13056-final-admission",
+      "bundle_digest": "ab8adb91ca98ef42733eb022b9b202d2bff7300b05228ae14bbecb81d23d857a",
+      "artifact_digest_consistency": "PASS",
+      "tests": {
+        "tests": 300,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "scope": "CI receipts for declared tests/governance/docs/debt commands; not local Windows/WSL host admission"
+    },
+    "unchanged_limits_seconds": {
+      "pre_commit": 30,
+      "commit_msg": 10,
+      "pre_push": 180
+    },
+    "blockers": [
+      "Windows full native push timeout",
+      "WSL full native commit timeout on DrvFS",
+      "positive rollback/reinstall sequence not completed on both hosts"
+    ],
+    "next_required": "Repair or requalify host execution within unchanged checks, guardrails and deadlines; no blind repeat or timeout increase"
+  }
 }
