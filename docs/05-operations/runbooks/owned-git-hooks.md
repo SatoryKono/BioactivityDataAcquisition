@@ -125,6 +125,19 @@ the initial diff captured before launching the group. No check, cache health pro
 containment requirement or event deadline is removed. Command changes require
 fresh qualification before updating the fingerprint pins. Commit formatters and
 commit-msg retain serial dispatch.
+
+For the sole known Conventional Commit checker, a source-pinned read-only message
+adapter executes the original parser in the already selected project interpreter.
+The seven package/helper source files, configured command, owned bundle, cache
+health and interpreter identity must match. Original worktree packages are loaded
+explicitly and namespaces/search paths are restored afterwards. Foreign/legacy
+callbacks, different checker sources or additional message hooks retain ordinary
+framework execution. The qualified metadata-only checker does not hide or inspect
+unstaged source files: it cannot write them, so framework mutation-detection diffs
+and a second project-Python startup are unnecessary in this scope. Fresh runtime
+index/HEAD/base/env bookends and changed-index protected checks remain mandatory.
+Missing or skipped message input cannot qualify execution. This is not a native
+AI permission boundary, cache waiver or authorization to mutate an env file.
 The qualified adapter replaces pre-commit
 stash/checkout with a read-only unstaged-diff check: if the framework would need
 to hide tracked unstaged changes, it refuses before configured callbacks. Stage

@@ -10,9 +10,9 @@ from __future__ import annotations
 from collections.abc import Iterator, Sequence
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import closing, contextmanager
-from functools import partial
 import hashlib
 import importlib.metadata
+import importlib.util
 import inspect
 import json
 import os
@@ -301,6 +301,22 @@ def _read_only_staged_files(patch_dir: str) -> Iterator[None]:
     yield
 
 
+def _message_backend() -> Any:
+    try:
+        source = (
+            Path(__file__).resolve().parents[3]
+            / "scripts/engineering/repo/readonly_message.py"
+        )
+        spec = importlib.util.spec_from_file_location("_bioetl_owned_message", source)
+        if spec is None or spec.loader is None:
+            raise BootstrapRequired("message_backend_unavailable")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+    except Exception:
+        raise BootstrapRequired("message_backend_unavailable") from None
+
+
 def run(hook_type: str, hook_dir: Path, args: Sequence[str]) -> int:
     """Preserve the framework's hook protocol and legacy chain after qualification."""
     if hook_type not in HOOK_TYPES:
@@ -312,6 +328,18 @@ def run(hook_type: str, hook_dir: Path, args: Sequence[str]) -> int:
             raise BootstrapRequired("framework_contract_changed")
         repository = importlib.import_module("pre_commit.repository")
         Store = importlib.import_module("pre_commit.store").Store
+
+        root = Path.cwd()
+        message = _message_backend() if hook_type == "commit-msg" else None
+        readonly = bool(message is not None and message.qualified(root, hook_dir))
+
+        @contextmanager
+        def staged_files(patch_dir: str) -> Iterator[None]:
+            if readonly:
+                yield  # Verified header code reads metadata; no source hiding.
+            else:
+                with _read_only_staged_files(patch_dir):
+                    yield
 
         offline = {
             "PIP_NO_INDEX": "1",
@@ -333,15 +361,29 @@ def run(hook_type: str, hook_dir: Path, args: Sequence[str]) -> int:
             framework_main = importlib.import_module("pre_commit.main")
             serial = run_module._run_hooks
 
+            def dispatch(config: Any, hooks: Any, skips: Any, options: Any) -> int:
+                if readonly:
+                    return int(
+                        message.dispatch(
+                            run_module,
+                            serial,
+                            config,
+                            hooks,
+                            skips,
+                            options,
+                            root=root,
+                            hook_dir=hook_dir,
+                        )
+                    )
+                return _run_qualified_hooks(
+                    run_module, serial, config, hooks, skips, options
+                )
+
             with (
                 patch.object(run_module, "install_hook_envs", _require_environments),
                 patch.object(framework_main, "error_handler", _quiet_errors),
-                patch.object(run_module, "staged_files_only", _read_only_staged_files),
-                patch.object(
-                    run_module,
-                    "_run_hooks",
-                    partial(_run_qualified_hooks, run_module, serial),
-                ),
+                patch.object(run_module, "staged_files_only", staged_files),
+                patch.object(run_module, "_run_hooks", dispatch),
             ):
                 return int(
                     framework_main.main(

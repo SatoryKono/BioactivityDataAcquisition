@@ -27,6 +27,7 @@ MODULES = (
     "process_deadline",
     "process_supervisor",
     "offline_precommit",
+    "readonly_message",
     "hook_runtime",
     "hook_installation",
     "hook_receipts",
