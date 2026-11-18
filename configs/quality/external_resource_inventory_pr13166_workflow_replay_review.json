@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "614ff8ad743ad4059c1695219d96d12b97599edd",
+  "source_ref": "614ff8ad743ad4059c1695219d96d12b97599edd",
+  "source_reviews": {
+    "src/bioetl/composition/bootstrap/assembly/storage.py": "Reviewed extracting workflow target configuration and parent selection into a bounded pure helper. Storage still passes the existing FileRunManifestStore-based parent reader and YAML hydrator as explicit callbacks. Existing profile/table admission owners and cleanup are unchanged; no new acquisition or runtime qualification.",
+    "src/bioetl/composition/bootstrap/assembly/target_classification_replay.py": "Reviewed every helper branch: select only target steps, merge workflow options, retain normal defaults, restore the existing parent through the passed reader, reject mismatched/empty parent configuration or conflicting classifications, hydrate the pinned payload. This module itself owns no file/client/process/task; the injected reader retains the original operation-scoped owner and cleanup. Static source qualification only; NOT_RUN_12553 remains unchanged."
+  }
+}
