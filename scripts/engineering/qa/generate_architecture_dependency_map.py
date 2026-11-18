@@ -74,6 +74,15 @@ MODULE_GROUP_OVERRIDES = {
     "bioetl.composition.evidence_location_registration": (
         _COMPOSITION_RUNTIME_BUILDERS_GROUP
     ),
+    # Target-classification owners stay in composition.services, but their
+    # cross-layer imports already exist on composition.factories. Folding them
+    # there keeps the shrink-only group-edge total.
+    "bioetl.composition.services.target_classification_identity": (
+        "composition.factories"
+    ),
+    "bioetl.composition.services.target_classification_runtime": (
+        "composition.factories"
+    ),
 }
 TYPE_CHECKING_NAME = "TYPE_CHECKING"
 _FRONTMATTER_DELIMITER = "---"

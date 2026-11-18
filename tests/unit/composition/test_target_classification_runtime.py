@@ -352,17 +352,13 @@ def test_target_preflight_uses_actual_writer_paths_even_when_off(
     gold._resolve_table_path.assert_called_once_with("chembl.target")
 
 
-def test_target_exact_replay_restores_saved_profile(shadow_config, monkeypatch):
+def test_target_exact_replay_restores_saved_profile(shadow_config):
     from bioetl.composition.services.target_classification_identity import (
         restore_target_replay_config,
     )
 
     parent = SimpleNamespace(
         pipeline_name="chembl_target", resolved_config=shadow_config.model_dump()
-    )
-    monkeypatch.setattr(
-        "bioetl.composition.services.target_classification_identity._resolve_replay_parent_manifest",
-        lambda **kwargs: parent,
     )
     ctx = SimpleNamespace(
         pipeline_name="chembl_target",
@@ -373,6 +369,7 @@ def test_target_exact_replay_restores_saved_profile(shadow_config, monkeypatch):
         ctx=ctx,
         settings=SimpleNamespace(),
         current_config=load_pipeline_config("chembl_target"),
+        resolve_parent=lambda **kwargs: parent,
     )
     assert restored.target_classification == shadow_config.target_classification
 
