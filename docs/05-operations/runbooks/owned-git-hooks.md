@@ -112,7 +112,20 @@ set semantics, with additions refused. Concurrent later index changes still need
 The offline framework adapter is qualified only for pre-commit 4.7.0 and the tested
 private API signatures. Unknown versions fail before configured framework callbacks. Missing repository
 cache or unhealthy/missing environments fail instead of cloning or installing.
-Existing checks remain required. The qualified adapter replaces pre-commit
+Existing checks remain required. The four qualified local read-only pre-push
+commands (secret baseline, mypy, Bandit and architecture smoke) may overlap in the
+owned process tree. Eligibility requires their exact tokenized-command fingerprints,
+local unsupported/system language with the qualified no-environment adapter, and
+no fail-fast or skip request. Changed commands, filename-passing hooks, explicit serial requests
+or an earlier unqualified check retain ordinary serial dispatch. Other configured
+checks run normally after the parallel group has completed; Python environments
+are never entered while the qualified processes are still running. The original
+framework still reports every result and captures Git diff after each check, with
+the initial diff captured before launching the group. No check, cache health probe,
+containment requirement or event deadline is removed. Command changes require
+fresh qualification before updating the fingerprint pins. Commit formatters and
+commit-msg retain serial dispatch.
+The qualified adapter replaces pre-commit
 stash/checkout with a read-only unstaged-diff check: if the framework would need
 to hide tracked unstaged changes, it refuses before configured callbacks. Stage
 or preserve those changes explicitly outside the hook and retry. It never creates
