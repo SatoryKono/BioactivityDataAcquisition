@@ -269,7 +269,7 @@ def build_target_classification_session(
     if profile is None:
         return None
     mode = config.target_classification.mode
-    if mode not in {"shadow", "enrich"}:
+    if mode not in ("shadow", "enrich"):
         raise ValueError("enabled target classification requires shadow or enrich mode")
     classifier = IupharTargetClassificationAdapter(profile)
     store = LocalTargetClassificationEvidenceStore(
