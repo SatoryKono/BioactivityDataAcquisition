@@ -114,13 +114,22 @@ def _interrupted_launch_block(observed, coord):
     return None
 
 
+def _unresolved_legacy_block(raw, coord):
+    if raw is None:
+        return False
+    raw_hash = digest(raw)
+    return not any(
+        item["snapshot"]["records"]["blocked"] == raw_hash for item in coord["history"]
+    )
+
+
 def block_identity(observed, coord):
     active = coord.get("active_block")
     if active:
         return active["id"]
     if coord["history"] and coord["history"][-1]["phase"] == "LAUNCHING":
         return _interrupted_launch_block(observed, coord)
-    if observed["blocked"] is not None:
+    if _unresolved_legacy_block(observed["blocked"], coord):
         return "legacy-" + digest(
             {k: observed[k] for k in ("blocked", "status", "work")}
         )
@@ -287,14 +296,7 @@ def blocked(owner, entry):
     coord = coordination(owner, entry)
     if coord.get("active_block"):
         return True
-    observed = records(owner, entry)
-    raw = observed["blocked"]
-    if raw is None:
-        return False
-    raw_hash = digest(raw)
-    return not any(
-        item["snapshot"]["records"]["blocked"] == raw_hash for item in coord["history"]
-    )
+    return _unresolved_legacy_block(records(owner, entry)["blocked"], coord)
 
 
 def decision(owner, entry, value, *, self_owner=False):
@@ -360,6 +362,7 @@ def observe(owner, entry, value, generation, *, idle=False):
                 and (
                     work.get("phase") != "idle"
                     or work.get("graph") != owner.state.graph_stamp(value)
+                    or work.get("mutating") is not False
                 )
             )
         ):

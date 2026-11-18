@@ -44,9 +44,19 @@ if (
 ):
     raise SystemExit("Converter requires an owner-private job snapshot")
 sys.path.append(str(root / "site-packages"))
-from markitdown import MarkItDown
+from markitdown import MarkItDown, StreamInfo
+from markitdown.converters import HtmlConverter
 
-text = MarkItDown(enable_plugins=False).convert(str(source)).text_content
+if source.suffix.lower() == ".html":
+    # Use the HTML parser directly so content sniffing cannot select other converters.
+    with source.open("rb") as stream:
+        text = (
+            HtmlConverter()
+            .convert(stream, StreamInfo(extension=".html", mimetype="text/html"))
+            .text_content
+        )
+else:
+    text = MarkItDown(enable_plugins=False).convert(str(source)).text_content
 output = text.encode("utf-8")
 if len(output) > 1024 * 1024:
     raise SystemExit("Converter output exceeds bound")

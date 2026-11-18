@@ -24,7 +24,10 @@ def session_root(cwd: Path, validator) -> Path:
     if not cwd.is_absolute() or cwd.resolve(strict=True) != cwd:
         raise PermissionError("Session cwd is not physical")
     for candidate in (cwd, *cwd.parents):
-        if (candidate / ".git").exists():
+        marker = candidate / ".git"
+        if marker.is_symlink() or marker.is_junction():
+            raise PermissionError("Session Git marker is a reparse point")
+        if marker.exists():
             return validator(candidate)
     raise PermissionError("No registered session workspace")
 
@@ -32,9 +35,7 @@ def session_root(cwd: Path, validator) -> Path:
 def _verify_dispatcher(directory=None):
     manifest_path = (directory or Path(__file__).parent) / "dispatcher.json"
     if not manifest_path.is_file():
-        if directory is not None:
-            raise PermissionError("Installed session dispatcher manifest is absent")
-        return None
+        raise PermissionError("Installed session dispatcher manifest is absent")
     raw = manifest_path.read_bytes()
     directory = manifest_path.parent
     manifest = json.loads(raw)

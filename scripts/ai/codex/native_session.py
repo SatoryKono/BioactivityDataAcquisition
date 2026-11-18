@@ -83,7 +83,7 @@ def validate_ref(config, mode):
 
 def toml_value(value):
     if isinstance(value, str):
-        return json.dumps(value, ensure_ascii=False)
+        return json.dumps(value, ensure_ascii=False).replace("\x7f", r"\u007f")
     if isinstance(value, bool):
         return str(value).lower()
     if isinstance(value, (int, float)):
@@ -94,7 +94,7 @@ def toml_value(value):
         return (
             "{"
             + ",".join(
-                json.dumps(key) + "=" + toml_value(item) for key, item in value.items()
+                toml_value(key) + "=" + toml_value(item) for key, item in value.items()
             )
             + "}"
         )
@@ -106,18 +106,14 @@ def ref_only_overrides(config):
     servers = config.get("mcp_servers", {})
     if not isinstance(servers, dict) or "ref" not in servers:
         raise PermissionError("Ref-only requires a configured Ref entry")
-    result = []
+    enabled = {}
     for name, entry in servers.items():
-        if (
-            not isinstance(name, str)
-            or re.fullmatch(r"[A-Za-z0-9_-]+", name) is None
-            or not isinstance(entry, dict)
-        ):
+        if not isinstance(name, str) or not name or not isinstance(entry, dict):
             raise PermissionError("Ref-only requires safe configured server names")
-        result.extend(
-            ["--config", f"mcp_servers.{name}.enabled={toml_value(name == 'ref')}"]
-        )
-    return result
+        enabled[name] = {"enabled": name == "ref"}
+    # Codex splits override paths on dots, including dots inside quoted keys.
+    # Put server names in the TOML value so each key remains literal.
+    return ["--config", "mcp_servers=" + toml_value(enabled)]
 
 
 def _validate_markdownify_client(entry):
@@ -147,18 +143,25 @@ def _validate_markdownify_client(entry):
     )
 
 
-def _markdownify_entry(source, root, servers):
+def _markdownify_entry(source, root, servers, *, explicit):
     from scripts.ai.codex.local_mcp_routes import common_directory
 
     if not source.exists():
         return None
     value = json.loads(physical(source).read_bytes())
+    workspace = Path(value["workspace"])
+    registered_common = Path(value["git_common"])
+    name = "Markdownify-BioETL"
     if (
         value.get("schema") != 1
-        or Path(value["workspace"]) != root
-        or value.get("server") != "Markdownify-BioETL"
-        or common_directory(root, expected=Path(value["git_common"])) is None
+        or value.get("server") != name
+        or not workspace.is_absolute()
+        or not registered_common.is_absolute()
     ):
+        raise PermissionError("Invalid Markdownify session binding")
+    if workspace != root and not explicit:
+        return (name, {"enabled": False}) if name in servers else None
+    if workspace != root or common_directory(root, expected=registered_common) is None:
         raise PermissionError(
             "Markdownify session binding does not match this workspace"
         )
@@ -270,7 +273,9 @@ def session_overrides(
         entry["args"][-1] = "memory-acceptance"
         selected["memory-acceptance"] = entry
     source = markdownify or Path.home() / ".config/pc-agent/markdownify-bioetl.json"
-    optional = _markdownify_entry(source, root, servers)
+    optional = _markdownify_entry(
+        source, root, servers, explicit=markdownify is not None
+    )
     if optional is not None:
         selected[optional[0]] = optional[1]
     result = []
@@ -280,16 +285,13 @@ def session_overrides(
 
 
 def workspace():
-    root = next(
-        (p for p in (Path.cwd(), *Path.cwd().parents) if (p / ".git").exists()), None
-    )
-    if root is None:
-        raise PermissionError("Native session requires its actual project cwd")
+    from scripts.ai.mcp.session_client import session_root
+
     path = Path("D:/pc-agent/tools/shared-mcp/ast-workspace-profile.py")
     spec = importlib.util.spec_from_file_location("native_session_workspace", path)
     roots = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(roots)
-    root = roots.physical_root(physical(root))
+    root = session_root(physical(Path.cwd()), roots.physical_root)
     return root, roots.CANONICAL
 
 

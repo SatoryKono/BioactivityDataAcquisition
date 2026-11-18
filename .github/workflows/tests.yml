@@ -1264,6 +1264,17 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Fetch pinned Grafana host evidence
+        if: ${{ matrix.test-group.name == 'integration' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence_ref='refs/tags/evidence/grafana-host-source-dd01e262e7-20261119'
+          expected='dd01e262e73e5295440f7c47715756166bc04da4'
+          git fetch --no-tags --depth=1 origin "${evidence_ref}:${evidence_ref}"
+          actual=$(git rev-parse --verify "${evidence_ref}^{commit}")
+          test "$actual" = "$expected"
+
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
         with:

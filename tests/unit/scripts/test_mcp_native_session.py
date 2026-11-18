@@ -173,6 +173,35 @@ def test_markdownify_source_cannot_redirect_a_foreign_workspace(
         session_overrides(config, root, manifest=manifest, markdownify=custom)
 
 
+def test_default_foreign_markdownify_binding_disables_only_that_server(
+    session_binding, tmp_path, monkeypatch
+):
+    root, manifest, _, config = session_binding
+    home = tmp_path / "home"
+    path = home / ".config/pc-agent/markdownify-bioetl.json"
+    path.parent.mkdir(parents=True)
+    path.write_text(
+        json.dumps(
+            {
+                "schema": 1,
+                "workspace": str(tmp_path / "foreign"),
+                "git_common": str(root / ".git"),
+                "server": "Markdownify-BioETL",
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(Path, "home", lambda: home)
+    config["mcp_servers"]["Markdownify-BioETL"] = {"command": "unrelated"}
+    overrides = session_overrides(config, root, manifest=manifest)
+    entries = {}
+    for override in overrides[1::2]:
+        entries.update(tomllib.loads(override)["mcp_servers"])
+    assert entries["memory"]["args"][-1] == "memory"
+    assert entries["ast-grep"]["args"][-1] == "ast-grep"
+    assert entries["Markdownify-BioETL"] == {"enabled": False}
+
+
 def test_session_uses_explicit_environment_manifest(
     session_binding, monkeypatch, tmp_path
 ):
@@ -255,236 +284,6 @@ def test_session_refuses_unqualified_selector_before_launch(
         )
 
 
-@pytest.fixture
-def ref_launch(session_binding, monkeypatch, tmp_path):
-    import dotenv
-
-    root, manifest, _, config = session_binding
-    config = deepcopy(config)
-    config["mcp_servers"]["ref"] = {
-        "url": native_session.REF_URL,
-        "env_http_headers": {"x-ref-api-key": "REF_TOOL_API_KEY"},
-        "enabled": False,
-    }
-    config["mcp_servers"]["Markdownify-BioETL"] = {
-        "command": "unrelated-installed-client",
-        "enabled": True,
-    }
-    home = tmp_path / "ref-home"
-    config_path = home / ".codex/config.toml"
-    config_path.parent.mkdir(parents=True)
-    config_path.write_text(
-        "mcp_servers = " + native_session.toml_value(config["mcp_servers"]) + "\n",
-        encoding="utf-8",
-    )
-    binary = home / "AppData/Local/OpenAI/Codex/bin/qualified/codex.exe"
-    binary.parent.mkdir(parents=True)
-    binary.write_bytes(b"qualified Ref-session executable fixture")
-    monkeypatch.setattr(Path, "home", lambda: home)
-    monkeypatch.chdir(root)
-    monkeypatch.setattr(native_session, "workspace", lambda: (root, root))
-    monkeypatch.setenv("BIOETL_CODEX_ROUTES_FILE", str(manifest))
-    physical = native_session.physical
-    # No .env fixture is created; dotenv data is supplied only in memory.
-    monkeypatch.setattr(
-        native_session,
-        "physical",
-        lambda path: path if path == root / ".env" else physical(path),
-    )
-    monkeypatch.setattr(
-        dotenv, "dotenv_values", lambda path: {"REF_TOOL_API_KEY": "fixture-ref-key"}
-    )
-    calls = []
-
-    def call(argv, *, cwd, env, **_kwargs):
-        calls.append({"argv": argv, "cwd": cwd, "ref_key": env["REF_TOOL_API_KEY"]})
-        return 0
-
-    monkeypatch.setattr(native_session.subprocess, "call", call)
-    return {
-        "root": root,
-        "home": home,
-        "config": config,
-        "config_path": config_path,
-        "calls": calls,
-        "argv": [
-            "--executable",
-            str(binary),
-            "--sha256",
-            hashlib.sha256(binary.read_bytes()).hexdigest(),
-            "--auth",
-            "api-key",
-        ],
-    }
-
-
-def test_ref_only_disables_other_servers_without_changing_settings():
-    config = {
-        "mcp_servers": {
-            "ref": {
-                "url": native_session.REF_URL,
-                "enabled": False,
-                "tools": {"ref_read_url": {"approval_mode": "approve"}},
-            },
-            "memory": {"command": "unrelated", "enabled": True},
-            "Markdownify-BioETL": {"command": "unrelated", "enabled": False},
-        }
-    }
-    original = deepcopy(config)
-
-    overrides = ref_only_overrides(config)
-
-    effective = deepcopy(config)
-    for override in overrides[1::2]:
-        for name, changes in tomllib.loads(override)["mcp_servers"].items():
-            assert set(changes) == {"enabled"}
-            effective["mcp_servers"][name].update(changes)
-    assert config == original
-    assert {
-        name for name, entry in effective["mcp_servers"].items() if entry["enabled"]
-    } == {"ref"}
-    assert (
-        effective["mcp_servers"]["ref"]["tools"]
-        == original["mcp_servers"]["ref"]["tools"]
-    )
-
-
-@pytest.mark.parametrize(
-    "name", ["", "memory.enabled", 'other"', "other\nref", "../ref"]
-)
-def test_ref_only_rejects_names_that_cannot_be_safe_override_paths(name):
-    config = {"mcp_servers": {"ref": {}, name: {}}}
-    with pytest.raises(PermissionError, match="safe configured server names"):
-        ref_only_overrides(config)
-
-
-@pytest.mark.parametrize("binding_state", ["foreign", "unavailable"])
-def test_ref_only_does_not_load_unrelated_markdownify_binding(
-    ref_launch, monkeypatch, binding_state, capsys
-):
-    binding = ref_launch["home"] / ".config/pc-agent/markdownify-bioetl.json"
-    binding.parent.mkdir(parents=True)
-    binding.write_text(
-        json.dumps(
-            {
-                "schema": 1,
-                "workspace": str(ref_launch["home"] / "foreign"),
-                "git_common": str(ref_launch["root"] / ".git"),
-                "server": "Markdownify-BioETL",
-            }
-        ),
-        encoding="utf-8",
-    )
-    read_bytes = Path.read_bytes
-    if binding_state == "unavailable":
-
-        def read(path):
-            if path == binding:
-                raise PermissionError("Unrelated Markdownify binding unavailable")
-            return read_bytes(path)
-
-        monkeypatch.setattr(Path, "read_bytes", read)
-    scoped_calls = []
-    session_overrides_original = native_session.session_overrides
-
-    def scoped(*args, **kwargs):
-        scoped_calls.append(True)
-        return session_overrides_original(*args, **kwargs)
-
-    monkeypatch.setattr(native_session, "session_overrides", scoped)
-    original_config = ref_launch["config_path"].read_bytes()
-    assert native_session.main(ref_launch["argv"]) == 64
-    assert capsys.readouterr().err == (
-        "Native session launch refused; no credential printed or fallback selected.\n"
-    )
-    assert len(scoped_calls) == 1
-    assert not ref_launch["calls"]
-
-    assert native_session.main([*ref_launch["argv"], "--ref-only"]) == 0
-
-    assert len(scoped_calls) == 1
-    assert len(ref_launch["calls"]) == 1
-    call = ref_launch["calls"][0]
-    assert call["cwd"] == ref_launch["root"]
-    assert call["argv"][1:3] == ["--cd", str(ref_launch["root"])]
-    assert call["ref_key"] == "fixture-ref-key"
-    assert "fixture-ref-key" not in " ".join(call["argv"])
-    entries = {}
-    for override in call["argv"][4::2]:
-        entries.update(tomllib.loads(override)["mcp_servers"])
-    assert {name: entry["enabled"] for name, entry in entries.items()} == {
-        "memory": False,
-        "ast-grep": False,
-        "ref": True,
-        "Markdownify-BioETL": False,
-    }
-    assert ref_launch["config_path"].read_bytes() == original_config
-
-
-def test_ref_only_check_reports_selection_without_starting_client(ref_launch, capsys):
-    original_config = ref_launch["config_path"].read_bytes()
-
-    assert native_session.main([*ref_launch["argv"], "--ref-only", "--check"]) == 0
-
-    output = capsys.readouterr().out
-    report = json.loads(output)
-    assert report["ref_only"] is True
-    assert report["selected_servers"] == ["ref"]
-    assert report["spawned"] is False
-    assert report["native_request"] == "NOT_TESTED"
-    assert report["root_credential_present"] is True
-    assert "fixture-ref-key" not in output
-    assert hashlib.sha256(b"fixture-ref-key").hexdigest() not in output
-    assert not ref_launch["calls"]
-    assert ref_launch["config_path"].read_bytes() == original_config
-
-
-@pytest.mark.parametrize("change", ["missing", "oauth", "query", "literal-header"])
-def test_ref_only_keeps_authorization_guards(ref_launch, monkeypatch, change, capsys):
-    import dotenv
-
-    argv = [*ref_launch["argv"], "--ref-only"]
-    if change == "missing":
-        monkeypatch.setattr(dotenv, "dotenv_values", lambda path: {})
-    elif change == "oauth":
-        argv[argv.index("--auth") + 1] = "oauth"
-    else:
-        config = deepcopy(ref_launch["config"])
-        ref = config["mcp_servers"]["ref"]
-        if change == "query":
-            ref["url"] += "?apiKey=fixture-only"
-        else:
-            ref["http_headers"] = {"x-ref-api-key": "fixture-only"}
-        ref_launch["config_path"].write_text(
-            "mcp_servers = " + native_session.toml_value(config["mcp_servers"]) + "\n",
-            encoding="utf-8",
-        )
-
-    assert native_session.main(argv) == 64
-    assert capsys.readouterr().err == (
-        "Native session launch refused; no credential printed or fallback selected.\n"
-    )
-    assert not ref_launch["calls"]
-
-
-def test_ref_only_still_requires_the_qualified_executable(ref_launch, capsys):
-    argv = [*ref_launch["argv"], "--ref-only"]
-    argv[argv.index("--sha256") + 1] = "0" * 64
-    assert native_session.main(argv) == 64
-    assert capsys.readouterr().err == (
-        "Native session launch refused; no credential printed or fallback selected.\n"
-    )
-    assert not ref_launch["calls"]
-
-
-def test_ref_only_cannot_enable_the_acceptance_graph(ref_launch, capsys):
-    with pytest.raises(SystemExit) as caught:
-        native_session.main([*ref_launch["argv"], "--ref-only", "--acceptance"])
-    assert caught.value.code == 2
-    assert "not allowed with argument" in capsys.readouterr().err
-    assert not ref_launch["calls"]
-
-
 @pytest.mark.parametrize(
     "entry", [{"command": "", "args": []}, {"command": "python", "args": ["client"]}]
 )
@@ -550,3 +349,245 @@ def test_native_selector_requires_the_physical_pinned_installation(
             config, root, manifest=manifest, markdownify=tmp_path / "absent.json"
         )
     assert Path.cwd() == cwd
+
+
+@pytest.fixture
+def ref_launch(session_binding, monkeypatch, tmp_path):
+    import dotenv
+
+    root, manifest, _, config = session_binding
+    config = deepcopy(config)
+    config["mcp_servers"]["ref"] = {
+        "url": native_session.REF_URL,
+        "env_http_headers": {"x-ref-api-key": "REF_TOOL_API_KEY"},
+        "enabled": False,
+    }
+    config["mcp_servers"]["Markdownify-BioETL"] = {
+        "command": "unrelated-installed-client",
+        "enabled": True,
+    }
+    config["mcp_servers"]["custom.name"] = {
+        "command": "unrelated-custom-client",
+        "enabled": True,
+    }
+    home = tmp_path / "ref-home"
+    config_path = home / ".codex/config.toml"
+    config_path.parent.mkdir(parents=True)
+    config_path.write_text(
+        "mcp_servers = " + native_session.toml_value(config["mcp_servers"]) + "\n",
+        encoding="utf-8",
+    )
+    binary = home / "AppData/Local/OpenAI/Codex/bin/qualified/codex.exe"
+    binary.parent.mkdir(parents=True)
+    binary.write_bytes(b"qualified Ref-session executable fixture")
+    monkeypatch.setattr(Path, "home", lambda: home)
+    monkeypatch.chdir(root)
+    monkeypatch.setattr(native_session, "workspace", lambda: (root, root))
+    monkeypatch.setenv("BIOETL_CODEX_ROUTES_FILE", str(manifest))
+    physical = native_session.physical
+    # No .env fixture is created; dotenv data is supplied only in memory.
+    monkeypatch.setattr(
+        native_session,
+        "physical",
+        lambda path: path if path == root / ".env" else physical(path),
+    )
+    monkeypatch.setattr(
+        dotenv, "dotenv_values", lambda path: {"REF_TOOL_API_KEY": "fixture-ref-key"}
+    )
+    calls = []
+
+    def call(argv, *, cwd, env, **_kwargs):
+        calls.append({"argv": argv, "cwd": cwd, "ref_key": env["REF_TOOL_API_KEY"]})
+        return 0
+
+    monkeypatch.setattr(native_session.subprocess, "call", call)
+    return {
+        "root": root,
+        "home": home,
+        "config": config,
+        "config_path": config_path,
+        "calls": calls,
+        "argv": [
+            "--executable",
+            str(binary),
+            "--sha256",
+            hashlib.sha256(binary.read_bytes()).hexdigest(),
+            "--auth",
+            "api-key",
+        ],
+    }
+
+
+def test_ref_only_disables_other_servers_without_changing_settings():
+    config = {
+        "mcp_servers": {
+            "ref": {
+                "url": native_session.REF_URL,
+                "enabled": False,
+                "tools": {"ref_read_url": {"approval_mode": "approve"}},
+            },
+            "memory": {"command": "unrelated", "enabled": True},
+            "Markdownify-BioETL": {"command": "unrelated", "enabled": False},
+            "custom.name": {"command": "unrelated", "enabled": True},
+            'custom."\U0001f9ea"': {"command": "unrelated", "enabled": True},
+        }
+    }
+    original = deepcopy(config)
+
+    overrides = ref_only_overrides(config)
+
+    effective = deepcopy(config)
+    assert len(overrides) == 2
+    assert overrides[0] == "--config"
+    assert overrides[1].startswith("mcp_servers=")
+    entries = tomllib.loads(overrides[1])["mcp_servers"]
+    assert entries.keys() == original["mcp_servers"].keys()
+    for name, changes in entries.items():
+        assert set(changes) == {"enabled"}
+        effective["mcp_servers"][name].update(changes)
+    assert config == original
+    assert {
+        name for name, entry in effective["mcp_servers"].items() if entry["enabled"]
+    } == {"ref"}
+    assert (
+        effective["mcp_servers"]["ref"]["tools"]
+        == original["mcp_servers"]["ref"]["tools"]
+    )
+
+
+@pytest.mark.parametrize(("name", "entry"), [("", {}), (1, {}), ("custom.name", True)])
+def test_ref_only_rejects_invalid_server_entries(name, entry):
+    config = {"mcp_servers": {"ref": {}, name: entry}}
+    with pytest.raises(PermissionError, match="safe configured server names"):
+        ref_only_overrides(config)
+
+
+@pytest.mark.parametrize("binding_state", ["foreign", "unavailable"])
+def test_ref_only_does_not_load_unrelated_markdownify_binding(
+    ref_launch, monkeypatch, binding_state
+):
+    binding = ref_launch["home"] / ".config/pc-agent/markdownify-bioetl.json"
+    binding.parent.mkdir(parents=True)
+    binding.write_text(
+        json.dumps(
+            {
+                "schema": 1,
+                "workspace": str(ref_launch["home"] / "foreign"),
+                "git_common": str(ref_launch["root"] / ".git"),
+                "server": "Markdownify-BioETL",
+            }
+        ),
+        encoding="utf-8",
+    )
+    read_bytes = Path.read_bytes
+    if binding_state == "unavailable":
+
+        def read(path):
+            if path == binding:
+                raise PermissionError("Unrelated Markdownify binding unavailable")
+            return read_bytes(path)
+
+        monkeypatch.setattr(Path, "read_bytes", read)
+    scoped_calls = []
+    session_overrides_original = native_session.session_overrides
+
+    def scoped(*args, **kwargs):
+        scoped_calls.append(True)
+        return session_overrides_original(*args, **kwargs)
+
+    monkeypatch.setattr(native_session, "session_overrides", scoped)
+    original_config = ref_launch["config_path"].read_bytes()
+    if binding_state == "unavailable":
+        with pytest.raises(PermissionError, match="unavailable"):
+            native_session._run(ref_launch["argv"])
+    else:
+        assert native_session._run(ref_launch["argv"]) == 0
+        [ordinary_call] = ref_launch["calls"]
+        assert (
+            'mcp_servers.Markdownify-BioETL={"enabled"=false}' in ordinary_call["argv"]
+        )
+        ref_launch["calls"].clear()
+    assert len(scoped_calls) == 1
+    assert not ref_launch["calls"]
+
+    assert native_session.main([*ref_launch["argv"], "--ref-only"]) == 0
+
+    assert len(scoped_calls) == 1
+    assert len(ref_launch["calls"]) == 1
+    call = ref_launch["calls"][0]
+    assert call["cwd"] == ref_launch["root"]
+    assert call["argv"][1:3] == ["--cd", str(ref_launch["root"])]
+    assert call["ref_key"] == "fixture-ref-key"
+    assert "fixture-ref-key" not in " ".join(call["argv"])
+    assert call["argv"][3] == "--config"
+    assert len(call["argv"]) == 5
+    entries = tomllib.loads(call["argv"][4])["mcp_servers"]
+    assert {name: entry["enabled"] for name, entry in entries.items()} == {
+        "memory": False,
+        "ast-grep": False,
+        "ref": True,
+        "Markdownify-BioETL": False,
+        "custom.name": False,
+    }
+    assert ref_launch["config_path"].read_bytes() == original_config
+
+
+def test_ref_only_check_reports_selection_without_starting_client(ref_launch, capsys):
+    original_config = ref_launch["config_path"].read_bytes()
+
+    assert native_session.main([*ref_launch["argv"], "--ref-only", "--check"]) == 0
+
+    output = capsys.readouterr().out
+    report = json.loads(output)
+    assert report["ref_only"] is True
+    assert report["selected_servers"] == ["ref"]
+    assert report["spawned"] is False
+    assert report["native_request"] == "NOT_TESTED"
+    assert report["root_credential_present"] is True
+    assert "fixture-ref-key" not in output
+    assert hashlib.sha256(b"fixture-ref-key").hexdigest() not in output
+    assert not ref_launch["calls"]
+    assert ref_launch["config_path"].read_bytes() == original_config
+
+
+@pytest.mark.parametrize("change", ["missing", "oauth", "query", "literal-header"])
+def test_ref_only_keeps_authorization_guards(ref_launch, monkeypatch, change):
+    import dotenv
+
+    argv = [*ref_launch["argv"], "--ref-only"]
+    if change == "missing":
+        monkeypatch.setattr(dotenv, "dotenv_values", lambda path: {})
+    elif change == "oauth":
+        argv[argv.index("--auth") + 1] = "oauth"
+    else:
+        config = deepcopy(ref_launch["config"])
+        ref = config["mcp_servers"]["ref"]
+        if change == "query":
+            ref["url"] += "?apiKey=fixture-only"
+        else:
+            ref["http_headers"] = {"x-ref-api-key": "fixture-only"}
+        ref_launch["config_path"].write_text(
+            "mcp_servers = " + native_session.toml_value(config["mcp_servers"]) + "\n",
+            encoding="utf-8",
+        )
+
+    with pytest.raises(PermissionError, match="absent|separate"):
+        native_session._run(argv)
+    assert not ref_launch["calls"]
+
+
+def test_ref_only_still_requires_the_qualified_executable(ref_launch):
+    argv = [*ref_launch["argv"], "--ref-only"]
+    argv[argv.index("--sha256") + 1] = "0" * 64
+    with pytest.raises(PermissionError, match="executable drift"):
+        native_session._run(argv)
+    assert native_session.main(argv) == 64
+    assert not ref_launch["calls"]
+
+
+def test_ref_only_cannot_enable_the_acceptance_graph(ref_launch, capsys):
+    with pytest.raises(SystemExit) as caught:
+        native_session.main([*ref_launch["argv"], "--ref-only", "--acceptance"])
+    assert caught.value.code == 2
+    assert "not allowed with argument" in capsys.readouterr().err
+    assert not ref_launch["calls"]
