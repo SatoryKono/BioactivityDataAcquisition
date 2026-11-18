@@ -216,7 +216,7 @@ Sessions expire after 15 minutes without a request; active requests renew that
 lease. A session-scoped 404 makes the stdio bridge complete a fresh internal
 initialize/initialized handshake. It returns an explicit interruption error for
 the original call and continues with the new session; it never replays that call.
-HTTP admission is bounded before authentication, with a ten-second absolute
+HTTP admission is bounded before authentication, with a five-second absolute
 header/body read deadline. A conversion acquires its execution slot without
 waiting; a busy owner returns a tool error before doing conversion work.
 Generation transitions and stop publication share one lock. A stale stop marker

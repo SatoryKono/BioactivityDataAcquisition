@@ -20,6 +20,7 @@ from pathlib import Path
 
 REF_URL = "https://api.ref.tools/mcp"
 BASE_PYTHON = Path("C:/Users/Fedor/AppData/Local/Programs/Python/Python313/python.exe")
+SESSION_CLIENT = "session_client.py"
 SESSION_VERSIONS = Path("D:/pc-agent/tools/codex-session-versions")
 
 
@@ -131,7 +132,7 @@ def _check_selector_manifest(script):
     manifest = json.loads(raw)
     if hashlib.sha256(raw).hexdigest() != directory.name or manifest.get("schema") != 1:
         raise PermissionError("Qualified selector manifest changed")
-    if "session_client.py" not in manifest.get("files", {}):
+    if SESSION_CLIENT not in manifest.get("files", {}):
         raise PermissionError("Qualified selector source is unregistered")
     for relative, expected in manifest["files"].items():
         path = Path(relative)
@@ -160,7 +161,7 @@ def _validate_selector(name, entry):
     if (
         Path(entry.get("command", "")) != BASE_PYTHON
         or not script.is_absolute()
-        or script.name != "session_client.py"
+        or script.name != SESSION_CLIENT
         or script.parent.parent != SESSION_VERSIONS
         or re.fullmatch("[0-9a-f]{64}", script.parent.name) is None
     ):
@@ -170,7 +171,7 @@ def _validate_selector(name, entry):
     )
     if version is None:
         raise PermissionError("Qualified selector version is not installed")
-    _check_selector_manifest(version / "session_client.py")
+    _check_selector_manifest(version / SESSION_CLIENT)
 
 
 def session_overrides(

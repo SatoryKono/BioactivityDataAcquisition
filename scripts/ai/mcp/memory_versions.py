@@ -693,34 +693,32 @@ def _optional_bytes(path):
     return path.read_bytes() if path.exists() else None
 
 
+def _binding_matches_transaction(binding, transaction):
+    phase = transaction["phase"]
+    if phase == "COMMITTED":
+        return (
+            all(binding.get(key) == transaction[key] for key in ("bundle", "version"))
+            and binding.get("transaction", transaction["id"]) == transaction["id"]
+        )
+    if phase == "ROLLED_BACK":
+        return binding == transaction["before"].get(
+            "runtime_binding", {"schema": 2, "state": "legacy"}
+        )
+    return False
+
+
 def _selected_binding(bundle_binding, transaction):
     if bundle_binding.get("schema") != 2 or bundle_binding.get("state") not in {
         "active",
         "legacy",
     }:
         raise PermissionError("Profile runtime binding is disabled or unsupported")
-    if transaction is not None:
-        phase = transaction["phase"]
-        if phase == "COMMITTED":
-            expected = {key: transaction[key] for key in ("bundle", "version")}
-            if any(bundle_binding.get(key) != value for key, value in expected.items()):
-                raise PermissionError(
-                    "Runtime binding does not match the committed transaction"
-                )
-            if (
-                bundle_binding.get("transaction", transaction["id"])
-                != transaction["id"]
-            ):
-                raise PermissionError("Runtime binding transaction changed")
-        elif phase == "ROLLED_BACK":
-            if bundle_binding != transaction["before"].get(
-                "runtime_binding", {"schema": 2, "state": "legacy"}
-            ):
-                raise PermissionError(
-                    "Runtime binding does not match completed rollback"
-                )
-        else:
-            raise PermissionError("Profile migration has not committed")
+    if transaction is not None and not _binding_matches_transaction(
+        bundle_binding, transaction
+    ):
+        raise PermissionError(
+            "Runtime binding does not match the committed transaction"
+        )
     if bundle_binding["state"] == "legacy":
         return None
     bundle = Path(bundle_binding["bundle"])

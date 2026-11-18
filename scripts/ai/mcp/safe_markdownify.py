@@ -38,7 +38,7 @@ MAX_RESPONSE_BYTES = 2 * 1024 * 1024
 SESSION_LIMIT = 64
 SESSION_IDLE_SECONDS = 15 * 60
 HTTP_CONNECTION_LIMIT = 64
-HTTP_READ_SECONDS = 10
+HTTP_READ_SECONDS = 5
 
 
 def module(name, path):
@@ -582,13 +582,15 @@ class _MarkdownifyHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(raw)
 
-    def authorized(self):
+    def authorized(self, *, verify_runtime=True):
         if not secrets.compare_digest(
             self.headers.get("Authorization", ""), "Bearer " + self._token
         ):
             self.reply(401)
             return False
-        specification(self._workspace)
+        if verify_runtime:
+            self._finish_reading()
+            specification(self._workspace)
         return True
 
     def _finish_reading(self):
@@ -619,7 +621,7 @@ class _MarkdownifyHandler(BaseHTTPRequestHandler):
             self.reply(200)
 
     def do_POST(self):
-        if not self.authorized():
+        if not self.authorized(verify_runtime=False):
             return
         if self.path != "/mcp":
             self.reply(404)
@@ -636,6 +638,7 @@ class _MarkdownifyHandler(BaseHTTPRequestHandler):
             self.reply(400)
             return
         self._finish_reading()
+        specification(self._workspace)
         self._dispatch_request(request_value)
 
     def _dispatch_request(self, request_value):
@@ -805,11 +808,26 @@ def _forward_request(spec, value, session, initialization):
                 "id": value["id"],
                 "error": {
                     "code": -32000,
-                    "message": "Session renewed; interrupted request was not executed or replayed",
+                    "message": "Session renewed; original request was not replayed or executed",
                 },
             }
         )
         return response, replacement
+
+
+def _stdio_requests(stream):
+    # -I ignores PYTHONUTF8; redirected Windows stdin may otherwise use CP1251.
+    binary = getattr(stream, "buffer", stream)
+    limit = 1024 * 1024
+    while True:
+        raw = binary.readline(limit + 1)
+        if not raw:
+            return
+        if isinstance(raw, str):
+            raw = raw.encode("utf-8")
+        if len(raw) > limit:
+            raise ValueError("Oversized Markdownify request")
+        yield json.loads(raw.decode("utf-8"))
 
 
 def client(root):
@@ -822,10 +840,7 @@ def client(root):
     session = None
     initialization = None
     try:
-        for line in sys.stdin:
-            if len(line) > 1024 * 1024:
-                raise ValueError("Oversized Markdownify request")
-            value = json.loads(line)
+        for value in _stdio_requests(sys.stdin):
             result, session = _forward_request(spec, value, session, initialization)
             if value.get("method") == "initialize" and result and "result" in result:
                 initialization = value

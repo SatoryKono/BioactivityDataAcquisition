@@ -6,6 +6,7 @@ import subprocess
 import pytest
 
 from scripts.ai.mcp.safe_file import read_confined
+from scripts.ai.mcp import safe_file
 
 pytestmark = [
     pytest.mark.unit,
@@ -87,6 +88,52 @@ def test_path_swap_after_open_cannot_expose_foreign_bytes(files):
 
     assert read_confined(root, str(document), after_open=swap) == b"allowed content"
     assert attempted and secret.read_bytes() == b"foreign sentinel"
+
+
+@pytest.mark.parametrize("ancestor", ["root", "nested"])
+@pytest.mark.parametrize("before_final_open", [False, True])
+def test_ancestor_rename_is_blocked_throughout_read(
+    files, tmp_path, monkeypatch, ancestor, before_final_open
+):
+    root, _, _ = files
+    nested = root / "nested"
+    nested.mkdir()
+    document = nested / "README.md"
+    document.write_bytes(b"nested allowed content")
+    target = root if ancestor == "root" else nested
+    moved = tmp_path / ("moved-" + ancestor)
+    assert target.resolve(strict=True).is_relative_to(tmp_path.resolve(strict=True))
+    assert moved.parent.resolve(strict=True) == tmp_path.resolve(strict=True)
+    attempts = []
+
+    def rename():
+        try:
+            with pytest.raises(PermissionError):
+                target.rename(moved)
+        finally:
+            # Restore only our own fixture if the negative control finds a gap.
+            if moved.exists():
+                moved.rename(target)
+        attempts.append(True)
+
+    if before_final_open:
+        verify = safe_file._verify_handle
+
+        def verified_parent(kernel, information, handle, expected, directory):
+            result = verify(kernel, information, handle, expected, directory)
+            if directory and expected == nested:
+                rename()
+            return result
+
+        monkeypatch.setattr(safe_file, "_verify_handle", verified_parent)
+        assert read_confined(root, str(document)) == b"nested allowed content"
+    else:
+        assert (
+            read_confined(root, str(document), after_open=rename)
+            == b"nested allowed content"
+        )
+    assert attempts == [True]
+    assert not moved.exists()
 
 
 def test_converter_snapshot_survives_original_replacement(files, tmp_path):
