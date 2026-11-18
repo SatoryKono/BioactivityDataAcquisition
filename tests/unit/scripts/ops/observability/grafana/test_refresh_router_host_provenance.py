@@ -38,6 +38,39 @@ promotion = importlib.util.module_from_spec(promotion_spec)
 promotion_spec.loader.exec_module(promotion)
 
 
+def test_promotion_uses_protected_registered_docker_before_image_io(
+    tmp_path, monkeypatch
+):
+    import pytest
+
+    selected = "D:/Programs/Docker/resources/bin/docker.exe"
+    monkeypatch.setattr(promotion, "docker_path", lambda: selected)
+    calls = []
+
+    def stop_at_first_docker_call(argv, **kwargs):
+        calls.append(argv)
+        raise RuntimeError("image I/O boundary reached")
+
+    monkeypatch.setattr(promotion.subprocess, "run", stop_at_first_docker_call)
+    with pytest.raises(RuntimeError, match="image I/O boundary reached"):
+        promotion.live_managed_parity(IMAGE, IMAGE, {}, b"", 11, tmp_path)
+    assert calls and calls[0][0] == selected
+
+
+def test_promotion_rejects_untrusted_docker_before_image_io(tmp_path, monkeypatch):
+    import pytest
+
+    def reject():
+        raise ValueError("Docker signature is invalid")
+
+    monkeypatch.setattr(promotion, "docker_path", reject)
+    calls = []
+    monkeypatch.setattr(promotion.subprocess, "run", lambda *a, **kw: calls.append(a))
+    with pytest.raises(ValueError, match="Docker signature is invalid"):
+        promotion.live_managed_parity(IMAGE, IMAGE, {}, b"", 11, tmp_path)
+    assert calls == []
+
+
 def fixture():
     run = {
         "id": 11,

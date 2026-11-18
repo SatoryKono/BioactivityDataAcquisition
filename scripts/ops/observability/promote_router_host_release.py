@@ -19,6 +19,8 @@ from pathlib import Path, PurePosixPath
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
+from scripts.ops.observability.grafana.trusted_docker import docker_path
+
 UNAPPROVED_RELEASE_IMAGE = "Unapproved immutable release image"
 INVALID_IMAGE_INSPECTION = "Invalid image inspection"
 INVALID_HOST_IMAGE = "Invalid host image"
@@ -360,16 +362,7 @@ def live_managed_parity(
     from scripts.ops.observability.grafana.router_managed_image import verify
     from scripts.ops.observability.grafana.router_rootfs import filesystem_records
 
-    candidates = (
-        (
-            Path("C:/Program Files/Docker/Docker/resources/bin/docker.exe"),
-            Path("E:/Programs/Docker/resources/bin/docker.exe"),
-        )
-        if sys.platform == "win32"
-        else (Path("/usr/bin/docker"),)
-    )
-    docker = next((path for path in candidates if path.is_file()), None)
-    require(docker is not None, "Trusted Docker executable is unavailable")
+    docker = docker_path()
     commands: list[dict[str, object]] = []
 
     def execute(*args: str) -> bytes:

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-18T08:24:15.490467+00:00",
+  "generated_at": "2026-11-18T10:22:28.831493+00:00",
   "summary": {
     "total_scripts": 753,
     "status_counts": {
@@ -13,7 +13,7 @@
       "build": 18,
       "ci": 77,
       "docs": 304,
-      "other": 27,
+      "other": 28,
       "scripts": 646,
       "skills": 13,
       "tests": 573
@@ -26269,13 +26269,19 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
           "line": 435,
           "source_group": "docs",
           "text": "# .\\scripts\\ops\\observability\\grafana\\recover_renderer.ps1"
+        },
+        {
+          "path": "grafana/tooling/router-v7-bridge/host-image.json",
+          "line": 4108,
+          "source_group": "other",
+          "text": "\"docker-compose.monitoring.yml\": \"name: bioetl-monitoring\\n\\n# OPTIONAL operator stack (ADR-010). Not part of the default release bundle.\\n# Default local workflow: Python/venv only, or main stack alo"
         },
         {
           "path": "tests/integration/test_grafana_datasource_provisioning.py",
@@ -26568,7 +26574,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 12,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -26584,39 +26590,39 @@
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 1766,
+          "line": 435,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/router_candidate.py\": \"e435d491abd9d8a8e07d05b820cafb5b90c381c961bfacf42f60a1ae2bd7a7d1\","
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 1965,
+          "line": 1778,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/router_candidate.py\": \"e435d491abd9d8a8e07d05b820cafb5b90c381c961bfacf42f60a1ae2bd7a7d1\","
         },
         {
-          "path": "scripts/ops/observability/grafana/router_managed_image.py",
-          "line": 175,
-          "source_group": "scripts",
-          "text": "from scripts.ops.observability.grafana.router_candidate import main as candidate"
+          "path": "grafana/tooling/router-v7-bridge/host-image.json",
+          "line": 1977,
+          "source_group": "other",
+          "text": "\"scripts/ops/observability/grafana/router_candidate.py\": \"e435d491abd9d8a8e07d05b820cafb5b90c381c961bfacf42f60a1ae2bd7a7d1\","
         },
         {
-          "path": "scripts/ops/observability/refresh_router_host_provenance.py",
-          "line": 64,
-          "source_group": "scripts",
-          "text": "\"scripts/ops/observability/grafana/router_candidate.py\","
+          "path": "grafana/tooling/router-v7-bridge/host-image.json",
+          "line": 2242,
+          "source_group": "other",
+          "text": "\"scripts/ops/observability/grafana/router_candidate.py\": \"e435d491abd9d8a8e07d05b820cafb5b90c381c961bfacf42f60a1ae2bd7a7d1\""
         },
         {
-          "path": "tests/architecture/test_circleci_migration_contract.py",
-          "line": 543,
-          "source_group": "tests",
-          "text": "\"scripts/ops/observability/grafana/router_candidate.py\","
+          "path": "grafana/tooling/router-v7-bridge/host-image.json",
+          "line": 3812,
+          "source_group": "other",
+          "text": "\"scripts/ops/observability/grafana/router_candidate.py\": \"e435d491abd9d8a8e07d05b820cafb5b90c381c961bfacf42f60a1ae2bd7a7d1\","
         },
         {
-          "path": "tests/unit/scripts/ops/test_router_candidate.py",
-          "line": 14,
-          "source_group": "tests",
-          "text": "from scripts.ops.observability.grafana import router_candidate as candidate"
+          "path": "grafana/tooling/router-v7-bridge/host-image.json",
+          "line": 4011,
+          "source_group": "other",
+          "text": "\"scripts/ops/observability/grafana/router_candidate.py\": \"e435d491abd9d8a8e07d05b820cafb5b90c381c961bfacf42f60a1ae2bd7a7d1\","
         }
       ],
       "owner": "@bioetl-platform",
@@ -26629,7 +26635,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 19,
+      "reference_count": 29,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -26645,37 +26651,37 @@
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 582,
+          "line": 436,
+          "source_group": "other",
+          "text": "\"scripts/ops/observability/grafana/router_managed_image.py\": \"17c4c0516389f7092c820c37f02f4a6602b5e67a9567f81c1cfe740d401deb1e\","
+        },
+        {
+          "path": "grafana/tooling/router-v7-bridge/host-image.json",
+          "line": 594,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/router_managed_image.py\": \"f48e0159d78251802a896a760e48e4cf2cd3a4f80d679a2411de3c362fe49645\","
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 778,
+          "line": 790,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/router_managed_image.py\": \"f48e0159d78251802a896a760e48e4cf2cd3a4f80d679a2411de3c362fe49645\","
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 974,
+          "line": 986,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/router_managed_image.py\": \"f48e0159d78251802a896a760e48e4cf2cd3a4f80d679a2411de3c362fe49645\","
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 1172,
+          "line": 1184,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/router_managed_image.py\": \"f48e0159d78251802a896a760e48e4cf2cd3a4f80d679a2411de3c362fe49645\","
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 1370,
-          "source_group": "other",
-          "text": "\"scripts/ops/observability/grafana/router_managed_image.py\": \"f48e0159d78251802a896a760e48e4cf2cd3a4f80d679a2411de3c362fe49645\","
-        },
-        {
-          "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 1568,
+          "line": 1382,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/router_managed_image.py\": \"f48e0159d78251802a896a760e48e4cf2cd3a4f80d679a2411de3c362fe49645\","
         }
@@ -26690,7 +26696,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 17,
+      "reference_count": 27,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -26706,37 +26712,37 @@
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 583,
+          "line": 437,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/router_rootfs.py\": \"28c1914c4104413695381c6d44c73d6c81a6a8d7d6136e497e61cfcde2561dfc\","
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 779,
+          "line": 595,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/router_rootfs.py\": \"28c1914c4104413695381c6d44c73d6c81a6a8d7d6136e497e61cfcde2561dfc\","
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 975,
+          "line": 791,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/router_rootfs.py\": \"28c1914c4104413695381c6d44c73d6c81a6a8d7d6136e497e61cfcde2561dfc\","
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 1173,
+          "line": 987,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/router_rootfs.py\": \"28c1914c4104413695381c6d44c73d6c81a6a8d7d6136e497e61cfcde2561dfc\","
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 1371,
+          "line": 1185,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/router_rootfs.py\": \"28c1914c4104413695381c6d44c73d6c81a6a8d7d6136e497e61cfcde2561dfc\","
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 1569,
+          "line": 1383,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/router_rootfs.py\": \"28c1914c4104413695381c6d44c73d6c81a6a8d7d6136e497e61cfcde2561dfc\","
         }
@@ -26988,7 +26994,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 15,
+      "reference_count": 26,
       "references": [
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
@@ -26998,43 +27004,43 @@
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 584,
+          "line": 438,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/trusted_docker.py\": \"0e2f171c358b1930e336962463630f2638c736c2db8c2d40d0bd3160e7166c9f\","
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 780,
+          "line": 596,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/trusted_docker.py\": \"0e2f171c358b1930e336962463630f2638c736c2db8c2d40d0bd3160e7166c9f\","
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 976,
+          "line": 792,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/trusted_docker.py\": \"0e2f171c358b1930e336962463630f2638c736c2db8c2d40d0bd3160e7166c9f\","
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 1174,
+          "line": 988,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/trusted_docker.py\": \"0e2f171c358b1930e336962463630f2638c736c2db8c2d40d0bd3160e7166c9f\","
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 1372,
+          "line": 1186,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/trusted_docker.py\": \"0e2f171c358b1930e336962463630f2638c736c2db8c2d40d0bd3160e7166c9f\","
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 1570,
+          "line": 1384,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/trusted_docker.py\": \"0e2f171c358b1930e336962463630f2638c736c2db8c2d40d0bd3160e7166c9f\","
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 1769,
+          "line": 1582,
           "source_group": "other",
           "text": "\"scripts/ops/observability/grafana/trusted_docker.py\": \"0e2f171c358b1930e336962463630f2638c736c2db8c2d40d0bd3160e7166c9f\","
         }
@@ -27131,7 +27137,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 18,
+      "reference_count": 28,
       "references": [
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
@@ -27141,45 +27147,45 @@
         },
         {
           "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 585,
-          "source_group": "other",
-          "text": "\"scripts/ops/observability/refresh_router_host_provenance.py\": \"04c9b927b4e99a96f569628b20657933e40fe9550932788aa85403eb6187ff83\""
-        },
-        {
-          "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 781,
-          "source_group": "other",
-          "text": "\"scripts/ops/observability/refresh_router_host_provenance.py\": \"04c9b927b4e99a96f569628b20657933e40fe9550932788aa85403eb6187ff83\""
-        },
-        {
-          "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 977,
-          "source_group": "other",
-          "text": "\"scripts/ops/observability/refresh_router_host_provenance.py\": \"04c9b927b4e99a96f569628b20657933e40fe9550932788aa85403eb6187ff83\""
-        },
-        {
-          "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 1175,
-          "source_group": "other",
-          "text": "\"scripts/ops/observability/refresh_router_host_provenance.py\": \"04c9b927b4e99a96f569628b20657933e40fe9550932788aa85403eb6187ff83\""
-        },
-        {
-          "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 1373,
-          "source_group": "other",
-          "text": "\"scripts/ops/observability/refresh_router_host_provenance.py\": \"04c9b927b4e99a96f569628b20657933e40fe9550932788aa85403eb6187ff83\""
-        },
-        {
-          "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 1571,
-          "source_group": "other",
-          "text": "\"scripts/ops/observability/refresh_router_host_provenance.py\": \"04c9b927b4e99a96f569628b20657933e40fe9550932788aa85403eb6187ff83\""
-        },
-        {
-          "path": "grafana/tooling/router-v7-bridge/host-image.json",
-          "line": 1770,
+          "line": 439,
           "source_group": "other",
           "text": "\"scripts/ops/observability/refresh_router_host_provenance.py\": \"6199a8c07353d4e214f4fdf57fd799f8dbda431f5e3bc2475c7a7081512ea07f\""
+        },
+        {
+          "path": "grafana/tooling/router-v7-bridge/host-image.json",
+          "line": 597,
+          "source_group": "other",
+          "text": "\"scripts/ops/observability/refresh_router_host_provenance.py\": \"04c9b927b4e99a96f569628b20657933e40fe9550932788aa85403eb6187ff83\""
+        },
+        {
+          "path": "grafana/tooling/router-v7-bridge/host-image.json",
+          "line": 793,
+          "source_group": "other",
+          "text": "\"scripts/ops/observability/refresh_router_host_provenance.py\": \"04c9b927b4e99a96f569628b20657933e40fe9550932788aa85403eb6187ff83\""
+        },
+        {
+          "path": "grafana/tooling/router-v7-bridge/host-image.json",
+          "line": 989,
+          "source_group": "other",
+          "text": "\"scripts/ops/observability/refresh_router_host_provenance.py\": \"04c9b927b4e99a96f569628b20657933e40fe9550932788aa85403eb6187ff83\""
+        },
+        {
+          "path": "grafana/tooling/router-v7-bridge/host-image.json",
+          "line": 1187,
+          "source_group": "other",
+          "text": "\"scripts/ops/observability/refresh_router_host_provenance.py\": \"04c9b927b4e99a96f569628b20657933e40fe9550932788aa85403eb6187ff83\""
+        },
+        {
+          "path": "grafana/tooling/router-v7-bridge/host-image.json",
+          "line": 1385,
+          "source_group": "other",
+          "text": "\"scripts/ops/observability/refresh_router_host_provenance.py\": \"04c9b927b4e99a96f569628b20657933e40fe9550932788aa85403eb6187ff83\""
+        },
+        {
+          "path": "grafana/tooling/router-v7-bridge/host-image.json",
+          "line": 1583,
+          "source_group": "other",
+          "text": "\"scripts/ops/observability/refresh_router_host_provenance.py\": \"04c9b927b4e99a96f569628b20657933e40fe9550932788aa85403eb6187ff83\""
         }
       ],
       "owner": "@bioetl-platform",
