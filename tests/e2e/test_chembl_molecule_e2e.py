@@ -46,6 +46,8 @@ import zstandard as zstd
 from bioetl.composition.bootstrap import bootstrap_pipeline_runner
 from bioetl.domain.context import CachedBronzeContext, PipelineRunContext
 from bioetl.domain.contracts.gold import ChEMBLMoleculeGoldSchema
+from bioetl.domain.run_reports.accounting import StageAccountingAccumulator
+from bioetl.domain.run_reports.context import bind_stage_accounting, reset_stage_accounting
 from bioetl.infrastructure.storage.gold.writer_schema_helpers import (
     _project_records_for_gold_schema,
 )
@@ -206,7 +208,15 @@ async def test_invalid_phase_is_quarantined_without_contaminating_gold(
         zstd.ZstdCompressor().compress(payload + json.dumps(invalid).encode() + b"\n")
     )
     context = replace(_cached_context(molecule_cache), limit=3)
-    await bootstrap_pipeline_runner(context).run()
+    accounting = StageAccountingAccumulator()
+    token = bind_stage_accounting(accounting)
+    try:
+        runner = bootstrap_pipeline_runner(context)
+        await runner.run()
+        layers = accounting.snapshot_layers_from_metrics(runner.execution_metrics)
+        funnel = accounting.snapshot_funnel(layers)
+    finally:
+        reset_stage_accounting(token)
 
     silver = await get_silver_records(e2e_data_dir, "chembl_molecule")
     gold = await get_gold_records(e2e_data_dir, "chembl_molecule")
@@ -220,18 +230,15 @@ async def test_invalid_phase_is_quarantined_without_contaminating_gold(
     assert rejected[0]["error_code"] == "INVALID_DATA"
     assert "max_phase" in json.loads(rejected[0]["error_details"])["message"]
     assert json.loads(rejected[0]["payload"])["max_phase"] == invalid_phase
-    reports = list((e2e_data_dir / "run-reports").rglob("pipeline-run-report.json"))
-    assert len(reports) == 1
-    report = json.loads(reports[0].read_text(encoding="utf-8"))
     silver_stage = next(
-        stage for stage in report["funnel"] if stage["stage_id"] == "silver"
+        stage.to_dict() for stage in funnel if stage.stage_id == "silver"
     )
     assert silver_stage["unaccounted"] == 0
-    assert silver_stage["removals"] == [
+    assert accounting.top_reasons() == (
         {
             "reason_code": "INVALID_DATA:max_phase",
             "reason_family": "dq",
             "outcome": "quarantined",
             "count": 1,
         }
-    ]
+    )
