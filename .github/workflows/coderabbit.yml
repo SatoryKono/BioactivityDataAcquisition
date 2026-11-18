@@ -1,9 +1,8 @@
 name: CodeRabbit
 
 # PR reviews are handled by the CodeRabbit GitHub App (no API key in PR context).
-# This workflow runs the CLI only on trusted events (push to protected default
-# branches and manual dispatch) so CODERABBIT_API_KEY is never exposed to
-# untrusted pull_request code.
+# This workflow runs the CLI only on workflow_dispatch, so CODERABBIT_API_KEY
+# stays out of untrusted pull_request code.
 on:
   workflow_dispatch:
 

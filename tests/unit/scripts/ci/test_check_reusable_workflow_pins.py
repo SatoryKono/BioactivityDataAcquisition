@@ -338,12 +338,35 @@ def test_fast_governance_hosts_the_checker_after_setup() -> None:
     assert "ref" not in fast[0].get("with", {})
     names = [step.get("name") for step in fast]
     assert names.index("Set up Python + uv") < names.index(
+        "Checkout default branch for pin gate"
+    )
+    assert names.index("Checkout default branch for pin gate") < names.index(
         "Check reusable workflow pins"
     )
+    assert names.index("Check reusable workflow pins") < names.index(
+        "Remove default-branch pin gate checkout"
+    )
+    assert names.index("Remove default-branch pin gate checkout") < names.index(
+        "Validate repository root allowlist"
+    )
+    remove_gate = fast[names.index("Remove default-branch pin gate checkout")]
+    assert remove_gate["if"] == "always()"
+    assert "rm -rf" in remove_gate["run"]
+    pin_gate = fast[names.index("Checkout default branch for pin gate")]
+    assert pin_gate["with"]["persist-credentials"] is False
+    assert pin_gate["with"]["fetch-depth"] == 1
+    assert pin_gate["with"]["ref"] == "${{ github.event.repository.default_branch }}"
+    assert pin_gate["with"]["path"] == ".gha-default-branch-pin-gate"
+    assert pin_gate["with"]["sparse-checkout"] == "scripts/engineering/repo"
+    assert pin_gate["with"]["sparse-checkout-cone-mode"] is True
     pin_step = fast[names.index("Check reusable workflow pins")]
+    assert "${RUNNER_TEMP}/check_github_actions_runtime_policy.py" in pin_step["run"]
+    assert ".gha-default-branch-pin-gate" in pin_step["run"]
+    assert 'rm -rf "${gate}"' in pin_step["run"]
+    assert "--pr-required-pins --check" in pin_step["run"]
     assert (
-        "check_github_actions_runtime_policy.py --pr-required-pins --check"
-        in pin_step["run"]
+        "python scripts/engineering/repo/check_github_actions_runtime_policy.py"
+        not in pin_step["run"]
     )
     assert "if" not in pin_step
     assert all(step.get("name") != "Check reusable workflow pins" for step in classify)

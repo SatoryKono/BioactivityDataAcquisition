@@ -1038,11 +1038,12 @@ def check_pins(
 ) -> bool:
     """Return whether every inspected uses reference matches the pin contract.
 
-    This check is not an independent trust boundary. fast-governance checks out
-    the PR head, so the same PR can replace the coordinator, this script, and
-    the pin registry together. Local action.yml existence does not prove the
-    action contents are trusted. #12046 stays open until workflows are forced
-    from the default branch by an org ruleset.
+    fast-governance executes this file from a checkout of the default branch,
+    then removes that checkout. The pull request tree cannot replace this
+    checker. The workflow file for pull_request is still the merge ref, so
+    the check is not a full trust boundary. Local action.yml existence does
+    not prove the action contents are trusted. #12046 stays open until an
+    org ruleset forces that workflow from the default branch.
     """
     errors: list[str] = []
     root = Path.cwd() if repo_root is None else repo_root
