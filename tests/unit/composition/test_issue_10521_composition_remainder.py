@@ -199,7 +199,9 @@ def test_exact_replay_setattr_and_parent_manifest(
 
     store = SimpleNamespace(get=lambda _mid: None, get_by_run_id=lambda _rid: "by-run")
     monkeypatch.setattr(replay_parent, "FileRunManifestStore", lambda **_k: store)
-    monkeypatch.setattr(replay_parent, "control_plane_root", lambda *_a, **_k: Path("x"))
+    monkeypatch.setattr(
+        replay_parent, "control_plane_root", lambda *_a, **_k: Path("x")
+    )
     ctx = SimpleNamespace(
         replay_of_manifest_id=None,
         replay_of_run_id="12345678-1234-5678-1234-567812345678",
