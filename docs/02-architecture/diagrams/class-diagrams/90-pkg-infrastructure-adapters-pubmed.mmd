@@ -1,11 +1,11 @@
 %% Title: Package Family: infrastructure/adapters/pubmed
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/adapters/pubmed; modules: _article_components, _filter_fetch_support, _search_models, _client_fallback_policy, _extended_record, _fetch.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/adapters/pubmed; modules: _article_components, _search_models, _filter_fetch_support, xml_processor, _client_fallback_policy, _errors.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-10-04
+%% @date    2026-11-18
 %% @level   Package Family / Inventory Slice
-%% @nodes   23
+%% @nodes   26
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
 
@@ -20,18 +20,28 @@ classDiagram
         class PubMedReference
     }
 
+    namespace search_models {
+        class PubMedSearchResponse
+        class PubMedSearchResult
+        class SearchLogHost
+    }
+
     namespace filter_fetch_support {
         class PubMedAdapterFilterFetchHost
         class _EmptyBronzeAsyncIterator
     }
 
-    namespace search_models {
-        class PubMedSearchResponse
-        class PubMedSearchResult
+    namespace xml_processor {
+        class LimitedParseTarget
+        class PubMedXmlProcessor
     }
 
     namespace client_fallback_policy {
         class _PubMedFallbackPolicyMixin
+    }
+
+    namespace errors {
+        class PubMedSearchPayloadError
     }
 
     namespace extended_record {
@@ -68,10 +78,6 @@ classDiagram
 
     namespace models {
         class PubMedArticleRecord
-    }
-
-    namespace xml_processor {
-        class PubMedXmlProcessor
     }
 
     PubMedAdapterFilterFetchMixin <|-- PubMedAdapter

@@ -3,7 +3,7 @@
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-10-04
+%% @date    2026-11-17
 %% @level   Package Family / Inventory Slice
 %% @nodes   30
 %% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
@@ -48,40 +48,32 @@ classDiagram
         class _SnapshotSource
     }
 
+    namespace selected_run_a2_resolve {
+        class _A2ManifestPort
+        class _A2WorkflowManifestPort
+    }
+
     namespace selected_run_report_assessment {
         class _IdentityMismatchError
         class _RevisionMissingError
     }
 
+    namespace selected_run_status_cache {
+        class SelectedRunStatusCache
+        class selected_run_status_cache__Entry
+    }
+
+    namespace selected_run_unavailable {
+        class RuntimeSourceResolver
+        class _ContextManifestPort
+    }
+
     namespace selector_options_cache {
         class SelectorOptionsCache
-        class _Entry
+        class selector_options_cache__Entry
     }
 
     namespace health_server_http_mixin {
         class HealthServerHTTPMixin
         class _RouteRequestSupport
     }
-
-    namespace types {
-        class HealthResponse
-        class _StaticHealthMetricsExposition
-    }
-
-    namespace forensic_request_budget {
-        class ForensicEndpointUnavailable
-    }
-
-    namespace health_server_checkpoint_freshness {
-        class _CheckpointFreshnessHost
-    }
-
-    namespace health_server_control_plane_evidence_routing {
-        class _EvidenceRoutingHost
-    }
-
-    namespace health_server_control_plane_evidence_scope {
-        class EvidenceScopeHost
-    }
-
-    EvidenceScopeHost <|-- _EvidenceRoutingHost

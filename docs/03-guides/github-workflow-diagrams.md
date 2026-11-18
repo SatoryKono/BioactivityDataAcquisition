@@ -39,40 +39,39 @@ graph TD
 
 ```mermaid
 graph TB
-    START[PR Created/Updated] --> DEP[dependency-preflight]
+    START[workflow_call] --> DEP[dependency-preflight]
+    START --> CONFIG[config-schema-preflight]
+
     DEP --> SMOKE[smoke-check]
-    SMOKE --> GOV[governance-preflight]
-    SMOKE --> CONFIG[config-schema-preflight]
-    SMOKE --> FAST[test-fast]
-    SMOKE --> MATRIX[test-matrix]
-    SMOKE --> E2E[control-plane-e2e]
-    SMOKE --> CONTRACT[contract-confidence]
-    SMOKE --> TRACKD[track-d-gates]
-    SMOKE --> MEMORY[memory-tests]
-    SMOKE --> PERF[performance-budgets]
-    
+    DEP --> GOV[governance-preflight]
+    DEP --> FAST[test-fast]
+    DEP --> MATRIX[test-matrix]
+    DEP --> E2E[control-plane-e2e]
+    DEP --> CONTRACT[contract-confidence]
+    DEP --> TRACKD[track-d-gates]
+    DEP --> MEMORY[memory-tests]
+    DEP --> PERF[performance-budgets]
     DEP --> QM[quality-metrics-gate]
+
     GOV --> DQ[dq-consistency-gate]
-    
-    FAST --> COV[coverage-verify]
+
+    SMOKE --> COV[coverage-verify]
+    FAST --> COV
     MATRIX --> COV
-    
-    COV --> DURATION[duration-telemetry]
-    CONTRACT --> DURATION
+    CONTRACT --> COV
+
+    CONTRACT --> DURATION[duration-telemetry]
     TRACKD --> DURATION
+    FAST --> DURATION
+    MATRIX --> DURATION
     MEMORY --> DURATION
-    
-    DURATION --> END{All Green?}
-    END -->|Да| READY[Ready to Merge]
-    END -->|Нет| FIX[Fix Issues]
-    FIX --> START
-    
+
     style START fill:#e1f5ff
-    style READY fill:#c8e6c9
-    style FIX fill:#ffcdd2
     style DEP fill:#fff9c4
     style COV fill:#fff59d
 ```
+
+Рёбра совпадают с ключами `needs` в `.github/workflows/tests.yml` для jobs на схеме. `dependency-preflight` и `config-schema-preflight` не объявляют `needs`. `coverage-verify` также ждёт `repo-backed-unit`, `unit-scripts-tooling`, `unit-filesystem-contracts`, `unit-subprocess-backed` и `serial-coverage`. `duration-telemetry` также ждёт `flaky-telemetry`, `repo-backed-unit`, `serial-coverage` и те же `unit-*` jobs.
 
 ## PR Lifecycle
 
@@ -126,25 +125,27 @@ graph LR
 ```mermaid
 sequenceDiagram
     participant Dev as Developer
-    participant Main as main branch
     participant CI as GitHub Actions
-    participant PyPI as PyPI Registry
-    participant GH as GitHub Releases
-    
-    Dev->>Main: Bump version in pyproject.toml
-    Dev->>Main: Update CHANGELOG.md
-    Dev->>Main: git tag -a v6.2.0
-    Dev->>Main: git push --tags
-    Dev->>GH: gh release create v6.2.0
-    GH->>CI: Trigger release.yml
-    CI->>CI: Build wheel + sdist
-    CI->>CI: Test on Python 3.13 (release.yml, tests.yml baseline is 3.12)
-    CI->>PyPI: Publish to TestPyPI
-    CI-->>CI: Test install from TestPyPI
-    CI->>PyPI: Publish to PyPI
-    CI->>GH: Upload artifacts
-    GH-->>Dev: Release published
+    participant TestPyPI as TestPyPI
+
+    Dev->>CI: workflow_dispatch release.yml
+    Note over Dev,CI: dry_run defaults to true
+    par
+        CI->>CI: build wheel and sdist on Python 3.13
+        CI->>CI: test-install from the local wheel
+    and
+        CI->>CI: security-gate
+    and
+        CI->>CI: release-tests on Python 3.13
+    end
+    alt dry_run is false
+        CI->>TestPyPI: publish-testpypi test.pypi.org/legacy
+    else dry_run is true
+        CI->>CI: build only
+    end
 ```
+
+`release.yml` запускается только через `workflow_dispatch`. `test-install` ждёт `build` и ставит локальное wheel. `security-gate` и `release-tests` не объявляют `needs`. `publish-testpypi` ждёт `build`, `test-install`, `security-gate` и `release-tests` и публикует в `https://test.pypi.org/legacy/` только при `dry_run=false`.
 
 ## Dependabot Weekly Triage
 

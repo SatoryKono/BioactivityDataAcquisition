@@ -1,11 +1,11 @@
 %% Title: Package Family: application/services/workflow
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/services/workflow; modules: _observability_workflow_lookup_support, _observability_workflow_models, workflow_runner_models, workflow_runner_support, workflow_transform_artifacts, workflow_transform_service.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/services/workflow; modules: _observability_workflow_lookup_support, _observability_workflow_models, workflow_runner_models, workflow_runner_support, workflow_runner_transitions, workflow_transform_artifacts.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-10-04
+%% @date    2026-11-17
 %% @level   Package Family / Inventory Slice
-%% @nodes   17
+%% @nodes   20
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
 
@@ -31,6 +31,11 @@ classDiagram
         class WorkflowExecutionState
     }
 
+    namespace workflow_runner_transitions {
+        class WorkflowStepTransitionContext
+        class WorkflowStepTransitionServices
+    }
+
     namespace workflow_transform_artifacts {
         class WorkflowTransformArtifactContext
         class WorkflowTransformArtifactSinkProtocol
@@ -47,6 +52,10 @@ classDiagram
 
     namespace observability_workflow_service {
         class ObservabilityWorkflowService
+    }
+
+    namespace workflow_runner_finalize {
+        class WorkflowFinalizeContext
     }
 
     namespace workflow_runner_service {

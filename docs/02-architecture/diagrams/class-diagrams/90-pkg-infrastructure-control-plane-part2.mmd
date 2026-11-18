@@ -1,16 +1,28 @@
 %% Title: Package Family: infrastructure/control_plane (Part 2/2)
-%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/control_plane; part 2/2; modules: file_contract_evidence_recorder, file_lineage_store, file_run_ledger_store, file_workflow_execution_state_store, file_workflow_ledger_store, file_workflow_manifest_store.
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/control_plane; part 2/2; modules: file_artifact_lifecycle_store, file_artifact_lifecycle_types, file_contract_evidence_recorder, file_evidence_location_store, file_lineage_store, file_run_ledger_store.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-10-04
+%% @date    2026-11-17
 %% @level   Package Family / Inventory Slice
-%% @nodes   9
+%% @nodes   13
 %% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
 classDiagram
 
+    namespace file_artifact_lifecycle_store {
+        class FileControlPlaneArtifactLifecycleStore
+    }
+
+    namespace file_artifact_lifecycle_types {
+        class _ProtectedRefs
+    }
+
     namespace file_contract_evidence_recorder {
         class FileContractEvidenceRecorder
+    }
+
+    namespace file_evidence_location_store {
+        class FileEvidenceLocationStore
     }
 
     namespace file_lineage_store {
@@ -35,6 +47,10 @@ classDiagram
 
     namespace file_workflow_transform_artifact_store {
         class FileWorkflowTransformArtifactStore
+    }
+
+    namespace live_run_manifest_catalog {
+        class LiveRootRecordResult
     }
 
     namespace provider_health_evidence {

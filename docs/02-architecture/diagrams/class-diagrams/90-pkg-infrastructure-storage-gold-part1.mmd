@@ -1,9 +1,9 @@
 %% Title: Package Family: infrastructure/storage/gold (Part 1/2)
-%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/storage/gold; part 1/2; modules: pipeline_helpers, io_delta_protocols, metadata_operations, writer_protocols, io_delta_mixins, io_delta_runtime.
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/storage/gold; part 1/2; modules: pipeline_helpers, io_delta_protocols, metadata_operations, writer_protocols, cancellation, io_delta_mixins.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-10-04
+%% @date    2026-11-17
 %% @level   Package Family / Inventory Slice
 %% @nodes   29
 %% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
@@ -41,6 +41,12 @@ classDiagram
         class _SchemaBuilder
     }
 
+    namespace cancellation {
+        class GoldWriteCancelled
+        class _DeferredCancellation
+        class _PhysicalCancellationBoundary
+    }
+
     namespace io_delta_mixins {
         class _GoldWriterExecutorArrowMixin
         class _GoldWriterScd2MergeMixin
@@ -51,12 +57,6 @@ classDiagram
         class _PreparedScd2GoldWrite
         class _PreparedSimpleGoldWrite
         class _SimpleGoldWriteRequest
-    }
-
-    namespace io_protocols {
-        class _GoldMergedMetadataWriterProtocol
-        class _GoldMergedWriteHostProtocol
-        class _GoldWriteDispatchTargetProtocol
     }
 
     GoldWriteRetryModuleProtocol <|-- GoldWriterDeltaModuleProtocol
