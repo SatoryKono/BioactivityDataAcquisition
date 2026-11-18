@@ -292,12 +292,19 @@ def _optional_status_record():
     return core.read_json(path) if path.exists() else {}
 
 
-def _owner_ready(spec, record, *, timeout):
+def _owner_ready(spec, record, *, deadline):
+    remaining = deadline - time.monotonic()
+    if remaining <= 0:
+        return False
     try:
-        health, _ = request(spec, "GET", HEALTH_PATH, timeout=timeout)
-        return health["ready"] and health["generation"] == record["generation"]
+        health, _ = request(spec, "GET", HEALTH_PATH, timeout=remaining)
     except (OSError, PermissionError):
         return False
+    return (
+        time.monotonic() < deadline
+        and health["ready"]
+        and health["generation"] == record["generation"]
+    )
 
 
 def _launch_owner(root, record, launched):
@@ -356,20 +363,14 @@ def ensure(root):
         record = _optional_status_record()
         pid, birth = _recorded_owner_identity(record)
         if pid and core.process_birth(pid) == birth:
-            remaining = deadline - time.monotonic()
-            if remaining <= 0:
-                break
-            if (
-                _owner_ready(spec, record, timeout=remaining)
-                and time.monotonic() < deadline
-            ):
+            if _owner_ready(spec, record, deadline=deadline):
                 return spec
         elif pid and psutil.pid_exists(pid):
             raise PermissionError("Reused or unknown Markdownify PID")
-        else:
-            if not _launch_owner(root, record, launched):
-                continue
+        elif _launch_owner(root, record, launched):
             launched = True
+        else:
+            continue
         time.sleep(min(0.2, max(0, deadline - time.monotonic())))
     raise TimeoutError("Markdownify startup deadline; no fallback")
 
@@ -386,33 +387,37 @@ def convert(spec, name, args):
     return _convert_bytes(spec, EXTENSIONS[name], raw)
 
 
+def _reclaim_finished_job(pending, snapshots):
+    job = scope.physical(pending.parent)
+    identity = job.name.removeprefix("job-")
+    if uuid.UUID(identity).hex != identity:
+        return
+    record = core.read_json(scope.physical(pending))
+    pid, birth = record["pid"], record["birth"]
+    if type(pid) is not int or pid <= 0 or record["snapshot"] not in snapshots:
+        return
+    if birth is not None and type(birth) not in {float, int}:
+        return
+    actual = core.process_birth(pid)
+    if (actual is None and psutil.pid_exists(pid)) or (
+        actual is not None and (birth is None or actual == birth)
+    ):
+        return
+    files_to_remove = [job / record["snapshot"], job / "output.md", pending]
+    if set(job.iterdir()) - set(files_to_remove):
+        return
+    for path in files_to_remove:
+        scope.physical(path, exists=False)
+    for path in files_to_remove:
+        path.unlink(missing_ok=True)
+    job.rmdir()
+
+
 def _reclaim_finished_jobs():
     snapshots = {"input" + suffix for suffix in EXTENSIONS.values()}
     for pending in core.STATE.glob("job-*/" + CLEANUP_RECORD):
         try:
-            job = scope.physical(pending.parent)
-            identity = job.name.removeprefix("job-")
-            if uuid.UUID(identity).hex != identity:
-                continue
-            record = core.read_json(scope.physical(pending))
-            pid, birth = record["pid"], record["birth"]
-            if type(pid) is not int or pid <= 0 or record["snapshot"] not in snapshots:
-                continue
-            if birth is not None and type(birth) not in {float, int}:
-                continue
-            actual = core.process_birth(pid)
-            if (actual is None and psutil.pid_exists(pid)) or (
-                actual is not None and (birth is None or actual == birth)
-            ):
-                continue
-            files_to_remove = [job / record["snapshot"], job / "output.md", pending]
-            if set(job.iterdir()) - set(files_to_remove):
-                continue
-            for path in files_to_remove:
-                scope.physical(path, exists=False)
-            for path in files_to_remove:
-                path.unlink(missing_ok=True)
-            job.rmdir()
+            _reclaim_finished_job(pending, snapshots)
         except (OSError, ValueError, TypeError, KeyError):
             continue  # Keep unqualified or temporarily inaccessible jobs for review/retry.
 

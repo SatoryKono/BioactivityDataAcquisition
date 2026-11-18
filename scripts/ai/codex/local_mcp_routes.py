@@ -14,6 +14,18 @@ from pathlib import Path
 from typing import Any
 
 
+MCP_POLICY_FIELDS = frozenset(
+    {
+        "enabled",
+        "enabled_tools",
+        "disabled_tools",
+        "tools",
+        "startup_timeout_sec",
+        "tool_timeout_sec",
+    }
+)
+
+
 def _physical(path: Path) -> Path:
     if not path.is_absolute() or ".." in path.parts:
         raise ValueError("Native MCP route requires a physical absolute path")
@@ -120,16 +132,7 @@ def apply_local_routes(
         flags = {
             k: deepcopy(v)
             for k, v in servers[name].items()
-            if k
-            in {
-                "enabled",
-                "disabled",
-                "enabled_tools",
-                "disabled_tools",
-                "tools",
-                "startup_timeout_sec",
-                "tool_timeout_sec",
-            }
+            if k in MCP_POLICY_FIELDS or k == "disabled"
         }
         result[name] = {**deepcopy(entry), **flags}
     return result
