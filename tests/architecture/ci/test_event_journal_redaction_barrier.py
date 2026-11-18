@@ -76,13 +76,41 @@ def test_line_for_storage_blocks_a_json_escaped_secret() -> None:
     assert "quote" not in stored
 
 
+def test_password_env_value_is_not_fingerprinted(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from scripts.engineering.ci import pytest_event_journal as journal
+
+    password = "swordfish-secret"
+    monkeypatch.setenv("BIOETL_UNIT_PASSWORD", password)
+    seen: list[str] = []
+    original = journal._correlation_tag
+
+    def spy(captured: str) -> str:
+        seen.append(captured)
+        return original(captured)
+
+    monkeypatch.setattr(journal, "_correlation_tag", spy)
+    path = tmp_path / "receipt.jsonl"
+    plugin = journal.EventJournalPlugin(None, path, _identity())
+    plugin.record("session_start", {"notes": f"prefix {password} suffix"})
+    assert plugin._file is not None
+    plugin._file.close()
+    text = path.read_text(encoding="utf-8")
+    assert password not in text
+    assert password not in "".join(seen)
+    payload = json.loads(text)
+    assert payload["event"] == "session_start"
+    assert payload["notes"] == "prefix [redacted] suffix"
+
+
 def test_record_redacts_a_secret_nested_in_a_tuple(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     from scripts.engineering.ci import pytest_event_journal as journal
 
     secret = 'quote"secret'
-    monkeypatch.setenv("BIOETL_UNIT_PASSWORD", secret)
+    monkeypatch.setenv("BIOETL_UNIT_TOKEN", secret)
     path = tmp_path / "receipt.jsonl"
     plugin = journal.EventJournalPlugin(None, path, _identity())
     plugin.record("session_start", {"notes": (secret,)})

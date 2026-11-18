@@ -919,7 +919,7 @@ def test_invalid_probe_plan_returns_not_tested_without_launch(
     if mode != "missing-root":
         (tmp_path / plan.parent).mkdir(parents=True)
     if mode == "invalid-json":
-        (tmp_path / plan).write_text(CONTROL_MARKER, encoding="utf-8")
+        (tmp_path / plan).write_text("{invalid", encoding="utf-8")
     if mode == "unsafe-path":
         plan = Path("../outside.json")
     assert (
@@ -939,6 +939,7 @@ def test_invalid_probe_plan_returns_not_tested_without_launch(
         "detail": "probe plan unavailable or invalid",
     }
     assert CONTROL_MARKER not in output.out + output.err
+    assert "{invalid" not in output.out + output.err
 
 
 @pytest.mark.parametrize(

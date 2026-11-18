@@ -188,24 +188,24 @@ def _sealed_marker() -> str:
     return _SEALED_REDACTION
 
 
-def _is_password_name(name: str) -> bool:
+def _is_sealed_field(name: str) -> bool:
     return _PASSWORD_NAME.search(name) is not None
 
 
-def _seal_tree(value: Any, secrets: tuple[str, ...]) -> Any:
+def _seal_tree(value: Any, needles: tuple[str, ...]) -> Any:
     if isinstance(value, dict):
         return {
-            _redact_text(str(key), secrets): _seal_tree(item, secrets)
+            _redact_text(str(key), needles): _seal_tree(item, needles)
             for key, item in value.items()
         }
     if isinstance(value, (list, tuple)):
-        return [_seal_tree(item, secrets) for item in value]
+        return [_seal_tree(item, needles) for item in value]
     if value is None:
         return None
     return _sealed_marker()
 
 
-def _password_assignment_replacement(value: str) -> str | None:
+def _sealed_assignment_replacement(value: str) -> str | None:
     """Return the password capture to write, or None when it is already sealed.
 
     Unquoted values stop before ``]``. A stored marker is therefore captured as
@@ -221,11 +221,11 @@ def _password_assignment_replacement(value: str) -> str | None:
     return _SEALED_REDACTION
 
 
-def _redaction_token(captured: str) -> str:
-    """Return a process-keyed fingerprint, not a password hash.
+def _correlation_tag(captured: str) -> str:
+    """Return a process-keyed fingerprint of a non-password needle.
 
-    BLAKE2s stays a keyed correlation tag. SHA-384 here is classified as
-    password hashing of credential-shaped values, and a KDF would run on
+    Password-shaped values never reach this function. BLAKE2s is a keyed
+    correlation tag for the remaining needles. A password KDF would run on
     every journal line.
     """
     digest = hmac.new(
@@ -236,7 +236,12 @@ def _redaction_token(captured: str) -> str:
     return f"[redacted:{digest}]"
 
 
-def _assigned_secret(match: re.Match[str]) -> tuple[int, str]:
+def _redaction_token(captured: str) -> str:
+    """Alias kept for tests that assert the correlation tag."""
+    return _correlation_tag(captured)
+
+
+def _assigned_capture(match: re.Match[str]) -> tuple[int, str]:
     for index in (2, 3, 4):
         value = match.group(index)
         if value is not None:
@@ -246,11 +251,11 @@ def _assigned_secret(match: re.Match[str]) -> tuple[int, str]:
 
 def _replace_assignment(match: re.Match[str]) -> str:
     keyword = match.group(1)
-    index, value = _assigned_secret(match)
+    index, value = _assigned_capture(match)
     prefix = match.group(0)[: match.start(index) - match.start(0)]
     suffix = match.group(0)[match.end(index) - match.start(0) :]
-    if _is_password_name(keyword):
-        replacement = _password_assignment_replacement(value)
+    if _is_sealed_field(keyword) or _contains_needle(value, _blocked_env_needles()):
+        replacement = _sealed_assignment_replacement(value)
         if replacement is None:
             return match.group(0)
         return prefix + replacement + suffix
@@ -259,93 +264,141 @@ def _replace_assignment(match: re.Match[str]) -> str:
         or value == _SEALED_REDACTION
     ):
         return match.group(0)
-    return prefix + _redaction_token(value) + suffix
+    return prefix + _correlation_tag(value) + suffix
 
 
 def _replace_prefix(match: re.Match[str]) -> str:
-    return _redaction_token(match.group(0))
+    return _correlation_tag(match.group(0))
+
+
+def _partition_env_needles() -> tuple[tuple[str, ...], tuple[str, ...]]:
+    """Split env needles into constant-sealed values and fingerprintable ones."""
+    blocked: set[str] = set()
+    keyed: set[str] = set()
+    for key, value in os.environ.items():
+        if len(value) < 8 or _SECRET_KEY.search(key) is None:
+            continue
+        if _is_sealed_field(key):
+            blocked.add(value)
+        else:
+            keyed.add(value)
+    blocked_values = tuple(sorted(blocked, key=len, reverse=True))
+    keyed_values = tuple(
+        sorted(
+            (value for value in keyed if value not in blocked), key=len, reverse=True
+        )
+    )
+    return blocked_values, keyed_values
+
+
+def _blocked_env_needles() -> tuple[str, ...]:
+    blocked, _keyed = _partition_env_needles()
+    return blocked
+
+
+def _keyed_env_needles() -> tuple[str, ...]:
+    _blocked, keyed = _partition_env_needles()
+    return keyed
 
 
 def _secret_values() -> tuple[str, ...]:
-    values = {
-        value
-        for key, value in os.environ.items()
-        if len(value) >= 8 and _SECRET_KEY.search(key) is not None
-    }
-    return tuple(sorted(values, key=len, reverse=True))
+    """Return fingerprintable env needles. Password values are excluded."""
+    return _keyed_env_needles()
 
 
-def _secret_needles(secret: str) -> tuple[str, ...]:
-    """Return the raw secret and its JSON-escaped form.
+def _encoded_forms(captured: str) -> tuple[str, ...]:
+    """Return the raw needle and its JSON-escaped form.
 
     ``json.dumps(..., ensure_ascii=True)`` turns a quote or newline into
     ``\\"`` or ``\\n``. The stored line then no longer contains the raw
     value, but parsing the line restores it.
     """
-    encoded = json.dumps(secret, ensure_ascii=True)
+    encoded = json.dumps(captured, ensure_ascii=True)
     fragment = encoded[1:-1]
-    if not fragment or fragment == secret:
-        return (secret,)
-    return (secret, fragment)
+    if not fragment or fragment == captured:
+        return (captured,)
+    return (captured, fragment)
 
 
-def _contains_known_secret(text: str, known_secrets: tuple[str, ...]) -> bool:
-    """True when text still holds a secret or its JSON encoding."""
-    for secret in known_secrets:
-        if not secret:
+def _contains_needle(text: str, known: tuple[str, ...]) -> bool:
+    """True when text still holds a needle or its JSON encoding."""
+    for captured in known:
+        if not captured:
             continue
-        if any(needle and needle in text for needle in _secret_needles(secret)):
+        if any(form and form in text for form in _encoded_forms(captured)):
             return True
     return False
 
 
-def _line_for_storage(line: str, known_secrets: tuple[str, ...]) -> str:
-    """Replace a line that still contains a raw secret.
+def _blocked_record(known: tuple[str, ...]) -> str:
+    blocked = (
+        '{"event":"redaction_blocked","schema_version":' + str(SCHEMA_VERSION) + "}\n"
+    )
+    if _contains_needle(blocked, known):
+        return "{}\n"
+    return blocked
 
-    A marker that itself contains a secret is re-fingerprinted so the
-    label and digest cannot preserve it. A quote or newline inside a
-    secret is matched in its JSON-escaped form as well.
-    """
-    stored = line
-    for marker in set(_REDACTION_MARKER.findall(stored)):
-        if _contains_known_secret(marker, known_secrets):
-            # Re-fingerprint the entire marker so a colliding secret cannot
-            # survive in either its label or its digest.
-            replacement = _redaction_token(marker).replace("[redacted:", "[", 1)
-            stored = stored.replace(marker, replacement)
-    if _contains_known_secret(stored, known_secrets):
-        blocked = (
-            '{"event":"redaction_blocked","schema_version":'
-            + str(SCHEMA_VERSION)
-            + "}\n"
-        )
-        if _contains_known_secret(blocked, known_secrets):
-            return "{}\n"
-        return blocked
-    # Replace each known value even when absent so the stored line is the
-    # replace result, not the input object that still carries the value.
-    for captured in known_secrets:
+
+def _seal_blocked_text(text: str, blocked: tuple[str, ...]) -> str:
+    """Replace password-shaped needles with a constant. Never fingerprints them."""
+    sealed = text
+    for captured in blocked:
         if not captured:
             continue
-        for needle in _secret_needles(captured):
-            if needle:
-                stored = stored.replace(needle, _redaction_token(captured))
-    if _contains_known_secret(stored, known_secrets):
+        for form in _encoded_forms(captured):
+            if form and form in sealed:
+                sealed = sealed.replace(form, _SEALED_REDACTION)
+    return sealed
+
+
+def _line_for_storage(line: str, known: tuple[str, ...]) -> str:
+    """Persist a line that no longer contains a raw needle.
+
+    Password-shaped env values are not fingerprinted. A line that still
+    contains one is replaced by a constant record. Other needles may be
+    replaced with a correlation tag. A quote or newline inside a needle is
+    matched in its JSON-escaped form as well.
+    """
+    blocked = _blocked_env_needles()
+    if _contains_needle(line, blocked):
+        return _blocked_record(blocked)
+    stored = line
+    for marker in set(_REDACTION_MARKER.findall(stored)):
+        if _contains_needle(marker, known):
+            # Re-tag the entire marker so a colliding needle cannot survive
+            # in either its label or its digest.
+            replacement = _correlation_tag(marker).replace("[redacted:", "[", 1)
+            stored = stored.replace(marker, replacement)
+    if _contains_needle(stored, known):
+        return _blocked_record(known)
+    # Replace each known value even when absent so the stored line is the
+    # replace result, not the input object that still carries the value.
+    for captured in known:
+        if not captured or _contains_needle(captured, blocked):
+            continue
+        for form in _encoded_forms(captured):
+            if form:
+                stored = stored.replace(form, _correlation_tag(captured))
+    if _contains_needle(stored, known) or _contains_needle(stored, blocked):
         return "{}\n"
     return stored
 
 
-def _redact_text(text: str, secrets: tuple[str, ...]) -> str:
-    redacted = text
-    for secret in secrets:
-        if secret and secret in redacted:
-            redacted = redacted.replace(secret, _redaction_token(secret))
+def _redact_text(text: str, needles: tuple[str, ...]) -> str:
+    redacted = _seal_blocked_text(text, _blocked_env_needles())
     redacted = _SECRET_ASSIGNMENT.sub(_replace_assignment, redacted)
+    for captured in needles:
+        if (
+            captured
+            and captured in redacted
+            and not _contains_needle(captured, _blocked_env_needles())
+        ):
+            redacted = redacted.replace(captured, _correlation_tag(captured))
     return _SECRET_PREFIX.sub(_replace_prefix, redacted)
 
 
-def _redact_args(args: list[str], secrets: tuple[str, ...]) -> list[str]:
-    return [_redact_text(token, secrets) for token in args]
+def _redact_args(args: list[str], needles: tuple[str, ...]) -> list[str]:
+    return [_redact_text(item, needles) for item in args]
 
 
 def _utc_now() -> str:
@@ -390,77 +443,83 @@ def _parse_matrix(raw: str) -> Any:
     return None
 
 
-def _redact_secret_value(value: Any, secrets: tuple[str, ...]) -> Any:
+def _fingerprint_or_seal(value: str) -> str:
+    if _contains_needle(value, _blocked_env_needles()):
+        return _SEALED_REDACTION
+    return _correlation_tag(value)
+
+
+def _redact_keyed_tree(value: Any, needles: tuple[str, ...]) -> Any:
     if isinstance(value, str):
-        return _redaction_token(value)
+        return _fingerprint_or_seal(value)
     if isinstance(value, dict):
         redacted: dict[str, Any] = {}
         for key, item in value.items():
             name = str(key)
-            safe_name = _redact_text(name, secrets)
-            if _is_password_name(name):
-                redacted[safe_name] = _seal_tree(item, secrets)
+            safe_name = _redact_text(name, needles)
+            if _is_sealed_field(name):
+                redacted[safe_name] = _seal_tree(item, needles)
             else:
-                redacted[safe_name] = _redact_secret_value(item, secrets)
+                redacted[safe_name] = _redact_keyed_tree(item, needles)
         return redacted
     if isinstance(value, (list, tuple)):
-        return [_redact_secret_value(item, secrets) for item in value]
+        return [_redact_keyed_tree(item, needles) for item in value]
     if value is None:
         return None
-    return _redaction_token(str(value))
+    return _fingerprint_or_seal(str(value))
 
 
-def _redact_structured(value: Any, secrets: tuple[str, ...]) -> Any:
+def _redact_structured(value: Any, needles: tuple[str, ...]) -> Any:
     if isinstance(value, dict):
         redacted: dict[str, Any] = {}
         for key, item in value.items():
             name = str(key)
-            safe_name = _redact_text(name, secrets)
-            if _is_password_name(name):
-                redacted[safe_name] = _seal_tree(item, secrets)
+            safe_name = _redact_text(name, needles)
+            if _is_sealed_field(name):
+                redacted[safe_name] = _seal_tree(item, needles)
             elif _SECRET_KEY.search(name) is not None:
-                redacted[safe_name] = _redact_secret_value(item, secrets)
+                redacted[safe_name] = _redact_keyed_tree(item, needles)
             else:
-                redacted[safe_name] = _redact_structured(item, secrets)
+                redacted[safe_name] = _redact_structured(item, needles)
         return redacted
     if isinstance(value, (list, tuple)):
-        return [_redact_structured(item, secrets) for item in value]
+        return [_redact_structured(item, needles) for item in value]
     if isinstance(value, str):
-        return _redact_text(value, secrets)
+        return _redact_text(value, needles)
     return value
 
 
-def _redacted_matrix(raw: str, secrets: tuple[str, ...]) -> Any:
+def _redacted_matrix(raw: str, needles: tuple[str, ...]) -> Any:
     parsed = _parse_matrix(raw)
     if not isinstance(parsed, dict):
         return None
-    return _redact_structured(parsed, secrets)
+    return _redact_structured(parsed, needles)
 
 
-def _matrix_env_text(raw: str, secrets: tuple[str, ...]) -> str:
-    redacted = _redacted_matrix(raw, secrets)
+def _matrix_env_text(raw: str, needles: tuple[str, ...]) -> str:
+    redacted = _redacted_matrix(raw, needles)
     if redacted is None:
-        return _redact_text(raw, secrets)
+        return _redact_text(raw, needles)
     return json.dumps(redacted, sort_keys=True, ensure_ascii=True)
 
 
-def _safe_env(secrets: tuple[str, ...]) -> dict[str, str]:
+def _safe_env(needles: tuple[str, ...]) -> dict[str, str]:
     redacted: dict[str, str] = {}
     for key in sorted(_SAFE_ENV_KEYS):
         if key not in os.environ:
             continue
         raw = os.environ[key]
         if key == "BIOETL_JOURNAL_MATRIX":
-            redacted[key] = _matrix_env_text(raw, secrets)
+            redacted[key] = _matrix_env_text(raw, needles)
             continue
-        redacted[key] = _redact_text(raw, secrets)
+        redacted[key] = _redact_text(raw, needles)
     return redacted
 
 
 def _identity_from_env(
     *,
     actual_sha: str | None,
-    secrets: tuple[str, ...],
+    needles: tuple[str, ...],
 ) -> dict[str, Any]:
     matrix_raw = os.environ.get("BIOETL_JOURNAL_MATRIX", "")
     job = os.environ.get("BIOETL_JOURNAL_JOB") or os.environ.get("GITHUB_JOB") or ""
@@ -470,32 +529,32 @@ def _identity_from_env(
     expected_sha = os.environ.get("EXPECTED_CHECKOUT_SHA") or None
     return {
         "workflow_run_id": _redact_text(
-            os.environ.get("GITHUB_RUN_ID") or "local", secrets
+            os.environ.get("GITHUB_RUN_ID") or "local", needles
         ),
         "workflow_run_attempt": _redact_text(
-            os.environ.get("GITHUB_RUN_ATTEMPT") or "local", secrets
+            os.environ.get("GITHUB_RUN_ATTEMPT") or "local", needles
         ),
-        "job": _redact_text(job, secrets),
-        "matrix": _redacted_matrix(matrix_raw, secrets),
+        "job": _redact_text(job, needles),
+        "matrix": _redacted_matrix(matrix_raw, needles),
         "actual_checkout_sha": actual_sha,
         "expected_checkout_sha": (
-            None if expected_sha is None else _redact_text(expected_sha, secrets)
+            None if expected_sha is None else _redact_text(expected_sha, needles)
         ),
-        "invocation_id": _redact_text(invocation, secrets),
+        "invocation_id": _redact_text(invocation, needles),
         "pass_name": _redact_text(
-            os.environ.get("BIOETL_JOURNAL_PASS") or "unspecified", secrets
+            os.environ.get("BIOETL_JOURNAL_PASS") or "unspecified", needles
         ),
-        "worker_id": _redact_text(worker, secrets),
+        "worker_id": _redact_text(worker, needles),
         "role": role,
     }
 
 
-def _selection_from_config(config: Any, secrets: tuple[str, ...]) -> dict[str, Any]:
+def _selection_from_config(config: Any, needles: tuple[str, ...]) -> dict[str, Any]:
     option = config.option
     maxfail = getattr(option, "maxfail", None)
     return {
-        "args": _redact_args([str(arg) for arg in config.args], secrets),
-        "marker": _redact_text(str(getattr(option, "markexpr", "") or ""), secrets),
+        "args": _redact_args([str(arg) for arg in config.args], needles),
+        "marker": _redact_text(str(getattr(option, "markexpr", "") or ""), needles),
         "collect_only": bool(getattr(option, "collectonly", False)),
         "exitfirst": bool(getattr(option, "exitfirst", False)),
         "maxfail": int(maxfail) if isinstance(maxfail, int) else None,
@@ -509,7 +568,7 @@ class EventJournalPlugin:
         self.config = config
         self.path = path
         self.identity = identity
-        self.secrets = _secret_values()
+        self._needles = _keyed_env_needles()
         self._file: Any = None
         self._closed = False
         self._io_error: str | None = None
@@ -521,7 +580,7 @@ class EventJournalPlugin:
             self._mark_io_error(f"open_failed:{exc.errno}")
 
     def _mark_io_error(self, message: str) -> None:
-        redacted = _redact_text(message, self.secrets)
+        redacted = _redact_text(message, self._needles)
         self._io_error = redacted
         sys.stderr.write(f"EventJournal: {redacted}\n")
         if self._file is not None and not self._closed:
@@ -538,14 +597,14 @@ class EventJournalPlugin:
             "schema_version": SCHEMA_VERSION,
             "timestamp": _utc_now(),
             "event": event_type,
-            "identity": _redact_structured(self.identity, self.secrets),
+            "identity": _redact_structured(self.identity, self._needles),
         }
-        redacted_data = _redact_structured(data, self.secrets)
+        redacted_data = _redact_structured(data, self._needles)
         if isinstance(redacted_data, dict):
             payload.update(redacted_data)
         line = _line_for_storage(
             json.dumps(payload, sort_keys=True, ensure_ascii=True) + "\n",
-            self.secrets,
+            self._needles,
         )
         try:
             self._file.write(line)
@@ -850,11 +909,11 @@ def pytest_configure(config: Any) -> None:
     if not journal_dir:
         return
     publish_redaction_key()
-    secrets = _secret_values()
+    needles = _keyed_env_needles()
     actual_sha, sha_error = measure_checkout_sha()
     workerinput = getattr(config, "workerinput", {})
     invocation = workerinput.get("BIOETL_JOURNAL_INVOCATION_ID")
-    identity = _identity_from_env(actual_sha=actual_sha, secrets=secrets)
+    identity = _identity_from_env(actual_sha=actual_sha, needles=needles)
     if invocation:
         identity["invocation_id"] = invocation
     config._event_journal_invocation = identity["invocation_id"]
@@ -869,9 +928,9 @@ def pytest_configure(config: Any) -> None:
     plugin.record(
         "session_start",
         {
-            "selection": _selection_from_config(config, secrets),
+            "selection": _selection_from_config(config, needles),
             "sha_error": sha_error,
-            "safe_env": _safe_env(secrets),
+            "safe_env": _safe_env(needles),
             "allow_no_tests": os.environ.get("BIOETL_JOURNAL_ALLOW_NO_TESTS") == "1",
         },
     )
