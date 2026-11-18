@@ -24,6 +24,7 @@ SESSION_CLIENT = "session_client.py"
 MARKDOWNIFY_CLIENT = "safe_markdownify.py"
 MARKDOWNIFY_VERSIONS = Path("D:/pc-agent/tools/markdownify-owner-versions")
 SESSION_VERSIONS = Path("D:/pc-agent/tools/codex-session-versions")
+SHA256_PATTERN = "[0-9a-f]{64}"
 
 
 def physical(path):
@@ -47,7 +48,7 @@ def qualified_binary(path, expected):
         raise PermissionError("Use the qualified app-owned native Codex executable")
     physical(path)
     if (
-        re.fullmatch("[0-9a-f]{64}", expected) is None
+        re.fullmatch(SHA256_PATTERN, expected) is None
         or hashlib.sha256(path.read_bytes()).hexdigest() != expected
     ):
         raise PermissionError("Native Codex executable drift")
@@ -114,7 +115,7 @@ def _validate_markdownify_client(entry):
         not script.is_absolute()
         or script.name != MARKDOWNIFY_CLIENT
         or script.parent.parent != MARKDOWNIFY_VERSIONS
-        or re.fullmatch("[0-9a-f]{64}", script.parent.name) is None
+        or re.fullmatch(SHA256_PATTERN, script.parent.name) is None
     ):
         raise PermissionError("Markdownify requires its qualified absolute client")
     version = next(
@@ -203,7 +204,7 @@ def _validate_selector(name, entry):
         or not script.is_absolute()
         or script.name != SESSION_CLIENT
         or script.parent.parent != SESSION_VERSIONS
-        or re.fullmatch("[0-9a-f]{64}", script.parent.name) is None
+        or re.fullmatch(SHA256_PATTERN, script.parent.name) is None
     ):
         raise PermissionError("Native session requires its qualified absolute selector")
     version = next(
