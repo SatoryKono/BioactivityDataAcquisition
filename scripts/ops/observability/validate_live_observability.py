@@ -21,6 +21,11 @@ import base64
 from dotenv import load_dotenv
 import yaml
 
+if __package__ in {None, ""}:
+    repo_root = str(Path(__file__).resolve().parents[3])
+    if repo_root not in sys.path:
+        sys.path.insert(0, repo_root)
+
 from scripts.engineering.qa.report_dashboard_inventory import (
     _normalize_dashboard_payload,
 )
