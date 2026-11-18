@@ -140,11 +140,12 @@ def project_official_export(evidence: SourceEvidence) -> OfficialProjection:
     """Preserve all raw rows; CSV Type is family evidence, never target type."""
     raw, rows, groups, selected, species = _raw_scope(evidence)
     scope = evidence.scope
+    raw_hash = sha256(raw)
     projected: list[dict[str, object]] = []
     uncovered: list[dict[str, str]] = []
     for target in sorted(selected, key=int):
         outputs, gaps = _project_group(
-            groups[target], species, evidence.provider_release, sha256(raw)
+            groups[target], species, evidence.provider_release, raw_hash
         )
         projected.extend(outputs)
         uncovered.extend(gaps)

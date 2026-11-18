@@ -1,5 +1,7 @@
 """Large CSV fields preserve bytes and restore the process-wide parser limit."""
 
+from __future__ import annotations
+
 import csv
 
 import pytest

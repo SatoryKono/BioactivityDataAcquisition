@@ -1,5 +1,7 @@
 """Deployment admission uses real YAML loading and real writer destinations."""
 
+from __future__ import annotations
+
 from pathlib import Path
 from dataclasses import replace
 from shutil import copytree, ignore_patterns
