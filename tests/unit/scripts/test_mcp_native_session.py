@@ -1,5 +1,7 @@
 """Credential delivery is a child-only operation with separate OAuth routing."""
 
+from __future__ import annotations
+
 import hashlib
 import json
 import tomllib
@@ -249,3 +251,39 @@ def test_session_refuses_unqualified_selector_before_launch(
         session_overrides(
             config, root, manifest=manifest, markdownify=tmp_path / "absent.json"
         )
+
+
+@pytest.mark.parametrize(
+    "entry", [{"command": "", "args": []}, {"command": "python", "args": ["client"]}]
+)
+def test_optional_markdownify_entry_refuses_unqualified_commands(
+    session_binding, tmp_path, entry
+):
+    root, manifest, _, config = session_binding
+    source = tmp_path / "markdownify.json"
+    source.write_text(
+        json.dumps(
+            {
+                "schema": 1,
+                "workspace": str(root),
+                "git_common": str(root / ".git"),
+                "server": "Markdownify-BioETL",
+                "entry": entry,
+            }
+        ),
+        encoding="utf-8",
+    )
+    with pytest.raises(PermissionError, match="qualified"):
+        session_overrides(config, root, manifest=manifest, markdownify=source)
+
+
+def test_native_operational_cli_returns_redacted_failure(monkeypatch, capsys):
+    def fail():
+        raise PermissionError("private workspace diagnostic")
+
+    monkeypatch.setattr(native_session, "workspace", fail)
+    assert (
+        native_session.main(["--executable", "unused", "--sha256", "a" * 64, "--check"])
+        == 64
+    )
+    assert "private workspace diagnostic" not in capsys.readouterr().err

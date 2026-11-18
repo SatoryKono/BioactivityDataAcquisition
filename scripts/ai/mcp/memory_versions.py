@@ -33,6 +33,7 @@ PROFILE_INDEX = "profiles.json"
 ACTIVE_INDEX = "active.json"
 PROFILE_DESCRIPTOR = "profile.json"
 RECOVERY_RECORD = "recovery-v2.json"
+RECONCILIATION_SOURCE = "memory_reconciliation.py"
 
 
 def canonical(value):
@@ -357,7 +358,7 @@ def build(owner, entry, value):
     staging.mkdir()
     _copy_runtime_dependencies(owner, hashes, staging)
     service = staging / "tools/shared-mcp"
-    source = Path(__file__).with_name("memory_reconciliation.py")
+    source = Path(__file__).with_name(RECONCILIATION_SOURCE)
     shutil.copyfile(source, service / "project-memory-reconciliation.py")
     for file in service.glob("*"):
         if file.suffix not in {".py", ".mjs"}:
@@ -382,12 +383,34 @@ def build(owner, entry, value):
     identity = hashlib.sha256(raw).hexdigest()
     target = VERSIONS / identity
     (staging / BUNDLE_MANIFEST).write_bytes(raw)
-    if target.exists():
-        verify(target)
-        # Keep the duplicate build as evidence instead of recursive cleanup.
-        return target
-    staging.rename(target)
+    return _publish_bundle(staging, target)
+
+
+def _discard_duplicate_build(staging):
+    if staging.parent != VERSIONS or not staging.name.startswith("building-"):
+        raise ValueError("Duplicate cleanup escaped the owned versions directory")
+    physical(staging)
+    for current, directories, files in os.walk(staging, followlinks=False):
+        for name in [*directories, *files]:
+            path = Path(current) / name
+            if (
+                getattr(path.lstat(), "st_file_attributes", 0) & 0x400
+                or path.is_symlink()
+            ):
+                raise ValueError("Duplicate cleanup contains a reparse point")
+    shutil.rmtree(staging)
+
+
+def _publish_bundle(staging, target):
+    if not target.exists():
+        try:
+            staging.rename(target)
+        except OSError:
+            if not target.is_dir():
+                raise
     verify(target)
+    if staging.exists():
+        _discard_duplicate_build(staging)
     return target
 
 
@@ -617,6 +640,19 @@ def _runtime_hashes_match(hashes):
         return False
 
 
+def _predecessor_runtime_matches(before):
+    binding = before.get("runtime_binding", {"schema": 2, "state": "legacy"})
+    if binding.get("state") == "active":
+        try:
+            bundle = Path(binding["bundle"])
+            if bundle.parent != VERSIONS or bundle.name != binding["version"]:
+                return False
+            verify(bundle)
+        except (OSError, ValueError, KeyError):
+            return False
+    return _runtime_hashes_match(before["active"]["hashes"])
+
+
 def rollback(owner, identity):
     entry, value = owner.specification(identity)
     directory = Path(entry["state"])
@@ -660,7 +696,7 @@ def rollback(owner, identity):
                         "graph_preserved": True,
                     }
                 before = transaction["before"]
-                if not _runtime_hashes_match(before["active"]["hashes"]):
+                if not _predecessor_runtime_matches(before):
                     owner.state.write(
                         directory / RUNTIME_BINDING,
                         {
@@ -799,11 +835,13 @@ def audit_profile(owner, identity):
         else None
     )
     branch_matches = bool(scope["directory"] or context["branch"] == scope["branch"])
-    process_states = {
-        role: owner.state.identity(status, role)
-        for role in ("owner", "gateway", "backend")
-    }
-    process_states["launch_owner"] = owner.state.identity(launch, "owner")
+    reconciler = load(
+        "audit_reconciliation", Path(__file__).with_name(RECONCILIATION_SOURCE)
+    )
+    process_states = reconciler.process_identities(
+        owner, {"status": status, "owner-launch": launch}
+    )
+    process_states["launch_owner"] = process_states.pop("launch")
     reasons = _audit_block_reasons(
         process_states, work, branch_matches, account_matches
     )
@@ -870,6 +908,19 @@ def _reconcile_profile(parser, args, selected, fixture):
     if args.action == "reconcile-plan":
         # Full plan is private operator output, never a public acceptance report.
         return selected.reconciler.plan(selected.runtime_owner(), entry, value)
+    if args.action == "reconcile-incident":
+        current = load(
+            "incident_reconciliation",
+            Path(__file__).with_name(RECONCILIATION_SOURCE),
+        )
+        incident = current.identify_interrupted_launch(
+            selected.runtime_owner(), entry, value
+        )
+        return {
+            "incident": incident["id"],
+            "state": "BLOCKED",
+            "next": "reconcile-plan",
+        }
     plan_path = args.plan
     if plan_path is None:
         return parser.error("reconcile-apply requires --plan")
@@ -905,6 +956,7 @@ def main(argv=None):
             "verify",
             "migrate",
             "rollback",
+            "reconcile-incident",
             "reconcile-plan",
             "reconcile-apply",
             "audit-profile",

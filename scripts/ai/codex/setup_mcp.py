@@ -947,6 +947,12 @@ def _render_tool_policy(tools: Any) -> str:
     return "tools = { " + ", ".join(rendered_tools) + " }"
 
 
+def _toml_timeout(value: Any) -> str:
+    if type(value) not in {int, float}:
+        raise ValueError("MCP timeout must be numeric")
+    return json.dumps(value, allow_nan=False)
+
+
 def _render_one_mcp_server_toml(name: str, server: dict[str, Any]) -> list[str]:
     """Render TOML lines for a single managed MCP server."""
     key = _toml_key(name)
@@ -955,9 +961,11 @@ def _render_one_mcp_server_toml(name: str, server: dict[str, Any]) -> list[str]:
         lines.append(f"enabled = {'true' if bool(server['enabled']) else 'false'}")
     lines.extend(_render_server_transport_lines(server))
     if "startup_timeout_sec" in server:
-        lines.append(f"startup_timeout_sec = {int(server['startup_timeout_sec'])}")
+        lines.append(
+            f"startup_timeout_sec = {_toml_timeout(server['startup_timeout_sec'])}"
+        )
     if "tool_timeout_sec" in server:
-        lines.append(f"tool_timeout_sec = {int(server['tool_timeout_sec'])}")
+        lines.append(f"tool_timeout_sec = {_toml_timeout(server['tool_timeout_sec'])}")
     for field in ("enabled_tools", "disabled_tools"):
         if field in server:
             lines.append(f"{field} = {_toml_array(server[field])}")
@@ -1085,6 +1093,7 @@ def _write_codex_config(
     *,
     profile: str = "full",
     transport_mode: str = "stdio",
+    stage: bool = False,
 ) -> Path:
     servers = _codex_runtime_servers(
         workspace_root, profile=profile, transport_mode=transport_mode
@@ -1139,9 +1148,16 @@ def _write_codex_config(
         else:
             rendered = managed_block
 
-        _write_user_toml(config_path, rendered, before=before)
-        os.chmod(config_path, 0o600)
-    return config_path
+        destination = (
+            config_path.with_name(
+                config_path.name + "." + uuid.uuid4().hex + ".candidate"
+            )
+            if stage
+            else config_path
+        )
+        _write_user_toml(destination, rendered, before=None if stage else before)
+        os.chmod(destination, 0o600)
+    return destination
 
 
 def _run_codex_validation(workspace_root: Path) -> None:
@@ -1204,6 +1220,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         "--skip-codex-config",
         action="store_true",
         help="Do not update ~/.codex/config.toml with the generated MCP servers.",
+    )
+    parser.add_argument(
+        "--stage-codex-config",
+        action="store_true",
+        help="Prepare a private unique TOML candidate without replacing config.toml; use when external editors may write it.",
     )
     parser.add_argument(
         "--codex-only",
@@ -1279,6 +1300,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         ),
     )
     args = parser.parse_args(raw_argv)
+    if args.stage_codex_config:
+        args.skip_codex_validation = True
     _apply_setup_mcp_flag_shortcuts(args)
     output_root = args.root.absolute()
     workspace_root = args.workspace_root.absolute()
@@ -1299,12 +1322,16 @@ def _run_codex_only_mode(
         )
     if args.skip_codex or args.skip_codex_config:
         parser.error("--codex-only cannot be combined with Codex skip flags")
-    _write_codex_config(
+    written = _write_codex_config(
         workspace_root,
         profile=args.profile,
         transport_mode=args.transport_mode,
+        **({"stage": True} if getattr(args, "stage_codex_config", False) else {}),
     )
-    print("Updated the private Codex user MCP managed block.")
+    if getattr(args, "stage_codex_config", False):
+        print(f"Prepared {written}; review and explicit apply required.")
+    else:
+        print("Updated the private Codex user MCP managed block.")
     if not args.skip_codex_validation:
         _run_codex_validation(workspace_root)
     return 0
@@ -1892,6 +1919,7 @@ def _write_optional_side_configs(
             workspace_root,
             profile=args.profile,
             transport_mode=args.transport_mode,
+            **({"stage": True} if getattr(args, "stage_codex_config", False) else {}),
         )
         print(f"Wrote {codex_config_path}")
     if not args.skip_gemini_settings:

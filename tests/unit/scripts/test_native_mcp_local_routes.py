@@ -1,5 +1,7 @@
 """Native route synchronization must preserve isolation and user-owned settings."""
 
+from __future__ import annotations
+
 import json
 import subprocess
 import sys
@@ -272,3 +274,71 @@ def test_managed_toml_headers_are_parsed_with_comments_quotes_and_multiline_valu
         result["mcp_servers"]["custom.name"] == expected["mcp_servers"]["custom.name"]
     )
     assert result["mcp_servers"]["memory"] == {"command": "new"}
+
+
+def test_sync_preserves_fractional_timeouts(routes, monkeypatch, tmp_path):
+    import tomllib
+
+    root, manifest, _ = routes
+    monkeypatch.setenv("BIOETL_CODEX_ROUTES_FILE", str(manifest))
+    home = tmp_path / "home"
+    config = home / ".codex/config.toml"
+    config.parent.mkdir(parents=True)
+    config.write_text(
+        '[mcp_servers.memory]\ncommand="old"\nstartup_timeout_sec=0.25\ntool_timeout_sec=0.5\n',
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(Path, "home", lambda: home)
+    setup_mcp._write_codex_config(root, profile="stable", transport_mode="shared")
+    values = tomllib.loads(config.read_text(encoding="utf-8"))["mcp_servers"]["memory"]
+    assert values["startup_timeout_sec"] == 0.25 and values["tool_timeout_sec"] == 0.5
+
+
+def test_staged_codex_candidate_never_replaces_an_external_edit(
+    routes, monkeypatch, tmp_path
+):
+    import tomllib
+
+    root, manifest, _ = routes
+    monkeypatch.setenv("BIOETL_CODEX_ROUTES_FILE", str(manifest))
+    home = tmp_path / "home"
+    config = home / ".codex/config.toml"
+    config.parent.mkdir(parents=True)
+    config.write_text('model="before"\n', encoding="utf-8")
+    monkeypatch.setattr(Path, "home", lambda: home)
+    publish = setup_mcp._write_user_toml
+
+    def editor_save(path, rendered, *, before):
+        config.write_text('model="saved-by-editor"\n', encoding="utf-8")
+        assert path != config and before is None
+        publish(path, rendered, before=before)
+
+    monkeypatch.setattr(setup_mcp, "_write_user_toml", editor_save)
+    candidate = setup_mcp._write_codex_config(
+        root, profile="stable", transport_mode="shared", stage=True
+    )
+    assert (
+        tomllib.loads(config.read_text(encoding="utf-8"))["model"] == "saved-by-editor"
+    )
+    assert tomllib.loads(candidate.read_text(encoding="utf-8"))["model"] == "before"
+    assert candidate.name.endswith(".candidate")
+
+
+def test_foreign_git_binding_is_not_probed_before_repository_comparison(
+    routes, tmp_path, monkeypatch
+):
+    from scripts.ai.codex import local_mcp_routes
+
+    root, path, data = routes
+    foreign = tmp_path / "foreign-private/.git"
+    data["git_common"] = str(foreign)
+    path.write_text(json.dumps(data), encoding="utf-8")
+    physical = local_mcp_routes._physical
+
+    def observed(value):
+        assert value != foreign, "foreign binding was probed before comparison"
+        return physical(value)
+
+    monkeypatch.setattr(local_mcp_routes, "_physical", observed)
+    with pytest.raises(ValueError, match="another repository"):
+        apply_local_routes({"memory": {}}, root, manifest=path)

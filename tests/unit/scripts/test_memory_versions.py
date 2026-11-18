@@ -1,5 +1,7 @@
 """Immutable dependency identity and fail-closed profile dispatch controls."""
 
+from __future__ import annotations
+
 import argparse
 import hashlib
 import json
@@ -557,3 +559,55 @@ def test_reconcile_reads_an_enumerated_owned_plan(tmp_path):
         == "RESOLVED"
     )
     assert apply.call_args.args[-1] == {"reviewed": True}
+
+
+def test_rollback_checks_the_entire_predecessor_bundle(
+    transition_owner, bundle, bundle_factory
+):
+    owner, directory, graph = transition_owner
+    versions.migrate(owner, directory.name, bundle)
+    successor = bundle_factory(b"VERSION = 'next'\n")
+    versions.migrate(owner, directory.name, successor, from_version=bundle.name)
+    (bundle / "runtime/unlisted.py").write_bytes(b"unlisted predecessor dependency")
+    result = versions.rollback(owner, directory.name)
+    assert result["state"] == "BLOCKED_LEGACY_RUNTIME_DRIFT"
+    assert owner.state.read(directory / "runtime-binding.json")["state"] == "disabled"
+    assert graph.read_bytes() == b'{"fixture":true}\n'
+
+
+def test_historical_audit_uses_the_same_unknown_identity_normalization():
+    from scripts.ai.mcp import memory_reconciliation
+
+    owner = SimpleNamespace(state=SimpleNamespace(identity=lambda *_: "ABSENT"))
+    observed = {"status": {}, "owner-launch": {}}
+    states = memory_reconciliation.process_identities(owner, observed)
+    assert states["owner"] == states["launch"] == "UNKNOWN"
+    assert "BLOCK_PROCESS_IDENTITY_UNKNOWN" in versions._audit_block_reasons(
+        states, {"schema": 2}, True, True
+    )
+
+
+def test_duplicate_build_cleanup_never_accepts_a_foreign_directory(
+    tmp_path, monkeypatch
+):
+    root = tmp_path / "versions"
+    root.mkdir()
+    foreign = tmp_path / "building-foreign"
+    foreign.mkdir()
+    sentinel = foreign / "preserved"
+    sentinel.write_bytes(b"foreign data")
+    monkeypatch.setattr(versions, "VERSIONS", root)
+    with pytest.raises(ValueError, match="escaped"):
+        versions._discard_duplicate_build(foreign)
+    assert sentinel.read_bytes() == b"foreign data"
+
+
+def test_verified_duplicate_bundle_releases_its_current_staging(bundle, monkeypatch):
+    import shutil
+
+    monkeypatch.setattr(versions, "VERSIONS", bundle.parent)
+    staging = bundle.parent / "building-current"
+    shutil.copytree(bundle, staging)
+    assert versions._publish_bundle(staging, bundle) == bundle
+    assert not staging.exists()
+    versions.verify(bundle)

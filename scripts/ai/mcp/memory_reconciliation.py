@@ -64,25 +64,30 @@ def coordination(owner, entry):
     return value
 
 
-def process_verdict(owner, observed, *, self_owner=False):
-    identities = [
-        owner.state.identity(observed["status"], role)
+def process_identities(owner, observed):
+    states = {
+        role: owner.state.identity(observed["status"], role)
         for role in ("owner", "gateway", "backend")
-    ]
-    launch = owner.state.identity(observed["owner-launch"], "owner")
-    if observed["status"] is not None and identities[0] == "ABSENT":
-        identities[0] = "UNKNOWN"
-    if observed["owner-launch"] is not None and launch == "ABSENT":
-        launch = "UNKNOWN"
-    if "UNKNOWN" in [*identities, launch]:
+    }
+    states["launch"] = owner.state.identity(observed["owner-launch"], "owner")
+    if observed["status"] is not None and states["owner"] == "ABSENT":
+        states["owner"] = "UNKNOWN"
+    if observed["owner-launch"] is not None and states["launch"] == "ABSENT":
+        states["launch"] = "UNKNOWN"
+    return states
+
+
+def process_verdict(owner, observed, *, self_owner=False):
+    states = process_identities(owner, observed)
+    if "UNKNOWN" in states.values():
         return "BLOCK_PROCESS_IDENTITY_UNKNOWN"
     for record, state in (
-        (observed["status"], identities[0]),
-        (observed["owner-launch"], launch),
+        (observed["status"], states["owner"]),
+        (observed["owner-launch"], states["launch"]),
     ):
         if state == "ALIVE" and not (self_owner and record["owner_pid"] == os.getpid()):
             return "BLOCK_OWNER_ACTIVE"
-    if "ALIVE" in identities[1:]:
+    if "ALIVE" in (states["gateway"], states["backend"]):
         return "BLOCK_SURVIVING_PROCESS"
     return None
 
@@ -113,9 +118,8 @@ def block_identity(observed, coord):
     active = coord.get("active_block")
     if active:
         return active["id"]
-    interrupted = _interrupted_launch_block(observed, coord)
-    if interrupted:
-        return interrupted
+    if coord["history"] and coord["history"][-1]["phase"] == "LAUNCHING":
+        return _interrupted_launch_block(observed, coord)
     if observed["blocked"] is not None:
         return "legacy-" + digest(
             {k: observed[k] for k in ("blocked", "status", "work")}
@@ -194,6 +198,33 @@ def plan(owner, entry, value):
     }
     result["plan_id"] = digest(result)
     return result
+
+
+def identify_interrupted_launch(owner, entry, value):
+    """Publish only an incident, allowing an older reconciler to plan a grant."""
+    directory = Path(entry["state"])
+    with _transition_lock(owner, directory):
+        with owner.core.LifetimeLock(
+            Path(value["profile"]["graph"]).with_name(".memory.service-owner.lock")
+        ):
+            coord = coordination(owner, entry)
+            proposed = plan(owner, entry, value)
+            if (
+                coord.get("active_block") is not None
+                or not proposed["eligible"]
+                or proposed["reason"] != "PROVEN_STARTUP_WITHOUT_REQUESTS"
+                or not str(proposed["block_id"]).startswith("interrupted-")
+            ):
+                raise ValueError(
+                    "No proven interrupted startup incident; state preserved"
+                )
+            coord["active_block"] = {
+                "id": proposed["block_id"],
+                "reason": "BLOCK_RECONCILED_LAUNCH_INTERRUPTED",
+                "records": proposed["snapshot"]["records"],
+            }
+            owner.state.write(directory / COORDINATION, coord)
+            return coord["active_block"]
 
 
 def apply(owner, entry, value, proposed):
