@@ -1,10 +1,16 @@
 """Regression contracts for global incident context and evidence navigation."""
 
 import json
+import re
 from pathlib import Path
 
 import pytest
 import yaml
+
+# Grafana 12 / scenes VARIABLE_REGEX. An unknown name is returned unchanged.
+_GRAFANA_VARIABLE = re.compile(
+    r"\$(\w+)|\[\[(\w+?)(?::(\w+))?\]\]|\$\{(\w+)(?:\.([^:^\}]+))?(?::([^\}]+))?\}"
+)
 
 pytestmark = pytest.mark.integration
 
@@ -183,3 +189,86 @@ def test_fleet_children_do_not_overlap() -> None:
                 or right[4] <= left[2]
             )
             assert not overlaps, f"{left[0]} overlaps {right[0]}"
+
+
+def _grafana_leave_unknown(target: str) -> str:
+    """Grafana 12 leaves a `$name` that is not a dashboard variable unchanged."""
+
+    def replace(match: re.Match[str]) -> str:
+        name = match.group(1) or match.group(2) or match.group(4)
+        if name != "1":
+            raise AssertionError(name)
+        return match.group(0)
+
+    return _GRAFANA_VARIABLE.sub(replace, target)
+
+
+def _prometheus_expand(template: str, groups: dict[int, str]) -> str:
+    """Go regexp Expand: `$$` is a literal dollar, `$1` is capture group 1."""
+    out: list[str] = []
+    index = 0
+    while index < len(template):
+        if template[index] == "$" and index + 1 < len(template):
+            nxt = template[index + 1]
+            if nxt == "$":
+                out.append("$")
+                index += 2
+                continue
+            if nxt.isdigit():
+                out.append(groups[int(nxt)])
+                index += 2
+                continue
+        out.append(template[index])
+        index += 1
+    return "".join(out)
+
+
+def _ranked_suspect_exprs(dashboard: dict) -> list[str]:
+    found: list[str] = []
+
+    def walk(node: object) -> None:
+        if isinstance(node, dict):
+            expr = node.get("expr")
+            if isinstance(expr, str) and "bioetl_incident_ranked_evidence" in expr:
+                found.append(expr)
+            for value in node.values():
+                walk(value)
+        elif isinstance(node, list):
+            for item in node:
+                walk(item)
+
+    walk(dashboard["panels"])
+    return found
+
+
+def test_ranked_suspect_capture_reaches_prometheus() -> None:
+    from scripts.ops.observability.grafana._incident_explanations import (
+        _stamp_ranked_suspect_expr,
+    )
+
+    stamped: dict = {"targets": [{}]}
+    _stamp_ranked_suspect_expr(stamped, summary=True)
+    generated = stamped["targets"][0]["expr"]
+    assert '"object","$1","object","(.*) / $"' in generated
+    assert "$$1" not in generated
+
+    for profile in ("dashboards", "dashboards-adaptive"):
+        dashboard = json.loads(
+            Path(f"grafana/{profile}/bioetl-incident-v1.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        assert all(item["name"] != "1" for item in dashboard["templating"]["list"])
+        exprs = _ranked_suspect_exprs(dashboard)
+        assert exprs
+        assert all(expr == generated for expr in exprs)
+
+    sent = _grafana_leave_unknown(generated)
+    assert '"object","$1","object"' in sent
+    match = re.fullmatch(r"(.*) / ", "chembl_activity / ")
+    assert match is not None
+    assert _prometheus_expand("$1", {1: match.group(1)}) == "chembl_activity"
+    assert (
+        _prometheus_expand(_grafana_leave_unknown("$$1"), {1: "chembl_activity"})
+        == "$1"
+    )

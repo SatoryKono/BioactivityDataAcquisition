@@ -45,7 +45,7 @@ Area fill only for `gridPos.y < 18` and only with a textual state. Below the fol
 Clock text is `YYYY-MM-DD HH:MM`. Grafana unit is `time:YYYY-MM-DD HH:mm` (`MM` is months and is forbidden) (`DASH-TIME-001`).
 Content titles start with `Monitor`, `Inspect`, `Track`, `Compare`, `Review`, or `Investigate` (`DASH-COPY-003`). Text, row, and shell titles may use `Navigate`, `Understand`, `Start`, `Assess`, `Explain`, `Continue`.
 First-window `Monitor*` panels must not use `$__range` (`DASH-COPY-004`).
-Verdict cards state `OK` / `WARN` / `CRIT` / `UNKNOWN` in the description. Trust gates `1. Trust` (`9422`) and runtime `9998` also state `INCOMPLETE` (`DASH-COPY-006`).
+Verdict cards state `OK` / `WARN` / `CRIT` / `UNKNOWN` in the description. Trust gate `9422` also states `INCOMPLETE` (`DASH-COPY-006`).
 HTML copy roles (`DASH-COPY-008`): `<b>` numbered dashboard name, `<em>` panel title, CAPS status/scope without bold, `<code style="font-size:16px">` field token, regular `16px` body. Navigation chips are exempt.
 
 ### Shared data and layout
@@ -128,7 +128,7 @@ HTML copy roles (`DASH-COPY-008`): `<b>` numbered dashboard name, `<em>` panel t
 Below-fold: walk the shipped JSON, not this fragment.
 
 ### 2. Overview `bioetl-overview-v2`
-- Question: What is the saved assessment of the selected Run ID?
+- Question: What is the saved assessment, runtime/domain status, identity, and provider evidence of the selected Run ID?
 - Answer panel: 9603 Review Selected Run Status + 9002 Review Run Domains
 - Next action token: Open Run Explorer
 - Basis tokens: SELECTED RUN; QUERY ERROR
@@ -144,44 +144,6 @@ Below-fold: walk the shipped JSON, not this fragment.
 | 9002 | 5 | first-window | table | Review Run Domains | BioETL Ops HTTP | data |
 | 9300 | 11 | first-window | table | Review Run Identity | BioETL Ops HTTP | data |
 | 9301 | 11 | first-window | table | Review Processed Records | BioETL Ops HTTP | data |
-
-### 3. Pipeline Diagnostics `bioetl-runtime`
-- Question: What is the saved runtime assessment of the selected Run ID?
-- Answer panel: 9998 Review Selected Run Status
-- Next action token: Open Run Explorer
-- Basis tokens: SELECTED RUN; QUERY ERROR
-- Data: Saved HTTP evidence for the selected Run ID. Missing 9998 is DASH-FIT-003. INCOMPLETE on missing required evidence; QUERY ERROR is not OK.
-- Snapshot panels: 10. Refresh `60s`, timezone `browser`.
-
-| id | y | band | type | title | datasource | role |
-| ---: | ---: | --- | --- | --- | --- | --- |
-| 1000 | 0 | first-window | text | (empty in JSON) |  | chrome |
-| 9400 | 2 | first-window | text | (empty in JSON) |  | chrome |
-| 9998 | 2 | first-window | table | Review Selected Run Status | BioETL Ops HTTP | data |
-| 9402 | 7 | first-window | table | Inspect Pipeline Identity | BioETL Ops HTTP | data |
-| 9403 | 7 | first-window | table | Inspect Processed Records | BioETL Ops HTTP | data |
-| 9450 | 14 | first-window | row | Inspect Saved Run Evidence |  | chrome |
-| 9460 | 15 | first-window | table | Inspect Selected Run Stages | BioETL Ops HTTP | data |
-| 9451 | 23 | first-load | table | Inspect Selected Run Domains | BioETL Ops HTTP | data |
-
-Below-fold: walk the shipped JSON, not this fragment.
-
-### 4. Provider Health `bioetl-provider-health-v2`
-- Question: Which provider is degraded/failing, and why?
-- Answer panel: 9461 Review Provider Check
-- Next action token: Pipeline Diagnostics
-- Basis tokens: SELECTED RUN; QUERY ERROR
-- Data: Saved HTTP evidence for the selected provider context. Legacy `9101` is not this answer; it lives on Incident below the fold.
-- Snapshot panels: 6. Refresh `60s`, timezone `browser`.
-
-| id | y | band | type | title | datasource | role |
-| ---: | ---: | --- | --- | --- | --- | --- |
-| 1000 | 0 | first-window | text | (empty in JSON) |  | chrome |
-| 9400 | 2 | first-window | text | (empty in JSON) |  | chrome |
-| 9461 | 2 | first-window | stat | Review Provider Check | BioETL Ops HTTP | data |
-| 9460 | 5 | first-window | table | Review Provider Evidence | BioETL Ops HTTP | data |
-| 9402 | 10 | first-window | table | Inspect Run Identity | BioETL Ops HTTP | data |
-| 9403 | 10 | first-window | table | Inspect Processed Records | BioETL Ops HTTP | data |
 
 ### 5. Data Quality `bioetl-dq-v2`
 - Question: What is the DQ assessment of the selected Run ID?
@@ -205,9 +167,9 @@ Below-fold: walk the shipped JSON, not this fragment.
 Below-fold: walk the shipped JSON, not this fragment.
 
 ### 6. Incident Workspace `bioetl-incident-v1`
-- Question: What is the highest-confidence active suspect?
+- Question: What is the highest-confidence active suspect, and which current/global runtime, provider, or control-plane evidence explains it?
 - Answer panel: 2010 Inspect Ranked Suspects
-- Next action token: Open Pipeline Diagnostics
+- Next action token: Open domain diagnostics
 - Basis tokens: TIME RANGE; VALID EMPTY
 - Data: Suspects are GLOBAL. VALID_EMPTY is not a healthy fleet. Scope status palette is OK/WARN/CRIT/UNKNOWN. CRIT is rule urgency, not confirmed cause.
 - Snapshot panels: 100. Refresh `60s`, timezone `browser`.
