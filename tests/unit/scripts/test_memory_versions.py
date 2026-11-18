@@ -392,3 +392,168 @@ def test_existing_migrate_command_recovers_only_the_exact_disabled_predecessor(
         versions._select_disabled_migration_bundle(owner, identity, bundle.name)
         == bundle
     )
+
+
+def test_migration_rejects_an_external_bundle_before_loading_its_owner(
+    transition_owner, bundle, tmp_path, monkeypatch
+):
+    import shutil
+
+    owner, directory, graph = transition_owner
+    foreign = tmp_path / "external" / bundle.name
+    shutil.copytree(bundle, foreign)
+    monkeypatch.setattr(
+        versions, "bundle_owner", lambda *_: pytest.fail("foreign runtime loaded")
+    )
+    before = graph.read_bytes()
+    with pytest.raises(ValueError, match="VERSIONS"):
+        versions.migrate(owner, directory.name, foreign)
+    assert graph.read_bytes() == before
+    assert not (directory / "migration-v2.json").exists()
+
+
+@pytest.mark.parametrize("phase", ["RESOLVED", "LAUNCHING"])
+def test_pending_recovery_grant_prevents_migration_before_preparing(
+    transition_owner, bundle, phase
+):
+    owner, directory, graph = transition_owner
+    owner.state.write(
+        directory / "recovery-v2.json", {"schema": 2, "history": [{"phase": phase}]}
+    )
+    before = {path: path.read_bytes() for path in directory.iterdir()}
+    with pytest.raises(ValueError, match="grant awaits"):
+        versions.migrate(owner, directory.name, bundle)
+    assert {path: path.read_bytes() for path in directory.iterdir()} == before
+    assert graph.read_bytes() == b'{"fixture":true}\n'
+
+
+def test_rollback_refuses_a_transaction_replaced_while_waiting_for_the_registry(
+    transition_owner, bundle, bundle_factory, monkeypatch
+):
+    from contextlib import contextmanager
+
+    owner, directory, graph = transition_owner
+    versions.migrate(owner, directory.name, bundle)
+    successor = bundle_factory(b"VERSION = 'successor'\n")
+    entered = []
+
+    @contextmanager
+    def lock(path):
+        if path == directory.parent / "registry.lock" and not entered:
+            entered.append(True)
+            versions.migrate(owner, directory.name, successor, from_version=bundle.name)
+        yield
+
+    monkeypatch.setattr(owner.core, "LifetimeLock", lock)
+    with pytest.raises(ValueError, match="Concurrent migration"):
+        versions.rollback(owner, directory.name)
+    assert versions.select_bundle(directory.parent, directory.name) == successor
+    assert owner.state.read(directory / "migration-v2.json")["phase"] == "COMMITTED"
+    assert graph.read_bytes() == b'{"fixture":true}\n'
+
+
+def test_missing_predecessor_dependency_disables_rollback_like_changed_bytes(
+    transition_owner, bundle
+):
+    owner, directory, graph = transition_owner
+    dependency = directory / "legacy-dependency.py"
+    dependency.write_bytes(b"qualified legacy dependency")
+    owner.state.write(
+        directory / "active.json",
+        {"hashes": {str(dependency): versions.sha(dependency)}},
+    )
+    versions.migrate(owner, directory.name, bundle)
+    dependency.unlink()
+    result = versions.rollback(owner, directory.name)
+    assert result["state"] == "BLOCKED_LEGACY_RUNTIME_DRIFT"
+    assert owner.state.read(directory / "runtime-binding.json")["state"] == "disabled"
+    with pytest.raises(PermissionError, match="disabled"):
+        versions.select_bundle(directory.parent, directory.name)
+    assert graph.read_bytes() == b'{"fixture":true}\n'
+
+
+@pytest.mark.parametrize("transition_point", ["between_records", "during_verification"])
+def test_dispatch_never_returns_a_bundle_from_incoherent_migration_records(
+    transition_owner, bundle, bundle_factory, monkeypatch, transition_point
+):
+    owner, directory, _ = transition_owner
+    versions.migrate(owner, directory.name, bundle)
+    successor = bundle_factory(b"VERSION = 'pending'\n")
+    original_verify = versions.verify
+    original_read = versions._optional_bytes
+    changed = []
+
+    def change():
+        changed.append(True)
+        transaction = owner.state.read(directory / "migration-v2.json")
+        transaction.update(
+            id="c" * 32,
+            phase="PREPARING",
+            bundle=str(successor),
+            version=successor.name,
+        )
+        owner.state.write(directory / "migration-v2.json", transaction)
+        owner.state.write(
+            directory / "runtime-binding.json",
+            {
+                "schema": 2,
+                "state": "active",
+                "bundle": str(successor),
+                "version": successor.name,
+            },
+        )
+
+    def read(path):
+        if (
+            transition_point == "between_records"
+            and path.name == "runtime-binding.json"
+            and not changed
+        ):
+            change()
+        return original_read(path)
+
+    def verify(path):
+        result = original_verify(path)
+        if transition_point == "during_verification" and not changed:
+            change()
+        return result
+
+    monkeypatch.setattr(versions, "_optional_bytes", read)
+    monkeypatch.setattr(versions, "verify", verify)
+    with pytest.raises(PermissionError, match="committed transaction|changed during"):
+        versions.select_bundle(directory.parent, directory.name)
+
+
+def test_reconcile_reads_an_enumerated_owned_plan(tmp_path):
+    from pathlib import Path
+    from unittest.mock import Mock
+
+    directory = tmp_path / "target"
+    plans = directory / "reconcile-plans"
+    plans.mkdir(parents=True)
+    path = plans / "reviewed.json"
+    path.write_text('{"reviewed": true}', encoding="utf-8")
+    apply = Mock(
+        return_value={
+            "id": "resolution",
+            "new_generation": "generation",
+            "phase": "RESOLVED",
+        }
+    )
+    selected = SimpleNamespace(
+        specification=lambda *_: ({"state": str(directory)}, {}),
+        runtime_owner=lambda: "fixture-owner",
+        state=SimpleNamespace(
+            scope=SimpleNamespace(physical=lambda value: value),
+            read=lambda value, **_: json.loads(Path(value).read_bytes()),
+        ),
+        reconciler=SimpleNamespace(apply=apply),
+    )
+    args = SimpleNamespace(action="reconcile-apply", profile="target", plan=path)
+    assert (
+        versions._reconcile_profile(argparse.ArgumentParser(), args, selected, False)[
+            "state"
+        ]
+        == "RESOLVED"
+    )
+    assert apply.call_args.args[-1] == {"reviewed": True}

@@ -178,7 +178,12 @@ The launch consumes R1 before a backend is created. An interrupted successor
 needs a new review, and a new incident gets a new block identity. Historical
 `blocked.json` remains intact without reblocking an already resolved incident.
 Repeated `ensure` reuses the live owner; normal idle restart follows ordinary
-recovery rules. No uncertain request is replayed.
+recovery rules. A terminated LAUNCHING generation can produce its own incident
+only when its status and complete zero-request startup receipt match that
+successor and the retained graph stamp. It requires a new plan/grant; the previous
+grant remains consumed. An idle receipt requires an explicit `mutating=false`.
+A pending RESOLVED or LAUNCHING grant blocks runtime migration until its reviewed
+launch is handled. No uncertain request is replayed.
 
 A v2 startup receipt with zero accepted requests, or a complete idle receipt,
 can support a reviewed transition. Legacy `starting` without an accepted-request
@@ -208,13 +213,26 @@ Responses retain the 2 MiB transport limit and encode ordinary Unicode as UTF-8.
 An oversized JSON envelope returns a bounded tool error rather than closing a
 successful conversion's connection. At most 64 sessions are admitted together.
 Sessions expire after 15 minutes without a request; active requests renew that
-lease. An expired client must initialize a new session after the normal reconnect
-boundary. Expiration does not restart the owner or replay a previous tool call.
+lease. A session-scoped 404 makes the stdio bridge complete a fresh internal
+initialize/initialized handshake. It returns an explicit interruption error for
+the original call and continues with the new session; it never replays that call.
+HTTP admission is bounded before authentication, with a ten-second absolute
+header/body read deadline. A conversion acquires its execution slot without
+waiting; a busy owner returns a tool error before doing conversion work.
+Generation transitions and stop publication share one lock. A stale stop marker
+keeps the watcher waiting for the current generation's marker.
 
-Only installed, version-compatible format dependencies are qualified and copied
-into a checked converter snapshot. Plugins and unavailable formats stay disabled.
-Qualification includes an actual representative conversion, path-swap controls,
-allow-deny-allow and reconnect tests. Retain originals and diagnostic evidence.
+Installed, version-compatible dependencies define candidate formats in the
+checked converter snapshot. Before publishing a new schema-2 profile, `prepare`
+runs a synthetic representative document for every candidate format, including
+HTML, through the same isolated owned worker used by tool calls. The expected
+text must survive conversion. The profile binds PASS/FAIL/UNAVAILABLE results to
+the exact converter version and advertises only PASS formats. Plugins stay off.
+An import error, timeout, wrong content or Windows DLL path-length failure leaves
+the format disabled. Existing profiles without this evidence are rejected and
+preserved for reviewed activation; do not manufacture PASS flags or overwrite
+credentials. Operator path-swap, allow-deny-allow and ordinary-client reconnect
+acceptance remain separate. Retain originals and diagnostic evidence.
 
 ## Verification
 
@@ -254,6 +272,17 @@ when their current values still match this deployment's expected values.
 Use profile-local Memory rollback after the compatibility and dormant-process
 checks. Preserve graphs, claims, block history, migration journals and recipes.
 An incompatible rollback or incomplete migration leaves the target closed.
+For `PREPARING` or `ROLLING_BACK`, there is currently no automatic completion or
+cancellation command. Do not retry migrate/rollback or edit records to bypass
+`select_bundle`. Escalate to repository/runtime owner `@SatoryKono` together with
+the operator of the bound Windows account. Preserve, unchanged, that profile's
+`migration-v2.json`, referenced `migration-history` entries, `runtime-binding.json`,
+`profile.json`, `active.json`, `recovery-v2.json`, `blocked.json`, `status.json`,
+`owner-launch.json`, `work.json`, graph and ownership claims. Retain the matching
+entry of `profiles.json`, referenced immutable bundles/manifests and process
+identity evidence. Keep credentials private. The owner must review a dedicated
+profile-local completion or cancellation against these records before writes;
+restoring the entire shared registry is not a recovery procedure.
 
 ## Post-incident
 

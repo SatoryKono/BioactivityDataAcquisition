@@ -4,11 +4,13 @@ from __future__ import annotations
 
 import hashlib
 import importlib.metadata
+import io
 import json
 import os
 import re
 import shutil
 import uuid
+import zipfile
 from pathlib import Path
 
 
@@ -143,3 +145,145 @@ def build(destination, site, extras=()):
         staging.rename(target)
     verify(target)
     return target
+
+
+QUALIFICATION_TEXT = "BioETL converter qualification"
+_PACKAGE_REL = "http://schemas.openxmlformats.org/package/2006/relationships"
+_OFFICE_REL = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
+
+
+def _relationship(kind, target):
+    return (
+        f'<Relationships xmlns="{_PACKAGE_REL}"><Relationship Id="rId1" '
+        f'Type="{_OFFICE_REL}/{kind}" Target="{target}"/></Relationships>'
+    )
+
+
+def _office_parts(extension):
+    """Minimal synthetic Office documents; no project or user data is read."""
+    if extension == ".docx":
+        return (
+            "word/document.xml",
+            "wordprocessingml.document.main+xml",
+            {
+                "word/document.xml": (
+                    '<w:document xmlns:w="http://schemas.openxmlformats.org/'
+                    'wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>'
+                    + QUALIFICATION_TEXT
+                    + "</w:t></w:r></w:p></w:body></w:document>"
+                )
+            },
+        )
+    if extension == ".xlsx":
+        return (
+            "xl/workbook.xml",
+            "spreadsheetml.sheet.main+xml",
+            {
+                "xl/workbook.xml": (
+                    '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" '
+                    f'xmlns:r="{_OFFICE_REL}"><sheets><sheet name="Probe" '
+                    'sheetId="1" r:id="rId1"/></sheets></workbook>'
+                ),
+                "xl/_rels/workbook.xml.rels": _relationship(
+                    "worksheet", "worksheets/sheet1.xml"
+                ),
+                "xl/worksheets/sheet1.xml": (
+                    '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+                    '<sheetData><row r="1"><c r="A1" t="inlineStr"><is><t>'
+                    + QUALIFICATION_TEXT
+                    + "</t></is></c></row></sheetData></worksheet>"
+                ),
+            },
+        )
+    if extension == ".pptx":
+        return (
+            "ppt/presentation.xml",
+            "presentationml.presentation.main+xml",
+            {
+                "ppt/presentation.xml": (
+                    '<p:presentation xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main" '
+                    f'xmlns:r="{_OFFICE_REL}"><p:sldIdLst><p:sldId id="256" r:id="rId1"/>'
+                    '</p:sldIdLst><p:sldSz cx="9144000" cy="6858000"/></p:presentation>'
+                ),
+                "ppt/_rels/presentation.xml.rels": _relationship(
+                    "slide", "slides/slide1.xml"
+                ),
+                "ppt/slides/slide1.xml": (
+                    '<p:sld xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main" '
+                    'xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><p:cSld><p:spTree>'
+                    '<p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr>'
+                    '<p:grpSpPr/><p:sp><p:nvSpPr><p:cNvPr id="2" name="Probe"/><p:cNvSpPr/>'
+                    "<p:nvPr/></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:r><a:t>"
+                    + QUALIFICATION_TEXT
+                    + "</a:t></a:r></a:p></p:txBody></p:sp></p:spTree></p:cSld></p:sld>"
+                ),
+            },
+        )
+    raise ValueError("No qualification document for this format")
+
+
+def _office_sample(extension):
+    main, content_type, parts = _office_parts(extension)
+    content_types = {
+        "xl/worksheets/sheet1.xml": "spreadsheetml.worksheet+xml",
+        "ppt/slides/slide1.xml": "presentationml.slide+xml",
+    }
+    overrides = {main: content_type}
+    overrides.update(
+        {name: kind for name, kind in content_types.items() if name in parts}
+    )
+    parts["[Content_Types].xml"] = (
+        '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+        '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
+        '<Default Extension="xml" ContentType="application/xml"/>'
+        + "".join(
+            f'<Override PartName="/{name}" ContentType="application/vnd.openxmlformats-officedocument.{kind}"/>'
+            for name, kind in overrides.items()
+        )
+        + "</Types>"
+    )
+    parts["_rels/.rels"] = _relationship("officeDocument", main)
+    stream = io.BytesIO()
+    with zipfile.ZipFile(stream, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+        for name, value in parts.items():
+            archive.writestr(name, value)
+    return stream.getvalue()
+
+
+def _pdf_sample():
+    content = f"BT /F1 12 Tf 50 750 Td ({QUALIFICATION_TEXT}) Tj ET".encode("ascii")
+    objects = [
+        b"<< /Type /Catalog /Pages 2 0 R >>",
+        b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+        b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>",
+        b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+        b"<< /Length "
+        + str(len(content)).encode()
+        + b" >>\nstream\n"
+        + content
+        + b"\nendstream",
+    ]
+    raw = bytearray(b"%PDF-1.4\n")
+    offsets = [0]
+    for index, value in enumerate(objects, 1):
+        offsets.append(len(raw))
+        raw.extend(f"{index} 0 obj\n".encode() + value + b"\nendobj\n")
+    start = len(raw)
+    raw.extend(f"xref\n0 {len(offsets)}\n0000000000 65535 f \n".encode())
+    for offset in offsets[1:]:
+        raw.extend(f"{offset:010d} 00000 n \n".encode())
+    raw.extend(
+        f"trailer\n<< /Size {len(offsets)} /Root 1 0 R >>\nstartxref\n{start}\n%%EOF\n".encode()
+    )
+    return bytes(raw)
+
+
+def qualification_sample(extension):
+    """Return a bounded synthetic document containing the qualification marker."""
+    if extension == ".html":
+        return (
+            "<!doctype html><html><body><p>" + QUALIFICATION_TEXT + "</p></body></html>"
+        ).encode()
+    if extension == ".pdf":
+        return _pdf_sample()
+    return _office_sample(extension)

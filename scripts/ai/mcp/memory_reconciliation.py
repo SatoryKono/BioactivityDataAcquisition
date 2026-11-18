@@ -87,10 +87,35 @@ def process_verdict(owner, observed, *, self_owner=False):
     return None
 
 
+def _interrupted_launch_block(observed, coord):
+    last = coord["history"][-1] if coord["history"] else {}
+    work, status = observed["work"] or {}, observed["status"] or {}
+    if (
+        last.get("phase") == "LAUNCHING"
+        and status.get("generation") == last.get("new_generation")
+        and work.get("generation") == status.get("generation")
+        and work.get("schema") == 2
+        and work.get("profile") == last["snapshot"]["profile"]
+        and work.get("graph") == last["snapshot"]["graph"]
+        and work.get("phase") == "starting"
+        and type(work.get("accepted_count")) is int
+        and work["accepted_count"] == 0
+        and work.get("request_id") is None
+        and work.get("mutating") is False
+    ):
+        return "interrupted-" + digest(
+            {"grant": last["id"], "generation": last["new_generation"]}
+        )
+    return None
+
+
 def block_identity(observed, coord):
     active = coord.get("active_block")
     if active:
         return active["id"]
+    interrupted = _interrupted_launch_block(observed, coord)
+    if interrupted:
+        return interrupted
     if observed["blocked"] is not None:
         return "legacy-" + digest(
             {k: observed[k] for k in ("blocked", "status", "work")}
@@ -142,6 +167,7 @@ def _receipt_verdict(bound, work, previous, coord, entry, block):
         work.get("phase") == "idle"
         and type(work.get("accepted_count")) is int
         and work["accepted_count"] >= 0
+        and work.get("mutating") is False
     ):
         return "PROVEN_IDLE_RECEIPT"
     else:

@@ -499,6 +499,10 @@ def previous_migration(
 def migrate(
     owner, identity, bundle, *, fixture=False, from_version=None, recover_disabled=False
 ):
+    if bundle.parent != VERSIONS:
+        raise ValueError(
+            "Migration bundle must be in the registered VERSIONS directory"
+        )
     new_owner = bundle_owner(bundle, owner.registry.ROOT if fixture else None)
     entry, value = owner.specification(identity, fixture)
     directory = Path(entry["state"])
@@ -508,6 +512,12 @@ def migrate(
                 Path(value["profile"]["graph"]).with_name(".memory.service-owner.lock")
             ):
                 stamp = dormant(owner, entry, value)
+                recovery_state = owner.state.read(directory / "recovery-v2.json") or {}
+                history = recovery_state.get("history", [])
+                if history and history[-1].get("phase") in {"RESOLVED", "LAUNCHING"}:
+                    raise ValueError(
+                        "Recovery grant awaits its reviewed launch; migration refused"
+                    )
                 binding, prior = previous_migration(
                     owner,
                     directory,
@@ -579,6 +589,7 @@ def migrate(
                         "state": "active",
                         "bundle": str(bundle),
                         "version": bundle.name,
+                        "transaction": transaction["id"],
                     },
                 )
                 if dormant(new_owner, new_entry, updated) != stamp:
@@ -595,19 +606,40 @@ def migrate(
                 }
 
 
+def _runtime_hashes_match(hashes):
+    try:
+        return all(sha(Path(path)) == expected for path, expected in hashes.items())
+    except OSError:
+        return False
+
+
 def rollback(owner, identity):
     entry, value = owner.specification(identity)
     directory = Path(entry["state"])
+    expected = owner.state.read(
+        directory / MIGRATION_RECORD, max_bytes=32 * 1024 * 1024
+    )
     with owner.core.LifetimeLock(owner.registry.ROOT / "registry.lock"):
         with owner.core.LifetimeLock(directory / "transition.lock"):
             with owner.core.LifetimeLock(
                 Path(value["profile"]["graph"]).with_name(".memory.service-owner.lock")
             ):
-                dormant(owner, entry, value)
                 path = directory / MIGRATION_RECORD
                 transaction = owner.state.read(path, max_bytes=32 * 1024 * 1024)
                 if transaction is None or transaction["phase"] != "COMMITTED":
                     raise ValueError("Migration is not committed; preserve journal")
+                index_path = owner.registry.ROOT / PROFILE_INDEX
+                index = owner.state.read(index_path)
+                if (
+                    expected is None
+                    or transaction["id"] != expected["id"]
+                    or index.get(identity) != entry
+                    or entry != transaction["after_entry"]
+                ):
+                    raise ValueError(
+                        "Concurrent migration or profile change; rollback refused"
+                    )
+                dormant(owner, entry, value)
                 current = owner.state.read(directory / "recovery-v2.json")
                 if current != transaction["before"]["coordination"]:
                     owner.state.write(
@@ -623,15 +655,8 @@ def rollback(owner, identity):
                         "state": "BLOCKED_INCOMPATIBLE_COORDINATION",
                         "graph_preserved": True,
                     }
-                index_path = owner.registry.ROOT / PROFILE_INDEX
-                index = owner.state.read(index_path)
-                if index.get(identity) != transaction["after_entry"]:
-                    raise ValueError("Concurrent profile registration change")
                 before = transaction["before"]
-                if any(
-                    sha(Path(path)) != expected
-                    for path, expected in before["active"]["hashes"].items()
-                ):
+                if not _runtime_hashes_match(before["active"]["hashes"]):
                     owner.state.write(
                         directory / RUNTIME_BINDING,
                         {
@@ -664,28 +689,69 @@ def rollback(owner, identity):
                 }
 
 
+def _optional_bytes(path):
+    return path.read_bytes() if path.exists() else None
+
+
+def _selected_binding(bundle_binding, transaction):
+    if bundle_binding.get("schema") != 2 or bundle_binding.get("state") not in {
+        "active",
+        "legacy",
+    }:
+        raise PermissionError("Profile runtime binding is disabled or unsupported")
+    if transaction is not None:
+        phase = transaction["phase"]
+        if phase == "COMMITTED":
+            expected = {key: transaction[key] for key in ("bundle", "version")}
+            if any(bundle_binding.get(key) != value for key, value in expected.items()):
+                raise PermissionError(
+                    "Runtime binding does not match the committed transaction"
+                )
+            if (
+                bundle_binding.get("transaction", transaction["id"])
+                != transaction["id"]
+            ):
+                raise PermissionError("Runtime binding transaction changed")
+        elif phase == "ROLLED_BACK":
+            if bundle_binding != transaction["before"].get(
+                "runtime_binding", {"schema": 2, "state": "legacy"}
+            ):
+                raise PermissionError(
+                    "Runtime binding does not match completed rollback"
+                )
+        else:
+            raise PermissionError("Profile migration has not committed")
+    if bundle_binding["state"] == "legacy":
+        return None
+    bundle = Path(bundle_binding["bundle"])
+    if bundle.parent != VERSIONS or bundle.name != bundle_binding["version"]:
+        raise PermissionError("Profile runtime version mismatch")
+    verify(bundle)
+    return bundle
+
+
 def select_bundle(registry_root, identity):
     directory = registry_root / identity
     physical(directory)
-    migration = directory / MIGRATION_RECORD
-    if migration.exists() and json.loads(migration.read_bytes())["phase"] not in {
+    migration, binding_path = directory / MIGRATION_RECORD, directory / RUNTIME_BINDING
+    observed = (_optional_bytes(migration), _optional_bytes(binding_path))
+    transaction = json.loads(observed[0]) if observed[0] is not None else None
+    if transaction is not None and transaction["phase"] not in {
         "COMMITTED",
         "ROLLED_BACK",
     }:
         raise PermissionError("Profile migration has not committed")
-    path = directory / RUNTIME_BINDING
-    if not path.exists():
-        return None
-    binding = json.loads(path.read_bytes())
-    if binding.get("schema") != 2 or binding.get("state") not in {"active", "legacy"}:
-        raise PermissionError("Profile runtime binding is disabled or unsupported")
-    if binding["state"] == "legacy":
-        return None
-    bundle = Path(binding["bundle"])
-    if bundle.parent != VERSIONS or bundle.name != binding["version"]:
-        raise PermissionError("Profile runtime version mismatch")
-    verify(bundle)
-    return bundle
+    binding = (
+        json.loads(observed[1])
+        if observed[1] is not None
+        else {"schema": 2, "state": "legacy"}
+    )
+    selected = _selected_binding(binding, transaction)
+    # Both records must still represent the same publication after closure verification.
+    # A read never creates a control-plane lock or starts a migration.
+    if observed != (_optional_bytes(migration), _optional_bytes(binding_path)):
+        raise PermissionError("Profile migration changed during runtime selection")
+    return selected
 
 
 def _audit_block_reasons(process_states, work, branch_matches, account_matches):
@@ -810,9 +876,16 @@ def _reconcile_profile(parser, args, selected, fixture):
         return parser.error(
             "apply plan must be in this profile's private reconcile-plans directory"
         )
-    physical(plan_path)
+    selected.state.scope.physical(plans)
+    owned_plan = next((path for path in plans.iterdir() if path == plan_path), None)
+    if owned_plan is None or owned_plan.suffix != ".json":
+        return parser.error("apply plan must be an existing private JSON plan")
+    physical(owned_plan)
     grant = selected.reconciler.apply(
-        selected.runtime_owner(), entry, value, json.loads(plan_path.read_bytes())
+        selected.runtime_owner(),
+        entry,
+        value,
+        selected.state.read(owned_plan, max_bytes=32 * 1024 * 1024),
     )
     return {
         "resolution": grant["id"],

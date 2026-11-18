@@ -78,6 +78,8 @@ def test_path_swap_after_open_cannot_expose_foreign_bytes(files):
 
     def swap():
         with pytest.raises(PermissionError):
+            root.rename(root.with_name("renamed-allowed"))
+        with pytest.raises(PermissionError):
             document.unlink()
         with pytest.raises(PermissionError):
             os.replace(secret, document)

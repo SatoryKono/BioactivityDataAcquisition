@@ -342,3 +342,77 @@ def test_exception_inside_a_transition_is_never_replayed(fixture):
             attempts.append(True)
             raise RuntimeError("Another owner holds the lifetime lock")
     assert attempts == [True]
+
+
+@pytest.mark.parametrize("mutating", [True, None])
+def test_idle_receipt_requires_an_explicit_nonmutating_flag(fixture, mutating):
+    owner, entry, value, _ = fixture
+    path = Path(entry["state"]) / "work.json"
+    work = owner.state.read(path)
+    work.update(
+        phase="idle",
+        accepted_count=1,
+        request_id="completed-request",
+        mutating=mutating,
+    )
+    owner.state.write(path, work)
+    assert not recovery.plan(owner, entry, value)["eligible"]
+    work["mutating"] = False
+    owner.state.write(path, work)
+    assert recovery.plan(owner, entry, value)["reason"] == "PROVEN_IDLE_RECEIPT"
+
+
+def test_interrupted_successor_has_a_new_incident_and_cannot_reuse_the_old_grant(
+    fixture,
+):
+    owner, entry, value, stamp = fixture
+    directory = Path(entry["state"])
+    owner.state.write(directory / "blocked.json", None)
+    recovery.record_block(owner, entry, "BLOCK_UNKNOWN_OUTCOME")
+    first = recovery.plan(owner, entry, value)
+    recovery.apply(owner, entry, value, first)
+    generation = recovery.launch_generation(owner, entry, value)
+    owner.state.write(
+        directory / "status.json",
+        {"generation": generation, "owner_pid": 123456, "owner_birth": 1},
+    )
+    owner.state.write(
+        directory / "work.json",
+        {
+            "schema": 2,
+            "profile": entry["id"],
+            "generation": generation,
+            "phase": "starting",
+            "mutating": False,
+            "accepted_count": 0,
+            "request_id": None,
+            "graph": stamp,
+        },
+    )
+    assert (
+        recovery.decision(owner, entry, value) == "BLOCK_RECONCILED_LAUNCH_INTERRUPTED"
+    )
+    second = recovery.plan(owner, entry, value)
+    assert second["eligible"] and second["block_id"].startswith("interrupted-")
+    assert second["block_id"] != first["block_id"]
+    assert second["new_generation"] not in {first["old_generation"], generation}
+    with pytest.raises(ValueError, match="already applied"):
+        recovery.apply(owner, entry, value, first)
+    recovery.apply(owner, entry, value, second)
+    assert recovery.decision(owner, entry, value) == "SAFE_RECONCILED_START"
+    assert len(recovery.coordination(owner, entry)["history"]) == 2
+
+
+def test_missing_successor_receipt_cannot_invent_an_incident(fixture):
+    owner, entry, value, _ = fixture
+    directory = Path(entry["state"])
+    owner.state.write(directory / "blocked.json", None)
+    recovery.record_block(owner, entry, "BLOCK_UNKNOWN_OUTCOME")
+    recovery.apply(owner, entry, value, recovery.plan(owner, entry, value))
+    generation = recovery.launch_generation(owner, entry, value)
+    owner.state.write(
+        directory / "status.json",
+        {"generation": generation, "owner_pid": 123456, "owner_birth": 1},
+    )
+    proposed = recovery.plan(owner, entry, value)
+    assert not proposed["eligible"] and proposed["block_id"] is None

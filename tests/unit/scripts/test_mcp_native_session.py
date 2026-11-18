@@ -74,17 +74,34 @@ def test_only_exact_qualified_app_binary_is_selected(tmp_path, monkeypatch):
 
 
 @pytest.fixture
-def session_binding(tmp_path):
+def session_binding(tmp_path, monkeypatch):
     root = tmp_path / "repo"
     (root / ".git").mkdir(parents=True)
     manifest = tmp_path / "routes.json"
+    python = tmp_path / "python.exe"
+    python.write_bytes(b"qualified interpreter fixture")
+    source = b"qualified dispatcher fixture"
+    snapshot = {
+        "schema": 1,
+        "files": {"session_client.py": hashlib.sha256(source).hexdigest()},
+        "host_pins": {str(python): hashlib.sha256(python.read_bytes()).hexdigest()},
+    }
+    raw = json.dumps(snapshot, sort_keys=True, separators=(",", ":")).encode()
+    versions = tmp_path / "selectors"
+    directory = versions / hashlib.sha256(raw).hexdigest()
+    directory.mkdir(parents=True)
+    (directory / "dispatcher.json").write_bytes(raw)
+    selector = directory / "session_client.py"
+    selector.write_bytes(source)
+    monkeypatch.setattr(native_session, "BASE_PYTHON", python)
+    monkeypatch.setattr(native_session, "SESSION_VERSIONS", versions)
     data = {
         "schema": 1,
         "git_common": str(root / ".git"),
         "entries": {
             name: {
-                "command": "python",
-                "args": ["-I", "-S", "-B", str(tmp_path / "session_client.py"), name],
+                "command": str(python),
+                "args": ["-I", "-S", "-B", str(selector), name],
             }
             for name in ("memory", "ast-grep")
         },
@@ -213,3 +230,22 @@ def test_child_keeps_validated_session_subdirectory(
     assert len(seen) == 1
     assert seen[0][0][:3] == [str(binary), "--cd", str(cwd)]
     assert seen[0][1] == cwd
+
+
+@pytest.mark.parametrize("change", ["relative", "interpreter", "source"])
+def test_session_refuses_unqualified_selector_before_launch(
+    session_binding, tmp_path, change
+):
+    root, manifest, data, config = session_binding
+    entry = data["entries"]["memory"]
+    if change == "relative":
+        entry["args"][3] = "session_client.py"
+    elif change == "interpreter":
+        entry["command"] = "python"
+    else:
+        Path(entry["args"][3]).write_bytes(b"changed dispatcher source")
+    manifest.write_text(json.dumps(data), encoding="utf-8")
+    with pytest.raises(PermissionError, match="qualified|source changed"):
+        session_overrides(
+            config, root, manifest=manifest, markdownify=tmp_path / "absent.json"
+        )

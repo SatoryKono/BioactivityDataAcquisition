@@ -19,6 +19,8 @@ import tomllib
 from pathlib import Path
 
 REF_URL = "https://api.ref.tools/mcp"
+BASE_PYTHON = Path("C:/Users/Fedor/AppData/Local/Programs/Python/Python313/python.exe")
+SESSION_VERSIONS = Path("D:/pc-agent/tools/codex-session-versions")
 
 
 def physical(path):
@@ -123,6 +125,54 @@ def _markdownify_entry(source, root, servers):
     return value["server"], entry
 
 
+def _check_selector_manifest(script):
+    directory = physical(script.parent)
+    raw = (directory / "dispatcher.json").read_bytes()
+    manifest = json.loads(raw)
+    if hashlib.sha256(raw).hexdigest() != directory.name or manifest.get("schema") != 1:
+        raise PermissionError("Qualified selector manifest changed")
+    if "session_client.py" not in manifest.get("files", {}):
+        raise PermissionError("Qualified selector source is unregistered")
+    for relative, expected in manifest["files"].items():
+        path = Path(relative)
+        if path.is_absolute() or ".." in path.parts:
+            raise PermissionError("Qualified selector source path is invalid")
+        if (
+            hashlib.sha256(physical(directory / path).read_bytes()).hexdigest()
+            != expected
+        ):
+            raise PermissionError("Qualified selector source changed")
+    pins = manifest.get("host_pins", {})
+    if str(BASE_PYTHON) not in pins:
+        raise PermissionError("Qualified selector interpreter is unregistered")
+    for path, expected in pins.items():
+        if hashlib.sha256(physical(Path(path)).read_bytes()).hexdigest() != expected:
+            raise PermissionError("Qualified selector host dependency changed")
+
+
+def _validate_selector(name, entry):
+    args = entry.get("args", [])
+    if len(args) != 5 or args[:3] != ["-I", "-S", "-B"] or args[4] != name:
+        raise PermissionError(
+            "Native session requires its reviewed inherited-cwd selector"
+        )
+    script = Path(args[3])
+    if (
+        Path(entry.get("command", "")) != BASE_PYTHON
+        or not script.is_absolute()
+        or script.name != "session_client.py"
+        or script.parent.parent != SESSION_VERSIONS
+        or re.fullmatch("[0-9a-f]{64}", script.parent.name) is None
+    ):
+        raise PermissionError("Native session requires its qualified absolute selector")
+    version = next(
+        (path for path in SESSION_VERSIONS.iterdir() if path == script.parent), None
+    )
+    if version is None:
+        raise PermissionError("Qualified selector version is not installed")
+    _check_selector_manifest(version / "session_client.py")
+
+
 def session_overrides(
     config, root, *, manifest=None, markdownify=None, acceptance=False
 ):
@@ -148,16 +198,7 @@ def session_overrides(
     if manifest.read_bytes() != raw:
         raise PermissionError("Session transport binding changed")
     for name, entry in selected.items():
-        args = entry.get("args", [])
-        if (
-            len(args) != 5
-            or args[:3] != ["-I", "-S", "-B"]
-            or Path(args[3]).name != "session_client.py"
-            or args[4] != name
-        ):
-            raise PermissionError(
-                "Native session requires its reviewed inherited-cwd selector"
-            )
+        _validate_selector(name, entry)
     if acceptance:
         entry = dict(selected["memory"])
         entry["args"] = list(entry["args"])
