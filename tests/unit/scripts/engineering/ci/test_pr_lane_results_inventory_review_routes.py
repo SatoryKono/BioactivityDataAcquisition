@@ -30,7 +30,7 @@ UNKNOWN = "configs/quality/external_resource_inventory_pr0_unreviewed.json"
         "configs/quality/external_resource_inventory_pr13166_replay_preflight_review.json",
         "configs/quality/external_resource_inventory_pr13166_eager_reader_review.json",
         "configs/quality/external_resource_inventory_pr13166_template_lifecycle_review.json",
-        "configs/quality/external_resource_inventory_pr13166_workflow_limits_review.json",
+        "configs/quality/external_resource_inventory_pr13166_workflow_replay_review.json",
     ],
 )
 def test_pr13166_inventory_review_snapshots_keep_bounded_owners(path: str) -> None:
@@ -39,3 +39,21 @@ def test_pr13166_inventory_review_snapshots_keep_bounded_owners(path: str) -> No
     assert build_shadow_compare([path], repo_root=ROOT)["covers_full_suite"] is False
     with pytest.raises(ValueError, match="unmapped"):
         build_shadow_compare([path, UNKNOWN], repo_root=ROOT)
+
+
+def test_target_replay_owner_keeps_lock_and_admission_coverage() -> None:
+    selected = affected_pytest_targets(
+        ["src/bioetl/composition/bootstrap/cli/lock.py"], repo_root=ROOT
+    )
+    owners = {
+        "tests/unit/composition/bootstrap/test_lock_bootstrap.py",
+        "tests/unit/composition/test_target_workflow_admission.py",
+        "tests/unit/composition/test_target_classification_runtime.py",
+    }
+    assert all(
+        any(
+            owner == target or owner.startswith(target.rstrip("/") + "/")
+            for target in selected
+        )
+        for owner in owners
+    )

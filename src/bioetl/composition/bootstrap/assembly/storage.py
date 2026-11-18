@@ -46,11 +46,11 @@ from bioetl.application.services.workflow.control_plane.mutation_plan import (
     WorkflowMutationSpec,
     build_workflow_mutation_plan,
 )
-from bioetl.composition.bootstrap.assembly.target_classification_replay import (
+from bioetl.composition.bootstrap.cli.lock import (
     resolve_workflow_target_config,
     resolve_workflow_target_replay_config,
+    validate_workflow_target_mutations,
 )
-from bioetl.composition.bootstrap.cli.lock import validate_workflow_target_mutations
 from bioetl.composition.runtime_builders.config_access import load_pipeline_config
 from bioetl.composition.runtime_builders._exact_replay_cached_bronze_context import (
     resolve_replay_parent_manifest,

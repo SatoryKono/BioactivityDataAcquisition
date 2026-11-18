@@ -1209,3 +1209,18 @@ def test_workflow_preflight_rejects_invalid_target_replay_parent(
                 test_mode=True, data_dir=tmp_path / "data", _env_file=None
             ),
         )
+
+
+@pytest.mark.parametrize(
+    "binding", [{}, {"target_config": None}, {"target_config": []}]
+)
+def test_workflow_preflight_rejects_malformed_pinned_configuration(
+    shadow_config, binding
+):
+    workflow = WorkflowConfig(
+        "malformed", steps=(WorkflowStepConfig("target", "chembl_target"),)
+    )
+    with pytest.raises(ValueError, match="no configuration"):
+        preflight_workflow_target_dependencies(
+            workflow, {TARGET_CLASSIFICATION_DEPENDENCY_KEY: binding}
+        )

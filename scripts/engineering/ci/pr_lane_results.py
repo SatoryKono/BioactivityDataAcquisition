@@ -1182,9 +1182,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
         ),
     ),
-    "src/bioetl/composition/bootstrap/assembly/target_classification_replay.py": (
-        "tests/unit/composition/test_target_classification_runtime.py",
-    ),
     "configs/quality/external_resource_inventory_pr12751_review.json": (
         EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
         EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
@@ -1561,7 +1558,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "configs/quality/external_resource_inventory_pr13166_replay_preflight_review.json",
             "configs/quality/external_resource_inventory_pr13166_eager_reader_review.json",
             "configs/quality/external_resource_inventory_pr13166_template_lifecycle_review.json",
-            "configs/quality/external_resource_inventory_pr13166_workflow_limits_review.json",
+            "configs/quality/external_resource_inventory_pr13166_workflow_replay_review.json",
             "configs/quality/external_resource_inventory_pr13092_review.json",
             "configs/quality/external_resource_inventory_pr13090_lineage_lock_review.json",
             "configs/quality/external_resource_inventory_pr13113_review.json",
