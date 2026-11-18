@@ -3,13 +3,14 @@
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-10-04
+%% @date    2026-11-17
 %% @level   Package Family / Inventory Slice
 %% @nodes   30
 %% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
 classDiagram
 
     namespace client_retry_flow {
+        class RetryPolicyContext
         class _CanRetryCheck
         class _RetryBudgetRecorder
         class _RetryDelayHandler
@@ -53,31 +54,19 @@ classDiagram
         class ProviderHealthState
     }
 
+    namespace pagination {
+        class PaginatedFetcherMixin
+        class PaginationTruncatedError
+    }
+
     namespace request_timing {
         class RequestTimingHost
         class _RequestKwargs
     }
 
-    namespace client_retry_request_flow {
-        class HTTPClientRetryRequestFlow
+    namespace response_body {
+        class ResponseBudgetExceeded
+        class _DeflateDecoder
     }
 
-    namespace health_monitor_transitions {
-        class ProviderHealthStateLike
-    }
-
-    namespace circuit_breaker {
-        class CircuitBreakerGuard
-    }
-
-    namespace client {
-        class UnifiedHTTPClient
-    }
-
-    namespace client_context_mixin {
-        class HTTPClientContextMixin
-    }
-
-    HTTPClientContextMixin <|-- UnifiedHTTPClient
-    HTTPClientRequestMethodsMixin <|-- UnifiedHTTPClient
     RequestTimingHost <|-- _HTTPClientRequestHost

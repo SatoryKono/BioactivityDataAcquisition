@@ -1,11 +1,11 @@
 %% Title: Package Family: domain/mapping
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/domain/mapping; modules: protein_class_target_type, protein_class_target_type_helpers, _publication_type_classification_support, classification_data, organism_classification, publication_controlled_vocabulary.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/domain/mapping; modules: protein_class_target_type, _publication_type_classification_support, protein_class_target_type_helpers, classification_data, organism_classification, publication_controlled_vocabulary.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-10-06
+%% @date    2026-11-17
 %% @level   Package Family / Inventory Slice
-%% @nodes   12
+%% @nodes   14
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
 
@@ -16,14 +16,16 @@ classDiagram
         class ProteinClassTopLevelMappingEntry
     }
 
+    namespace publication_type_classification_support {
+        class PublicationTypeEntry
+        class PublicationTypeEntryProtocol
+        class _ClassificationViews
+    }
+
     namespace protein_class_target_type_helpers {
         class _NormalizedTopLevelConstructor
         class _NormalizedTopLevelLike
         class _TopLevelMappingEntryLike
-    }
-
-    namespace publication_type_classification_support {
-        class PublicationTypeEntryProtocol
     }
 
     namespace classification_data {
@@ -39,5 +41,5 @@ classDiagram
     }
 
     namespace publication_type_classification {
-        class PublicationTypeEntry
+        class ClassificationInstall
     }

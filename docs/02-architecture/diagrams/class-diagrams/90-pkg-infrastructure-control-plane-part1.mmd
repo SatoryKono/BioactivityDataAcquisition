@@ -3,7 +3,7 @@
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-10-04
+%% @date    2026-11-17
 %% @level   Package Family / Inventory Slice
 %% @nodes   30
 %% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
@@ -38,6 +38,11 @@ classDiagram
     namespace file_effective_config_artifact_store {
         class EffectiveConfigArtifactConflictError
         class FileEffectiveConfigArtifactStore
+    }
+
+    namespace file_evidence_read_context {
+        class FileEvidenceReadContext
+        class _SelectedRootLedgerPort
     }
 
     namespace file_historical_replay_closure_store {
@@ -86,14 +91,6 @@ classDiagram
 
     namespace file_archive_store {
         class FileArchiveStore
-    }
-
-    namespace file_artifact_lifecycle_store {
-        class FileControlPlaneArtifactLifecycleStore
-    }
-
-    namespace file_artifact_lifecycle_types {
-        class _ProtectedRefs
     }
 
     RawRunManifestInspectionMixin <|-- FileRunManifestStore

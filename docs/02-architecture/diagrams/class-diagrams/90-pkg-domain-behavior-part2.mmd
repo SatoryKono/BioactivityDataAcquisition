@@ -1,11 +1,11 @@
 %% Title: Package Family: domain/behavior (Part 2/2)
-%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/domain/behavior; part 2/2; modules: composite_validation_layer, data_normalization_config, data_normalization_service, dq_policy_resolver, dq_serializer, identity_service.
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/domain/behavior; part 2/2; modules: composite_validation_layer, data_normalization_config, data_normalization_service, dq_contract_rule_source, dq_policy_resolver, dq_serializer.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-10-04
+%% @date    2026-11-17
 %% @level   Package Family / Inventory Slice
-%% @nodes   12
+%% @nodes   13
 %% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
 classDiagram
 
@@ -19,6 +19,10 @@ classDiagram
 
     namespace data_normalization_service {
         class DefaultDataNormalizer
+    }
+
+    namespace dq_contract_rule_source {
+        class ExecutableContractRules
     }
 
     namespace dq_policy_resolver {

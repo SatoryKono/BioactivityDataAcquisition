@@ -493,7 +493,9 @@ jobs:
           echo "$changed_diagrams"
 
           changed_rendered=$(
-            git diff --name-only "${base_ref}"...HEAD -- \
+            # --no-renames: a deleted sibling SVG must remain visible when git
+            # would otherwise pair it with a newly rendered diagram.
+            git diff --name-only --no-renames "${base_ref}"...HEAD -- \
               ':(glob)docs/**/svg/*.svg' \
               ':(glob)docs/**/png/*.png' || true
           )
@@ -524,6 +526,13 @@ jobs:
             source_file="${source_path##*/}"
             stem="${source_file%.*}"
             expected_svg="${source_dir}/svg/${stem}.svg"
+            # A deleted source has no sibling to track. A source that still
+            # exists must already have a committed SVG: render.sh would
+            # otherwise recreate it untracked, and git diff ignores that.
+            if [ -f "${source_path}" ] && ! git ls-files --error-unmatch -- "${expected_svg}" >/dev/null 2>&1; then
+              echo "::error::Sibling ${expected_svg} is not committed."
+              exit 1
+            fi
             bash docs/02-architecture/diagrams/tooling/render.sh \
               --svg-only \
               --puppeteer /tmp/puppeteer-config.json \
