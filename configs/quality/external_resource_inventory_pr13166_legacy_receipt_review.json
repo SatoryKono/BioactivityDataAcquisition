@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "ff4bbd89d6ecd708e829b6d8d733d63987dd2d4b",
+  "source_ref": "ff4bbd89d6ecd708e829b6d8d733d63987dd2d4b",
+  "source_reviews": {
+    "src/bioetl/infrastructure/storage/target_migration_dependencies.py": "Reviewed the schema 1 shadow-receipt compatibility fix: preserve the hash-pinned receipt bytes, leave validation and strict schema 2 enrich admission in load_profile, and return before walking the unavailable historical typed closure. Existing Path reads and exclusive backup writes, operation ownership, digest verification and cleanup are unchanged. Lines after acceptance shift by five only. No new acquisition or resource is introduced; no runtime qualification or scientific acceptance is inferred."
+  },
+  "line_updates": {
+    "src/bioetl/infrastructure/storage/target_migration_dependencies.py": {
+      "347": 352,
+      "351": 356,
+      "358": 363
+    }
+  }
+}
