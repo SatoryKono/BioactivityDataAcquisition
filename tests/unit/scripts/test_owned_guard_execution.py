@@ -113,3 +113,74 @@ def test_owned_entry_scopes_and_resets_context(monkeypatch, tmp_path, failure):
     else:
         assert runtime.main() == 0
     assert not runtime._OWNED_GUARD_CONTEXT.get()
+
+
+@pytest.mark.parametrize(
+    "tree_code,budget_code,expected",
+    [(0, 0, 0), (1, 2, 11), (0, 1, 12), (0, 2, 22), (True, 0, 20)],
+)
+def test_parallel_guard_group_awaits_both_and_preserves_order(
+    owned_linux, monkeypatch, capsys, tree_code, budget_code, expected
+):
+    from threading import Barrier
+
+    barrier = Barrier(2)
+    finished = []
+    modules = {}
+    commands = [(phase, _command(phase)) for phase in ("tree", "budgets")]
+    for (phase, command), code in zip(commands, (tree_code, budget_code), strict=True):
+
+        def main(args, phase=phase, code=code, command=command):
+            assert args == command[4:]
+            barrier.wait(timeout=5)
+            print("private guard output")
+            finished.append(phase)
+            return code
+
+        modules[Path(command[3]).stem] = SimpleNamespace(__file__=command[3], main=main)
+    monkeypatch.setattr(
+        runtime.importlib, "import_module", lambda name: modules[name.rsplit(".", 1)[1]]
+    )
+    assert runtime._try_parallel_guards(commands) == expected
+    assert set(finished) == {"tree", "budgets"}
+    captured = capsys.readouterr()
+    assert captured.out == captured.err == ""
+
+
+def test_parallel_group_rejects_unknown_partner_without_executing(
+    owned_linux, monkeypatch
+):
+    commands = [(phase, _command(phase)) for phase in ("tree", "budgets")]
+    commands[1][1][2] = "-b"
+    module = SimpleNamespace(
+        __file__=commands[0][1][3], main=lambda args: pytest.fail("executed")
+    )
+    monkeypatch.setattr(runtime.importlib, "import_module", lambda name: module)
+    assert runtime._try_parallel_guards(commands) is None
+
+
+def test_parallel_group_exception_still_awaits_other_check(owned_linux, monkeypatch):
+    from threading import Barrier
+
+    barrier = Barrier(2)
+    finished = []
+    commands = [(phase, _command(phase)) for phase in ("tree", "budgets")]
+
+    def tree(args):
+        barrier.wait(timeout=5)
+        raise SystemExit(0)
+
+    def budgets(args):
+        barrier.wait(timeout=5)
+        finished.append("budgets")
+        return 0
+
+    modules = {
+        "check_no_partial_tree": SimpleNamespace(__file__=commands[0][1][3], main=tree),
+        "budget_guard": SimpleNamespace(__file__=commands[1][1][3], main=budgets),
+    }
+    monkeypatch.setattr(
+        runtime.importlib, "import_module", lambda name: modules[name.rsplit(".", 1)[1]]
+    )
+    assert runtime._try_parallel_guards(commands) == 20
+    assert finished == ["budgets"]

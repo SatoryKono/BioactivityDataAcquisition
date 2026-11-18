@@ -164,6 +164,8 @@ inspection overlaps only immutable ancestor/tree queries in four worker slots;
 it checks every candidate commit and refreshes shallow boundaries afterwards.
 Only inside the already supervised Linux worker, the two exact tree/budget
 guard CLIs may execute in that interpreter with their original argument lists.
+The independent tree/budget pair can overlap in two bounded worker slots;
+both results are awaited before callbacks, retaining the original failure order.
 Every invocation performs fresh checks; no result is reused. The module must
 resolve to the verified deployment bundle, and the outer watchdog still contains
 all Python work and Git descendants. Unknown commands, foreign modules, Windows

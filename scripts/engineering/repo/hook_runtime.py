@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import redirect_stderr, redirect_stdout
 from contextvars import ContextVar
 import importlib
@@ -149,32 +150,64 @@ def _foreign_command(
     return None
 
 
-def _try_builtin_guard(phase: str, command: list[str]) -> int | None:
-    """Reuse code, never results; unknown/non-owned calls keep subprocess guards."""
+def _guard_entry(phase: str, command: list[str]) -> Any | None:
+    """Resolve exact guard code only in the already supervised Linux worker."""
     if sys.platform != "linux" or not _OWNED_GUARD_CONTEXT.get():
         return None
-    names = {"tree": "check_no_partial_tree", "budgets": "budget_guard"}
-    name = names.get(phase)
+    name = {"tree": "check_no_partial_tree", "budgets": "budget_guard"}.get(phase)
     if name is None:
         return None
     expected = Path(__file__).with_name(name + ".py")
     if command[:4] != [sys.executable, "-I", "-B", str(expected)]:
         return None
-    try:
-        module = importlib.import_module("scripts.engineering.repo." + name)
-        if Path(module.__file__).resolve() != expected.resolve():
-            return None
-        # The outer owned watchdog still contains every Git subprocess and all
-        # Python work. Guard CLIs receive exactly their original argument list.
-        with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
-            code = module.main(command[4:])
-    except (Exception, SystemExit):
-        return 20
+    module = importlib.import_module("scripts.engineering.repo." + name)
+    return (
+        module.main if Path(module.__file__).resolve() == expected.resolve() else None
+    )
+
+
+def _guard_code(phase: str, code: Any) -> int:
     if type(code) is not int or code not in {0, 1, 2}:
         return 20
-    if code == 0:
-        return 0
-    return PHASE_CODES[phase] if code == 1 else 22
+    return 0 if code == 0 else PHASE_CODES[phase] if code == 1 else 22
+
+
+def _try_builtin_guard(phase: str, command: list[str]) -> int | None:
+    """Reuse code, never results; unknown/non-owned calls keep subprocess guards."""
+    try:
+        entry = _guard_entry(phase, command)
+        if entry is None:
+            return None
+        with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+            return _guard_code(phase, entry(command[4:]))
+    except (Exception, SystemExit):
+        return 20
+
+
+def _try_parallel_guards(commands: list[tuple[str, list[str]]]) -> int | None:
+    """Await both fresh read-only checks before any callback; preserve error order."""
+    if [phase for phase, _ in commands] != ["tree", "budgets"]:
+        return None
+    try:
+        entries = [_guard_entry(phase, command) for phase, command in commands]
+        if any(entry is None for entry in entries):
+            return None
+        # Redirect once around the complete group, never per worker thread.
+        with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+            with ThreadPoolExecutor(max_workers=2) as pool:
+                pending = [
+                    pool.submit(entry, command[4:])
+                    for entry, (_, command) in zip(entries, commands, strict=True)
+                ]
+                codes = []
+                for (phase, _), result in zip(commands, pending, strict=True):
+                    try:
+                        codes.append(_guard_code(phase, result.result()))
+                    except (Exception, SystemExit):
+                        codes.append(20)
+        return next((code for code in codes if code), 0)
+    except (Exception, SystemExit):
+        return 20
 
 
 def _execute_commands(
@@ -186,10 +219,19 @@ def _execute_commands(
     env: dict[str, str],
     start: float,
 ) -> int:
-    for phase, command in commands:
+    position = 0
+    while position < len(commands):
         remaining = DEADLINES[kind] - (time.monotonic() - start)
         if remaining <= 0:
             return 2
+        parallel = _try_parallel_guards(commands[position : position + 2])
+        if parallel is not None:
+            if parallel:
+                return parallel
+            position += 2
+            continue
+        phase, command = commands[position]
+        position += 1
         builtin = _try_builtin_guard(phase, command)
         if builtin is not None:
             if builtin:
