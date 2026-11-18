@@ -115,7 +115,7 @@ suffix_boundary_rules:
       - path: src/bioetl/domain/value_objects/dq_report_builder.py
         issue: "#3722"
         owner: "@bioetl-architecture"
-        expires_on: "2027-01-30"
+        expires_on: "2027-01-15"
         removal_step: Rename module when DQ report value-object construction helpers are migrated to role-neutral naming.
         reason: Existing domain helper module with no public *Builder symbol; retained as reviewed naming debt.
       - path: src/bioetl/infrastructure/adapters/crossref/client_builders.py
