@@ -26,20 +26,12 @@ if _REPO_ROOT_STR not in sys.path:
     sys.path.insert(0, _REPO_ROOT_STR)
 
 from scripts.ai.mcp.wrappers import load_wrapper_specs
-from scripts.ai.codex.local_mcp_routes import apply_local_routes
+from scripts.ai.codex.local_mcp_routes import MCP_POLICY_FIELDS, apply_local_routes
 from scripts.engineering.common.platform import detect_platform
 
 MANAGED_BLOCK_BEGIN = "# === BEGIN MANAGED MCP SERVERS ==="
 MANAGED_BLOCK_END = "# === END MANAGED MCP SERVERS ==="
 DORMANT_POLICY_PREFIX = "# BioETL inactive MCP policies: "
-MCP_POLICY_FIELDS = {
-    "enabled",
-    "enabled_tools",
-    "disabled_tools",
-    "tools",
-    "startup_timeout_sec",
-    "tool_timeout_sec",
-}
 MCP_JSON_FILENAME = "mcp.json"
 DOT_MCP_JSON_FILENAME = ".mcp.json"
 SETTINGS_JSON_FILENAME = "settings.json"
@@ -1069,8 +1061,7 @@ def _strip_managed_mcp_blocks(content: str, managed_server_names: set[str]) -> s
             in_server_table = False
             continue
         if marker_block:
-            if stripped == MANAGED_BLOCK_END:
-                marker_block = False
+            marker_block = stripped != MANAGED_BLOCK_END
             continue
         if stripped.startswith("["):
             tables = parsed.get("mcp_servers", {})
@@ -1134,6 +1125,46 @@ def _lock_codex_config(config_path: Path) -> Iterator[None]:
                 fcntl.flock(stream.fileno(), fcntl.LOCK_UN)
 
 
+def _managed_codex_projection(
+    existing: str,
+    workspace_root: Path,
+    *,
+    profile: str,
+    transport_mode: str,
+) -> tuple[str, set[str]]:
+    """Compute the same policy-aware managed block for validation and publication."""
+    servers = _codex_runtime_servers(
+        workspace_root, profile=profile, transport_mode=transport_mode
+    )
+    existing_servers = tomllib.loads(existing).get("mcp_servers", {})
+    managed_names = set(_canonical_servers(workspace_root, profile="full"))
+    saved_policies = _dormant_mcp_policies(existing, managed_names)
+    dormant_policies: dict[str, dict[str, Any]] = {}
+    known_fields = {
+        "command",
+        "args",
+        "url",
+        "cwd",
+        "env",
+        "env_http_headers",
+    } | MCP_POLICY_FIELDS
+    for name in sorted(managed_names | servers.keys()):
+        previous = existing_servers.get(name, saved_policies.get(name, {}))
+        if not isinstance(previous, dict) or set(previous) - known_fields:
+            raise ValueError(
+                "Unsupported existing MCP settings; config preserved for explicit review"
+            )
+        policy = {
+            key: deepcopy(previous[key]) for key in MCP_POLICY_FIELDS & previous.keys()
+        }
+        if name in servers:
+            servers[name].update(policy)
+        elif policy:
+            dormant_policies[name] = policy
+    block = _render_codex_mcp_toml(servers, dormant_policies=dormant_policies)
+    return block, managed_names | set(REMOVED_MCP_SERVER_NAMES)
+
+
 def _write_codex_config(
     workspace_root: Path,
     *,
@@ -1141,9 +1172,6 @@ def _write_codex_config(
     transport_mode: str = "stdio",
     stage: bool = False,
 ) -> Path:
-    servers = _codex_runtime_servers(
-        workspace_root, profile=profile, transport_mode=transport_mode
-    )
     config_dir = Path.home() / CODEX_DIRNAME
     config_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
     os.chmod(config_dir, 0o700)
@@ -1152,37 +1180,10 @@ def _write_codex_config(
     with _lock_codex_config(config_path):
         before = config_path.read_bytes() if config_path.exists() else None
         existing = before.decode("utf-8") if before is not None else ""
-        existing_servers = tomllib.loads(existing).get("mcp_servers", {})
-        managed_names = set(_canonical_servers(workspace_root, profile="full"))
-        saved_policies = _dormant_mcp_policies(existing, managed_names)
-        dormant_policies: dict[str, dict[str, Any]] = {}
-        for name in sorted(managed_names | servers.keys()):
-            previous = existing_servers.get(name, saved_policies.get(name, {}))
-            known = {
-                "command",
-                "args",
-                "url",
-                "cwd",
-                "env",
-                "env_http_headers",
-            } | MCP_POLICY_FIELDS
-            if set(previous) - known:
-                raise ValueError(
-                    "Unsupported existing MCP settings; config preserved for explicit review"
-                )
-            policy = {
-                key: deepcopy(previous[key])
-                for key in MCP_POLICY_FIELDS & previous.keys()
-            }
-            if name in servers:
-                servers[name].update(policy)
-            elif policy:
-                dormant_policies[name] = policy
-        managed_or_retired_names = managed_names | set(REMOVED_MCP_SERVER_NAMES)
-        preserved = _strip_managed_mcp_blocks(existing, managed_or_retired_names)
-        managed_block = _render_codex_mcp_toml(
-            servers, dormant_policies=dormant_policies
+        managed_block, managed_or_retired_names = _managed_codex_projection(
+            existing, workspace_root, profile=profile, transport_mode=transport_mode
         )
+        preserved = _strip_managed_mcp_blocks(existing, managed_or_retired_names)
 
         if preserved:
             rendered = preserved.rstrip() + "\n\n" + managed_block

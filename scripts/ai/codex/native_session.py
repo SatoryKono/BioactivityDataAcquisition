@@ -143,6 +143,19 @@ def _validate_markdownify_client(entry):
     )
 
 
+def _markdownify_user_policies(entry, existing):
+    from scripts.ai.codex.local_mcp_routes import MCP_POLICY_FIELDS
+
+    if existing is None:
+        return {}
+    transport = {
+        key: value for key, value in existing.items() if key not in MCP_POLICY_FIELDS
+    }
+    if transport != {"command": entry["command"], "args": entry["args"]}:
+        raise PermissionError("Existing unrelated Markdownify entry needs review")
+    return {key: existing[key] for key in MCP_POLICY_FIELDS & existing.keys()}
+
+
 def _markdownify_entry(source, root, servers, *, explicit):
     from scripts.ai.codex.local_mcp_routes import common_directory
 
@@ -176,9 +189,8 @@ def _markdownify_entry(source, root, servers, *, explicit):
             "Markdownify session binding must be credential-free stdio"
         )
     _validate_markdownify_client(entry)
-    if value["server"] in servers and servers[value["server"]] != entry:
-        raise PermissionError("Existing unrelated Markdownify entry needs review")
-    return value["server"], entry
+    policy = _markdownify_user_policies(entry, servers.get(name))
+    return name, {**entry, **policy}
 
 
 def _check_client_manifest(script, manifest_name, required_source):
