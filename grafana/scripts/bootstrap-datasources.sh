@@ -13,10 +13,12 @@
 # - Override: BIOETL_GRAFANA_OPS_READY_ATTEMPTS / BIOETL_GRAFANA_OPS_READY_SLEEP_SEC.
 # - Prometheus is provisioned BEFORE the Ops poll so a slow bioetl never blocks
 #   the core datasource path.
-# - Dashboard UX is fail-closed: soft fallback provisions the same seven UIDs
+# - Dashboard UX is fail-closed: soft fallback provisions the same five UIDs
 #   from a static Prometheus-only notice profile. Full dashboards are selected
 #   only after Ops HTTP identity and the Infinity plugin are ready.
 # - BIOETL_OPS_HTTP_URL is validated before any HTTP probe.
+# - A bounded late-identity watcher may request one restart after soft timeout.
+#   A persistent shared claim prevents repeated or competing recovery restarts.
 #
 # shellcheck disable=SC2039,SC3043
 set -u
@@ -33,8 +35,9 @@ STALE_RENDERER_PLUGIN_DIR="/var/lib/grafana/plugins/grafana-image-renderer"
 EXPECTED_RUNTIME_SOURCE_ID="${BIOETL_EXPECTED_RUNTIME_SOURCE_ID:-unmanaged}"
 REQUIRE_OPS_HTTP="${BIOETL_GRAFANA_REQUIRE_OPS_HTTP:-0}"
 OPS_HTTP_STATE_DEFERRED="deferred"
-OPS_HTTP_STATE_FAILED="failed"
-DASHBOARD_PROFILE_FAILED="failed"
+LATE_RECOVERY_STATE_FAILED="failed"
+OPS_HTTP_STATE_FAILED="${LATE_RECOVERY_STATE_FAILED}"
+DASHBOARD_PROFILE_FAILED="${LATE_RECOVERY_STATE_FAILED}"
 
 # Soft vs fail-closed poll budgets (host/compose may still override explicitly).
 if [ "${REQUIRE_OPS_HTTP}" = "1" ]; then
@@ -58,6 +61,16 @@ SOURCE_ID_MATCHED=0
 IDENTITY_VALID=0
 DASHBOARD_PROFILE="not_selected"
 BOOTSTRAP_ERRORS=0
+LATE_RECOVERY_ROOT="$(dirname "${STATUS_FILE}")/bioetl-late-cutover"
+LATE_RECOVERY_CLAIM="${LATE_RECOVERY_ROOT}/${EXPECTED_RUNTIME_SOURCE_ID}.claim"
+LATE_RECOVERY_OWNER="${LATE_RECOVERY_CLAIM}/owner"
+LATE_RECOVERY_LEASE="${LATE_RECOVERY_ROOT}/${EXPECTED_RUNTIME_SOURCE_ID}.lease"
+LATE_RECOVERY_STATE="disabled"
+LATE_RECOVERY_INSTANCE=""
+LATE_RECOVERY_DEADLINE=0
+LATE_RECOVERY_STARTED=0
+LATE_RECOVERY_HEALTHY_SINCE=""
+LATE_RECOVERY_FOREGROUND=$$
 
 log() {
   echo "[bioetl-grafana] $*"
@@ -108,7 +121,10 @@ write_bootstrap_status() {
     log_warn "cannot create status dir ${status_dir}"
     return 0
   fi
-  cat > "${STATUS_FILE}" <<EOF || log_warn "cannot write ${STATUS_FILE}"
+  _late_status_source=""
+  [ "${IDENTITY_VALID}" -ne 1 ] || _late_status_source="${EXPECTED_RUNTIME_SOURCE_ID}"
+  status_tmp="${STATUS_FILE}.tmp.$$"
+  if ! cat > "${status_tmp}" <<EOF
 {
   "ops_http": "${OPS_HTTP_STATE}",
   "reason": "${OPS_HTTP_REASON}",
@@ -120,9 +136,18 @@ write_bootstrap_status() {
   "dashboard_profile": "${DASHBOARD_PROFILE}",
   "ready_attempts": "${OPS_READY_ATTEMPTS}",
   "ready_sleep_sec": "${OPS_READY_SLEEP_SEC}",
-  "bootstrap_errors": "${BOOTSTRAP_ERRORS}"
+  "bootstrap_errors": "${BOOTSTRAP_ERRORS}",
+  "late_recovery_state": "${LATE_RECOVERY_STATE}",
+  "late_recovery_source_id": "${_late_status_source}",
+  "late_recovery_instance": "${LATE_RECOVERY_INSTANCE}",
+  "late_recovery_deadline": "${LATE_RECOVERY_DEADLINE}"
 }
 EOF
+  then
+    log_warn "cannot write ${STATUS_FILE}"
+    return 0
+  fi
+  mv -f "${status_tmp}" "${STATUS_FILE}" 2>/dev/null || log_warn "cannot replace ${STATUS_FILE}"
   log "bootstrap status written to ${STATUS_FILE} (ops_http=${OPS_HTTP_STATE})"
 }
 
@@ -269,6 +294,173 @@ ensure_infinity_plugin() {
   return 1
 }
 
+# Use kernel monotonic time and process identity: a lease from an earlier
+# container/PID incarnation must never block a later managed recovery.
+late_recovery_now() {
+  read -r _uptime _rest < /proc/uptime || return 1
+  printf '%s\n' "${_uptime%%.*}"
+}
+
+late_recovery_process_start() {
+  sed 's/^[^)]*) //' "/proc/${LATE_RECOVERY_FOREGROUND}/stat" 2>/dev/null | awk '{print $20}'
+}
+
+late_recovery_alive() {
+  kill -0 "${LATE_RECOVERY_FOREGROUND}" 2>/dev/null &&
+    [ "$(late_recovery_process_start)" = "${LATE_RECOVERY_PROCESS_START}" ]
+}
+
+late_recovery_release() {
+  # Remove only our lease, never a new bootstrap's activity or persistent claim.
+  if [ "$(cat "${LATE_RECOVERY_LEASE}" 2>/dev/null)" = "${LATE_RECOVERY_LEASE_VALUE}" ]; then
+    rm -f "${LATE_RECOVERY_LEASE}" 2>/dev/null || true
+  fi
+}
+
+late_recovery_finish() {
+  LATE_RECOVERY_STATE="$1"
+  write_bootstrap_status
+  late_recovery_release
+}
+
+late_recovery_identity() {
+  _late_payload="$(late_recovery_fetch "${OPS_READY_URL}")" || return 1
+  if printf '%s' "${_late_payload}" | grep -Eq \
+    "\"runtime_source_id\"[[:space:]]*:[[:space:]]*\"${EXPECTED_RUNTIME_SOURCE_ID}\""; then
+    return 0
+  fi
+  if printf '%s' "${_late_payload}" | grep -Eq \
+    '"runtime_source_id"[[:space:]]*:[[:space:]]*"[0-9a-f]{64}"'; then
+    return 2
+  fi
+  return 1
+}
+
+late_recovery_health() {
+  _late_health="$(late_recovery_fetch http://127.0.0.1:3000/api/health)" || return 1
+  printf '%s' "${_late_health}" | grep -Eq '"database"[[:space:]]*:[[:space:]]*"ok"'
+}
+
+late_recovery_fetch() {
+  local _late_fetch_url="$1"
+  _late_fetch_now="$(late_recovery_now)" || return 1
+  _late_fetch_timeout=$((LATE_RECOVERY_DEADLINE - _late_fetch_now))
+  [ "${_late_fetch_timeout}" -gt 0 ] || return 1
+  [ "${_late_fetch_timeout}" -le 3 ] || _late_fetch_timeout=3
+  wget -qO- -T "${_late_fetch_timeout}" "${_late_fetch_url}" 2>/dev/null
+}
+
+late_recovery_watch() {
+  trap 'late_recovery_release' 0
+  trap 'exit 0' HUP INT TERM
+  _late_attempt=0
+  while [ "${_late_attempt}" -lt 60 ]; do
+    late_recovery_alive || { late_recovery_finish stopped; return; }
+    _late_now="$(late_recovery_now)" || { late_recovery_finish "${LATE_RECOVERY_STATE_FAILED}"; return; }
+    [ "${_late_now}" -lt "${LATE_RECOVERY_DEADLINE}" ] || break
+    _late_attempt=$((_late_attempt + 1))
+    late_recovery_identity
+    _late_identity=$?
+    if [ "${_late_identity}" -eq 2 ]; then
+      OPS_HTTP_STATE="${OPS_HTTP_STATE_DEFERRED}"
+      OPS_HTTP_REASON="identity_mismatch"
+      SOURCE_ID_MATCHED=0
+      late_recovery_finish mismatch
+      return
+    fi
+    if [ "${_late_identity}" -eq 0 ] && late_recovery_health; then
+      _late_now="$(late_recovery_now)" || { late_recovery_finish "${LATE_RECOVERY_STATE_FAILED}"; return; }
+      if [ -z "${LATE_RECOVERY_HEALTHY_SINCE}" ]; then
+        LATE_RECOVERY_HEALTHY_SINCE="${_late_now}"
+      fi
+      if [ "${_late_now}" -lt "${LATE_RECOVERY_DEADLINE}" ] &&
+        [ "$((_late_now - LATE_RECOVERY_HEALTHY_SINCE))" -ge 10 ] && late_recovery_alive; then
+        # Revalidate immediately before claiming; foreign identity never restarts.
+        late_recovery_identity
+        _late_identity=$?
+        if [ "${_late_identity}" -eq 2 ]; then
+          OPS_HTTP_STATE="${OPS_HTTP_STATE_DEFERRED}"
+          OPS_HTTP_REASON="identity_mismatch"
+          SOURCE_ID_MATCHED=0
+          late_recovery_finish mismatch
+          return
+        fi
+        if [ "${_late_identity}" -eq 0 ]; then
+          _late_now="$(late_recovery_now)" || { late_recovery_finish "${LATE_RECOVERY_STATE_FAILED}"; return; }
+          [ "${_late_now}" -lt "${LATE_RECOVERY_DEADLINE}" ] || break
+          late_recovery_alive || { late_recovery_finish stopped; return; }
+          if [ "${LATE_RECOVERY_STATE}" = "confirming_full" ]; then
+            # owner is the exclusive claim marker; the directory must be empty to clear.
+            rm -f "${LATE_RECOVERY_OWNER}"
+            if rmdir "${LATE_RECOVERY_CLAIM}" 2>/dev/null; then
+              late_recovery_finish complete
+            else
+              late_recovery_finish "${LATE_RECOVERY_STATE_FAILED}"
+            fi
+            return
+          fi
+          # Directory success is not exclusive on every supported coreutils.
+          # Both watcher and manager elect ownership through the same owner file.
+          if ! mkdir "${LATE_RECOVERY_CLAIM}" 2>/dev/null ||
+             ! (set -C; : > "${LATE_RECOVERY_OWNER}") 2>/dev/null; then
+            late_recovery_finish blocked
+            return
+          fi
+          LATE_RECOVERY_STATE="restart_requested"
+          write_bootstrap_status
+          if ! kill -TERM "${LATE_RECOVERY_FOREGROUND}" 2>/dev/null; then
+            late_recovery_finish "${LATE_RECOVERY_STATE_FAILED}"
+          fi
+          return
+        fi
+      fi
+    else
+      LATE_RECOVERY_HEALTHY_SINCE=""
+    fi
+    _late_now="$(late_recovery_now)" || { late_recovery_finish "${LATE_RECOVERY_STATE_FAILED}"; return; }
+    _late_remaining=$((LATE_RECOVERY_DEADLINE - _late_now))
+    [ "${_late_remaining}" -gt 0 ] || break
+    [ "${_late_remaining}" -ge 5 ] && _late_remaining=5
+    sleep "${_late_remaining}"
+  done
+  late_recovery_finish expired
+}
+
+start_late_recovery() {
+  [ "${REQUIRE_OPS_HTTP}" = "0" ] && [ "${IDENTITY_VALID}" -eq 1 ] &&
+    [ "${OPS_HTTP_URL_VALID}" -eq 1 ] || return 0
+  if [ "${OPS_HTTP_STATE}" = "ready" ] && [ "${DASHBOARD_PROFILE}" = "full" ] &&
+    [ "${BOOTSTRAP_ERRORS}" -eq 0 ] && [ -f "${LATE_RECOVERY_OWNER}" ]; then
+    LATE_RECOVERY_STATE="confirming_full"
+  elif [ "${OPS_HTTP_REASON}" = "identity_timeout_or_unreachable" ] &&
+    [ "${DASHBOARD_PROFILE}" = "prometheus_only" ]; then
+    if [ -d "${LATE_RECOVERY_CLAIM}" ]; then
+      LATE_RECOVERY_STATE="blocked"
+      return 0
+    fi
+    LATE_RECOVERY_STATE="waiting"
+  else
+    return 0
+  fi
+  LATE_RECOVERY_STARTED="$(late_recovery_now)" || { LATE_RECOVERY_STATE="${LATE_RECOVERY_STATE_FAILED}"; return 0; }
+  LATE_RECOVERY_PROCESS_START="$(late_recovery_process_start)"
+  LATE_RECOVERY_BOOT_ID="$(cat /proc/sys/kernel/random/boot_id 2>/dev/null)"
+  case "${LATE_RECOVERY_PROCESS_START}" in
+    ''|*[!0-9]*) LATE_RECOVERY_STATE="${LATE_RECOVERY_STATE_FAILED}"; return 0 ;;
+    *) ;;
+  esac
+  [ -n "${LATE_RECOVERY_BOOT_ID}" ] || { LATE_RECOVERY_STATE="${LATE_RECOVERY_STATE_FAILED}"; return 0; }
+  LATE_RECOVERY_DEADLINE=$((LATE_RECOVERY_STARTED + 480))
+  LATE_RECOVERY_INSTANCE="${LATE_RECOVERY_FOREGROUND}:${LATE_RECOVERY_PROCESS_START}:${LATE_RECOVERY_BOOT_ID}"
+  LATE_RECOVERY_LEASE_VALUE="${LATE_RECOVERY_FOREGROUND} ${LATE_RECOVERY_PROCESS_START} ${LATE_RECOVERY_BOOT_ID} ${LATE_RECOVERY_DEADLINE}"
+  if ! mkdir -p "${LATE_RECOVERY_ROOT}" 2>/dev/null ||
+    ! printf '%s\n' "${LATE_RECOVERY_LEASE_VALUE}" > "${LATE_RECOVERY_LEASE}"; then
+    LATE_RECOVERY_STATE="${LATE_RECOVERY_STATE_FAILED}"
+    return 0
+  fi
+  return 0
+}
+
 # --- Always provision Prometheus first (never blocked by Ops wait) ---
 if ! provision_prometheus_only; then
   note_error "Prometheus provisioning incomplete; Grafana will still start"
@@ -361,7 +553,7 @@ if [ "${OPS_HTTP_STATE}" = "ready" ]; then
 fi
 
 # Select exactly one dashboard provider. The Prometheus-only profile contains
-# static notices under the same seven stable UIDs and therefore never evaluates
+# static notices under the same five stable UIDs and therefore never evaluates
 # an Ops HTTP panel while its datasource is intentionally absent.
 if [ "${OPS_HTTP_STATE}" = "ready" ]; then
   if ! provision_dashboard_profile "full"; then
@@ -394,11 +586,15 @@ if [ -n "${RENDERING_SERVER_URL}" ] && [ -d "${STALE_RENDERER_PLUGIN_DIR}" ]; th
   log "removed stale local grafana-image-renderer plugin for remote renderer mode"
 fi
 
-write_bootstrap_status
-
 if [ ! -x "${RUN_SCRIPT}" ] && [ ! -f "${RUN_SCRIPT}" ]; then
   log_err "${RUN_SCRIPT} missing; cannot start Grafana"
   exit 1
 fi
+start_late_recovery
+write_bootstrap_status
+case "${LATE_RECOVERY_STATE}" in
+  waiting|confirming_full) late_recovery_watch & ;;
+  *) ;;
+esac
 log "starting Grafana (/run.sh) with ops_http=${OPS_HTTP_STATE} dashboard_profile=${DASHBOARD_PROFILE}"
 exec "${RUN_SCRIPT}"

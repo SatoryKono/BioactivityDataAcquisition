@@ -1,6 +1,6 @@
 ---
 name: "py-audit-bot"
-description: "Execute the BioETL py-audit-bot profile for baseline, final, targeted, review, debt, or reproducibility audits. Use when the user asks for an audit/review gate or independent compliance check."
+description: "Audit BioETL code for compliance, debt, or review findings without applying the fix. For a sequenced change plan use py-plan-bot."
 ---
 
 # py-audit-bot

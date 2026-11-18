@@ -1,6 +1,6 @@
 ---
 name: "py-plan-bot"
-description: "Execute the BioETL py-plan-bot profile for scoped implementation, refactor, audit-remediation, or release plans. Use when the user asks for a plan or when findings need sequencing before edits."
+description: "Sequence a BioETL implementation, refactor, or release plan before any edits. For an audit verdict use py-audit-bot."
 ---
 
 # py-plan-bot

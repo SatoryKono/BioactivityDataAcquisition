@@ -1,6 +1,6 @@
 ---
 name: technical-designer-mermaid
-description: Design technical diagrams in Mermaid syntax for architecture, data flows, API interactions, domain models, and process behavior. Supports generic Mermaid tasks and BioETL project mode with ADR-040 compliance, lint/render workflow, and repository file conventions. Use when users ask for Mermaid diagrams, mention common typos like "merimad/merimd", convert text/design docs into diagrams, or improve existing Mermaid blocks.
+description: "Draw or revise Mermaid diagrams for BioETL architecture, data flow, and domain models. For prose-only docs use py-doc-bot."
 ---
 
 # Technical Designer Mermaid
