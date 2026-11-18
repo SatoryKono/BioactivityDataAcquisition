@@ -399,6 +399,8 @@ late_recovery_watch() {
             fi
             return
           fi
+          # Directory success is not exclusive on every supported coreutils.
+          # Both watcher and manager elect ownership through the same owner file.
           if ! mkdir "${LATE_RECOVERY_CLAIM}" 2>/dev/null ||
              ! (set -C; : > "${LATE_RECOVERY_OWNER}") 2>/dev/null; then
             late_recovery_finish blocked

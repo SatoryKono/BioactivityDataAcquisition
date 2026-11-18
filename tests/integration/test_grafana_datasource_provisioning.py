@@ -624,11 +624,14 @@ OPS_READY_URL=http://bioetl:8000/ops/control-plane/ready
 mkdir -p "${LATE_RECOVERY_ROOT}"
 printf '%s' "${LATE_RECOVERY_LEASE_VALUE}" > "${LATE_RECOVERY_LEASE}"
 case "${SCENARIO}" in
-  claimed|full|full_unhealthy|full_health_delayed|full_health_flap)
+  claimed|claimed_nonexclusive|full|full_unhealthy|full_health_delayed|full_health_flap)
     mkdir "${LATE_RECOVERY_CLAIM}"
     : > "${LATE_RECOVERY_CLAIM}/owner"
     ;;
 esac
+if [ "${SCENARIO}" = claimed_nonexclusive ]; then
+  mkdir() { command mkdir "$@" 2>/dev/null || true; }
+fi
 case "${SCENARIO}" in
   full|full_unhealthy|full_health_delayed|full_health_flap) LATE_RECOVERY_STATE=confirming_full; OPS_HTTP_STATE=ready; DASHBOARD_PROFILE=full ;;
 esac
@@ -737,6 +740,7 @@ def test_late_recovery_restarts_saved_foreground_once_after_delayed_match(
         ("http_failed", "expired"),
         ("stopped", "stopped"),
         ("claimed", "blocked"),
+        ("claimed_nonexclusive", "blocked"),
         ("deadline", "expired"),
     ],
 )

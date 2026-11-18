@@ -2485,7 +2485,15 @@ def test_recovery_is_bounded_to_three_attempts_and_writes_one_incident(
 
 
 @pytest.mark.parametrize(
-    "health_response", ["", "{}", '{"database":"error"}', "invalid"]
+    "health_response",
+    [
+        "",
+        "{}",
+        '{"database":"error"}',
+        "invalid",
+        '{"database":"ok"} trailing',
+        '{"nested":{"database":"ok"}}',
+    ],
 )
 def test_full_profile_wait_requires_live_health(health_response: str) -> None:
     now = [0.0]
