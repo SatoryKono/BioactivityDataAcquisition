@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "7d5b749d9ef1c6a5ab96a4bd02b54b07f5199ca6",
+  "source_ref": "7d5b749d9ef1c6a5ab96a4bd02b54b07f5199ca6",
+  "source_reviews": {
+    "src/bioetl/infrastructure/storage/delta/table_ops.py": "Reviewed Windows active-file schema evolution: physical Parquet columns are selected before reading, missing Delta fields are filled as typed nulls, and zero-physical-column projections retain metadata row counts. Partition values still come from Delta add-actions. pq.read_table remains operation-owned and single-threaded; schema/metadata reads return values without persistent handles. No new persistent client, background task, cleanup owner or runtime qualification is asserted."
+  },
+  "expression_updates": {
+    "src/bioetl/infrastructure/storage/delta/table_ops.py": {
+      "pq.read_table(resolve_parquet_file_uri(file_uri), columns=physical_columns, use_threads=False)": "pq.read_table(path, columns=physical_columns, use_threads=False)"
+    }
+  },
+  "segment_updates": {
+    "src/bioetl/infrastructure/storage/delta/table_ops.py": {
+      "result = pq.read_table(": "result = pq.read_table(path, columns=physical_columns, use_threads=False)"
+    }
+  },
+  "line_updates": {
+    "src/bioetl/infrastructure/storage/delta/table_ops.py": {
+      "152": 217,
+      "154": 219
+    }
+  }
+}

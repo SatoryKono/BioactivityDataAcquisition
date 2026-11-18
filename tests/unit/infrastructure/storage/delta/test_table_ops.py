@@ -229,6 +229,12 @@ def test_windows_read_fills_schema_evolved_columns_as_typed_nulls(
     assert by_id["a"]["target_type"] == "SINGLE PROTEIN"
     assert by_id["b"]["taxonomy_id"] == 9606
 
+    projected = table_ops.read_delta_records(DeltaTable(str(path)), columns=["added"])
+    assert sorted(projected, key=lambda row: row["added"] is not None) == [
+        {"added": None},
+        {"added": "new"},
+    ]
+
 
 def test_resolve_parquet_file_uri_strips_windows_file_uri_prefix() -> None:
     assert (
