@@ -116,9 +116,7 @@ def _physical_columns_for_read(
     if columns is None:
         return list(available)
     return [
-        name
-        for name in columns
-        if name not in partition_columns and name in available
+        name for name in columns if name not in partition_columns and name in available
     ]
 
 
