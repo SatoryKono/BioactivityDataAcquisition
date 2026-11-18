@@ -21,7 +21,41 @@
 
 ## Windows host
 
-Windows host: непустой commit прошёл; локальный push достиг лимита 180 секунд и был заблокирован. Штатный аварийный rollback восстановил отсутствие owned callbacks; foreign hooks и env-файлы сохранены. Положительная host-приёмка и повторная установка остаются незавершёнными.
+Повтор на source `2b59d3e23cf09b614bde74377bc9ea5caeb82625`: непустой native
+commit прошёл за 14,20 s; native локальный push заблокирован по timeout за 180,58 s.
+Штатный rollback восстановил исходное отсутствие owned callbacks; foreign hooks,
+их ACL и env-файлы сохранены. Положительная последовательность rollback/reinstall
+не достигнута. Предыдущий единичный push за 179,64 s не доказывает устойчивость.
+
+## WSL host и установленная причина задержки
+
+Создан отдельный полный WSL-клон в разрешённом каталоге
+`D:/github/BioactivityDataAcquisition-worktrees/epic-13056-wsl-20261118`.
+Windows/WSL absolute gitfile несовместимы, поэтому это independent clone,
+а не linked worktree. Пользователь отдельно разрешил только checkout `.env.example`
+в этом клоне; остальные env-файлы не создавались и не менялись.
+
+Native Git 2.43.0, Python 3.13.18, pre-commit 4.7.0 и новый явно подготовленный
+Linux-cache проверены отдельно. Install/doctor/idempotence прошли, но это только
+идентичность установки. Валидный непустой commit завершился timeout pre-commit
+(41,13 s с внешним runner/cleanup при лимите события 30 s). Неверный заголовок
+тоже остановился на pre-commit (44,41 s), поэтому commit-msg negative control
+остаётся NOT_REACHED, а не PASS. Push и положительная повторная установка
+не достигнуты. Owned rollback восстановил исходное отсутствие callbacks;
+staged probe и все неуспешные captures сохранены.
+
+Вне event watchdog полный framework protocol прошёл за 79,05 s. Git trace
+зафиксировал девять preload-проходов по 14 779 `lstat`, каждый примерно 6,76–8,03 s:
+повторные whole-tree diff на DrvFS — подтверждённый основной расход этого прогона.
+Metadata refresh index не помог: diff до него 11,37 s, после 18,66 s;
+диагностический `core.preloadindex=false` замедлил diff до 81,00 s и не сохранён
+в Git config. Семантика staged index до/после идентична.
+
+При корректном PATH project-interpreter все 46 environment probes здоровы:
+2,749 s против 0,282 s для шести различных environments. Ранний probe с другим
+PATH — невалидный диагностический контекст, не доказательство поломанного cache
+Git event. Дедупликация probes не заявлена исправлением 79-секундного framework.
+Checks, containment и лимиты 30/10/180 s не ослаблялись.
 
 Подготовительные ошибки collector/локального remote сохранены отдельно от результата hooks.
 
@@ -31,12 +65,35 @@ Windows host: непустой commit прошёл; локальный push до
 | --- | --- | --- |
 | 1 | AUD-001–AUD-011 → задачи и evidence | Все 16 задач карты повторно проверены через GitHub API: CLOSED / COMPLETED. Историческая трассировка сохраняется; состояние задач само по себе не доказывает host-приёмку. |
 | 2 | Runtime identity и загрузка | Codex и Devin проверены на текущем source; presence, resolver/render и execution разделены ниже. Junie и native enforcement остаются NOT_PROVEN. |
-| 3 | Матрица сценариев | Windows: 391 passed / 6 skipped; WSL: 231 passed / 0 skipped. Это профильные contract/fixture tests. Полная WSL-приёмка на действующей конфигурации ещё NOT_RUN; host-результат учитывается отдельно. |
+| 3 | Матрица сценариев | Windows: 391 passed / 6 skipped; WSL: 231 passed / 0 skipped. Это профильные contract/fixture tests. Полная native WSL-приёмка предпринята на новом клоне: commit timeout, positive push/reinstall NOT_REACHED; это отдельный FAIL host-последовательности. |
 | 4 | Дисциплина статусов | ERROR, FAIL, SKIP, DEGRADED, timeout и INCONCLUSIVE сохранены. Неуспешная подготовка локального remote не названа отказом hooks. |
 | 5 | Guardrails и бюджеты | Full-tree и сравнение бюджетов current base→HEAD проходят. Исторический budget guard возвращает ERROR на новой policy, отсутствующей в старом base; это не PASS исторического диапазона. Эта задача не повышает бюджеты. |
-| 6 | Inventories, mirrors, SHA и CI | Static doctor, Codex–Junie parity и module source hash проходят на source SHA. Проверки документационного changeset и его CI должны быть зафиксированы отдельно; зелёные проверки старого source не являются приёмкой нового head. |
+| 6 | Inventories, mirrors, SHA и CI | Static doctor, Codex–Junie parity и module source hash проходят на source SHA. CI на main `f444a6b8…`: runtime checks и bounded Proof-or-Stop ADMIT подтверждены ниже. Это не приёмка failing native host-последовательностей и не CI нового документационного head. |
 | 7 | Эффект #13033 | ASSESSED_INCONCLUSIVE. Сохранены исходные измерения; новые model turns не выполнялись. Причинная экономия контекста и улучшение качества не доказаны. |
-| 8 | Проверенный откат | Изолированные installer/ownership/timeout tests прошли на обеих платформах. Общий host rollback и его последующая повторная квалификация требуют отдельного результата; наличие команды revert не заменяет репетицию. |
+| 8 | Проверенный откат | Изолированные installer/ownership/timeout tests прошли на обеих платформах. Реальный rollback после timeout прошёл на Windows и WSL; исходное отсутствие owned callbacks восстановлено. Положительная последовательность reinstall/commit/push на обеих платформах не завершена. |
+
+## CI принятого main и границы ADMIT
+
+PR #13205 фактически merged другим процессом 18 ноября 2026, 14:10:57 UTC:
+head `85b46ffce5ed2b07fc721b143287bdde3aa177a5`, merge/main
+`f444a6b8061965e7075bea10d64322fa4c4aac42`. Эта сессия merge не выполняла.
+Между host source `2b59d3e…` и этим main меняются только девять отчётных/generated
+файлов; runtime, guards, pre-commit config и тесты идентичны. Это сравнение
+содержимого не переносит измерения автоматически на другой head.
+
+[Skills Consistency run 44323116672](https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/44323116672)
+успешен именно на `f444a6b8061965e7075bea10d64322fa4c4aac42`.
+Исходный artifact `ai-runtime-proof-44323116672-1` скачан; canonical bundle и
+receipt digests совпали. `verification.json`: ADMIT, claim_qualified=true,
+task_id `epic-13056-final-admission`, bundle digest
+`ab8adb91ca98ef42733eb022b9b202d2bff7300b05228ae14bbecb81d23d857a`.
+Scope: записанные CI-команды tests, governance light, docs links и source-only debt.
+Это bounded CI admission, не успешная Windows/WSL host-квалификация и не
+доказательство native AI enforcement. До устранения host timeout эпик OPEN.
+CI нового документационного head оценивается отдельно после push.
+
+Локальные captures продолжения, Git trace и original CI artifact сохранены в
+`reports/local/epic-13056-host-acceptance-20261118/` основного checkout.
 
 ## Проверки на source SHA
 
