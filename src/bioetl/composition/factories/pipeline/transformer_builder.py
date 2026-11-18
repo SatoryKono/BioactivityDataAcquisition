@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 
-from bioetl.composition.services.target_classification_runtime import (
+from bioetl.composition.factories.pipeline.target_classification_runtime import (
     select_target_transformer,
     configure_target_transformer,
 )

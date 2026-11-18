@@ -7,7 +7,7 @@ from bioetl.composition.bootstrap.assembly.storage import hydrate_target_runtime
 from bioetl.composition.runtime_builders._exact_replay_cached_bronze_context import (
     _resolve_replay_parent_manifest,
 )
-from bioetl.composition.services.target_classification_runtime import (
+from bioetl.composition.factories.pipeline.target_classification_runtime import (
     resolve_target_runtime_config,
 )
 
@@ -29,7 +29,7 @@ from bioetl.infrastructure.config.contract_identity_resolution import (
 from bioetl.infrastructure.config.target_classification_profile import (
     target_v31_schema_hash,
 )
-from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+from bioetl.infrastructure.config.pipeline_config_api import PipelineYamlConfig
 
 
 def target_classification_contract_schema_identity(

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.composition.services.target_classification_identity import (
+from bioetl.composition.runtime_builders.target_classification_identity import (
     target_run_context_identity,
 )
 

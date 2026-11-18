@@ -4,9 +4,9 @@
     "total_internal_imports": 8782,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
-    "cross_layer_group_edges_total": 336,
+    "cross_layer_group_edges_total": 330,
     "violations": 0,
-    "source_fingerprint": "081c743c58ea582c94c9df941bacb370d3190e685c9aba0f15d292f5b36afc28"
+    "source_fingerprint": "d1e24265b88c8ad1030f074ec1211ac432be238eec8f0e548628900e22e6b175"
   },
   "layer_edges": [
     {
@@ -147,17 +147,17 @@
     {
       "source": "composition.factories",
       "target": "application.core",
-      "imports": 50
+      "imports": 51
+    },
+    {
+      "source": "composition.runtime_builders",
+      "target": "domain.control_plane",
+      "imports": 44
     },
     {
       "source": "infrastructure.storage",
       "target": "domain.value_objects",
       "imports": 43
-    },
-    {
-      "source": "composition.runtime_builders",
-      "target": "domain.control_plane",
-      "imports": 42
     },
     {
       "source": "composition.factories",
@@ -175,6 +175,11 @@
       "imports": 36
     },
     {
+      "source": "composition.factories",
+      "target": "infrastructure.config",
+      "imports": 36
+    },
+    {
       "source": "infrastructure.storage",
       "target": "domain.models",
       "imports": 36
@@ -187,11 +192,6 @@
     {
       "source": "composition.bootstrap",
       "target": "infrastructure.storage",
-      "imports": 34
-    },
-    {
-      "source": "composition.factories",
-      "target": "infrastructure.config",
       "imports": 34
     },
     {
@@ -230,6 +230,11 @@
       "imports": 27
     },
     {
+      "source": "composition.runtime_builders",
+      "target": "infrastructure.config",
+      "imports": 26
+    },
+    {
       "source": "infrastructure.adapters",
       "target": "domain.ports",
       "imports": 26
@@ -265,11 +270,6 @@
       "imports": 23
     },
     {
-      "source": "composition.runtime_builders",
-      "target": "infrastructure.config",
-      "imports": 23
-    },
-    {
       "source": "interfaces.cli",
       "target": "composition.runtime_builders",
       "imports": 23
@@ -291,6 +291,11 @@
     },
     {
       "source": "composition.factories",
+      "target": "application.services",
+      "imports": 22
+    },
+    {
+      "source": "composition.factories",
       "target": "domain.schemas",
       "imports": 22
     },
@@ -298,11 +303,6 @@
       "source": "composition.factories",
       "target": "infrastructure.storage",
       "imports": 22
-    },
-    {
-      "source": "composition.factories",
-      "target": "application.services",
-      "imports": 21
     },
     {
       "source": "composition.factories",
