@@ -1,13 +1,13 @@
 # Compatibility Importer Census
 
-- snapshot_date: 2026-10-18
+- snapshot_date: 2026-11-18
 - retained_entrypoint_count: 12
 - retained_public_entrypoint_burden: 0
 - removed_compatibility_surface_count: 23
 - removed_compatibility_surfaces_with_src_importers: 0
 - removed_compatibility_surfaces_with_test_importers: 0
 - removed_compatibility_surfaces_still_present: 0
-- twin_pair_count: 0
+- twin_pair_count: 1
 - tracked_twin_family_count: 0
 - config_root_symbol_count: 3
 - config_root_src_importer_count: 0
@@ -31,7 +31,7 @@
 | `src/bioetl/composition/entrypoints.py` | 0 | 4 |
 | `src/bioetl/composition/health_api.py` | 0 | 3 |
 | `src/bioetl/composition/maintenance_api.py` | 0 | 2 |
-| `src/bioetl/infrastructure/config/__init__.py` | 0 | 16 |
+| `src/bioetl/infrastructure/config/__init__.py` | 0 | 17 |
 | `src/bioetl/domain/composite/config.py` | 0 | 43 |
 | `src/bioetl/application/composite/merger.py` | 0 | 5 |
 
@@ -48,7 +48,7 @@
 | `src/bioetl/composition/entrypoints.py` | `bioetl.composition` | `stable_public_api_zero_first_party_src` | `external-facing` | yes | yes | 0 | 4 |
 | `src/bioetl/composition/health_api.py` | `bioetl.composition` | `stable_public_api_zero_first_party_src` | `external-facing` | yes | yes | 0 | 3 |
 | `src/bioetl/composition/maintenance_api.py` | `bioetl.composition` | `stable_public_api_zero_first_party_src` | `external-facing` | yes | yes | 0 | 2 |
-| `src/bioetl/infrastructure/config/__init__.py` | `bioetl.infrastructure.config` | `stable_public_api_zero_first_party_src` | `external-facing` | yes | yes | 0 | 16 |
+| `src/bioetl/infrastructure/config/__init__.py` | `bioetl.infrastructure.config` | `stable_public_api_zero_first_party_src` | `external-facing` | yes | yes | 0 | 17 |
 | `src/bioetl/domain/composite/config.py` | `bioetl.domain.composite` | `stable_public_api_with_reviewed_first_party_usage` | `external-facing` | no | yes | 0 | 43 |
 | `src/bioetl/application/composite/merger.py` | `bioetl.application.composite` | `stable_public_api_zero_first_party_src` | `external-facing` | yes | yes | 0 | 5 |
 
@@ -66,7 +66,7 @@
 | --- | --- | --- | --- | ---: | ---: | ---: |
 | `src/bioetl/composition/entrypoints.py` | `bioetl.composition` | `stable_public_api_zero_first_party_src` | `external-facing` | 0 | 4 | 10 |
 | `src/bioetl/composition/health_api.py` | `bioetl.composition` | `stable_public_api_zero_first_party_src` | `external-facing` | 0 | 3 | 7 |
-| `src/bioetl/infrastructure/config/__init__.py` | `bioetl.infrastructure.config` | `stable_public_api_zero_first_party_src` | `external-facing` | 0 | 16 | 18 |
+| `src/bioetl/infrastructure/config/__init__.py` | `bioetl.infrastructure.config` | `stable_public_api_zero_first_party_src` | `external-facing` | 0 | 17 | 18 |
 
 ## First Safe Removal Wave
 
@@ -110,6 +110,7 @@ Migration prerequisites for `src/bioetl/interfaces/cli/commands/maintenance.py`:
 
 | Public module | Public src | Private src |
 | --- | ---: | ---: |
+| `bioetl.infrastructure.control_plane.evidence_location_publish` | 2 | 2 |
 
 ## Tracked Twin Family Ratchet
 

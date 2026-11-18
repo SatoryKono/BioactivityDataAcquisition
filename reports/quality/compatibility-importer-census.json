@@ -1,5 +1,5 @@
 {
-  "snapshot_date": "2026-10-18",
+  "snapshot_date": "2026-11-18",
   "inventory_source": "configs/quality/compatibility_facade_inventory.yaml",
   "twin_ratchet_source": "configs/quality/compatibility_twin_module_ratchet.yaml",
   "config_root_facade_source": "configs/quality/infrastructure_config_root_facade_inventory.yaml",
@@ -11,8 +11,8 @@
     "removed_compatibility_surfaces_with_src_importers": 0,
     "removed_compatibility_surfaces_with_test_importers": 0,
     "removed_compatibility_surfaces_still_present": 0,
-    "twin_pair_count": 0,
-    "twin_pairs_with_private_src_importers": 0,
+    "twin_pair_count": 1,
+    "twin_pairs_with_private_src_importers": 1,
     "twin_pairs_without_public_src_importers": 0,
     "tracked_twin_family_count": 0,
     "config_root_symbol_count": 3,
@@ -297,10 +297,11 @@
         "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py",
         "tests/unit/infrastructure/test_issue_10469_stream_a_infra_five.py",
         "tests/unit/infrastructure/test_issue_10469_stream_a_infra_fourteen.py",
-        "tests/unit/infrastructure/test_issue_10469_two_line_residuals_three.py"
+        "tests/unit/infrastructure/test_issue_10469_two_line_residuals_three.py",
+        "tests/unit/interfaces/http/test_selected_run_contract_exclusions.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 16,
+      "test_importer_count": 17,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing",
@@ -704,10 +705,11 @@
         "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py",
         "tests/unit/infrastructure/test_issue_10469_stream_a_infra_five.py",
         "tests/unit/infrastructure/test_issue_10469_stream_a_infra_fourteen.py",
-        "tests/unit/infrastructure/test_issue_10469_two_line_residuals_three.py"
+        "tests/unit/infrastructure/test_issue_10469_two_line_residuals_three.py",
+        "tests/unit/interfaces/http/test_selected_run_contract_exclusions.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 16,
+      "test_importer_count": 17,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing",
@@ -978,7 +980,7 @@
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing",
       "src_importer_count": 0,
-      "test_importer_count": 16
+      "test_importer_count": 17
     }
   ],
   "retained_public_export_owner_usage_map": [
@@ -1122,7 +1124,7 @@
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing",
       "src_importer_count": 0,
-      "test_importer_count": 16
+      "test_importer_count": 17
     }
   ],
   "first_safe_removal_wave": {
@@ -1450,7 +1452,26 @@
       "test_importer_count": 0
     }
   ],
-  "twin_pairs": [],
+  "twin_pairs": [
+    {
+      "private_path": "src/bioetl/infrastructure/control_plane/_evidence_location_publish.py",
+      "public_path": "src/bioetl/infrastructure/control_plane/evidence_location_publish.py",
+      "private_module": "bioetl.infrastructure.control_plane._evidence_location_publish",
+      "public_module": "bioetl.infrastructure.control_plane.evidence_location_publish",
+      "public_src_importer_count": 2,
+      "public_test_importer_count": 0,
+      "private_src_importer_count": 2,
+      "private_test_importer_count": 2,
+      "public_src_importers": [
+        "src/bioetl/infrastructure/adapters/iuphar/evidence_store.py",
+        "src/bioetl/infrastructure/storage/target_classification_migration.py"
+      ],
+      "private_src_importers": [
+        "src/bioetl/infrastructure/control_plane/evidence_location_publish.py",
+        "src/bioetl/infrastructure/control_plane/file_evidence_location_store.py"
+      ]
+    }
+  ],
   "tracked_twin_families": [],
   "config_root_facade": {
     "target_module": "bioetl.infrastructure.config",

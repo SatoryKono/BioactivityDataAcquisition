@@ -549,7 +549,7 @@
       "runtime_checkable": true
     },
     {
-      "line": 44,
+      "line": 59,
       "name": "TargetClassificationEvidencePort",
       "path": "src/bioetl/domain/ports/target_classification.py",
       "runtime_checkable": true
