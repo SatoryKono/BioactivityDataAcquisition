@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-18T19:34:21.384564+00:00",
+  "generated_at": "2026-11-18T19:45:35.293866+00:00",
   "summary": {
     "total_scripts": 763,
     "status_counts": {
@@ -5157,7 +5157,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "scripts/ai/mcp/safe_markdownify.py",
@@ -5176,6 +5176,12 @@
           "line": 8,
           "source_group": "tests",
           "text": "from scripts.ai.mcp.safe_file import read_confined"
+        },
+        {
+          "path": "tests/unit/scripts/test_mcp_safe_file.py",
+          "line": 9,
+          "source_group": "tests",
+          "text": "from scripts.ai.mcp import safe_file"
         }
       ],
       "owner": "@bioetl-platform",

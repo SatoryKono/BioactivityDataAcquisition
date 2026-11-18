@@ -135,9 +135,11 @@ def read_confined(
     kernel.ReadFile.restype = wintypes.BOOL
 
     with ExitStack() as stack:
-        # Pin all ancestors against rename; checking a path string alone is racy.
+        # FILE_TRAVERSE (FILE_EXECUTE for files) makes absence of SHARE_DELETE
+        # participate in rename sharing checks. READ_ATTRIBUTES alone does not.
+        # This does not request FILE_LIST_DIRECTORY from traverse-only ancestors.
         for parent in reversed(path.parents):
-            handle = kernel.CreateFileW(str(parent), 0x80, 3, None, 3, 0x02200000, None)
+            handle = kernel.CreateFileW(str(parent), 0xA0, 3, None, 3, 0x02200000, None)
             if handle == wintypes.HANDLE(-1).value:
                 raise ctypes.WinError(ctypes.get_last_error())
             stack.callback(kernel.CloseHandle, handle)
