@@ -318,3 +318,62 @@ def test_native_selector_requires_the_physical_pinned_installation(
             config, root, manifest=manifest, markdownify=tmp_path / "absent.json"
         )
     assert Path.cwd() == cwd
+
+
+def test_default_foreign_markdownify_binding_keeps_memory_and_ast(
+    session_binding, tmp_path, monkeypatch
+):
+    root, manifest, _, config = session_binding
+    home = tmp_path / "client-home"
+    source = home / ".config/pc-agent/markdownify-bioetl.json"
+    source.parent.mkdir(parents=True)
+    source.write_text(
+        json.dumps(
+            {
+                "schema": 1,
+                "workspace": str(tmp_path / "foreign"),
+                "server": "Markdownify-BioETL",
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(Path, "home", lambda: home)
+    args = session_overrides(config, root, manifest=manifest)
+    assert len(args) == 4
+    assert args[1].startswith("mcp_servers.memory=")
+    assert args[3].startswith("mcp_servers.ast-grep=")
+
+
+def test_native_workspace_does_not_skip_a_dangling_nearest_git_marker(
+    tmp_path, monkeypatch
+):
+    from types import SimpleNamespace
+
+    outer, inner = tmp_path / "outer", tmp_path / "outer/nested"
+    inner.mkdir(parents=True)
+    (outer / ".git").mkdir()
+    original = native_session.os.path.lexists
+    monkeypatch.setattr(
+        native_session.os.path,
+        "lexists",
+        lambda path: True if Path(path) == inner / ".git" else original(path),
+    )
+    monkeypatch.setattr(Path, "cwd", lambda: inner)
+
+    def validate(path):
+        assert path == inner
+        raise PermissionError("Broken nearest marker")
+
+    roots = SimpleNamespace(physical_root=validate)
+    monkeypatch.setattr(
+        native_session.importlib.util,
+        "spec_from_file_location",
+        lambda *args: SimpleNamespace(
+            loader=SimpleNamespace(exec_module=lambda _: None)
+        ),
+    )
+    monkeypatch.setattr(
+        native_session.importlib.util, "module_from_spec", lambda _: roots
+    )
+    with pytest.raises(PermissionError, match="nearest marker"):
+        native_session.workspace()

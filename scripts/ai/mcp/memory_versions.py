@@ -356,6 +356,18 @@ def build(owner, entry, value):
     physical(VERSIONS)
     staging = VERSIONS / ("building-" + uuid.uuid4().hex)
     staging.mkdir()
+    try:
+        return _build_version(owner, hashes, staging)
+    except BaseException:
+        if staging.exists():
+            try:
+                _discard_duplicate_build(staging)
+            except Exception:
+                pass  # Preserve the build error when safe cleanup cannot complete.
+        raise
+
+
+def _build_version(owner, hashes, staging):
     _copy_runtime_dependencies(owner, hashes, staging)
     service = staging / "tools/shared-mcp"
     source = Path(__file__).with_name(RECONCILIATION_SOURCE)
@@ -774,6 +786,8 @@ def _selected_binding(bundle_binding, transaction):
         "legacy",
     }:
         raise PermissionError("Profile runtime binding is disabled or unsupported")
+    if bundle_binding["state"] == "active" and transaction is None:
+        raise PermissionError("Active runtime has no committed migration transaction")
     if transaction is not None and not _binding_matches_transaction(
         bundle_binding, transaction
     ):

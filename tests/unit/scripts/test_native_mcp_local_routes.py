@@ -342,3 +342,48 @@ def test_foreign_git_binding_is_not_probed_before_repository_comparison(
     monkeypatch.setattr(local_mcp_routes, "_physical", observed)
     with pytest.raises(ValueError, match="another repository"):
         apply_local_routes({"memory": {}}, root, manifest=path)
+
+
+def test_session_selector_respects_a_dangling_nearest_git_marker(tmp_path, monkeypatch):
+    from scripts.ai.mcp import session_client
+
+    outer, inner = tmp_path / "outer", tmp_path / "outer/nested"
+    inner.mkdir(parents=True)
+    (outer / ".git").mkdir()
+    original = session_client.os.path.lexists
+    monkeypatch.setattr(
+        session_client.os.path,
+        "lexists",
+        lambda path: True if Path(path) == inner / ".git" else original(path),
+    )
+
+    def validate(path):
+        assert path == inner
+        raise PermissionError("Broken nearest marker")
+
+    with pytest.raises(PermissionError, match="nearest marker"):
+        session_root(inner, validate)
+
+
+def test_selector_main_refuses_missing_dispatcher_before_loading_host(
+    tmp_path, monkeypatch
+):
+    from types import SimpleNamespace
+    from unittest.mock import Mock
+    from scripts.ai.mcp import session_client
+
+    monkeypatch.setattr(session_client, "__file__", str(tmp_path / "session_client.py"))
+    monkeypatch.setattr(
+        session_client,
+        "sys",
+        SimpleNamespace(
+            executable=str(session_client.PYTHON),
+            flags=SimpleNamespace(isolated=True, no_site=True),
+            dont_write_bytecode=True,
+        ),
+    )
+    load = Mock(side_effect=AssertionError("Unqualified host loaded"))
+    monkeypatch.setattr(session_client.importlib.util, "spec_from_file_location", load)
+    with pytest.raises(PermissionError, match="dispatcher manifest"):
+        session_client.main()
+    load.assert_not_called()

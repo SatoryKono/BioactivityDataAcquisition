@@ -114,13 +114,23 @@ def _interrupted_launch_block(observed, coord):
     return None
 
 
+def _legacy_block_pending(observed, coord):
+    raw = observed["blocked"]
+    if raw is None:
+        return False
+    raw_hash = digest(raw)
+    return not any(
+        item["snapshot"]["records"]["blocked"] == raw_hash for item in coord["history"]
+    )
+
+
 def block_identity(observed, coord):
     active = coord.get("active_block")
     if active:
         return active["id"]
     if coord["history"] and coord["history"][-1]["phase"] == "LAUNCHING":
         return _interrupted_launch_block(observed, coord)
-    if observed["blocked"] is not None:
+    if _legacy_block_pending(observed, coord):
         return "legacy-" + digest(
             {k: observed[k] for k in ("blocked", "status", "work")}
         )
@@ -287,14 +297,7 @@ def blocked(owner, entry):
     coord = coordination(owner, entry)
     if coord.get("active_block"):
         return True
-    observed = records(owner, entry)
-    raw = observed["blocked"]
-    if raw is None:
-        return False
-    raw_hash = digest(raw)
-    return not any(
-        item["snapshot"]["records"]["blocked"] == raw_hash for item in coord["history"]
-    )
+    return _legacy_block_pending(records(owner, entry), coord)
 
 
 def decision(owner, entry, value, *, self_owner=False):
@@ -336,6 +339,20 @@ def launch_generation(owner, entry, value):
         return last["new_generation"]
 
 
+def _observed_receipt_matches(work, entry, generation, idle, graph):
+    if (
+        work.get("schema") != 2
+        or work.get("profile") != entry["id"]
+        or work.get("generation") != generation
+    ):
+        return False
+    return not idle or (
+        work.get("phase") == "idle"
+        and work.get("mutating") is False
+        and work.get("graph") == graph
+    )
+
+
 def observe(owner, entry, value, generation, *, idle=False):
     directory = Path(entry["state"])
     with _transition_lock(owner, directory):
@@ -351,18 +368,8 @@ def observe(owner, entry, value, generation, *, idle=False):
         ) != last.get("owner_birth"):
             raise ValueError("Recovery generation owner changed")
         work = owner.state.read(directory / "work.json") or {}
-        if (
-            work.get("schema") != 2
-            or work.get("profile") != entry["id"]
-            or work.get("generation") != generation
-            or (
-                idle
-                and (
-                    work.get("phase") != "idle"
-                    or work.get("graph") != owner.state.graph_stamp(value)
-                )
-            )
-        ):
+        graph = owner.state.graph_stamp(value) if idle else None
+        if not _observed_receipt_matches(work, entry, generation, idle, graph):
             raise ValueError("Recovery generation has no idle receipt")
         last["phase"] = phase
         owner.state.write(directory / COORDINATION, coord)

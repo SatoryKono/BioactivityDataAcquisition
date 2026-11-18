@@ -95,6 +95,18 @@ def test_wrong_version_binding_is_rejected(tmp_path, bundle, monkeypatch):
         ),
         encoding="utf-8",
     )
+    (directory / "migration-v2.json").write_text(
+        json.dumps(
+            {
+                "schema": 2,
+                "id": "fixture-transaction",
+                "phase": "COMMITTED",
+                "bundle": str(bundle),
+                "version": "other",
+            }
+        ),
+        encoding="utf-8",
+    )
     with pytest.raises(PermissionError, match="version mismatch"):
         versions.select_bundle(tmp_path, "profile")
 
@@ -120,6 +132,18 @@ def test_selected_profile_does_not_modify_neighbor_binding(
         (directory / "runtime-binding.json").write_text(
             json.dumps(binding), encoding="utf-8"
         )
+    (tmp_path / "target/migration-v2.json").write_text(
+        json.dumps(
+            {
+                "schema": 2,
+                "id": "completed-fixture",
+                "phase": "COMMITTED",
+                "bundle": str(bundle),
+                "version": bundle.name,
+            }
+        ),
+        encoding="utf-8",
+    )
     neighbor = tmp_path / "neighbor/runtime-binding.json"
     before = neighbor.read_bytes()
     assert versions.select_bundle(tmp_path, "target") == bundle
@@ -698,3 +722,69 @@ def test_interrupted_old_runtime_can_upgrade_only_with_a_zero_request_start_rece
             bundle
         )
     assert graph.read_bytes() == b'{"fixture":true}\n'
+
+
+def test_active_runtime_without_committed_journal_is_refused(
+    tmp_path, bundle, monkeypatch
+):
+    monkeypatch.setattr(versions, "VERSIONS", bundle.parent)
+    directory = tmp_path / "active-profile"
+    directory.mkdir()
+    binding = directory / "runtime-binding.json"
+    binding.write_text(
+        json.dumps(
+            {
+                "schema": 2,
+                "state": "active",
+                "version": bundle.name,
+                "bundle": str(bundle),
+            }
+        ),
+        encoding="utf-8",
+    )
+    before = binding.read_bytes()
+    with pytest.raises(PermissionError, match="no committed migration"):
+        versions.select_bundle(tmp_path, directory.name)
+    assert binding.read_bytes() == before
+    assert not (directory / "migration-v2.json").exists()
+
+
+@pytest.mark.parametrize("cleanup_fails", [False, True])
+def test_failed_build_cleans_only_its_staging_and_preserves_original_error(
+    tmp_path, monkeypatch, cleanup_fails
+):
+    host, root = tmp_path / "host", tmp_path / "versions"
+    host.mkdir()
+    for name in ("project-memory-scoped-client.py", "host-servers.json"):
+        (host / name).write_text("synthetic fixture", encoding="utf-8")
+    root.mkdir()
+    published = root / ("a" * 64)
+    published.mkdir()
+    sentinel = published / "preserved"
+    sentinel.write_bytes(b"published")
+    monkeypatch.setattr(versions, "HOST", host)
+    monkeypatch.setattr(versions, "VERSIONS", root)
+    created = []
+
+    def copy(_owner, _hashes, staging):
+        created.append(staging)
+        service = staging / "tools/shared-mcp"
+        service.mkdir(parents=True)
+        (service / "changed.py").write_text("fixture", encoding="utf-8")
+
+    def fail(*_):
+        raise ValueError("fixture source drift")
+
+    monkeypatch.setattr(versions, "_copy_runtime_dependencies", copy)
+    monkeypatch.setattr(versions, "_adapt_service_text", fail)
+    if cleanup_fails:
+
+        def refuse_cleanup(_):
+            raise OSError("fixture cleanup failure")
+
+        monkeypatch.setattr(versions, "_discard_duplicate_build", refuse_cleanup)
+    owner = SimpleNamespace(candidate=lambda *_: {"hashes": {}})
+    with pytest.raises(ValueError, match="fixture source drift"):
+        versions.build(owner, {}, {})
+    assert len(created) == 1 and created[0].exists() is cleanup_fails
+    assert sentinel.read_bytes() == b"published"

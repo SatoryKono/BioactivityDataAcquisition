@@ -11,6 +11,7 @@ import hashlib
 import http.client
 import importlib.util
 import json
+import math
 import os
 import secrets
 import socket
@@ -20,6 +21,7 @@ import threading
 import time
 import uuid
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from contextlib import contextmanager
 from functools import partial
 from pathlib import Path
 
@@ -40,6 +42,8 @@ SESSION_LIMIT = 64
 SESSION_IDLE_SECONDS = 15 * 60
 HTTP_CONNECTION_LIMIT = 64
 HTTP_READ_SECONDS = 5
+STARTUP_SECONDS = 32
+PENDING_CLEANUP = "cleanup.pending.json"
 
 
 def module(name, path):
@@ -117,7 +121,7 @@ def configure(root):
     return key, binding
 
 
-def pins(converter):
+def _control_pins():
     paths = [
         HERE / "safe_markdownify.py",
         HERE / "safe_file.py",
@@ -128,24 +132,30 @@ def pins(converter):
         HOST / "project-memory-scope.py",
         HOST / "ast-workspace-profile.py",
         PYTHON,
-        Path(converter) / "converter.json",
     ]
-    snapshots.verify(Path(converter))
     result = {str(path): core.sha(path) for path in paths}
     result.update(runtime.python_hashes())
     return result
 
 
-def specification(root):
+def pins(converter):
+    snapshots.verify(Path(converter))
+    result = _control_pins()
+    path = Path(converter) / "converter.json"
+    result[str(path)] = core.sha(path)
+    return result
+
+
+def specification(root, *, for_stop=False):
     key, binding = configure(root)
     spec = core.read_json(core.STATE / "profile.json")
-    if (
-        spec.get("schema") != 2
-        or spec["id"] != key
-        or spec["binding"] != binding
-        or spec["pins"] != pins(spec["converter"])
-        or not _qualification_matches(spec)
-    ):
+    if spec.get("schema") != 2 or spec["id"] != key or spec["binding"] != binding:
+        raise PermissionError("Markdownify profile/runtime drift")
+    actual = _control_pins() if for_stop else pins(spec["converter"])
+    expected = (
+        {key: spec["pins"].get(key) for key in actual} if for_stop else spec["pins"]
+    )
+    if actual != expected or (not for_stop and not _qualification_matches(spec)):
         raise PermissionError("Markdownify profile/runtime drift")
     return spec
 
@@ -154,6 +164,7 @@ def prepare(root):
     key, binding = configure(root)
     core.private_directory()
     with core.LifetimeLock(core.STATE / TRANSITION_LOCK):
+        _retry_pending_jobs()
         path = core.STATE / "profile.json"
         if path.exists():
             return specification(root)
@@ -171,19 +182,15 @@ def prepare(root):
         converter = snapshots.build(
             Path("D:/pc-agent/tools/markdownify-converter-versions"), site, qualified
         )
-        with socket.socket() as sock:
-            sock.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
-            sock.bind(("127.0.0.1", 0))
-            port = sock.getsockname()[1]
         spec = {
             "schema": 2,
             "id": key,
             "binding": binding,
-            "port": port,
             "converter": str(converter),
             "pins": pins(converter),
         }
         spec["qualification"] = _qualify_converter(spec, qualified)
+        _retry_pending_jobs()
         spec["enabled_tools"] = _enabled_tools(spec["qualification"])
         core.credential(create=True)
         core.write_json(path, spec)
@@ -238,7 +245,66 @@ def _response_value(response, method, path, session):
     return (json.loads(data) if data else None), response.getheader("Mcp-Session-Id")
 
 
-def request(spec, method, path, body=None, session=None):
+def _expire_socket(sock):
+    try:
+        sock.shutdown(socket.SHUT_RDWR)
+    except OSError:
+        pass
+
+
+@contextmanager
+def _bounded_connection(connection, timeout):
+    deadline = time.monotonic() + timeout
+    timer = None
+    try:
+        connection.connect()
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            raise TimeoutError("Markdownify connection deadline expired")
+        connection.sock.settimeout(remaining)
+        timer = threading.Timer(remaining, _expire_socket, args=(connection.sock,))
+        timer.daemon = True
+        timer.start()
+        yield
+    finally:
+        if timer is not None:
+            timer.cancel()
+        connection.close()
+
+
+def _connection_record(spec):
+    if spec.get("id") != core.STATE.name:
+        raise PermissionError("Markdownify endpoint belongs to another profile")
+    record = core.read_json(core.STATE / STATUS_RECORD) or {}
+    pid, birth = _recorded_owner_identity(record)
+    port = record.get("port")
+    if not pid or type(port) is not int or not 0 < port < 65536:
+        raise PermissionError("Markdownify owner endpoint is not published")
+    if core.process_birth(pid) != birth:
+        raise PermissionError("Markdownify owner identity unavailable")
+    return record
+
+
+def _verify_connection_peer(connection, record):
+    local_port = connection.sock.getsockname()[1]
+    matched = [
+        row
+        for row in psutil.net_connections(kind="tcp")
+        if row.status == "ESTABLISHED"
+        and row.laddr.ip == "127.0.0.1"
+        and row.laddr.port == record["port"]
+        and row.raddr
+        and row.raddr.port == local_port
+    ]
+    if (
+        not matched
+        or any(row.pid != record["owner_pid"] for row in matched)
+        or core.process_birth(record["owner_pid"]) != record["owner_birth"]
+    ):
+        raise PermissionError("Markdownify socket identity unavailable")
+
+
+def request(spec, method, path, body=None, session=None, *, timeout=100):
     payload = (
         None
         if body is None
@@ -248,36 +314,23 @@ def request(spec, method, path, body=None, session=None):
     )
     if payload is not None and len(payload) > 1024 * 1024:
         raise ValueError("Oversized Markdownify request")
-    record = core.read_json(core.STATE / STATUS_RECORD)
-    if core.process_birth(record["owner_pid"]) != record["owner_birth"]:
-        raise PermissionError("Markdownify owner identity unavailable")
-    connection = http.client.HTTPConnection("127.0.0.1", spec["port"], timeout=100)
-    connection.connect()
+    if timeout <= 0:
+        raise TimeoutError("Markdownify request deadline expired")
+    record = _connection_record(spec)
+    connection = http.client.HTTPConnection(
+        "127.0.0.1", record["port"], timeout=timeout
+    )
     connection.auto_open = False
-    local_port = connection.sock.getsockname()[1]
-    matched = [
-        row
-        for row in psutil.net_connections(kind="tcp")
-        if row.status == "ESTABLISHED"
-        and row.laddr.ip == "127.0.0.1"
-        and row.laddr.port == spec["port"]
-        and row.raddr
-        and row.raddr.port == local_port
-    ]
-    if not matched or any(row.pid != record["owner_pid"] for row in matched):
-        connection.close()
-        raise PermissionError("Markdownify socket identity unavailable")
-    headers = {
-        "Authorization": "Bearer " + core.credential(),
-        "Content-Type": "application/json",
-    }
-    if session:
-        headers["Mcp-Session-Id"] = session
-    try:
+    with _bounded_connection(connection, timeout):
+        _verify_connection_peer(connection, record)
+        headers = {
+            "Authorization": "Bearer " + core.credential(),
+            "Content-Type": "application/json",
+        }
+        if session:
+            headers["Mcp-Session-Id"] = session
         connection.request(method, path, payload, headers)
         return _response_value(connection.getresponse(), method, path, session)
-    finally:
-        connection.close()
 
 
 def _optional_status_record():
@@ -285,11 +338,11 @@ def _optional_status_record():
     return core.read_json(path) if path.exists() else {}
 
 
-def _owner_ready(spec, record):
+def _owner_ready(spec, record, *, timeout=100):
     try:
-        health, _ = request(spec, "GET", HEALTH_PATH)
+        health, _ = request(spec, "GET", HEALTH_PATH, timeout=timeout)
         return health["ready"] and health["generation"] == record["generation"]
-    except (OSError, PermissionError):
+    except (OSError, PermissionError, http.client.HTTPException):
         return False
 
 
@@ -336,27 +389,41 @@ def _recorded_owner_identity(record):
     pid, birth = record.get("owner_pid"), record.get("owner_birth")
     if record and not pid and set(record) != {RETIRED_GENERATION}:
         raise PermissionError("Markdownify owner identity is unknown")
+    if pid is not None and (
+        type(pid) is not int or pid <= 0 or type(birth) not in {int, float}
+    ):
+        raise PermissionError("Markdownify owner identity is unknown")
     return pid, birth
 
 
+def _startup_step(root, spec, record, launched, deadline):
+    pid, birth = _recorded_owner_identity(record)
+    if pid and core.process_birth(pid) == birth:
+        ready = _owner_ready(spec, record, timeout=deadline - time.monotonic())
+        return ready, launched
+    if pid and psutil.pid_exists(pid):
+        raise PermissionError("Reused or unknown Markdownify PID")
+    if time.monotonic() >= deadline:
+        raise TimeoutError("Markdownify startup deadline; no fallback")
+    return False, _launch_owner(root, record, launched) or launched
+
+
 def ensure(root):
+    deadline = time.monotonic() + STARTUP_SECONDS
     spec = specification(root)
     if (core.STATE / STOP_REQUEST).exists():
         raise PermissionError("Markdownify profile is administratively stopped")
     launched = False
-    for _ in range(160):
-        record = _optional_status_record()
-        pid, birth = _recorded_owner_identity(record)
-        if pid and core.process_birth(pid) == birth:
-            if _owner_ready(spec, record):
-                return spec
-        elif pid and psutil.pid_exists(pid):
-            raise PermissionError("Reused or unknown Markdownify PID")
-        else:
-            if not _launch_owner(root, record, launched):
-                continue
-            launched = True
-        time.sleep(0.2)
+    while time.monotonic() < deadline:
+        ready, launched = _startup_step(
+            root, spec, _optional_status_record(), launched, deadline
+        )
+        if ready and time.monotonic() < deadline:
+            return spec
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            break
+        time.sleep(min(0.2, remaining))
     raise TimeoutError("Markdownify startup deadline; no fallback")
 
 
@@ -372,8 +439,142 @@ def convert(spec, name, args):
     return _convert_bytes(spec, EXTENSIONS[name], raw)
 
 
+def _worker_job_name(name):
+    return (
+        name.startswith("job-")
+        and len(name) == 36
+        and all(char in "0123456789abcdef" for char in name[4:])
+    )
+
+
+def _check_worker_job(job):
+    if (
+        job.parent != core.STATE
+        or not _worker_job_name(job.name)
+        or core.STATE.resolve(strict=True) != core.STATE
+        or job.resolve(strict=True) != job
+        or not job.is_dir()
+    ):
+        raise PermissionError("Worker cleanup namespace is not physical")
+    for path in job.iterdir():
+        if (
+            path.is_symlink()
+            or getattr(path, "is_junction", lambda: False)()
+            or path.resolve(strict=True) != path
+        ):
+            raise PermissionError("Worker cleanup path changed")
+        if path.is_file() and path.stat().st_nlink != 1:
+            raise PermissionError("Worker cleanup file has an unowned link")
+
+
+def _erase_worker_job(job, snapshot):
+    _check_worker_job(job)
+    permitted = {"input" + ext for ext in EXTENSIONS.values() if ext != ".md"}
+    if snapshot not in permitted or any(
+        path.name not in {snapshot, "output.md", PENDING_CLEANUP}
+        for path in job.iterdir()
+    ):
+        raise PermissionError("Worker cleanup contains unowned files")
+    for name in (snapshot, "output.md", PENDING_CLEANUP):
+        (job / name).unlink(missing_ok=True)
+    job.rmdir()
+
+
+def _pending_worker_finished(record, job):
+    if (
+        not isinstance(record, dict)
+        or record.get("schema") != 1
+        or record.get("job") != job.name
+    ):
+        raise PermissionError("Unsupported pending worker cleanup")
+    if record.get("job_closed") is not True:
+        return False
+    pid, birth = record.get("worker_pid"), record.get("worker_birth")
+    if pid is None:
+        return birth is None
+    if (
+        type(pid) is not int
+        or pid <= 0
+        or (
+            birth is not None
+            and (type(birth) not in {int, float} or not math.isfinite(birth))
+        )
+    ):
+        raise PermissionError("Pending worker identity is unknown")
+    current = core.process_birth(pid)
+    if current is not None:
+        return birth is not None and current != birth
+    return not psutil.pid_exists(pid)
+
+
+def _retry_pending_jobs():
+    for job in core.STATE.iterdir():
+        if not _worker_job_name(job.name):
+            continue
+        _check_worker_job(job)
+        marker = job / PENDING_CLEANUP
+        if not marker.exists():
+            continue
+        record = core.read_json(marker)
+        if not _pending_worker_finished(record, job):
+            raise PermissionError("Previous worker cleanup remains pending")
+        try:
+            _erase_worker_job(job, record.get("snapshot"))
+        except OSError:
+            core.write_json(marker, record)
+            raise
+
+
+def _close_worker(owned, child):
+    closed, problem = owned is None, None
+    try:
+        if owned is not None:
+            owned.close()
+            closed = True
+    except Exception as error:
+        problem = error
+    try:
+        if child is not None:
+            if child.poll() is None:
+                child.terminate()  # Only the exact child handle created here.
+            child.wait(timeout=10)
+    except Exception as error:
+        problem = problem or error
+    return closed, problem
+
+
+def _pending_worker_record(job, snapshot, child, closed):
+    pid = None if child is None else child.pid
+    birth = None if pid is None else core.process_birth(pid)
+    return {
+        "schema": 1,
+        "job": job.name,
+        "snapshot": snapshot.name,
+        "worker_pid": pid,
+        "worker_birth": birth,
+        "job_closed": closed,
+    }
+
+
+def _finish_worker(job, snapshot, owned, child):
+    closed, problem = _close_worker(owned, child)
+    if problem is not None:
+        core.write_json(
+            job / PENDING_CLEANUP, _pending_worker_record(job, snapshot, child, closed)
+        )
+        raise problem
+    try:
+        _erase_worker_job(job, snapshot.name)
+    except OSError:
+        core.write_json(
+            job / PENDING_CLEANUP, _pending_worker_record(job, snapshot, child, closed)
+        )
+        raise
+
+
 def _convert_bytes(spec, extension, raw):
     """Execute a pinned worker on an owner-private snapshot, including probes."""
+    _retry_pending_jobs()
     job = core.STATE / ("job-" + uuid.uuid4().hex)
     job.mkdir(mode=0o700)
     snapshot = job / ("input" + extension)
@@ -397,6 +598,7 @@ def _convert_bytes(spec, extension, raw):
     env["PYTHONUTF8"] = "1"
     owned = None
     child = None
+    failed = True
     try:
         snapshot.write_bytes(raw)
         owned = core.Job()
@@ -423,17 +625,15 @@ def _convert_bytes(spec, extension, raw):
             output = output_stream.read(1024 * 1024 + 1)
         if child.returncode or len(output) > 1024 * 1024:
             raise ValueError("Conversion failed or exceeded output bound")
-        return output.decode("utf-8")
+        text = output.decode("utf-8")
+        failed = False
+        return text
     finally:
-        if owned is not None:
-            owned.close()
-        if child is not None:
-            if child.poll() is None:
-                child.terminate()  # Only the exact child handle created above.
-            child.wait(timeout=10)
-        snapshot.unlink(missing_ok=True)
-        output_path.unlink(missing_ok=True)
-        job.rmdir()
+        try:
+            _finish_worker(job, snapshot, owned, child)
+        except Exception:
+            if not failed:
+                raise
 
 
 class _SessionRegistry:
@@ -777,8 +977,22 @@ def _watch_stop(server, record, gate, draining):
         time.sleep(0.2)
 
 
+def _publish_listener(server, record):
+    with core.LifetimeLock(core.STATE / TRANSITION_LOCK):
+        if (
+            core.read_json(core.STATE / STATUS_RECORD) != record
+            or (core.STATE / STOP_REQUEST).exists()
+        ):
+            raise PermissionError(
+                "Markdownify launch changed before endpoint publication"
+            )
+        record["port"] = server.server_address[1]
+        core.write_json(core.STATE / STATUS_RECORD, record)
+
+
 def serve(root):
     spec = specification(root)
+    _retry_pending_jobs()
     with core.LifetimeLock(core.STATE / "owner.lock"):
         # Parent publishes PID+birth before this process binds the port.
         for _ in range(100):
@@ -806,20 +1020,22 @@ def serve(root):
             gate=gate,
             draining=draining,
         )
-        server = _BoundedHTTPServer(
-            ("127.0.0.1", spec["port"]), handler, bind_and_activate=False
-        )
+        server = _BoundedHTTPServer(("127.0.0.1", 0), handler, bind_and_activate=False)
         server.allow_reuse_address = False
-        server.socket.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
-        server.server_bind()
-        server.server_activate()
-        server.daemon_threads = True
-
-        threading.Thread(
-            target=_watch_stop, args=(server, record, gate, draining), daemon=True
-        ).start()
-        server.serve_forever(poll_interval=0.2)
-        server.server_close()
+        try:
+            exclusive = getattr(socket, "SO_EXCLUSIVEADDRUSE", None)
+            if exclusive is not None:
+                server.socket.setsockopt(socket.SOL_SOCKET, exclusive, 1)
+            server.server_bind()
+            server.server_activate()
+            _publish_listener(server, record)
+            server.daemon_threads = True
+            threading.Thread(
+                target=_watch_stop, args=(server, record, gate, draining), daemon=True
+            ).start()
+            server.serve_forever(poll_interval=0.2)
+        finally:
+            server.server_close()
 
 
 def _renew_session(spec, initialization):
@@ -847,7 +1063,7 @@ def _discard_session(spec, session):
     try:
         request(spec, "DELETE", "/mcp", session=session)
     except Exception:
-        pass  # Best effort; preserve the original handshake failure.
+        pass  # Best effort; preserve the original operation failure.
 
 
 def _forward_request(spec, value, session, initialization):
@@ -906,10 +1122,7 @@ def client(root):
                 print(json.dumps(result), flush=True)
     finally:
         if session:
-            try:
-                request(spec, "DELETE", "/mcp", session=session)
-            except _SessionExpired:
-                pass  # An expired session already owns no server resources.
+            _discard_session(spec, session)
 
 
 def _retire_stopped_record(record, marker_value):
@@ -958,7 +1171,7 @@ def _start(root):
 
 
 def _stop(root):
-    specification(root)
+    specification(root, for_stop=True)
     with core.LifetimeLock(core.STATE / TRANSITION_LOCK):
         record = core.read_json(core.STATE / STATUS_RECORD)
         if core.process_birth(record["owner_pid"]) != record["owner_birth"]:
@@ -1000,7 +1213,11 @@ def _run(argv=None):
         raise ValueError("Administrative root required")
     elif args.mode == "prepare":
         value = prepare(args.root)
-        print(json.dumps({"prepared": True, "id": value["id"], "port": value["port"]}))
+        print(
+            json.dumps(
+                {"prepared": True, "id": value["id"], "endpoint": "allocated_on_start"}
+            )
+        )
     elif args.mode == "serve":
         serve(args.root)
     elif args.mode == "start":

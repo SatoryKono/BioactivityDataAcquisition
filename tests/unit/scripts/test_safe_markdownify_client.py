@@ -442,12 +442,15 @@ def test_expired_inner_session_reinitializes_without_replaying_the_tool(monkeypa
     assert calls[1][0]["params"] == initialization["params"]
 
 
-def test_preauth_connections_have_a_capacity_and_an_absolute_read_deadline(monkeypatch):
+def test_preauth_connection_capacity_remains_held_until_explicit_release(monkeypatch):
     import socket
     from threading import Condition, Thread
 
     monkeypatch.setattr(markdownify, "HTTP_CONNECTION_LIMIT", 2)
     monkeypatch.setattr(markdownify, "HTTP_READ_SECONDS", 1)
+    released = Event()
+    timer = SimpleNamespace(start=lambda: None, cancel=lambda: None, daemon=False)
+    monkeypatch.setattr(markdownify.threading, "Timer", lambda *args: timer)
     changed = Condition()
     active = [0]
 
@@ -456,8 +459,7 @@ def test_preauth_connections_have_a_capacity_and_an_absolute_read_deadline(monke
             active[0] += 1
             changed.notify_all()
         try:
-            while connection.recv(1):
-                pass
+            released.wait()
         finally:
             with changed:
                 active[0] -= 1
@@ -482,6 +484,7 @@ def test_preauth_connections_have_a_capacity_and_an_absolute_read_deadline(monke
             assert extra.recv(1) == b""
         except ConnectionResetError:
             pass
+        released.set()
         with changed:
             assert changed.wait_for(lambda: active[0] == 0, timeout=3)
         assert server._slots.acquire(timeout=2)
@@ -490,6 +493,7 @@ def test_preauth_connections_have_a_capacity_and_an_absolute_read_deadline(monke
         server._slots.release()
         server._slots.release()
     finally:
+        released.set()
         for connection in connections:
             connection.close()
         server.shutdown()
@@ -648,7 +652,7 @@ def test_only_session_404_has_a_reinitialization_signal(monkeypatch, status, err
         "core",
         SimpleNamespace(
             STATE=markdownify.Path("fixture-state"),
-            read_json=lambda _: {"owner_pid": 77, "owner_birth": 1},
+            read_json=lambda _: {"owner_pid": 77, "owner_birth": 1, "port": 88},
             process_birth=lambda _: 1,
             credential=lambda: "fixture-token",
         ),
@@ -671,7 +675,9 @@ def test_only_session_404_has_a_reinitialization_signal(monkeypatch, status, err
         markdownify.http.client, "HTTPConnection", lambda *_, **__: connection
     )
     with pytest.raises(error) as raised:
-        markdownify.request({"port": 88}, "POST", "/mcp", {"id": 2}, "expired")
+        markdownify.request(
+            {"id": "fixture-state"}, "POST", "/mcp", {"id": 2}, "expired"
+        )
     assert type(raised.value) is error
     connection.close.assert_called_once()
 
@@ -713,7 +719,7 @@ def test_stop_marker_is_published_under_the_generation_transition_lock(
         assert held
         assert value == {"generation": "current"}
 
-    monkeypatch.setattr(markdownify, "specification", lambda _: {})
+    monkeypatch.setattr(markdownify, "specification", lambda _, **kwargs: {})
     monkeypatch.setattr(
         markdownify,
         "core",
@@ -853,7 +859,7 @@ def test_request_sends_the_same_bounded_utf8_bytes(monkeypatch):
         "core",
         SimpleNamespace(
             STATE=markdownify.Path("fixture-state"),
-            read_json=lambda _: {"owner_pid": 77, "owner_birth": 1},
+            read_json=lambda _: {"owner_pid": 77, "owner_birth": 1, "port": 88},
             process_birth=lambda _: 1,
             credential=lambda: "fixture-token",
         ),
@@ -875,7 +881,7 @@ def test_request_sends_the_same_bounded_utf8_bytes(monkeypatch):
         markdownify.http.client, "HTTPConnection", lambda *args, **kwargs: connection
     )
     body = {"id": "я" * 200_000, "method": "ping"}
-    markdownify.request({"port": 88}, "POST", "/mcp", body)
+    markdownify.request({"id": "fixture-state"}, "POST", "/mcp", body)
     payload = connection.request.call_args.args[2]
     assert isinstance(payload, bytes) and len(payload) < 1024 * 1024
     assert json.loads(payload) == body
@@ -1294,3 +1300,220 @@ def test_start_distinguishes_reused_pid_from_live_or_unknown_owner(
             markdownify._start(tmp_path)
         assert marker.exists() and status.exists()
         ensure.assert_not_called()
+
+
+def test_client_preserves_request_error_when_final_delete_also_fails(
+    tmp_path, monkeypatch
+):
+    original = OSError("original request failure")
+    calls = []
+    monkeypatch.setattr(markdownify, "specification", lambda _: {})
+    monkeypatch.setattr(
+        markdownify.sys,
+        "stdin",
+        StringIO('{"id":1,"method":"initialize"}\n{"id":2,"method":"ping"}\n'),
+    )
+
+    def request(spec, method, path, body=None, session=None):
+        calls.append((method, body))
+        if method == "GET":
+            return {"ready": True}, None
+        if body and body.get("method") == "initialize":
+            return {"id": 1, "result": {}}, "session"
+        if method == "DELETE":
+            raise PermissionError("cleanup unavailable")
+        raise original
+
+    monkeypatch.setattr(markdownify, "request", request)
+    with pytest.raises(OSError) as error:
+        markdownify.client(tmp_path)
+    assert error.value is original
+    assert calls[-1] == ("DELETE", None)
+    assert sum(body and body.get("id") == 2 for _, body in calls if body) == 1
+
+
+def test_converter_drift_does_not_prevent_identity_checked_stop(tmp_path, monkeypatch):
+    from contextlib import nullcontext
+
+    binding = {"root": str(tmp_path)}
+    spec = {
+        "schema": 2,
+        "id": "fixture",
+        "binding": binding,
+        "pins": {"control": "qualified", "converter.json": "old"},
+        "converter": "drifted",
+    }
+    record = {"owner_pid": 77, "owner_birth": 1, "generation": "a" * 32}
+    written = []
+    monkeypatch.setattr(markdownify, "configure", lambda _: ("fixture", binding))
+    monkeypatch.setattr(markdownify, "_control_pins", lambda: {"control": "qualified"})
+
+    def drift(_):
+        raise ValueError("converter drift")
+
+    monkeypatch.setattr(markdownify, "pins", drift)
+    monkeypatch.setattr(
+        markdownify,
+        "core",
+        SimpleNamespace(
+            STATE=tmp_path,
+            read_json=lambda path: spec if path.name == "profile.json" else record,
+            LifetimeLock=lambda _: nullcontext(),
+            process_birth=lambda _: 1,
+            write_json=lambda path, value: written.append((path.name, value)),
+        ),
+    )
+    monkeypatch.setattr(
+        markdownify, "psutil", SimpleNamespace(pid_exists=lambda _: False)
+    )
+    with pytest.raises(ValueError, match="converter drift"):
+        markdownify.specification(tmp_path)
+    markdownify._stop(tmp_path)
+    assert written == [(markdownify.STOP_REQUEST, {"generation": record["generation"]})]
+    record["owner_birth"] = 2
+    with pytest.raises(PermissionError, match="identity"):
+        markdownify._stop(tmp_path)
+    assert len(written) == 1
+
+
+@pytest.mark.parametrize("late_success", [False, True])
+def test_startup_has_one_monotonic_budget_for_readiness(
+    tmp_path, monkeypatch, late_success
+):
+    clock, budgets = [0.0], []
+    monkeypatch.setattr(markdownify, "STARTUP_SECONDS", 1)
+    monkeypatch.setattr(markdownify.time, "monotonic", lambda: clock[0])
+    monkeypatch.setattr(
+        markdownify.time, "sleep", lambda _: pytest.fail("Expired startup slept again")
+    )
+    monkeypatch.setattr(markdownify, "specification", lambda _: {})
+    monkeypatch.setattr(
+        markdownify, "core", SimpleNamespace(STATE=tmp_path, process_birth=lambda _: 1)
+    )
+    record = {"owner_pid": 77, "owner_birth": 1, "generation": "fixture"}
+    monkeypatch.setattr(markdownify, "_optional_status_record", lambda: record)
+
+    def request(*args, timeout, **kwargs):
+        budgets.append(timeout)
+        clock[0] += timeout
+        if late_success:
+            return {"ready": True, "generation": "fixture"}, None
+        raise TimeoutError("Synthetic stalled owner")
+
+    monkeypatch.setattr(markdownify, "request", request)
+    with pytest.raises(TimeoutError, match="startup deadline"):
+        markdownify.ensure(tmp_path)
+    assert budgets == [1]
+    assert clock[0] == 1
+
+
+def test_startup_validation_time_consumes_the_same_budget(tmp_path, monkeypatch):
+    clock = [0.0]
+    monkeypatch.setattr(markdownify, "STARTUP_SECONDS", 1)
+    monkeypatch.setattr(markdownify.time, "monotonic", lambda: clock[0])
+
+    def slow_validation(_):
+        clock[0] = 2
+        return {}
+
+    monkeypatch.setattr(markdownify, "specification", slow_validation)
+    monkeypatch.setattr(markdownify, "core", SimpleNamespace(STATE=tmp_path))
+    attempt = Mock(side_effect=AssertionError("Expired startup launched a process"))
+    monkeypatch.setattr(markdownify, "_startup_step", attempt)
+    with pytest.raises(TimeoutError, match="startup deadline"):
+        markdownify.ensure(tmp_path)
+    attempt.assert_not_called()
+
+
+def test_client_deadline_covers_remaining_socket_lifetime(monkeypatch):
+    clock = [0.0]
+    connection, timer = Mock(), Mock()
+    connection.connect.side_effect = lambda: clock.__setitem__(0, 0.4)
+    captured = []
+
+    def create_timer(interval, callback, args):
+        captured.append((interval, callback, args))
+        return timer
+
+    monkeypatch.setattr(markdownify.time, "monotonic", lambda: clock[0])
+    monkeypatch.setattr(markdownify.threading, "Timer", create_timer)
+    with markdownify._bounded_connection(connection, 1):
+        assert captured[0][0] == pytest.approx(0.6)
+        captured[0][1](*captured[0][2])
+        connection.sock.shutdown.assert_called_once_with(markdownify.socket.SHUT_RDWR)
+    timer.cancel.assert_called_once()
+    connection.close.assert_called_once()
+
+
+def test_serve_allocates_and_publishes_a_port_after_binding(tmp_path, monkeypatch):
+    import os
+    import socket
+    from contextlib import nullcontext
+
+    old_server = markdownify._BoundedHTTPServer
+    with socket.socket() as occupied:
+        occupied.bind(("127.0.0.1", 0))
+        occupied.listen()
+        old_port = occupied.getsockname()[1]
+        record = {"owner_pid": os.getpid(), "owner_birth": 1, "generation": "a" * 32}
+        path = tmp_path / markdownify.STATUS_RECORD
+        path.write_text(json.dumps(record), encoding="utf-8")
+
+        def read(value):
+            return json.loads(value.read_bytes())
+
+        def write(value, data):
+            value.write_text(json.dumps(data), encoding="utf-8")
+
+        monkeypatch.setattr(
+            markdownify,
+            "core",
+            SimpleNamespace(
+                STATE=tmp_path,
+                LifetimeLock=lambda _: nullcontext(),
+                read_json=read,
+                write_json=write,
+                process_birth=lambda _: 1,
+                credential=lambda: "fixture-token",
+            ),
+        )
+        monkeypatch.setattr(markdownify, "specification", lambda _: {"port": old_port})
+
+        class Server(old_server):
+            def serve_forever(self, **kwargs):
+                assert read(path)["port"] == self.server_address[1] != old_port
+
+        monkeypatch.setattr(markdownify, "_BoundedHTTPServer", Server)
+        monkeypatch.setattr(
+            markdownify.threading,
+            "Thread",
+            lambda *args, **kwargs: SimpleNamespace(start=lambda: None),
+        )
+        markdownify.serve(tmp_path)
+        assert occupied.getsockname()[1] == old_port
+    assert read(path)["generation"] == record["generation"]
+
+
+def test_unpublished_owner_endpoint_does_not_open_a_connection(tmp_path, monkeypatch):
+    monkeypatch.setattr(
+        markdownify,
+        "core",
+        SimpleNamespace(
+            STATE=tmp_path, read_json=lambda _: {"owner_pid": 77, "owner_birth": 1}
+        ),
+    )
+    connection = Mock(side_effect=AssertionError("Unpublished port contacted"))
+    monkeypatch.setattr(markdownify.http.client, "HTTPConnection", connection)
+    with pytest.raises(PermissionError, match="not published"):
+        markdownify.request({"id": tmp_path.name}, "GET", "/health")
+    connection.assert_not_called()
+
+
+def test_prepare_cli_reports_deferred_endpoint_without_a_reserved_port(
+    tmp_path, monkeypatch, capsys
+):
+    monkeypatch.setattr(markdownify, "bootstrap_host", lambda: None)
+    monkeypatch.setattr(markdownify, "prepare", lambda _: {"id": "fixture"})
+    markdownify._run(["prepare", "--root", str(tmp_path)])
+    value = json.loads(capsys.readouterr().out)
+    assert value["endpoint"] == "allocated_on_start" and "port" not in value

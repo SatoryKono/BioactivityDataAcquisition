@@ -128,12 +128,19 @@ def _validate_markdownify_client(entry):
     )
 
 
-def _markdownify_entry(source, root, servers):
+def _markdownify_entry(source, root, servers, *, explicit=True):
     from scripts.ai.codex.local_mcp_routes import common_directory
 
     if not source.exists():
         return None
     value = json.loads(physical(source).read_bytes())
+    if (
+        not explicit
+        and value.get("schema") == 1
+        and isinstance(value.get("workspace"), str)
+        and Path(value["workspace"]) != root
+    ):
+        return None
     if (
         value.get("schema") != 1
         or Path(value["workspace"]) != root
@@ -251,7 +258,9 @@ def session_overrides(
         entry["args"][-1] = "memory-acceptance"
         selected["memory-acceptance"] = entry
     source = markdownify or Path.home() / ".config/pc-agent/markdownify-bioetl.json"
-    optional = _markdownify_entry(source, root, servers)
+    optional = _markdownify_entry(
+        source, root, servers, explicit=markdownify is not None
+    )
     if optional is not None:
         selected[optional[0]] = optional[1]
     result = []
@@ -262,7 +271,8 @@ def session_overrides(
 
 def workspace():
     root = next(
-        (p for p in (Path.cwd(), *Path.cwd().parents) if (p / ".git").exists()), None
+        (p for p in (Path.cwd(), *Path.cwd().parents) if os.path.lexists(p / ".git")),
+        None,
     )
     if root is None:
         raise PermissionError("Native session requires its actual project cwd")

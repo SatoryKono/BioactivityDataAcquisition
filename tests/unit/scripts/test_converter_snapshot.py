@@ -98,18 +98,48 @@ def test_staging_cleanup_refuses_a_foreign_absolute_target(tmp_path):
     assert sentinel.read_bytes() == b"original"
 
 
-@pytest.mark.parametrize("size,expected_exit", [(1024 * 1024, 0), (1024 * 1024 + 1, 1)])
+@pytest.mark.parametrize(
+    "size,expected_exit,kind",
+    [
+        (1024 * 1024, 0, "html"),
+        (1024 * 1024 + 1, 1, "html"),
+        (128, 1, "zip-as-html"),
+        (128, 1, "unsupported"),
+    ],
+)
 def test_isolated_worker_writes_exactly_the_checked_utf8_bytes(
-    tmp_path, size, expected_exit
+    tmp_path, size, expected_exit, kind
 ):
     staging = tmp_path / "staging"
     site = staging / "site-packages"
     site.mkdir(parents=True)
     runner = Path(snapshots.__file__).with_name("converter_runner.py")
     (staging / runner.name).write_bytes(runner.read_bytes())
-    (site / "markitdown.py").write_text(
+    package = site / "markitdown"
+    package.mkdir()
+    (package / "__init__.py").write_text(
         f"class Result:\n    text_content = 'x' * {size}\n"
-        "class MarkItDown:\n    def __init__(self, **kwargs): pass\n    def convert(self, path): return Result()\n",
+        "class MarkItDown:\n"
+        "    def __init__(self, **kwargs):\n"
+        "        assert kwargs == {'enable_builtins': False, 'enable_plugins': False}\n"
+        "        self.selected = []\n"
+        "    def register_converter(self, value): self.selected.append(value)\n"
+        "    def convert(self, path):\n"
+        "        assert len(self.selected) == 1 and type(self.selected[0]).__name__ == 'HtmlConverter'\n"
+        "        return Result()\n",
+        encoding="utf-8",
+    )
+    (package / "converters.py").write_text(
+        "\n".join(
+            "class " + name + ": pass"
+            for name in (
+                "DocxConverter",
+                "HtmlConverter",
+                "PdfConverter",
+                "PptxConverter",
+                "XlsxConverter",
+            )
+        ),
         encoding="utf-8",
     )
     manifest = {
@@ -132,8 +162,14 @@ def test_isolated_worker_writes_exactly_the_checked_utf8_bytes(
         / "AppData/Local/pc-agent/mcp-shared/markdownify-bioetl-v1/profile/job-fixture"
     )
     job.mkdir(parents=True)
-    source = job / "input.html"
-    source.write_bytes(b"synthetic input")
+    source = job / ("input.zip" if kind == "unsupported" else "input.html")
+    if kind == "zip-as-html":
+        import zipfile
+
+        with zipfile.ZipFile(source, "w") as archive:
+            archive.writestr("nested.md", "synthetic archive content")
+    else:
+        source.write_bytes(b"synthetic input")
     env = {
         key: value
         for key, value in os.environ.items()
@@ -148,6 +184,10 @@ def test_isolated_worker_writes_exactly_the_checked_utf8_bytes(
     )
     assert result.returncode == expected_exit
     assert result.stdout == (b"x" * size if expected_exit == 0 else b"")
+    if kind == "zip-as-html":
+        assert b"HTML snapshot contains a ZIP archive" in result.stderr
+    if kind == "unsupported":
+        assert b"format is not permitted" in result.stderr
 
 
 def test_parallel_publication_reuses_verified_target_and_discards_only_own_copy(

@@ -101,6 +101,7 @@ def test_complete_recovery_lifecycle_and_ordinary_restart(fixture):
             "profile": "profile",
             "generation": generation,
             "phase": "idle",
+            "mutating": False,
             "accepted_count": 0,
             "graph": stamp,
         },
@@ -565,4 +566,59 @@ def test_historical_legacy_block_cannot_replace_an_unproven_launch_incident(
     assert not second["eligible"] and second["block_id"] is None
     with pytest.raises(ValueError):
         recovery.apply(owner, entry, value, second)
+    assert (directory / recovery.COORDINATION).read_bytes() == before
+
+
+@pytest.mark.parametrize("mutating", [None, True])
+def test_idle_observation_requires_explicit_nonmutating_receipt(fixture, mutating):
+    owner, entry, value, stamp = fixture
+    recovery.apply(owner, entry, value, recovery.plan(owner, entry, value))
+    generation = recovery.launch_generation(owner, entry, value)
+    work = {
+        "schema": 2,
+        "profile": entry["id"],
+        "generation": generation,
+        "phase": "idle",
+        "graph": stamp,
+    }
+    if mutating is not None:
+        work["mutating"] = mutating
+    directory = Path(entry["state"])
+    owner.state.write(directory / "work.json", work)
+    before = (directory / recovery.COORDINATION).read_bytes()
+    with pytest.raises(ValueError, match="idle receipt"):
+        recovery.observe(owner, entry, value, generation, idle=True)
+    assert (directory / recovery.COORDINATION).read_bytes() == before
+
+
+def test_resolved_legacy_block_never_produces_another_recovery_grant(fixture):
+    owner, entry, value, stamp = fixture
+    recovery.apply(owner, entry, value, recovery.plan(owner, entry, value))
+    generation = recovery.launch_generation(owner, entry, value)
+    directory = Path(entry["state"])
+    owner.state.write(
+        directory / "work.json",
+        {
+            "schema": 2,
+            "profile": entry["id"],
+            "generation": generation,
+            "phase": "idle",
+            "mutating": False,
+            "accepted_count": 1,
+            "graph": stamp,
+        },
+    )
+    recovery.observe(owner, entry, value, generation, idle=True)
+    owner.state.write(
+        directory / "status.json",
+        {
+            "generation": generation,
+            "owner_pid": 123456,
+            "owner_birth": 1,
+        },
+    )
+    before = (directory / recovery.COORDINATION).read_bytes()
+    assert not recovery.blocked(owner, entry)
+    planned = recovery.plan(owner, entry, value)
+    assert planned["block_id"] is None and not planned["eligible"]
     assert (directory / recovery.COORDINATION).read_bytes() == before
