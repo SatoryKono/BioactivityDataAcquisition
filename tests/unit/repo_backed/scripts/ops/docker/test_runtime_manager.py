@@ -2372,3 +2372,30 @@ def test_recovery_is_bounded_to_three_attempts_and_writes_one_incident(
     assert incident["recent_logs"]["captured"] is True
     # recovery_history records start (and wait when reached) rows
     assert len(incident["recovery_history"]) >= 3
+
+
+@pytest.mark.parametrize(
+    "health_response", ["", "{}", '{"database":"error"}', "invalid"]
+)
+def test_full_profile_wait_requires_live_health(health_response: str) -> None:
+    now = [0.0]
+    health_timeouts: list[float] = []
+
+    def runner(cmd: Sequence[str], _cwd: Path, timeout: float):
+        if cmd[3] == "cat":
+            return runtime_manager.CommandResult(
+                list(cmd),
+                0,
+                stdout=json.dumps({"dashboard_profile": "full", "ops_http": "ready"}),
+            )
+        assert cmd[-1] == "http://127.0.0.1:3000/api/health"
+        health_timeouts.append(timeout)
+        return runtime_manager.CommandResult(list(cmd), 0, stdout=health_response)
+
+    assert not runtime_manager._wait_for_grafana_full_profile(
+        runner,
+        deadline=2.0,
+        sleep=lambda seconds: now.__setitem__(0, now[0] + seconds),
+        clock=lambda: now[0],
+    )
+    assert health_timeouts and all(0 < value <= 2 for value in health_timeouts)

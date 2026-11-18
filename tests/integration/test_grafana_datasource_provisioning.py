@@ -636,6 +636,11 @@ kill() { printf '%s %s\n' "$1" "$2" >> "${SIGNALS_PATH}"; [ "${SCENARIO}" != kil
 wget() {
   case "$*" in
     *api/health*)
+      read -r _time < "${CLOCK_PATH}" || true
+      case "${SCENARIO}" in
+        health_delayed) [ "${_time}" -ge 120 ] || return 1 ;;
+        health_flaps) [ "${_time}" -ne 105 ] || return 1 ;;
+      esac
       [ "${SCENARIO}" != full_unhealthy ] || return 1
       printf '%s' '{"database":"ok"}'
       ;;
@@ -680,6 +685,7 @@ late_recovery_watch
         "signals": signals_path.read_text(encoding="utf-8").splitlines()
         if signals_path.exists()
         else [],
+        "finished_at": int(clock_path.read_text(encoding="utf-8")),
         "claim_exists": (
             tmp_path / "bioetl-late-cutover" / ("a" * 64 + ".claim")
         ).is_dir(),
@@ -783,3 +789,14 @@ def test_bootstrap_validates_ops_http_url_before_probe() -> None:
     gate_idx = content.index('if is_valid_ops_http_url "${BIOETL_OPS_HTTP_URL}"')
     wget_idx = content.index('wget -qO- -T 3 "${OPS_READY_URL}"')
     assert fn_idx < gate_idx < wget_idx
+
+
+@pytest.mark.parametrize(
+    ("scenario", "earliest"), [("health_delayed", 130), ("health_flaps", 120)]
+)
+def test_late_recovery_requires_ten_continuous_healthy_seconds(
+    tmp_path: Path, scenario: str, earliest: int
+) -> None:
+    result = _run_late_recovery_case(tmp_path, scenario)
+    assert result["signals"] == ["-TERM 424242"]
+    assert result["finished_at"] >= earliest
