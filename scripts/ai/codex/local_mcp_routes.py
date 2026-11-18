@@ -50,6 +50,37 @@ def common_directory(root: Path) -> Path:
     )
 
 
+def _validate_route_entry(name: str, entry: Any) -> None:
+    if (
+        name == "ref"
+        or not isinstance(entry, dict)
+        or set(entry) != {"command", "args"}
+    ):
+        raise ValueError("Native MCP route must be credential-free stdio without cwd")
+    if not isinstance(entry["command"], str) or not entry["command"].strip():
+        raise ValueError("Invalid native MCP executable")
+    if not isinstance(entry["args"], list) or not all(
+        isinstance(x, str) for x in entry["args"]
+    ):
+        raise ValueError("Invalid native MCP arguments")
+
+
+def _repository_binding_matches(
+    expected: Path, workspace: Path, *, strict: bool
+) -> bool:
+    try:
+        actual = common_directory(workspace)
+    except FileNotFoundError:
+        if strict:
+            raise
+        return False  # A default host binding does not own a new/foreign repo.
+    if actual != expected:
+        if strict:
+            raise ValueError("Native MCP route belongs to another repository")
+        return False
+    return True
+
+
 def apply_local_routes(
     servers: dict[str, dict[str, Any]], workspace: Path, *, manifest: Path | None = None
 ) -> dict[str, dict[str, Any]]:
@@ -67,34 +98,15 @@ def apply_local_routes(
     if set(data) != {"schema", "git_common", "entries"} or data["schema"] != 1:
         raise ValueError("Invalid native MCP route manifest")
     expected = _physical(Path(data["git_common"]))
-    try:
-        actual = common_directory(workspace)
-    except FileNotFoundError:
-        if explicit or manifest:
-            raise
-        return servers  # A default host binding does not own a new/foreign repo.
-    if actual != expected:
-        if explicit or manifest:
-            raise ValueError("Native MCP route belongs to another repository")
+    if not _repository_binding_matches(
+        expected, workspace, strict=bool(explicit or manifest)
+    ):
         return servers
     result = deepcopy(servers)
     if not isinstance(data["entries"], dict):
         raise ValueError("Invalid native MCP route entries")
     for name, entry in data["entries"].items():
-        if (
-            name == "ref"
-            or not isinstance(entry, dict)
-            or set(entry) != {"command", "args"}
-        ):
-            raise ValueError(
-                "Native MCP route must be credential-free stdio without cwd"
-            )
-        if not isinstance(entry["command"], str) or not entry["command"].strip():
-            raise ValueError("Invalid native MCP executable")
-        if not isinstance(entry["args"], list) or not all(
-            isinstance(x, str) for x in entry["args"]
-        ):
-            raise ValueError("Invalid native MCP arguments")
+        _validate_route_entry(name, entry)
         # Profiles may omit optional catalogue members. Never add an extra server.
         if name not in servers:
             continue

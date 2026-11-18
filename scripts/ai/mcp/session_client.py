@@ -29,11 +29,7 @@ def session_root(cwd: Path, validator) -> Path:
     raise PermissionError("No registered session workspace")
 
 
-def main() -> int:
-    if Path(sys.executable) != PYTHON or not (
-        sys.flags.isolated and sys.flags.no_site and sys.dont_write_bytecode
-    ):
-        raise PermissionError("Pinned isolated Python required")
+def _verify_dispatcher():
     manifest_path = Path(__file__).with_name("dispatcher.json")
     if manifest_path.is_file():
         raw = manifest_path.read_bytes()
@@ -56,6 +52,50 @@ def main() -> int:
         for path, expected in manifest["host_pins"].items():
             if hashlib.sha256(Path(path).read_bytes()).hexdigest() != expected:
                 raise PermissionError("Session dispatcher host dependency changed")
+
+
+def _memory_command(service, root):
+    scope_spec = importlib.util.spec_from_file_location(
+        "session_memory_scope", HOST / "project-memory-scope.py"
+    )
+    scope = importlib.util.module_from_spec(scope_spec)
+    scope_spec.loader.exec_module(scope)
+    context = scope.git_context(root)
+    project = "BioETL-Acceptance-Test" if service == "memory-acceptance" else "BioETL"
+    identity = scope.describe(
+        root, project=project, branch=context["branch"], policy="read-write"
+    )["id"]
+    version_spec = importlib.util.spec_from_file_location(
+        "session_memory_versions", Path(__file__).with_name("memory_versions.py")
+    )
+    versions = importlib.util.module_from_spec(version_spec)
+    version_spec.loader.exec_module(versions)
+    private = Path.home() / "AppData/Local/pc-agent/mcp-shared/project-memory-v1"
+    bundle = versions.select_bundle(private, identity)
+    runtime = bundle / "tools/shared-mcp" if bundle else HOST
+    python = bundle / "runtime/python/python.exe" if bundle else PYTHON
+    command = [
+        str(python),
+        "-I",
+        "-S",
+        "-B",
+        str(runtime / "project-memory-scoped-client.py"),
+        "--workspace",
+        str(root),
+        "--project",
+        project,
+        "--policy",
+        "read-write",
+    ]
+    return command
+
+
+def main() -> int:
+    if Path(sys.executable) != PYTHON or not (
+        sys.flags.isolated and sys.flags.no_site and sys.dont_write_bytecode
+    ):
+        raise PermissionError("Pinned isolated Python required")
+    _verify_dispatcher()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("service", choices=("memory", "memory-acceptance", "ast-grep"))
     args = parser.parse_args()
@@ -66,42 +106,7 @@ def main() -> int:
     spec.loader.exec_module(profiles)
     root = session_root(Path.cwd(), profiles.physical_root)
     if args.service in {"memory", "memory-acceptance"}:
-        scope_spec = importlib.util.spec_from_file_location(
-            "session_memory_scope", HOST / "project-memory-scope.py"
-        )
-        scope = importlib.util.module_from_spec(scope_spec)
-        scope_spec.loader.exec_module(scope)
-        context = scope.git_context(root)
-        project = (
-            "BioETL-Acceptance-Test"
-            if args.service == "memory-acceptance"
-            else "BioETL"
-        )
-        identity = scope.describe(
-            root, project=project, branch=context["branch"], policy="read-write"
-        )["id"]
-        version_spec = importlib.util.spec_from_file_location(
-            "session_memory_versions", Path(__file__).with_name("memory_versions.py")
-        )
-        versions = importlib.util.module_from_spec(version_spec)
-        version_spec.loader.exec_module(versions)
-        private = Path.home() / "AppData/Local/pc-agent/mcp-shared/project-memory-v1"
-        bundle = versions.select_bundle(private, identity)
-        runtime = bundle / "tools/shared-mcp" if bundle else HOST
-        python = bundle / "runtime/python/python.exe" if bundle else PYTHON
-        command = [
-            str(python),
-            "-I",
-            "-S",
-            "-B",
-            str(runtime / "project-memory-scoped-client.py"),
-            "--workspace",
-            str(root),
-            "--project",
-            project,
-            "--policy",
-            "read-write",
-        ]
+        command = _memory_command(args.service, root)
     else:
         command = [str(PYTHON), "-B", str(HOST / "codex-project-client.py"), "ast-grep"]
     core_spec = importlib.util.spec_from_file_location(

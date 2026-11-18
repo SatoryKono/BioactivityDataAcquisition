@@ -924,6 +924,28 @@ def _render_server_env_section(key: str, env: dict[str, Any]) -> list[str]:
     return lines
 
 
+def _render_tool_policy(tools: Any) -> str:
+    if not isinstance(tools, dict):
+        raise ValueError("Invalid existing MCP tool policy")
+    rendered_tools = []
+    for tool, policy in tools.items():
+        if not isinstance(policy, dict) or set(policy) - {
+            "enabled",
+            "approval_mode",
+        }:
+            raise ValueError("Unsupported existing MCP tool policy; preserve config")
+        fields = []
+        for field, value in policy.items():
+            if not isinstance(value, (bool, str)):
+                raise ValueError("Invalid existing MCP tool policy value")
+            literal = (
+                str(value).lower() if isinstance(value, bool) else _toml_string(value)
+            )
+            fields.append(f"{_toml_key(field)} = {literal}")
+        rendered_tools.append(f"{_toml_key(tool)} = {{ " + ", ".join(fields) + " }")
+    return "tools = { " + ", ".join(rendered_tools) + " }"
+
+
 def _render_one_mcp_server_toml(name: str, server: dict[str, Any]) -> list[str]:
     """Render TOML lines for a single managed MCP server."""
     key = _toml_key(name)
@@ -944,30 +966,7 @@ def _render_one_mcp_server_toml(name: str, server: dict[str, Any]) -> list[str]:
             f"env_http_headers = {_toml_inline_string_table(env_http_headers)}"
         )
     if "tools" in server:
-        tools = server["tools"]
-        if not isinstance(tools, dict):
-            raise ValueError("Invalid existing MCP tool policy")
-        rendered_tools = []
-        for tool, policy in tools.items():
-            if not isinstance(policy, dict) or set(policy) - {
-                "enabled",
-                "approval_mode",
-            }:
-                raise ValueError(
-                    "Unsupported existing MCP tool policy; preserve config"
-                )
-            fields = []
-            for field, value in policy.items():
-                if not isinstance(value, (bool, str)):
-                    raise ValueError("Invalid existing MCP tool policy value")
-                literal = (
-                    str(value).lower()
-                    if isinstance(value, bool)
-                    else _toml_string(value)
-                )
-                fields.append(f"{_toml_key(field)} = {literal}")
-            rendered_tools.append(f"{_toml_key(tool)} = {{ " + ", ".join(fields) + " }")
-        lines.append("tools = { " + ", ".join(rendered_tools) + " }")
+        lines.append(_render_tool_policy(server["tools"]))
     env = server.get("env")
     if env:
         lines.extend(_render_server_env_section(key, env))

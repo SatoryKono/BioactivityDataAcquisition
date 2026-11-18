@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-18T18:12:33.693100+00:00",
+  "generated_at": "2026-11-18T18:43:11.915945+00:00",
   "summary": {
     "total_scripts": 763,
     "status_counts": {
@@ -1155,19 +1155,31 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 5,
       "references": [
         {
           "path": "scripts/ai/codex/native_session.py",
-          "line": 96,
+          "line": 93,
           "source_group": "scripts",
-          "text": "from scripts.ai.codex.local_mcp_routes import apply_local_routes, common_directory"
+          "text": "from scripts.ai.codex.local_mcp_routes import common_directory"
+        },
+        {
+          "path": "scripts/ai/codex/native_session.py",
+          "line": 126,
+          "source_group": "scripts",
+          "text": "from scripts.ai.codex.local_mcp_routes import apply_local_routes"
         },
         {
           "path": "scripts/ai/codex/setup_mcp.py",
           "line": 28,
           "source_group": "scripts",
           "text": "from scripts.ai.codex.local_mcp_routes import apply_local_routes"
+        },
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 189,
+          "source_group": "tests",
+          "text": "from scripts.ai.codex.local_mcp_routes import common_directory"
         },
         {
           "path": "tests/unit/scripts/test_native_mcp_local_routes.py",
@@ -1559,13 +1571,13 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 467,
+          "line": 481,
           "source_group": "tests",
           "text": "from scripts.ai.codex.native_runtime_contract import ("
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 689,
+          "line": 703,
           "source_group": "tests",
           "text": "from scripts.ai.codex.native_runtime_contract import ("
         }
@@ -3366,25 +3378,25 @@
       "references": [
         {
           "path": "scripts/ai/mcp/converter_snapshot.py",
-          "line": 117,
+          "line": 127,
           "source_group": "scripts",
           "text": "runner = Path(__file__).with_name(\"converter_runner.py\")"
         },
         {
           "path": "scripts/ai/mcp/converter_snapshot.py",
-          "line": 118,
+          "line": 128,
           "source_group": "scripts",
           "text": "shutil.copyfile(runner, staging / \"converter_runner.py\")"
         },
         {
           "path": "scripts/ai/mcp/safe_markdownify.py",
-          "line": 113,
+          "line": 120,
           "source_group": "scripts",
           "text": "HERE / \"converter_runner.py\","
         },
         {
           "path": "scripts/ai/mcp/safe_markdownify.py",
-          "line": 330,
+          "line": 341,
           "source_group": "scripts",
           "text": "str(Path(spec[\"converter\"]) / \"converter_runner.py\"),"
         }
@@ -3403,13 +3415,13 @@
       "references": [
         {
           "path": "scripts/ai/mcp/safe_markdownify.py",
-          "line": 40,
+          "line": 47,
           "source_group": "scripts",
           "text": "snapshots = module(\"markdownify_converter_snapshot\", HERE / \"converter_snapshot.py\")"
         },
         {
           "path": "scripts/ai/mcp/safe_markdownify.py",
-          "line": 112,
+          "line": 119,
           "source_group": "scripts",
           "text": "HERE / \"converter_snapshot.py\","
         }
@@ -3477,7 +3489,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 410,
+          "line": 424,
           "source_group": "tests",
           "text": "ps_content = (root / \"scripts/ai/mcp/github-mcp-wrapper.ps1\").read_text("
         },
@@ -3540,13 +3552,13 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 300,
+          "line": 314,
           "source_group": "tests",
           "text": "\"github\": \"github-mcp-wrapper.sh\","
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 407,
+          "line": 421,
           "source_group": "tests",
           "text": "sh_content = (root / \"scripts/ai/mcp/github-mcp-wrapper.sh\").read_text("
         },
@@ -3690,7 +3702,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 299,
+          "line": 313,
           "source_group": "tests",
           "text": "\"ast-grep\": \"mcp_ast_grep_wrapper.sh\","
         },
@@ -3788,7 +3800,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 298,
+          "line": 312,
           "source_group": "tests",
           "text": "\"brave-search\": \"mcp_brave_search_wrapper.sh\","
         },
@@ -3982,7 +3994,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 297,
+          "line": 311,
           "source_group": "tests",
           "text": "\"context7\": \"mcp_context7_wrapper.sh\","
         },
@@ -4558,7 +4570,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 206,
+          "line": 220,
           "source_group": "tests",
           "text": "(\"mcp_memory_wrapper.sh\", \"mcp_memory_wrapper.ps1\")"
         },
@@ -4609,7 +4621,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 206,
+          "line": 220,
           "source_group": "tests",
           "text": "(\"mcp_memory_wrapper.sh\", \"mcp_memory_wrapper.ps1\")"
         },
@@ -4990,7 +5002,7 @@
       "references": [
         {
           "path": "scripts/ai/mcp/memory_versions.py",
-          "line": 260,
+          "line": 359,
           "source_group": "scripts",
           "text": "source = Path(__file__).with_name(\"memory_reconciliation.py\")"
         },
@@ -5021,7 +5033,7 @@
         },
         {
           "path": "scripts/ai/mcp/session_client.py",
-          "line": 84,
+          "line": 69,
           "source_group": "scripts",
           "text": "\"session_memory_versions\", Path(__file__).with_name(\"memory_versions.py\")"
         },
@@ -5143,13 +5155,13 @@
       "references": [
         {
           "path": "scripts/ai/mcp/safe_markdownify.py",
-          "line": 39,
+          "line": 46,
           "source_group": "scripts",
           "text": "files = module(\"markdownify_safe_file\", HERE / \"safe_file.py\")"
         },
         {
           "path": "scripts/ai/mcp/safe_markdownify.py",
-          "line": 110,
+          "line": 117,
           "source_group": "scripts",
           "text": "HERE / \"safe_file.py\","
         },
@@ -5180,7 +5192,7 @@
         },
         {
           "path": "tests/unit/scripts/test_safe_markdownify_client.py",
-          "line": 7,
+          "line": 10,
           "source_group": "tests",
           "text": "from scripts.ai.mcp import safe_markdownify as markdownify"
         }
@@ -5199,7 +5211,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/native_session.py",
-          "line": 118,
+          "line": 148,
           "source_group": "scripts",
           "text": "or Path(args[3]).name != \"session_client.py\""
         },
@@ -22974,13 +22986,13 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 618,
+          "line": 632,
           "source_group": "tests",
           "text": "from scripts.engineering.repo.operation_guards import evaluate_request"
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 629,
+          "line": 643,
           "source_group": "tests",
           "text": "from scripts.engineering.repo.operation_guards import evaluate_request"
         },
@@ -28401,13 +28413,13 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 358,
+          "line": 372,
           "source_group": "tests",
           "text": "root / \"scripts/ops/runtime/mcp/apply-shared-to-devin.py\""
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 369,
+          "line": 383,
           "source_group": "tests",
           "text": "materializer_path = root / \"scripts/ops/runtime/mcp/apply-shared-to-devin.py\""
         }

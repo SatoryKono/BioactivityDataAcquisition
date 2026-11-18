@@ -38,6 +38,40 @@ def confined_path(root: Path, supplied: str) -> Path:
     return path
 
 
+def _verify_handle(kernel, information_type, handle, expected: Path, directory: bool):
+    info = information_type()
+    if not kernel.GetFileInformationByHandle(handle, ctypes.byref(info)):
+        raise ctypes.WinError(ctypes.get_last_error())
+    if info.attributes & 0x400 or bool(info.attributes & 0x10) != directory:
+        raise PermissionError("Unsupported file or reparse point")
+    buffer = ctypes.create_unicode_buffer(32768)
+    size = kernel.GetFinalPathNameByHandleW(handle, buffer, len(buffer), 0)
+    if not size or size >= len(buffer):
+        raise PermissionError("Physical handle path is not proven")
+    final = buffer.value
+    if final.startswith("\\\\?\\"):
+        final = final[4:]
+    if Path(final) != expected:
+        raise PermissionError("Physical handle path does not match request")
+    return info
+
+
+def _read_handle_bytes(kernel, handle, limit):
+    chunks, total = [], 0
+    while True:
+        buffer = ctypes.create_string_buffer(min(65536, limit + 1 - total))
+        count = wintypes.DWORD()
+        if not kernel.ReadFile(handle, buffer, len(buffer), ctypes.byref(count), None):
+            raise ctypes.WinError(ctypes.get_last_error())
+        if not count.value:
+            break
+        chunks.append(buffer.raw[: count.value])
+        total += count.value
+        if total > limit:
+            raise PermissionError("File exceeds bound")
+    return b"".join(chunks)
+
+
 def read_confined(
     root: Path,
     supplied: str,
@@ -100,23 +134,6 @@ def read_confined(
     ]
     kernel.ReadFile.restype = wintypes.BOOL
 
-    def verify(handle, expected: Path, directory: bool) -> Information:
-        info = Information()
-        if not kernel.GetFileInformationByHandle(handle, ctypes.byref(info)):
-            raise ctypes.WinError(ctypes.get_last_error())
-        if info.attributes & 0x400 or bool(info.attributes & 0x10) != directory:
-            raise PermissionError("Unsupported file or reparse point")
-        buffer = ctypes.create_unicode_buffer(32768)
-        size = kernel.GetFinalPathNameByHandleW(handle, buffer, len(buffer), 0)
-        if not size or size >= len(buffer):
-            raise PermissionError("Physical handle path is not proven")
-        final = buffer.value
-        if final.startswith("\\\\?\\"):
-            final = final[4:]
-        if Path(final) != expected:
-            raise PermissionError("Physical handle path does not match request")
-        return info
-
     with ExitStack() as stack:
         # Pin all ancestors against rename; checking a path string alone is racy.
         for parent in reversed(path.parents):
@@ -124,30 +141,17 @@ def read_confined(
             if handle == wintypes.HANDLE(-1).value:
                 raise ctypes.WinError(ctypes.get_last_error())
             stack.callback(kernel.CloseHandle, handle)
-            verify(handle, parent, True)
+            _verify_handle(kernel, Information, handle, parent, True)
         handle = kernel.CreateFileW(str(path), 0x80000000, 1, None, 3, 0x08200000, None)
         if handle == wintypes.HANDLE(-1).value:
             raise ctypes.WinError(ctypes.get_last_error())
         stack.callback(kernel.CloseHandle, handle)
-        info = verify(handle, path, False)
+        info = _verify_handle(kernel, Information, handle, path, False)
         size = (info.size_high << 32) | info.size_low
         if info.links != 1 or size > limit:
             raise PermissionError("Hard links and oversized files are unsupported")
         if after_open:
             after_open()
-        chunks, total = [], 0
-        while True:
-            buffer = ctypes.create_string_buffer(min(65536, limit + 1 - total))
-            count = wintypes.DWORD()
-            if not kernel.ReadFile(
-                handle, buffer, len(buffer), ctypes.byref(count), None
-            ):
-                raise ctypes.WinError(ctypes.get_last_error())
-            if not count.value:
-                break
-            chunks.append(buffer.raw[: count.value])
-            total += count.value
-            if total > limit:
-                raise PermissionError("File exceeds bound")
-        verify(handle, path, False)
-        return b"".join(chunks)
+        result = _read_handle_bytes(kernel, handle, limit)
+        _verify_handle(kernel, Information, handle, path, False)
+        return result

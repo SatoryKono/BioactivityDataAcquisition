@@ -12,12 +12,15 @@ import uuid
 from pathlib import Path
 
 
+CONVERTER_MANIFEST = "converter.json"
+
+
 def digest(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def verify(root):
-    raw = (root / "converter.json").read_bytes()
+    raw = (root / CONVERTER_MANIFEST).read_bytes()
     manifest = json.loads(raw)
     if root.name != hashlib.sha256(raw).hexdigest() or manifest.get("schema") != 1:
         raise ValueError("Converter snapshot identity mismatch")
@@ -33,7 +36,7 @@ def verify(root):
         actual.update(
             (Path(current) / name).relative_to(root).as_posix()
             for name in files
-            if Path(current) / name != root / "converter.json"
+            if Path(current) / name != root / CONVERTER_MANIFEST
         )
     if actual != set(manifest["files"]):
         raise ValueError("Converter snapshot file set changed")
@@ -70,26 +73,47 @@ def closure(site, extras=()):
         selected[name] = (previous or set()) | extras
         distribution = installed[name]
         packages[name] = distribution.version
-        for raw in distribution.requires or []:
-            requirement = Requirement(raw)
-            if requirement.marker is None or any(
-                requirement.marker.evaluate({"extra": extra})
-                for extra in {"", *selected[name]}
-            ):
-                if normalize(requirement.name) not in installed:
-                    raise ValueError(
-                        "Converter dependency missing: " + requirement.name
-                    )
-                if (
-                    requirement.specifier
-                    and installed[normalize(requirement.name)].version
-                    not in requirement.specifier
-                ):
-                    raise ValueError(
-                        "Converter dependency version mismatch: " + requirement.name
-                    )
-                pending.append((requirement.name, set(requirement.extras)))
+        for requirement in _active_requirements(
+            distribution, selected[name], Requirement
+        ):
+            _validate_requirement(requirement, installed, normalize)
+            pending.append((requirement.name, set(requirement.extras)))
     return installed, selected, packages
+
+
+def _active_requirements(distribution, extras, requirement_type):
+    for raw in distribution.requires or []:
+        requirement = requirement_type(raw)
+        if requirement.marker is None or any(
+            requirement.marker.evaluate({"extra": extra}) for extra in {"", *extras}
+        ):
+            yield requirement
+
+
+def _validate_requirement(requirement, installed, normalize):
+    name = normalize(requirement.name)
+    if name not in installed:
+        raise ValueError("Converter dependency missing: " + requirement.name)
+    if requirement.specifier and installed[name].version not in requirement.specifier:
+        raise ValueError("Converter dependency version mismatch: " + requirement.name)
+
+
+def _copy_distribution(staging, site, distribution):
+    for relative in distribution.files or []:
+        source = Path(distribution.locate_file(relative)).resolve(strict=True)
+        if not source.is_relative_to(site):
+            continue  # Console entrypoints are replaced by the isolated runner.
+        if "__pycache__" in source.parts or source.suffix == ".pyc":
+            continue
+        if source.name == ".env" or source.name.startswith(".env."):
+            raise ValueError("Converter package contains an environment file")
+        if source.resolve(strict=True) != source or source.is_symlink():
+            raise ValueError("Converter package traverses a reparse path")
+        target = staging / "site-packages" / source.relative_to(site)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(source, target)
+        if digest(source) != digest(target):
+            raise ValueError("Converter dependency changed during copying")
 
 
 def build(destination, site, extras=()):
@@ -99,21 +123,7 @@ def build(destination, site, extras=()):
     staging = destination / ("building-" + uuid.uuid4().hex)
     staging.mkdir()
     for name in selected:
-        for relative in installed[name].files or []:
-            source = Path(installed[name].locate_file(relative)).resolve(strict=True)
-            if not source.is_relative_to(site):
-                continue  # Console entrypoints are replaced by the isolated runner.
-            if "__pycache__" in source.parts or source.suffix == ".pyc":
-                continue
-            if source.name == ".env" or source.name.startswith(".env."):
-                raise ValueError("Converter package contains an environment file")
-            if source.resolve(strict=True) != source or source.is_symlink():
-                raise ValueError("Converter package traverses a reparse path")
-            target = staging / "site-packages" / source.relative_to(site)
-            target.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(source, target)
-            if digest(source) != digest(target):
-                raise ValueError("Converter dependency changed during copying")
+        _copy_distribution(staging, site, installed[name])
     runner = Path(__file__).with_name("converter_runner.py")
     shutil.copyfile(runner, staging / "converter_runner.py")
     manifest = {
@@ -127,7 +137,7 @@ def build(destination, site, extras=()):
         },
     }
     raw = json.dumps(manifest, sort_keys=True, separators=(",", ":")).encode()
-    (staging / "converter.json").write_bytes(raw)
+    (staging / CONVERTER_MANIFEST).write_bytes(raw)
     target = destination / hashlib.sha256(raw).hexdigest()
     if not target.exists():
         staging.rename(target)

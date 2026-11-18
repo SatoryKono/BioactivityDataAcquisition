@@ -25,6 +25,15 @@ VENV = Path("D:/github/BioactivityDataAcquisition/.venv-win")
 SDK_ROOT = Path("D:/pc-agent/tools/mcp/markdownify/node_modules")
 
 
+BUNDLE_MANIFEST = "bundle.json"
+RUNTIME_BINDING = "runtime-binding.json"
+MIGRATION_RECORD = "migration-v2.json"
+SITE_PACKAGES = "Lib/site-packages"
+PROFILE_INDEX = "profiles.json"
+ACTIVE_INDEX = "active.json"
+PROFILE_DESCRIPTOR = "profile.json"
+
+
 def canonical(value):
     return json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
 
@@ -55,7 +64,7 @@ def physical(path):
 
 def verify(bundle):
     bundle = physical(bundle)
-    raw = (bundle / "bundle.json").read_bytes()
+    raw = (bundle / BUNDLE_MANIFEST).read_bytes()
     manifest = json.loads(raw)
     if (
         manifest.get("schema") != 2
@@ -72,7 +81,7 @@ def verify(bundle):
         actual.update(
             (Path(current) / name).relative_to(bundle).as_posix()
             for name in files
-            if Path(current) / name != bundle / "bundle.json"
+            if Path(current) / name != bundle / BUNDLE_MANIFEST
         )
     if actual != set(manifest["files"]):
         raise ValueError("Immutable bundle file set changed")
@@ -211,17 +220,24 @@ for relative, expected in manifest["files"].items():
 """
 
 
-def build(owner, entry, value):
-    """Copy the reviewed legacy closure and deterministically adapt a new version."""
-    hashes = owner.candidate(entry, value)["hashes"]
-    hashes[str(HOST / "project-memory-scoped-client.py")] = sha(
-        HOST / "project-memory-scoped-client.py"
-    )
-    hashes[str(HOST / "host-servers.json")] = sha(HOST / "host-servers.json")
-    VERSIONS.mkdir(parents=True, exist_ok=True)
-    physical(VERSIONS)
-    staging = VERSIONS / ("building-" + uuid.uuid4().hex)
-    staging.mkdir()
+def _bundle_relative_path(source, node):
+    if source.is_relative_to(HOST):
+        return Path("tools/shared-mcp") / source.relative_to(HOST)
+    elif source.is_relative_to(SDK_ROOT):
+        return Path("tools/mcp/markdownify/node_modules") / source.relative_to(SDK_ROOT)
+    elif source.is_relative_to(BASE_PYTHON):
+        return Path("runtime/python") / source.relative_to(BASE_PYTHON)
+    elif source.is_relative_to(VENV / SITE_PACKAGES):
+        return Path("runtime/site-packages") / source.relative_to(VENV / SITE_PACKAGES)
+    elif source.is_relative_to(VENV):
+        return Path("runtime/venv") / source.relative_to(VENV)
+    elif source == node:
+        return Path("runtime/node.exe")
+    else:
+        raise ValueError("Unclassified runtime dependency")
+
+
+def _copy_runtime_dependencies(owner, hashes, staging):
     checked_parents = set()
     for raw_path, expected in hashes.items():
         source = Path(raw_path)
@@ -233,105 +249,84 @@ def build(owner, entry, value):
             raise ValueError("Runtime source is a reparse point")
         if sha(source) != expected:
             raise ValueError("Legacy closure changed during build")
-        if source.is_relative_to(HOST):
-            relative = Path("tools/shared-mcp") / source.relative_to(HOST)
-        elif source.is_relative_to(SDK_ROOT):
-            relative = Path("tools/mcp/markdownify/node_modules") / source.relative_to(
-                SDK_ROOT
-            )
-        elif source.is_relative_to(BASE_PYTHON):
-            relative = Path("runtime/python") / source.relative_to(BASE_PYTHON)
-        elif source.is_relative_to(VENV / "Lib/site-packages"):
-            relative = Path("runtime/site-packages") / source.relative_to(
-                VENV / "Lib/site-packages"
-            )
-        elif source.is_relative_to(VENV):
-            relative = Path("runtime/venv") / source.relative_to(VENV)
-        elif source == owner.core.NODE:
-            relative = Path("runtime/node.exe")
-        else:
-            raise ValueError("Unclassified runtime dependency")
+        relative = _bundle_relative_path(source, owner.core.NODE)
         target = staging / relative
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(source, target)
         if sha(target) != expected:
             raise ValueError("Runtime dependency changed while copying")
-    service = staging / "tools/shared-mcp"
-    source = Path(__file__).with_name("memory_reconciliation.py")
-    shutil.copyfile(source, service / "project-memory-reconciliation.py")
-    for file in service.glob("*"):
-        if file.suffix not in {".py", ".mjs"}:
-            continue
-        text = file.read_text(encoding="utf-8").replace("\r\n", "\n")
-        if file.name == "project-memory-owner.py":
-            text = adapt_owner(text)
-        if file.name == "project-memory-client.py":
-            text = replace_once(
-                text,
-                "owner.ensure(args.profile, fixture)",
-                "owner.connect(args.profile, fixture)",
-            )
-        if file.name == "project-memory-gateway.mjs":
-            text = adapt_gateway(text)
-        if file.name == "project-memory-connection.mjs":
-            # Each health bridge verifies the entire closure before network IO.
-            # A cold verification can exceed the legacy five-second GET budget.
-            text = replace_once(
-                text, "AbortSignal.timeout(5000)", "AbortSignal.timeout(120_000)"
-            )
-        if file.name == "github-grok-broker.mjs":
-            text = replace_once(
-                text,
-                "this.client.connect(this.transport,{timeout:60000})",
-                "this.client.connect(this.transport,{timeout:180000})",
-            )
-        if file.suffix == ".py":
-            text = text.replace(
-                '"C:/Users/Fedor/AppData/Local/Programs/Python/Python313/python.exe"',
-                '(HERE.parents[1] / "runtime/python/python.exe")',
-            )
-            text = text.replace(
-                '"D:/github/BioactivityDataAcquisition/.venv-win/Lib/site-packages"',
-                'str(HERE.parents[1] / "runtime/site-packages")',
-            )
-        else:
-            text = text.replace(
-                "'C:/Users/Fedor/AppData/Local/Programs/Python/Python313/python.exe'",
-                "path.resolve(here, '../../runtime/python/python.exe')",
-            )
-        if file.name == "supervisor.py":
-            text = replace_once(
-                text,
-                "ROOT = Path('D:/pc-agent')",
-                "ROOT = Path(__file__).resolve().parents[2]",
-            )
-            text = replace_once(
-                text,
-                "NODE = Path('C:/Program Files/nodejs/node.exe')",
-                'NODE = ROOT / "runtime/node.exe"',
-            )
-            text = replace_once(
-                text,
-                "PYTHON = Path('C:/Users/Fedor/AppData/Local/Programs/Python/Python313/python.exe')",
-                'PYTHON = ROOT / "runtime/python/python.exe"',
-            )
-        if file.name == "project-memory-bootstrap.py":
-            text = replace_once(
-                text,
-                "HERE = Path(__file__).resolve().parent\n",
-                "HERE = Path(__file__).resolve().parent\n" + VERIFY_BOOTSTRAP,
-            )
-        if file.name == "project-memory-runtime.py":
-            text = replace_once(
-                text,
-                'pathlib.Path("D:/pc-agent/tools/mcp/markdownify/node_modules/@modelcontextprotocol/sdk")',
-                'pathlib.Path(__file__).resolve().parents[1] / "mcp/markdownify/node_modules/@modelcontextprotocol/sdk"',
-            )
-            start = text.index("def python_hashes()")
-            end = text.index('\n\nif __name__ == "__main__":', start)
-            text = (
-                text[:start]
-                + """def python_hashes():
+
+
+def _adapt_service_text(file, text):
+    if file.name == "project-memory-owner.py":
+        text = adapt_owner(text)
+    if file.name == "project-memory-client.py":
+        text = replace_once(
+            text,
+            "owner.ensure(args.profile, fixture)",
+            "owner.connect(args.profile, fixture)",
+        )
+    if file.name == "project-memory-gateway.mjs":
+        text = adapt_gateway(text)
+    if file.name == "project-memory-connection.mjs":
+        # Each health bridge verifies the entire closure before network IO.
+        # A cold verification can exceed the legacy five-second GET budget.
+        text = replace_once(
+            text, "AbortSignal.timeout(5000)", "AbortSignal.timeout(120_000)"
+        )
+    if file.name == "github-grok-broker.mjs":
+        text = replace_once(
+            text,
+            "this.client.connect(this.transport,{timeout:60000})",
+            "this.client.connect(this.transport,{timeout:180000})",
+        )
+    if file.suffix == ".py":
+        text = text.replace(
+            '"C:/Users/Fedor/AppData/Local/Programs/Python/Python313/python.exe"',
+            '(HERE.parents[1] / "runtime/python/python.exe")',
+        )
+        text = text.replace(
+            '"D:/github/BioactivityDataAcquisition/.venv-win/Lib/site-packages"',
+            'str(HERE.parents[1] / "runtime/site-packages")',
+        )
+    else:
+        text = text.replace(
+            "'C:/Users/Fedor/AppData/Local/Programs/Python/Python313/python.exe'",
+            "path.resolve(here, '../../runtime/python/python.exe')",
+        )
+    if file.name == "supervisor.py":
+        text = replace_once(
+            text,
+            "ROOT = Path('D:/pc-agent')",
+            "ROOT = Path(__file__).resolve().parents[2]",
+        )
+        text = replace_once(
+            text,
+            "NODE = Path('C:/Program Files/nodejs/node.exe')",
+            'NODE = ROOT / "runtime/node.exe"',
+        )
+        text = replace_once(
+            text,
+            "PYTHON = Path('C:/Users/Fedor/AppData/Local/Programs/Python/Python313/python.exe')",
+            'PYTHON = ROOT / "runtime/python/python.exe"',
+        )
+    if file.name == "project-memory-bootstrap.py":
+        text = replace_once(
+            text,
+            "HERE = Path(__file__).resolve().parent\n",
+            "HERE = Path(__file__).resolve().parent\n" + VERIFY_BOOTSTRAP,
+        )
+    if file.name == "project-memory-runtime.py":
+        text = replace_once(
+            text,
+            'pathlib.Path("D:/pc-agent/tools/mcp/markdownify/node_modules/@modelcontextprotocol/sdk")',
+            'pathlib.Path(__file__).resolve().parents[1] / "mcp/markdownify/node_modules/@modelcontextprotocol/sdk"',
+        )
+        start = text.index("def python_hashes()")
+        end = text.index('\n\nif __name__ == "__main__":', start)
+        text = (
+            text[:start]
+            + """def python_hashes():
     root = pathlib.Path(__file__).resolve().parents[2]
     manifest = json.loads((root / "bundle.json").read_bytes())
     result = {}
@@ -343,8 +338,31 @@ def build(owner, entry, value):
             result[str(path)] = hashlib.sha256(path.read_bytes()).hexdigest()
     return result
 """
-                + text[end:]
-            )
+            + text[end:]
+        )
+    return text
+
+
+def build(owner, entry, value):
+    """Copy the reviewed legacy closure and deterministically adapt a new version."""
+    hashes = owner.candidate(entry, value)["hashes"]
+    hashes[str(HOST / "project-memory-scoped-client.py")] = sha(
+        HOST / "project-memory-scoped-client.py"
+    )
+    hashes[str(HOST / "host-servers.json")] = sha(HOST / "host-servers.json")
+    VERSIONS.mkdir(parents=True, exist_ok=True)
+    physical(VERSIONS)
+    staging = VERSIONS / ("building-" + uuid.uuid4().hex)
+    staging.mkdir()
+    _copy_runtime_dependencies(owner, hashes, staging)
+    service = staging / "tools/shared-mcp"
+    source = Path(__file__).with_name("memory_reconciliation.py")
+    shutil.copyfile(source, service / "project-memory-reconciliation.py")
+    for file in service.glob("*"):
+        if file.suffix not in {".py", ".mjs"}:
+            continue
+        text = file.read_text(encoding="utf-8").replace("\r\n", "\n")
+        text = _adapt_service_text(file, text)
         file.write_text(text, encoding="utf-8", newline="\n")
     manifest = {
         "schema": 2,
@@ -362,7 +380,7 @@ def build(owner, entry, value):
     raw = canonical(manifest)
     identity = hashlib.sha256(raw).hexdigest()
     target = VERSIONS / identity
-    (staging / "bundle.json").write_bytes(raw)
+    (staging / BUNDLE_MANIFEST).write_bytes(raw)
     if target.exists():
         verify(target)
         # Keep the duplicate build as evidence instead of recursive cleanup.
@@ -400,10 +418,8 @@ def dormant(owner, entry, value):
 
 def previous_migration(owner, directory, entry, expected_version):
     """Require an explicit, consistent predecessor before replacing its journal."""
-    binding = owner.state.read(directory / "runtime-binding.json")
-    prior = owner.state.read(
-        directory / "migration-v2.json", max_bytes=32 * 1024 * 1024
-    )
+    binding = owner.state.read(directory / RUNTIME_BINDING)
+    prior = owner.state.read(directory / MIGRATION_RECORD, max_bytes=32 * 1024 * 1024)
     if binding is None and prior is None:
         if expected_version is not None:
             raise ValueError("Unexpected predecessor version")
@@ -458,7 +474,7 @@ def migrate(owner, identity, bundle, *, fixture=False, from_version=None):
                     and Path(binding["bundle"]) == bundle
                 ):
                     raise ValueError("Runtime version is already selected")
-                index_path = owner.registry.ROOT / "profiles.json"
+                index_path = owner.registry.ROOT / PROFILE_INDEX
                 index = owner.state.read(index_path)
                 if index.get(identity) != entry:
                     raise ValueError("Concurrent profile registration change")
@@ -466,7 +482,7 @@ def migrate(owner, identity, bundle, *, fixture=False, from_version=None):
                     "entry": entry,
                     "descriptor": value,
                     "active": owner.state.read(
-                        directory / "active.json", max_bytes=32 * 1024 * 1024
+                        directory / ACTIVE_INDEX, max_bytes=32 * 1024 * 1024
                     ),
                     "graph": stamp,
                     "coordination": owner.state.read(directory / "recovery-v2.json"),
@@ -488,7 +504,7 @@ def migrate(owner, identity, bundle, *, fixture=False, from_version=None):
                     "bundle": str(bundle),
                     "version": bundle.name,
                 }
-                path = directory / "migration-v2.json"
+                path = directory / MIGRATION_RECORD
                 if prior is not None:
                     history = directory / "migration-history"
                     owner.state.scope.physical(history, exists=False)
@@ -509,12 +525,12 @@ def migrate(owner, identity, bundle, *, fixture=False, from_version=None):
                         "sha256": sha(archive),
                     }
                 owner.state.write(path, transaction)
-                owner.state.write(directory / "profile.json", updated)
-                owner.state.write(directory / "active.json", active)
+                owner.state.write(directory / PROFILE_DESCRIPTOR, updated)
+                owner.state.write(directory / ACTIVE_INDEX, active)
                 index[identity] = new_entry
                 owner.state.write(index_path, index)
                 owner.state.write(
-                    directory / "runtime-binding.json",
+                    directory / RUNTIME_BINDING,
                     {
                         "schema": 2,
                         "state": "active",
@@ -545,14 +561,14 @@ def rollback(owner, identity):
                 Path(value["profile"]["graph"]).with_name(".memory.service-owner.lock")
             ):
                 dormant(owner, entry, value)
-                path = directory / "migration-v2.json"
+                path = directory / MIGRATION_RECORD
                 transaction = owner.state.read(path, max_bytes=32 * 1024 * 1024)
                 if transaction is None or transaction["phase"] != "COMMITTED":
                     raise ValueError("Migration is not committed; preserve journal")
                 current = owner.state.read(directory / "recovery-v2.json")
                 if current != transaction["before"]["coordination"]:
                     owner.state.write(
-                        directory / "runtime-binding.json",
+                        directory / RUNTIME_BINDING,
                         {
                             "schema": 2,
                             "state": "disabled",
@@ -563,7 +579,7 @@ def rollback(owner, identity):
                         "state": "BLOCKED_INCOMPATIBLE_COORDINATION",
                         "graph_preserved": True,
                     }
-                index_path = owner.registry.ROOT / "profiles.json"
+                index_path = owner.registry.ROOT / PROFILE_INDEX
                 index = owner.state.read(index_path)
                 if index.get(identity) != transaction["after_entry"]:
                     raise ValueError("Concurrent profile registration change")
@@ -573,7 +589,7 @@ def rollback(owner, identity):
                     for path, expected in before["active"]["hashes"].items()
                 ):
                     owner.state.write(
-                        directory / "runtime-binding.json",
+                        directory / RUNTIME_BINDING,
                         {
                             "schema": 2,
                             "state": "disabled",
@@ -586,12 +602,12 @@ def rollback(owner, identity):
                     }
                 transaction["phase"] = "ROLLING_BACK"
                 owner.state.write(path, transaction)
-                owner.state.write(directory / "profile.json", before["descriptor"])
-                owner.state.write(directory / "active.json", before["active"])
+                owner.state.write(directory / PROFILE_DESCRIPTOR, before["descriptor"])
+                owner.state.write(directory / ACTIVE_INDEX, before["active"])
                 index[identity] = before["entry"]
                 owner.state.write(index_path, index)
                 owner.state.write(
-                    directory / "runtime-binding.json",
+                    directory / RUNTIME_BINDING,
                     before.get("runtime_binding", {"schema": 2, "state": "legacy"}),
                 )
                 transaction["phase"] = "ROLLED_BACK"
@@ -606,13 +622,13 @@ def rollback(owner, identity):
 def select_bundle(registry_root, identity):
     directory = registry_root / identity
     physical(directory)
-    migration = directory / "migration-v2.json"
+    migration = directory / MIGRATION_RECORD
     if migration.exists() and json.loads(migration.read_bytes())["phase"] not in {
         "COMMITTED",
         "ROLLED_BACK",
     }:
         raise PermissionError("Profile migration has not committed")
-    path = directory / "runtime-binding.json"
+    path = directory / RUNTIME_BINDING
     if not path.exists():
         return None
     binding = json.loads(path.read_bytes())
@@ -627,17 +643,32 @@ def select_bundle(registry_root, identity):
     return bundle
 
 
+def _audit_block_reasons(process_states, work, branch_matches, account_matches):
+    reasons = []
+    if "UNKNOWN" in process_states.values():
+        reasons.append("BLOCK_PROCESS_IDENTITY_UNKNOWN")
+    if "ALIVE" in process_states.values():
+        reasons.append("BLOCK_SURVIVING_PROCESS")
+    if work.get("schema") != 2:
+        reasons.append("BLOCK_INSUFFICIENT_LEGACY_EVIDENCE")
+    if not branch_matches or not account_matches:
+        reasons.append("BLOCK_CONTEXT_MISMATCH")
+    if not reasons:
+        reasons.append("REQUIRES_VERSIONED_PLAN_IN_MATCHING_SCOPE")
+    return reasons
+
+
 def audit_profile(owner, identity):
     """Inspect historical state without pretending its branch is checked out."""
     if len(identity) != 64 or any(ch not in "0123456789abcdef" for ch in identity):
         raise ValueError("Invalid historical profile identity")
-    index = owner.state.read(owner.registry.ROOT / "profiles.json") or {}
+    index = owner.state.read(owner.registry.ROOT / PROFILE_INDEX) or {}
     entry = index[identity]
     directory = Path(entry["state"])
     if directory != owner.registry.ROOT / identity:
         raise ValueError("Historical profile registry mismatch")
-    descriptor = owner.state.read(directory / "profile.json")
-    if sha(directory / "profile.json") != entry["descriptor_sha256"]:
+    descriptor = owner.state.read(directory / PROFILE_DESCRIPTOR)
+    if sha(directory / PROFILE_DESCRIPTOR) != entry["descriptor_sha256"]:
         raise ValueError("Historical descriptor drift")
     if (owner.state.read(owner.registry.ROOT / "graphs.json") or {}).get(
         owner.registry.claim(descriptor)
@@ -660,17 +691,9 @@ def audit_profile(owner, identity):
         for role in ("owner", "gateway", "backend")
     }
     process_states["launch_owner"] = owner.state.identity(launch, "owner")
-    reasons = []
-    if "UNKNOWN" in process_states.values():
-        reasons.append("BLOCK_PROCESS_IDENTITY_UNKNOWN")
-    if "ALIVE" in process_states.values():
-        reasons.append("BLOCK_SURVIVING_PROCESS")
-    if work.get("schema") != 2:
-        reasons.append("BLOCK_INSUFFICIENT_LEGACY_EVIDENCE")
-    if not branch_matches or not account_matches:
-        reasons.append("BLOCK_CONTEXT_MISMATCH")
-    if not reasons:
-        reasons.append("REQUIRES_VERSIONED_PLAN_IN_MATCHING_SCOPE")
+    reasons = _audit_block_reasons(
+        process_states, work, branch_matches, account_matches
+    )
     return {
         "profile": identity,
         "historical_branch": scope["branch"],
@@ -691,6 +714,57 @@ def audit_profile(owner, identity):
         else "MISMATCH",
         "files_changed": False,
         "request_replayed": False,
+    }
+
+
+def _profile_action(parser, args, owner, fixture):
+    if args.action == "audit-profile":
+        return audit_profile(owner, args.profile)
+    if args.action == "build":
+        entry, value = owner.specification(args.profile, fixture)
+        bundle = build(owner, entry, value)
+        return {"bundle": str(bundle), "version": bundle.name}
+    if args.action == "migrate":
+        if not args.bundle:
+            parser.error("migrate requires --bundle")
+        prior_bundle = select_bundle(owner.registry.ROOT, args.profile)
+        if prior_bundle is not None:
+            owner = bundle_owner(prior_bundle, args.fixture_registry)
+        return migrate(
+            owner,
+            args.profile,
+            args.bundle,
+            fixture=fixture,
+            from_version=args.from_version,
+        )
+    bundle = select_bundle(owner.registry.ROOT, args.profile)
+    if bundle is None:
+        parser.error("profile has no selected v2 runtime")
+    selected = bundle_owner(bundle, args.fixture_registry)
+    if args.action == "rollback":
+        return rollback(selected, args.profile)
+    return _reconcile_profile(parser, args, selected, fixture)
+
+
+def _reconcile_profile(parser, args, selected, fixture):
+    entry, value = selected.specification(args.profile, fixture)
+    if args.action == "reconcile-plan":
+        # Full plan is private operator output, never a public acceptance report.
+        return selected.reconciler.plan(selected.runtime_owner(), entry, value)
+    if args.plan is None:
+        parser.error("reconcile-apply requires --plan")
+    physical(args.plan)
+    if not args.plan.is_relative_to(Path(entry["state"]) / "reconcile-plans"):
+        parser.error(
+            "apply plan must be in this profile's private reconcile-plans directory"
+        )
+    grant = selected.reconciler.apply(
+        selected.runtime_owner(), entry, value, json.loads(args.plan.read_bytes())
+    )
+    return {
+        "resolution": grant["id"],
+        "generation": grant["new_generation"],
+        "state": grant["phase"],
     }
 
 
@@ -719,89 +793,21 @@ def main(argv=None):
     args = parser.parse_args(argv)
     if args.action == "verify":
         manifest = verify(args.bundle)
-        print(
-            json.dumps(
-                {
-                    "verified": True,
-                    "files": len(manifest["files"]),
-                    "version": args.bundle.name,
-                }
-            )
-        )
+        result = {
+            "verified": True,
+            "files": len(manifest["files"]),
+            "version": args.bundle.name,
+        }
     else:
         if not args.profile:
             parser.error("--profile is required")
-        sys.path.append(str(VENV / "Lib/site-packages"))
+        sys.path.append(str(VENV / SITE_PACKAGES))
         owner = load("legacy_memory_owner", HOST / "project-memory-owner.py")
         fixture = owner.fixture_registry(
             str(args.fixture_registry) if args.fixture_registry else None
         )
-        if args.action == "audit-profile":
-            print(json.dumps(audit_profile(owner, args.profile)))
-            return
-        if args.action == "build":
-            entry, value = owner.specification(args.profile, fixture)
-            bundle = build(owner, entry, value)
-            print(json.dumps({"bundle": str(bundle), "version": bundle.name}))
-            return
-        if args.action == "migrate":
-            if not args.bundle:
-                parser.error("migrate requires --bundle")
-            prior_bundle = select_bundle(owner.registry.ROOT, args.profile)
-            if prior_bundle is not None:
-                owner = bundle_owner(prior_bundle, args.fixture_registry)
-            print(
-                json.dumps(
-                    migrate(
-                        owner,
-                        args.profile,
-                        args.bundle,
-                        fixture=fixture,
-                        from_version=args.from_version,
-                    )
-                )
-            )
-            return
-        bundle = select_bundle(owner.registry.ROOT, args.profile)
-        if bundle is None:
-            parser.error("profile has no selected v2 runtime")
-        selected = bundle_owner(bundle, args.fixture_registry)
-        if args.action == "rollback":
-            print(json.dumps(rollback(selected, args.profile)))
-        else:
-            entry, value = selected.specification(args.profile, fixture)
-            if args.action == "reconcile-plan":
-                # Full plan is private operator output, never a public acceptance report.
-                print(
-                    json.dumps(
-                        selected.reconciler.plan(selected.runtime_owner(), entry, value)
-                    )
-                )
-            else:
-                if args.plan is None:
-                    parser.error("reconcile-apply requires --plan")
-                physical(args.plan)
-                if not args.plan.is_relative_to(
-                    Path(entry["state"]) / "reconcile-plans"
-                ):
-                    parser.error(
-                        "apply plan must be in this profile's private reconcile-plans directory"
-                    )
-                grant = selected.reconciler.apply(
-                    selected.runtime_owner(),
-                    entry,
-                    value,
-                    json.loads(args.plan.read_bytes()),
-                )
-                print(
-                    json.dumps(
-                        {
-                            "resolution": grant["id"],
-                            "generation": grant["new_generation"],
-                            "state": grant["phase"],
-                        }
-                    )
-                )
+        result = _profile_action(parser, args, owner, fixture)
+    print(json.dumps(result))
 
 
 if __name__ == "__main__":

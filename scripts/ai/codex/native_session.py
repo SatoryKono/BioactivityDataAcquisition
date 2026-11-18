@@ -89,11 +89,41 @@ def toml_value(value):
     raise ValueError("Unsupported native session setting")
 
 
+def _markdownify_entry(source, root, servers):
+    from scripts.ai.codex.local_mcp_routes import common_directory
+
+    if not source.exists():
+        return None
+    value = json.loads(physical(source).read_bytes())
+    if (
+        value.get("schema") != 1
+        or Path(value["workspace"]) != root
+        or Path(value["git_common"]) != common_directory(root)
+        or value.get("server") != "Markdownify-BioETL"
+    ):
+        raise PermissionError(
+            "Markdownify session binding does not match this workspace"
+        )
+    entry = value["entry"]
+    if (
+        set(entry) - {"command", "args", "startup_timeout_sec", "tool_timeout_sec"}
+        or not isinstance(entry.get("command"), str)
+        or not isinstance(entry.get("args"), list)
+        or not all(isinstance(item, str) for item in entry["args"])
+    ):
+        raise PermissionError(
+            "Markdownify session binding must be credential-free stdio"
+        )
+    if value["server"] in servers and servers[value["server"]] != entry:
+        raise PermissionError("Existing unrelated Markdownify entry needs review")
+    return value["server"], entry
+
+
 def session_overrides(
     config, root, *, manifest=None, markdownify=None, acceptance=False
 ):
     """Use supported CLI-scoped fields without changing the global user TOML."""
-    from scripts.ai.codex.local_mcp_routes import apply_local_routes, common_directory
+    from scripts.ai.codex.local_mcp_routes import apply_local_routes
 
     manifest = manifest or Path.home() / ".config/pc-agent/codex-routes.json"
     raw = physical(manifest).read_bytes()
@@ -131,30 +161,9 @@ def session_overrides(
         entry["args"][-1] = "memory-acceptance"
         selected["memory-acceptance"] = entry
     source = markdownify or Path.home() / ".config/pc-agent/markdownify-bioetl.json"
-    if source.exists():
-        value = json.loads(physical(source).read_bytes())
-        if (
-            value.get("schema") != 1
-            or Path(value["workspace"]) != root
-            or Path(value["git_common"]) != common_directory(root)
-            or value.get("server") != "Markdownify-BioETL"
-        ):
-            raise PermissionError(
-                "Markdownify session binding does not match this workspace"
-            )
-        entry = value["entry"]
-        if (
-            set(entry) - {"command", "args", "startup_timeout_sec", "tool_timeout_sec"}
-            or not isinstance(entry.get("command"), str)
-            or not isinstance(entry.get("args"), list)
-            or not all(isinstance(item, str) for item in entry["args"])
-        ):
-            raise PermissionError(
-                "Markdownify session binding must be credential-free stdio"
-            )
-        if value["server"] in servers and servers[value["server"]] != entry:
-            raise PermissionError("Existing unrelated Markdownify entry needs review")
-        selected[value["server"]] = entry
+    optional = _markdownify_entry(source, root, servers)
+    if optional is not None:
+        selected[optional[0]] = optional[1]
     result = []
     for name, entry in selected.items():
         result.extend(["--config", "mcp_servers." + name + "=" + toml_value(entry)])

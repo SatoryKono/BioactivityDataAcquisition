@@ -109,6 +109,45 @@ def snapshot(owner, entry, value):
     }, observed
 
 
+def _receipt_verdict(bound, work, previous, coord, entry, block):
+    if not block:
+        return "BLOCK_NOT_BLOCKED"
+    elif any(item["block_id"] == block for item in coord["history"]):
+        return "BLOCK_ALREADY_RESOLVED"
+    elif (
+        work.get("schema") != 2
+        or work.get("profile") != entry["id"]
+        or work.get("generation") != previous.get("generation")
+        or not isinstance(previous.get("generation"), str)
+        or re.fullmatch("[0-9a-f]{32}", previous["generation"]) is None
+    ):
+        return "BLOCK_INSUFFICIENT_LEGACY_EVIDENCE"
+    elif (
+        coord["history"]
+        and coord["history"][-1]["phase"] == "LAUNCHING"
+        and previous.get("generation") != coord["history"][-1]["new_generation"]
+    ):
+        return "BLOCK_INCOMPLETE_SUCCESSOR_HISTORY"
+    elif work.get("graph") != bound["graph"]:
+        return "BLOCK_GRAPH_RECEIPT_MISMATCH"
+    elif (
+        work.get("phase") == "starting"
+        and type(work.get("accepted_count")) is int
+        and work["accepted_count"] == 0
+        and work.get("request_id") is None
+        and work.get("mutating") is False
+    ):
+        return "PROVEN_STARTUP_WITHOUT_REQUESTS"
+    elif (
+        work.get("phase") == "idle"
+        and type(work.get("accepted_count")) is int
+        and work["accepted_count"] >= 0
+    ):
+        return "PROVEN_IDLE_RECEIPT"
+    else:
+        return "BLOCK_UNKNOWN_OUTCOME"
+
+
 def plan(owner, entry, value):
     bound, observed = snapshot(owner, entry, value)
     coord = coordination(owner, entry)
@@ -116,42 +155,7 @@ def plan(owner, entry, value):
     reason = process_verdict(owner, observed)
     block = block_identity(observed, coord)
     if reason is None:
-        if not block:
-            reason = "BLOCK_NOT_BLOCKED"
-        elif any(item["block_id"] == block for item in coord["history"]):
-            reason = "BLOCK_ALREADY_RESOLVED"
-        elif (
-            work.get("schema") != 2
-            or work.get("profile") != entry["id"]
-            or work.get("generation") != previous.get("generation")
-            or not isinstance(previous.get("generation"), str)
-            or re.fullmatch("[0-9a-f]{32}", previous["generation"]) is None
-        ):
-            reason = "BLOCK_INSUFFICIENT_LEGACY_EVIDENCE"
-        elif (
-            coord["history"]
-            and coord["history"][-1]["phase"] == "LAUNCHING"
-            and previous.get("generation") != coord["history"][-1]["new_generation"]
-        ):
-            reason = "BLOCK_INCOMPLETE_SUCCESSOR_HISTORY"
-        elif work.get("graph") != bound["graph"]:
-            reason = "BLOCK_GRAPH_RECEIPT_MISMATCH"
-        elif (
-            work.get("phase") == "starting"
-            and type(work.get("accepted_count")) is int
-            and work["accepted_count"] == 0
-            and work.get("request_id") is None
-            and work.get("mutating") is False
-        ):
-            reason = "PROVEN_STARTUP_WITHOUT_REQUESTS"
-        elif (
-            work.get("phase") == "idle"
-            and type(work.get("accepted_count")) is int
-            and work["accepted_count"] >= 0
-        ):
-            reason = "PROVEN_IDLE_RECEIPT"
-        else:
-            reason = "BLOCK_UNKNOWN_OUTCOME"
+        reason = _receipt_verdict(bound, work, previous, coord, entry, block)
     eligible = reason in {"PROVEN_STARTUP_WITHOUT_REQUESTS", "PROVEN_IDLE_RECEIPT"}
     result = {
         "schema": 2,

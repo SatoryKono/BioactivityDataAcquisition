@@ -20,6 +20,7 @@ import threading
 import time
 import uuid
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from functools import partial
 from pathlib import Path
 
 sys.dont_write_bytecode = True
@@ -27,6 +28,12 @@ HERE = Path(__file__).resolve().parent
 HOST = Path("D:/pc-agent/tools/shared-mcp")
 PYTHON = Path("C:/Users/Fedor/AppData/Local/Programs/Python/Python313/python.exe")
 SITE = "D:/github/BioactivityDataAcquisition/.venv-win/Lib/site-packages"
+
+
+TRANSITION_LOCK = "transition.lock"
+STATUS_RECORD = "status.json"
+STOP_REQUEST = "stop.request"
+HEALTH_PATH = "/health"
 
 
 def module(name, path):
@@ -138,12 +145,12 @@ def specification(root):
 def prepare(root):
     key, binding = configure(root)
     core.private_directory()
-    with core.LifetimeLock(core.STATE / "transition.lock"):
+    with core.LifetimeLock(core.STATE / TRANSITION_LOCK):
         path = core.STATE / "profile.json"
         if path.exists():
             return specification(root)
         if any(core.STATE.iterdir()):
-            if any(p.name != "transition.lock" for p in core.STATE.iterdir()):
+            if any(p.name != TRANSITION_LOCK for p in core.STATE.iterdir()):
                 raise PermissionError("Incomplete Markdownify profile; no overwrite")
         site = PYTHON.parent / "Lib/site-packages"
         qualified = set()
@@ -179,7 +186,7 @@ def prepare(root):
 
 
 def request(spec, method, path, body=None, session=None):
-    record = core.read_json(core.STATE / "status.json")
+    record = core.read_json(core.STATE / STATUS_RECORD)
     if core.process_birth(record["owner_pid"]) != record["owner_birth"]:
         raise PermissionError("Markdownify owner identity unavailable")
     connection = http.client.HTTPConnection("127.0.0.1", spec["port"], timeout=100)
@@ -218,70 +225,74 @@ def request(spec, method, path, body=None, session=None):
         connection.close()
 
 
+def _optional_status_record():
+    path = core.STATE / STATUS_RECORD
+    return core.read_json(path) if path.exists() else {}
+
+
+def _owner_ready(spec, record):
+    try:
+        health, _ = request(spec, "GET", HEALTH_PATH)
+        return health["ready"] and health["generation"] == record["generation"]
+    except (OSError, PermissionError):
+        return False
+
+
+def _launch_owner(root, record, launched):
+    with core.LifetimeLock(core.STATE / TRANSITION_LOCK):
+        current = _optional_status_record()
+        if current != record:
+            return False
+        if launched:
+            raise PermissionError("Markdownify exited during startup; no launch loop")
+        child = subprocess.Popen(
+            [
+                str(PYTHON),
+                "-I",
+                "-S",
+                "-B",
+                str(HERE / "safe_markdownify.py"),
+                "serve",
+                "--root",
+                str(root),
+            ],
+            cwd=HERE,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            creationflags=core.WINDOWS_HIDE | subprocess.CREATE_NEW_PROCESS_GROUP,
+        )
+        birth = core.process_birth(child.pid)
+        if birth is None:
+            raise PermissionError("Markdownify launch identity unknown")
+        core.write_json(
+            core.STATE / STATUS_RECORD,
+            {
+                "owner_pid": child.pid,
+                "owner_birth": birth,
+                "generation": uuid.uuid4().hex,
+            },
+        )
+        return True
+
+
 def ensure(root):
     spec = specification(root)
-    if (core.STATE / "stop.request").exists():
+    if (core.STATE / STOP_REQUEST).exists():
         raise PermissionError("Markdownify profile is administratively stopped")
     launched = False
     for _ in range(160):
-        record = (
-            core.read_json(core.STATE / "status.json")
-            if (core.STATE / "status.json").exists()
-            else {}
-        )
+        record = _optional_status_record()
         pid, birth = record.get("owner_pid"), record.get("owner_birth")
         if pid and core.process_birth(pid) == birth:
-            try:
-                health, _ = request(spec, "GET", "/health")
-                if health["ready"] and health["generation"] == record["generation"]:
-                    return spec
-            except (OSError, PermissionError):
-                pass
+            if _owner_ready(spec, record):
+                return spec
         elif pid and psutil.pid_exists(pid):
             raise PermissionError("Reused or unknown Markdownify PID")
         else:
-            with core.LifetimeLock(core.STATE / "transition.lock"):
-                current = (
-                    core.read_json(core.STATE / "status.json")
-                    if (core.STATE / "status.json").exists()
-                    else {}
-                )
-                if current != record:
-                    continue
-                if launched:
-                    raise PermissionError(
-                        "Markdownify exited during startup; no launch loop"
-                    )
-                child = subprocess.Popen(
-                    [
-                        str(PYTHON),
-                        "-I",
-                        "-S",
-                        "-B",
-                        str(HERE / "safe_markdownify.py"),
-                        "serve",
-                        "--root",
-                        str(root),
-                    ],
-                    cwd=HERE,
-                    stdin=subprocess.DEVNULL,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                    creationflags=core.WINDOWS_HIDE
-                    | subprocess.CREATE_NEW_PROCESS_GROUP,
-                )
-                birth = core.process_birth(child.pid)
-                if birth is None:
-                    raise PermissionError("Markdownify launch identity unknown")
-                core.write_json(
-                    core.STATE / "status.json",
-                    {
-                        "owner_pid": child.pid,
-                        "owner_birth": birth,
-                        "generation": uuid.uuid4().hex,
-                    },
-                )
-                launched = True
+            if not _launch_owner(root, record, launched):
+                continue
+            launched = True
         time.sleep(0.2)
     raise TimeoutError("Markdownify startup deadline; no fallback")
 
@@ -353,13 +364,152 @@ def convert(spec, name, args):
         job.rmdir()
 
 
+class _MarkdownifyHandler(BaseHTTPRequestHandler):
+    def __init__(
+        self, *args, workspace, spec, record, token, sessions, gate, draining, **kwargs
+    ):
+        self._workspace = workspace
+        self._spec = spec
+        self._record = record
+        self._token = token
+        self._sessions = sessions
+        self._gate = gate
+        self._draining = draining
+        super().__init__(*args, **kwargs)
+
+    def log_message(self, *_):
+        # Requests contain credentials and paths; never emit access logs.
+        pass
+
+    def reply(self, status, value=None, session=None):
+        raw = json.dumps(value).encode() if value is not None else b""
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(raw)))
+        self.send_header("Cache-Control", "no-store")
+        if session:
+            self.send_header("Mcp-Session-Id", session)
+        self.end_headers()
+        self.wfile.write(raw)
+
+    def authorized(self):
+        if not secrets.compare_digest(
+            self.headers.get("Authorization", ""), "Bearer " + self._token
+        ):
+            self.reply(401)
+            return False
+        specification(self._workspace)
+        return True
+
+    def do_GET(self):
+        if not self.authorized():
+            return
+        if self.path == HEALTH_PATH:
+            self.reply(
+                200,
+                {
+                    "ready": True,
+                    "service": "markdownify-bioetl",
+                    "generation": self._record["generation"],
+                },
+            )
+        else:
+            self.reply(405)
+
+    def do_DELETE(self):
+        if self.authorized():
+            self._sessions.discard(self.headers.get("Mcp-Session-Id"))
+            self.reply(200)
+
+    def do_POST(self):
+        if not self.authorized():
+            return
+        if self.path != "/mcp":
+            self.reply(404)
+            return
+        length = int(self.headers.get("Content-Length", "0"))
+        if not 0 < length <= 1024 * 1024:
+            self.reply(413)
+            return
+        request_value = json.loads(self.rfile.read(length))
+        self._dispatch_request(request_value)
+
+    def _dispatch_request(self, request_value):
+        identifier = request_value.get("id")
+        method = request_value.get("method")
+        session = self.headers.get("Mcp-Session-Id")
+        if method == "initialize":
+            if len(self._sessions) >= 64 or self._draining.is_set():
+                self.reply(503)
+                return
+            session = uuid.uuid4().hex
+            self._sessions.add(session)
+            result = {
+                "protocolVersion": "2025-06-18",
+                "capabilities": {"tools": {}},
+                "serverInfo": {
+                    "name": "markdownify-bioetl",
+                    "version": "1.0.0",
+                },
+            }
+        elif session not in self._sessions:
+            self.reply(404)
+            return
+        elif identifier is None:
+            self.reply(202)
+            return
+        elif method == "tools/list":
+            result = {
+                "tools": [
+                    tool
+                    for tool in TOOLS
+                    if tool["name"] in self._spec["enabled_tools"]
+                ]
+            }
+        elif method == "ping":
+            result = {}
+        elif method == "tools/call":
+            result = self._call_tool(request_value)
+        else:
+            self.reply(
+                200,
+                {
+                    "jsonrpc": "2.0",
+                    "id": identifier,
+                    "error": {"code": -32601, "message": "Unsupported method"},
+                },
+            )
+            return
+        self.reply(200, {"jsonrpc": "2.0", "id": identifier, "result": result}, session)
+
+    def _call_tool(self, request_value):
+        with self._gate:
+            try:
+                if self._draining.is_set():
+                    raise PermissionError("Markdownify is draining")
+                params = request_value["params"]
+                text = convert(self._spec, params["name"], params.get("arguments", {}))
+                result = {"content": [{"type": "text", "text": text}]}
+            except Exception:
+                result = {
+                    "isError": True,
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": "Local file access/conversion refused",
+                        }
+                    ],
+                }
+        return result
+
+
 def serve(root):
     spec = specification(root)
     with core.LifetimeLock(core.STATE / "owner.lock"):
         # Parent publishes PID+birth before this process binds the port.
         for _ in range(100):
-            if (core.STATE / "status.json").is_file():
-                record = core.read_json(core.STATE / "status.json")
+            if (core.STATE / STATUS_RECORD).is_file():
+                record = core.read_json(core.STATE / STATUS_RECORD)
                 if record.get("owner_pid") == os.getpid() and record.get(
                     "owner_birth"
                 ) == core.process_birth(os.getpid()):
@@ -372,130 +522,18 @@ def serve(root):
         gate = threading.Lock()
         draining = threading.Event()
 
-        class Handler(BaseHTTPRequestHandler):
-            def log_message(self, *_):
-                pass
-
-            def reply(self, status, value=None, session=None):
-                raw = json.dumps(value).encode() if value is not None else b""
-                self.send_response(status)
-                self.send_header("Content-Type", "application/json")
-                self.send_header("Content-Length", str(len(raw)))
-                self.send_header("Cache-Control", "no-store")
-                if session:
-                    self.send_header("Mcp-Session-Id", session)
-                self.end_headers()
-                self.wfile.write(raw)
-
-            def authorized(self):
-                if not secrets.compare_digest(
-                    self.headers.get("Authorization", ""), "Bearer " + token
-                ):
-                    self.reply(401)
-                    return False
-                specification(root)
-                return True
-
-            def do_GET(self):
-                if not self.authorized():
-                    return
-                if self.path == "/health":
-                    self.reply(
-                        200,
-                        {
-                            "ready": True,
-                            "service": "markdownify-bioetl",
-                            "generation": record["generation"],
-                        },
-                    )
-                elif self.path != "/health":
-                    self.reply(405)
-
-            def do_DELETE(self):
-                if self.authorized():
-                    sessions.discard(self.headers.get("Mcp-Session-Id"))
-                    self.reply(200)
-
-            def do_POST(self):
-                if not self.authorized():
-                    return
-                if self.path != "/mcp":
-                    self.reply(404)
-                    return
-                length = int(self.headers.get("Content-Length", "0"))
-                if not 0 < length <= 1024 * 1024:
-                    self.reply(413)
-                    return
-                request_value = json.loads(self.rfile.read(length))
-                identifier = request_value.get("id")
-                method = request_value.get("method")
-                session = self.headers.get("Mcp-Session-Id")
-                if method == "initialize":
-                    if len(sessions) >= 64 or draining.is_set():
-                        self.reply(503)
-                        return
-                    session = uuid.uuid4().hex
-                    sessions.add(session)
-                    result = {
-                        "protocolVersion": "2025-06-18",
-                        "capabilities": {"tools": {}},
-                        "serverInfo": {
-                            "name": "markdownify-bioetl",
-                            "version": "1.0.0",
-                        },
-                    }
-                elif session not in sessions:
-                    self.reply(404)
-                    return
-                elif identifier is None:
-                    self.reply(202)
-                    return
-                elif method == "tools/list":
-                    result = {
-                        "tools": [
-                            tool
-                            for tool in TOOLS
-                            if tool["name"] in spec["enabled_tools"]
-                        ]
-                    }
-                elif method == "ping":
-                    result = {}
-                elif method == "tools/call":
-                    with gate:
-                        try:
-                            if draining.is_set():
-                                raise PermissionError("Markdownify is draining")
-                            params = request_value["params"]
-                            text = convert(
-                                spec, params["name"], params.get("arguments", {})
-                            )
-                            result = {"content": [{"type": "text", "text": text}]}
-                        except Exception:
-                            result = {
-                                "isError": True,
-                                "content": [
-                                    {
-                                        "type": "text",
-                                        "text": "Local file access/conversion refused",
-                                    }
-                                ],
-                            }
-                else:
-                    self.reply(
-                        200,
-                        {
-                            "jsonrpc": "2.0",
-                            "id": identifier,
-                            "error": {"code": -32601, "message": "Unsupported method"},
-                        },
-                    )
-                    return
-                self.reply(
-                    200, {"jsonrpc": "2.0", "id": identifier, "result": result}, session
-                )
-
+        handler = partial(
+            _MarkdownifyHandler,
+            workspace=root,
+            spec=spec,
+            record=record,
+            token=token,
+            sessions=sessions,
+            gate=gate,
+            draining=draining,
+        )
         server = ThreadingHTTPServer(
-            ("127.0.0.1", spec["port"]), Handler, bind_and_activate=False
+            ("127.0.0.1", spec["port"]), handler, bind_and_activate=False
         )
         server.allow_reuse_address = False
         server.socket.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
@@ -504,7 +542,7 @@ def serve(root):
         server.daemon_threads = True
 
         def stop_when_requested():
-            marker = core.STATE / "stop.request"
+            marker = core.STATE / STOP_REQUEST
             while not marker.exists():
                 time.sleep(0.2)
             if core.read_json(marker).get("generation") != record["generation"]:
@@ -520,7 +558,7 @@ def serve(root):
 
 def client(root):
     spec = specification(root)
-    health, _ = request(spec, "GET", "/health")
+    health, _ = request(spec, "GET", HEALTH_PATH)
     if not health.get("ready"):
         raise PermissionError(
             "Markdownify owner requires explicit administrative start"
@@ -540,6 +578,48 @@ def client(root):
             request(spec, "DELETE", "/mcp", session=session)
 
 
+def _start(root):
+    value = specification(root)
+    marker = core.STATE / STOP_REQUEST
+    if marker.exists():
+        record = core.read_json(core.STATE / STATUS_RECORD)
+        if (
+            psutil.pid_exists(record["owner_pid"])
+            or core.read_json(marker).get("generation") != record["generation"]
+        ):
+            raise PermissionError("Markdownify stop has not completed")
+        marker.unlink()
+    ensure(root)
+    print(json.dumps({"ready": True, "id": value["id"]}))
+
+
+def _stop(root):
+    specification(root)
+    record = core.read_json(core.STATE / STATUS_RECORD)
+    if core.process_birth(record["owner_pid"]) != record["owner_birth"]:
+        raise PermissionError("Markdownify owner identity not proven")
+    core.write_json(core.STATE / STOP_REQUEST, {"generation": record["generation"]})
+    for _ in range(200):
+        if not psutil.pid_exists(record["owner_pid"]):
+            print(json.dumps({"state": "STOPPED"}))
+            return
+        time.sleep(0.2)
+    print(json.dumps({"state": "DRAIN_PENDING"}))
+
+
+def _client_root(args):
+    if args.root is not None:
+        raise PermissionError("Client root override is forbidden")
+    root = next(
+        (p for p in (Path.cwd(), *Path.cwd().parents) if (p / ".git").exists()),
+        None,
+    )
+    if root is None:
+        raise PermissionError("No session workspace")
+    roots.physical_root(root)
+    return root
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -549,15 +629,7 @@ def main(argv=None):
     args = parser.parse_args(argv)
     bootstrap_host()
     if args.mode == "client":
-        if args.root is not None:
-            raise PermissionError("Client root override is forbidden")
-        root = next(
-            (p for p in (Path.cwd(), *Path.cwd().parents) if (p / ".git").exists()),
-            None,
-        )
-        if root is None:
-            raise PermissionError("No session workspace")
-        roots.physical_root(root)
+        root = _client_root(args)
         client(root)
     elif args.root is None:
         raise ValueError("Administrative root required")
@@ -567,35 +639,12 @@ def main(argv=None):
     elif args.mode == "serve":
         serve(args.root)
     elif args.mode == "start":
-        value = specification(args.root)
-        marker = core.STATE / "stop.request"
-        if marker.exists():
-            record = core.read_json(core.STATE / "status.json")
-            if (
-                psutil.pid_exists(record["owner_pid"])
-                or core.read_json(marker).get("generation") != record["generation"]
-            ):
-                raise PermissionError("Markdownify stop has not completed")
-            marker.unlink()
-        ensure(args.root)
-        print(json.dumps({"ready": True, "id": value["id"]}))
+        _start(root=args.root)
     elif args.mode == "stop":
-        specification(args.root)
-        record = core.read_json(core.STATE / "status.json")
-        if core.process_birth(record["owner_pid"]) != record["owner_birth"]:
-            raise PermissionError("Markdownify owner identity not proven")
-        core.write_json(
-            core.STATE / "stop.request", {"generation": record["generation"]}
-        )
-        for _ in range(200):
-            if not psutil.pid_exists(record["owner_pid"]):
-                print(json.dumps({"state": "STOPPED"}))
-                return
-            time.sleep(0.2)
-        print(json.dumps({"state": "DRAIN_PENDING"}))
+        _stop(root=args.root)
     else:
         value = specification(args.root)
-        print(json.dumps(request(value, "GET", "/health")[0]))
+        print(json.dumps(request(value, "GET", HEALTH_PATH)[0]))
 
 
 if __name__ == "__main__":
