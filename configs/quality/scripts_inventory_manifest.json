@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-18T21:39:32.154034+00:00",
+  "generated_at": "2026-11-18T21:53:38.142479+00:00",
   "summary": {
     "total_scripts": 763,
     "status_counts": {
@@ -16,7 +16,7 @@
       "other": 22,
       "scripts": 656,
       "skills": 13,
-      "tests": 581
+      "tests": 583
     }
   },
   "scripts": [
@@ -699,7 +699,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 944,
+          "line": 945,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/ensure-mcp.sh\","
         }
@@ -1155,17 +1155,17 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": "scripts/ai/codex/native_session.py",
-          "line": 118,
+          "line": 151,
           "source_group": "scripts",
           "text": "from scripts.ai.codex.local_mcp_routes import common_directory"
         },
         {
           "path": "scripts/ai/codex/native_session.py",
-          "line": 185,
+          "line": 241,
           "source_group": "scripts",
           "text": "from scripts.ai.codex.local_mcp_routes import ("
         },
@@ -1183,9 +1183,15 @@
         },
         {
           "path": "tests/unit/scripts/test_native_mcp_local_routes.py",
-          "line": 11,
+          "line": 13,
           "source_group": "tests",
           "text": "from scripts.ai.codex.local_mcp_routes import apply_local_routes"
+        },
+        {
+          "path": "tests/unit/scripts/test_native_mcp_local_routes.py",
+          "line": 330,
+          "source_group": "tests",
+          "text": "from scripts.ai.codex import local_mcp_routes"
         }
       ],
       "owner": "@bioetl-platform",
@@ -1553,7 +1559,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 806,
+          "line": 807,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/native_runtime_contract.py\": ("
         },
@@ -1602,13 +1608,13 @@
         },
         {
           "path": "tests/unit/scripts/test_mcp_native_session.py",
-          "line": 11,
+          "line": 13,
           "source_group": "tests",
           "text": "from scripts.ai.codex import native_session"
         },
         {
           "path": "tests/unit/scripts/test_mcp_native_session.py",
-          "line": 12,
+          "line": 14,
           "source_group": "tests",
           "text": "from scripts.ai.codex.native_session import ("
         }
@@ -2174,7 +2180,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 986,
+          "line": 987,
           "source_group": "scripts",
           "text": "\"scripts/ai/cursor/setup_skills.sh\","
         },
@@ -3059,7 +3065,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 651,
+          "line": 652,
           "source_group": "scripts",
           "text": "\"scripts/ai/junie/check_junie_mirror.py\": (JUNIE_RUNTIME_CI_TEST,),"
         },
@@ -3308,7 +3314,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1898,
+          "line": 1899,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/check.sh\": ("
         }
@@ -3380,31 +3386,37 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": "scripts/ai/mcp/converter_snapshot.py",
-          "line": 129,
+          "line": 156,
           "source_group": "scripts",
           "text": "runner = Path(__file__).with_name(\"converter_runner.py\")"
         },
         {
           "path": "scripts/ai/mcp/converter_snapshot.py",
-          "line": 130,
+          "line": 157,
           "source_group": "scripts",
           "text": "shutil.copyfile(runner, staging / \"converter_runner.py\")"
         },
         {
           "path": "scripts/ai/mcp/safe_markdownify.py",
-          "line": 125,
+          "line": 126,
           "source_group": "scripts",
           "text": "HERE / \"converter_runner.py\","
         },
         {
           "path": "scripts/ai/mcp/safe_markdownify.py",
-          "line": 394,
+          "line": 410,
           "source_group": "scripts",
           "text": "str(Path(spec[\"converter\"]) / \"converter_runner.py\"),"
+        },
+        {
+          "path": "tests/unit/scripts/test_converter_snapshot.py",
+          "line": 108,
+          "source_group": "tests",
+          "text": "runner = Path(snapshots.__file__).with_name(\"converter_runner.py\")"
         }
       ],
       "owner": "@bioetl-platform",
@@ -3417,19 +3429,25 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ai/mcp/safe_markdownify.py",
-          "line": 52,
+          "line": 53,
           "source_group": "scripts",
           "text": "snapshots = module(\"markdownify_converter_snapshot\", HERE / \"converter_snapshot.py\")"
         },
         {
           "path": "scripts/ai/mcp/safe_markdownify.py",
-          "line": 124,
+          "line": 125,
           "source_group": "scripts",
           "text": "HERE / \"converter_snapshot.py\","
+        },
+        {
+          "path": "tests/unit/scripts/test_converter_snapshot.py",
+          "line": 15,
+          "source_group": "tests",
+          "text": "from scripts.ai.mcp import converter_snapshot as snapshots"
         }
       ],
       "owner": "@bioetl-platform",
@@ -3489,7 +3507,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 970,
+          "line": 971,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/github-mcp-wrapper.ps1\","
         },
@@ -3552,7 +3570,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 971,
+          "line": 972,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/github-mcp-wrapper.sh\","
         },
@@ -3628,7 +3646,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 946,
+          "line": 947,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_adr_analysis_wrapper.sh\","
         },
@@ -3653,7 +3671,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 993,
+          "line": 994,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_ast_grep_wrapper.ps1\","
         },
@@ -3702,7 +3720,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1014,
+          "line": 1015,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_ast_grep_wrapper.sh\","
         },
@@ -3739,7 +3757,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 994,
+          "line": 995,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.ps1\","
         },
@@ -3800,7 +3818,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 995,
+          "line": 996,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.sh\","
         },
@@ -3882,7 +3900,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 947,
+          "line": 948,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_code_analyzer_wrapper.sh\","
         }
@@ -3945,7 +3963,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 996,
+          "line": 997,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_context7_wrapper.ps1\","
         },
@@ -3994,7 +4012,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1015,
+          "line": 1016,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_context7_wrapper.sh\","
         },
@@ -4070,7 +4088,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 948,
+          "line": 949,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_deja_wrapper.sh\","
         }
@@ -4214,7 +4232,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1889,
+          "line": 1890,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.ps1\": (MCP_WRAPPER_CONTRACTS_TEST,),"
         },
@@ -4269,7 +4287,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1888,
+          "line": 1889,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.sh\": (MCP_WRAPPER_CONTRACTS_TEST,),"
         },
@@ -4314,7 +4332,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1887,
+          "line": 1888,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\": (NPM_RUNTIME_TEST,),"
         },
@@ -4369,7 +4387,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1886,
+          "line": 1887,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\": (NPM_RUNTIME_TEST,),"
         },
@@ -4445,7 +4463,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 949,
+          "line": 950,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_github_actions_wrapper.sh\","
         },
@@ -4564,7 +4582,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 952,
+          "line": 953,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_memory_wrapper.ps1\","
         },
@@ -4615,7 +4633,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 953,
+          "line": 954,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_memory_wrapper.sh\","
         },
@@ -4785,7 +4803,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 954,
+          "line": 955,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1\","
         },
@@ -4828,7 +4846,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 955,
+          "line": 956,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\","
         },
@@ -4861,7 +4879,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 956,
+          "line": 957,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1\","
         },
@@ -5008,25 +5026,25 @@
       "references": [
         {
           "path": "scripts/ai/mcp/memory_versions.py",
-          "line": 360,
+          "line": 36,
           "source_group": "scripts",
-          "text": "source = Path(__file__).with_name(\"memory_reconciliation.py\")"
-        },
-        {
-          "path": "scripts/ai/mcp/memory_versions.py",
-          "line": 503,
-          "source_group": "scripts",
-          "text": "from scripts.ai.mcp.memory_reconciliation import _interrupted_launch_block, records"
+          "text": "RECONCILIATION_SOURCE = \"memory_reconciliation.py\""
         },
         {
           "path": "tests/unit/scripts/test_memory_reconciliation.py",
-          "line": 12,
+          "line": 14,
           "source_group": "tests",
           "text": "from scripts.ai.mcp import memory_reconciliation as recovery"
         },
         {
           "path": "tests/unit/scripts/test_memory_versions.py",
-          "line": 494,
+          "line": 579,
+          "source_group": "tests",
+          "text": "from scripts.ai.mcp import memory_reconciliation"
+        },
+        {
+          "path": "tests/unit/scripts/test_memory_versions.py",
+          "line": 635,
           "source_group": "tests",
           "text": "from scripts.ai.mcp import memory_reconciliation as recovery"
         }
@@ -5041,7 +5059,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "scripts/ai/mcp/__main__.py",
@@ -5056,8 +5074,14 @@
           "text": "\"session_memory_versions\", Path(__file__).with_name(\"memory_versions.py\")"
         },
         {
+          "path": "tests/unit/scripts/test_memory_reconciliation.py",
+          "line": 482,
+          "source_group": "tests",
+          "text": "from scripts.ai.mcp import memory_versions"
+        },
+        {
           "path": "tests/unit/scripts/test_memory_versions.py",
-          "line": 11,
+          "line": 13,
           "source_group": "tests",
           "text": "from scripts.ai.mcp import memory_versions as versions"
         }
@@ -5173,25 +5197,25 @@
       "references": [
         {
           "path": "scripts/ai/mcp/safe_markdownify.py",
-          "line": 51,
+          "line": 52,
           "source_group": "scripts",
           "text": "files = module(\"markdownify_safe_file\", HERE / \"safe_file.py\")"
         },
         {
           "path": "scripts/ai/mcp/safe_markdownify.py",
-          "line": 122,
+          "line": 123,
           "source_group": "scripts",
           "text": "HERE / \"safe_file.py\","
         },
         {
           "path": "tests/unit/scripts/test_mcp_safe_file.py",
-          "line": 8,
+          "line": 10,
           "source_group": "tests",
           "text": "from scripts.ai.mcp.safe_file import read_confined"
         },
         {
           "path": "tests/unit/scripts/test_mcp_safe_file.py",
-          "line": 9,
+          "line": 11,
           "source_group": "tests",
           "text": "from scripts.ai.mcp import safe_file"
         }
@@ -5206,8 +5230,14 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
+        {
+          "path": "scripts/ai/codex/native_session.py",
+          "line": 24,
+          "source_group": "scripts",
+          "text": "MARKDOWNIFY_CLIENT = \"safe_markdownify.py\""
+        },
         {
           "path": "scripts/ai/mcp/__main__.py",
           "line": 37,
@@ -5216,7 +5246,7 @@
         },
         {
           "path": "tests/unit/scripts/test_safe_markdownify_client.py",
-          "line": 13,
+          "line": 15,
           "source_group": "tests",
           "text": "from scripts.ai.mcp import safe_markdownify as markdownify"
         }
@@ -5231,55 +5261,55 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 9,
       "references": [
         {
           "path": "scripts/ai/codex/native_session.py",
-          "line": 159,
+          "line": 23,
           "source_group": "scripts",
-          "text": "or selector.name != \"session_client.py\""
-        },
-        {
-          "path": "scripts/ai/codex/native_session.py",
-          "line": 169,
-          "source_group": "scripts",
-          "text": "from scripts.ai.mcp.session_client import _verify_dispatcher"
-        },
-        {
-          "path": "scripts/ai/codex/native_session.py",
-          "line": 175,
-          "source_group": "scripts",
-          "text": "if \"session_client.py\" not in manifest[\"files\"] or not any("
+          "text": "SESSION_CLIENT = \"session_client.py\""
         },
         {
           "path": "tests/unit/scripts/test_mcp_native_session.py",
-          "line": 87,
+          "line": 90,
+          "source_group": "tests",
+          "text": "\"files\": {\"session_client.py\": hashlib.sha256(source).hexdigest()},"
+        },
+        {
+          "path": "tests/unit/scripts/test_mcp_native_session.py",
+          "line": 98,
           "source_group": "tests",
           "text": "selector = directory / \"session_client.py\""
         },
         {
           "path": "tests/unit/scripts/test_mcp_native_session.py",
-          "line": 92,
-          "source_group": "tests",
-          "text": "\"session_client.py\": hashlib.sha256(selector.read_bytes()).hexdigest()"
-        },
-        {
-          "path": "tests/unit/scripts/test_mcp_native_session.py",
-          "line": 109,
-          "source_group": "tests",
-          "text": "\"args\": [\"-I\", \"-S\", \"-B\", str(installed / \"session_client.py\"), name],"
-        },
-        {
-          "path": "tests/unit/scripts/test_mcp_native_session.py",
-          "line": 166,
+          "line": 246,
           "source_group": "tests",
           "text": "entry[\"args\"][3] = \"session_client.py\""
         },
         {
           "path": "tests/unit/scripts/test_mcp_native_session.py",
-          "line": 168,
+          "line": 303,
+          "source_group": "tests",
+          "text": "entry[\"args\"][3] = \"session_client.py\""
+        },
+        {
+          "path": "tests/unit/scripts/test_mcp_native_session.py",
+          "line": 305,
           "source_group": "tests",
           "text": "foreign = tmp_path / \"session_client.py\""
+        },
+        {
+          "path": "tests/unit/scripts/test_native_mcp_local_routes.py",
+          "line": 14,
+          "source_group": "tests",
+          "text": "from scripts.ai.mcp.session_client import session_root"
+        },
+        {
+          "path": "tests/unit/scripts/test_native_mcp_local_routes.py",
+          "line": 28,
+          "source_group": "tests",
+          "text": "\"memory\": {\"command\": \"python\", \"args\": [\"session_client.py\", \"memory\"]}"
         }
       ],
       "owner": "@bioetl-platform",
@@ -5408,7 +5438,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1894,
+          "line": 1895,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/exec_windows_ps1_wrapper.sh\": ("
         },
@@ -5457,7 +5487,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 972,
+          "line": 973,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/github_project_transport.mjs\","
         },
@@ -5494,7 +5524,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 997,
+          "line": 998,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/host_transport.mjs\","
         },
@@ -5543,7 +5573,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 998,
+          "line": 999,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/invoke_host_transport.ps1\","
         },
@@ -5604,7 +5634,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 999,
+          "line": 1000,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/invoke_host_transport.sh\","
         },
@@ -5827,7 +5857,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1890,
+          "line": 1891,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/run_owned_stdio.ps1\": ("
         },
@@ -6088,7 +6118,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 951,
+          "line": 952,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/test_env_loading.sh\","
         },
@@ -11605,7 +11635,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1876,
+          "line": 1877,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/nightly_shadow_archive.py\": NIGHTLY_SHADOW_TESTS,"
         },
@@ -11776,7 +11806,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1754,
+          "line": 1755,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/presubmit_gate.py\": ("
         },
@@ -11819,7 +11849,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1917,
+          "line": 1918,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/publish_docker_image.sh\": ("
         },
@@ -14242,7 +14272,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1346,
+          "line": 1347,
           "source_group": "scripts",
           "text": "\"scripts/engineering/dev/zed_mypy.py\","
         },
@@ -19856,13 +19886,13 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 839,
+          "line": 840,
           "source_group": "scripts",
           "text": "\"scripts/engineering/qa/runtime_acceptance_12553.py\","
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 841,
+          "line": 842,
           "source_group": "scripts",
           "text": "\"tests/helpers/runtime_acceptance_12553.py\","
         },
@@ -19905,7 +19935,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 840,
+          "line": 841,
           "source_group": "scripts",
           "text": "\"scripts/engineering/qa/runtime_acceptance_12553_coverage.py\","
         },
@@ -23153,7 +23183,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 653,
+          "line": 654,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/process_supervisor.py\": ("
         },
@@ -23490,7 +23520,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 744,
+          "line": 745,
           "source_group": "scripts",
           "text": "\"scripts/memory/run_workflow.sh\": ("
         },
@@ -24590,7 +24620,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 670,
+          "line": 671,
           "source_group": "scripts",
           "text": "\"scripts/ops/launchers/codex/setup_plugins.sh\": ("
         },
@@ -26115,7 +26145,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 866,
+          "line": 867,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/audit_live_grafana_panels.py\": ("
         },
@@ -26233,7 +26263,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 2245,
+          "line": 2246,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },
@@ -26407,7 +26437,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 869,
+          "line": 870,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/dashboard_context_links.py\": ("
         },
@@ -28443,7 +28473,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1008,
+          "line": 1009,
           "source_group": "scripts",
           "text": "\"scripts/ops/runtime/mcp/apply-shared-to-devin.py\","
         },

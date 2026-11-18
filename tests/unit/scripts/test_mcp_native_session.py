@@ -1,5 +1,7 @@
 """Credential delivery is a child-only operation with separate OAuth routing."""
 
+from __future__ import annotations
+
 import hashlib
 import json
 import tomllib
@@ -79,34 +81,31 @@ def test_only_exact_qualified_app_binary_is_selected(tmp_path, monkeypatch):
 def session_binding(tmp_path, monkeypatch):
     root = tmp_path / "repo"
     (root / ".git").mkdir(parents=True)
-    python = tmp_path / "reviewed-python.exe"
+    manifest = tmp_path / "routes.json"
+    python = tmp_path / "python.exe"
     python.write_bytes(b"qualified interpreter fixture")
-    versions = tmp_path / "selector-versions"
-    directory = versions / "building"
-    directory.mkdir(parents=True)
-    selector = directory / "session_client.py"
-    selector.write_bytes(b"# qualified selector fixture\n")
-    dispatcher = {
+    source = b"qualified dispatcher fixture"
+    snapshot = {
         "schema": 1,
-        "files": {
-            "session_client.py": hashlib.sha256(selector.read_bytes()).hexdigest()
-        },
+        "files": {"session_client.py": hashlib.sha256(source).hexdigest()},
         "host_pins": {str(python): hashlib.sha256(python.read_bytes()).hexdigest()},
     }
-    raw = json.dumps(dispatcher, sort_keys=True).encode()
+    raw = json.dumps(snapshot, sort_keys=True, separators=(",", ":")).encode()
+    versions = tmp_path / "selectors"
+    directory = versions / hashlib.sha256(raw).hexdigest()
+    directory.mkdir(parents=True)
     (directory / "dispatcher.json").write_bytes(raw)
-    installed = versions / hashlib.sha256(raw).hexdigest()
-    directory.rename(installed)
-    monkeypatch.setattr(native_session, "SELECTOR_PYTHON", python)
-    monkeypatch.setattr(native_session, "SELECTOR_VERSIONS", versions)
-    manifest = tmp_path / "routes.json"
+    selector = directory / "session_client.py"
+    selector.write_bytes(source)
+    monkeypatch.setattr(native_session, "BASE_PYTHON", python)
+    monkeypatch.setattr(native_session, "SESSION_VERSIONS", versions)
     data = {
         "schema": 1,
         "git_common": str(root / ".git"),
         "entries": {
             name: {
                 "command": str(python),
-                "args": ["-I", "-S", "-B", str(installed / "session_client.py"), name],
+                "args": ["-I", "-S", "-B", str(selector), name],
             }
             for name in ("memory", "ast-grep")
         },
@@ -152,37 +151,6 @@ def test_explicit_pinned_root_route_is_not_a_session_binding(session_binding, tm
         session_overrides(
             config, root, manifest=manifest, markdownify=tmp_path / "absent.json"
         )
-
-
-@pytest.mark.parametrize(
-    "change", ["relative", "foreign", "interpreter", "drift", "manifest"]
-)
-def test_native_selector_requires_the_physical_pinned_installation(
-    session_binding, tmp_path, monkeypatch, change
-):
-    root, manifest, data, config = session_binding
-    entry = data["entries"]["memory"]
-    if change == "relative":
-        entry["args"][3] = "session_client.py"
-    elif change == "foreign":
-        foreign = tmp_path / "session_client.py"
-        foreign.write_bytes(b"# same basename, unrelated script\n")
-        entry["args"][3] = str(foreign)
-    elif change == "interpreter":
-        entry["command"] = "python"
-    elif change == "drift":
-        Path(entry["args"][3]).write_bytes(b"# changed after qualification\n")
-    else:
-        Path(entry["args"][3]).with_name("dispatcher.json").unlink()
-    manifest.write_text(json.dumps(data), encoding="utf-8")
-    cwd = root / "docs"
-    cwd.mkdir()
-    monkeypatch.chdir(cwd)
-    with pytest.raises(PermissionError, match="selector|dispatcher"):
-        session_overrides(
-            config, root, manifest=manifest, markdownify=tmp_path / "absent.json"
-        )
-    assert Path.cwd() == cwd
 
 
 def test_markdownify_source_cannot_redirect_a_foreign_workspace(
@@ -281,10 +249,77 @@ def test_session_refuses_unqualified_selector_before_launch(
     else:
         Path(entry["args"][3]).write_bytes(b"changed dispatcher source")
     manifest.write_text(json.dumps(data), encoding="utf-8")
-    with pytest.raises(PermissionError, match="qualified|source changed|dispatcher"):
+    with pytest.raises(PermissionError, match="qualified|source changed"):
         session_overrides(
             config, root, manifest=manifest, markdownify=tmp_path / "absent.json"
         )
+
+
+@pytest.mark.parametrize(
+    "entry", [{"command": "", "args": []}, {"command": "python", "args": ["client"]}]
+)
+def test_optional_markdownify_entry_refuses_unqualified_commands(
+    session_binding, tmp_path, entry
+):
+    root, manifest, _, config = session_binding
+    source = tmp_path / "markdownify.json"
+    source.write_text(
+        json.dumps(
+            {
+                "schema": 1,
+                "workspace": str(root),
+                "git_common": str(root / ".git"),
+                "server": "Markdownify-BioETL",
+                "entry": entry,
+            }
+        ),
+        encoding="utf-8",
+    )
+    with pytest.raises(PermissionError, match="qualified"):
+        session_overrides(config, root, manifest=manifest, markdownify=source)
+
+
+def test_native_operational_cli_returns_redacted_failure(monkeypatch, capsys):
+    def fail():
+        raise PermissionError("private workspace diagnostic")
+
+    monkeypatch.setattr(native_session, "workspace", fail)
+    assert (
+        native_session.main(["--executable", "unused", "--sha256", "a" * 64, "--check"])
+        == 64
+    )
+    assert "private workspace diagnostic" not in capsys.readouterr().err
+
+
+@pytest.mark.parametrize(
+    "change", ["relative", "foreign", "interpreter", "drift", "manifest"]
+)
+def test_native_selector_requires_the_physical_pinned_installation(
+    session_binding, tmp_path, monkeypatch, change
+):
+    root, manifest, data, config = session_binding
+    entry = data["entries"]["memory"]
+    if change == "relative":
+        entry["args"][3] = "session_client.py"
+    elif change == "foreign":
+        foreign = tmp_path / "session_client.py"
+        foreign.write_bytes(b"# same basename, unrelated script\n")
+        entry["args"][3] = str(foreign)
+    elif change == "interpreter":
+        entry["command"] = "python"
+    elif change == "drift":
+        Path(entry["args"][3]).write_bytes(b"# changed after qualification\n")
+    else:
+        Path(entry["args"][3]).with_name("dispatcher.json").unlink()
+    manifest.write_text(json.dumps(data), encoding="utf-8")
+    cwd = root / "docs"
+    cwd.mkdir()
+    monkeypatch.chdir(cwd)
+    with pytest.raises(PermissionError, match="selector|dispatcher"):
+        session_overrides(
+            config, root, manifest=manifest, markdownify=tmp_path / "absent.json"
+        )
+    assert Path.cwd() == cwd
 
 
 @pytest.fixture
@@ -426,7 +461,7 @@ def test_ref_only_does_not_load_unrelated_markdownify_binding(
     monkeypatch.setattr(native_session, "session_overrides", scoped)
     original_config = ref_launch["config_path"].read_bytes()
     with pytest.raises(PermissionError, match="workspace|unavailable"):
-        native_session.main(ref_launch["argv"])
+        native_session._run(ref_launch["argv"])
     assert len(scoped_calls) == 1
     assert not ref_launch["calls"]
 
@@ -491,7 +526,7 @@ def test_ref_only_keeps_authorization_guards(ref_launch, monkeypatch, change):
         )
 
     with pytest.raises(PermissionError, match="absent|separate"):
-        native_session.main(argv)
+        native_session._run(argv)
     assert not ref_launch["calls"]
 
 
@@ -499,7 +534,8 @@ def test_ref_only_still_requires_the_qualified_executable(ref_launch):
     argv = [*ref_launch["argv"], "--ref-only"]
     argv[argv.index("--sha256") + 1] = "0" * 64
     with pytest.raises(PermissionError, match="executable drift"):
-        native_session.main(argv)
+        native_session._run(argv)
+    assert native_session.main(argv) == 64
     assert not ref_launch["calls"]
 
 

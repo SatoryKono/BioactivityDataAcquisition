@@ -58,6 +58,15 @@ tool lists are preserved; unsupported existing fields require explicit review.
 Unchanged output does not replace the file. Back up only changed fields in
 owner-private storage and compare current values before restoring them.
 
+The sibling lock coordinates BioETL writers; it does not serialize an external
+editor saving between comparison and replacement. When such writers may be
+active, use `python -B -m scripts.ai.codex.setup_mcp --codex-only
+--stage-codex-config`. This mode prints the unique private candidate path,
+preserves the original TOML, and skips validation of an unapplied candidate.
+Review it against the latest original and apply it explicitly after coordinating
+writers. Ordinary synchronized publication retains its detected-conflict guard.
+Fractional startup/tool timeouts are preserved without integer truncation.
+
 ### Session boundaries
 
 The existing operational CLI exposes `python -B -m scripts.ai.mcp codex-session
@@ -110,6 +119,21 @@ Versioned private clients connect only to an already ready owner. They never
 start a persistent backend inside a per-connection Windows Job. Start or ensure
 the owner explicitly through its administrative entrypoint before client use.
 
+Verify the selected immutable bundle with `memory-runtime verify --bundle`, then
+run its copied interpreter and administrative owner from the matching scope:
+
+```powershell
+$bundle = "<selected immutable bundle directory>"
+$profile = "<exact registered profile ID>"
+& "$bundle/runtime/python/python.exe" -I -S -B "$bundle/tools/shared-mcp/project-memory-owner.py" start --profile $profile
+& "$bundle/runtime/python/python.exe" -I -S -B "$bundle/tools/shared-mcp/project-memory-owner.py" status --profile $profile
+```
+
+A successful start and a matching ready health/generation establish owner
+readiness. They do not establish a successful MCP client connection. Confirm the
+latter separately by initialize, tools/list and a substantive scoped operation.
+Do not run these administrative commands for an unapproved permanent profile.
+
 The selector owns its child tree in a Windows Job and forwards explicit stdio
 handles. Installed selectors use content-addressed source versions and checked
 host dependencies. Do not point permanent user configuration at a mutable
@@ -124,6 +148,7 @@ python -B -m scripts.ai.mcp memory-runtime audit-profile --profile <profile-id>
 python -B -m scripts.ai.mcp memory-runtime build --profile <profile-id>
 python -B -m scripts.ai.mcp memory-runtime verify --bundle <bundle>
 python -B -m scripts.ai.mcp memory-runtime migrate --profile <profile-id> --bundle <bundle>
+python -B -m scripts.ai.mcp memory-runtime reconcile-incident --profile <profile-id>
 python -B -m scripts.ai.mcp memory-runtime reconcile-plan --profile <profile-id>
 python -B -m scripts.ai.mcp memory-runtime reconcile-apply --profile <profile-id> --plan <private-plan>
 python -B -m scripts.ai.mcp memory-runtime rollback --profile <profile-id>
@@ -194,8 +219,21 @@ recovery rules. A terminated LAUNCHING generation can produce its own incident
 only when its status and complete zero-request startup receipt match that
 successor and the retained graph stamp. It requires a new plan/grant; the previous
 grant remains consumed. An idle receipt requires an explicit `mutating=false`.
-A pending RESOLVED or LAUNCHING grant blocks runtime migration until its reviewed
-launch is handled. No uncertain request is replayed.
+A pending RESOLVED grant blocks runtime migration until its reviewed launch is
+handled. A LAUNCHING generation also blocks migration unless the dormant-process,
+zero-request startup and matching-graph checks in Rollback/Recovery prove the
+bounded forward-upgrade exception. That upgrade preserves the consumed grant and
+requires a new reconciliation before launch. No uncertain request is replayed.
+
+For an older v2 reconciler that reports BLOCK_NOT_BLOCKED after an interrupted
+LAUNCHING generation, the current administrative `reconcile-incident` command
+can publish an incident into the existing coordination record. It requires
+known dormant processes and the complete matching zero-request startup receipt;
+it preserves profile, runtime binding, graph and grant history. It neither grants
+a restart nor migrates the runtime. Use the selected old runtime's normal
+reconcile-plan/apply flow next, perform the reviewed start, verify it, drain to
+IDLE and prove dormancy before migration. Missing/unknown evidence keeps the
+profile blocked and requires the documented escalation.
 
 A v2 startup receipt with zero accepted requests, or a complete idle receipt,
 can support a reviewed transition. Legacy `starting` without an accepted-request
@@ -233,6 +271,10 @@ header/body read deadline. A conversion acquires its execution slot without
 waiting; a busy owner returns a tool error before doing conversion work.
 Generation transitions and stop publication share one lock. A stale stop marker
 keeps the watcher waiting for the current generation's marker.
+An administrative restart archives a stopped generation before retiring its
+status. A known different birth for a reused PID proves the former owner is gone;
+that foreign process is left untouched. Unknown birth and a still-live matching
+owner remain refusals. Retirement is resumable after a publication interruption.
 
 Installed, version-compatible dependencies define candidate formats in the
 checked converter snapshot. Before publishing a new schema-2 profile, `prepare`

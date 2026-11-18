@@ -582,6 +582,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
     "docs/05-operations/runbooks/mcp-scoped-recovery.md": (
+        "tests/unit/scripts/test_converter_snapshot.py",
         "tests/unit/scripts/test_mcp_native_session.py",
         "tests/unit/scripts/test_native_mcp_local_routes.py",
         "tests/unit/scripts/test_memory_versions.py",

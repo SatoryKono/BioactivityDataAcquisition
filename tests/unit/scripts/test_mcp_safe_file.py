@@ -1,5 +1,7 @@
 """Exercise actual Windows handle confinement and deterministic path swaps."""
 
+from __future__ import annotations
+
 import os
 import subprocess
 

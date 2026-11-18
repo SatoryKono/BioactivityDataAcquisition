@@ -1,5 +1,5 @@
 {
-  "snapshot_date": "2026-10-18",
+  "snapshot_date": "2026-11-19",
   "inventory_source": "configs/quality/compatibility_facade_inventory.yaml",
   "twin_ratchet_source": "configs/quality/compatibility_twin_module_ratchet.yaml",
   "config_root_facade_source": "configs/quality/infrastructure_config_root_facade_inventory.yaml",
@@ -297,10 +297,11 @@
         "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py",
         "tests/unit/infrastructure/test_issue_10469_stream_a_infra_five.py",
         "tests/unit/infrastructure/test_issue_10469_stream_a_infra_fourteen.py",
-        "tests/unit/infrastructure/test_issue_10469_two_line_residuals_three.py"
+        "tests/unit/infrastructure/test_issue_10469_two_line_residuals_three.py",
+        "tests/unit/interfaces/http/test_selected_run_contract_exclusions.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 16,
+      "test_importer_count": 17,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing",
@@ -704,10 +705,11 @@
         "tests/unit/infrastructure/test_issue_10469_infrastructure_tail_two.py",
         "tests/unit/infrastructure/test_issue_10469_stream_a_infra_five.py",
         "tests/unit/infrastructure/test_issue_10469_stream_a_infra_fourteen.py",
-        "tests/unit/infrastructure/test_issue_10469_two_line_residuals_three.py"
+        "tests/unit/infrastructure/test_issue_10469_two_line_residuals_three.py",
+        "tests/unit/interfaces/http/test_selected_run_contract_exclusions.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 16,
+      "test_importer_count": 17,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing",
@@ -978,7 +980,7 @@
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing",
       "src_importer_count": 0,
-      "test_importer_count": 16
+      "test_importer_count": 17
     }
   ],
   "retained_public_export_owner_usage_map": [
@@ -1122,7 +1124,7 @@
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing",
       "src_importer_count": 0,
-      "test_importer_count": 16
+      "test_importer_count": 17
     }
   ],
   "first_safe_removal_wave": {
