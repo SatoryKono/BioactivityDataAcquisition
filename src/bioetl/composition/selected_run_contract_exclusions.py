@@ -49,20 +49,29 @@ def attach_contract_fields(
     return payload
 
 
-def _limits_for_pipeline(
-    pipeline: str,
-    *,
-    configs_root: Path | None = None,
-) -> tuple[float | None, float | None]:
+def _pipeline_parts(pipeline: str) -> tuple[str, str] | None:
+    """Accept only bounded provider/entity path segments."""
     if not pipeline or pipeline in {".*", "-", "All", "$__all", "unknown"}:
-        return None, None
+        return None
     provider, separator, entity = pipeline.partition("_")
     if (
         not separator
         or not _SAFE_SEGMENT.fullmatch(provider)
         or not _SAFE_SEGMENT.fullmatch(entity)
     ):
+        return None
+    return provider, entity
+
+
+def _limits_for_pipeline(
+    pipeline: str,
+    *,
+    configs_root: Path | None = None,
+) -> tuple[float | None, float | None]:
+    parts = _pipeline_parts(pipeline)
+    if parts is None:
         return None, None
+    provider, entity = parts
     root = resolve_configs_root(configs_root)
     if configs_root is None and not root.is_dir():
         # Installed readers have no repository marker beside site-packages.
