@@ -113,8 +113,8 @@ _JSON_FIELDS: tuple[str, ...] = (
 _CORE_METADATA = FieldGroup(
     name="core_metadata",
     fields=(
-        *simple_fields("pref_name", "molecule_type", "structure_type"),
-        *int_fields("max_phase", "first_approval"),
+        *simple_fields("pref_name", "molecule_type", "structure_type", "max_phase"),
+        *int_fields("first_approval"),
     ),
 )
 
