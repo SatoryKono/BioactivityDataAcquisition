@@ -272,6 +272,13 @@ when their current values still match this deployment's expected values.
 Use profile-local Memory rollback after the compatibility and dormant-process
 checks. Preserve graphs, claims, block history, migration journals and recipes.
 An incompatible rollback or incomplete migration leaves the target closed.
+A predecessor stopped in `LAUNCHING` may be upgraded with its explicit
+`--from-version` only when all processes are proven dormant, its original v2
+startup receipt proves zero accepted requests and no mutation, and its graph
+stamp still matches the launch snapshot. Migration preserves the unresolved
+coordination record; it issues no grant and replays no request. Use the new
+runtime's explicit reconcile-plan/reconcile-apply procedure before launching.
+Missing, idle, changed-generation or nonzero-request receipts remain blocked.
 For `PREPARING` or `ROLLING_BACK`, there is currently no automatic completion or
 cancellation command. Do not retry migrate/rollback or edit records to bypass
 `select_bundle`. Escalate to repository/runtime owner `@SatoryKono` together with

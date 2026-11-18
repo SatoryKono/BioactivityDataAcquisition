@@ -498,9 +498,30 @@ def previous_migration(
     return binding, prior
 
 
-def _require_consumed_recovery(owner, directory):
+def _upgradeable_interrupted_launch(owner, directory, recovery_state, graph):
+    # Preserve the unconsumed incident for the successor's explicit reconciliation.
+    from scripts.ai.mcp.memory_reconciliation import _interrupted_launch_block, records
+
+    last = recovery_state["history"][-1]
+    if (
+        recovery_state.get("active_block")
+        or last.get("snapshot", {}).get("graph") != graph
+    ):
+        return False
+    return (
+        _interrupted_launch_block(
+            records(owner, {"state": str(directory)}), recovery_state
+        )
+        is not None
+    )
+
+
+def _require_consumed_recovery(owner, directory, graph):
     recovery_state = owner.state.read(directory / RECOVERY_RECORD) or {}
     history = recovery_state.get("history", [])
+    if history and history[-1].get("phase") == "LAUNCHING":
+        if _upgradeable_interrupted_launch(owner, directory, recovery_state, graph):
+            return
     if history and history[-1].get("phase") in {"RESOLVED", "LAUNCHING"}:
         raise ValueError("Recovery grant awaits its reviewed launch; migration refused")
 
@@ -521,7 +542,7 @@ def migrate(
                 Path(value["profile"]["graph"]).with_name(".memory.service-owner.lock")
             ):
                 stamp = dormant(owner, entry, value)
-                _require_consumed_recovery(owner, directory)
+                _require_consumed_recovery(owner, directory, stamp)
                 binding, prior = previous_migration(
                     owner,
                     directory,
@@ -617,6 +638,18 @@ def _runtime_hashes_match(hashes):
         return False
 
 
+def _predecessor_runtime_matches(before):
+    if not _runtime_hashes_match(before["active"]["hashes"]):
+        return False
+    binding = before.get("runtime_binding", {})
+    if binding.get("state") == "active":
+        try:
+            _selected_binding(binding, None)
+        except (OSError, ValueError):
+            return False
+    return True
+
+
 def rollback(owner, identity):
     entry, value = owner.specification(identity)
     directory = Path(entry["state"])
@@ -660,7 +693,7 @@ def rollback(owner, identity):
                         "graph_preserved": True,
                     }
                 before = transaction["before"]
-                if not _runtime_hashes_match(before["active"]["hashes"]):
+                if not _predecessor_runtime_matches(before):
                     owner.state.write(
                         directory / RUNTIME_BINDING,
                         {

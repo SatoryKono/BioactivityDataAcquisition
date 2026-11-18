@@ -113,9 +113,8 @@ def block_identity(observed, coord):
     active = coord.get("active_block")
     if active:
         return active["id"]
-    interrupted = _interrupted_launch_block(observed, coord)
-    if interrupted:
-        return interrupted
+    if coord["history"] and coord["history"][-1].get("phase") == "LAUNCHING":
+        return _interrupted_launch_block(observed, coord)
     if observed["blocked"] is not None:
         return "legacy-" + digest(
             {k: observed[k] for k in ("blocked", "status", "work")}

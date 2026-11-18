@@ -472,6 +472,80 @@ def test_missing_predecessor_dependency_disables_rollback_like_changed_bytes(
     assert graph.read_bytes() == b'{"fixture":true}\n'
 
 
+def test_unlisted_file_in_predecessor_bundle_blocks_rollback_before_commit(
+    transition_owner, bundle, bundle_factory
+):
+    owner, directory, graph = transition_owner
+    versions.migrate(owner, directory.name, bundle)
+    successor = bundle_factory(b"VERSION = 'successor'\n")
+    versions.migrate(owner, directory.name, successor, from_version=bundle.name)
+    (bundle / "runtime/injected.py").write_bytes(b"unregistered executable")
+    result = versions.rollback(owner, directory.name)
+    assert result["state"] == "BLOCKED_LEGACY_RUNTIME_DRIFT"
+    assert owner.state.read(directory / "migration-v2.json")["phase"] == "COMMITTED"
+    assert owner.state.read(directory / "runtime-binding.json")["state"] == "disabled"
+    assert graph.read_bytes() == b'{"fixture":true}\n'
+
+
+@pytest.mark.parametrize("valid", [True, False])
+def test_interrupted_old_runtime_can_upgrade_only_with_a_zero_request_start_receipt(
+    transition_owner, bundle, bundle_factory, valid
+):
+    from scripts.ai.mcp import memory_reconciliation as recovery
+
+    owner, directory, graph = transition_owner
+    versions.migrate(owner, directory.name, bundle)
+    stamp = {"graph_sha256": versions.sha(graph)}
+    generation = "a" * 32
+    coord = {
+        "schema": 2,
+        "active_block": None,
+        "history": [
+            {
+                "id": "b" * 32,
+                "phase": "LAUNCHING",
+                "new_generation": generation,
+                "snapshot": {"profile": directory.name, "graph": stamp},
+            }
+        ],
+    }
+    owner.state.write(directory / "recovery-v2.json", coord)
+    owner.state.write(directory / "status.json", {"generation": generation})
+    owner.state.write(
+        directory / "work.json",
+        {
+            "schema": 2,
+            "profile": directory.name,
+            "generation": generation,
+            "phase": "starting",
+            "accepted_count": 0 if valid else 1,
+            "request_id": None,
+            "mutating": False,
+            "graph": stamp,
+        },
+    )
+    successor = bundle_factory(b"VERSION = 'new-reconciler'\n")
+    if valid:
+        assert (
+            versions.migrate(
+                owner, directory.name, successor, from_version=bundle.name
+            )["state"]
+            == "COMMITTED"
+        )
+        preserved = owner.state.read(directory / "recovery-v2.json")
+        assert preserved == coord
+        observed = recovery.records(owner, {"state": str(directory)})
+        assert recovery.block_identity(observed, preserved).startswith("interrupted-")
+        assert versions.select_bundle(directory.parent, directory.name) == successor
+    else:
+        with pytest.raises(ValueError, match="grant awaits"):
+            versions.migrate(owner, directory.name, successor, from_version=bundle.name)
+        assert owner.state.read(directory / "runtime-binding.json")["bundle"] == str(
+            bundle
+        )
+    assert graph.read_bytes() == b'{"fixture":true}\n'
+
+
 @pytest.mark.parametrize("transition_point", ["between_records", "during_verification"])
 def test_dispatch_never_returns_a_bundle_from_incoherent_migration_records(
     transition_owner, bundle, bundle_factory, monkeypatch, transition_point

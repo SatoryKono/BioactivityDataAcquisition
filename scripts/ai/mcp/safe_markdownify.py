@@ -226,6 +226,17 @@ class _SessionExpired(PermissionError):
     """A session-scoped 404 requires a fresh handshake, never replay."""
 
 
+def _response_value(response, method, path, session):
+    data = response.read(MAX_RESPONSE_BYTES + 1)
+    if len(data) > MAX_RESPONSE_BYTES:
+        raise PermissionError("Markdownify response exceeds transport bound")
+    if response.status == 404 and session and method == "POST" and path == "/mcp":
+        raise _SessionExpired("Markdownify session expired; no replay")
+    if response.status >= 400:
+        raise PermissionError("Markdownify request refused; no replay")
+    return (json.loads(data) if data else None), response.getheader("Mcp-Session-Id")
+
+
 def request(spec, method, path, body=None, session=None):
     record = core.read_json(core.STATE / STATUS_RECORD)
     if core.process_birth(record["owner_pid"]) != record["owner_birth"]:
@@ -256,17 +267,7 @@ def request(spec, method, path, body=None, session=None):
         connection.request(
             method, path, json.dumps(body) if body is not None else None, headers
         )
-        response = connection.getresponse()
-        data = response.read(MAX_RESPONSE_BYTES + 1)
-        if len(data) > MAX_RESPONSE_BYTES:
-            raise PermissionError("Markdownify response exceeds transport bound")
-        if response.status == 404 and session and method == "POST" and path == "/mcp":
-            raise _SessionExpired("Markdownify session expired")
-        if response.status >= 400:
-            raise PermissionError("Markdownify request refused; no replay")
-        return (json.loads(data) if data else None), response.getheader(
-            "Mcp-Session-Id"
-        )
+        return _response_value(connection.getresponse(), method, path, session)
     finally:
         connection.close()
 
@@ -542,14 +543,18 @@ class _BoundedHTTPServer(ThreadingHTTPServer):
             HTTP_READ_SECONDS, self._expire_reader, (request_socket,)
         )
         timer.daemon = True
-        with self._deadline_lock:
-            self._deadlines[request_socket] = timer
-            timer.start()
+        handling = False
         try:
+            with self._deadline_lock:
+                self._deadlines[request_socket] = timer
+                timer.start()
+            handling = True
             super().process_request_thread(request_socket, client_address)
         finally:
             self.finish_reading(request_socket)
             self._slots.release()
+            if not handling:
+                self.shutdown_request(request_socket)
 
     def handle_error(self, _request_socket, _client_address):
         # Authentication failures, disconnects and read deadlines expose no paths.
@@ -633,7 +638,11 @@ class _MarkdownifyHandler(BaseHTTPRequestHandler):
             if not 0 < length <= 1024 * 1024:
                 self.reply(413)
                 return
-            request_value = json.loads(self.rfile.read(length))
+            raw = self.rfile.read(length)
+            if len(raw) != length:
+                self.close_connection = True
+                raise ValueError("Incomplete request body")
+            request_value = json.loads(raw)
             if not isinstance(request_value, dict):
                 raise ValueError("Object required")
         except (OSError, ValueError):
@@ -677,7 +686,13 @@ class _MarkdownifyHandler(BaseHTTPRequestHandler):
         elif method == "ping":
             result = {}
         elif method == "tools/call":
-            result = self._call_tool(request_value)
+            self._call_tool(
+                request_value,
+                respond=lambda result: self.reply(
+                    200, {"jsonrpc": "2.0", "id": identifier, "result": result}, session
+                ),
+            )
+            return
         else:
             self.reply(
                 200,
@@ -690,9 +705,9 @@ class _MarkdownifyHandler(BaseHTTPRequestHandler):
             return
         self.reply(200, {"jsonrpc": "2.0", "id": identifier, "result": result}, session)
 
-    def _call_tool(self, request_value):
+    def _call_tool(self, request_value, *, respond=None):
         if not self._gate.acquire(blocking=False):
-            return {
+            result = {
                 "isError": True,
                 "content": [
                     {
@@ -701,6 +716,18 @@ class _MarkdownifyHandler(BaseHTTPRequestHandler):
                     }
                 ],
             }
+            if respond is not None:
+                respond(result)
+            return result
+        try:
+            result = self._convert_tool(request_value)
+            if respond is not None:
+                respond(result)
+            return result
+        finally:
+            self._gate.release()
+
+    def _convert_tool(self, request_value):
         try:
             if self._draining.is_set():
                 raise PermissionError("Markdownify is draining")
@@ -714,8 +741,6 @@ class _MarkdownifyHandler(BaseHTTPRequestHandler):
                     {"type": "text", "text": "Local file access/conversion refused"}
                 ],
             }
-        finally:
-            self._gate.release()
 
 
 def _watch_stop(server, record, gate, draining):
@@ -785,14 +810,25 @@ def _renew_session(spec, initialization):
     response, session = request(spec, "POST", "/mcp", handshake)
     if not session or not isinstance(response, dict) or "result" not in response:
         raise PermissionError("Markdownify reinitialization refused")
-    request(
-        spec,
-        "POST",
-        "/mcp",
-        {"jsonrpc": "2.0", "method": "notifications/initialized"},
-        session,
-    )
+    try:
+        request(
+            spec,
+            "POST",
+            "/mcp",
+            {"jsonrpc": "2.0", "method": "notifications/initialized"},
+            session,
+        )
+    except BaseException:
+        _discard_session(spec, session)
+        raise
     return session
+
+
+def _discard_session(spec, session):
+    try:
+        request(spec, "DELETE", "/mcp", session=session)
+    except Exception:
+        pass  # Best effort; preserve the original handshake failure.
 
 
 def _forward_request(spec, value, session, initialization):
@@ -857,18 +893,29 @@ def client(root):
                 pass  # An expired session already owns no server resources.
 
 
+def _clear_completed_stop(marker):
+    record = core.read_json(core.STATE / STATUS_RECORD)
+    pid = record["owner_pid"]
+    birth = core.process_birth(pid)
+    alive = psutil.pid_exists(pid)
+    if (alive and (birth is None or birth == record["owner_birth"])) or core.read_json(
+        marker
+    ).get("generation") != record["generation"]:
+        raise PermissionError("Markdownify stop has not completed")
+    if alive:
+        # Preserve the stopped owner's receipt; the reused PID is never signalled.
+        (core.STATE / STATUS_RECORD).rename(
+            core.STATE / ("stopped-" + uuid.uuid4().hex + ".json")
+        )
+    marker.unlink()
+
+
 def _start(root):
     value = specification(root)
     with core.LifetimeLock(core.STATE / TRANSITION_LOCK):
         marker = core.STATE / STOP_REQUEST
         if marker.exists():
-            record = core.read_json(core.STATE / STATUS_RECORD)
-            if (
-                psutil.pid_exists(record["owner_pid"])
-                or core.read_json(marker).get("generation") != record["generation"]
-            ):
-                raise PermissionError("Markdownify stop has not completed")
-            marker.unlink()
+            _clear_completed_stop(marker)
     ensure(root)
     print(json.dumps({"ready": True, "id": value["id"]}))
 
