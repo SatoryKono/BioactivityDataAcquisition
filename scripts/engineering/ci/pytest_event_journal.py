@@ -445,6 +445,28 @@ def _line_for_storage(line: str, known: tuple[str, ...]) -> str:
     return stored
 
 
+def _replace_known_preserving_sealed_keys(
+    text: str, form: str, replacement: str
+) -> str:
+    """Keep password field names recognizable until their values are sealed."""
+    protected = tuple(
+        match.span(1)
+        for match in _SECRET_ASSIGNMENT.finditer(text)
+        if _is_sealed_field(match.group(1))
+    )
+    if not protected:
+        return text.replace(form, replacement)
+
+    def replace(match: re.Match[str]) -> str:
+        if any(
+            start <= match.start() and match.end() <= end for start, end in protected
+        ):
+            return match.group(0)
+        return replacement
+
+    return re.sub(re.escape(form), replace, text)
+
+
 def _redact_text(text: str, needles: tuple[str, ...]) -> str:
     blocked = _blocked_env_needles()
     redacted = text
@@ -461,7 +483,9 @@ def _redact_text(text: str, needles: tuple[str, ...]) -> str:
             else _correlation_tag(captured)
         )
         for form in forms:
-            redacted = redacted.replace(form, replacement)
+            redacted = _replace_known_preserving_sealed_keys(
+                redacted, form, replacement
+            )
     # Capture complete unknown credentials before sealing password substrings.
     redacted = _SECRET_ASSIGNMENT.sub(_replace_assignment, redacted)
     redacted = _SECRET_PREFIX.sub(_replace_prefix, redacted)

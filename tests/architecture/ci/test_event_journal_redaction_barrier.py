@@ -401,6 +401,21 @@ def test_unknown_credential_containing_password_is_sealed_in_full(
     assert not any(password in item for item in seen)
 
 
+@pytest.mark.parametrize("keyword", ["password", "passphrase"])
+@pytest.mark.parametrize("token", ["password", "passphrase"])
+def test_token_cannot_hide_a_password_assignment_keyword(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, keyword: str, token: str
+) -> None:
+    from scripts.engineering.ci import pytest_event_journal as journal
+
+    monkeypatch.setenv("BIOETL_UNIT_TOKEN", token)
+    path = tmp_path / "receipt.jsonl"
+    plugin = journal.EventJournalPlugin(None, path, _identity())
+    plugin.record("outcome", {"notes": f"{keyword}=independent-canary-value"})
+    plugin.finalize()
+    assert "independent-canary-value" not in path.read_text(encoding="utf-8")
+
+
 def test_inventory_fixture_reset_does_not_unseal_an_active_plugin(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
