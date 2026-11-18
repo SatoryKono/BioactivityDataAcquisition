@@ -1,0 +1,12 @@
+{
+  "catalog_ref": "83ca7fb3b838daa4887665f8d289b633c8f9ceaa",
+  "schema_version": 1,
+  "source_ref": "7aff3d70ffa38c5cc53c5f4f09f8318ce851e1f7",
+  "source_reviews": {
+    "src/bioetl/infrastructure/adapters/pubmed/_errors.py": "Reviewed the ESearch payload parser from #13178. A missing or non-object esearchresult now raises PubMedSearchPayloadError instead of looking like no hits. No new client, endpoint, or task.",
+    "src/bioetl/infrastructure/adapters/pubmed/_search.py": "Reviewed PubMed ESearch paging. The existing http_client.get call to esearch.fcgi now follows retstart until max_count or the reported count, and PaginationTruncatedError is raised when a later page does not advance. No new client or endpoint.",
+    "src/bioetl/infrastructure/adapters/pubmed/_search_models.py": "Reviewed the new ESearch page helpers. They decide whether a page completed, stalled, or hit the page cap. They do not open a client, socket, or file.",
+    "src/bioetl/infrastructure/adapters/uniprot/protein_fetch_adapter_mixin.py": "Reviewed the protein fetch mixin. It now surfaces UniProtProteinPageError from the existing parser instead of treating a failed page as cursor exhaustion. No new client or endpoint.",
+    "src/bioetl/infrastructure/adapters/uniprot/response_parser.py": "Reviewed the UniProt protein page parser. A non-200 status or a non-object payload raises UniProtProteinPageError. None remains the real final cursor. No new client, network call, or task."
+  }
+}
