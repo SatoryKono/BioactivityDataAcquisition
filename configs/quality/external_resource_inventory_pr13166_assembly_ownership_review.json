@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "catalog_ref": "7fb8f88fc2b652df41da94ce312d52046c41200f",
-  "source_ref": "7fb8f88fc2b652df41da94ce312d52046c41200f",
+  "catalog_ref": "56213bbf9314b6616415bcf822d143210b7621d3",
+  "source_ref": "56213bbf9314b6616415bcf822d143210b7621d3",
   "source_reviews": {
     "src/bioetl/composition/factories/pipeline/_creation_wiring.py": "Retarget target runtime/identity imports to their actual factory/runtime-builders owners. Pass the existing public replay parent resolver at runtime assembly; all pipeline, replay, schema and resource lifecycle decisions remain unchanged.",
     "src/bioetl/composition/factories/pipeline/run_context_factory.py": "Retarget target runtime/identity imports to their actual factory/runtime-builders owners. Pass the existing public replay parent resolver at runtime assembly; all pipeline, replay, schema and resource lifecycle decisions remain unchanged.",
