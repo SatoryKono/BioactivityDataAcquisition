@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "catalog_ref": "3ff5f7cddec60b8f15500da8b162900aca123ea7",
-  "source_ref": "734e5957a9d70f7e1a2bfb5ac667411352a76951",
+  "catalog_ref": "64553f701a6118e2c403a982fdfb96e12b73caf2",
+  "source_ref": "85930ac5df4ada30ea3d528b6c7f07b358cf54ac",
   "source_reviews": {
     "src/bioetl/infrastructure/config/target_classification_profile.py": "Reviewed pure schema-set selection extracted into one helper. The same four V30/V31 classes and schemas remain selected for off/shadow/enrich. No file read, client allocation, task, external resource owner, acquisition or cleanup path changes; no runtime qualification or acceptance is inferred.",
     "src/bioetl/composition/factories/pipeline/run_context_factory.py": "Extract target contract identity selection into a pure helper without changing schema/normalization resolution, resource ownership, acquisition, cleanup, or runtime qualification."
