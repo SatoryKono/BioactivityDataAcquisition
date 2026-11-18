@@ -109,15 +109,10 @@ def resolve_manifest_publication_context(
         pipeline_name=ctx.pipeline_name,
         yaml_config=inputs.yaml_config,
     )
-    identity_kwargs: ManifestPublicationIdentityKwargs = {
-        "ctx": ctx,
-        "inputs": inputs,
-        "provider": provider,
-        "entity": entity,
-        "reproducibility_context": reproducibility_context,
-    }
     reproducibility_context, contract_identity = ensure_manifest_publication_identity(
-        **identity_kwargs,
+        **build_manifest_publication_identity_kwargs(
+            ctx, inputs, provider, entity, reproducibility_context
+        ),
         contract_identity=contract_identity,
     )
     return ResolvedManifestPublicationContext(
