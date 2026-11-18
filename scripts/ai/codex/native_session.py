@@ -25,6 +25,16 @@ MARKDOWNIFY_CLIENT = "safe_markdownify.py"
 MARKDOWNIFY_VERSIONS = Path("D:/pc-agent/tools/markdownify-owner-versions")
 SESSION_VERSIONS = Path("D:/pc-agent/tools/codex-session-versions")
 SHA256_PATTERN = "[0-9a-f]{64}"
+MCP_POLICY_FIELDS = frozenset(
+    {
+        "enabled",
+        "enabled_tools",
+        "disabled_tools",
+        "tools",
+        "startup_timeout_sec",
+        "tool_timeout_sec",
+    }
+)
 
 
 def physical(path):
@@ -135,12 +145,24 @@ def _markdownify_entry(source, root, servers, *, explicit=True):
         return None
     value = json.loads(physical(source).read_bytes())
     if (
+        not isinstance(value, dict)
+        or value.get("schema") != 1
+        or value.get("server") != "Markdownify-BioETL"
+        or not isinstance(value.get("workspace"), str)
+        or not Path(value["workspace"]).is_absolute()
+    ):
+        raise PermissionError("Invalid Markdownify session binding")
+    if (
         not explicit
         and value.get("schema") == 1
         and isinstance(value.get("workspace"), str)
         and Path(value["workspace"]) != root
     ):
-        return None
+        return (
+            ("Markdownify-BioETL", {"enabled": False})
+            if "Markdownify-BioETL" in servers
+            else None
+        )
     if (
         value.get("schema") != 1
         or Path(value["workspace"]) != root
@@ -161,9 +183,20 @@ def _markdownify_entry(source, root, servers, *, explicit=True):
             "Markdownify session binding must be credential-free stdio"
         )
     _validate_markdownify_client(entry)
-    if value["server"] in servers and servers[value["server"]] != entry:
+    return value["server"], _markdownify_policy(entry, servers.get(value["server"]))
+
+
+def _markdownify_policy(entry, previous):
+    if previous is None:
+        return entry
+    if not isinstance(previous, dict) or {
+        key: value for key, value in previous.items() if key not in MCP_POLICY_FIELDS
+    } != {key: value for key, value in entry.items() if key not in MCP_POLICY_FIELDS}:
         raise PermissionError("Existing unrelated Markdownify entry needs review")
-    return value["server"], entry
+    return {
+        **entry,
+        **{key: value for key, value in previous.items() if key in MCP_POLICY_FIELDS},
+    }
 
 
 def _check_client_manifest(script, manifest_name, required_source):

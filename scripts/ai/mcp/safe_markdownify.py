@@ -468,6 +468,13 @@ def _check_worker_job(job):
 
 
 def _erase_worker_job(job, snapshot):
+    _validate_cleanup_files(job, snapshot)
+    for name in (snapshot, "output.md", PENDING_CLEANUP):
+        (job / name).unlink(missing_ok=True)
+    job.rmdir()
+
+
+def _validate_cleanup_files(job, snapshot):
     _check_worker_job(job)
     permitted = {"input" + ext for ext in EXTENSIONS.values() if ext != ".md"}
     if snapshot not in permitted or any(
@@ -475,9 +482,6 @@ def _erase_worker_job(job, snapshot):
         for path in job.iterdir()
     ):
         raise PermissionError("Worker cleanup contains unowned files")
-    for name in (snapshot, "output.md", PENDING_CLEANUP):
-        (job / name).unlink(missing_ok=True)
-    job.rmdir()
 
 
 def _pending_worker_finished(record, job):
@@ -485,6 +489,8 @@ def _pending_worker_finished(record, job):
         not isinstance(record, dict)
         or record.get("schema") != 1
         or record.get("job") != job.name
+        or set(record)
+        != {"schema", "job", "snapshot", "worker_pid", "worker_birth", "job_closed"}
     ):
         raise PermissionError("Unsupported pending worker cleanup")
     if record.get("job_closed") is not True:
@@ -514,13 +520,15 @@ def _retry_pending_jobs():
         _check_worker_job(job)
         marker = job / PENDING_CLEANUP
         if not marker.exists():
-            continue
+            raise PermissionError("Previous worker cleanup has no identity record")
         record = core.read_json(marker)
         if not _pending_worker_finished(record, job):
             raise PermissionError("Previous worker cleanup remains pending")
+        _validate_cleanup_files(job, record.get("snapshot"))
         try:
             _erase_worker_job(job, record.get("snapshot"))
         except OSError:
+            _validate_cleanup_files(job, record.get("snapshot"))
             core.write_json(marker, record)
             raise
 
@@ -990,6 +998,21 @@ def _publish_listener(server, record):
         core.write_json(core.STATE / STATUS_RECORD, record)
 
 
+def _bind_owner_server(handler):
+    server = _BoundedHTTPServer(("127.0.0.1", 0), handler, bind_and_activate=False)
+    server.allow_reuse_address = False
+    try:
+        exclusive = getattr(socket, "SO_EXCLUSIVEADDRUSE", None)
+        if exclusive is not None:
+            server.socket.setsockopt(socket.SOL_SOCKET, exclusive, 1)
+        server.server_bind()
+        server.server_activate()
+        return server
+    except BaseException:
+        server.server_close()
+        raise
+
+
 def serve(root):
     spec = specification(root)
     _retry_pending_jobs()
@@ -1020,14 +1043,8 @@ def serve(root):
             gate=gate,
             draining=draining,
         )
-        server = _BoundedHTTPServer(("127.0.0.1", 0), handler, bind_and_activate=False)
-        server.allow_reuse_address = False
+        server = _bind_owner_server(handler)
         try:
-            exclusive = getattr(socket, "SO_EXCLUSIVEADDRUSE", None)
-            if exclusive is not None:
-                server.socket.setsockopt(socket.SOL_SOCKET, exclusive, 1)
-            server.server_bind()
-            server.server_activate()
             _publish_listener(server, record)
             server.daemon_threads = True
             threading.Thread(
@@ -1189,7 +1206,7 @@ def _client_root(args):
     if args.root is not None:
         raise PermissionError("Client root override is forbidden")
     root = next(
-        (p for p in (Path.cwd(), *Path.cwd().parents) if (p / ".git").exists()),
+        (p for p in (Path.cwd(), *Path.cwd().parents) if os.path.lexists(p / ".git")),
         None,
     )
     if root is None:

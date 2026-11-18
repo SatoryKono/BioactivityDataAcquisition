@@ -11,6 +11,7 @@ import pytest
 
 from scripts.ai.codex import setup_mcp
 from scripts.ai.codex.local_mcp_routes import apply_local_routes
+from scripts.ai.mcp import session_client
 from scripts.ai.mcp.session_client import session_root
 
 pytestmark = pytest.mark.unit
@@ -127,6 +128,24 @@ def test_session_subdirectory_preserves_actual_root(routes):
     source = root / "src"
     source.mkdir()
     assert session_root(source, lambda candidate: candidate) == root
+
+
+def test_broken_nested_git_link_does_not_fall_through_to_parent(routes):
+    root, _, _ = routes
+    nested = root / "nested"
+    nested.mkdir()
+    try:
+        (nested / ".git").symlink_to(nested / "missing")
+    except OSError:
+        pytest.skip("Symbolic links are unavailable in this environment")
+    with pytest.raises(PermissionError, match="reparse point"):
+        session_root(nested, lambda candidate: candidate)
+
+
+def test_implicit_dispatcher_manifest_is_required(tmp_path, monkeypatch):
+    monkeypatch.setattr(session_client, "__file__", str(tmp_path / "session_client.py"))
+    with pytest.raises(PermissionError, match="manifest is absent"):
+        session_client._verify_dispatcher()
 
 
 def test_explicit_missing_manifest_is_not_a_fallback(tmp_path, monkeypatch):
@@ -292,6 +311,56 @@ def test_sync_preserves_fractional_timeouts(routes, monkeypatch, tmp_path):
     setup_mcp._write_codex_config(root, profile="stable", transport_mode="shared")
     values = tomllib.loads(config.read_text(encoding="utf-8"))["mcp_servers"]["memory"]
     assert values["startup_timeout_sec"] == 0.25 and values["tool_timeout_sec"] == 0.5
+
+
+def test_policy_survives_when_its_server_is_inactive(routes, monkeypatch, tmp_path):
+    import tomllib
+
+    root, manifest, _ = routes
+    monkeypatch.setenv("BIOETL_CODEX_ROUTES_FILE", str(manifest))
+    home = tmp_path / "home"
+    config = home / ".codex/config.toml"
+    config.parent.mkdir(parents=True)
+    config.write_text(
+        "[mcp_servers.prometheus]\n"
+        'url = "http://localhost/fixture"\n'
+        'disabled_tools = ["dangerous_operation"]\n'
+        "tool_timeout_sec = 0.5\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(Path, "home", lambda: home)
+    setup_mcp._write_codex_config(root, profile="stable", transport_mode="shared")
+    stable = config.read_text(encoding="utf-8")
+    assert "prometheus" not in tomllib.loads(stable)["mcp_servers"]
+    assert "http://localhost/fixture" not in stable
+    setup_mcp._write_codex_config(root, profile="full", transport_mode="shared")
+    restored = tomllib.loads(config.read_text(encoding="utf-8"))["mcp_servers"]
+    assert restored["prometheus"]["disabled_tools"] == ["dangerous_operation"]
+    assert restored["prometheus"]["tool_timeout_sec"] == 0.5
+
+
+def test_strip_managed_inline_server_keeps_other_entries():
+    import tomllib
+
+    source = (
+        "[mcp_servers]\n"
+        'memory = { command = "old" }\n'
+        '"custom.name" = { command = "custom" } # keep this comment\n'
+    )
+    filtered = setup_mcp._strip_managed_mcp_blocks(source, {"memory"})
+    assert "# keep this comment" in filtered
+    actual = tomllib.loads(filtered + '\n[mcp_servers.memory]\ncommand = "new"\n')
+    assert actual["mcp_servers"] == {
+        "memory": {"command": "new"},
+        "custom.name": {"command": "custom"},
+    }
+
+
+@pytest.mark.parametrize("flag", ["--skip-codex-config", "--skip-codex", "--check"])
+def test_stage_rejects_options_that_prevent_writing_a_candidate(flag):
+    with pytest.raises(SystemExit) as error:
+        setup_mcp.main(["--stage-codex-config", flag])
+    assert error.value.code == 2
 
 
 def test_staged_codex_candidate_never_replaces_an_external_edit(

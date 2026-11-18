@@ -262,13 +262,11 @@ transport_mode = (
     os.environ.get("CODEX_MCP_TRANSPORT_MODE")
     or getattr(module, "DEFAULT_LOCAL_TRANSPORT_MODE", "shared")
 )
-expected = module._render_codex_mcp_toml(
-    module._codex_runtime_servers(
-        workspace_root,
-        profile=profile,
-        transport_mode=transport_mode,
-    )
-).strip()
+servers = module._codex_runtime_servers(
+    workspace_root, profile=profile, transport_mode=transport_mode,
+)
+managed = set(module._canonical_servers(workspace_root, profile="full")) | set(module.REMOVED_MCP_SERVER_NAMES)
+expected = module._render_retained_codex_block(content, servers, managed).strip()
 if actual != expected:
     raise SystemExit("managed MCP block differs from canonical setup output")
 PY

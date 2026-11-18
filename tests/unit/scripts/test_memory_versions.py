@@ -788,3 +788,23 @@ def test_failed_build_cleans_only_its_staging_and_preserves_original_error(
         versions.build(owner, {}, {})
     assert len(created) == 1 and created[0].exists() is cleanup_fails
     assert sentinel.read_bytes() == b"published"
+
+
+def test_failed_bundle_assembly_cleans_its_staging_only(bundle, monkeypatch):
+    owner = SimpleNamespace(candidate=lambda *_: {"hashes": {}})
+    monkeypatch.setattr(versions, "VERSIONS", bundle.parent)
+    monkeypatch.setattr(versions, "sha", lambda _: "fixture-digest")
+
+    def copy_inputs(_owner, _hashes, staging):
+        service = staging / "tools/shared-mcp"
+        service.mkdir(parents=True)
+        (service / "fixture.py").write_bytes(b"# candidate input\n")
+
+    def reject(_file, _text):
+        raise ValueError("reviewed source drift")
+
+    monkeypatch.setattr(versions, "_copy_runtime_dependencies", copy_inputs)
+    monkeypatch.setattr(versions, "_adapt_service_text", reject)
+    with pytest.raises(ValueError, match="reviewed source drift"):
+        versions.build(owner, {}, {})
+    assert list(bundle.parent.iterdir()) == [bundle]

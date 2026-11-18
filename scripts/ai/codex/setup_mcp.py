@@ -100,7 +100,7 @@ GITHUB_MCP_RETIRED_NPX_PACKAGE = "@modelcontextprotocol/server-github"
 # hosts. Prefer `stable` or `core` for daily work; enable graph/full only when
 # the task needs those tools.
 MCP_PROFILE_STABLE = (
-    # No Docker/gateway/stdio container MCP — host process or remote HTTP only.
+    # No Docker/gateway/stdio container MCP â€” host process or remote HTTP only.
     # github-actions is ops-only (see MCP_PROFILE_OPS); official github already
     # exposes actions_* via GITHUB_MCP_TOOLSETS. Shared transport projects
     # github to http://127.0.0.1:8820/mcp (#10299). Tracked portable manifests
@@ -285,7 +285,7 @@ APPROVED_REMOTE_MCP_BASE_URLS = frozenset(
     }
 )
 
-# Local shared plane only — never treat these as remote SaaS MCP.
+# Local shared plane only â€” never treat these as remote SaaS MCP.
 APPROVED_LOCAL_MCP_BASE_URL_PREFIXES = (
     "http://127.0.0.1:",
     "http://localhost:",
@@ -317,9 +317,9 @@ def _wrapper_command(
     """Build a stdio MCP wrapper invocation.
 
     ``wrapper_platform``:
-      * ``None`` — host OS (``os.name``)
-      * ``\"posix\"`` — always bash + ``.sh`` (tracked portable SSOT)
-      * ``\"nt\"`` — always PowerShell + ``.ps1``
+      * ``None`` â€” host OS (``os.name``)
+      * ``\"posix\"`` â€” always bash + ``.sh`` (tracked portable SSOT)
+      * ``\"nt\"`` â€” always PowerShell + ``.ps1``
     """
     platform = wrapper_platform or detect_platform().wrapper_platform
     if platform not in {"nt", "posix"}:
@@ -387,7 +387,7 @@ def _apply_tracked_json_compat(
     disabled for this runtime``) when an entry carries a field outside its
     bundled Agent Plugins 1.0.0 schema:
 
-    * remote transport must be ``streamable-http`` — the canonical Codex
+    * remote transport must be ``streamable-http`` â€” the canonical Codex
       ``http`` alias is rewritten for the tracked JSON only (local IDE/Codex
       projections keep the Codex alias they already understand);
     * Codex-only ``mode``, ``startup_timeout_sec``, and ``env_http_headers``
@@ -1058,7 +1058,11 @@ def _archived_codex_policies(content: str, managed_names: set[str]) -> dict[str,
             raise ValueError("Duplicate inactive MCP policy archive")
         seen = True
         payload = json.loads(stripped[len(CODEX_POLICY_ARCHIVE) :])
-        if payload.get("schema") != 1 or not isinstance(payload.get("servers"), dict):
+        if (
+            not isinstance(payload, dict)
+            or payload.get("schema") != 1
+            or not isinstance(payload.get("servers"), dict)
+        ):
             raise ValueError("Unsupported inactive MCP policy archive")
         archived = payload["servers"]
     for name, policy in archived.items():
@@ -1096,6 +1100,20 @@ def _retained_codex_policies(
             )
             policies[name] = policy
     return policies
+
+
+def _render_retained_codex_block(content, canonical_servers, managed_names):
+    """Share policy preservation between publication and the shell readiness check."""
+    policies = _retained_codex_policies(
+        content, tomllib.loads(content).get("mcp_servers", {}), managed_names
+    )
+    servers = deepcopy(canonical_servers)
+    for name, server in servers.items():
+        server.update(deepcopy(policies.get(name, {})))
+    inactive = {
+        name: policy for name, policy in policies.items() if name not in servers
+    }
+    return _render_codex_mcp_toml(servers, inactive_policies=inactive)
 
 
 def _owned_mcp_assignment(
@@ -1201,20 +1219,13 @@ def _write_codex_config(
     with _lock_codex_config(config_path):
         before = config_path.read_bytes() if config_path.exists() else None
         existing = before.decode("utf-8") if before is not None else ""
-        existing_servers = tomllib.loads(existing).get("mcp_servers", {})
         managed_or_retired_names = set(
             _canonical_servers(workspace_root, profile="full")
         ) | set(REMOVED_MCP_SERVER_NAMES)
-        policies = _retained_codex_policies(
-            existing, existing_servers, managed_or_retired_names
-        )
-        for name, server in servers.items():
-            server.update(deepcopy(policies.get(name, {})))
-        inactive = {
-            name: policy for name, policy in policies.items() if name not in servers
-        }
         preserved = _strip_managed_mcp_blocks(existing, managed_or_retired_names)
-        managed_block = _render_codex_mcp_toml(servers, inactive_policies=inactive)
+        managed_block = _render_retained_codex_block(
+            existing, servers, managed_or_retired_names
+        )
 
         if preserved:
             rendered = preserved.rstrip() + "\n\n" + managed_block

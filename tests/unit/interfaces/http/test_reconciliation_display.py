@@ -385,3 +385,66 @@ def test_visible_workflow_failure_preserves_error_assessment_revision_and_report
     ):
         assert present[field] == absent[field]
     assert path.read_bytes() == original
+
+
+def test_complete_reference_caption_uses_persisted_completeness():
+    recon = {
+        **_reconciliation(),
+        "reconciliation_mode": "complete-reference",
+        "reference_completeness": "verified",
+    }
+    payload = _parent(recon)
+    before = copy.deepcopy(payload)
+    [row] = reconciliation_display(payload)
+    assert row["mode"] == "complete-reference"
+    assert row["meaning"] == "Reference completeness: verified"
+    assert row["result"] == "expired 8/10; retained 2" and payload == before
+
+
+@pytest.mark.parametrize("execution", [None, {}, "unavailable"])
+def test_malformed_execution_cannot_invent_a_reconciliation_result(execution):
+    [row] = reconciliation_display({"execution": execution})
+    assert row["result"] == "UNKNOWN"
+    assert row["meaning"] == "FK reconciliation evidence not recorded"
+
+
+def test_unsupported_reconciliation_mode_is_explicitly_unknown():
+    payload = {
+        "execution": [
+            {
+                "step_id": "fk",
+                "reconciliation": {
+                    "reconciliation_mode": "future",
+                    "orphan_rows_deleted": 100,
+                },
+            }
+        ]
+    }
+    [row] = reconciliation_display(payload)
+    assert row["step_id"] == "fk" and row["result"] == "UNKNOWN"
+    assert row["meaning"] == "FK reconciliation mode absent or unsupported"
+    assert "100" not in json.dumps(row)
+
+
+def test_failed_step_cannot_display_stale_success_counts():
+    payload = {
+        "execution": [
+            {
+                "step_id": "fk",
+                "status": "failed",
+                "error_type": "IncompleteReference",
+                "reconciliation": _reconciliation(),
+            }
+        ]
+    }
+    [row] = reconciliation_display(payload)
+    assert row["step_id"] == "fk" and row["result"] == "FAILED"
+    assert "IncompleteReference" in row["meaning"]
+    assert "8/10" not in json.dumps(row)
+
+
+def test_non_mapping_execution_entries_do_not_hide_a_valid_comparison():
+    payload = _parent(_reconciliation())
+    expected = reconciliation_display(payload)
+    payload["execution"][:0] = [None, "invalid", 42, []]
+    assert reconciliation_display(payload) == expected

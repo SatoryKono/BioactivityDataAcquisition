@@ -171,6 +171,35 @@ def test_markdownify_source_cannot_redirect_a_foreign_workspace(
         session_overrides(config, root, manifest=manifest, markdownify=custom)
 
 
+def test_default_foreign_markdownify_binding_disables_only_that_server(
+    session_binding, tmp_path, monkeypatch
+):
+    root, manifest, _, config = session_binding
+    home = tmp_path / "home"
+    path = home / ".config/pc-agent/markdownify-bioetl.json"
+    path.parent.mkdir(parents=True)
+    path.write_text(
+        json.dumps(
+            {
+                "schema": 1,
+                "workspace": str(tmp_path / "foreign"),
+                "git_common": str(root / ".git"),
+                "server": "Markdownify-BioETL",
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(Path, "home", lambda: home)
+    config["mcp_servers"]["Markdownify-BioETL"] = {"command": "unrelated"}
+    overrides = session_overrides(config, root, manifest=manifest)
+    entries = {}
+    for override in overrides[1::2]:
+        entries.update(tomllib.loads(override)["mcp_servers"])
+    assert entries["memory"]["args"][-1] == "memory"
+    assert entries["ast-grep"]["args"][-1] == "ast-grep"
+    assert entries["Markdownify-BioETL"] == {"enabled": False}
+
+
 def test_session_uses_explicit_environment_manifest(
     session_binding, monkeypatch, tmp_path
 ):
@@ -377,3 +406,57 @@ def test_native_workspace_does_not_skip_a_dangling_nearest_git_marker(
     )
     with pytest.raises(PermissionError, match="nearest marker"):
         native_session.workspace()
+
+
+@pytest.mark.parametrize(
+    "policy",
+    [
+        {"enabled": False},
+        {"disabled_tools": ["pdf-to-markdown"]},
+        {"enabled_tools": ["get-markdown-file"]},
+        {"tools": {"get-markdown-file": {"approval_mode": "approve"}}},
+        {"startup_timeout_sec": 0.75, "tool_timeout_sec": 2.25},
+    ],
+)
+def test_matching_markdownify_transport_preserves_existing_policies(
+    session_binding, tmp_path, monkeypatch, policy
+):
+    from copy import deepcopy
+
+    root, manifest, _, config = session_binding
+    entry = {
+        "command": "qualified-fixture",
+        "args": ["client"],
+        "startup_timeout_sec": 60,
+    }
+    config["mcp_servers"]["Markdownify-BioETL"] = {**entry, **policy}
+    original = deepcopy(config)
+    source = tmp_path / "markdownify.json"
+    source.write_text(
+        json.dumps(
+            {
+                "schema": 1,
+                "server": "Markdownify-BioETL",
+                "workspace": str(root),
+                "git_common": str(root / ".git"),
+                "entry": entry,
+            }
+        ),
+        encoding="utf-8",
+    )
+    validated = []
+    monkeypatch.setattr(
+        native_session,
+        "_validate_markdownify_client",
+        lambda value: validated.append(value),
+    )
+    entries = {}
+    for value in session_overrides(config, root, manifest=manifest, markdownify=source)[
+        1::2
+    ]:
+        entries.update(tomllib.loads(value)["mcp_servers"])
+    assert entries["Markdownify-BioETL"] == {**entry, **policy}
+    assert validated == [entry] and config == original
+    config["mcp_servers"]["Markdownify-BioETL"]["command"] = "foreign"
+    with pytest.raises(PermissionError, match="unrelated"):
+        session_overrides(config, root, manifest=manifest, markdownify=source)

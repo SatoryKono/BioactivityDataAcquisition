@@ -180,3 +180,55 @@ def test_staging_rejects_modes_that_cannot_write_a_candidate(
     assert error.value.code == 2
     write.assert_not_called()
     assert not output.exists()
+
+
+@pytest.mark.parametrize("profile", ["full", "stable"])
+def test_shell_readiness_accepts_retained_policies_but_rejects_transport_drift(
+    tmp_path, monkeypatch, profile
+):
+    import sys
+    from pathlib import Path
+    from scripts.ai.codex import setup_mcp as setup
+
+    home, root = tmp_path / "private-home", tmp_path / "workspace"
+    root.mkdir()
+    monkeypatch.setattr(Path, "home", lambda: home)
+    monkeypatch.delenv("BIOETL_CODEX_ROUTES_FILE", raising=False)
+    monkeypatch.setenv("CODEX_MCP_PROFILE", profile)
+    monkeypatch.setenv("CODEX_MCP_TRANSPORT_MODE", "shared")
+    path = home / ".codex/config.toml"
+    path.parent.mkdir(parents=True)
+    path.write_text(
+        '[mcp_servers.prometheus]\nurl="http://127.0.0.1:1/mcp"\ntool_timeout_sec=0.5\n[mcp_servers.memory]\ncommand="old"\ndisabled_tools=["delete_entities"]\n',
+        encoding="utf-8",
+    )
+    setup._write_codex_config(root, profile=profile, transport_mode="shared")
+    script = (
+        Path(__file__).resolve().parents[3] / "scripts/ai/codex/helper/ensure-mcp.sh"
+    )
+    shell = script.read_text(encoding="utf-8").split("check_codex_config() {", 1)[1]
+    python = (
+        "import importlib.util"
+        + shell.split("\nimport importlib.util", 1)[1].split("\nPY", 1)[0]
+    )
+    monkeypatch.setattr(
+        sys, "argv", ["-", str(Path(setup.__file__)), str(path), str(root)]
+    )
+    before = path.read_bytes()
+    exec(compile(python, str(script), "exec"), {"__name__": "__main__"})
+    assert path.read_bytes() == before
+    assert tomllib.loads(before.decode())["mcp_servers"]["memory"][
+        "disabled_tools"
+    ] == ["delete_entities"]
+    text = before.decode()
+    memory = setup._codex_runtime_servers(
+        root, profile=profile, transport_mode="shared"
+    )["memory"]
+    assert memory["url"] in text
+    path.write_text(
+        text.replace(memory["url"], "http://127.0.0.1:1/foreign"), encoding="utf-8"
+    )
+    drift = path.read_bytes()
+    with pytest.raises(SystemExit, match="differs"):
+        exec(compile(python, str(script), "exec"), {"__name__": "__main__"})
+    assert path.read_bytes() == drift
