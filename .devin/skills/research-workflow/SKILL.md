@@ -1,6 +1,6 @@
 ---
 name: research-workflow
-description: "Use when conducting structured research projects that require traceable evidence, explicit decisions, and constrained specifications. Covers the full workflow from initialization through evidence collection, synthesis, decision-making, and spec generation."
+description: "Run structured BioETL research with evidence, decisions, and specs in one phase router. For a code change plan use py-plan-bot."
 ---
 
 # Research Workflow

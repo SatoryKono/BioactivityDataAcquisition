@@ -1,6 +1,6 @@
 ---
 name: "observability-prometheus"
-description: "Create, review, test, or debug BioETL Prometheus alert and recording rules with real metric and label evidence."
+description: "Create, test, or debug BioETL Prometheus alert and recording rules from real metrics. For Grafana panels use observability-dashboard."
 ---
 
 # Observability Prometheus

@@ -6,7 +6,7 @@ ______________________________________________________________________
 
 ---
 name: "agent-debugging"
-description: "Diagnose a concrete AI-agent trajectory with BioETL's safe optional AgentDebugX adapter, and optionally collect ProofAgent advisory evidence. Use only when a reproducible trajectory or bounded change scope exists."
+description: "Diagnose a reproducible AI-agent trajectory or tool-routing failure, including exceptions inside that trajectory. For product tests or product runtime exceptions use py-debug-bot."
 ---
 
 # Agent Debugging

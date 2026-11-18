@@ -457,15 +457,21 @@ def test_monitoring_compose_exposes_ops_http_soft_gate_env() -> None:
     )
 
 
+def _require_posix_sh() -> str:
+    shell = shutil.which("sh")
+    if shell is None:
+        pytest.skip("POSIX sh is required for the Grafana bootstrap integration test")
+    return shell
+
+
 def _run_bootstrap_profile(
     tmp_path: Path,
     *,
     runtime_source_id: str,
     ready: bool,
+    require_ops: bool = False,
 ) -> tuple[subprocess.CompletedProcess[str], Path, Path, Path]:
-    shell = shutil.which("sh")
-    if shell is None:
-        pytest.skip("POSIX sh is required for the Grafana bootstrap integration test")
+    shell = _require_posix_sh()
 
     datasource_target = tmp_path / "datasources"
     datasource_core = tmp_path / "datasources-core"
@@ -498,28 +504,32 @@ def _run_bootstrap_profile(
             "BIOETL_GRAFANA_RUN_SCRIPT": shutil.which("true") or "/bin/true",
             "BIOETL_EXPECTED_RUNTIME_SOURCE_ID": runtime_source_id,
             "BIOETL_OPS_HTTP_URL": "http://bioetl:8000",
-            "BIOETL_GRAFANA_REQUIRE_OPS_HTTP": "0",
+            "BIOETL_GRAFANA_REQUIRE_OPS_HTTP": "1" if require_ops else "0",
             "BIOETL_GRAFANA_OPS_READY_ATTEMPTS": "1",
             "BIOETL_GRAFANA_OPS_READY_SLEEP_SEC": "0",
             "GF_RENDERING_SERVER_URL": "",
         }
     )
-    if ready:
-        fake_bin = tmp_path / "bin"
-        fake_bin.mkdir()
-        wget = fake_bin / "wget"
-        wget.write_text(
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    wget = fake_bin / "wget"
+    wget.write_text(
+        (
             "#!/bin/sh\nprintf '%s\\n' "
-            f'\'{{"runtime_source_id":"{runtime_source_id}"}}\'\n',
-            encoding="utf-8",
-        )
-        wget.chmod(0o755)
+            f'\'{{"runtime_source_id":"{runtime_source_id}"}}\'\n'
+            if ready
+            else "#!/bin/sh\nexit 1\n"
+        ),
+        encoding="utf-8",
+    )
+    wget.chmod(0o755)
+    env["PATH"] = f"{fake_bin}{os.pathsep}{env.get('PATH', '')}"
+    if ready:
         plugin_dir = tmp_path / "plugins" / "yesoreyeram-infinity-datasource"
         plugin_dir.mkdir(parents=True)
         (plugin_dir / "plugin.json").write_text(
             '{\n  "version": "3.8.0"\n}\n', encoding="utf-8"
         )
-        env["PATH"] = f"{fake_bin}{os.pathsep}{env.get('PATH', '')}"
         env["BIOETL_INFINITY_PLUGIN_DIR"] = str(plugin_dir)
 
     result = subprocess.run(
@@ -575,6 +585,198 @@ def test_bootstrap_selects_full_dashboard_profile_after_identity_match(
     assert status["dashboard_profile"] == "full"
 
 
+def test_bootstrap_strict_timeout_never_launches_late_recovery(tmp_path: Path) -> None:
+    result, _, _, status_file = _run_bootstrap_profile(
+        tmp_path, runtime_source_id="a" * 64, ready=False, require_ops=True
+    )
+    assert result.returncode == 1
+    status = json.loads(status_file.read_text(encoding="utf-8"))
+    assert status["ops_http"] == "failed"
+    assert status["late_recovery_state"] == "disabled"
+    assert not list((tmp_path / "bioetl-late-cutover").glob("*.lease"))
+
+
+def _run_late_recovery_case(tmp_path: Path, scenario: str) -> dict:
+    """Execute production watcher functions with deterministic clock/HTTP/PID seams."""
+    shell = _require_posix_sh()
+    source = Path("grafana/scripts/bootstrap-datasources.sh").read_text(
+        encoding="utf-8"
+    )
+    definitions = source.split("# --- Always provision Prometheus first", 1)[0]
+    status_path = tmp_path / "status.json"
+    clock_path = tmp_path / "clock"
+    signals_path = tmp_path / "signals"
+    clock_path.write_text("100", encoding="utf-8")
+    harness = tmp_path / "watcher.sh"
+    harness.write_text(
+        definitions
+        + r"""
+LATE_RECOVERY_FOREGROUND=424242
+LATE_RECOVERY_PROCESS_START=123
+LATE_RECOVERY_INSTANCE="424242:123:test-boot"
+LATE_RECOVERY_STARTED=100
+LATE_RECOVERY_DEADLINE=580
+case "${SCENARIO}" in unreachable|full_unhealthy|http_failed) LATE_RECOVERY_DEADLINE=130 ;; esac
+LATE_RECOVERY_LEASE_VALUE="424242 123 test-boot 580"
+LATE_RECOVERY_STATE=waiting
+IDENTITY_VALID=1
+OPS_HTTP_STATE=deferred
+OPS_HTTP_REASON=identity_timeout_or_unreachable
+DASHBOARD_PROFILE=prometheus_only
+OPS_READY_URL=http://bioetl:8000/ops/control-plane/ready
+mkdir -p "${LATE_RECOVERY_ROOT}"
+printf '%s' "${LATE_RECOVERY_LEASE_VALUE}" > "${LATE_RECOVERY_LEASE}"
+case "${SCENARIO}" in
+  claimed|claimed_nonexclusive|full|full_unhealthy|full_health_delayed|full_health_flap)
+    mkdir "${LATE_RECOVERY_CLAIM}"
+    : > "${LATE_RECOVERY_CLAIM}/owner"
+    ;;
+esac
+if [ "${SCENARIO}" = claimed_nonexclusive ]; then
+  mkdir() { command mkdir "$@" 2>/dev/null || true; }
+fi
+case "${SCENARIO}" in
+  full|full_unhealthy|full_health_delayed|full_health_flap) LATE_RECOVERY_STATE=confirming_full; OPS_HTTP_STATE=ready; DASHBOARD_PROFILE=full ;;
+esac
+late_recovery_now() { read -r _time < "${CLOCK_PATH}" || true; printf '%s\n' "${_time}"; }
+late_recovery_alive() { [ "${SCENARIO}" != stopped ]; }
+sleep() { read -r _time < "${CLOCK_PATH}" || true; printf '%s' "$((_time + $1))" > "${CLOCK_PATH}"; }
+kill() { printf '%s %s\n' "$1" "$2" >> "${SIGNALS_PATH}"; [ "${SCENARIO}" != kill_failed ]; }
+wget() {
+  case "$*" in
+    *api/health*)
+      [ "${SCENARIO}" != full_unhealthy ] || return 1
+      read -r _time < "${CLOCK_PATH}" || true
+      case "${SCENARIO}" in
+        health_delayed|full_health_delayed) [ "${_time}" -ge 120 ] || return 1 ;;
+        health_flaps) [ "${_time}" -ne 105 ] || return 1 ;;
+        health_flap|full_health_flap) [ "${_time}" -ge 110 ] && [ "${_time}" -ne 115 ] || return 1 ;;
+      esac
+      printf '%s' '{"database":"ok"}'
+      ;;
+    *)
+      read -r _time < "${CLOCK_PATH}" || true
+      _count=0
+      [ ! -f "${CLOCK_PATH}.calls" ] || read -r _count < "${CLOCK_PATH}.calls" || true
+      _count=$((_count + 1))
+      printf '%s\n' "${_count}" > "${CLOCK_PATH}.calls"
+      case "${SCENARIO}" in
+        unreachable) return 1 ;;
+        mismatch) printf '%s' '{"runtime_source_id":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"}'; return ;;
+        changed) if [ "${_count}" -ge 4 ]; then printf '%s' '{"runtime_source_id":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"}'; return; fi ;;
+        delayed) [ "${_time}" -ge 110 ] || return 1 ;;
+        deadline) printf '580' > "${CLOCK_PATH}" ;;
+      esac
+      printf '{"runtime_source_id":"%s"}' "${BIOETL_EXPECTED_RUNTIME_SOURCE_ID}"
+      [ "${SCENARIO}" != http_failed ] || return 1
+      ;;
+  esac
+}
+late_recovery_watch
+""",
+        encoding="utf-8",
+    )
+    env = os.environ.copy()
+    env.update(
+        {
+            "BIOETL_GRAFANA_BOOTSTRAP_STATUS_FILE": str(status_path),
+            "BIOETL_EXPECTED_RUNTIME_SOURCE_ID": "a" * 64,
+            "CLOCK_PATH": str(clock_path),
+            "SIGNALS_PATH": str(signals_path),
+            "SCENARIO": scenario,
+        }
+    )
+    result = subprocess.run(
+        [shell, str(harness)], env=env, capture_output=True, text=True, timeout=15
+    )
+    assert result.returncode == 0, result.stderr
+    return {
+        "finished_at": int(clock_path.read_text(encoding="utf-8")),
+        "status": json.loads(status_path.read_text(encoding="utf-8")),
+        "signals": signals_path.read_text(encoding="utf-8").splitlines()
+        if signals_path.exists()
+        else [],
+        "claim_exists": (
+            tmp_path / "bioetl-late-cutover" / ("a" * 64 + ".claim")
+        ).is_dir(),
+        "lease_exists": (
+            tmp_path / "bioetl-late-cutover" / ("a" * 64 + ".lease")
+        ).exists(),
+    }
+
+
+@pytest.mark.parametrize(
+    "scenario",
+    ["health_delayed", "health_flap", "full_health_delayed", "full_health_flap"],
+)
+def test_late_recovery_waits_for_ten_seconds_of_consecutive_health(
+    tmp_path: Path, scenario: str
+) -> None:
+    result = _run_late_recovery_case(tmp_path, scenario)
+    assert result["finished_at"] == 130
+    if scenario.startswith("full_"):
+        assert result["status"]["late_recovery_state"] == "complete"
+        assert result["signals"] == []
+        assert not result["claim_exists"]
+    else:
+        assert result["status"]["late_recovery_state"] == "restart_requested"
+        assert result["signals"] == ["-TERM 424242"]
+        assert result["claim_exists"]
+
+
+def test_late_recovery_restarts_saved_foreground_once_after_delayed_match(
+    tmp_path: Path,
+) -> None:
+    result = _run_late_recovery_case(tmp_path, "delayed")
+    assert result["signals"] == ["-TERM 424242"]
+    assert result["status"]["late_recovery_state"] == "restart_requested"
+    assert result["claim_exists"]
+    assert not result["lease_exists"]
+
+
+@pytest.mark.parametrize(
+    ("scenario", "state"),
+    [
+        ("unreachable", "expired"),
+        ("mismatch", "mismatch"),
+        ("changed", "mismatch"),
+        ("http_failed", "expired"),
+        ("stopped", "stopped"),
+        ("claimed", "blocked"),
+        ("claimed_nonexclusive", "blocked"),
+        ("deadline", "expired"),
+    ],
+)
+def test_late_recovery_does_not_restart_without_proof(
+    tmp_path: Path, scenario: str, state: str
+) -> None:
+    result = _run_late_recovery_case(tmp_path, scenario)
+    assert result["signals"] == []
+    assert result["status"]["late_recovery_state"] == state
+    assert not result["lease_exists"]
+
+
+@pytest.mark.parametrize(
+    ("scenario", "cleared"), [("full", True), ("full_unhealthy", False)]
+)
+def test_late_recovery_claim_clears_only_after_full_health_and_identity(
+    tmp_path: Path, scenario: str, cleared: bool
+) -> None:
+    result = _run_late_recovery_case(tmp_path, scenario)
+    assert result["signals"] == []
+    assert result["claim_exists"] is not cleared
+    assert result["status"]["late_recovery_state"] == (
+        "complete" if cleared else "expired"
+    )
+
+
+def test_late_recovery_failed_signal_preserves_claim(tmp_path: Path) -> None:
+    result = _run_late_recovery_case(tmp_path, "kill_failed")
+    assert result["signals"] == ["-TERM 424242"]
+    assert result["claim_exists"]
+    assert result["status"]["late_recovery_state"] == "failed"
+
+
 def test_monitoring_compose_local_resource_budget() -> None:
     """Grafana+renderer must not reserve ~32 GiB peak on local hosts."""
     monitoring = _load_monitoring_compose()
@@ -617,3 +819,14 @@ def test_bootstrap_validates_ops_http_url_before_probe() -> None:
     gate_idx = content.index('if is_valid_ops_http_url "${BIOETL_OPS_HTTP_URL}"')
     wget_idx = content.index('wget -qO- -T 3 "${OPS_READY_URL}"')
     assert fn_idx < gate_idx < wget_idx
+
+
+@pytest.mark.parametrize(
+    ("scenario", "earliest"), [("health_delayed", 130), ("health_flaps", 120)]
+)
+def test_late_recovery_requires_ten_continuous_healthy_seconds(
+    tmp_path: Path, scenario: str, earliest: int
+) -> None:
+    result = _run_late_recovery_case(tmp_path, scenario)
+    assert result["signals"] == ["-TERM 424242"]
+    assert result["finished_at"] >= earliest

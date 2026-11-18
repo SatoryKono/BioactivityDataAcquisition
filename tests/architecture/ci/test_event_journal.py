@@ -523,6 +523,8 @@ def _run_journal(
     journal = tmp_path / "journal"
     test_file = tmp_path / "test_sample.py"
     test_file.write_text(body, encoding="utf-8")
+    config_file = tmp_path / "pytest.ini"
+    config_file.write_text("[pytest]\naddopts =\n", encoding="utf-8")
     child_env = _drop_inherited_xdist(os.environ.copy())
     child_env.pop("EXPECTED_CHECKOUT_SHA", None)
     child_env["BIOETL_JOURNAL_INVOCATION_ID"] = "inv-live"
@@ -545,6 +547,9 @@ def _run_journal(
             sys.executable,
             "-m",
             "pytest",
+            "-c",
+            str(config_file),
+            f"--basetemp={tmp_path / 'child-temp'}",
             str(test_file),
             "--noconftest",
             "-p",

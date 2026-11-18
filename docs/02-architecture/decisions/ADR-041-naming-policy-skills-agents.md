@@ -69,11 +69,11 @@ model: opus | sonnet | haiku   # Abstract alias, NOT versioned ID
 ```yaml
 ---
 name: {skill-name}            # MUST match directory name
-description: "..."             # English, max 200 chars
-context: fork | none
-agent: general-purpose | specific-type
+description: "..."             # English, max 200 chars, names the neighboring skill
 ---
 ```
+
+`context` and `agent` are not required. See Amendment 2026-11-18.
 
 #### 1.3 Commands (runtime command registry)
 
@@ -187,6 +187,31 @@ ______________________________________________________________________
 | 5.2  | Add this ADR to index                                              | `docs/02-architecture/decisions/`    |
 
 ______________________________________________________________________
+
+## Amendment 2026-11-18
+
+This amendment supersedes the skill frontmatter fields `context` and `agent`
+from section 1.2. The previous required block was:
+
+```yaml
+---
+name: {skill-name}
+description: "..."             # English, max 200 chars
+context: fork | none
+agent: general-purpose | specific-type
+---
+```
+
+No repository loader reads `context` or `agent`. The executable trigger
+contract is:
+
+- `name` MUST equal the skill directory name (NAME-007, unchanged).
+- `description` MUST be English, at most 200 characters, and MUST name the
+  neighboring skill to use instead (`use <skill>.`).
+- Shared Codex and Devin skills MUST carry the same `description` string.
+  `SKILL.md` bodies may still differ where the mirror contract allows it.
+
+Gate: `tests/architecture/test_codex_skill_agent_links.py`.
 
 ## Consequences
 

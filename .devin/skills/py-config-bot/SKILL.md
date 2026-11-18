@@ -1,6 +1,6 @@
 ---
 name: py-config-bot
-description: Execute BioETL py-config-bot profile for role-specific workflow and constraints. This skill serves as a convenient entry point for configuration tasks.
+description: "Validate or fix BioETL YAML configs, schemas, and pipeline contracts. For a brand-new provider pipeline use new-pipeline."
 ---
 
 # py-config-bot

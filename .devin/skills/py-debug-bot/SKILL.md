@@ -1,6 +1,6 @@
 ---
 name: py-debug-bot
-description: Execute BioETL py-debug-bot profile for role-specific workflow and constraints. This skill serves as a convenient entry point for debugging tasks.
+description: "Find the root cause of a failing test, CI log, or runtime error. Read-only. For an AI-agent trajectory use agent-debugging."
 ---
 
 # py-debug-bot

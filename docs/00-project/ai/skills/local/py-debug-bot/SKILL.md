@@ -6,7 +6,7 @@ ______________________________________________________________________
 
 ---
 name: "py-debug-bot"
-description: "Execute the read-only BioETL py-debug-bot profile for reproducing, isolating, and analyzing concrete failures. Use when tests, runtime behavior, CI logs, or user-provided stack traces need root-cause diagnosis."
+description: "Find the root cause of a failing test, CI log, or runtime error. Read-only. For an AI-agent trajectory use agent-debugging."
 ---
 
 # py-debug-bot
