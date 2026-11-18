@@ -1,24 +1,50 @@
 {
   "schema_version": 1,
-  "catalog_ref": "7d5b749d9ef1c6a5ab96a4bd02b54b07f5199ca6",
-  "source_ref": "7d5b749d9ef1c6a5ab96a4bd02b54b07f5199ca6",
+  "catalog_ref": "580177584f8d3ada198775d9c1e48af2a2ce8bcc",
+  "source_ref": "bd510699d42585f17a9f480fef26a545338a73fb",
   "source_reviews": {
-    "src/bioetl/infrastructure/storage/delta/table_ops.py": "Reviewed Windows active-file schema evolution: physical Parquet columns are selected before reading, missing Delta fields are filled as typed nulls, and zero-physical-column projections retain metadata row counts. Partition values still come from Delta add-actions. pq.read_table remains operation-owned and single-threaded; schema/metadata reads return values without persistent handles. No new persistent client, background task, cleanup owner or runtime qualification is asserted."
-  },
-  "expression_updates": {
-    "src/bioetl/infrastructure/storage/delta/table_ops.py": {
-      "pq.read_table(resolve_parquet_file_uri(file_uri), columns=physical_columns, use_threads=False)": "pq.read_table(path, columns=physical_columns, use_threads=False)"
-    }
-  },
-  "segment_updates": {
-    "src/bioetl/infrastructure/storage/delta/table_ops.py": {
-      "result = pq.read_table(": "result = pq.read_table(path, columns=physical_columns, use_threads=False)"
-    }
+    "src/bioetl/infrastructure/storage/delta/table_ops.py": "Reviewed the Windows schema-probe fallback and its error corrections. The existing operation-owned, single-threaded pq.read_table boundary moves into _read_physical_parquet and remains one call. read_schema failures defer to the actual reader; unreadable metadata propagates instead of silently returning zero rows. Projection alignment fills only declared Delta fields and rejects unknown requested fields. No new persistent client, background task, cleanup owner, resource qualification or runtime acceptance is introduced."
   },
   "line_updates": {
     "src/bioetl/infrastructure/storage/delta/table_ops.py": {
-      "152": 217,
-      "154": 219
+      "217": 250,
+      "219": 252
     }
-  }
+  },
+  "reference_moves": [
+    {
+      "identity": "storage.delta-operations.table-file",
+      "fields": [
+        "creation_sites"
+      ],
+      "from": {
+        "file": "src/bioetl/infrastructure/storage/delta/table_ops.py",
+        "line": 172,
+        "expression": "pq.read_table(path, columns=physical_columns, use_threads=False)"
+      },
+      "to": {
+        "file": "src/bioetl/infrastructure/storage/delta/table_ops.py",
+        "scope": "_read_physical_parquet",
+        "call": "pq.read_table",
+        "expression": "pq.read_table(path, columns=physical_columns, use_threads=False)"
+      }
+    },
+    {
+      "identity": "storage.delta-operations.table-file",
+      "fields": [
+        "production_binding",
+        "cleanup_sources"
+      ],
+      "from": {
+        "file": "src/bioetl/infrastructure/storage/delta/table_ops.py",
+        "line": 172,
+        "source_segment": "result = pq.read_table(path, columns=physical_columns, use_threads=False)"
+      },
+      "to": {
+        "file": "src/bioetl/infrastructure/storage/delta/table_ops.py",
+        "scope": "_read_physical_parquet",
+        "segment": "return pq.read_table(path, columns=physical_columns, use_threads=False)"
+      }
+    }
+  ]
 }
