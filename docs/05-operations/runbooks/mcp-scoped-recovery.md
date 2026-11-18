@@ -198,6 +198,13 @@ deny rename while the final file is checked and read through the same handle.
 Converters receive a bounded private snapshot, never the original path. Worker
 processes run in owned Jobs with isolated Python and no service credential.
 
+Responses retain the 2 MiB transport limit and encode ordinary Unicode as UTF-8.
+An oversized JSON envelope returns a bounded tool error rather than closing a
+successful conversion's connection. At most 64 sessions are admitted together.
+Sessions expire after 15 minutes without a request; active requests renew that
+lease. An expired client must initialize a new session after the normal reconnect
+boundary. Expiration does not restart the owner or replay a previous tool call.
+
 Only installed, version-compatible format dependencies are qualified and copied
 into a checked converter snapshot. Plugins and unavailable formats stay disabled.
 Qualification includes an actual representative conversion, path-swap controls,

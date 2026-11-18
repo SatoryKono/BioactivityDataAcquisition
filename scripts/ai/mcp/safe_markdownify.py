@@ -34,6 +34,9 @@ TRANSITION_LOCK = "transition.lock"
 STATUS_RECORD = "status.json"
 STOP_REQUEST = "stop.request"
 HEALTH_PATH = "/health"
+MAX_RESPONSE_BYTES = 2 * 1024 * 1024
+SESSION_LIMIT = 64
+SESSION_IDLE_SECONDS = 15 * 60
 
 
 def module(name, path):
@@ -215,8 +218,8 @@ def request(spec, method, path, body=None, session=None):
             method, path, json.dumps(body) if body is not None else None, headers
         )
         response = connection.getresponse()
-        data = response.read(2 * 1024 * 1024 + 1)
-        if len(data) > 2 * 1024 * 1024 or response.status >= 400:
+        data = response.read(MAX_RESPONSE_BYTES + 1)
+        if len(data) > MAX_RESPONSE_BYTES or response.status >= 400:
             raise PermissionError("Markdownify request refused; no replay")
         return (json.loads(data) if data else None), response.getheader(
             "Mcp-Session-Id"
@@ -364,6 +367,82 @@ def convert(spec, name, args):
         job.rmdir()
 
 
+class _SessionRegistry:
+    """Bound concurrent sessions and reclaim disconnected clients after inactivity."""
+
+    def __init__(self, *, clock=time.monotonic):
+        self._clock = clock
+        self._seen = {}
+        self._lock = threading.Lock()
+
+    def _expire(self, now):
+        expired = [
+            key
+            for key, seen in self._seen.items()
+            if now - seen >= SESSION_IDLE_SECONDS
+        ]
+        for key in expired:
+            del self._seen[key]
+
+    def issue(self):
+        with self._lock:
+            now = self._clock()
+            self._expire(now)
+            if len(self._seen) >= SESSION_LIMIT:
+                return None
+            session = uuid.uuid4().hex
+            self._seen[session] = now
+            return session
+
+    def touch(self, session):
+        with self._lock:
+            now = self._clock()
+            self._expire(now)
+            if session not in self._seen:
+                return False
+            self._seen[session] = now
+            return True
+
+    def discard(self, session):
+        with self._lock:
+            self._seen.pop(session, None)
+
+
+def _response_bytes(value):
+    if value is None:
+        return b""
+    # JSON permits escaped unpaired surrogates in request identifiers. Preserve
+    # those escapes while keeping ordinary Unicode text in compact UTF-8.
+    raw = json.dumps(value, ensure_ascii=False).encode(
+        "utf-8", errors="backslashreplace"
+    )
+    if len(raw) <= MAX_RESPONSE_BYTES:
+        return raw
+    error = {
+        "jsonrpc": "2.0",
+        "id": value.get("id") if isinstance(value, dict) else None,
+        "result": {
+            "isError": True,
+            "content": [
+                {
+                    "type": "text",
+                    "text": "Local conversion response exceeds transport bound",
+                }
+            ],
+        },
+    }
+    raw = json.dumps(error, ensure_ascii=False).encode(
+        "utf-8", errors="backslashreplace"
+    )
+    if len(raw) > MAX_RESPONSE_BYTES:
+        # An oversized request identifier must not defeat the envelope bound.
+        error["id"] = None
+        raw = json.dumps(error, ensure_ascii=False).encode(
+            "utf-8", errors="backslashreplace"
+        )
+    return raw
+
+
 class _MarkdownifyHandler(BaseHTTPRequestHandler):
     def __init__(
         self, *args, workspace, spec, record, token, sessions, gate, draining, **kwargs
@@ -382,7 +461,7 @@ class _MarkdownifyHandler(BaseHTTPRequestHandler):
         pass
 
     def reply(self, status, value=None, session=None):
-        raw = json.dumps(value).encode() if value is not None else b""
+        raw = _response_bytes(value)
         self.send_response(status)
         self.send_header("Content-Type", "application/json")
         self.send_header("Content-Length", str(len(raw)))
@@ -439,11 +518,10 @@ class _MarkdownifyHandler(BaseHTTPRequestHandler):
         method = request_value.get("method")
         session = self.headers.get("Mcp-Session-Id")
         if method == "initialize":
-            if len(self._sessions) >= 64 or self._draining.is_set():
+            session = None if self._draining.is_set() else self._sessions.issue()
+            if session is None:
                 self.reply(503)
                 return
-            session = uuid.uuid4().hex
-            self._sessions.add(session)
             result = {
                 "protocolVersion": "2025-06-18",
                 "capabilities": {"tools": {}},
@@ -452,7 +530,7 @@ class _MarkdownifyHandler(BaseHTTPRequestHandler):
                     "version": "1.0.0",
                 },
             }
-        elif session not in self._sessions:
+        elif not self._sessions.touch(session):
             self.reply(404)
             return
         elif identifier is None:
@@ -518,7 +596,7 @@ def serve(root):
         else:
             raise PermissionError("Markdownify launch was not published")
         token = core.credential()
-        sessions = set()
+        sessions = _SessionRegistry()
         gate = threading.Lock()
         draining = threading.Event()
 
