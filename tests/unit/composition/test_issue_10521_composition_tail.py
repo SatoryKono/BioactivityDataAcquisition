@@ -569,25 +569,46 @@ def test_exact_replay_contract_identity_seams(
 def test_exact_replay_assembly_and_factory_seams(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    from bioetl.composition.factories.pipeline import runner_assembly as assembly
     from bioetl.composition.factories.pipeline import (
         _runner_assembly_support as support,
+        _runner_preflight_observer as collaborators,
+        runner_assembly as assembly,
     )
 
-    context = MagicMock(spec=support.RunnerAssemblyContext)
-    parts = MagicMock(spec=assembly.RunnerAssemblyParts)
-    delegate = MagicMock(return_value=parts)
-    monkeypatch.setattr(assembly, "_assemble_runner_parts_impl", delegate)
-    assert assembly._assemble_runner_parts(context) is parts
-    delegate.assert_called_once_with(
-        context,
-        checkpoint_manager_builder=assembly._build_checkpoint_manager,
-        lock_runtime_service_builder=support.build_lock_runtime_service,
-        preflight_service_builder=support.build_preflight_service,
-        observer_builder=support.build_observer,
-        postrun_service_builder=assembly._build_postrun_service,
-        batch_executor_builder=support.build_batch_executor,
+    context = MagicMock()
+    preflight_factory = MagicMock(return_value="pre")
+    observer_factory = MagicMock(return_value="obs")
+    batch_factory = MagicMock(return_value="batch")
+    monkeypatch.setattr(collaborators, "_build_preflight_service", preflight_factory)
+    monkeypatch.setattr(collaborators, "build_preflight_health_monitor", lambda _: None)
+    monkeypatch.setattr(collaborators, "PipelineObserver", observer_factory)
+    monkeypatch.setattr(
+        support.ServicesBuilder, "create_batch_executor_from_pipeline", batch_factory
     )
+    monkeypatch.setattr(
+        support,
+        "extract_dq_output_paths",
+        lambda *_a, **_k: SimpleNamespace(
+            bronze_path=None, silver_path=None, gold_path=None, flat_structure=False
+        ),
+    )
+    assert assembly._build_preflight_service(context) == "pre"
+    assert assembly._build_observer(context) == "obs"
+    assert (
+        assembly._build_batch_executor(
+            context,
+            checkpoint_manager=object(),  # type: ignore[arg-type]
+            lock_runtime_service=MagicMock(),
+            observer=object(),  # type: ignore[arg-type]
+        )
+        == "batch"
+    )
+    assert preflight_factory.call_args.kwargs["pipeline"] is context.pipeline
+    assert (
+        observer_factory.call_args.kwargs["metrics"]
+        is context.pipeline.services.metrics
+    )
+    assert batch_factory.call_args.args[0].pipeline is context.pipeline
 
     from bioetl.composition.factories.services.pipeline_batch_executor_builder import (
         _resolve_effective_gold_table,
