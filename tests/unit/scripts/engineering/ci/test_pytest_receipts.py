@@ -8,6 +8,7 @@ import stat
 import subprocess
 import sys
 from pathlib import Path
+from uuid import uuid4
 
 import pytest
 
@@ -58,6 +59,8 @@ def _pytest(
     repo_root: Path | None = None,
 ) -> subprocess.CompletedProcess[str]:
     child_env = os.environ.copy() if env is None else env.copy()
+    if env is None:
+        child_env.pop("PYTEST_ADDOPTS", None)
     inherited = [
         part for part in child_env.get("PYTHONPATH", "").split(os.pathsep) if part
     ]
@@ -72,6 +75,8 @@ def _pytest(
         "-o",
         "addopts=",
         "--noconftest",
+        "--basetemp",
+        str(test_file.parent / f".pytest-child-{uuid4().hex}"),
         "-p",
         PLUGIN,
         "-p",
@@ -291,8 +296,19 @@ def test_sha_mismatch_fails(receipts: Path, tmp_path: Path) -> None:
     assert "fake_sha123" in str(payload["observed_error"])
 
 
-def test_xdist_workers_do_not_double_count(receipts: Path, tmp_path: Path) -> None:
+@pytest.mark.parametrize("contaminate_parent", [False, True])
+def test_xdist_workers_do_not_double_count(
+    receipts: Path,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    contaminate_parent: bool,
+) -> None:
     pytest.importorskip("xdist")
+    unrelated = tmp_path / "unrelated-default-temp"
+    if contaminate_parent:
+        unrelated.write_bytes(b"unrelated temporary-root sentinel")
+        monkeypatch.setenv("PYTEST_DEBUG_TEMPROOT", str(unrelated))
+        monkeypatch.setenv("PYTEST_ADDOPTS", "-k inherited_filter_must_not_apply")
     test_file = tmp_path / "test_dist.py"
     _write(
         test_file,
@@ -315,6 +331,22 @@ def test_xdist_workers_do_not_double_count(receipts: Path, tmp_path: Path) -> No
         collection = item["collection"]
         assert isinstance(collection, dict)
         assert collection["selected"] == len(item["results"])
+    if contaminate_parent:
+        assert unrelated.read_bytes() == b"unrelated temporary-root sentinel"
+
+
+def test_explicit_child_addopts_are_preserved(receipts: Path, tmp_path: Path) -> None:
+    test_file = tmp_path / "test_explicit_selection.py"
+    _write(
+        test_file,
+        "def test_selected():\n    assert True\n\ndef test_unselected():\n    assert False\n",
+    )
+    env = {**os.environ, "PYTEST_ADDOPTS": "-k test_selected"}
+    completed = _pytest(test_file, receipts, env=env)
+    assert completed.returncode == 0, completed.stdout + completed.stderr
+    payload = _load(receipts)
+    assert len(payload["results"]) == 1
+    assert next(iter(payload["results"])).endswith("::test_selected")
 
 
 def test_xdist_waits_for_slow_worker_receipt_finalization(
