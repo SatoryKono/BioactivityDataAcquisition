@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-10-15'
+  Last verified: '2026-11-17'
 
 ______________________________________________________________________
 
@@ -32,11 +32,11 @@ policy.
 
 | Dashboard | JSON file | Family | Primary docs | Panel docs | Datasources | Versioning form |
 | --- | --- | --- | --- | --- | --- | --- |
-| `1. Trust` | `grafana/dashboards/bioetl-control-plane-v1.json` | primary | [dashboard-v2-usage.md](dashboard-v2-usage.md), [Monitoring Guide](../../05-operations/01-monitoring-guide.md) | [bioetl-control-plane-v1-panels.md](panels/bioetl-control-plane-v1-panels.md) | Prometheus, BioETL Ops HTTP, Grafana | versioned (`v1`) |
-| `2. Overview` | `grafana/dashboards/bioetl-overview-v2.json` | primary | [dashboard-v2-usage.md](dashboard-v2-usage.md), [monitoring-index.md](monitoring-index.md) | [bioetl-overview-v2-panels.md](panels/bioetl-overview-v2-panels.md) | Prometheus, BioETL Ops HTTP, Grafana | versioned (`v2`) |
-| `3. Data Quality` | `grafana/dashboards/bioetl-dq-v2.json` | primary | [dashboard-v2-usage.md](dashboard-v2-usage.md), [Monitoring Guide](../../05-operations/01-monitoring-guide.md) | [bioetl-dq-v2-panels.md](panels/bioetl-dq-v2-panels.md) | Prometheus, BioETL Ops HTTP, Grafana | versioned (`v2`) |
-| `4. Incident Workspace` | `grafana/dashboards/bioetl-incident-v1.json` | adjunct | [dashboard-system-2.0-phase2-residual.md](dashboard-system-2.0-phase2-residual.md) | [bioetl-incident-v1-panels.md](panels/bioetl-incident-v1-panels.md) | Prometheus, BioETL Ops HTTP | versioned (`v1`) |
-| `Run Explorer` | `grafana/dashboards/bioetl-run-explorer-v1.json` | adjunct | [dashboard-system-2.0-phase2-residual.md](dashboard-system-2.0-phase2-residual.md) | [bioetl-run-explorer-v1-panels.md](panels/bioetl-run-explorer-v1-panels.md) | Prometheus, BioETL Ops HTTP | versioned (`v1`) |
+| `2. Replay Readiness` | `grafana/dashboards/bioetl-control-plane-v1.json` | primary | [dashboard-v2-usage.md](dashboard-v2-usage.md), [Monitoring Guide](../../05-operations/01-monitoring-guide.md) | [bioetl-control-plane-v1-panels.md](panels/bioetl-control-plane-v1-panels.md) | Prometheus, Grafana, BioETL Ops HTTP | versioned (`v1`) |
+| `3. Run Overview` | `grafana/dashboards/bioetl-overview-v2.json` | primary | [dashboard-v2-usage.md](dashboard-v2-usage.md), [monitoring-index.md](monitoring-index.md) | [bioetl-overview-v2-panels.md](panels/bioetl-overview-v2-panels.md) | Prometheus, Grafana, BioETL Ops HTTP | versioned (`v2`) |
+| `4. Data Quality` | `grafana/dashboards/bioetl-dq-v2.json` | primary | [dashboard-v2-usage.md](dashboard-v2-usage.md), [Monitoring Guide](../../05-operations/01-monitoring-guide.md) | [bioetl-dq-v2-panels.md](panels/bioetl-dq-v2-panels.md) | Prometheus, Grafana, BioETL Ops HTTP | versioned (`v2`) |
+| `5. Incident Workspace` | `grafana/dashboards/bioetl-incident-v1.json` | adjunct | [dashboard-system-2.0-phase2-residual.md](dashboard-system-2.0-phase2-residual.md) | [bioetl-incident-v1-panels.md](panels/bioetl-incident-v1-panels.md) | Prometheus, Grafana, BioETL Ops HTTP | versioned (`v1`) |
+| `1. Run Explorer` | `grafana/dashboards/bioetl-run-explorer-v1.json` | adjunct | [dashboard-system-2.0-phase2-residual.md](dashboard-system-2.0-phase2-residual.md) | [bioetl-run-explorer-v1-panels.md](panels/bioetl-run-explorer-v1-panels.md) | Grafana, BioETL Ops HTTP | versioned (`v1`) |
 
 > **Shipped surface = 5 dashboards** (portfolio cap; Phase-2 residual #6828). Machine inventory:
 > `docs/03-guides/dashboards/contracts/dashboard-inventory.yaml`.

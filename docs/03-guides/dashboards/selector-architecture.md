@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-08-05'
+  Last verified: '2026-11-17'
 
 ______________________________________________________________________
 
@@ -155,9 +155,19 @@ Retired with Workflow Overview (do not reintroduce on primary boards):
 - `run_type_context` / `run_type_context_exact`
 - `provider_context` / `provider_context_exact`
 
-Future reserved:
+Shipped on `bioetl-overview-v2` and `bioetl-dq-v2` (`hide=2`, `skipUrlSync=true`),
+resolved from `/ops/control-plane/selector-context`:
 
 - `selected_run_id`
+- `selected_pipeline`
+
+Panel `9002` and panel `9406` already interpolate
+`run_id=${selected_run_id}` and `pipeline=${selected_pipeline}` in their
+answer URLs. `selector-contracts.yaml` lists both names under
+`detail_only_shipped_vars`.
+
+Future reserved:
+
 - `selected_manifest_id`
 - `selected_started_at`
 
@@ -264,6 +274,10 @@ embed the unsigned panel by default; local Grafana must allow the plugin id.
 
 ## Future execution selector model
 
+`selected_run_id` and `selected_pipeline` are shipped hidden variables on
+Run Overview and Data Quality. See the hidden-context section above and
+`docs/03-guides/dashboards/variables-guide.md`.
+
 After the shipped resolver is paired with an execution-aware selector shell,
 eligible dashboards may adopt:
 
@@ -271,9 +285,8 @@ eligible dashboards may adopt:
 - `run_selector_mode=previous`
 - `run_selector_mode=exact`
 
-Resolved hidden context would then be:
+Hidden names still reserved for that model:
 
-- `selected_run_id`
 - `selected_manifest_id`
 - `selected_started_at`
 
