@@ -48,6 +48,9 @@ from bioetl.application.services.workflow.control_plane.mutation_plan import (
 )
 from bioetl.composition.bootstrap.cli.lock import validate_workflow_target_mutations
 from bioetl.composition.runtime_builders.config_access import load_pipeline_config
+from bioetl.composition.runtime_builders._exact_replay_cached_bronze_context import (
+    resolve_replay_parent_manifest_refs,
+)
 from bioetl.domain.filtering.silver_config import FORBIDDEN_SILVER_SEMANTIC_FILTER_KEYS
 from bioetl.infrastructure.adapters.iuphar import (
     IupharTargetClassificationAdapter,
@@ -333,10 +336,6 @@ def _workflow_replay_target_config(
     config: WorkflowConfig, current: PipelineYamlConfig, settings: Settings
 ) -> PipelineYamlConfig:
     """Pin the parent's classification inputs before admitting workflow writes."""
-    from bioetl.composition.runtime_builders._exact_replay_cached_bronze_context import (
-        resolve_replay_parent_manifest_refs,
-    )
-
     selected: PipelineYamlConfig | None = None
     for step in config.pipeline_steps:
         if step.pipeline_name != "chembl_target":

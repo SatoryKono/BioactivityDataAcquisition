@@ -1082,7 +1082,7 @@ def test_workflow_preflight_pins_exact_replay_parent(
         lambda _: off,
     )
     monkeypatch.setattr(
-        "bioetl.composition.runtime_builders._exact_replay_cached_bronze_context.resolve_replay_parent_manifest_refs",
+        "bioetl.composition.bootstrap.assembly.storage.resolve_replay_parent_manifest_refs",
         lambda **kwargs: SimpleNamespace(
             pipeline_name="chembl_target",
             resolved_config=shadow_config.model_dump(mode="json"),
@@ -1129,7 +1129,7 @@ def test_workflow_preflight_rejects_conflicting_replay_dependencies(
         lambda _: off,
     )
     monkeypatch.setattr(
-        "bioetl.composition.runtime_builders._exact_replay_cached_bronze_context.resolve_replay_parent_manifest_refs",
+        "bioetl.composition.bootstrap.assembly.storage.resolve_replay_parent_manifest_refs",
         lambda **kwargs: SimpleNamespace(
             pipeline_name="chembl_target",
             resolved_config=shadow_config.model_dump(mode="json"),
