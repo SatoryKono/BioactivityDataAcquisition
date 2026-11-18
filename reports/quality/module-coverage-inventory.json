@@ -10398,26 +10398,6 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 3,
-      "executable_lines": 3,
-      "missing_lines": 0,
-      "module": "bioetl.composition.providers._chembl_target_protein_classification_helpers",
-      "path": "src/bioetl/composition/providers/_chembl_target_protein_classification_helpers.py",
-      "source_lines": 31
-    },
-    {
-      "coverage_percent": 100.0,
-      "coverage_status": "fully_covered",
-      "covered_lines": 3,
-      "executable_lines": 3,
-      "missing_lines": 0,
-      "module": "bioetl.composition.providers._chembl_target_protein_classification_manifest",
-      "path": "src/bioetl/composition/providers/_chembl_target_protein_classification_manifest.py",
-      "source_lines": 10
-    },
-    {
-      "coverage_percent": 100.0,
-      "coverage_status": "fully_covered",
       "covered_lines": 94,
       "executable_lines": 94,
       "missing_lines": 0,
@@ -36950,26 +36930,6 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 3,
-      "executable_lines": 3,
-      "missing_lines": 0,
-      "module": "bioetl.composition.providers._chembl_target_protein_classification_helpers",
-      "path": "src/bioetl/composition/providers/_chembl_target_protein_classification_helpers.py",
-      "source_lines": 31
-    },
-    {
-      "coverage_percent": 100.0,
-      "coverage_status": "fully_covered",
-      "covered_lines": 3,
-      "executable_lines": 3,
-      "missing_lines": 0,
-      "module": "bioetl.composition.providers._chembl_target_protein_classification_manifest",
-      "path": "src/bioetl/composition/providers/_chembl_target_protein_classification_manifest.py",
-      "source_lines": 10
-    },
-    {
-      "coverage_percent": 100.0,
-      "coverage_status": "fully_covered",
       "covered_lines": 94,
       "executable_lines": 94,
       "missing_lines": 0,
@@ -53110,7 +53070,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-09-18",
-  "source_tree_sha256": "4ac266379ff0fb95b991d73ad5ae5e984d542a5c173cb83d4e1be33707619ce0",
+  "source_tree_sha256": "fda1a29f7d0b65a3406e0a0b2157dbf8a425c9bee6711238f43a9472a524d946",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -53265,10 +53225,10 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 2655,
+    "source_module_count": 2653,
     "status_counts": {
       "coverage_xml_missing": 0,
-      "fully_covered": 2498,
+      "fully_covered": 2496,
       "no_executable_lines": 1,
       "partially_covered": 156,
       "uncovered": 0,
