@@ -263,3 +263,74 @@ def test_rehearsal_config_may_change_classification_only(rehearsal):
     paths.candidate_config.write_text(yaml.safe_dump(document), encoding="utf-8")
     with pytest.raises(ValueError, match="only target_classification"):
         _bind(rehearsal)
+
+
+def test_rehearsal_workspace_must_match_active_repository(rehearsal):
+    paths, occurrence, copied, active, settings, _, _ = rehearsal
+    with pytest.raises(ValueError, match="workspace must match"):
+        bind_target_rehearsal(
+            paths,
+            rehearsal_root=occurrence,
+            configs_root=copied,
+            settings=settings,
+            active_configs_root=copied,
+        )
+
+
+def test_rehearsal_rejects_the_active_configs_tree(rehearsal):
+    paths, occurrence, _, active, settings, _, _ = rehearsal
+    with pytest.raises(ValueError, match="load its copied configs tree"):
+        bind_target_rehearsal(
+            paths,
+            rehearsal_root=occurrence,
+            configs_root=active,
+            settings=settings,
+            active_configs_root=active,
+        )
+
+
+def test_rehearsal_requires_enrich(rehearsal):
+    paths, *_ = rehearsal
+    document = yaml.safe_load(paths.candidate_config.read_bytes())
+    document["pipeline"]["target_classification"] = {"mode": "off"}
+    paths.candidate_config.write_text(yaml.safe_dump(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="must select enrich"):
+        _bind(rehearsal)
+
+
+def test_rehearsal_rejects_missing_admitted_profile(rehearsal, monkeypatch):
+    from bioetl.composition.bootstrap.cli import metrics
+
+    monkeypatch.setattr(metrics, "load_target_runtime_profile", lambda *a, **k: None)
+    with pytest.raises(ValueError, match="no admitted profile"):
+        _bind(rehearsal)
+
+
+def test_rehearsal_rejects_another_physical_target(rehearsal, monkeypatch):
+    from bioetl.composition.bootstrap.cli import metrics
+
+    paths, _, _, _, settings, _, _ = rehearsal
+    original = metrics.resolve_target_table_paths
+
+    def different_target(active_settings, config):
+        if active_settings is settings:
+            return paths.silver.parent / "other", paths.gold
+        return original(active_settings, config)
+
+    monkeypatch.setattr(
+        metrics,
+        "resolve_target_table_paths",
+        different_target,
+    )
+    with pytest.raises(ValueError, match="different physical target"):
+        _bind(rehearsal)
+
+
+def test_rehearsal_protects_active_destinations_from_overlap(rehearsal):
+    from bioetl.composition.bootstrap.cli import metrics
+
+    _, _, _, active, _, _, _ = rehearsal
+    with pytest.raises(ValueError, match="overlap active canonical"):
+        metrics._protect_active_resources(
+            {"config": active / "entities/chembl/target.yaml"}, active
+        )

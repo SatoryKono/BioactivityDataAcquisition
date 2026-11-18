@@ -11,8 +11,8 @@
     "removed_compatibility_surfaces_with_src_importers": 0,
     "removed_compatibility_surfaces_with_test_importers": 0,
     "removed_compatibility_surfaces_still_present": 0,
-    "twin_pair_count": 1,
-    "twin_pairs_with_private_src_importers": 1,
+    "twin_pair_count": 0,
+    "twin_pairs_with_private_src_importers": 0,
     "twin_pairs_without_public_src_importers": 0,
     "tracked_twin_family_count": 0,
     "config_root_symbol_count": 3,
@@ -1452,26 +1452,7 @@
       "test_importer_count": 0
     }
   ],
-  "twin_pairs": [
-    {
-      "private_path": "src/bioetl/infrastructure/control_plane/_evidence_location_publish.py",
-      "public_path": "src/bioetl/infrastructure/control_plane/evidence_location_publish.py",
-      "private_module": "bioetl.infrastructure.control_plane._evidence_location_publish",
-      "public_module": "bioetl.infrastructure.control_plane.evidence_location_publish",
-      "public_src_importer_count": 2,
-      "public_test_importer_count": 0,
-      "private_src_importer_count": 2,
-      "private_test_importer_count": 2,
-      "public_src_importers": [
-        "src/bioetl/infrastructure/adapters/iuphar/evidence_store.py",
-        "src/bioetl/infrastructure/storage/target_classification_migration.py"
-      ],
-      "private_src_importers": [
-        "src/bioetl/infrastructure/control_plane/evidence_location_publish.py",
-        "src/bioetl/infrastructure/control_plane/file_evidence_location_store.py"
-      ]
-    }
-  ],
+  "twin_pairs": [],
   "tracked_twin_families": [],
   "config_root_facade": {
     "target_module": "bioetl.infrastructure.config",

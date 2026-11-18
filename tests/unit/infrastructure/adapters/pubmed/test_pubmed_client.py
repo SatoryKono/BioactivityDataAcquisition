@@ -533,3 +533,50 @@ def test_xml_parser_enforces_elapsed_time_budget(monkeypatch):
     monkeypatch.setattr(subject.time, "monotonic", lambda: target.start_time + 1)
     with pytest.raises(ValueError, match="XML time limit exceeded"):
         target._raise_if_time_exceeded()
+
+
+@pytest.mark.parametrize("value", ["unknown", "2.5", -0.5, {}, []])
+def test_invalid_esearch_count_is_unknown(value):
+    from bioetl.infrastructure.adapters.pubmed._errors import coerce_esearch_count
+
+    assert coerce_esearch_count(value) is None
+
+
+@pytest.mark.asyncio
+async def test_zero_search_limit_does_not_issue_a_request(adapter, mock_http_client):
+    assert await adapter._get_pmids("cancer", 0) == []
+    mock_http_client.get.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_esearch_page_cap_refuses_a_partial_list(
+    adapter, mock_http_client, monkeypatch
+):
+    from bioetl.infrastructure.adapters.pubmed import _search
+
+    monkeypatch.setattr(_search, "MAX_ESEARCH_PAGES", 1)
+    mock_http_client.get = AsyncMock(return_value=_esearch_page(count=3, ids=["1"]))
+    with pytest.raises(PaginationTruncatedError) as caught:
+        await adapter._get_pmids("cancer", 3)
+    assert caught.value.reason == "max_pages"
+    assert mock_http_client.get.await_count == 1
+
+
+def test_esearch_terminal_guard_refuses_a_short_reported_count(adapter):
+    from bioetl.infrastructure.adapters.pubmed._search_models import (
+        reject_short_esearch_result,
+    )
+
+    with pytest.raises(PaginationTruncatedError) as caught:
+        reject_short_esearch_result(
+            adapter, ["1"], max_count=3, reported_count=3, page_count=1, retstart=1
+        )
+    assert caught.value.reason == "short_idlist"
+
+
+@pytest.mark.asyncio
+async def test_title_search_propagates_truncation(adapter, mock_http_client):
+    mock_http_client.get = AsyncMock(return_value=_esearch_page(count=5, ids=["1"]))
+    with pytest.raises(PaginationTruncatedError) as caught:
+        await adapter._search_by_title("cancer", limit=5)
+    assert caught.value.reason == "repeated_page"

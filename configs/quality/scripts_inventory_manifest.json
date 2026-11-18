@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-18T08:26:02.036904+00:00",
+  "generated_at": "2026-11-18T08:52:07.601716+00:00",
   "summary": {
     "total_scripts": 758,
     "status_counts": {
@@ -3028,7 +3028,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 2010,
+          "line": 2020,
           "source_group": "ci",
           "text": "bash scripts/ai/junie/check_junie_mirror.sh --check >> \"$log\" 2>&1"
         },
@@ -3234,7 +3234,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1968,
+          "line": 1969,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/check.sh\": ("
         }
@@ -4078,7 +4078,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1959,
+          "line": 1960,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.ps1\": (MCP_WRAPPER_CONTRACTS_TEST,),"
         },
@@ -4133,7 +4133,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1958,
+          "line": 1959,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.sh\": (MCP_WRAPPER_CONTRACTS_TEST,),"
         },
@@ -4178,7 +4178,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1957,
+          "line": 1958,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\": (NPM_RUNTIME_TEST,),"
         },
@@ -4233,7 +4233,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1956,
+          "line": 1957,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\": (NPM_RUNTIME_TEST,),"
         },
@@ -5081,7 +5081,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1964,
+          "line": 1965,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/exec_windows_ps1_wrapper.sh\": ("
         },
@@ -5500,7 +5500,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1960,
+          "line": 1961,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/run_owned_stdio.ps1\": ("
         },
@@ -9380,7 +9380,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 741,
+          "line": 755,
           "source_group": "tests",
           "text": "from scripts.docs.checks import verify"
         },
@@ -11113,7 +11113,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1900,
+          "line": 1910,
           "source_group": "ci",
           "text": "python -m scripts.engineering.ci.junit_duration_summary"
         },
@@ -11266,7 +11266,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1946,
+          "line": 1947,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/nightly_shadow_archive.py\": NIGHTLY_SHADOW_TESTS,"
         },
@@ -11437,7 +11437,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1824,
+          "line": 1825,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/presubmit_gate.py\": ("
         },
@@ -11480,7 +11480,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1987,
+          "line": 1988,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/publish_docker_image.sh\": ("
         },
@@ -11591,7 +11591,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1525,
+          "line": 1535,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci.pytest_event_journal \\"
         },
@@ -11683,7 +11683,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 2102,
+          "line": 2112,
           "source_group": "ci",
           "text": "\"python -m scripts.engineering.ci.quality_integral_gate\" \\"
         },
@@ -11909,7 +11909,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1499,
+          "line": 1509,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -12824,7 +12824,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 2088,
+          "line": 2098,
           "source_group": "ci",
           "text": "\"bash scripts/engineering/dev/pretest_guardrails.sh\" \\"
         },
@@ -15778,13 +15778,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 408,
+          "line": 422,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.debt_governance_gate_evaluators import ("
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 429,
+          "line": 443,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import debt_governance_gate_evaluators as evaluators"
         },
@@ -15821,7 +15821,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 428,
+          "line": 442,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import debt_governance_gate_report as cli"
         },
@@ -16624,7 +16624,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1412,
+          "line": 1422,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa.generate_hotspot_degradation_report \\"
         },
@@ -25938,7 +25938,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 2313,
+          "line": 2314,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },

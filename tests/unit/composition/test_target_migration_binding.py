@@ -94,3 +94,30 @@ def test_deployment_rejects_an_inactive_assay_copy(deployment):
             settings=settings,
             configs_root=paths.workspace / "configs",
         )
+
+
+@pytest.mark.parametrize("document", [[], {"pipeline": []}, {"other": {}}])
+def test_entity_document_rejects_incomplete_yaml(tmp_path, document):
+    config = tmp_path / "invalid.yaml"
+    config.write_text(yaml.safe_dump(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="complete entity YAML"):
+        migration._entity_document(config)
+
+
+def test_deployment_requires_enrich_before_profile_admission(deployment):
+    paths, settings, document = deployment
+    document["pipeline"]["target_classification"] = {"mode": "off"}
+    paths.candidate_config.write_text(yaml.safe_dump(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="must select enrich"):
+        migration.bind_target_deployment(
+            paths, settings=settings, configs_root=paths.workspace / "configs"
+        )
+
+
+def test_deployment_rejects_missing_admitted_profile(deployment, monkeypatch):
+    paths, settings, _ = deployment
+    monkeypatch.setattr(migration, "load_target_runtime_profile", lambda *a, **k: None)
+    with pytest.raises(ValueError, match="no admitted profile"):
+        migration.bind_target_deployment(
+            paths, settings=settings, configs_root=paths.workspace / "configs"
+        )

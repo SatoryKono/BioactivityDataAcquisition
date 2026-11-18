@@ -7,7 +7,7 @@
 - removed_compatibility_surfaces_with_src_importers: 0
 - removed_compatibility_surfaces_with_test_importers: 0
 - removed_compatibility_surfaces_still_present: 0
-- twin_pair_count: 1
+- twin_pair_count: 0
 - tracked_twin_family_count: 0
 - config_root_symbol_count: 3
 - config_root_src_importer_count: 0
@@ -110,7 +110,6 @@ Migration prerequisites for `src/bioetl/interfaces/cli/commands/maintenance.py`:
 
 | Public module | Public src | Private src |
 | --- | ---: | ---: |
-| `bioetl.infrastructure.control_plane.evidence_location_publish` | 2 | 2 |
 
 ## Tracked Twin Family Ratchet
 

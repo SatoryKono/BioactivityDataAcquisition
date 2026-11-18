@@ -1266,6 +1266,16 @@ jobs:
           # Integration verifies the immutable host-image source commit, not just HEAD.
           fetch-depth: ${{ matrix.test-group.name == 'integration' && '0' || '1' }}
 
+      - name: Fetch immutable integration source
+        if: matrix.test-group.name == 'integration'
+        shell: bash
+        run: |
+          set -euo pipefail
+          integration_source=$(python -c 'import json, re; from pathlib import Path; manifest = json.loads(Path("grafana/tooling/router-v7-bridge/host-image.json").read_text()); source = manifest["ci_source_revalidations"][-1]["source_commit"]; assert re.fullmatch(r"[0-9a-f]{40}", source); print(source)')
+          if ! git cat-file -e "${integration_source}^{tree}" 2>/dev/null; then
+            git fetch --no-tags --depth=1 origin "$integration_source"
+          fi
+
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
         with:

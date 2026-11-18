@@ -294,6 +294,37 @@ def test_schema_alignment_rejects_unknown_projected_columns() -> None:
         )
 
 
+def test_empty_projection_preserves_row_count() -> None:
+    import pyarrow as pa
+
+    empty = table_ops._empty_row_table(3)
+    aligned = table_ops._align_table_to_schema(empty, pa.schema([]), [])
+    assert aligned is empty
+    assert aligned.num_rows == 3
+    assert aligned.column_names == []
+
+
+def test_partition_restoration_keeps_an_existing_typed_column(tmp_path) -> None:
+    import pyarrow as pa
+
+    original = pa.table({"region": ["west"]})
+    info = table_ops._PartitionInfo(
+        tmp_path.resolve(),
+        ["region"],
+        original.schema,
+        {"active.parquet": {"region": "west"}},
+    )
+    result = table_ops._append_partition_columns(
+        original,
+        path=str(tmp_path / "active.parquet"),
+        partition_info=info,
+        columns=None,
+        schema=original.schema,
+    )
+    assert result is original
+    assert result.to_pylist() == [{"region": "west"}]
+
+
 def test_resolve_parquet_file_uri_strips_windows_file_uri_prefix() -> None:
     assert (
         table_ops.resolve_parquet_file_uri("file:///C:/tmp/part.parquet")
