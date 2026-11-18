@@ -33,6 +33,7 @@ PROFILE_INDEX = "profiles.json"
 ACTIVE_INDEX = "active.json"
 PROFILE_DESCRIPTOR = "profile.json"
 RECOVERY_RECORD = "recovery-v2.json"
+RECONCILIATION_SOURCE = "memory_reconciliation.py"
 
 
 def canonical(value):
@@ -357,7 +358,7 @@ def build(owner, entry, value):
     staging.mkdir()
     _copy_runtime_dependencies(owner, hashes, staging)
     service = staging / "tools/shared-mcp"
-    source = Path(__file__).with_name("memory_reconciliation.py")
+    source = Path(__file__).with_name(RECONCILIATION_SOURCE)
     shutil.copyfile(source, service / "project-memory-reconciliation.py")
     for file in service.glob("*"):
         if file.suffix not in {".py", ".mjs"}:
@@ -382,12 +383,34 @@ def build(owner, entry, value):
     identity = hashlib.sha256(raw).hexdigest()
     target = VERSIONS / identity
     (staging / BUNDLE_MANIFEST).write_bytes(raw)
-    if target.exists():
-        verify(target)
-        # Keep the duplicate build as evidence instead of recursive cleanup.
-        return target
-    staging.rename(target)
+    return _publish_bundle(staging, target)
+
+
+def _discard_duplicate_build(staging):
+    if staging.parent != VERSIONS or not staging.name.startswith("building-"):
+        raise ValueError("Duplicate cleanup escaped the owned versions directory")
+    physical(staging)
+    for current, directories, files in os.walk(staging, followlinks=False):
+        for name in [*directories, *files]:
+            path = Path(current) / name
+            if (
+                getattr(path.lstat(), "st_file_attributes", 0) & 0x400
+                or path.is_symlink()
+            ):
+                raise ValueError("Duplicate cleanup contains a reparse point")
+    shutil.rmtree(staging)
+
+
+def _publish_bundle(staging, target):
+    if not target.exists():
+        try:
+            staging.rename(target)
+        except OSError:
+            if not target.is_dir():
+                raise
     verify(target)
+    if staging.exists():
+        _discard_duplicate_build(staging)
     return target
 
 
@@ -453,7 +476,7 @@ def _select_disabled_migration_bundle(owner, identity, from_version):
     return _retained_disabled_bundle(binding, prior or {}, from_version)
 
 
-def _predecessor_matches(prior, binding, entry, current):
+def _predecessor_consistent(binding, prior, entry, current):
     if prior.get("phase") == "COMMITTED":
         return prior.get("after_entry") == entry and prior.get("version") == current
     if prior.get("phase") == "ROLLED_BACK":
@@ -462,6 +485,34 @@ def _predecessor_matches(prior, binding, entry, current):
             "runtime_binding", {"schema": 2, "state": "legacy"}
         )
     return False
+
+
+def _upgradeable_interrupted_launch(owner, directory, recovery_state, graph):
+    current = load(
+        "migration_reconciliation", Path(__file__).with_name(RECONCILIATION_SOURCE)
+    )
+    last = recovery_state["history"][-1]
+    if (
+        graph is None
+        or recovery_state.get("active_block")
+        or last.get("snapshot", {}).get("graph") != graph
+    ):
+        return False
+    observed = current.records(owner, {"state": str(directory)})
+    return (
+        current.process_verdict(owner, observed) is None
+        and current._interrupted_launch_block(observed, recovery_state) is not None
+    )
+
+
+def _check_pending_recovery(owner, directory, graph=None):
+    recovery_state = owner.state.read(directory / RECOVERY_RECORD) or {}
+    history = recovery_state.get("history", [])
+    if history and history[-1].get("phase") == "LAUNCHING":
+        if _upgradeable_interrupted_launch(owner, directory, recovery_state, graph):
+            return
+    if history and history[-1].get("phase") in {"RESOLVED", "LAUNCHING"}:
+        raise ValueError("Recovery grant awaits its reviewed launch; migration refused")
 
 
 def previous_migration(
@@ -487,7 +538,7 @@ def previous_migration(
     current = "legacy" if binding["state"] == "legacy" else binding["version"]
     if expected_version != current:
         raise ValueError("Existing runtime requires its explicit --from-version")
-    consistent = _predecessor_matches(prior, binding, entry, current)
+    consistent = _predecessor_consistent(binding, prior, entry, current)
     identity = prior.get("id", "")
     if (
         not consistent
@@ -496,34 +547,6 @@ def previous_migration(
     ):
         raise ValueError("Predecessor migration does not match current profile")
     return binding, prior
-
-
-def _upgradeable_interrupted_launch(owner, directory, recovery_state, graph):
-    # Preserve the unconsumed incident for the successor's explicit reconciliation.
-    from scripts.ai.mcp.memory_reconciliation import _interrupted_launch_block, records
-
-    last = recovery_state["history"][-1]
-    if (
-        recovery_state.get("active_block")
-        or last.get("snapshot", {}).get("graph") != graph
-    ):
-        return False
-    return (
-        _interrupted_launch_block(
-            records(owner, {"state": str(directory)}), recovery_state
-        )
-        is not None
-    )
-
-
-def _require_consumed_recovery(owner, directory, graph):
-    recovery_state = owner.state.read(directory / RECOVERY_RECORD) or {}
-    history = recovery_state.get("history", [])
-    if history and history[-1].get("phase") == "LAUNCHING":
-        if _upgradeable_interrupted_launch(owner, directory, recovery_state, graph):
-            return
-    if history and history[-1].get("phase") in {"RESOLVED", "LAUNCHING"}:
-        raise ValueError("Recovery grant awaits its reviewed launch; migration refused")
 
 
 def migrate(
@@ -542,7 +565,7 @@ def migrate(
                 Path(value["profile"]["graph"]).with_name(".memory.service-owner.lock")
             ):
                 stamp = dormant(owner, entry, value)
-                _require_consumed_recovery(owner, directory, stamp)
+                _check_pending_recovery(owner, directory, stamp)
                 binding, prior = previous_migration(
                     owner,
                     directory,
@@ -639,15 +662,16 @@ def _runtime_hashes_match(hashes):
 
 
 def _predecessor_runtime_matches(before):
-    if not _runtime_hashes_match(before["active"]["hashes"]):
-        return False
-    binding = before.get("runtime_binding", {})
+    binding = before.get("runtime_binding", {"schema": 2, "state": "legacy"})
     if binding.get("state") == "active":
         try:
-            _selected_binding(binding, None)
-        except (OSError, ValueError):
+            bundle = Path(binding["bundle"])
+            if bundle.parent != VERSIONS or bundle.name != binding["version"]:
+                return False
+            verify(bundle)
+        except (OSError, ValueError, KeyError):
             return False
-    return True
+    return _runtime_hashes_match(before["active"]["hashes"])
 
 
 def rollback(owner, identity):
@@ -832,11 +856,13 @@ def audit_profile(owner, identity):
         else None
     )
     branch_matches = bool(scope["directory"] or context["branch"] == scope["branch"])
-    process_states = {
-        role: owner.state.identity(status, role)
-        for role in ("owner", "gateway", "backend")
-    }
-    process_states["launch_owner"] = owner.state.identity(launch, "owner")
+    reconciler = load(
+        "audit_reconciliation", Path(__file__).with_name(RECONCILIATION_SOURCE)
+    )
+    process_states = reconciler.process_identities(
+        owner, {"status": status, "owner-launch": launch}
+    )
+    process_states["launch_owner"] = process_states.pop("launch")
     reasons = _audit_block_reasons(
         process_states, work, branch_matches, account_matches
     )
@@ -903,6 +929,19 @@ def _reconcile_profile(parser, args, selected, fixture):
     if args.action == "reconcile-plan":
         # Full plan is private operator output, never a public acceptance report.
         return selected.reconciler.plan(selected.runtime_owner(), entry, value)
+    if args.action == "reconcile-incident":
+        current = load(
+            "incident_reconciliation",
+            Path(__file__).with_name(RECONCILIATION_SOURCE),
+        )
+        incident = current.identify_interrupted_launch(
+            selected.runtime_owner(), entry, value
+        )
+        return {
+            "incident": incident["id"],
+            "state": "BLOCKED",
+            "next": "reconcile-plan",
+        }
     plan_path = args.plan
     if plan_path is None:
         return parser.error("reconcile-apply requires --plan")
@@ -938,6 +977,7 @@ def main(argv=None):
             "verify",
             "migrate",
             "rollback",
+            "reconcile-incident",
             "reconcile-plan",
             "reconcile-apply",
             "audit-profile",

@@ -1,5 +1,7 @@
 """Crash, stale-plan and single-use recovery controls on disposable owner state."""
 
+from __future__ import annotations
+
 import json
 import os
 import threading
@@ -300,6 +302,13 @@ def test_generation_waits_for_transition_lock_before_consuming_a_grant(
     owner, entry, value, _ = fixture
     proposed = recovery.plan(owner, entry, value)
     recovery.apply(owner, entry, value, proposed)
+    clock = [0.0]
+    monkeypatch.setattr(recovery.time, "monotonic", lambda: clock[0])
+    monkeypatch.setattr(
+        recovery.time,
+        "sleep",
+        lambda duration: clock.__setitem__(0, clock[0] + duration),
+    )
     original_lock = owner.core.LifetimeLock
     attempts = []
 
@@ -416,6 +425,112 @@ def test_missing_successor_receipt_cannot_invent_an_incident(fixture):
     )
     proposed = recovery.plan(owner, entry, value)
     assert not proposed["eligible"] and proposed["block_id"] is None
+
+
+@pytest.fixture
+def interrupted_successor(fixture):
+    owner, entry, value, stamp = fixture
+    directory = Path(entry["state"])
+    owner.state.write(directory / "blocked.json", None)
+    recovery.record_block(owner, entry, "initial incident")
+    recovery.apply(owner, entry, value, recovery.plan(owner, entry, value))
+    generation = recovery.launch_generation(owner, entry, value)
+    owner.state.write(
+        directory / "status.json",
+        {"generation": generation, "owner_pid": 123456, "owner_birth": 1},
+    )
+    owner.state.write(
+        directory / "work.json",
+        {
+            "schema": 2,
+            "profile": entry["id"],
+            "generation": generation,
+            "phase": "starting",
+            "mutating": False,
+            "accepted_count": 0,
+            "request_id": None,
+            "graph": stamp,
+        },
+    )
+    return owner, entry, value, stamp
+
+
+def test_launching_does_not_reuse_historical_block_for_an_idle_successor(fixture):
+    owner, entry, value, _ = fixture
+    directory = Path(entry["state"])
+    recovery.apply(owner, entry, value, recovery.plan(owner, entry, value))
+    generation = recovery.launch_generation(owner, entry, value)
+    owner.state.write(
+        directory / "status.json",
+        {"generation": generation, "owner_pid": 123456, "owner_birth": 1},
+    )
+    work = owner.state.read(directory / "work.json")
+    work.update(
+        generation=generation, phase="idle", accepted_count=1, request_id="completed"
+    )
+    owner.state.write(directory / "work.json", work)
+    proposed = recovery.plan(owner, entry, value)
+    assert proposed["block_id"] is None and not proposed["eligible"]
+    assert (
+        recovery.decision(owner, entry, value) == "BLOCK_RECONCILED_LAUNCH_INTERRUPTED"
+    )
+
+
+def test_supported_incident_command_unblocks_the_old_reconciler_path(
+    interrupted_successor, monkeypatch
+):
+    from scripts.ai.mcp import memory_versions
+
+    owner, entry, value, stamp = interrupted_successor
+    directory = Path(entry["state"])
+    current_block_identity = recovery.block_identity
+
+    def old_identity(observed, coord):
+        return coord["active_block"]["id"] if coord.get("active_block") else None
+
+    monkeypatch.setattr(recovery, "block_identity", old_identity)
+    assert recovery.plan(owner, entry, value)["reason"] == "BLOCK_NOT_BLOCKED"
+    monkeypatch.setattr(recovery, "block_identity", current_block_identity)
+    incident = recovery.identify_interrupted_launch(owner, entry, value)
+    assert incident["id"].startswith("interrupted-")
+    monkeypatch.setattr(recovery, "block_identity", old_identity)
+    proposed = recovery.plan(owner, entry, value)
+    assert proposed["eligible"]
+    recovery.apply(owner, entry, value, proposed)
+    generation = recovery.launch_generation(owner, entry, value)
+    owner.state.write(
+        directory / "status.json",
+        {"generation": generation, "owner_pid": os.getpid(), "owner_birth": 42},
+    )
+    owner.state.write(
+        directory / "work.json",
+        {
+            "schema": 2,
+            "profile": entry["id"],
+            "generation": generation,
+            "phase": "idle",
+            "mutating": False,
+            "accepted_count": 0,
+            "graph": stamp,
+        },
+    )
+    recovery.observe(owner, entry, value, generation, idle=True)
+    memory_versions._check_pending_recovery(owner, directory)
+    assert recovery.coordination(owner, entry)["history"][-1]["phase"] == "IDLE"
+
+
+def test_identifying_an_incident_does_not_mutate_unproven_startup(
+    interrupted_successor,
+):
+    owner, entry, value, _ = interrupted_successor
+    directory = Path(entry["state"])
+    work = owner.state.read(directory / "work.json")
+    work["accepted_count"] = 1
+    owner.state.write(directory / "work.json", work)
+    before = (directory / recovery.COORDINATION).read_bytes()
+    with pytest.raises(ValueError, match="No proven"):
+        recovery.identify_interrupted_launch(owner, entry, value)
+    assert (directory / recovery.COORDINATION).read_bytes() == before
 
 
 @pytest.mark.parametrize("receipt", ["idle", "missing", "wrong-generation"])

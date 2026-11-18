@@ -19,16 +19,21 @@ import tomllib
 from pathlib import Path
 
 REF_URL = "https://api.ref.tools/mcp"
-SELECTOR_VERSIONS = Path("D:/pc-agent/tools/codex-session-versions")
-SELECTOR_PYTHON = Path.home() / "AppData/Local/Programs/Python/Python313/python.exe"
+BASE_PYTHON = Path("C:/Users/Fedor/AppData/Local/Programs/Python/Python313/python.exe")
+SESSION_CLIENT = "session_client.py"
+MARKDOWNIFY_CLIENT = "safe_markdownify.py"
+MARKDOWNIFY_VERSIONS = Path("D:/pc-agent/tools/markdownify-owner-versions")
+SESSION_VERSIONS = Path("D:/pc-agent/tools/codex-session-versions")
 
 
 def physical(path):
-    if not path.is_absolute() or path.resolve(strict=True) != path:
+    if not path.is_absolute() or ".." in path.parts:
         raise PermissionError("A physical absolute native path is required")
-    for part in (path, *path.parents):
+    for part in reversed((path, *path.parents)):
         if part.is_symlink() or getattr(part, "is_junction", lambda: False)():
             raise PermissionError("Native session path traverses a reparse point")
+    if path.resolve(strict=True) != path:
+        raise PermissionError("A physical absolute native path is required")
     return path
 
 
@@ -81,7 +86,7 @@ def toml_value(value):
     if isinstance(value, bool):
         return str(value).lower()
     if isinstance(value, (int, float)):
-        return str(value)
+        return json.dumps(value, allow_nan=False)
     if isinstance(value, list):
         return "[" + ",".join(toml_value(item) for item in value) + "]"
     if isinstance(value, dict):
@@ -93,6 +98,33 @@ def toml_value(value):
             + "}"
         )
     raise ValueError("Unsupported native session setting")
+
+
+def _validate_markdownify_client(entry):
+    args = entry["args"]
+    if (
+        Path(entry["command"]) != BASE_PYTHON
+        or len(args) != 5
+        or args[:3] != ["-I", "-S", "-B"]
+        or args[-1] != "client"
+    ):
+        raise PermissionError("Markdownify requires its qualified isolated client")
+    script = Path(args[3])
+    if (
+        not script.is_absolute()
+        or script.name != MARKDOWNIFY_CLIENT
+        or script.parent.parent != MARKDOWNIFY_VERSIONS
+        or re.fullmatch("[0-9a-f]{64}", script.parent.name) is None
+    ):
+        raise PermissionError("Markdownify requires its qualified absolute client")
+    version = next(
+        (path for path in MARKDOWNIFY_VERSIONS.iterdir() if path == script.parent), None
+    )
+    if version is None:
+        raise PermissionError("Qualified Markdownify version is not installed")
+    _check_client_manifest(
+        version / MARKDOWNIFY_CLIENT, "owner.json", MARKDOWNIFY_CLIENT
+    )
 
 
 def _markdownify_entry(source, root, servers):
@@ -120,43 +152,66 @@ def _markdownify_entry(source, root, servers):
         raise PermissionError(
             "Markdownify session binding must be credential-free stdio"
         )
+    _validate_markdownify_client(entry)
     if value["server"] in servers and servers[value["server"]] != entry:
         raise PermissionError("Existing unrelated Markdownify entry needs review")
     return value["server"], entry
 
 
-def _selector_paths(entry, name):
+def _check_client_manifest(script, manifest_name, required_source):
+    directory = physical(script.parent)
+    try:
+        raw = (directory / manifest_name).read_bytes()
+    except FileNotFoundError:
+        raise PermissionError("Qualified selector manifest is absent") from None
+    manifest = json.loads(raw)
+    if hashlib.sha256(raw).hexdigest() != directory.name or manifest.get("schema") != 1:
+        raise PermissionError("Qualified selector manifest changed")
+    if required_source not in manifest.get("files", {}):
+        raise PermissionError("Qualified selector source is unregistered")
+    for relative, expected in manifest["files"].items():
+        path = Path(relative)
+        if path.is_absolute() or ".." in path.parts:
+            raise PermissionError("Qualified selector source path is invalid")
+        if (
+            hashlib.sha256(physical(directory / path).read_bytes()).hexdigest()
+            != expected
+        ):
+            raise PermissionError("Qualified selector source changed")
+    return manifest
+
+
+def _check_selector_manifest(script):
+    manifest = _check_client_manifest(script, "dispatcher.json", SESSION_CLIENT)
+    pins = manifest.get("host_pins", {})
+    if str(BASE_PYTHON) not in pins:
+        raise PermissionError("Qualified selector interpreter is unregistered")
+    for path, expected in pins.items():
+        if hashlib.sha256(physical(Path(path)).read_bytes()).hexdigest() != expected:
+            raise PermissionError("Qualified selector host dependency changed")
+
+
+def _validate_selector(name, entry):
     args = entry.get("args", [])
     if len(args) != 5 or args[:3] != ["-I", "-S", "-B"] or args[4] != name:
         raise PermissionError(
             "Native session requires its reviewed inherited-cwd selector"
         )
-    command = Path(entry["command"])
-    selector = Path(args[3])
+    script = Path(args[3])
     if (
-        command != SELECTOR_PYTHON
-        or not command.is_absolute()
-        or not selector.is_absolute()
-        or selector.name != "session_client.py"
-        or selector.parent.parent != SELECTOR_VERSIONS
+        Path(entry.get("command", "")) != BASE_PYTHON
+        or not script.is_absolute()
+        or script.name != SESSION_CLIENT
+        or script.parent.parent != SESSION_VERSIONS
+        or re.fullmatch("[0-9a-f]{64}", script.parent.name) is None
     ):
-        raise PermissionError(
-            "Native session requires its qualified installed selector"
-        )
-    return command, selector
-
-
-def _validate_selector(entry, name):
-    from scripts.ai.mcp.session_client import _verify_dispatcher
-
-    command, selector = _selector_paths(entry, name)
-    physical(command)
-    physical(selector)
-    manifest = _verify_dispatcher(selector.parent)
-    if "session_client.py" not in manifest["files"] or not any(
-        Path(path) == command for path in manifest["host_pins"]
-    ):
-        raise PermissionError("Installed selector must pin its script and interpreter")
+        raise PermissionError("Native session requires its qualified absolute selector")
+    version = next(
+        (path for path in SESSION_VERSIONS.iterdir() if path == script.parent), None
+    )
+    if version is None:
+        raise PermissionError("Qualified selector version is not installed")
+    _check_selector_manifest(version / SESSION_CLIENT)
 
 
 def session_overrides(
@@ -184,7 +239,7 @@ def session_overrides(
     if manifest.read_bytes() != raw:
         raise PermissionError("Session transport binding changed")
     for name, entry in selected.items():
-        _validate_selector(entry, name)
+        _validate_selector(name, entry)
     if acceptance:
         entry = dict(selected["memory"])
         entry["args"] = list(entry["args"])
@@ -218,7 +273,7 @@ def workspace():
     return root, roots.CANONICAL
 
 
-def main(argv=None):
+def _run(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--executable", type=Path, required=True)
     parser.add_argument("--sha256", required=True)
@@ -273,11 +328,17 @@ def main(argv=None):
     )
 
 
-if __name__ == "__main__":
+def main(argv=None):
     try:
-        raise SystemExit(main())
+        result = _run(argv)
+        return 0 if result is None else result
     except Exception:
         sys.stderr.write(
-            "Native session launch refused; no credential printed or fallback selected.\n"
+            "Native session launch refused; no credential printed or fallback selected."
+            + "\n"
         )
-        raise SystemExit(64) from None
+        return 64
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

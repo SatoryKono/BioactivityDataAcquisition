@@ -33,6 +33,7 @@ SITE = "D:/github/BioactivityDataAcquisition/.venv-win/Lib/site-packages"
 TRANSITION_LOCK = "transition.lock"
 STATUS_RECORD = "status.json"
 STOP_REQUEST = "stop.request"
+RETIRED_GENERATION = "retired_generation"
 HEALTH_PATH = "/health"
 MAX_RESPONSE_BYTES = 2 * 1024 * 1024
 SESSION_LIMIT = 64
@@ -238,6 +239,15 @@ def _response_value(response, method, path, session):
 
 
 def request(spec, method, path, body=None, session=None):
+    payload = (
+        None
+        if body is None
+        else json.dumps(body, ensure_ascii=False, separators=(",", ":")).encode(
+            "utf-8", errors="backslashreplace"
+        )
+    )
+    if payload is not None and len(payload) > 1024 * 1024:
+        raise ValueError("Oversized Markdownify request")
     record = core.read_json(core.STATE / STATUS_RECORD)
     if core.process_birth(record["owner_pid"]) != record["owner_birth"]:
         raise PermissionError("Markdownify owner identity unavailable")
@@ -264,9 +274,7 @@ def request(spec, method, path, body=None, session=None):
     if session:
         headers["Mcp-Session-Id"] = session
     try:
-        connection.request(
-            method, path, json.dumps(body) if body is not None else None, headers
-        )
+        connection.request(method, path, payload, headers)
         return _response_value(connection.getresponse(), method, path, session)
     finally:
         connection.close()
@@ -332,6 +340,8 @@ def ensure(root):
     for _ in range(160):
         record = _optional_status_record()
         pid, birth = record.get("owner_pid"), record.get("owner_birth")
+        if record and not pid and set(record) != {RETIRED_GENERATION}:
+            raise PermissionError("Markdownify owner identity is unknown")
         if pid and core.process_birth(pid) == birth:
             if _owner_ready(spec, record):
                 return spec
@@ -362,7 +372,6 @@ def _convert_bytes(spec, extension, raw):
     job = core.STATE / ("job-" + uuid.uuid4().hex)
     job.mkdir(mode=0o700)
     snapshot = job / ("input" + extension)
-    snapshot.write_bytes(raw)
     output_path = job / "output.md"
     env = {
         key: value
@@ -381,9 +390,11 @@ def _convert_bytes(spec, extension, raw):
         }
     }
     env["PYTHONUTF8"] = "1"
-    owned = core.Job()
+    owned = None
     child = None
     try:
+        snapshot.write_bytes(raw)
+        owned = core.Job()
         with output_path.open("xb") as output_stream:
             child = subprocess.Popen(
                 [
@@ -409,10 +420,13 @@ def _convert_bytes(spec, extension, raw):
             raise ValueError("Conversion failed or exceeded output bound")
         return output.decode("utf-8")
     finally:
-        owned.close()
-        if child and child.poll() is None:
+        if owned is not None:
+            owned.close()
+        if child is not None:
+            if child.poll() is None:
+                child.terminate()  # Only the exact child handle created above.
             child.wait(timeout=10)
-        snapshot.unlink()
+        snapshot.unlink(missing_ok=True)
         output_path.unlink(missing_ok=True)
         job.rmdir()
 
@@ -539,22 +553,22 @@ class _BoundedHTTPServer(ThreadingHTTPServer):
             raise TimeoutError("HTTP read deadline expired before dispatch")
 
     def process_request_thread(self, request_socket, client_address):
-        timer = threading.Timer(
-            HTTP_READ_SECONDS, self._expire_reader, (request_socket,)
-        )
-        timer.daemon = True
-        handling = False
+        delegated = False
         try:
+            timer = threading.Timer(
+                HTTP_READ_SECONDS, self._expire_reader, (request_socket,)
+            )
+            timer.daemon = True
             with self._deadline_lock:
                 self._deadlines[request_socket] = timer
-                timer.start()
-            handling = True
+            timer.start()
+            delegated = True
             super().process_request_thread(request_socket, client_address)
         finally:
             self.finish_reading(request_socket)
-            self._slots.release()
-            if not handling:
+            if not delegated:
                 self.shutdown_request(request_socket)
+            self._slots.release()
 
     def handle_error(self, _request_socket, _client_address):
         # Authentication failures, disconnects and read deadlines expose no paths.
@@ -720,14 +734,14 @@ class _MarkdownifyHandler(BaseHTTPRequestHandler):
                 respond(result)
             return result
         try:
-            result = self._convert_tool(request_value)
+            result = self._conversion_result(request_value)
             if respond is not None:
                 respond(result)
             return result
         finally:
             self._gate.release()
 
-    def _convert_tool(self, request_value):
+    def _conversion_result(self, request_value):
         try:
             if self._draining.is_set():
                 raise PermissionError("Markdownify is draining")
@@ -893,21 +907,37 @@ def client(root):
                 pass  # An expired session already owns no server resources.
 
 
-def _clear_completed_stop(marker):
-    record = core.read_json(core.STATE / STATUS_RECORD)
-    pid = record["owner_pid"]
-    birth = core.process_birth(pid)
-    alive = psutil.pid_exists(pid)
-    if (alive and (birth is None or birth == record["owner_birth"])) or core.read_json(
-        marker
-    ).get("generation") != record["generation"]:
-        raise PermissionError("Markdownify stop has not completed")
-    if alive:
-        # Preserve the stopped owner's receipt; the reused PID is never signalled.
-        (core.STATE / STATUS_RECORD).rename(
-            core.STATE / ("stopped-" + uuid.uuid4().hex + ".json")
+def _retire_stopped_record(record, marker_value):
+    generation = marker_value["generation"]
+    if not isinstance(generation, str) or uuid.UUID(generation).hex != generation:
+        raise PermissionError("Invalid stopped generation")
+    history = core.STATE / "restart-history"
+    scope.physical(history, exists=False)
+    archive = history / (generation + ".json")
+    if set(record) == {RETIRED_GENERATION} and record[RETIRED_GENERATION] == generation:
+        record = core.read_json(archive)["status"]
+    if record.get("generation") != generation:
+        raise PermissionError("Markdownify stopped generation changed")
+    if (
+        type(record.get("owner_pid")) is not int
+        or record["owner_pid"] <= 0
+        or type(record.get("owner_birth")) not in {int, float}
+    ):
+        raise PermissionError("Invalid stopped owner identity")
+    actual = core.process_birth(record["owner_pid"])
+    if actual == record["owner_birth"] or (
+        actual is None and psutil.pid_exists(record["owner_pid"])
+    ):
+        raise PermissionError(
+            "Markdownify stop has not completed or identity is unknown"
         )
-    marker.unlink()
+    history.mkdir(exist_ok=True)
+    evidence = {"status": record, "stop": marker_value}
+    if archive.exists() and core.read_json(archive) != evidence:
+        raise PermissionError("Markdownify restart history changed")
+    if not archive.exists():
+        core.write_json(archive, evidence)
+    core.write_json(core.STATE / STATUS_RECORD, {RETIRED_GENERATION: generation})
 
 
 def _start(root):
@@ -915,7 +945,9 @@ def _start(root):
     with core.LifetimeLock(core.STATE / TRANSITION_LOCK):
         marker = core.STATE / STOP_REQUEST
         if marker.exists():
-            _clear_completed_stop(marker)
+            record = core.read_json(core.STATE / STATUS_RECORD)
+            _retire_stopped_record(record, core.read_json(marker))
+            marker.unlink()
     ensure(root)
     print(json.dumps({"ready": True, "id": value["id"]}))
 
@@ -948,7 +980,7 @@ def _client_root(args):
     return root
 
 
-def main(argv=None):
+def _run(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "mode", choices=("prepare", "serve", "status", "client", "start", "stop")
@@ -975,11 +1007,17 @@ def main(argv=None):
         print(json.dumps(request(value, "GET", HEALTH_PATH)[0]))
 
 
-if __name__ == "__main__":
+def main(argv=None):
     try:
-        main()
+        result = _run(argv)
+        return 0 if result is None else result
     except Exception:
         sys.stderr.write(
-            "Safe Markdownify operation refused; no credential or fallback exposed.\n"
+            "Safe Markdownify operation refused; no credential or fallback exposed."
+            + "\n"
         )
-        raise SystemExit(64) from None
+        return 64
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
