@@ -13,6 +13,12 @@ from bioetl.infrastructure.adapters.common.response_shapes import (
 if TYPE_CHECKING:
     import httpx
 
+__all__ = ["UniProtProteinPageError", "parse_uniprot_protein_response"]
+
+
+class UniProtProteinPageError(RuntimeError):
+    """Protein search page failed and must not be read as cursor exhaustion."""
+
 
 def parse_uniprot_protein_response(
     response: httpx.Response,
@@ -24,12 +30,20 @@ def parse_uniprot_protein_response(
 
     Returns:
         Tuple of (list of protein records, next cursor string or None if last page).
+
+    Raises:
+        UniProtProteinPageError: The page is not a successful object payload.
+            ``None`` remains reserved for a real final cursor.
     """
     if response.status_code != 200:
-        return [], None
+        raise UniProtProteinPageError(
+            f"UniProt protein page status {response.status_code} is not cursor exhaustion"
+        )
     data = response.json()
     if not isinstance(data, dict):
-        return [], None
+        raise UniProtProteinPageError(
+            "UniProt protein page payload is not an object and is not cursor exhaustion"
+        )
     results = [
         record
         for record in extract_response_items(data, "results")
@@ -37,6 +51,3 @@ def parse_uniprot_protein_response(
     ]
     cursor = extract_response_text(data, "nextCursor")
     return results, cursor
-
-
-__all__ = ["parse_uniprot_protein_response"]
