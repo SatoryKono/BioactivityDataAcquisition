@@ -67,6 +67,18 @@ child-only credential delivery without spawning Codex or sending a request.
 The launcher requires a separately qualified native executable and does not
 claim that a currently running ACP/editor client has reloaded its configuration.
 
+For independent RF-004 Ref authentication qualification, add `--ref-only` and
+select `--auth api-key`. This invocation enables Ref and disables every other
+configured MCP server without changing user TOML or reading Memory, AST or
+Markdownify bindings. `--ref-only` cannot be combined with `--acceptance`.
+Use `--check` first to inspect the requested Ref-only server set; it starts no
+client and leaves native search/read `NOT_TESTED`. Then omit `--check` to open
+the ordinary interactive native CLI. Preserve its actual tool-call evidence,
+repeat search/read after a client restart and normal synchronization, and
+record the qualified client/version/workspace. This does not qualify the
+current editor/chat or an SDK probe; RF-007 must repeat Ref controls in its
+full multi-server target session.
+
 The launcher compiles explicit Memory/AST and optional Markdownify bindings into
 supported per-invocation `--config` transport tables. It preserves existing tool
 approval policies. This path leaves the global user TOML unchanged; subsequent

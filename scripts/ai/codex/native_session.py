@@ -95,6 +95,25 @@ def toml_value(value):
     raise ValueError("Unsupported native session setting")
 
 
+def ref_only_overrides(config):
+    """Select Ref without loading unrelated workspace bindings or credentials."""
+    servers = config.get("mcp_servers", {})
+    if not isinstance(servers, dict) or "ref" not in servers:
+        raise PermissionError("Ref-only requires a configured Ref entry")
+    result = []
+    for name, entry in servers.items():
+        if (
+            not isinstance(name, str)
+            or re.fullmatch(r"[A-Za-z0-9_-]+", name) is None
+            or not isinstance(entry, dict)
+        ):
+            raise PermissionError("Ref-only requires safe configured server names")
+        result.extend(
+            ["--config", f"mcp_servers.{name}.enabled={toml_value(name == 'ref')}"]
+        )
+    return result
+
+
 def _markdownify_entry(source, root, servers):
     from scripts.ai.codex.local_mcp_routes import common_directory
 
@@ -224,7 +243,13 @@ def main(argv=None):
     parser.add_argument("--sha256", required=True)
     parser.add_argument("--auth", choices=("api-key", "oauth"), default="api-key")
     parser.add_argument("--check", action="store_true")
-    parser.add_argument(
+    modes = parser.add_mutually_exclusive_group()
+    modes.add_argument(
+        "--ref-only",
+        action="store_true",
+        help="Qualify Ref in an ordinary session with other MCP servers disabled",
+    )
+    modes.add_argument(
         "--acceptance",
         action="store_true",
         help="Enable the separate registered acceptance graph",
@@ -239,7 +264,11 @@ def main(argv=None):
         (Path.home() / ".codex/config.toml").read_text(encoding="utf-8")
     )
     validate_ref(config, args.auth)
-    overrides = session_overrides(config, root, acceptance=args.acceptance)
+    overrides = (
+        ref_only_overrides(config)
+        if args.ref_only
+        else session_overrides(config, root, acceptance=args.acceptance)
+    )
     from dotenv import dotenv_values
 
     values = (
@@ -247,12 +276,16 @@ def main(argv=None):
     )
     environment = ref_environment(os.environ, values, args.auth)
     if args.check:
+        selection = {"ref_only": args.ref_only}
+        if args.ref_only:
+            selection["selected_servers"] = ["ref"]
         print(
             json.dumps(
                 {
                     "workspace": str(root),
                     "executable": str(binary),
                     "auth": args.auth,
+                    **selection,
                     "root_credential_present": bool(
                         environment.get("REF_TOOL_API_KEY")
                     ),
