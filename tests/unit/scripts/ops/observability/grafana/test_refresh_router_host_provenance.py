@@ -38,6 +38,39 @@ promotion = importlib.util.module_from_spec(promotion_spec)
 promotion_spec.loader.exec_module(promotion)
 
 
+def test_promotion_uses_protected_registered_docker_before_image_io(
+    tmp_path, monkeypatch
+):
+    import pytest
+
+    selected = "D:/Programs/Docker/resources/bin/docker.exe"
+    monkeypatch.setattr(promotion, "docker_path", lambda: selected)
+    calls = []
+
+    def stop_at_first_docker_call(argv, **kwargs):
+        calls.append(argv)
+        raise RuntimeError("image I/O boundary reached")
+
+    monkeypatch.setattr(promotion.subprocess, "run", stop_at_first_docker_call)
+    with pytest.raises(RuntimeError, match="image I/O boundary reached"):
+        promotion.live_managed_parity(IMAGE, IMAGE, {}, b"", 11, tmp_path)
+    assert calls and calls[0][0] == selected
+
+
+def test_promotion_rejects_untrusted_docker_before_image_io(tmp_path, monkeypatch):
+    import pytest
+
+    def reject():
+        raise ValueError("Docker signature is invalid")
+
+    monkeypatch.setattr(promotion, "docker_path", reject)
+    calls = []
+    monkeypatch.setattr(promotion.subprocess, "run", lambda *a, **kw: calls.append(a))
+    with pytest.raises(ValueError, match="Docker signature is invalid"):
+        promotion.live_managed_parity(IMAGE, IMAGE, {}, b"", 11, tmp_path)
+    assert calls == []
+
+
 def fixture():
     run = {
         "id": 11,
@@ -163,6 +196,7 @@ def release_case():
         "parent_image": IMAGE,
         "declared_image": IMAGE.replace(DIGEST, "f" * 64),
         "rootfs_sha256": DIGEST,
+        "built_image_config_digest": "sha256:" + "c" * 64,
     }
     return (
         original,
@@ -177,7 +211,244 @@ def release_case():
     )
 
 
+def test_legacy_pair_requires_one_committed_snapshot(tmp_path, monkeypatch):
+    import pytest
+
+    case = list(release_case())
+    first = promotion.build_release_files(*case)
+    managed = json.loads(first[promotion.MANAGED_PATH])
+    del managed["delivery_source"]["candidate_ci"]
+    legacy = {
+        **first,
+        promotion.MANAGED_PATH: (json.dumps(managed, indent=2) + "\n").encode(),
+    }
+    for path in (promotion.HOST_PATH, promotion.MANAGED_PATH):
+        target = tmp_path / path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(legacy[path])
+    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)
+    subprocess.run(["git", "add", "."], cwd=tmp_path, check=True)
+    subprocess.run(
+        [
+            "git",
+            "-c",
+            "user.name=Fixture",
+            "-c",
+            "user.email=fixture@example.test",
+            "commit",
+            "-qm",
+            "Record legacy release pair",
+        ],
+        cwd=tmp_path,
+        check=True,
+    )
+    monkeypatch.setattr(promotion, "ROOT", tmp_path)
+    later = {**case[1], "id": 12}
+    upgraded = promotion.build_release_files(legacy, later, *case[2:])
+    host = json.loads(upgraded[promotion.HOST_PATH])
+    mate = json.loads(upgraded[promotion.MANAGED_PATH])
+    assert mate["delivery_source"]["candidate_ci"] == host["release_promotion"]
+    assert host["release_history"][-1]["managed_manifest"] == managed
+    # Same source/image, different capture: a truncated legacy update must fail.
+    mixed = {**upgraded, promotion.MANAGED_PATH: legacy[promotion.MANAGED_PATH]}
+    with pytest.raises(ValueError, match="Mixed release manifest"):
+        promotion.build_release_files(mixed, {**later, "id": 13}, *case[2:])
+
+
 class ProvenanceControls(unittest.TestCase):
+    def test_check_ignores_only_the_independent_rebuild_config_id(self):
+        case = list(release_case())
+        first = promotion.build_release_files(*case)
+        case[7] = {**case[7], "built_image_config_digest": "sha256:" + "d" * 64}
+        second = promotion.build_release_files(first, *case[1:])
+        self.assertNotEqual(first, second)
+        self.assertTrue(promotion.release_outputs_match(second, first))
+        self.assertEqual(
+            json.loads(second[promotion.MANAGED_PATH])["delivery_source"][
+                "artifact_parity"
+            ]["built_image_config_digest"],
+            "sha256:" + "d" * 64,
+        )
+        for field in ("rootfs_sha256", "declared_image", "scenes_installed"):
+            changed = dict(second)
+            manifest = json.loads(changed[promotion.MANAGED_PATH])
+            manifest["delivery_source"]["artifact_parity"][field] = "tampered"
+            changed[promotion.MANAGED_PATH] = (
+                json.dumps(manifest, indent=2) + "\n"
+            ).encode()
+            self.assertFalse(promotion.release_outputs_match(changed, first))
+        changed = {**second, promotion.RECIPE_PATH: b"different recipe\n"}
+        self.assertFalse(promotion.release_outputs_match(changed, first))
+
+    def test_same_image_requalification_preserves_previous_capture(self):
+        case = list(release_case())
+        first = promotion.build_release_files(*case)
+        previous = json.loads(first[promotion.HOST_PATH])
+        case[1] = {**case[1], "id": 12, "head_sha": "c" * 40}
+        second = promotion.build_release_files(first, *case[1:])
+        current = json.loads(second[promotion.HOST_PATH])
+        self.assertEqual(current["image"], previous["image"])
+        self.assertEqual(current["release_promotion"]["ci_run_id"], 12)
+        archived = current["release_history"][-1]["host_manifest"]
+        self.assertEqual(archived["release_promotion"], previous["release_promotion"])
+        self.assertEqual(current["acceptance"], previous["acceptance"])
+        for path in (*promotion.COMPOSE_PATHS, promotion.RECIPE_PATH):
+            self.assertEqual(second[path], first[path])
+        with self.assertRaisesRegex(ValueError, "Existing promotion conflicts"):
+            promotion.build_release_files(
+                second, case[1], {**case[2], "id": 999}, *case[3:]
+            )
+
+    def test_requalification_checks_archived_capture_identity(self):
+        case = list(release_case())
+        first = promotion.build_release_files(*case)
+        later = {**case[1], "id": 12, "head_sha": "c" * 40}
+        second = promotion.build_release_files(first, later, *case[2:])
+        with self.assertRaisesRegex(ValueError, "Existing promotion conflicts"):
+            promotion.build_release_files(
+                second, case[1], {**case[2], "id": 999}, *case[3:]
+            )
+        # Reusing the identical capture is allowed; changing its attempt is new.
+        restored = promotion.build_release_files(second, *case[1:])
+        self.assertEqual(
+            json.loads(restored[promotion.HOST_PATH])["release_promotion"],
+            json.loads(first[promotion.HOST_PATH])["release_promotion"],
+        )
+        new_attempt = {**case[1], "run_attempt": case[1]["run_attempt"] + 1}
+        third = promotion.build_release_files(second, new_attempt, *case[2:])
+        self.assertEqual(
+            json.loads(third[promotion.HOST_PATH])["release_promotion"][
+                "ci_run_attempt"
+            ],
+            new_attempt["run_attempt"],
+        )
+
+    def test_same_capture_generator_refresh_preserves_history_and_runtime_bindings(
+        self,
+    ):
+        case = release_case()
+        first = promotion.build_release_files(*case)
+        later = {**case[1], "id": 12, "head_sha": "c" * 40}
+        second = promotion.build_release_files(first, later, *case[2:])
+        for original in (first, second):
+            with self.subTest(archived=original is second):
+                before = json.loads(original[promotion.HOST_PATH])
+                refreshed = promotion.build_release_files(
+                    original, *case[1:-1], "e" * 64
+                )
+                host = json.loads(refreshed[promotion.HOST_PATH])
+                managed = json.loads(refreshed[promotion.MANAGED_PATH])
+                self.assertEqual(
+                    host["release_promotion"]["generator_sha256"], "e" * 64
+                )
+                self.assertEqual(host["release_promotion"]["ci_run_id"], case[1]["id"])
+                self.assertEqual(
+                    host["release_promotion"]["ci_run_attempt"], case[1]["run_attempt"]
+                )
+                self.assertEqual(
+                    host["release_history"][:-1], before["release_history"]
+                )
+                prior = copy.deepcopy(before)
+                prior.pop("release_history")
+                self.assertEqual(host["release_history"][-1]["host_manifest"], prior)
+                self.assertEqual(host["acceptance"], before["acceptance"])
+                self.assertEqual(host["image"], before["image"])
+                self.assertEqual(
+                    managed["delivery_source"]["candidate_ci"],
+                    host["release_promotion"],
+                )
+                for path in (*promotion.COMPOSE_PATHS, promotion.RECIPE_PATH):
+                    self.assertEqual(refreshed[path], original[path])
+                self.assertEqual(
+                    promotion.build_release_files(refreshed, *case[1:-1], "e" * 64),
+                    refreshed,
+                )
+                # The delivered generator hash still matters to --check.
+                self.assertFalse(promotion.release_outputs_match(refreshed, original))
+
+    def test_generator_refresh_does_not_mask_other_capture_conflicts(self):
+        case = release_case()
+        first = promotion.build_release_files(*case)
+        later = {**case[1], "id": 12, "head_sha": "c" * 40}
+        second = promotion.build_release_files(first, later, *case[2:])
+        for archived in (False, True):
+            for field, value in (
+                ("source_commit", "d" * 40),
+                ("source_tree", "d" * 40),
+                ("ci_run_url", "https://example.test/foreign"),
+                ("original_artifact_id", 999),
+                ("original_zip_sha256", "d" * 64),
+                ("qualification", "UNQUALIFIED"),
+                ("default_delivery_ci_claimed", True),
+                ("runtime_rollout_claimed", True),
+                ("unexpected_capture_field", "untrusted"),
+            ):
+                with self.subTest(archived=archived, field=field):
+                    files = dict(second if archived else first)
+                    host = json.loads(files[promotion.HOST_PATH])
+                    capture = (
+                        host["release_history"][-1]["host_manifest"][
+                            "release_promotion"
+                        ]
+                        if archived
+                        else host["release_promotion"]
+                    )
+                    capture[field] = value
+                    files[promotion.HOST_PATH] = json.dumps(host).encode()
+                    with self.assertRaisesRegex(
+                        ValueError, "Existing promotion conflicts"
+                    ):
+                        promotion.build_release_files(files, *case[1:-1], "e" * 64)
+
+    def test_generator_refresh_still_rejects_mixed_manifest_pairs(self):
+        case = release_case()
+        first = promotion.build_release_files(*case)
+        refreshed = promotion.build_release_files(first, *case[1:-1], "e" * 64)
+        mixed = {**refreshed, promotion.MANAGED_PATH: first[promotion.MANAGED_PATH]}
+        with self.assertRaisesRegex(ValueError, "Mixed release manifest capture"):
+            promotion.build_release_files(mixed, *case[1:-1], "e" * 64)
+
+    def test_generator_refresh_requires_valid_old_and_new_digests(self):
+        case = release_case()
+        first = promotion.build_release_files(*case)
+        for invalid in (None, "", "e" * 63, "E" * 64, 123):
+            for previous in (False, True):
+                with self.subTest(invalid=invalid, previous=previous):
+                    files = dict(first)
+                    generator = invalid
+                    if previous:
+                        host = json.loads(files[promotion.HOST_PATH])
+                        host["release_promotion"]["generator_sha256"] = invalid
+                        files[promotion.HOST_PATH] = json.dumps(host).encode()
+                        generator = "e" * 64
+                    with self.assertRaisesRegex(
+                        ValueError, "Invalid promotion generator"
+                    ):
+                        promotion.build_release_files(files, *case[1:-1], generator)
+
+    def test_existing_image_requires_its_current_capture(self):
+        case = release_case()
+        first = promotion.build_release_files(*case)
+        host = json.loads(first[promotion.HOST_PATH])
+        del host["release_promotion"]
+        incomplete = {**first, promotion.HOST_PATH: json.dumps(host).encode()}
+        with self.assertRaises(ValueError):
+            promotion.build_release_files(incomplete, *case[1:])
+
+    def test_interrupted_manifest_pair_is_never_archived(self):
+        case = list(release_case())
+        first = promotion.build_release_files(*case)
+        for head in (case[1]["head_sha"], "c" * 40):
+            with self.subTest(head=head):
+                later = {**case[1], "id": 12, "head_sha": head}
+                second = promotion.build_release_files(first, later, *case[2:])
+                mixed = {
+                    **second,
+                    promotion.MANAGED_PATH: first[promotion.MANAGED_PATH],
+                }
+                with self.assertRaisesRegex(ValueError, "Mixed release manifest"):
+                    promotion.build_release_files(mixed, {**later, "id": 13}, *case[2:])
+
     def test_release_promotion_preserves_history_and_all_coupled_pins(self):
         case = release_case()
         outputs = promotion.build_release_files(*case)
@@ -573,6 +844,15 @@ class ProvenanceControls(unittest.TestCase):
             )
             commit = git("rev-parse", "HEAD").decode().strip()
             inputs, tree = module.source_inputs(root, commit, manifest)
+            patch = (
+                root
+                / "grafana/tooling/router-v7-bridge/grafana-alert-instance-link.patch"
+            )
+            self.assertIn(patch.relative_to(root).as_posix(), inputs)
+            patch.write_bytes(b"changed patch outside plugin roots\n")
+            with self.assertRaisesRegex(ValueError, "differs from actual CI"):
+                module.source_inputs(root, commit, manifest)
+            patch.write_bytes(b"support fixture\n")
             self.assertEqual(
                 inputs,
                 {
