@@ -37,7 +37,11 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from bioetl.domain.types import HealthStatus
+from bioetl.infrastructure.adapters.http.pagination import PaginationTruncatedError
 from bioetl.infrastructure.adapters.pubmed import PubMedAdapter
+from bioetl.infrastructure.adapters.pubmed._filter_fetch_support import (
+    resolve_pmids_for_fetch,
+)
 from tests.helpers.adapter_runtime import build_http_adapter_runtime_kwargs
 
 
@@ -311,6 +315,214 @@ async def test_fetch_returns_early_when_resume_offset_reaches_limit(adapter) -> 
     assert records == []
     adapter._get_pmids.assert_not_called()
     assert called is False
+
+
+def _esearch_page(*, count: object, ids: list[str]) -> MagicMock:
+    response = MagicMock()
+    response.json.return_value = {"esearchresult": {"count": count, "idlist": ids}}
+    return response
+
+
+@pytest.mark.asyncio
+async def test_get_pmids_pages_retstart_until_count(adapter, mock_http_client) -> None:
+    """A short first idlist is incomplete while count is still larger."""
+    pages = {
+        0: _esearch_page(count="5", ids=["1", "2"]),
+        2: _esearch_page(count="5", ids=["3", "4", "5"]),
+    }
+
+    async def get(_url: str, params: dict[str, str]) -> MagicMock:
+        retstart = int(params.get("retstart", "0"))
+        return pages[retstart]
+
+    mock_http_client.get = AsyncMock(side_effect=get)
+
+    assert await adapter._get_pmids("cancer", 10) == ["1", "2", "3", "4", "5"]
+    first_params = mock_http_client.get.await_args_list[0].kwargs["params"]
+    second_params = mock_http_client.get.await_args_list[1].kwargs["params"]
+    assert "retstart" not in first_params
+    assert first_params["retmax"] == "10"
+    assert second_params["retstart"] == "2"
+    assert second_params["retmax"] == "8"
+
+
+@pytest.mark.asyncio
+async def test_get_pmids_keeps_filled_limit_below_count(
+    adapter, mock_http_client
+) -> None:
+    """An idlist that fills the requested ceiling is complete even if count is larger."""
+    mock_http_client.get = AsyncMock(
+        return_value=_esearch_page(count=100, ids=["1", "2"])
+    )
+
+    assert await adapter._get_pmids("cancer", 2) == ["1", "2"]
+    assert mock_http_client.get.await_count == 1
+    assert mock_http_client.get.await_args_list[0].kwargs["params"]["retmax"] == "2"
+
+
+@pytest.mark.asyncio
+async def test_get_pmids_raises_when_next_page_is_empty(
+    adapter, mock_http_client
+) -> None:
+    """An empty follow-up page must not turn a short idlist into a full result."""
+    pages = {
+        0: _esearch_page(count=5, ids=["1"]),
+        1: _esearch_page(count=5, ids=[]),
+    }
+
+    async def get(_url: str, params: dict[str, str]) -> MagicMock:
+        return pages[int(params.get("retstart", "0"))]
+
+    mock_http_client.get = AsyncMock(side_effect=get)
+
+    with pytest.raises(PaginationTruncatedError) as caught:
+        await adapter._get_pmids("cancer", 5)
+
+    assert caught.value.reason == "empty_page"
+    assert mock_http_client.get.await_args_list[1].kwargs["params"]["retstart"] == "1"
+
+
+@pytest.mark.asyncio
+async def test_get_pmids_raises_when_page_repeats(adapter, mock_http_client) -> None:
+    """A repeated idlist must not be returned as the whole count."""
+    mock_http_client.get = AsyncMock(return_value=_esearch_page(count=5, ids=["1"]))
+
+    with pytest.raises(PaginationTruncatedError) as caught:
+        await adapter._get_pmids("cancer", 5)
+
+    assert caught.value.reason == "repeated_page"
+    assert mock_http_client.get.await_args_list[1].kwargs["params"]["retstart"] == "1"
+
+
+@pytest.mark.asyncio
+async def test_get_pmids_raises_when_repeated_page_fills_count(
+    adapter, mock_http_client
+) -> None:
+    """A duplicate page must not satisfy count by length alone."""
+    pages = {
+        0: _esearch_page(count=4, ids=["1", "2"]),
+        2: _esearch_page(count=4, ids=["1", "2"]),
+    }
+
+    async def get(_url: str, params: dict[str, str]) -> MagicMock:
+        return pages[int(params.get("retstart", "0"))]
+
+    mock_http_client.get = AsyncMock(side_effect=get)
+
+    with pytest.raises(PaginationTruncatedError) as caught:
+        await adapter._get_pmids("cancer", 4)
+
+    assert caught.value.reason == "repeated_page"
+
+
+@pytest.mark.asyncio
+async def test_get_pmids_raises_when_pages_overlap(adapter, mock_http_client) -> None:
+    """Partial page overlap must not pad list length up to count."""
+    pages = {
+        0: _esearch_page(count=4, ids=["1", "2"]),
+        2: _esearch_page(count=4, ids=["2", "3"]),
+    }
+
+    async def get(_url: str, params: dict[str, str]) -> MagicMock:
+        return pages[int(params.get("retstart", "0"))]
+
+    mock_http_client.get = AsyncMock(side_effect=get)
+
+    with pytest.raises(PaginationTruncatedError) as caught:
+        await adapter._get_pmids("cancer", 4)
+
+    assert caught.value.reason == "overlapping_page"
+    assert mock_http_client.get.await_args_list[1].kwargs["params"]["retstart"] == "2"
+
+
+@pytest.mark.asyncio
+async def test_get_pmids_rejects_duplicates_within_first_page(
+    adapter, mock_http_client
+) -> None:
+    """A duplicate within the first page cannot satisfy the reported count."""
+    mock_http_client.get = AsyncMock(
+        return_value=_esearch_page(count=2, ids=["1", "1"])
+    )
+    with pytest.raises(PaginationTruncatedError) as caught:
+        await adapter._get_pmids("cancer", 2)
+    assert caught.value.reason == "repeated_page"
+    assert mock_http_client.get.await_count == 1
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "payload",
+    [
+        [],
+        {"error": "upstream failure"},
+        {"esearchresult": None},
+        {"esearchresult": {}},
+        {"esearchresult": {"idlist": "1"}},
+        {"esearchresult": {"count": "2", "idlist": ["1", {}]}},
+    ],
+)
+async def test_get_pmids_rejects_malformed_esearch_payload(
+    adapter, mock_http_client, payload: object
+) -> None:
+    """A broken ESearch body must not look like a successful empty search."""
+    response = MagicMock()
+    response.json.return_value = payload
+    mock_http_client.get = AsyncMock(return_value=response)
+
+    with pytest.raises(PaginationTruncatedError) as caught:
+        await adapter._get_pmids("cancer", 10)
+
+    assert caught.value.reason == "malformed_payload"
+
+
+@pytest.mark.asyncio
+async def test_get_pmids_accepts_explicit_empty_idlist(
+    adapter, mock_http_client
+) -> None:
+    """A result object with an empty idlist is a real empty search."""
+    mock_http_client.get = AsyncMock(return_value=_esearch_page(count="0", ids=[]))
+
+    assert await adapter._get_pmids("cancer", 10) == []
+
+
+@pytest.mark.asyncio
+async def test_resolve_pmids_for_fetch_pages_above_default_ceiling(
+    adapter, mock_http_client
+) -> None:
+    """limit=None uses the 10000 ceiling and still reconciles a short first page."""
+    pages = {
+        0: _esearch_page(count=4, ids=["1", "2"]),
+        2: _esearch_page(count=4, ids=["3", "4"]),
+    }
+
+    async def get(_url: str, params: dict[str, str]) -> MagicMock:
+        return pages[int(params.get("retstart", "0"))]
+
+    mock_http_client.get = AsyncMock(side_effect=get)
+
+    assert await resolve_pmids_for_fetch(adapter, query="term", limit=None) == [
+        "1",
+        "2",
+        "3",
+        "4",
+    ]
+    first_params = mock_http_client.get.await_args_list[0].kwargs["params"]
+    assert first_params["retmax"] == "10000"
+    assert mock_http_client.get.await_args_list[1].kwargs["params"]["retstart"] == "2"
+
+
+@pytest.mark.asyncio
+async def test_resolve_pmids_for_fetch_signals_short_default_ceiling(
+    adapter, mock_http_client
+) -> None:
+    """The default 10000 ceiling is not a complete result when count is larger."""
+    mock_http_client.get = AsyncMock(return_value=_esearch_page(count=12000, ids=["1"]))
+
+    with pytest.raises(PaginationTruncatedError) as caught:
+        await resolve_pmids_for_fetch(adapter, query=None, limit=None)
+
+    assert caught.value.reason == "repeated_page"
+    assert mock_http_client.get.await_args_list[1].kwargs["params"]["retstart"] == "1"
 
 
 def test_xml_parser_enforces_elapsed_time_budget(monkeypatch):
