@@ -151,13 +151,31 @@ def _validate_release_inventory(
     )
 
 
-def _archive_release(
+def _prepare_release_history(
     result: JsonObject,
     host: JsonObject,
     managed: JsonObject,
     original: dict[str, bytes],
-) -> None:
-    """Preserve the previous qualification, including unchanged image pins."""
+    promotion: JsonObject,
+    image: str,
+    managed_image: str,
+) -> bool:
+    """Validate existing pins and archive a new qualification without altering it."""
+    image_changed = host["image"] != image
+    if not image_changed:
+        require(
+            managed["image"] == managed_image and managed["parent_image"] == image,
+            "Existing managed release differs",
+        )
+        previous = provenance.json_object(host.get("release_promotion"))
+        if previous != promotion:
+            require(
+                (previous["ci_run_id"], previous["ci_run_attempt"])
+                != (promotion["ci_run_id"], promotion["ci_run_attempt"]),
+                "Existing promotion conflicts with this capture",
+            )
+    if not image_changed and host.get("release_promotion") == promotion:
+        return False
     history = provenance.json_list(copy.deepcopy(host.get("release_history", [])))
     prior_host = copy.deepcopy(host)
     prior_host.pop("release_history", None)
@@ -170,6 +188,7 @@ def _archive_release(
         }
     )
     result["release_history"] = history
+    return image_changed
 
 
 def release_outputs_match(
@@ -262,21 +281,9 @@ def build_release_files(
         "default_delivery_ci_claimed": False,
         "runtime_rollout_claimed": False,
     }
-    image_changed = host["image"] != image
-    if not image_changed:
-        require(
-            managed["image"] == managed_image and managed["parent_image"] == image,
-            "Existing managed release differs",
-        )
-        previous = provenance.json_object(host.get("release_promotion"))
-        if previous != promotion:
-            require(
-                (previous["ci_run_id"], previous["ci_run_attempt"])
-                != (promotion["ci_run_id"], promotion["ci_run_attempt"]),
-                "Existing promotion conflicts with this capture",
-            )
-    if image_changed or host.get("release_promotion") != promotion:
-        _archive_release(result, host, managed, original)
+    image_changed = _prepare_release_history(
+        result, host, managed, original, promotion, image, managed_image
+    )
     if image_changed:
         require(
             managed["parent_image"] == host["image"],
