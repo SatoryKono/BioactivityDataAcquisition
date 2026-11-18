@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-18T08:18:23.757846+00:00",
+  "generated_at": "2026-11-18T08:40:26.746042+00:00",
   "summary": {
     "total_scripts": 758,
     "status_counts": {
@@ -11542,7 +11542,7 @@
         },
         {
           "path": "tests/architecture/ci/test_event_journal.py",
-          "line": 1496,
+          "line": 1505,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import pytest_abort_diagnostic_adapter as adapter"
         },
@@ -11633,7 +11633,7 @@
         },
         {
           "path": "tests/architecture/ci/test_event_journal.py",
-          "line": 535,
+          "line": 538,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.pytest_event_journal import ("
         }
