@@ -14,6 +14,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.base_transformer.structural_policy import (
         StructuralPolicyProtocol,
     )
+    from bioetl.application.core.pre_silver_record import PreSilverEvidenceProtocol
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.filtering import SilverFilterConfig
     from bioetl.domain.ports import MetricsPort, TracingPort
@@ -29,6 +30,8 @@ class TransformerExecutionOwner(Protocol):
     _metrics: MetricsPort
     _silver_filters: SilverFilterConfig | None
     _structural_policy: StructuralPolicyProtocol
+    _business_evidence_observer: PreSilverEvidenceProtocol | None
+    _business_evidence_discarder: PreSilverEvidenceProtocol | None
 
     async def _transform_impl(
         self,

@@ -31,11 +31,6 @@ class _PreSilverFinalizationFlowMixin:
         del context, index
         return business_data
 
-    def _publish_business_evidence(self, context: PipelineContext, index: int) -> None:
-        observer = getattr(self, "_business_evidence_observer", None)
-        if observer is not None:
-            observer(context, index)
-
     if TYPE_CHECKING:
 
         def compute_content_hash(
@@ -71,19 +66,6 @@ class _PreSilverFinalizationFlowMixin:
     def _normalize_business_data(self, business_data: JsonDict) -> JsonDict:
         return self._get_record_normalizer().normalize_business_data(business_data)
 
-    def _project_pre_silver_findings(
-        self,
-        silver_record: JsonDict,
-        *,
-        context: PipelineContext,
-        index: int,
-    ) -> JsonDict:
-        return self._get_record_normalizer().project_normalization_findings(
-            silver_record,
-            context=context,
-            index=index,
-        )
-
     def _project_hashed_silver_record(
         self,
         *,
@@ -96,10 +78,7 @@ class _PreSilverFinalizationFlowMixin:
         normalized_business_data = self._enrich_normalized_business_data(
             context, index, normalized_business_data
         )
-        content_hash = self.compute_content_hash(
-            normalized_business_data,
-            exclude_none=True,
-        )
+        content_hash = self.compute_content_hash(normalized_business_data)
         silver_record = self._build_pre_silver_record(
             context,
             entity_id,
@@ -107,12 +86,11 @@ class _PreSilverFinalizationFlowMixin:
             index,
             normalized_business_data,
         )
-        projected = self._project_pre_silver_findings(
+        return self._get_record_normalizer().project_normalization_findings(
             silver_record,
             context=context,
             index=index,
         )
-        return projected
 
     def _finalize_staged_business_data(
         self,

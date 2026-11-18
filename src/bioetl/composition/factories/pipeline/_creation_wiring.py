@@ -100,10 +100,7 @@ def _resolve_yaml_config(
     deps: _ServiceBundleDeps,
 ) -> PipelineYamlConfig:
     """Resolve the effective pipeline YAML config for one creation request."""
-    resolved = cast(
-        "PipelineYamlConfig",
-        inputs.request.config or deps.load_pipeline_config(inputs.pipeline_name),
-    )
+    resolved = inputs.request.config or deps.load_pipeline_config(inputs.pipeline_name)
     if inputs.pipeline_name == "chembl_target":
         return resolve_target_runtime_config(
             resolved, exact_replay=inputs.request.runtime.exact_replay

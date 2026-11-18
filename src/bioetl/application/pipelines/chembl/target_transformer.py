@@ -33,7 +33,7 @@ from bioetl.domain.value_objects.taxonomy_id import TaxonomyId
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.types import BronzeRecord, PrimaryId, SilverRecord
+    from bioetl.domain.types import BronzeRecord, PrimaryId
 
 
 class TargetTransformer(BaseChemblTransformer):
@@ -52,6 +52,7 @@ class TargetTransformer(BaseChemblTransformer):
             raise RuntimeError("target classification is already configured")
         self._target_classification_session = session
         self._business_evidence_observer = session.publish
+        self._business_evidence_discarder = session.discard
 
     def _enrich_normalized_business_data(
         self, context: PipelineContext, index: int, business_data: JsonDict
@@ -60,24 +61,6 @@ class TargetTransformer(BaseChemblTransformer):
         if session is None:
             return business_data
         return session.enrich(context, index, business_data)
-
-    def _discard_business_evidence(self, context: PipelineContext, index: int) -> None:
-        session = self._target_classification_session
-        if session is not None:
-            session.discard(context, index)
-
-    @override
-    async def transform(
-        self, context: PipelineContext, record: BronzeRecord, index: int
-    ) -> SilverRecord | None:
-        """Publish classification evidence after the direct Silver policy checks."""
-        try:
-            result = await super().transform(context, record, index)
-            if result is not None:
-                self._publish_business_evidence(context, index)
-            return result
-        finally:
-            self._discard_business_evidence(context, index)
 
     def finalize_target_classification(self, context: PipelineContext) -> None:
         """Expose completion to the application runner, never during transform."""

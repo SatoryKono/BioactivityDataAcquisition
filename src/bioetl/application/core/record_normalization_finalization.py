@@ -50,17 +50,6 @@ class PreSilverFinalizerProtocol(Protocol):
         ...
 
 
-def _active_content_hash(
-    normalizer: PreSilverFinalizerProtocol,
-    normalized_business_data: JsonDict,
-    version_hashes: dict[str, str],
-) -> str:
-    policy = normalizer.content_hash_policy_by_version
-    active_version = getattr(policy, "active_version", None)
-    content_hash = version_hashes.get(active_version) if active_version else None
-    return content_hash or normalizer.compute_content_hash(normalized_business_data)
-
-
 def finalize_pre_silver_record(
     normalizer: PreSilverFinalizerProtocol,
     pre_silver: PreSilverRecord,
@@ -80,10 +69,11 @@ def finalize_pre_silver_record(
         version_hashes = normalizer.compute_content_hashes_by_version(
             normalized_business_data
         )
-        content_hash = _active_content_hash(
-            normalizer,
-            normalized_business_data,
-            version_hashes,
+        policy = normalizer.content_hash_policy_by_version
+        active_version = getattr(policy, "active_version", None)
+        content_hash = version_hashes.get(active_version) if active_version else None
+        content_hash = content_hash or normalizer.compute_content_hash(
+            normalized_business_data
         )
         silver_record = pre_silver.build_silver_record(
             context,
