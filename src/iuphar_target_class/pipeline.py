@@ -228,7 +228,7 @@ def _scope_match(
     species = {taxon for _, taxon in snapshot.species_annotations}
     missing_variant = _missing_variant(row, snapshot)
     if row.taxon not in species or (not snapshot.complete and missing_variant):
-        return replace(
+        scoped_match: MatchResult = replace(
             match,
             match_status="source_unavailable",
             matched_target_id=None,
@@ -241,6 +241,7 @@ def _scope_match(
                 ),
             ),
         )
+        return scoped_match
     return match
 
 
