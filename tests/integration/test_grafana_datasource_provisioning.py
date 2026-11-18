@@ -640,6 +640,7 @@ wget() {
       read -r _time < "${CLOCK_PATH}" || true
       case "${SCENARIO}" in
         health_delayed|full_health_delayed) [ "${_time}" -ge 120 ] || return 1 ;;
+        health_flaps) [ "${_time}" -ne 105 ] || return 1 ;;
         health_flap|full_health_flap) [ "${_time}" -ge 110 ] && [ "${_time}" -ne 115 ] || return 1 ;;
       esac
       printf '%s' '{"database":"ok"}'
@@ -808,3 +809,14 @@ def test_bootstrap_validates_ops_http_url_before_probe() -> None:
     gate_idx = content.index('if is_valid_ops_http_url "${BIOETL_OPS_HTTP_URL}"')
     wget_idx = content.index('wget -qO- -T 3 "${OPS_READY_URL}"')
     assert fn_idx < gate_idx < wget_idx
+
+
+@pytest.mark.parametrize(
+    ("scenario", "earliest"), [("health_delayed", 130), ("health_flaps", 120)]
+)
+def test_late_recovery_requires_ten_continuous_healthy_seconds(
+    tmp_path: Path, scenario: str, earliest: int
+) -> None:
+    result = _run_late_recovery_case(tmp_path, scenario)
+    assert result["signals"] == ["-TERM 424242"]
+    assert result["finished_at"] >= earliest

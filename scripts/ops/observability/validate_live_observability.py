@@ -21,6 +21,10 @@ import base64
 from dotenv import load_dotenv
 import yaml
 
+REPO_ROOT = Path(__file__).resolve().parents[3]
+if __package__ in {None, ""} and str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 from scripts.engineering.qa.report_dashboard_inventory import (
     _normalize_dashboard_payload,
 )
@@ -35,7 +39,6 @@ DEFAULT_OUTPUT_DIR = Path("reports/observability/live-validation")
 DEFAULT_TIMEOUT = 5.0
 EXPECTED_OPS_HTTP_DATASOURCE_UID = "bioetl-ops-http"
 EXPECTED_OPS_HTTP_DATASOURCE_NAME = "BioETL Ops HTTP"
-REPO_ROOT = Path(__file__).resolve().parents[3]
 REPO_ENV_PATH = REPO_ROOT / ".env"
 DASHBOARD_PROFILES = {
     "native": REPO_ROOT / "grafana/dashboards",

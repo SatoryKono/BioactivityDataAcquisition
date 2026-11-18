@@ -13,6 +13,9 @@
 from __future__ import annotations
 
 import json
+import os
+import subprocess
+import sys
 from copy import deepcopy
 from dataclasses import replace
 from pathlib import Path
@@ -735,3 +738,18 @@ def test_cli_dashboard_profile_reaches_validation(
         vlo.main()
     assert exited.value.code == 0
     assert len(list(tmp_path.glob("validation-report-*.json"))) == 1
+
+
+def test_direct_script_help_bootstraps_repository_imports(tmp_path: Path) -> None:
+    env = {key: value for key, value in os.environ.items() if key != "PYTHONPATH"}
+    result = subprocess.run(
+        [sys.executable, str(Path(vlo.__file__).resolve()), "--help"],
+        cwd=tmp_path,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=30,
+    )
+    assert result.returncode == 0, result.stderr
+    assert "--prometheus-url" in result.stdout

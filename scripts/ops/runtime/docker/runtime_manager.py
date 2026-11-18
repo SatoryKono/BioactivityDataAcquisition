@@ -1894,21 +1894,24 @@ already_full() {
   ready="$(wget -qO- -T 3 http://bioetl:8000/ops/control-plane/ready 2>/dev/null)" || return 1
   printf '%s' "$ready" | grep -Eq "\"runtime_source_id\"[[:space:]]*:[[:space:]]*\"$source_id\""
 }
+lease_is_active() {
+  [ -f "$lease" ] || return 1
+  read -r pid ticks boot deadline < "$lease" || return 1
+  case "$pid:$ticks:$deadline" in *[!0-9:]*) return 1 ;; esac
+  current_boot="$(cat /proc/sys/kernel/random/boot_id)" || return 1
+  now="$(cut -d. -f1 /proc/uptime)" || return 1
+  current_ticks="$(sed 's/^.*) //' "/proc/$pid/stat" 2>/dev/null | awk '{print $20}')"
+  [ -n "$pid" ] && [ -n "$ticks" ] && [ -n "$deadline" ] &&
+    [ "$boot" = "$current_boot" ] && [ "$ticks" = "$current_ticks" ] &&
+    [ "$now" -lt "$deadline" ]
+}
 if already_full; then printf 'full\n'; exit 0; fi
 [ "$mode" != "ack-restart" ] || { printf 'inactive\n'; exit 0; }
+# Check mode must see a live lease even when the persistent claim remains.
+if [ "$mode" = "check" ] && lease_is_active; then printf 'active\n'; exit 0; fi
 if [ -d "$claim" ]; then printf 'claimed\n'; exit 0; fi
-if [ -f "$lease" ] && read -r pid ticks boot deadline < "$lease"; then
-  case "$pid:$ticks:$deadline" in *[!0-9:]*) exit 1 ;; esac
-  current_boot="$(cat /proc/sys/kernel/random/boot_id)" || exit 1
-  now="$(cut -d. -f1 /proc/uptime)" || exit 1
-  current_ticks="$(sed 's/^.*) //' "/proc/$pid/stat" 2>/dev/null | awk '{print $20}')"
-  if [ -n "$pid" ] && [ -n "$ticks" ] && [ -n "$deadline" ] &&
-     [ "$boot" = "$current_boot" ] && [ "$ticks" = "$current_ticks" ] &&
-     [ "$now" -lt "$deadline" ]; then
-    printf 'active\n'; exit 0
-  fi
-fi
-[ "${1:-claim}" = "claim" ] || { printf 'inactive\n'; exit 0; }
+if lease_is_active; then printf 'active\n'; exit 0; fi
+[ "$mode" = "claim" ] || { printf 'inactive\n'; exit 0; }
 mkdir -p "$recovery_root" || exit 1
 if mkdir "$claim" 2>/dev/null; then
   if already_full; then

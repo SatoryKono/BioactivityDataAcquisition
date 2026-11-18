@@ -1075,6 +1075,7 @@ def test_manager_waits_for_live_lease_before_probing_late_main(
         and cmd[-1] == "http://bioetl:8000/ops/control-plane/ready"
         for cmd in commands
     )
+    assert any(cmd[-1] == "http://127.0.0.1:3000/api/health" for cmd in commands)
     assert any(cmd[-1] == "check" for cmd in commands)
 
 
@@ -2306,3 +2307,130 @@ def test_recovery_is_bounded_to_three_attempts_and_writes_one_incident(
     assert incident["recent_logs"]["captured"] is True
     # recovery_history records start (and wait when reached) rows
     assert len(incident["recovery_history"]) >= 3
+
+
+def test_full_profile_status_is_not_ready_until_grafana_health_responds() -> None:
+    health_calls = {"n": 0}
+    now = [0.0]
+
+    def runner(
+        command: Sequence[str], cwd: Path, timeout: float
+    ) -> runtime_manager.CommandResult:
+        del cwd, timeout
+        current = list(command)
+        if current[:4] == [
+            "docker",
+            "exec",
+            runtime_manager._GRAFANA_CONTAINER,
+            "cat",
+        ]:
+            return runtime_manager.CommandResult(
+                current,
+                0,
+                stdout=json.dumps(
+                    {
+                        "ops_http": "ready",
+                        "reason": "identity_matched",
+                        "dashboard_profile": "full",
+                    }
+                ),
+            )
+        if any("api/health" in part for part in current):
+            health_calls["n"] += 1
+            if health_calls["n"] == 1:
+                return runtime_manager.CommandResult(current, 1, stderr="down")
+            return runtime_manager.CommandResult(current, 0, stdout='{"database":"ok"}')
+        raise AssertionError(current)
+
+    ready = runtime_manager._wait_for_grafana_full_profile(
+        runner,
+        deadline=10.0,
+        sleep=lambda seconds: now.__setitem__(0, now[0] + seconds),
+        clock=lambda: now[0],
+    )
+
+    assert ready is True
+    assert health_calls["n"] == 2
+
+
+def test_check_mode_sees_active_lease_while_claim_remains(
+    tmp_path: Path,
+) -> None:
+    shell = shutil.which("sh")
+    if shell is None:
+        pytest.skip("POSIX sh is required for the atomic recovery claim test")
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    for name, value in {
+        "cat": "boot",
+        "cut": "100",
+        "sed": "unused",
+        "awk": "200",
+    }.items():
+        fake = fake_bin / name
+        fake.write_text(
+            f"#!/bin/sh\nprintf '%s\\n' '{value}'\n", encoding="utf-8", newline="\n"
+        )
+        fake.chmod(0o755)
+    source_id = "a" * 64
+    recovery_root = tmp_path / "bioetl-late-cutover"
+    recovery_root.mkdir()
+    (recovery_root / f"{source_id}.lease").write_text(
+        "42 200 boot 150\n", encoding="utf-8", newline="\n"
+    )
+    (recovery_root / f"{source_id}.claim").mkdir()
+    env = {
+        **os.environ,
+        "PATH": str(fake_bin) + os.pathsep + os.environ.get("PATH", ""),
+        "TEST_BIN": str(fake_bin),
+        "BIOETL_EXPECTED_RUNTIME_SOURCE_ID": source_id,
+        "BIOETL_GRAFANA_BOOTSTRAP_STATUS_FILE": str(tmp_path / "bootstrap-status.json"),
+    }
+    script = (
+        'PATH="$(cd "$TEST_BIN" && pwd):$PATH"\n'
+        + runtime_manager._GRAFANA_LATE_CUTOVER_CLAIM
+    )
+
+    def run(mode: str) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            [shell, "-c", script, "bioetl-late-cutover", mode],
+            capture_output=True,
+            text=True,
+            env=env,
+            check=False,
+            timeout=10,
+        )
+
+    checked = run("check")
+    claimed = run("claim")
+    assert checked.returncode == 0, checked.stderr
+    assert checked.stdout.strip() == "active"
+    assert claimed.returncode == 0, claimed.stderr
+    assert claimed.stdout.strip() == "claimed"
+
+
+@pytest.mark.parametrize(
+    "health_response", ["", "{}", '{"database":"error"}', "invalid"]
+)
+def test_full_profile_wait_requires_live_health(health_response: str) -> None:
+    now = [0.0]
+    health_timeouts: list[float] = []
+
+    def runner(cmd: Sequence[str], _cwd: Path, timeout: float):
+        if cmd[3] == "cat":
+            return runtime_manager.CommandResult(
+                list(cmd),
+                0,
+                stdout=json.dumps({"dashboard_profile": "full", "ops_http": "ready"}),
+            )
+        assert cmd[-1] == "http://127.0.0.1:3000/api/health"
+        health_timeouts.append(timeout)
+        return runtime_manager.CommandResult(list(cmd), 0, stdout=health_response)
+
+    assert not runtime_manager._wait_for_grafana_full_profile(
+        runner,
+        deadline=2.0,
+        sleep=lambda seconds: now.__setitem__(0, now[0] + seconds),
+        clock=lambda: now[0],
+    )
+    assert health_timeouts and all(0 < value <= 2 for value in health_timeouts)
