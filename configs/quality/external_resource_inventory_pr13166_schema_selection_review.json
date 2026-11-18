@@ -1,9 +1,8 @@
 {
   "schema_version": 1,
-  "catalog_ref": "64553f701a6118e2c403a982fdfb96e12b73caf2",
-  "source_ref": "85930ac5df4ada30ea3d528b6c7f07b358cf54ac",
+  "catalog_ref": "1ef8782c5921dd1e648ec28ad72ba3be93b9c15a",
+  "source_ref": "9a2a04608736368144363c0dbac304a3e912d468",
   "source_reviews": {
-    "src/bioetl/infrastructure/config/target_classification_profile.py": "Reviewed pure schema-set selection extracted into one helper. The same four V30/V31 classes and schemas remain selected for off/shadow/enrich. No file read, client allocation, task, external resource owner, acquisition or cleanup path changes; no runtime qualification or acceptance is inferred.",
-    "src/bioetl/composition/factories/pipeline/run_context_factory.py": "Extract target contract identity selection into a pure helper without changing schema/normalization resolution, resource ownership, acquisition, cleanup, or runtime qualification."
+    "src/bioetl/infrastructure/adapters/iuphar/_input_projection.py": "Extract pure taxonomy/name consistency validation without changing eligibility results or precedence; no resource ownership, acquisition, cleanup, or runtime qualification changes."
   }
 }
