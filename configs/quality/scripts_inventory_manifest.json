@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-18T11:14:56.151267+00:00",
+  "generated_at": "2026-11-18T13:04:46.810984+00:00",
   "summary": {
     "total_scripts": 754,
     "status_counts": {
@@ -11676,7 +11676,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pytest_receipts.py",
-          "line": 964,
+          "line": 1014,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.pytest_receipts import write_runner_terminal_receipt"
         }

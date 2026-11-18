@@ -660,12 +660,25 @@ def _configure_wsl_timeout(config: pytest.Config) -> None:
     if not _is_wsl():
         return
 
+    threaded_call = asyncio.to_thread
+
     async def _run_inline[ResultT](
         func: Callable[..., ResultT],
         /,
         *args: object,
         **kwargs: object,
     ) -> ResultT:
+        if isinstance(
+            getattr(func, "__self__", None),
+            (
+                threading.Thread,
+                threading.Event,
+                threading.Condition,
+                threading.Semaphore,
+                threading.Barrier,
+            ),
+        ):
+            return await threaded_call(func, *args, **kwargs)
         return func(*args, **kwargs)
 
     # Python 3.13 on the WSL cloud-mounted checkout can lose the event-loop
