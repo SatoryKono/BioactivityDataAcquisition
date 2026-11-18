@@ -209,6 +209,7 @@ jobs:
             tests/unit/scripts/test_parallel_precommit.py \
             tests/unit/scripts/test_coalesced_precommit.py \
             tests/unit/scripts/test_partitioned_diff.py \
+            tests/unit/scripts/test_owned_guard_execution.py \
             tests/unit/scripts/test_readonly_message.py \
             tests/unit/scripts/test_offline_precommit.py \
             tests/unit/scripts/test_hook_installation.py \

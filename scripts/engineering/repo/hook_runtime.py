@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from contextlib import redirect_stderr, redirect_stdout
+from contextvars import ContextVar
+import importlib
+import io
 import os
 from pathlib import Path
 import re
@@ -17,6 +21,9 @@ from scripts.engineering.repo.operation_guards import is_env_target
 from scripts.engineering.repo.process_deadline import ProcessResult, run_owned
 
 TRUSTED_BASE = "origin/main"
+_OWNED_GUARD_CONTEXT: ContextVar[bool] = ContextVar(
+    "bioetl_owned_guard_context", default=False
+)
 DEADLINES = {"pre-commit": 30, "pre-push": 180, "commit-msg": 10}
 PHASE_CODES = {"tree": 11, "budgets": 12, "foreign": 13, "framework": 14}
 CONTROLLED_REASONS = {
@@ -142,6 +149,34 @@ def _foreign_command(
     return None
 
 
+def _try_builtin_guard(phase: str, command: list[str]) -> int | None:
+    """Reuse code, never results; unknown/non-owned calls keep subprocess guards."""
+    if sys.platform != "linux" or not _OWNED_GUARD_CONTEXT.get():
+        return None
+    names = {"tree": "check_no_partial_tree", "budgets": "budget_guard"}
+    name = names.get(phase)
+    if name is None:
+        return None
+    expected = Path(__file__).with_name(name + ".py")
+    if command[:4] != [sys.executable, "-I", "-B", str(expected)]:
+        return None
+    try:
+        module = importlib.import_module("scripts.engineering.repo." + name)
+        if Path(module.__file__).resolve() != expected.resolve():
+            return None
+        # The outer owned watchdog still contains every Git subprocess and all
+        # Python work. Guard CLIs receive exactly their original argument list.
+        with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+            code = module.main(command[4:])
+    except (Exception, SystemExit):
+        return 20
+    if type(code) is not int or code not in {0, 1, 2}:
+        return 20
+    if code == 0:
+        return 0
+    return PHASE_CODES[phase] if code == 1 else 22
+
+
 def _execute_commands(
     commands: list[tuple[str, list[str]]],
     repo: Path,
@@ -155,6 +190,11 @@ def _execute_commands(
         remaining = DEADLINES[kind] - (time.monotonic() - start)
         if remaining <= 0:
             return 2
+        builtin = _try_builtin_guard(phase, command)
+        if builtin is not None:
+            if builtin:
+                return builtin
+            continue
         result = run_owned(
             command,
             cwd=repo,
@@ -283,7 +323,11 @@ def main() -> int:
         payload = (
             sys.stdin.buffer.read(8 * 1024 * 1024 + 1) if kind == "pre-push" else b""
         )
-        return run(kind, Path(args[2]), args[3:], payload)
+        token = _OWNED_GUARD_CONTEXT.set(True)
+        try:
+            return run(kind, Path(args[2]), args[3:], payload)
+        finally:
+            _OWNED_GUARD_CONTEXT.reset(token)
     if len(args) < 2 or args[0] not in DEADLINES:
         return 2
     # The outer watchdog covers protocol reads, Git discovery and every callback.

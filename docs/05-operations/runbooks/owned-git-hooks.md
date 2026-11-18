@@ -162,6 +162,13 @@ The total scan deadline remains ten seconds. No sparse/assume-unchanged setting,
 cross-event cache or omitted source prefix is introduced. Full-tree history
 inspection overlaps only immutable ancestor/tree queries in four worker slots;
 it checks every candidate commit and refreshes shallow boundaries afterwards.
+Only inside the already supervised Linux worker, the two exact tree/budget
+guard CLIs may execute in that interpreter with their original argument lists.
+Every invocation performs fresh checks; no result is reused. The module must
+resolve to the verified deployment bundle, and the outer watchdog still contains
+all Python work and Git descendants. Unknown commands, foreign modules, Windows
+and calls outside the owned worker retain subprocess execution. Invalid return
+values or unavailable guard execution refuse the operation.
 The qualified adapter replaces pre-commit
 stash/checkout with a read-only unstaged-diff check: if the framework would need
 to hide tracked unstaged changes, it refuses before configured callbacks. Stage
