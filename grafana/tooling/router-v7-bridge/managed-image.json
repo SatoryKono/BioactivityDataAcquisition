@@ -9,7 +9,7 @@
   ],
   "acceptance": "Artifact verified as the declared parent minus Scenes; runtime rollout remains independent.",
   "delivery_source": {
-    "source_ref": "8879246c81868cb674c70601b9fb5e2f9ce833f1",
+    "source_ref": "2d80323fff3828793c8177a03a74c8b048a9330c",
     "artifact_parity": {
       "status": "PASS",
       "declared_image": "satorykono/bioetl-grafana-router7-canvas@sha256:23447d1dec5d1f9fda446c0b8adc290ddbd225953f3be2ef57aba05c9a1e2108",

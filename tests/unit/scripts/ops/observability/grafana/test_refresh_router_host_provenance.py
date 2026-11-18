@@ -275,6 +275,15 @@ class ProvenanceControls(unittest.TestCase):
             new_attempt["run_attempt"],
         )
 
+    def test_existing_image_requires_its_current_capture(self):
+        case = release_case()
+        first = promotion.build_release_files(*case)
+        host = json.loads(first[promotion.HOST_PATH])
+        del host["release_promotion"]
+        incomplete = {**first, promotion.HOST_PATH: json.dumps(host).encode()}
+        with self.assertRaises(ValueError):
+            promotion.build_release_files(incomplete, *case[1:])
+
     def test_release_promotion_preserves_history_and_all_coupled_pins(self):
         case = release_case()
         outputs = promotion.build_release_files(*case)

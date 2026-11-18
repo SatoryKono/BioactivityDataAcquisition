@@ -182,6 +182,7 @@ def _prepare_release_history(
     _validate_capture_history(host, promotion)
     image_changed = host["image"] != image
     if not image_changed:
+        provenance.json_object(host.get("release_promotion"))
         require(
             managed["image"] == managed_image and managed["parent_image"] == image,
             "Existing managed release differs",
