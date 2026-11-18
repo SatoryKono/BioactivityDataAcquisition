@@ -1,173 +1,104 @@
-name: Nightly
-
+# Diagnostic branch only. Never merge this replacement into main or a PR branch.
+name: Neo4j audit resource diagnosis
 on:
-  schedule:
-    - cron: "0 3 * * *"
   workflow_dispatch:
-
 permissions:
   contents: read
-
-concurrency:
-  group: nightly-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: false
-
 jobs:
-  clock:
+  diagnose:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
-    permissions:
-      contents: read
-    outputs:
-      dow: ${{ steps.clock.outputs.dow }}
-      dom: ${{ steps.clock.outputs.dom }}
-      month: ${{ steps.clock.outputs.month }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: existing
+            initial: 192m
+            heap: 384m
+            pagecache: 96m
+            limit: 768m
+          - label: additional-headroom
+            initial: 256m
+            heap: 768m
+            pagecache: 192m
+            limit: 1536m
+    env:
+      NEO4J_USERNAME: neo4j
+      # Same CI-only placeholder as tests.yml; no machine-local env file.
+      NEO4J_PASSWORD: ci-neo4j-live-audit
     steps:
-      - name: Read UTC calendar
-        id: clock
-        run: |
-          set -euo pipefail
-          echo "dow=$(LC_ALL=C date -u +%a)" >> "$GITHUB_OUTPUT"
-          echo "dom=$(LC_ALL=C date -u +%d)" >> "$GITHUB_OUTPUT"
-          echo "month=$(LC_ALL=C date -u +%m)" >> "$GITHUB_OUTPUT"
-
-  tests:
-    uses: ./.github/workflows/tests.yml
-    with:
-      generated-artifacts: true
-    permissions:
-      contents: read
-
-  e2e:
-    uses: ./.github/workflows/e2e-matrix-health.yml
-    permissions:
-      contents: read
-
-  security:
-    uses: ./.github/workflows/security.yml
-    permissions:
-      contents: read
-
-  duplication:
-    uses: ./.github/workflows/duplication-complexity.yml
-    permissions:
-      contents: read
-
-  import-linter:
-    uses: ./.github/workflows/import-linter.yml
-    permissions:
-      contents: read
-
-  zizmor:
-    uses: ./.github/workflows/zizmor.yml
-    permissions:
-      contents: read
-      security-events: write
-
-  codeql:
-    needs: clock
-    if: needs.clock.outputs.dow == 'Mon'
-    uses: ./.github/workflows/codeql.yml
-    permissions:
-      contents: read
-      security-events: write
-
-  scorecard:
-    needs: clock
-    if: needs.clock.outputs.dow == 'Mon'
-    uses: ./.github/workflows/scorecard.yml
-    permissions:
-      contents: read
-      security-events: write
-      id-token: write
-
-  branch-hygiene:
-    needs: clock
-    if: needs.clock.outputs.dow == 'Mon'
-    uses: ./.github/workflows/branch-hygiene.yml
-    permissions:
-      contents: read
-      pull-requests: read
-
-  github-settings:
-    needs: clock
-    if: >-
-      ${{
-        needs.clock.outputs.dom == '01' &&
-        (needs.clock.outputs.month == '01' || needs.clock.outputs.month == '04' ||
-         needs.clock.outputs.month == '07' || needs.clock.outputs.month == '10')
-      }}
-    uses: ./.github/workflows/github-settings-quarterly-review.yml
-    permissions:
-      actions: read
-      contents: read
-      deployments: read
-      security-events: read
-
-  mutation:
-    needs: clock
-    if: needs.clock.outputs.dow == 'Sun'
-    uses: ./.github/workflows/mutation-testing.yml
-    permissions:
-      contents: read
-
-  generated-artifact-daily:
-    name: Generated artifact assertions (daily)
-    runs-on: ubuntu-latest
-    timeout-minutes: 120
-    permissions:
-      contents: read
-    steps:
-      - name: Checkout complete history
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Checkout diagnostic source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
-          fetch-depth: 0
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
         with:
-          python-version: "3.12"
-      - name: Run every generated-artifact assertion including slow tests serially
-        id: daily
-        run: >-
-          uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks
-          daily --report reports/quality/generated-artifact-daily-selection.json
-      - name: Run standalone generated-artifact validators
-        id: validators
-        if: ${{ !cancelled() }}
-        run: >-
-          uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks
-          validators --report reports/quality/generated-artifact-daily-validators.json
-      - name: Partition producer outcome before upload
-        id: partition
-        if: always() && !cancelled()
-        run: >-
-          uv run --frozen --no-build python -m scripts.engineering.ci
-          nightly-shadow partition
-          --daily-outcome "${{ steps.daily.outcome }}"
-          --validators-outcome "${{ steps.validators.outcome }}"
-          --output reports/quality/generated-artifact-daily-partition.json
-      - name: Upload success evidence
-        if: "always() && !cancelled() && steps.partition.outputs.bucket == 'success'"
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+          python-version: '3.12'
+      - name: Cache Neo4j image
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
         with:
-          name: generated-artifact-daily-success
-          path: reports/quality/generated-artifact-daily-*.json
+          path: /tmp/neo4j-community.tar
+          key: neo4j-5.15-community-d9e2fb1ba398536e50d22ebc3d5d585baa086c1c0cf8e5b96bdc9e11e87e002a
+      - name: Load pinned image
+        run: |
+          set -euo pipefail
+          image='neo4j:5.15-community@sha256:d9e2fb1ba398536e50d22ebc3d5d585baa086c1c0cf8e5b96bdc9e11e87e002a'
+          if [[ -f /tmp/neo4j-community.tar ]]; then
+            docker load -i /tmp/neo4j-community.tar
+          else
+            docker pull "$image"
+          fi
+      - name: Start the controlled configuration
+        env:
+          DIAG_INITIAL: ${{ matrix.initial }}
+          DIAG_HEAP: ${{ matrix.heap }}
+          DIAG_PAGECACHE: ${{ matrix.pagecache }}
+          DIAG_LIMIT: ${{ matrix.limit }}
+        run: |
+          set -euo pipefail
+          mkdir -p reports/neo4j-diagnostic
+          cat > reports/neo4j-diagnostic/override.yml <<YAML
+          services:
+            neo4j:
+              environment:
+                NEO4J_server_memory_heap_initial__size: ${DIAG_INITIAL}
+                NEO4J_server_memory_heap_max__size: ${DIAG_HEAP}
+                NEO4J_server_memory_pagecache_size: ${DIAG_PAGECACHE}
+              mem_limit: ${DIAG_LIMIT}
+          YAML
+          docker network create bioetl-runtime >/dev/null 2>&1 || true
+          docker compose -f docker-compose.neo4j.yml -f .github/compose/neo4j-ci-overlay.yml -f reports/neo4j-diagnostic/override.yml up -d --wait --wait-timeout 120 neo4j
+      - name: Run the unchanged live audit and sample the container
+        run: |
+          set -euo pipefail
+          (
+            while true; do
+              date -u +%FT%TZ
+              docker inspect --format '{{json .State}} restarts={{.RestartCount}}' bioetl-neo4j || true
+              docker stats --no-stream --format '{{.MemUsage}} {{.CPUPerc}}' bioetl-neo4j || true
+              sleep 5
+            done
+          ) > reports/neo4j-diagnostic/states.log 2>&1 &
+          sampler_pid=$!
+          set +e
+          uv run --frozen --no-build python -m scripts.engineering.ci neo4j-memory-live --batch-size 50 > reports/neo4j-diagnostic/audit.log 2>&1
+          audit_status=$?
+          set -e
+          kill "$sampler_pid" 2>/dev/null || true
+          wait "$sampler_pid" 2>/dev/null || true
+          docker logs --tail 160 bioetl-neo4j > reports/neo4j-diagnostic/server.log 2>&1 || true
+          docker inspect --format '{{json .State}} restarts={{.RestartCount}}' bioetl-neo4j >> reports/neo4j-diagnostic/states.log || true
+          tail -n 30 reports/neo4j-diagnostic/audit.log
+          exit "$audit_status"
+      - name: Preserve diagnostic evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: neo4j-diagnostic-${{ matrix.label }}
+          path: reports/neo4j-diagnostic/
           if-no-files-found: error
           retention-days: 7
-      - name: Upload non-success diagnostics
-        if: "always() && !cancelled() && (steps.partition.outputs.bucket == 'diagnostics' || steps.partition.outcome != 'success')"
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: generated-artifact-daily-diagnostics
-          path: reports/quality/generated-artifact-daily-*.json
-          if-no-files-found: error
-          retention-days: 90
-      - name: Upload cancellation diagnostics best effort
-        if: cancelled()
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: generated-artifact-daily-cancelled
-          path: reports/quality/generated-artifact-daily-*.json
-          if-no-files-found: warn
-          retention-days: 90
+      - name: Stop the diagnostic container
+        if: always()
+        run: docker compose -f docker-compose.neo4j.yml down -v neo4j
