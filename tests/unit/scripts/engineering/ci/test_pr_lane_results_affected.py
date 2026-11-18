@@ -415,6 +415,7 @@ def test_iuphar_shadow_paths_keep_explicit_owners(tmp_path: Path) -> None:
         "tests/unit/iuphar_target_class/test_integration_acceptance.py",
         "tests/unit/iuphar_target_class/test_reference_coverage_v2.py",
         "tests/architecture/test_codex_skill_agent_links.py",
+        "tests/architecture/test_ai_runtime_governance_links.py",
         "tests/architecture/test_documentation_cleanup_inventory.py",
         "tests/architecture/test_gold_strict_validation_policy.py",
         "tests/architecture/test_issue_12029_remaining_parity_gates.py",
