@@ -287,12 +287,12 @@ def test_hotspot_family_fan_in_census_matches_live_ast_graph() -> None:
     }
     assert control_plane["at_budget_module_count"] == 0
     assert runtime_builders["files"] == 55
-    # Replay admission now reuses both frozen-context helpers from existing modules.
-    # The maximum fan-in and bounded-growth caps below remain unchanged.
+    # Target-specific replay wiring now lives outside the generic builder family.
+    # Keep the original observed fan-in census and unchanged bounded-growth caps.
     assert runtime_builders["internal_fan_in_census"]["distribution"] == {
         "0": 3,
-        "1": 26,
-        "2": 26,
+        "1": 28,
+        "2": 24,
     }
     assert runtime_builders["internal_fan_in_census"]["max_fan_in"] == 2
     assert runtime_builders["at_budget_module_count"] == 0
