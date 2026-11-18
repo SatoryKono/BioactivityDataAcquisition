@@ -452,6 +452,7 @@
         "tests/e2e/test_chembl_molecule_e2e.py",
         "tests/integration/chembl/test_molecule_extraction_params.py",
         "tests/integration/composite/test_molecule_pipeline.py",
+        "tests/unit/application/pipelines/chembl/test_molecule_transformer_contract.py",
         "tests/unit/application/pipelines/test_molecule_error_identity_contract.py"
       ],
       "contract_yaml_contract_ref": "chembl.molecule",
@@ -1559,6 +1560,7 @@
         "tests/e2e/test_chembl_molecule_e2e.py",
         "tests/integration/chembl/test_molecule_extraction_params.py",
         "tests/integration/composite/test_molecule_pipeline.py",
+        "tests/unit/application/pipelines/chembl/test_molecule_transformer_contract.py",
         "tests/unit/application/pipelines/test_molecule_error_identity_contract.py"
       ],
       "contract_yaml_contract_ref": "composite.molecule",
