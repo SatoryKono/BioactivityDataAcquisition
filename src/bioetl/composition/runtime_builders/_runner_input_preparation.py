@@ -11,6 +11,9 @@ from bioetl.composition.runtime_builders._exact_replay_cached_bronze_context imp
     bind_cached_bronze_context as _bind_cached_bronze_context,
     resolve_exact_replay_cached_bronze_context as _resolve_exact_replay_cached_bronze_context,
 )
+from bioetl.composition.runtime_builders.exact_replay_parent_manifest import (
+    resolve_replay_parent_manifest,
+)
 from bioetl.composition.runtime_builders.target_classification_identity import (
     load_target_aware_pipeline_config,
 )
@@ -155,6 +158,7 @@ def prepare_runner_context(
         validate_pk_contract_fn,
         ctx=effective_ctx,
         settings=settings,
+        resolve_parent=resolve_replay_parent_manifest,
     )
     observability = _build_runner_observability(
         ctx=effective_ctx,

@@ -1,12 +1,9 @@
 """Target-classification identities shared by run and manifest assembly."""
 
 from __future__ import annotations
-from collections.abc import Callable
-from typing import TYPE_CHECKING, overload
+from collections.abc import Callable, Mapping
+from typing import TYPE_CHECKING, Protocol, overload
 from bioetl.composition.bootstrap.assembly.storage import hydrate_target_runtime_config
-from bioetl.composition.runtime_builders._exact_replay_cached_bronze_context import (
-    _resolve_replay_parent_manifest,
-)
 from bioetl.composition.factories.pipeline.target_classification_runtime import (
     resolve_target_runtime_config,
 )
@@ -30,6 +27,14 @@ from bioetl.infrastructure.config.target_classification_profile import (
     target_v31_schema_hash,
 )
 from bioetl.infrastructure.config.pipeline_config_api import PipelineYamlConfig
+
+
+class _ReplayParent(Protocol):
+    @property
+    def pipeline_name(self) -> str: ...
+
+    @property
+    def resolved_config(self) -> Mapping[str, object]: ...
 
 
 def target_classification_contract_schema_identity(
@@ -155,18 +160,30 @@ def target_run_context_identity(
 
 @overload
 def restore_target_replay_config(
-    *, ctx: PipelineRunContext, settings: Settings, current_config: PipelineYamlConfig
+    *,
+    ctx: PipelineRunContext,
+    settings: Settings,
+    current_config: PipelineYamlConfig,
+    resolve_parent: Callable[..., _ReplayParent],
 ) -> PipelineYamlConfig: ...
 
 
 @overload
 def restore_target_replay_config(
-    *, ctx: PipelineRunContext, settings: Settings, current_config: object
+    *,
+    ctx: PipelineRunContext,
+    settings: Settings,
+    current_config: object,
+    resolve_parent: Callable[..., _ReplayParent],
 ) -> object: ...
 
 
 def restore_target_replay_config(
-    *, ctx: PipelineRunContext, settings: Settings, current_config: object
+    *,
+    ctx: PipelineRunContext,
+    settings: Settings,
+    current_config: object,
+    resolve_parent: Callable[..., _ReplayParent],
 ) -> object:
     """Restore the saved target profile rather than consulting a newer default."""
     if ctx.pipeline_name != "chembl_target" or not bool(
@@ -182,7 +199,7 @@ def restore_target_replay_config(
     )
     if not has_parent and not current_config.target_classification.to_domain().enabled:
         return current_config
-    parent = _resolve_replay_parent_manifest(ctx=ctx, settings=settings)
+    parent = resolve_parent(ctx=ctx, settings=settings)
     if parent.pipeline_name != "chembl_target":
         raise ValueError("target replay parent pipeline mismatch")
     if not parent.resolved_config:
@@ -197,12 +214,18 @@ def load_target_aware_pipeline_config(
     validate_pk_contract_fn: Callable[[PipelineYamlConfig], None],
     ctx: PipelineRunContext | None = None,
     settings: Settings | None = None,
+    resolve_parent: Callable[..., _ReplayParent] | None = None,
 ) -> PipelineYamlConfig:
     yaml_config = load_pipeline_config_fn(pipeline_name)
     if pipeline_name == "chembl_target":
         if ctx is not None and settings is not None:
+            if resolve_parent is None:
+                raise ValueError("target replay parent resolver is required")
             yaml_config = restore_target_replay_config(
-                ctx=ctx, settings=settings, current_config=yaml_config
+                ctx=ctx,
+                settings=settings,
+                current_config=yaml_config,
+                resolve_parent=resolve_parent,
             )
         yaml_config = resolve_target_runtime_config(yaml_config)
     validate_pk_contract_fn(yaml_config)

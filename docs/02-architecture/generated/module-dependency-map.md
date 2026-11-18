@@ -5,8 +5,8 @@
 
 ## Summary
 
-- Scanned modules: `2653`
-- Internal import edges (raw): `8782`
+- Scanned modules: `2654`
+- Internal import edges (raw): `8787`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `330`
@@ -24,9 +24,9 @@ flowchart LR
     application -->|1686 OK| application
     application -->|1156 OK| domain
     composition -->|253 OK| application
-    composition -->|689 OK| composition
-    composition -->|334 OK| domain
-    composition -->|360 OK| infrastructure
+    composition -->|691 OK| composition
+    composition -->|336 OK| domain
+    composition -->|361 OK| infrastructure
     domain -->|1330 OK| domain
     infrastructure -->|825 OK| domain
     infrastructure -->|1402 OK| infrastructure
@@ -43,9 +43,9 @@ flowchart LR
 | `application`    | `application`    |    1686 | allowed |
 | `application`    | `domain`         |    1156 | allowed |
 | `composition`    | `application`    |     253 | allowed |
-| `composition`    | `composition`    |     689 | allowed |
-| `composition`    | `domain`         |     334 | allowed |
-| `composition`    | `infrastructure` |     360 | allowed |
+| `composition`    | `composition`    |     691 | allowed |
+| `composition`    | `domain`         |     336 | allowed |
+| `composition`    | `infrastructure` |     361 | allowed |
 | `domain`         | `domain`         |    1330 | allowed |
 | `infrastructure` | `domain`         |     825 | allowed |
 | `infrastructure` | `infrastructure` |    1402 | allowed |
@@ -70,7 +70,7 @@ flowchart LR
 | `composition.bootstrap`        | `application.services`         |      56 |
 | `application.composite`        | `domain.ports`                 |      55 |
 | `composition.factories`        | `application.core`             |      51 |
-| `composition.runtime_builders` | `domain.control_plane`         |      44 |
+| `composition.runtime_builders` | `domain.control_plane`         |      46 |
 | `infrastructure.storage`       | `domain.value_objects`         |      43 |
 | `composition.factories`        | `domain.ports`                 |      37 |
 | `application.composite`        | `domain.exceptions`            |      36 |
