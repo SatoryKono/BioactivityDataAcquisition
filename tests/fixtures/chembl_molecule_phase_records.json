@@ -1,0 +1,82 @@
+{
+  "expected_phases": {
+    "CHEMBL14830": 0.5,
+    "CHEMBL25": 4.0
+  },
+  "provenance": {
+    "description": "Selected real provider fields; original identifiers, phase codes and structures preserved.",
+    "provider": "chembl",
+    "snapshot_date": "2026-11-18",
+    "source_bronze_sha256": "f901481aca1c95b10395d2453e7764523cfd73b97d661a5e7c74132d9abf4e4a"
+  },
+  "records": [
+    {
+      "inorganic_flag": 0,
+      "max_phase": "4.0",
+      "molecule_chembl_id": "CHEMBL25",
+      "molecule_hierarchy": {
+        "active_chembl_id": "CHEMBL25",
+        "molecule_chembl_id": "CHEMBL25",
+        "parent_chembl_id": "CHEMBL25"
+      },
+      "molecule_properties": {
+        "alogp": "1.31",
+        "aromatic_rings": 1,
+        "full_molformula": "C9H8O4",
+        "full_mwt": "180.16",
+        "hba": 3,
+        "hbd": 1,
+        "heavy_atoms": 13,
+        "mw_freebase": "180.16",
+        "np_likeness_score": "0.12",
+        "num_ro5_violations": 0,
+        "psa": "63.60",
+        "qed_weighted": "0.55",
+        "ro3_pass": "N",
+        "rtb": 2
+      },
+      "molecule_structures": {
+        "canonical_smiles": "CC(=O)Oc1ccccc1C(=O)O",
+        "standard_inchi": "InChI=1S/C9H8O4/c1-6(10)13-8-5-3-2-4-7(8)9(11)12/h2-5H,1H3,(H,11,12)",
+        "standard_inchi_key": "BSYNRYMUTXBXSQ-UHFFFAOYSA-N"
+      },
+      "molecule_type": "Small molecule",
+      "pref_name": "ASPIRIN",
+      "structure_type": "MOL"
+    },
+    {
+      "inorganic_flag": 0,
+      "max_phase": "0.5",
+      "molecule_chembl_id": "CHEMBL14830",
+      "molecule_hierarchy": {
+        "active_chembl_id": "CHEMBL14830",
+        "molecule_chembl_id": "CHEMBL14830",
+        "parent_chembl_id": "CHEMBL14830"
+      },
+      "molecule_properties": {
+        "alogp": "-1.75",
+        "aromatic_rings": 2,
+        "full_molformula": "C10H15N5O10P2",
+        "full_mwt": "427.20",
+        "hba": 12,
+        "hbd": 6,
+        "heavy_atoms": 27,
+        "mw_freebase": "427.20",
+        "np_likeness_score": "1.39",
+        "num_ro5_violations": 2,
+        "psa": "232.60",
+        "qed_weighted": "0.28",
+        "ro3_pass": "N",
+        "rtb": 6
+      },
+      "molecule_structures": {
+        "canonical_smiles": "Nc1ncnc2c1ncn2[C@@H]1O[C@H](COP(=O)(O)OP(=O)(O)O)[C@@H](O)[C@H]1O",
+        "standard_inchi": "InChI=1S/C10H15N5O10P2/c11-8-5-9(13-2-12-8)15(3-14-5)10-7(17)6(16)4(24-10)1-23-27(21,22)25-26(18,19)20/h2-4,6-7,10,16-17H,1H2,(H,21,22)(H2,11,12,13)(H2,18,19,20)/t4-,6-,7-,10-/m1/s1",
+        "standard_inchi_key": "XTWYTFMLZFPYCI-KQYNXXCUSA-N"
+      },
+      "molecule_type": "Small molecule",
+      "pref_name": "ADENOSINE DIPHOSPHATE",
+      "structure_type": "MOL"
+    }
+  ]
+}

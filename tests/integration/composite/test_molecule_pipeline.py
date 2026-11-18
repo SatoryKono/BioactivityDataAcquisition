@@ -23,6 +23,8 @@ Reference: ADR-026 Composite Pipeline Pattern
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
 from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
@@ -220,6 +222,49 @@ class TestCompositeMoleculePipeline:
         # All seed records should be preserved
         assert len(seed_renamed) == 3
         assert "chembl.molecule.molecule_id" in seed_renamed.columns
+
+    def test_recorded_fractional_seed_phase_survives_enrichment_join(
+        self, mock_logger: LoggerPort, enricher_pubchem_df: pl.DataFrame
+    ) -> None:
+        """The actual recorded 0.5 code survives provider qualification and join."""
+        sample = json.loads(
+            Path("tests/fixtures/chembl_molecule_phase_records.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        seed = pl.DataFrame(
+            [
+                {
+                    "molecule_id": row["molecule_chembl_id"],
+                    "inchi_key": row["molecule_structures"]["standard_inchi_key"],
+                    "max_phase": sample["expected_phases"][row["molecule_chembl_id"]],
+                }
+                for row in sample["records"]
+            ]
+        )
+        renamer = ColumnRenamer(mock_logger)
+        qualified = renamer.rename_dataframe(seed, "chembl_molecule")
+        enrichment = renamer.rename_dataframe(enricher_pubchem_df, "pubchem_compound")
+        joined = qualified.join(
+            enrichment,
+            left_on="chembl.molecule.inchi_key",
+            right_on="pubchem.compound.inchi_key",
+            how="left",
+        )
+        assert joined.height == seed.height == 2
+        assert (
+            dict(
+                joined.select(
+                    "chembl.molecule.molecule_id", "chembl.molecule.max_phase"
+                ).rows()
+            )
+            == sample["expected_phases"]
+        )
+        assert dict(
+            joined.select(
+                "chembl.molecule.molecule_id", "chembl.molecule.inchi_key"
+            ).rows()
+        ) == dict(seed.select("molecule_id", "inchi_key").rows())
 
     def test_enricher_join_by_inchi_key(
         self,
