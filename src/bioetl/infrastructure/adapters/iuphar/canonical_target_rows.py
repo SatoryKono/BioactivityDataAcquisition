@@ -12,6 +12,7 @@ from bioetl.infrastructure.schemas.silver_chembl_core import CHEMBL_TARGET_SCHEM
 from bioetl.infrastructure.storage.target_classification_guard import (
     TARGET_CLASSIFICATION_FIELDS,
 )
+from iuphar_target_class.bioetl_input import project_target_fields
 from iuphar_target_class.csv_io import read_csv_records
 from iuphar_target_class.stage0.io import (
     canonical_csv_bytes,
@@ -19,7 +20,6 @@ from iuphar_target_class.stage0.io import (
     sha256_bytes,
 )
 
-from ._input_projection import project_target_fields
 from .cohort_contract import (
     _COLUMNS,
     _REQUIRED,

@@ -13,6 +13,7 @@ from pathlib import Path
 from time import perf_counter
 from typing import NotRequired, TypedDict, cast
 
+from .bioetl_input import target_input_eligibility
 from .models import ClassificationResult, RawTargetRow, RunProvenance
 from .pipeline import BatchResult, IndexedSnapshot, classify_batch
 from .pipeline_acceptance import (
@@ -110,6 +111,7 @@ class IntegrationAcceptanceRequest:
     run_id: str
     pipeline_proof: Path | None = None
     pipeline_report: Path | None = None
+    species_taxon_ids: frozenset[str] | None = None
 
 
 def _verified_labels(request: IntegrationAcceptanceRequest) -> _ReferenceSpecification:
@@ -379,6 +381,11 @@ def _write_execution_config(
         "stage0_manifest_sha256": cohort.manifest_sha256,
         "run_id": request.run_id,
         "expected_rows": len(cohort.rows),
+        "species_taxon_ids": (
+            sorted(request.species_taxon_ids)
+            if request.species_taxon_ids is not None
+            else None
+        ),
     }
     (output_dir / "execution-config.json").write_bytes(canonical_json_bytes(config))
 
@@ -432,7 +439,9 @@ def _verify_batch_outputs(
 
 
 def _execution_bindings(
-    cohort: AdmittedCohort, batch: BatchResult
+    cohort: AdmittedCohort,
+    batch: BatchResult,
+    species_taxon_ids: frozenset[str] | None = None,
 ) -> tuple[PipelineExecutionBinding, ...]:
     """Bind each admitted input to the semantic result of this execution."""
     by_row = {row.result.input_row_id: row.result for row in batch.rows}
@@ -441,11 +450,27 @@ def _execution_bindings(
         result = by_row.get(row.input_row_id)
         if result is None:
             raise ValueError("pipeline proof belongs to another admitted cohort")
+        raw_fields: Mapping[str, object] = dict(row.fields)
+        semantic = execution_semantics(result)
+        business_json = row.fields.get("source_business_data")
+        if business_json:
+            if species_taxon_ids is None:
+                raise ValueError(
+                    "canonical pipeline proof requires the profile species scope"
+                )
+            business = json.loads(business_json)
+            if not isinstance(business, dict):
+                raise ValueError("canonical source business data must be an object")
+            _, reason = target_input_eligibility(business, species_taxon_ids)
+            if reason is not None:
+                raw_fields = business
+                semantic = dict.fromkeys(semantic)
+                semantic.update(status="not_applicable", reason=reason)
         bindings.append(
             PipelineExecutionBinding(
                 row.input_row_id,
-                dict(row.fields),
-                execution_semantics(result),
+                raw_fields,
+                semantic,
             )
         )
     return tuple(bindings)
@@ -466,7 +491,9 @@ def _record_pipeline_acceptance(
         request.pipeline_report,
         provenance=request.provenance,
         expected_row_ids=tuple(row.input_row_id for row in cohort.rows),
-        expected_execution=_execution_bindings(cohort, batch),
+        expected_execution=_execution_bindings(
+            cohort, batch, request.species_taxon_ids
+        ),
     )
     if request.pipeline_report is not None:
         receipt["pipeline_report_sha256"] = sha256_file(request.pipeline_report)

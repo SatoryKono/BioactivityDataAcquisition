@@ -46,6 +46,7 @@ def main(argv: list[str] | None = None) -> int:
         args.run_id,
         args.pipeline_proof,
         args.pipeline_report,
+        species_taxon_ids=profile.snapshot.species_taxon_ids,
     )
     receipt = run_integration_acceptance(
         request,

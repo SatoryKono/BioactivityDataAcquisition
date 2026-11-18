@@ -299,6 +299,7 @@ def acceptance_inputs(tmp_path):
         "reference-fixture",
         proof,
         report,
+        species_taxon_ids=frozenset({"9606"}),
     )
     return request, snapshot
 

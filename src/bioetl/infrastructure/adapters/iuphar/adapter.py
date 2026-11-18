@@ -10,20 +10,20 @@ from bioetl.domain.entities.target_classification_boundary import (
     TargetClassificationInput,
     TargetClassificationResult,
 )
+from iuphar_target_class.bioetl_input import (
+    plain_target_value as _plain,
+)
+from iuphar_target_class.bioetl_input import (
+    project_target_fields as _raw_fields,
+)
+from iuphar_target_class.bioetl_input import (
+    target_input_eligibility as _eligibility,
+)
 from iuphar_target_class.models import RawTargetRow, RunProvenance
 from iuphar_target_class.pipeline import BatchResult, classify_batch
 from iuphar_target_class.pipeline_io import render_batch
 from iuphar_target_class.stage0.io import canonical_json_bytes
 
-from ._input_projection import (
-    plain_target_value as _plain,
-)
-from ._input_projection import (
-    project_target_fields as _raw_fields,
-)
-from ._input_projection import (
-    target_input_eligibility as _eligibility,
-)
 from .snapshot_loader import LoadedIupharProfile
 
 _FIELD_MAP = {

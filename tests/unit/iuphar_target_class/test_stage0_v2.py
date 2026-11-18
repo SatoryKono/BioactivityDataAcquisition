@@ -11,7 +11,7 @@ from pathlib import Path
 import pyarrow as pa
 import pytest
 
-from bioetl.infrastructure.adapters.iuphar._input_projection import (
+from iuphar_target_class.bioetl_input import (
     project_target_fields,
 )
 from bioetl.infrastructure.adapters.iuphar.cohort_projection import (

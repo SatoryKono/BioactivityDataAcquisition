@@ -27,6 +27,166 @@ from tests.helpers.iuphar_snapshot import synthetic_snapshot_bundle
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.parametrize(
+    "taxon,organism,reason",
+    [
+        (9606, "Homo sapiens", None),
+        (10116, "Rattus norvegicus", "unsupported_taxon"),
+        (9606, "Mus musculus", "taxonomy_name_conflict"),
+    ],
+)
+def test_canonical_cohort_roundtrip_uses_runtime_eligibility(
+    tmp_path,
+    classification_boundary,
+    taxon,
+    organism,
+    reason,
+):
+    import pyarrow as pa
+    from bioetl.infrastructure.adapters.iuphar.cohort_projection import (
+        ARROW_SOURCE_FORMAT,
+        NORMALIZED_TARGET_SCHEMA,
+        CohortExportRequest,
+        export_canonical_cohort,
+    )
+    from iuphar_target_class.integration_acceptance import _execution_bindings
+    from iuphar_target_class.models import RunProvenance
+    from iuphar_target_class.pipeline import classify_batch
+    from iuphar_target_class.pipeline_acceptance import AdmittedCohort
+    from iuphar_target_class.pipeline_io import read_bioetl_target_kernel_csv_v1
+    from iuphar_target_class.pipeline_proof import verify_stored_pipeline_proof
+    from iuphar_target_class.stage0.io import sha256_file
+
+    classifier, store, _, business, root = classification_boundary
+    business.update(taxonomy_id=taxon, organism=organism, pref_name="Fixture")
+    source = tmp_path / "source.arrow"
+    table = pa.Table.from_pylist([business])
+    with pa.ipc.new_stream(source, table.schema) as writer:
+        writer.write_table(table)
+    exported = export_canonical_cohort(
+        CohortExportRequest(
+            source,
+            sha256_file(source),
+            ARROW_SOURCE_FORMAT,
+            NORMALIZED_TARGET_SCHEMA,
+            "synthetic-mapping",
+            "test",
+        ),
+        output_dir=tmp_path / "cohort",
+    )
+    rows = read_bioetl_target_kernel_csv_v1(
+        exported.canonical_path.read_bytes(),
+        source_path="source.arrow",
+        target_kind="protein",
+    )
+    profile = classifier._profile
+    store = LocalTargetClassificationEvidenceStore(
+        root,
+        mode="shadow",
+        snapshot_manifest_sha256=classifier.snapshot_manifest_sha256,
+        profile_sha256=classifier.profile_sha256,
+        normalization_version=profile.normalization_version,
+        rules_version=profile.rules_version,
+        classification_schema_version=profile.classification_schema_version,
+    )
+    provenance = RunProvenance(
+        classifier.snapshot_id,
+        profile.normalization_version,
+        profile.rules_version,
+        profile.classification_schema_version,
+        profile.snapshot.retrieved_at,
+        "fixed",
+    )
+    batch = classify_batch(
+        rows,
+        snapshot=profile.snapshot.snapshot,
+        provenance=provenance,
+        run_id="reference",
+    )
+    cohort = AdmittedCohort("a" * 64, (), rows)
+    with pytest.raises(ValueError, match="profile species scope"):
+        _execution_bindings(cohort, batch)
+    bindings = _execution_bindings(cohort, batch, profile.snapshot.species_taxon_ids)
+    result = classifier.classify_record(
+        business,
+        input_row_id=rows[0].input_row_id,
+        run_id="run-a",
+        run_started_at="fixed",
+    )
+    if reason:
+        assert result.diagnostic_codes == (reason,)
+    else:
+        assert "unsupported_taxon" not in result.diagnostic_codes
+    store.publish_result(result, run_id="run-a", batch_id="batch-1")
+    store.finalize_run(run_id="run-a", expected_row_ids=(rows[0].input_row_id,))
+    proof = root / "run-a/manifest.json"
+    document = json.loads(proof.read_bytes())
+    report = tmp_path / "report.json"
+    facts = {
+        key: document[key]
+        for key in (
+            "run_id",
+            "mode",
+            "snapshot_manifest_sha256",
+            "profile_sha256",
+            "normalization_version",
+            "rules_version",
+            "classification_schema_version",
+            "row_count",
+        )
+    }
+    facts.update(
+        evidence_manifest_uri=proof.as_uri(),
+        evidence_manifest_sha256=sha256_file(proof),
+    )
+    report.write_bytes(
+        canonical_json_bytes(
+            {
+                "schema_version": "pipeline_run_report_v2",
+                "identity": {
+                    "pipeline": "chembl_target",
+                    "run_id": "run-a",
+                    "status": "success",
+                },
+                "observations": {
+                    "Target Classification": {
+                        "verdict": "OK",
+                        "reason": "verified_target_classification_evidence",
+                        "facts": facts,
+                    }
+                },
+            }
+        )
+    )
+    assert verify_stored_pipeline_proof(
+        proof,
+        classifier.snapshot_manifest_sha256,
+        report,
+        provenance,
+        expected_execution=bindings,
+    ) == sha256_file(proof)
+    altered_input = dict(bindings[0].raw_fields)
+    altered_input["target_id"] = "another-target"
+    with pytest.raises(ValueError, match="input differs"):
+        verify_stored_pipeline_proof(
+            proof,
+            classifier.snapshot_manifest_sha256,
+            report,
+            provenance,
+            expected_execution=(replace(bindings[0], raw_fields=altered_input),),
+        )
+    changed = dict(bindings[0].semantic)
+    changed["reason"] = "wrong-policy-result"
+    with pytest.raises(ValueError, match="eligibility differs"):
+        verify_stored_pipeline_proof(
+            proof,
+            classifier.snapshot_manifest_sha256,
+            report,
+            provenance,
+            expected_execution=(replace(bindings[0], semantic=changed),),
+        )
+
+
 @pytest.fixture
 def classification_boundary(tmp_path):
     root, bundle = synthetic_snapshot_bundle(tmp_path / "synthetic-provider")

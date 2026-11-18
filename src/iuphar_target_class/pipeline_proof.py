@@ -238,6 +238,12 @@ def _bind_executed_cohort(
         raise ValueError(_OTHER_COHORT)
     for row_id, item in expected.items():
         row = records(found[row_id]["classification.json"])[0]
+        if (row.get("status") == "not_applicable") != (
+            item.semantic.get("status") == "not_applicable"
+        ) or row.get("reason") != item.semantic.get("reason"):
+            raise ValueError(
+                "pipeline proof eligibility differs from the admitted execution"
+            )
         if canonical_json_bytes(
             _classification_input_projection(row.get("raw_fields"))
         ) != canonical_json_bytes(_classification_input_projection(item.raw_fields)):
