@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "8c9560b11933283509c92e84fb87900dc907bdf3",
+  "source_ref": "8c9560b11933283509c92e84fb87900dc907bdf3",
+  "source_reviews": {
+    "src/bioetl/application/core/_base_transformer_execution_support.py": "Adds typed in-process callbacks to the transformer ownership protocol. No new acquisition or cleanup owner.",
+    "src/bioetl/application/core/base_transformer_execution_mixin.py": "Executes the existing evidence publish and discard callbacks within the established transformation lifecycle. Span creation and closure use the existing owners.",
+    "src/bioetl/application/core/pre_silver_finalization_flow.py": "Calls the existing record normalizer projection directly and uses the unchanged default content hash policy. No acquisition or cleanup change.",
+    "src/bioetl/application/core/pre_silver_staging_flow.py": "Passes existing evidence callbacks through the in-process staging adapter. No new statement opens an external resource.",
+    "src/bioetl/application/core/record_normalization_finalization.py": "Keeps active version hash selection in the existing record finalizer. The change is pure record projection.",
+    "src/bioetl/application/pipelines/chembl/target_transformer.py": "Registers existing per-row evidence publish and discard callbacks with the base transformer. The session and its owned resources remain unchanged.",
+    "src/bioetl/composition/bootstrap/assembly/storage.py": "Passes the existing workflow options directly to the qualified replay parent reader and narrows the existing allowed modes with a tuple. The owned manifest read, allowed modes and admission remain unchanged.",
+    "src/bioetl/composition/factories/pipeline/_creation_wiring.py": "Keeps the typing cast at the existing pipeline YAML boundary after resolution. The call, resource owner and lifetime are unchanged.",
+    "src/bioetl/composition/runtime_builders/_exact_replay_cached_bronze_context.py": "Shares existing parent selectors between pipeline context and workflow options. The same FileRunManifestStore call, base path and manifest lookup remain in use."
+  }
+}
