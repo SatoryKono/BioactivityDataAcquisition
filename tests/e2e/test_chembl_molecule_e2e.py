@@ -51,6 +51,9 @@ from bioetl.domain.run_reports.context import (
     bind_stage_accounting,
     reset_stage_accounting,
 )
+from bioetl.infrastructure.config.reason_catalog_loader import (
+    load_default_reason_catalog,
+)
 from bioetl.infrastructure.storage.gold.writer_schema_helpers import (
     _project_records_for_gold_schema,
 )
@@ -211,7 +214,7 @@ async def test_invalid_phase_is_quarantined_without_contaminating_gold(
         zstd.ZstdCompressor().compress(payload + json.dumps(invalid).encode() + b"\n")
     )
     context = replace(_cached_context(molecule_cache), limit=3)
-    accounting = StageAccountingAccumulator()
+    accounting = StageAccountingAccumulator(catalog=load_default_reason_catalog())
     token = bind_stage_accounting(accounting)
     try:
         runner = bootstrap_pipeline_runner(context)
