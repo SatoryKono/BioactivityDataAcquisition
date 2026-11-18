@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import hashlib
+from collections.abc import Iterator
 from pathlib import Path
+from shutil import copyfile
 from uuid import UUID
 
 import pytest
@@ -21,11 +23,36 @@ from bioetl.domain.config import RuntimeConfig
 from bioetl.domain.ports import PipelineCreateRunnerRequest
 from bioetl.domain.types import HealthStatus, RunType
 from bioetl.infrastructure.config.settings_api import Settings
+from bioetl.infrastructure.config.config_root import resolve_configs_root
+from bioetl.infrastructure.config.contract_policy_loader import (
+    load_pipeline_contract_policy,
+)
 from tests.helpers.clock import FIXED_TEST_TIME
 from tests.helpers.iuphar_snapshot import synthetic_snapshot_bundle
 from tests.integration.pipelines.observability import build_test_observability_bundle
 
 pytestmark = pytest.mark.unit
+
+
+@pytest.fixture
+def isolated_working_directory(tmp_path: Path) -> Iterator[Path]:
+    """Supply real policy inputs to the cwd-based loader with a cold cache."""
+    working_directory = tmp_path / "canonical-working-directory"
+    working_directory.mkdir()
+    configs_root = resolve_configs_root()
+    for relative in (
+        "base/pipeline.yaml",
+        "base/contract_registry.yaml",
+        "entities/chembl/target.yaml",
+    ):
+        destination = working_directory / "configs" / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        copyfile(configs_root / relative, destination)
+    load_pipeline_contract_policy.cache_clear()
+    try:
+        yield working_directory
+    finally:
+        load_pipeline_contract_policy.cache_clear()
 
 
 def _hashes(paths):
@@ -72,7 +99,7 @@ class _Source:
 @pytest.mark.asyncio
 @pytest.mark.parametrize("mode", ["off", "shadow"])
 async def test_real_factory_preserves_canonical_dq_and_writes_isolated_data_and_reports(
-    tmp_path, monkeypatch, mode
+    tmp_path, monkeypatch, mode, isolated_working_directory
 ):
     config = load_pipeline_config("chembl_target")
     if mode == "shadow":
@@ -88,8 +115,7 @@ async def test_real_factory_preserves_canonical_dq_and_writes_isolated_data_and_
                 )
             }
         )
-    canonical = tmp_path / "canonical-working-directory"
-    canonical.mkdir()
+    canonical = isolated_working_directory
     sentinels = []
     for layer in ("bronze", "silver", "gold"):
         report = (
