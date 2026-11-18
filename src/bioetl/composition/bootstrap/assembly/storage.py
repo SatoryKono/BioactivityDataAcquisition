@@ -46,6 +46,10 @@ from bioetl.application.services.workflow.control_plane.mutation_plan import (
     WorkflowMutationSpec,
     build_workflow_mutation_plan,
 )
+from bioetl.composition.bootstrap.assembly.target_classification_replay import (
+    resolve_workflow_target_config,
+    resolve_workflow_target_replay_config,
+)
 from bioetl.composition.bootstrap.cli.lock import validate_workflow_target_mutations
 from bioetl.composition.runtime_builders.config_access import load_pipeline_config
 from bioetl.composition.runtime_builders._exact_replay_cached_bronze_context import (
@@ -59,9 +63,6 @@ from bioetl.infrastructure.adapters.iuphar import (
     load_profile,
 )
 from bioetl.infrastructure.config.config_root import resolve_configs_root
-from bioetl.infrastructure.config.target_classification_profile import (
-    resolve_target_classification_profile,
-)
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.schemas.workflow_config import WorkflowConfig
 
@@ -301,8 +302,18 @@ def preflight_workflow_target_dependencies(
     """Admit a target dependency before the first workflow step can mutate data."""
     stored = launch_context.get(TARGET_CLASSIFICATION_DEPENDENCY_KEY)
     runtime_settings = settings or get_settings()
-    target = _workflow_target_config(stored)
-    target = _workflow_replay_target_config(config, target, runtime_settings)
+    target = resolve_workflow_target_config(
+        stored,
+        load_config=load_pipeline_config,
+        hydrate_config=hydrate_target_runtime_config,
+    )
+    target = resolve_workflow_target_replay_config(
+        config,
+        target,
+        runtime_settings,
+        load_parent=resolve_replay_parent_manifest,
+        hydrate_config=hydrate_target_runtime_config,
+    )
     plan = mutation_plan or build_workflow_mutation_plan(config)
     admission = validate_workflow_target_mutations(
         config,
@@ -330,47 +341,3 @@ def preflight_workflow_target_dependencies(
     if isinstance(stored, Mapping) and dict(stored) != binding:
         raise ValueError("stored target classification dependency identity changed")
     return {TARGET_CLASSIFICATION_DEPENDENCY_KEY: binding}
-
-
-def _workflow_replay_target_config(
-    config: WorkflowConfig, current: PipelineYamlConfig, settings: Settings
-) -> PipelineYamlConfig:
-    """Pin the parent's classification inputs before admitting workflow writes."""
-    selected: PipelineYamlConfig | None = None
-    for step in config.pipeline_steps:
-        if step.pipeline_name != "chembl_target":
-            continue
-        options = config.defaults.merged_with(step.run_options)
-        candidate = current
-        if options.exact_replay and (
-            options.replay_of_manifest_id or options.replay_of_run_id
-        ):
-            parent = resolve_replay_parent_manifest(ctx=options, settings=settings)
-            if parent.pipeline_name != "chembl_target" or not parent.resolved_config:
-                raise ValueError(
-                    "target replay parent has no matching pinned configuration"
-                )
-            candidate = hydrate_target_runtime_config(parent.resolved_config)
-        candidate = resolve_target_classification_profile(
-            candidate
-        ).resolved_yaml_config
-        if (
-            selected is not None
-            and selected.target_classification != candidate.target_classification
-        ):
-            raise ValueError(
-                "workflow target steps require conflicting classification dependencies"
-            )
-        selected = candidate
-    return selected if selected is not None else current
-
-
-def _workflow_target_config(stored: object) -> PipelineYamlConfig:
-    if isinstance(stored, Mapping):
-        payload = stored.get("target_config")
-        if not isinstance(payload, Mapping):
-            raise ValueError("stored workflow target dependency has no configuration")
-        target = hydrate_target_runtime_config(payload)
-    else:
-        target = load_pipeline_config("chembl_target")
-    return resolve_target_classification_profile(target).resolved_yaml_config

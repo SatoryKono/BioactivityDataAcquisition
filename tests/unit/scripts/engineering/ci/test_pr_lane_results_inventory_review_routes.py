@@ -30,6 +30,7 @@ UNKNOWN = "configs/quality/external_resource_inventory_pr0_unreviewed.json"
         "configs/quality/external_resource_inventory_pr13166_replay_preflight_review.json",
         "configs/quality/external_resource_inventory_pr13166_eager_reader_review.json",
         "configs/quality/external_resource_inventory_pr13166_template_lifecycle_review.json",
+        "configs/quality/external_resource_inventory_pr13166_workflow_limits_review.json",
     ],
 )
 def test_pr13166_inventory_review_snapshots_keep_bounded_owners(path: str) -> None:
