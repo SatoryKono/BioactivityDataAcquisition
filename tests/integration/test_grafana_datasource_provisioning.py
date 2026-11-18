@@ -624,10 +624,10 @@ OPS_READY_URL=http://bioetl:8000/ops/control-plane/ready
 mkdir -p "${LATE_RECOVERY_ROOT}"
 printf '%s' "${LATE_RECOVERY_LEASE_VALUE}" > "${LATE_RECOVERY_LEASE}"
 case "${SCENARIO}" in
-  claimed|full|full_unhealthy) mkdir "${LATE_RECOVERY_CLAIM}" ;;
+  claimed|full|full_unhealthy|full_health_delayed|full_health_flap) mkdir "${LATE_RECOVERY_CLAIM}" ;;
 esac
 case "${SCENARIO}" in
-  full|full_unhealthy) LATE_RECOVERY_STATE=confirming_full; OPS_HTTP_STATE=ready; DASHBOARD_PROFILE=full ;;
+  full|full_unhealthy|full_health_delayed|full_health_flap) LATE_RECOVERY_STATE=confirming_full; OPS_HTTP_STATE=ready; DASHBOARD_PROFILE=full ;;
 esac
 late_recovery_now() { read -r _time < "${CLOCK_PATH}" || true; printf '%s\n' "${_time}"; }
 late_recovery_alive() { [ "${SCENARIO}" != stopped ]; }
@@ -637,6 +637,11 @@ wget() {
   case "$*" in
     *api/health*)
       [ "${SCENARIO}" != full_unhealthy ] || return 1
+      read -r _time < "${CLOCK_PATH}" || true
+      case "${SCENARIO}" in
+        health_delayed|full_health_delayed) [ "${_time}" -ge 120 ] || return 1 ;;
+        health_flap|full_health_flap) [ "${_time}" -ge 110 ] && [ "${_time}" -ne 115 ] || return 1 ;;
+      esac
       printf '%s' '{"database":"ok"}'
       ;;
     *)
@@ -676,6 +681,7 @@ late_recovery_watch
     )
     assert result.returncode == 0, result.stderr
     return {
+        "finished_at": int(clock_path.read_text(encoding="utf-8")),
         "status": json.loads(status_path.read_text(encoding="utf-8")),
         "signals": signals_path.read_text(encoding="utf-8").splitlines()
         if signals_path.exists()
@@ -687,6 +693,25 @@ late_recovery_watch
             tmp_path / "bioetl-late-cutover" / ("a" * 64 + ".lease")
         ).exists(),
     }
+
+
+@pytest.mark.parametrize(
+    "scenario",
+    ["health_delayed", "health_flap", "full_health_delayed", "full_health_flap"],
+)
+def test_late_recovery_waits_for_ten_seconds_of_consecutive_health(
+    tmp_path: Path, scenario: str
+) -> None:
+    result = _run_late_recovery_case(tmp_path, scenario)
+    assert result["finished_at"] == 130
+    if scenario.startswith("full_"):
+        assert result["status"]["late_recovery_state"] == "complete"
+        assert result["signals"] == []
+        assert not result["claim_exists"]
+    else:
+        assert result["status"]["late_recovery_state"] == "restart_requested"
+        assert result["signals"] == ["-TERM 424242"]
+        assert result["claim_exists"]
 
 
 def test_late_recovery_restarts_saved_foreground_once_after_delayed_match(

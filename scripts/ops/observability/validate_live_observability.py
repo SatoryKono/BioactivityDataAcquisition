@@ -202,9 +202,14 @@ def check_prometheus_targets(prometheus_url: str, timeout: float) -> ValidationR
             if t.get("health") != "up"
         ]
 
+        status: Literal["pass", "partial", "fail"] = "pass"
+        if missing_jobs:
+            status = "fail"
+        elif down_count:
+            status = "partial"
         return ValidationResult(
             check_name="prometheus_targets",
-            status=("fail" if missing_jobs else "partial" if down_count else "pass"),
+            status=status,
             message=(
                 f"Prometheus targets: {up_count} up, {down_count} unhealthy, "
                 f"{len(missing_jobs)} configured jobs missing"
@@ -498,6 +503,29 @@ def check_grafana_datasources(
         )
 
 
+def _grafana_dashboard_model_matches(
+    dashboard_root: Path,
+    uid: str,
+    grafana_url: str,
+    headers: dict[str, str],
+    timeout: float,
+) -> bool:
+    """Compare one validated shipped model with its live Grafana payload."""
+    source = json.loads((dashboard_root / f"{uid}.json").read_text(encoding="utf-8"))
+    live = _fetch_json(f"{grafana_url}/api/dashboards/uid/{uid}", timeout, headers)
+    if (
+        not isinstance(source, dict)
+        or source.get("uid") != uid
+        or not isinstance(source.get("panels"), list)
+        or not isinstance(live, dict)
+        or not isinstance(live.get("dashboard"), dict)
+        or live["dashboard"].get("uid") != uid
+        or not isinstance(live["dashboard"].get("panels"), list)
+    ):
+        raise ValueError(f"Malformed dashboard model for {uid}")
+    return _normalize_dashboard_payload(source) == _normalize_dashboard_payload(live)
+
+
 def check_grafana_dashboards(
     grafana_url: str,
     username: str,
@@ -542,24 +570,8 @@ def check_grafana_dashboards(
         for uid in sorted(EXPECTED_BIOETL_DASHBOARD_UIDS):
             if uid in missing_bioetl_dashboard_uids:
                 continue
-            source = json.loads(
-                (dashboard_root / f"{uid}.json").read_text(encoding="utf-8")
-            )
-            live = _fetch_json(
-                f"{grafana_url}/api/dashboards/uid/{uid}", timeout, headers
-            )
-            if (
-                not isinstance(source, dict)
-                or source.get("uid") != uid
-                or not isinstance(source.get("panels"), list)
-                or not isinstance(live, dict)
-                or not isinstance(live.get("dashboard"), dict)
-                or live["dashboard"].get("uid") != uid
-                or not isinstance(live["dashboard"].get("panels"), list)
-            ):
-                raise ValueError(f"Malformed dashboard model for {uid}")
-            if _normalize_dashboard_payload(source) != _normalize_dashboard_payload(
-                live
+            if not _grafana_dashboard_model_matches(
+                dashboard_root, uid, grafana_url, headers, timeout
             ):
                 mismatched_uids.append(uid)
 

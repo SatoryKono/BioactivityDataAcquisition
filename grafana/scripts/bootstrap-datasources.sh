@@ -64,9 +64,11 @@ LATE_RECOVERY_ROOT="$(dirname "${STATUS_FILE}")/bioetl-late-cutover"
 LATE_RECOVERY_CLAIM="${LATE_RECOVERY_ROOT}/${EXPECTED_RUNTIME_SOURCE_ID}.claim"
 LATE_RECOVERY_LEASE="${LATE_RECOVERY_ROOT}/${EXPECTED_RUNTIME_SOURCE_ID}.lease"
 LATE_RECOVERY_STATE="disabled"
+LATE_RECOVERY_FAILED="failed"
 LATE_RECOVERY_INSTANCE=""
 LATE_RECOVERY_DEADLINE=0
 LATE_RECOVERY_STARTED=0
+LATE_RECOVERY_HEALTHY_SINCE=""
 LATE_RECOVERY_FOREGROUND=$$
 
 log() {
@@ -315,7 +317,8 @@ late_recovery_release() {
 }
 
 late_recovery_finish() {
-  LATE_RECOVERY_STATE="$1"
+  local final_state="$1"
+  LATE_RECOVERY_STATE="${final_state}"
   write_bootstrap_status
   late_recovery_release
 }
@@ -352,7 +355,7 @@ late_recovery_watch() {
   _late_attempt=0
   while [ "${_late_attempt}" -lt 60 ]; do
     late_recovery_alive || { late_recovery_finish stopped; return; }
-    _late_now="$(late_recovery_now)" || { late_recovery_finish failed; return; }
+    _late_now="$(late_recovery_now)" || { late_recovery_finish "${LATE_RECOVERY_FAILED}"; return; }
     [ "${_late_now}" -lt "${LATE_RECOVERY_DEADLINE}" ] || break
     _late_attempt=$((_late_attempt + 1))
     late_recovery_identity
@@ -365,9 +368,10 @@ late_recovery_watch() {
       return
     fi
     if [ "${_late_identity}" -eq 0 ] && late_recovery_health; then
-      _late_now="$(late_recovery_now)" || { late_recovery_finish failed; return; }
+      _late_now="$(late_recovery_now)" || { late_recovery_finish "${LATE_RECOVERY_FAILED}"; return; }
+      [ -n "${LATE_RECOVERY_HEALTHY_SINCE}" ] || LATE_RECOVERY_HEALTHY_SINCE="${_late_now}"
       if [ "${_late_now}" -lt "${LATE_RECOVERY_DEADLINE}" ] &&
-        [ "$((_late_now - LATE_RECOVERY_STARTED))" -ge 10 ] && late_recovery_alive; then
+        [ "$((_late_now - LATE_RECOVERY_HEALTHY_SINCE))" -ge 10 ] && late_recovery_alive; then
         # Revalidate immediately before claiming; foreign identity never restarts.
         late_recovery_identity
         _late_identity=$?
@@ -379,14 +383,14 @@ late_recovery_watch() {
           return
         fi
         if [ "${_late_identity}" -eq 0 ]; then
-          _late_now="$(late_recovery_now)" || { late_recovery_finish failed; return; }
+          _late_now="$(late_recovery_now)" || { late_recovery_finish "${LATE_RECOVERY_FAILED}"; return; }
           [ "${_late_now}" -lt "${LATE_RECOVERY_DEADLINE}" ] || break
           late_recovery_alive || { late_recovery_finish stopped; return; }
           if [ "${LATE_RECOVERY_STATE}" = "confirming_full" ]; then
             if rmdir "${LATE_RECOVERY_CLAIM}" 2>/dev/null; then
               late_recovery_finish complete
             else
-              late_recovery_finish failed
+              late_recovery_finish "${LATE_RECOVERY_FAILED}"
             fi
             return
           fi
@@ -397,13 +401,15 @@ late_recovery_watch() {
           LATE_RECOVERY_STATE="restart_requested"
           write_bootstrap_status
           if ! kill -TERM "${LATE_RECOVERY_FOREGROUND}" 2>/dev/null; then
-            late_recovery_finish failed
+            late_recovery_finish "${LATE_RECOVERY_FAILED}"
           fi
           return
         fi
       fi
+    else
+      LATE_RECOVERY_HEALTHY_SINCE=""
     fi
-    _late_now="$(late_recovery_now)" || { late_recovery_finish failed; return; }
+    _late_now="$(late_recovery_now)" || { late_recovery_finish "${LATE_RECOVERY_FAILED}"; return; }
     _late_remaining=$((LATE_RECOVERY_DEADLINE - _late_now))
     [ "${_late_remaining}" -gt 0 ] || break
     [ "${_late_remaining}" -ge 5 ] && _late_remaining=5
@@ -428,17 +434,20 @@ start_late_recovery() {
   else
     return 0
   fi
-  LATE_RECOVERY_STARTED="$(late_recovery_now)" || { LATE_RECOVERY_STATE="failed"; return 0; }
+  LATE_RECOVERY_STARTED="$(late_recovery_now)" || { LATE_RECOVERY_STATE="${LATE_RECOVERY_FAILED}"; return 0; }
   LATE_RECOVERY_PROCESS_START="$(late_recovery_process_start)"
   LATE_RECOVERY_BOOT_ID="$(cat /proc/sys/kernel/random/boot_id 2>/dev/null)"
-  case "${LATE_RECOVERY_PROCESS_START}" in ''|*[!0-9]*) LATE_RECOVERY_STATE="failed"; return 0 ;; esac
-  [ -n "${LATE_RECOVERY_BOOT_ID}" ] || { LATE_RECOVERY_STATE="failed"; return 0; }
+  case "${LATE_RECOVERY_PROCESS_START}" in
+    ''|*[!0-9]*) LATE_RECOVERY_STATE="${LATE_RECOVERY_FAILED}"; return 0 ;;
+    *) ;;
+  esac
+  [ -n "${LATE_RECOVERY_BOOT_ID}" ] || { LATE_RECOVERY_STATE="${LATE_RECOVERY_FAILED}"; return 0; }
   LATE_RECOVERY_DEADLINE=$((LATE_RECOVERY_STARTED + 480))
   LATE_RECOVERY_INSTANCE="${LATE_RECOVERY_FOREGROUND}:${LATE_RECOVERY_PROCESS_START}:${LATE_RECOVERY_BOOT_ID}"
   LATE_RECOVERY_LEASE_VALUE="${LATE_RECOVERY_FOREGROUND} ${LATE_RECOVERY_PROCESS_START} ${LATE_RECOVERY_BOOT_ID} ${LATE_RECOVERY_DEADLINE}"
   if ! mkdir -p "${LATE_RECOVERY_ROOT}" 2>/dev/null ||
     ! printf '%s\n' "${LATE_RECOVERY_LEASE_VALUE}" > "${LATE_RECOVERY_LEASE}"; then
-    LATE_RECOVERY_STATE="failed"
+    LATE_RECOVERY_STATE="${LATE_RECOVERY_FAILED}"
     return 0
   fi
   return 0

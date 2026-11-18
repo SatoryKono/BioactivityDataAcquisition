@@ -51,6 +51,10 @@ Grafana is healthy for at least ten seconds, recovery requests one Grafana
 restart. Strict audit/render mode retains its fail-closed startup behavior.
 Foreign identity never triggers recovery. An unavailable backend retains the
 fallback and an explicit recovery state.
+The ten-second interval starts at the first healthy observation and resets
+when health or matching identity is lost. Runtime full-profile waiting also
+requires a live `/api/health` response with `database=ok`; a saved status file
+alone cannot confirm successful cutover.
 
 The runtime manager credits at most one Grafana restart above its initial
 baseline, and only for a full recovery receipt bound to the current source,

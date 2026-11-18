@@ -1,6 +1,6 @@
 ---
 name: new-pipeline
-description: "Scaffold a new BioETL provider or entity pipeline, including configs, wiring, docs, and tests. For an existing pipeline use py-config-bot."
+description: "Scaffold a new BioETL provider or entity pipeline, including configs, wiring, docs, and tests. For existing pipeline YAML or schema changes use py-config-bot."
 ---
 
 # New Pipeline
@@ -26,6 +26,8 @@ Create a new ETL pipeline for a provider/entity pair in BioETL.
 Use this wrapper for a new provider/entity pipeline, not for normal pipeline bug
 fixes. Confirm provider, entity, source API, expected medallion layers, and
 configuration ownership before writing files.
+
+For Python transformer defects in an existing pipeline, use [py-debug-bot](../py-debug-bot/SKILL.md) for diagnosis, then follow the active runtime's parent implementation workflow for the bounded code fix. Configuration changes remain in [py-config-bot](../py-config-bot/SKILL.md).
 
 ## Workflow
 

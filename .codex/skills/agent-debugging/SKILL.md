@@ -1,6 +1,6 @@
 ---
 name: "agent-debugging"
-description: "Diagnose a reproducible AI-agent trajectory or tool-routing failure. For product tests or runtime exceptions use py-debug-bot."
+description: "Diagnose a reproducible AI-agent trajectory or tool-routing failure. For product runtime exceptions or failing product tests use py-debug-bot."
 ---
 
 # Agent Debugging

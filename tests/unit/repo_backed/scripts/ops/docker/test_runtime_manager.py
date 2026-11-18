@@ -393,6 +393,10 @@ def test_grafana_bootstrap_timeout_retry_restarts_when_identity_now_matches(
             runtime_manager._GRAFANA_CONTAINER,
             "wget",
         ]:
+            if cmd[-1] == "http://127.0.0.1:3000/api/health":
+                return runtime_manager.CommandResult(
+                    list(cmd), 0, stdout=json.dumps({"database": "ok"})
+                )
             return runtime_manager.CommandResult(
                 list(cmd),
                 0,
@@ -902,9 +906,11 @@ def _grafana_cutover_runner(
     actual_source_id: str | None = None,
     restart_code: int = 0,
     ownership: str = "acquired",
+    health_payloads: list[object] | None = None,
 ) -> tuple[list[list[str]], runtime_manager.Runner]:
     commands: list[list[str]] = []
     status_reads = {"n": 0}
+    health_reads = {"n": 0}
     actual = expected_source_id if actual_source_id is None else actual_source_id
 
     def runner(cmd: Sequence[str], _cwd: Path, _timeout: float):
@@ -933,6 +939,13 @@ def _grafana_cutover_runner(
             runtime_manager._GRAFANA_CONTAINER,
             "wget",
         ]:
+            if cmd[-1] == "http://127.0.0.1:3000/api/health":
+                payloads = health_payloads or [{"database": "ok"}]
+                payload = payloads[min(health_reads["n"], len(payloads) - 1)]
+                health_reads["n"] += 1
+                return runtime_manager.CommandResult(
+                    list(cmd), 1 if payload is None else 0, stdout=json.dumps(payload)
+                )
             return runtime_manager.CommandResult(
                 list(cmd),
                 0,
@@ -1056,7 +1069,12 @@ def test_manager_waits_for_live_lease_before_probing_late_main(
     assert result is not None
     assert result["status"] == "full"
     assert not any(cmd[:2] == ["docker", "restart"] for cmd in commands)
-    assert not any(len(cmd) > 3 and cmd[3] == "wget" for cmd in commands)
+    assert not any(
+        len(cmd) > 3
+        and cmd[3] == "wget"
+        and cmd[-1] == "http://bioetl:8000/ops/control-plane/ready"
+        for cmd in commands
+    )
     assert any(cmd[-1] == "check" for cmd in commands)
 
 
@@ -1158,7 +1176,7 @@ def test_late_cutover_claim_has_one_owner_across_concurrent_processes(
     assert sorted(stdout.strip() for stdout, _stderr in results) == [
         "acquired",
         "claimed",
-    ]
+    ], results
 
 
 @pytest.mark.parametrize("current_source", [True, False])
@@ -1449,6 +1467,37 @@ def test_status_grafana_bootstrap_ignored_when_grafana_stopped() -> None:
         grafana_running=False,
     )
     assert findings == []
+
+
+@pytest.mark.parametrize(
+    ("health_payloads", "expected"),
+    [
+        ([None, {"database": "ok"}], True),
+        ([None], False),
+        ([{"database": "error"}], False),
+        (["malformed health body"], False),
+    ],
+)
+def test_full_bootstrap_status_requires_live_health_within_deadline(
+    health_payloads, expected
+) -> None:
+    now = [0.0]
+    commands, runner = _grafana_cutover_runner(
+        statuses=[{"ops_http": "ready", "dashboard_profile": "full"}],
+        expected_source_id="a" * 64,
+        health_payloads=health_payloads,
+    )
+    assert (
+        runtime_manager._wait_for_grafana_full_profile(
+            runner,
+            deadline=3,
+            sleep=lambda seconds: now.__setitem__(0, now[0] + seconds),
+            clock=lambda: now[0],
+        )
+        is expected
+    )
+    assert now[0] <= 3
+    assert len([cmd for cmd in commands if cmd[-1].endswith("/api/health")]) == 2
 
 
 def test_readiness_fails_on_restart_oom_and_image_drift() -> None:
