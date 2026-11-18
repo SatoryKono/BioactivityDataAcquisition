@@ -222,6 +222,11 @@ def test_monitoring_images_are_pinned_and_pushgateway_is_not_a_datasource() -> N
     managed = json.loads(
         Path("grafana/tooling/router-v7-bridge/managed-image.json").read_text()
     )
+    capture = json.loads(
+        Path("grafana/tooling/router-v7-bridge/host-image.json").read_text()
+    )["release_promotion"]
+    assert managed["delivery_source"]["candidate_ci"] == capture
+    assert managed["delivery_source"]["source_ref"] == capture["source_commit"]
     assert monitoring["services"]["grafana"]["image"] == managed["image"]
     assert managed["installed_bioetl_plugins"] == ["bioetl-selectorshell-panel"]
     unsigned = [

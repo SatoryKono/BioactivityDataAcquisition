@@ -169,6 +169,43 @@ def _validate_capture_history(host: JsonObject, promotion: JsonObject) -> None:
             )
 
 
+def _validate_committed_legacy_pair(original: dict[str, bytes]) -> None:
+    """Bootstrap old metadata only from the same immutable committed snapshot."""
+    commit = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True, timeout=20
+    ).strip()
+    require(bool(re.fullmatch(r"[0-9a-f]{40}", commit)), "Invalid legacy source commit")
+    for path in (HOST_PATH, MANAGED_PATH):
+        committed = subprocess.check_output(
+            ["git", "show", commit + ":" + path], cwd=ROOT, timeout=20
+        )
+        require(
+            original[path].replace(b"\r\n", b"\n") == committed.replace(b"\r\n", b"\n"),
+            "Mixed release manifest: restore both legacy snapshots from evidence/before",
+        )
+
+
+def _validate_manifest_pair(
+    host: JsonObject, managed: JsonObject, original: dict[str, bytes]
+) -> None:
+    """Do not archive a partially written qualification as a coherent pair."""
+    capture = host.get("release_promotion")
+    if capture is None:
+        return  # Preserve pre-promotion history without inventing a qualification.
+    capture = provenance.json_object(capture)
+    source = provenance.json_object(host["delivery_source"])
+    mate = provenance.json_object(managed["delivery_source"])
+    require(
+        source.get("candidate_ci") == capture
+        and source["source_ref"] == mate["source_ref"] == capture["source_commit"],
+        "Mixed release manifest qualification",
+    )
+    if "candidate_ci" in mate:
+        require(mate["candidate_ci"] == capture, "Mixed release manifest capture")
+    else:
+        _validate_committed_legacy_pair(original)
+
+
 def _prepare_release_history(
     result: JsonObject,
     host: JsonObject,
@@ -180,6 +217,7 @@ def _prepare_release_history(
 ) -> bool:
     """Validate existing pins and archive a new qualification without altering it."""
     _validate_capture_history(host, promotion)
+    _validate_manifest_pair(host, managed, original)
     image_changed = host["image"] != image
     if not image_changed:
         provenance.json_object(host.get("release_promotion"))
@@ -355,6 +393,7 @@ def build_release_files(
     managed["dockerfile_sha256"] = sha256(outputs[RECIPE_PATH])
     managed["delivery_source"] = {
         "source_ref": run["head_sha"],
+        "candidate_ci": promotion,
         "artifact_parity": managed_receipt,
     }
     outputs[HOST_PATH] = (json.dumps(result, indent=2) + "\n").encode()

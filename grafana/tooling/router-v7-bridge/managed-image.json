@@ -9,7 +9,20 @@
   ],
   "acceptance": "Artifact verified as the declared parent minus Scenes; runtime rollout remains independent.",
   "delivery_source": {
-    "source_ref": "2d80323fff3828793c8177a03a74c8b048a9330c",
+    "source_ref": "dd01e262e73e5295440f7c47715756166bc04da4",
+    "candidate_ci": {
+      "source_commit": "dd01e262e73e5295440f7c47715756166bc04da4",
+      "source_tree": "aa6ec42ac4fb9a4b8d4d146c7c9b069796c3c773",
+      "ci_run_id": 44328936552,
+      "ci_run_attempt": 1,
+      "ci_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/44328936552",
+      "original_artifact_id": 14439625064,
+      "original_zip_sha256": "74a9d663b631d26409331d0143e1daeb92062be51855759784ae78259f8e22b4",
+      "generator_sha256": "7de318b3edfe7bfafb87a412dbf3718f675576a17e15733647af12946a234a8a",
+      "qualification": "CI_CANDIDATE_IMAGE_ARTIFACT_PARITY",
+      "default_delivery_ci_claimed": false,
+      "runtime_rollout_claimed": false
+    },
     "artifact_parity": {
       "status": "PASS",
       "declared_image": "satorykono/bioetl-grafana-router7-canvas@sha256:23447d1dec5d1f9fda446c0b8adc290ddbd225953f3be2ef57aba05c9a1e2108",

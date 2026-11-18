@@ -211,6 +211,50 @@ def release_case():
     )
 
 
+def test_legacy_pair_requires_one_committed_snapshot(tmp_path, monkeypatch):
+    import pytest
+
+    case = list(release_case())
+    first = promotion.build_release_files(*case)
+    managed = json.loads(first[promotion.MANAGED_PATH])
+    del managed["delivery_source"]["candidate_ci"]
+    legacy = {
+        **first,
+        promotion.MANAGED_PATH: (json.dumps(managed, indent=2) + "\n").encode(),
+    }
+    for path in (promotion.HOST_PATH, promotion.MANAGED_PATH):
+        target = tmp_path / path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(legacy[path])
+    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)
+    subprocess.run(["git", "add", "."], cwd=tmp_path, check=True)
+    subprocess.run(
+        [
+            "git",
+            "-c",
+            "user.name=Fixture",
+            "-c",
+            "user.email=fixture@example.test",
+            "commit",
+            "-qm",
+            "Record legacy release pair",
+        ],
+        cwd=tmp_path,
+        check=True,
+    )
+    monkeypatch.setattr(promotion, "ROOT", tmp_path)
+    later = {**case[1], "id": 12}
+    upgraded = promotion.build_release_files(legacy, later, *case[2:])
+    host = json.loads(upgraded[promotion.HOST_PATH])
+    mate = json.loads(upgraded[promotion.MANAGED_PATH])
+    assert mate["delivery_source"]["candidate_ci"] == host["release_promotion"]
+    assert host["release_history"][-1]["managed_manifest"] == managed
+    # Same source/image, different capture: a truncated legacy update must fail.
+    mixed = {**upgraded, promotion.MANAGED_PATH: legacy[promotion.MANAGED_PATH]}
+    with pytest.raises(ValueError, match="Mixed release manifest"):
+        promotion.build_release_files(mixed, {**later, "id": 13}, *case[2:])
+
+
 class ProvenanceControls(unittest.TestCase):
     def test_check_ignores_only_the_independent_rebuild_config_id(self):
         case = list(release_case())
@@ -283,6 +327,20 @@ class ProvenanceControls(unittest.TestCase):
         incomplete = {**first, promotion.HOST_PATH: json.dumps(host).encode()}
         with self.assertRaises(ValueError):
             promotion.build_release_files(incomplete, *case[1:])
+
+    def test_interrupted_manifest_pair_is_never_archived(self):
+        case = list(release_case())
+        first = promotion.build_release_files(*case)
+        for head in (case[1]["head_sha"], "c" * 40):
+            with self.subTest(head=head):
+                later = {**case[1], "id": 12, "head_sha": head}
+                second = promotion.build_release_files(first, later, *case[2:])
+                mixed = {
+                    **second,
+                    promotion.MANAGED_PATH: first[promotion.MANAGED_PATH],
+                }
+                with self.assertRaisesRegex(ValueError, "Mixed release manifest"):
+                    promotion.build_release_files(mixed, {**later, "id": 13}, *case[2:])
 
     def test_release_promotion_preserves_history_and_all_coupled_pins(self):
         case = release_case()
