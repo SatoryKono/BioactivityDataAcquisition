@@ -1,6 +1,6 @@
 # BioETL Class Diagrams Bundle
 
-- Generated: 2026-10-25T18:11:35+00:00
+- Generated: 2026-11-17T18:59:00+00:00
 - Diagram count: 149
 
 ## Table of Contents
@@ -2329,13 +2329,13 @@
 ![90-pkg-infrastructure-adapters-pubmed](../class-diagrams/svg/90-pkg-infrastructure-adapters-pubmed.svg)
 
 ### Описание
-Диаграмма «Package Family: infrastructure/adapters/pubmed» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/adapters/pubmed; modules: _article_components, _filter_fetch_support, _search_models, xml_processor, _client_fallback_policy, _extended_record.. Схема имеет плотность порядка 24 узлов и 8 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: article components, filter fetch support, search models, xml processor, client fallback policy, extended record. Показательные узлы для быстрого чтения: PubMedArticleId, PubMedAuthor, PubMedChemical, PubMedGrant, PubMedJournal, PubMedMeshHeading. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
+Диаграмма «Package Family: infrastructure/adapters/pubmed» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/adapters/pubmed; modules: _article_components, _search_models, _filter_fetch_support, xml_processor, _client_fallback_policy, _errors.. Схема имеет плотность порядка 26 узлов и 8 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: article components, search models, filter fetch support, xml processor, client fallback policy, errors. Показательные узлы для быстрого чтения: PubMedArticleId, PubMedAuthor, PubMedChemical, PubMedGrant, PubMedJournal, PubMedMeshHeading. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-11-17`
-- Узлы (metadata): `24`
+- Дата: `2026-11-18`
+- Узлы (metadata): `26`
 
 \newpage
 
@@ -2386,13 +2386,13 @@
 ![90-pkg-infrastructure-adapters-uniprot-part2](../class-diagrams/svg/90-pkg-infrastructure-adapters-uniprot-part2.svg)
 
 ### Описание
-Диаграмма «Package Family: infrastructure/adapters/uniprot (Part 2/2)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/adapters/uniprot; part 2/2; modules: _idmapping_retry, _idmapping_transport, feature_sequence_adapter_mixin, client, fallback_policy, fasta_parser.. Схема имеет плотность порядка 12 узлов и 6 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: idmapping retry, idmapping transport, feature sequence adapter mixin, client, fallback policy, fasta parser. Показательные узлы для быстрого чтения: IDMappingRetryDependencies, IDMappingRetryMixin, IDMappingTransportDependencies, IDMappingTransportMixin, UniProtAdapterMetadataMixin, UniProtFeatureSequenceAdapterMixin. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
+Диаграмма «Package Family: infrastructure/adapters/uniprot (Part 2/2)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/adapters/uniprot; part 2/2; modules: _idmapping_retry, _idmapping_transport, feature_sequence_adapter_mixin, client, fallback_policy, fasta_parser.. Схема имеет плотность порядка 13 узлов и 6 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: idmapping retry, idmapping transport, feature sequence adapter mixin, client, fallback policy, fasta parser. Показательные узлы для быстрого чтения: IDMappingRetryDependencies, IDMappingRetryMixin, IDMappingTransportDependencies, IDMappingTransportMixin, UniProtAdapterMetadataMixin, UniProtFeatureSequenceAdapterMixin. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-10-04`
-- Узлы (metadata): `12`
+- Дата: `2026-11-18`
+- Узлы (metadata): `13`
 
 \newpage
 

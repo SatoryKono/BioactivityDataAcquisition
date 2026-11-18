@@ -3,9 +3,9 @@
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-10-04
+%% @date    2026-11-18
 %% @level   Package Family / Inventory Slice
-%% @nodes   12
+%% @nodes   13
 %% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
 classDiagram
 
@@ -46,6 +46,10 @@ classDiagram
 
     namespace protein_fetch_adapter_mixin {
         class UniProtProteinFetchAdapterMixin
+    }
+
+    namespace response_parser {
+        class UniProtProteinPageError
     }
 
     IDMappingRetryMixin <|-- UniProtIDMappingClient
