@@ -47,10 +47,15 @@ def test_private_host_delivery_binds_source_and_survives_data_volume() -> None:
     assert manifest["upstream_sha"] == "6193dc03311b631b9727b560d24369e683dc396e"
     # This immutable host image is a released snapshot. The adaptive plugin
     # candidate has its own build-provenance and is not installed by this test.
-    binding = manifest["ci_source_revalidations"][-1]
+    binding = manifest["release_promotion"]
     source = binding["source_commit"]
-    assert binding["qualification"] == "image_artifact_parity"
-    assert binding["browser_acceptance_claimed"] is False
+    assert source == manifest["delivery_source"]["source_ref"]
+    assert binding["qualification"] == "CI_CANDIDATE_IMAGE_ARTIFACT_PARITY"
+    assert binding["default_delivery_ci_claimed"] is False
+    assert binding["runtime_rollout_claimed"] is False
+    historical = manifest["ci_source_revalidations"][-1]
+    assert historical["qualification"] == "image_artifact_parity"
+    assert historical["browser_acceptance_claimed"] is False
     assert (
         subprocess.check_output(
             ["git", "rev-parse", source + "^{tree}"], text=True
@@ -209,7 +214,7 @@ def test_monitoring_images_are_pinned_and_pushgateway_is_not_a_datasource() -> N
     monitoring = _load_monitoring_compose()
     assert monitoring["services"]["grafana"]["image"] == (
         "satorykono/bioetl-grafana-router7-canvas@sha256:"
-        "32fc0cfe4b4c8931cb37a2b10d4cefcfe81e6dc928133eec1c22f4690eaf72cc"
+        "23447d1dec5d1f9fda446c0b8adc290ddbd225953f3be2ef57aba05c9a1e2108"
     )
     managed = json.loads(
         Path("grafana/tooling/router-v7-bridge/managed-image.json").read_text()
