@@ -23,7 +23,7 @@ ______________________________________________________________________
 
 - Canonical `.mmd` sources:
   - `architecture/` — 89 files
-  - `class-diagrams/` — 149 files
+  - `class-diagrams/` — 151 files
   - `foundation/` — 55 files
   - `providers/` — 28 files
   - `sequence/` — 5 files
