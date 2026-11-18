@@ -1191,6 +1191,62 @@ def test_late_cutover_claim_checks_current_process_and_deadline(
         assert repeated.stdout.strip() == "claimed"
 
 
+def test_check_mode_sees_active_lease_while_claim_remains(
+    tmp_path: Path,
+) -> None:
+    shell = shutil.which("sh")
+    if shell is None:
+        pytest.skip("POSIX sh is required for the atomic recovery claim test")
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    for name, value in {
+        "cat": "boot",
+        "cut": "100",
+        "sed": "unused",
+        "awk": "200",
+    }.items():
+        fake = fake_bin / name
+        fake.write_text(
+            f"#!/bin/sh\nprintf '%s\\n' '{value}'\n", encoding="utf-8", newline="\n"
+        )
+        fake.chmod(0o755)
+    source_id = "a" * 64
+    recovery_root = tmp_path / "bioetl-late-cutover"
+    recovery_root.mkdir()
+    (recovery_root / f"{source_id}.lease").write_text(
+        "42 200 boot 150\n", encoding="utf-8", newline="\n"
+    )
+    (recovery_root / f"{source_id}.claim").mkdir()
+    env = {
+        **os.environ,
+        "PATH": str(fake_bin) + os.pathsep + os.environ.get("PATH", ""),
+        "TEST_BIN": str(fake_bin),
+        "BIOETL_EXPECTED_RUNTIME_SOURCE_ID": source_id,
+        "BIOETL_GRAFANA_BOOTSTRAP_STATUS_FILE": str(tmp_path / "bootstrap-status.json"),
+    }
+    script = (
+        'PATH="$(cd "$TEST_BIN" && pwd):$PATH"\n'
+        + runtime_manager._GRAFANA_LATE_CUTOVER_CLAIM
+    )
+
+    def run(mode: str) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            [shell, "-c", script, "bioetl-late-cutover", mode],
+            capture_output=True,
+            text=True,
+            env=env,
+            check=False,
+            timeout=10,
+        )
+
+    checked = run("check")
+    claimed = run("claim")
+    assert checked.returncode == 0, checked.stderr
+    assert checked.stdout.strip() == "active"
+    assert claimed.returncode == 0, claimed.stderr
+    assert claimed.stdout.strip() == "claimed"
+
+
 def test_late_cutover_claim_has_one_owner_across_concurrent_processes(
     tmp_path: Path,
 ) -> None:
