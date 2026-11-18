@@ -406,9 +406,7 @@ def _resolve_query_paths(
 ) -> tuple[Path, Path, Path | None, dict[str, Any] | None]:
     chunks_ready = not require_chunks or rag_chunks_ready(chunks_path)
     events_ready = not require_events or timeline_events_ready(events_dir)
-    required_chunks_ready = not require_chunks or chunks_ready
-    required_events_ready = not require_events or events_ready
-    if required_chunks_ready and required_events_ready:
+    if chunks_ready and events_ready:
         return chunks_path, events_dir, None, None
     if not auto_refresh:
         if allow_partial:

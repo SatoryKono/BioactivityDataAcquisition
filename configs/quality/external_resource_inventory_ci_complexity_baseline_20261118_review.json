@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "ddb0d9774f31e843be6f33989c6a5895d3e53740",
+  "source_ref": "4bde3a1123bef6b366478304b3ae0b35e53a56de",
+  "source_reviews": {
+    "src/bioetl/composition/selected_run_contract_exclusions.py": "Extract the same pure pipeline sentinel and path-segment validation before existing config resolution. DQConfigLoader selection, fallback, exceptions, thresholds and all resource ownership/cleanup remain unchanged."
+  }
+}
