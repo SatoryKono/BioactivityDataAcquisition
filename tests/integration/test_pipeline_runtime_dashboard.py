@@ -585,9 +585,10 @@ def test_runtime_first_action_cta_contract() -> None:
     content = str(first_action_panel.get("options", {}).get("content", ""))
     description = str(first_action_panel.get("description", ""))
     assert "UNKNOWN means no matching samples or an unpublished reason" in content
+    assert "viewPanel=2461" in content
     assert "missing stage signals" in content
-    assert "Query time is not event time" in content
     assert "continue monitoring" not in content
+    assert "Query time is not event time." in content
     assert "SCRAPING" not in content
     assert "verify coverage" in description.lower()
     assert "scraping is telemetry confidence" in description.lower()

@@ -96,11 +96,11 @@ def test_value_columns_have_operator_display_names_on_suspect_tables() -> None:
         if prop.get("id") == "displayName"
     ]
     assert display_names, "Inspect Ranked Suspects must label Value columns"
-    assert any(
-        needle in str(v).casefold()
-        for v in display_names
-        for needle in ("priority", "severity", "signal", "count")
+    assert "Diagnostic priority" in display_names
+    organize = next(
+        item for item in suspects["transformations"] if item["id"] == "organize"
     )
+    assert organize["options"]["renameByName"]["Value"] == "Severity"
 
 
 def test_percent_scores_use_integer_precision() -> None:

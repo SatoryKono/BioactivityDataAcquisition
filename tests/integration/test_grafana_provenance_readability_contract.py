@@ -116,6 +116,10 @@ def test_provenance_panel_readability_contract(
     assert all(token in content for token in css if not token.startswith("line-height"))
     assert "line-height:1.2" in content or "line-height:20px" in content
     assert all(token in content for token in required_copy)
+    if filename == "bioetl-incident-v1.json":
+        adaptive = panel["options"]["bioetlCurrentPresentation"]
+        assert "CURRENT" in adaptive["content"]
+        assert "CURRENT" in adaptive["description"]
     assert "background:" not in content.replace("background:none", "")
     assert "background-color" not in content
     assert "#ff9830" not in content

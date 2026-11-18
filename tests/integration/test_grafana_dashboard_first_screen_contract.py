@@ -480,6 +480,10 @@ def test_first_screen_scope_and_cta_panels_document_role_and_scope() -> None:
             5 if filename == "bioetl-overview-v2.json" else 4
         )
         assert "overflow:hidden" not in content
+        if filename == "bioetl-incident-v1.json":
+            adaptive = panel["options"]["bioetlCurrentPresentation"]
+            assert "CURRENT" in adaptive["description"]
+            assert "CURRENT" in adaptive["content"]
 
 
 def test_navigation_bus_panels_document_handoff_policy() -> None:
