@@ -25,29 +25,29 @@ def _physical(path: Path) -> Path:
     return path
 
 
-def common_directory(root: Path) -> Path:
-    """Verify a checkout or linked-worktree marker and its backlink."""
-    root = _physical(root)
-    marker = root / ".git"
-    _physical(marker)
-    if marker.is_dir():
-        return marker
-    text = marker.read_text(encoding="utf-8-sig").strip()
-    if not text.startswith("gitdir: "):
+def _read_git_path(marker: Path, parent: Path, prefix: str = "") -> Path:
+    limit = 8192
+    with _physical(marker).open(encoding="utf-8-sig") as stream:
+        raw = stream.read(limit + 1)
+    text = raw.strip()
+    if len(raw) > limit or not text.startswith(prefix) or not text[len(prefix) :]:
         raise ValueError("Invalid native MCP Git marker")
-    gitdir = Path(text[8:])
-    gitdir = _physical(
-        (gitdir if gitdir.is_absolute() else root / gitdir).resolve(strict=True)
-    )
-    backlink = Path((gitdir / "gitdir").read_text(encoding="utf-8-sig").strip())
-    if not backlink.is_absolute():
-        backlink = gitdir / backlink
-    if backlink.resolve(strict=True) != marker:
+    return Path(os.path.abspath(parent / text[len(prefix) :]))
+
+
+def common_directory(root: Path, *, expected: Path) -> Path | None:
+    """Verify a checkout or worktree bound to the registered Git directory."""
+    root = _physical(root)
+    marker = _physical(root / ".git")
+    if marker.is_dir():
+        return marker if marker == expected else None
+    gitdir = _read_git_path(marker, root, prefix="gitdir: ")
+    if gitdir.parent != expected / "worktrees":
+        return None
+    if _read_git_path(gitdir / "gitdir", gitdir) != marker:
         raise ValueError("Native MCP worktree backlink mismatch")
-    common = Path((gitdir / "commondir").read_text(encoding="utf-8-sig").strip())
-    return _physical(
-        (common if common.is_absolute() else gitdir / common).resolve(strict=True)
-    )
+    common = _read_git_path(gitdir / "commondir", gitdir)
+    return expected if common == expected else None
 
 
 def _validate_route_entry(name: str, entry: Any) -> None:
@@ -69,7 +69,7 @@ def _repository_binding_matches(
     expected: Path, workspace: Path, *, strict: bool
 ) -> bool:
     try:
-        actual = common_directory(workspace)
+        actual = common_directory(workspace, expected=expected)
     except FileNotFoundError:
         if strict:
             raise

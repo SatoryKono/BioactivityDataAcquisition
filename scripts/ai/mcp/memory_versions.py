@@ -416,10 +416,49 @@ def dormant(owner, entry, value):
     return owner.state.graph_stamp(value)
 
 
-def previous_migration(owner, directory, entry, expected_version):
+def _retained_disabled_bundle(binding, prior, expected_version):
+    version = binding.get("version")
+    if (
+        binding.get("schema") != 2
+        or binding.get("state") != "disabled"
+        or not isinstance(version, str)
+        or len(version) != 64
+        or any(char not in "0123456789abcdef" for char in version)
+        or expected_version != version
+    ):
+        raise ValueError("Disabled recovery requires the exact retained --from-version")
+    bundle = VERSIONS / version
+    if binding.get("bundle", str(bundle)) != str(bundle):
+        raise ValueError("Disabled recovery bundle does not match the binding")
+    if prior.get("phase") == "COMMITTED":
+        if prior.get("version") == version and prior.get("bundle") == str(bundle):
+            return bundle
+    if prior.get("phase") == "ROLLED_BACK":
+        if prior.get("before", {}).get("runtime_binding") == binding:
+            return bundle
+    raise ValueError("Disabled recovery requires a matching completed migration record")
+
+
+def _select_disabled_migration_bundle(owner, identity, from_version):
+    if from_version is None:
+        return None
+    if Path(identity).name != identity or identity in {"", ".", ".."}:
+        raise ValueError("Invalid recovery profile identity")
+    directory = physical(owner.registry.ROOT / identity)
+    binding = owner.state.read(directory / RUNTIME_BINDING)
+    if not binding or binding.get("state") != "disabled":
+        return None
+    prior = owner.state.read(directory / MIGRATION_RECORD, max_bytes=32 * 1024 * 1024)
+    return _retained_disabled_bundle(binding, prior or {}, from_version)
+
+
+def previous_migration(
+    owner, directory, entry, expected_version, *, recover_disabled=False
+):
     """Require an explicit, consistent predecessor before replacing its journal."""
     binding = owner.state.read(directory / RUNTIME_BINDING)
     prior = owner.state.read(directory / MIGRATION_RECORD, max_bytes=32 * 1024 * 1024)
+    states = {"disabled"} if recover_disabled else {"active", "legacy"}
     if binding is None and prior is None:
         if expected_version is not None:
             raise ValueError("Unexpected predecessor version")
@@ -428,10 +467,12 @@ def previous_migration(owner, directory, entry, expected_version):
         not binding
         or not prior
         or binding.get("schema") != 2
-        or binding.get("state") not in {"active", "legacy"}
+        or binding.get("state") not in states
     ):
         raise ValueError("Incomplete predecessor migration; preserve its records")
-    current = binding["version"] if binding["state"] == "active" else "legacy"
+    if recover_disabled:
+        _retained_disabled_bundle(binding, prior, expected_version)
+    current = "legacy" if binding["state"] == "legacy" else binding["version"]
     if expected_version != current:
         raise ValueError("Existing runtime requires its explicit --from-version")
     if prior.get("phase") == "COMMITTED":
@@ -455,7 +496,9 @@ def previous_migration(owner, directory, entry, expected_version):
     return binding, prior
 
 
-def migrate(owner, identity, bundle, *, fixture=False, from_version=None):
+def migrate(
+    owner, identity, bundle, *, fixture=False, from_version=None, recover_disabled=False
+):
     new_owner = bundle_owner(bundle, owner.registry.ROOT if fixture else None)
     entry, value = owner.specification(identity, fixture)
     directory = Path(entry["state"])
@@ -466,14 +509,14 @@ def migrate(owner, identity, bundle, *, fixture=False, from_version=None):
             ):
                 stamp = dormant(owner, entry, value)
                 binding, prior = previous_migration(
-                    owner, directory, entry, from_version
+                    owner,
+                    directory,
+                    entry,
+                    from_version,
+                    recover_disabled=recover_disabled,
                 )
-                if (
-                    binding
-                    and binding.get("state") == "active"
-                    and Path(binding["bundle"]) == bundle
-                ):
-                    raise ValueError("Runtime version is already selected")
+                if binding and binding.get("version") == bundle.name:
+                    raise ValueError("Migration requires a different runtime version")
                 index_path = owner.registry.ROOT / PROFILE_INDEX
                 index = owner.state.read(index_path)
                 if index.get(identity) != entry:
@@ -572,6 +615,7 @@ def rollback(owner, identity):
                         {
                             "schema": 2,
                             "state": "disabled",
+                            "bundle": transaction["bundle"],
                             "version": transaction["version"],
                         },
                     )
@@ -593,6 +637,7 @@ def rollback(owner, identity):
                         {
                             "schema": 2,
                             "state": "disabled",
+                            "bundle": transaction["bundle"],
                             "version": transaction["version"],
                         },
                     )
@@ -727,7 +772,12 @@ def _profile_action(parser, args, owner, fixture):
     if args.action == "migrate":
         if not args.bundle:
             parser.error("migrate requires --bundle")
-        prior_bundle = select_bundle(owner.registry.ROOT, args.profile)
+        recovery_bundle = _select_disabled_migration_bundle(
+            owner, args.profile, args.from_version
+        )
+        prior_bundle = recovery_bundle or select_bundle(
+            owner.registry.ROOT, args.profile
+        )
         if prior_bundle is not None:
             owner = bundle_owner(prior_bundle, args.fixture_registry)
         return migrate(
@@ -736,6 +786,7 @@ def _profile_action(parser, args, owner, fixture):
             args.bundle,
             fixture=fixture,
             from_version=args.from_version,
+            recover_disabled=recovery_bundle is not None,
         )
     bundle = select_bundle(owner.registry.ROOT, args.profile)
     if bundle is None:
@@ -751,15 +802,17 @@ def _reconcile_profile(parser, args, selected, fixture):
     if args.action == "reconcile-plan":
         # Full plan is private operator output, never a public acceptance report.
         return selected.reconciler.plan(selected.runtime_owner(), entry, value)
-    if args.plan is None:
-        parser.error("reconcile-apply requires --plan")
-    physical(args.plan)
-    if not args.plan.is_relative_to(Path(entry["state"]) / "reconcile-plans"):
-        parser.error(
+    plan_path = args.plan
+    if plan_path is None:
+        return parser.error("reconcile-apply requires --plan")
+    plans = Path(entry["state"]) / "reconcile-plans"
+    if ".." in plan_path.parts or not plan_path.is_relative_to(plans):
+        return parser.error(
             "apply plan must be in this profile's private reconcile-plans directory"
         )
+    physical(plan_path)
     grant = selected.reconciler.apply(
-        selected.runtime_owner(), entry, value, json.loads(args.plan.read_bytes())
+        selected.runtime_owner(), entry, value, json.loads(plan_path.read_bytes())
     )
     return {
         "resolution": grant["id"],
@@ -788,7 +841,7 @@ def main(argv=None):
     parser.add_argument("--fixture-registry", type=Path)
     parser.add_argument(
         "--from-version",
-        help="Exact active version, or legacy after a compatible rollback",
+        help="Exact active or retained disabled version, or legacy after a compatible rollback",
     )
     args = parser.parse_args(argv)
     if args.action == "verify":

@@ -132,6 +132,12 @@ transaction. An interrupted migration closes the route. Rollback restores only
 compatible target metadata and never rewinds a graph or committed operation.
 Changed v2 coordination or legacy runtime drift disables the target until
 compatible forward recovery. Neighboring profiles keep their original pins.
+For that recovery, use `migrate` with a different verified bundle and the
+disabled profile's exact retained `--from-version`. This administrative
+migration checks the existing journal, profile entry and dormant graph under
+the same transition locks. Client dispatch stays closed until the new
+transaction commits. A compatible rollback of the recovery restores the
+earlier disabled state.
 
 An upgrade of an already versioned profile requires its exact `--from-version`.
 The current descriptor, binding and committed (or rolled-back) transaction must

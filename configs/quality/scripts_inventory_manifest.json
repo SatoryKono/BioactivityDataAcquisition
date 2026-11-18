@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-18T19:11:21.749367+00:00",
+  "generated_at": "2026-11-18T19:20:32.554050+00:00",
   "summary": {
     "total_scripts": 763,
     "status_counts": {
@@ -1159,13 +1159,13 @@
       "references": [
         {
           "path": "scripts/ai/codex/native_session.py",
-          "line": 93,
+          "line": 97,
           "source_group": "scripts",
           "text": "from scripts.ai.codex.local_mcp_routes import common_directory"
         },
         {
           "path": "scripts/ai/codex/native_session.py",
-          "line": 126,
+          "line": 130,
           "source_group": "scripts",
           "text": "from scripts.ai.codex.local_mcp_routes import ("
         },
@@ -3402,7 +3402,7 @@
         },
         {
           "path": "scripts/ai/mcp/safe_markdownify.py",
-          "line": 344,
+          "line": 343,
           "source_group": "scripts",
           "text": "str(Path(spec[\"converter\"]) / \"converter_runner.py\"),"
         }
@@ -5045,7 +5045,7 @@
         },
         {
           "path": "tests/unit/scripts/test_memory_versions.py",
-          "line": 10,
+          "line": 11,
           "source_group": "tests",
           "text": "from scripts.ai.mcp import memory_versions as versions"
         }
@@ -5217,7 +5217,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/native_session.py",
-          "line": 151,
+          "line": 155,
           "source_group": "scripts",
           "text": "or Path(args[3]).name != \"session_client.py\""
         },

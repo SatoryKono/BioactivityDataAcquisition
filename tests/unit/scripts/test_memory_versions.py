@@ -1,5 +1,6 @@
 """Immutable dependency identity and fail-closed profile dispatch controls."""
 
+import argparse
 import hashlib
 import json
 from contextlib import nullcontext
@@ -13,21 +14,29 @@ pytestmark = pytest.mark.unit
 
 
 @pytest.fixture
-def bundle(tmp_path):
-    source = tmp_path / "building"
-    (source / "runtime").mkdir(parents=True)
-    (source / "runtime/dependency.py").write_bytes(b"VERSION = 'qualified'\n")
-    manifest = {
-        "schema": 2,
-        "files": {
-            "runtime/dependency.py": versions.sha(source / "runtime/dependency.py")
-        },
-    }
-    raw = versions.canonical(manifest)
-    (source / "bundle.json").write_bytes(raw)
-    target = tmp_path / hashlib.sha256(raw).hexdigest()
-    source.rename(target)
-    return target
+def bundle_factory(tmp_path):
+    def build(dependency):
+        source = tmp_path / "building"
+        (source / "runtime").mkdir(parents=True)
+        (source / "runtime/dependency.py").write_bytes(dependency)
+        manifest = {
+            "schema": 2,
+            "files": {
+                "runtime/dependency.py": versions.sha(source / "runtime/dependency.py")
+            },
+        }
+        raw = versions.canonical(manifest)
+        (source / "bundle.json").write_bytes(raw)
+        target = tmp_path / hashlib.sha256(raw).hexdigest()
+        source.rename(target)
+        return target
+
+    return build
+
+
+@pytest.fixture
+def bundle(bundle_factory):
+    return bundle_factory(b"VERSION = 'qualified'\n")
 
 
 def test_dependency_drift_is_rejected(bundle):
@@ -184,6 +193,24 @@ def test_rollback_to_an_older_bundle_retains_that_bundle_identity(
     assert selected == binding and history == prior
 
 
+@pytest.mark.parametrize("has_external_plan", [False, True])
+def test_reconcile_apply_requires_a_private_plan_before_access(
+    tmp_path, monkeypatch, has_external_plan
+):
+    plan = tmp_path / "other-profile/plan.json" if has_external_plan else None
+    args = SimpleNamespace(profile="target", action="reconcile-apply", plan=plan)
+    entry = {"state": str(tmp_path / "target")}
+    selected = SimpleNamespace(specification=lambda *_args: (entry, {}))
+
+    def forbidden_path_access(_path):
+        pytest.fail("An absent or foreign plan must be refused before path access")
+
+    monkeypatch.setattr(versions, "physical", forbidden_path_access)
+    with pytest.raises(SystemExit) as error:
+        versions._reconcile_profile(argparse.ArgumentParser(), args, selected, False)
+    assert error.value.code == 2
+
+
 @pytest.fixture
 def transition_owner(tmp_path, bundle, monkeypatch):
     registry = tmp_path / "registry"
@@ -218,8 +245,15 @@ def transition_owner(tmp_path, bundle, monkeypatch):
             directory / "profile.json"
         )
 
+    def physical(path, *, exists=True):
+        resolved = path.resolve(strict=exists)
+        assert resolved.is_relative_to(registry)
+        return resolved
+
     state = SimpleNamespace(
-        read=read, write=write, scope=SimpleNamespace(canonical=versions.canonical)
+        read=read,
+        write=write,
+        scope=SimpleNamespace(canonical=versions.canonical, physical=physical),
     )
     owner = SimpleNamespace(
         state=state,
@@ -295,3 +329,66 @@ def test_interrupted_transition_blocks_dispatch(
     assert graph.read_bytes() == original_graph
     with pytest.raises(PermissionError, match="not committed"):
         versions.select_bundle(directory.parent, identity)
+
+
+@pytest.mark.parametrize("legacy_disabled_record", [False, True])
+def test_existing_migrate_command_recovers_only_the_exact_disabled_predecessor(
+    transition_owner, bundle, bundle_factory, legacy_disabled_record
+):
+    owner, directory, graph = transition_owner
+    identity = directory.name
+    assert versions.migrate(owner, identity, bundle)["state"] == "COMMITTED"
+    coordination = {"schema": 2, "generation": 2}
+    owner.state.write(directory / "recovery-v2.json", coordination)
+    assert (
+        versions.rollback(owner, identity)["state"]
+        == "BLOCKED_INCOMPATIBLE_COORDINATION"
+    )
+
+    binding_path = directory / "runtime-binding.json"
+    binding = owner.state.read(binding_path)
+    assert binding["bundle"] == str(bundle)
+    if legacy_disabled_record:
+        binding.pop("bundle")
+        owner.state.write(binding_path, binding)
+    journal_path = directory / "migration-v2.json"
+    old_journal = journal_path.read_bytes()
+    original_graph = graph.read_bytes()
+    successor = bundle_factory(b"VERSION = 'successor'\n")
+    args = SimpleNamespace(
+        action="migrate",
+        profile=identity,
+        bundle=successor,
+        from_version=None,
+        fixture_registry=directory.parent,
+    )
+    parser = argparse.ArgumentParser()
+    with pytest.raises(PermissionError, match="disabled"):
+        versions.select_bundle(directory.parent, identity)
+    with pytest.raises(PermissionError, match="disabled"):
+        versions._profile_action(parser, args, owner, True)
+    args.from_version = successor.name
+    with pytest.raises(ValueError, match="exact retained"):
+        versions._profile_action(parser, args, owner, True)
+    assert journal_path.read_bytes() == old_journal
+    assert owner.state.read(binding_path) == binding
+
+    args.from_version = bundle.name
+    assert versions._profile_action(parser, args, owner, True)["state"] == "COMMITTED"
+    assert versions.select_bundle(directory.parent, identity) == successor
+    assert owner.state.read(directory / "recovery-v2.json") == coordination
+    assert graph.read_bytes() == original_graph
+    transaction = owner.state.read(journal_path)
+    assert transaction["before"]["runtime_binding"] == binding
+    assert (
+        list((directory / "migration-history").glob("*.json"))[0].read_bytes()
+        == old_journal
+    )
+
+    assert versions.rollback(owner, identity)["state"] == "ROLLED_BACK"
+    with pytest.raises(PermissionError, match="disabled"):
+        versions.select_bundle(directory.parent, identity)
+    assert (
+        versions._select_disabled_migration_bundle(owner, identity, bundle.name)
+        == bundle
+    )

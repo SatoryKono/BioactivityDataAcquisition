@@ -80,6 +80,23 @@ def test_foreign_repository_never_receives_binding(routes, tmp_path):
         apply_local_routes({"memory": {}}, foreign, manifest=path)
 
 
+def test_relative_worktree_links_use_the_registered_common_directory(routes, tmp_path):
+    root, path, data = routes
+    checkout = tmp_path / "worktree"
+    checkout.mkdir()
+    gitdir = root / ".git/worktrees/worktree"
+    gitdir.mkdir(parents=True)
+    (checkout / ".git").write_text(
+        "gitdir: ../repo/.git/worktrees/worktree\n", encoding="utf-8"
+    )
+    (gitdir / "gitdir").write_text("../../../../worktree/.git\n", encoding="utf-8")
+    (gitdir / "commondir").write_text("../..\n", encoding="utf-8")
+
+    actual = apply_local_routes({"memory": {}}, checkout, manifest=path)
+
+    assert actual == data["entries"]
+
+
 def test_ref_cannot_be_overridden_by_stdio_manifest(routes):
     root, path, data = routes
     data["entries"]["ref"] = data["entries"].pop("memory")

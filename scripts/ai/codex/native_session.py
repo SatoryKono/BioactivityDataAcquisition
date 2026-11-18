@@ -32,9 +32,13 @@ def physical(path):
 
 def qualified_binary(path, expected):
     approved = Path.home() / "AppData/Local/OpenAI/Codex/bin"
-    physical(path)
-    if path.name.lower() != "codex.exe" or not path.is_relative_to(approved):
+    if (
+        path.name.lower() != "codex.exe"
+        or ".." in path.parts
+        or not path.is_relative_to(approved)
+    ):
         raise PermissionError("Use the qualified app-owned native Codex executable")
+    physical(path)
     if (
         re.fullmatch("[0-9a-f]{64}", expected) is None
         or hashlib.sha256(path.read_bytes()).hexdigest() != expected
@@ -98,8 +102,8 @@ def _markdownify_entry(source, root, servers):
     if (
         value.get("schema") != 1
         or Path(value["workspace"]) != root
-        or Path(value["git_common"]) != common_directory(root)
         or value.get("server") != "Markdownify-BioETL"
+        or common_directory(root, expected=Path(value["git_common"])) is None
     ):
         raise PermissionError(
             "Markdownify session binding does not match this workspace"
