@@ -2026,9 +2026,9 @@
       ],
       "duplication_clusters": 0,
       "files": 32,
-      "total_loc": 3864,
+      "total_loc": 3851,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.358,
+      "helper_function_ratio": 0.352,
       "max_internal_fan_in": 2,
       "max_internal_fan_in_module": "bioetl.composition.factories.pipeline.runner_constructor",
       "bounded_growth_budgets": {

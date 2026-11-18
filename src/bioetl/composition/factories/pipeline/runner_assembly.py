@@ -19,7 +19,7 @@ from bioetl.composition.factories.pipeline._runner_assembly_support import (
     build_lock_runtime_service as _build_lock_runtime_service_impl,
     build_observer as _build_observer_impl,
     build_preflight_service as _build_preflight_service_impl,
-    build_runner_constructor_payload as _build_runner_constructor_payload_impl,
+    build_runner_constructor_payload as _build_runner_constructor_payload,
 )
 from bioetl.composition.factories.pipeline_support.checkpoint_metadata_helpers import (
     build_current_checkpoint_metadata,
@@ -161,19 +161,6 @@ def _build_postrun_service(
         lifecycle_service=lifecycle_service,
         dq_configs=context.dq_configs_extractor(context.yaml_config),
         tracer=context.observability.tracer,
-    )
-
-
-def _build_runner_constructor_payload(
-    *,
-    pipeline: BasePipeline,
-    observability: ObservabilityBundle,
-    parts: RunnerAssemblyParts,
-) -> RunnerConstructorPayload:
-    return _build_runner_constructor_payload_impl(
-        pipeline=pipeline,
-        observability=observability,
-        parts=parts,
     )
 
 
