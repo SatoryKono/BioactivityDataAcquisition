@@ -101,6 +101,8 @@ def test_read_delta_records_uses_dataset_scanner_off_windows(
 def test_read_delta_records_uses_active_parquet_files_when_scanner_disabled(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    import pyarrow as pa
+
     monkeypatch.setattr(
         table_ops,
         "_can_use_pyarrow_dataset_scanner",
@@ -109,6 +111,10 @@ def test_read_delta_records_uses_active_parquet_files_when_scanner_disabled(
     rows = [{"entity_id": "row-1"}]
     observed: dict[str, object] = {}
 
+    class _FakeDeltaSchema:
+        def to_pyarrow(self) -> pa.Schema:
+            return pa.schema([("entity_id", pa.string())])
+
     class _FakeTable:
         def file_uris(self) -> list[str]:
             observed["file_uris"] = True
@@ -116,6 +122,9 @@ def test_read_delta_records_uses_active_parquet_files_when_scanner_disabled(
 
         def metadata(self):
             return SimpleNamespace(partition_columns=[])
+
+        def schema(self) -> _FakeDeltaSchema:
+            return _FakeDeltaSchema()
 
         def to_pyarrow_dataset(self) -> _FakeDataset:
             raise AssertionError("Windows path must not import dataset scanner")
@@ -127,22 +136,28 @@ def test_read_delta_records_uses_active_parquet_files_when_scanner_disabled(
                 f"native full-table scan must not be used: columns={columns}"
             )
 
+    def _fake_read_schema(path: object) -> pa.Schema:
+        observed["read_schema_path"] = path
+        return pa.schema([("entity_id", pa.string())])
+
     def _fake_read_table(
         path: object,
         columns: list[str] | None = None,
         *,
         use_threads: bool = True,
-    ) -> _FakeArrowTable:
+    ) -> pa.Table:
         observed["path"] = path
         observed["columns"] = columns
         observed["use_threads"] = use_threads
-        return _FakeArrowTable(rows)
+        return pa.table({"entity_id": ["row-1"]})
 
+    monkeypatch.setattr(table_ops.pq, "read_schema", _fake_read_schema)
     monkeypatch.setattr(table_ops.pq, "read_table", _fake_read_table)
 
     assert table_ops.read_delta_records(_FakeTable(), columns=["entity_id"]) == rows
     assert observed == {
         "file_uris": True,
+        "read_schema_path": "C:/tmp/part-0.parquet",
         "path": "C:/tmp/part-0.parquet",
         "columns": ["entity_id"],
         "use_threads": False,
@@ -173,6 +188,46 @@ def test_windows_read_restores_typed_partition_values(tmp_path, monkeypatch, col
         for row in rows
     ]
     assert sorted(actual, key=str) == sorted(expected, key=str)
+
+
+def test_windows_read_fills_schema_evolved_columns_as_typed_nulls(
+    tmp_path, monkeypatch
+):
+    """Older active Parquet files must tolerate Delta schema merge columns."""
+    import pyarrow as pa
+    from deltalake import DeltaTable, write_deltalake
+
+    path = tmp_path / "partitioned-evolved"
+    write_deltalake(
+        str(path),
+        pa.Table.from_pylist(
+            [{"entity_id": "a", "target_type": "SINGLE PROTEIN", "taxonomy_id": 9606}]
+        ),
+        partition_by=["target_type"],
+    )
+    write_deltalake(
+        str(path),
+        pa.Table.from_pylist(
+            [
+                {
+                    "entity_id": "b",
+                    "target_type": "SINGLE PROTEIN",
+                    "taxonomy_id": 9606,
+                    "added": "new",
+                }
+            ]
+        ),
+        mode="append",
+        schema_mode="merge",
+        partition_by=["target_type"],
+    )
+    monkeypatch.setattr(table_ops, "_can_use_pyarrow_dataset_scanner", lambda: False)
+    actual = table_ops.read_delta_records(DeltaTable(str(path)))
+    by_id = {row["entity_id"]: row for row in actual}
+    assert by_id["a"]["added"] is None
+    assert by_id["b"]["added"] == "new"
+    assert by_id["a"]["target_type"] == "SINGLE PROTEIN"
+    assert by_id["b"]["taxonomy_id"] == 9606
 
 
 def test_resolve_parquet_file_uri_strips_windows_file_uri_prefix() -> None:

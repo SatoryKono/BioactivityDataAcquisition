@@ -56,8 +56,11 @@ def _read_records_from_active_parquet_files(
             for uri in file_uris
         )
         return [{} for _ in range(count)]
-    partition_info = _partition_info(table)
-    tables = [_read_active_file(uri, columns, partition_info) for uri in file_uris]
+    schema = delta_schema_to_pyarrow(table.schema())
+    partition_info = _partition_info(table, schema=schema)
+    tables = [
+        _read_active_file(uri, columns, partition_info, schema) for uri in file_uris
+    ]
     if len(tables) == 1:
         rows: list[BronzeRecord] = tables[0].to_pylist()
         return rows
@@ -73,14 +76,16 @@ class _PartitionInfo:
     values: dict[str, dict[str, str | None]]
 
 
-def _partition_info(table: DeltaTable) -> _PartitionInfo | None:
+def _partition_info(
+    table: DeltaTable, *, schema: pa.Schema | None = None
+) -> _PartitionInfo | None:
     columns = table.metadata().partition_columns
     if not columns:
         return None
     return _PartitionInfo(
         Path(resolve_parquet_file_uri(table.table_uri)).resolve(),
         columns,
-        delta_schema_to_pyarrow(table.schema()),
+        schema if schema is not None else delta_schema_to_pyarrow(table.schema()),
         {
             item["path"]: item["partition_values"]
             for item in table.get_add_actions().to_pylist()
@@ -88,36 +93,68 @@ def _partition_info(table: DeltaTable) -> _PartitionInfo | None:
     )
 
 
+def _align_table_to_schema(
+    result: pa.Table, schema: pa.Schema, columns: list[str] | None
+) -> pa.Table:
+    """Fill schema-evolved columns missing from older Parquet payloads as typed nulls."""
+    target = list(schema.names) if columns is None else list(columns)
+    for name in target:
+        if name in result.column_names:
+            continue
+        result = result.append_column(
+            name, pa.nulls(result.num_rows, type=schema.field(name).type)
+        )
+    return result.select(target)
+
+
 def _read_active_file(
-    file_uri: str, columns: list[str] | None, partition_info: _PartitionInfo | None
+    file_uri: str,
+    columns: list[str] | None,
+    partition_info: _PartitionInfo | None,
+    schema: pa.Schema,
 ) -> pa.Table:
     """Restore partition columns from Delta actions, including typed nulls.
 
     Parquet payloads omit partition fields. Inferring them from Hive directory
     names loses Delta's types and depends on PyArrow's version-specific defaults.
+    After schema evolution, older active files may also omit newly added columns;
+    fill those as typed nulls before selecting the Delta schema projection.
     """
-    partition_columns = partition_info.columns if partition_info else []
-    physical_columns = (
-        None if columns is None else [c for c in columns if c not in partition_columns]
-    )
-    result = pq.read_table(
-        resolve_parquet_file_uri(file_uri), columns=physical_columns, use_threads=False
-    )
-    if partition_info is None:
-        return result
-    schema, root = partition_info.schema, partition_info.root
-    relative = (
-        Path(resolve_parquet_file_uri(file_uri)).resolve().relative_to(root).as_posix()
-    )
-    values = partition_info.values[relative]
-    for name in partition_columns:
-        if columns is not None and name not in columns:
-            continue
-        value = pa.scalar(values[name]).cast(schema.field(name).type)
-        result = result.append_column(
-            name, pa.array([value.as_py()] * result.num_rows, type=value.type)
-        )
-    return result.select(columns if columns is not None else schema.names)
+    path = resolve_parquet_file_uri(file_uri)
+    partition_columns = frozenset(partition_info.columns if partition_info else [])
+    available = set(pq.read_schema(path).names)
+    if columns is None:
+        physical_columns = [name for name in available]
+    else:
+        physical_columns = [
+            name
+            for name in columns
+            if name not in partition_columns and name in available
+        ]
+    if physical_columns:
+        result = pq.read_table(path, columns=physical_columns, use_threads=False)
+    else:
+        # No readable physical columns (partition-only or schema-evolved-only
+        # projection). Keep the row count so typed null fills stay aligned.
+        row_count = pq.read_metadata(path).num_rows
+        result = pa.table(
+            {"__bioetl_row_pad__": pa.nulls(row_count, type=pa.null())}
+        ).drop_columns(["__bioetl_row_pad__"])
+
+    if partition_info is not None:
+        root = partition_info.root
+        relative = Path(path).resolve().relative_to(root).as_posix()
+        values = partition_info.values[relative]
+        for name in partition_info.columns:
+            if columns is not None and name not in columns:
+                continue
+            if name in result.column_names:
+                continue
+            value = pa.scalar(values[name]).cast(schema.field(name).type)
+            result = result.append_column(
+                name, pa.array([value.as_py()] * result.num_rows, type=value.type)
+            )
+    return _align_table_to_schema(result, schema, columns)
 
 
 def read_delta_records(
