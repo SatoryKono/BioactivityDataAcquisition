@@ -591,9 +591,9 @@
     },
     "scripts/ai/sync/governance.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the AI governance sync helper for Codex/docs agent and skill mirrors; keep it supporting unless it becomes a governed CI workflow. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",
+      "next_step": "Retain as the AI governance sync helper for Codex/docs agent and skill mirrors; keep it supporting unless it becomes a governed CI workflow. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/ai/codex/doctor.py:41; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-11-17"
+      "review_by": "2026-12-18"
     },
     "scripts/ai/sync/windsurf.py": {
       "decision": "legacy_manual_utility",
@@ -609,21 +609,21 @@
     },
     "scripts/data_quality/export_chembl_observed_vocab.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the deterministic ChEMBL observed-vocabulary export helper while docs-generated inventory artifacts and normalization parity checks still consume this surface; fold it into broader QA/docs generation only if that reporting pipeline is consolidated. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",
+      "next_step": "Retain as the deterministic ChEMBL observed-vocabulary export helper while docs-generated inventory artifacts and normalization parity checks still consume this surface; fold it into broader QA/docs generation only if that reporting pipeline is consolidated. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/data_quality/__init__.py:5; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-11-17"
+      "review_by": "2026-12-18"
     },
     "scripts/data_quality/run_silver_gold_filter_parity.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the deterministic Silver/Gold migration parity report helper consumed by reproducibility contract tests and CI artifacts; fold it into a broader governed QA parity runner only if filter-migration report surfaces consolidate.",
+      "next_step": "Retain as the deterministic Silver/Gold migration parity report helper consumed by reproducibility contract tests and CI artifacts; fold it into a broader governed QA parity runner only if filter-migration report surfaces consolidate. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/data_quality/__init__.py:7; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
+      "review_by": "2026-12-18"
     },
     "scripts/diagrams/core/diagram_paths.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the shared diagram path resolver during the diagrams layout migration; keep it non-active unless diagram path discovery becomes a standalone command surface. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",
+      "next_step": "Retain as the shared diagram path resolver during the diagrams layout migration; keep it non-active unless diagram path discovery becomes a standalone command surface. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/diagrams/check/check_class_method_render_integrity.py:27; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-11-17"
+      "review_by": "2026-12-18"
     },
     "scripts/diagrams/diagram_paths.sh": {
       "decision": "shared_helper_module",
@@ -633,15 +633,15 @@
     },
     "scripts/diagrams/render/pipeline_dataflow_ir.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the IR builder for generated pipeline dataflow diagrams; keep it supporting unless promoted to a standalone scripts.diagrams command surface.",
+      "next_step": "Retain as the IR builder for generated pipeline dataflow diagrams; keep it supporting unless promoted to a standalone scripts.diagrams command surface. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/diagrams/render/generate_pipeline_dataflows.py:13; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
+      "review_by": "2026-12-18"
     },
     "scripts/diagrams/render/pipeline_dataflow_render.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the renderer for generated pipeline dataflow Mermaid/SVG artifacts; keep it supporting unless promoted to a standalone scripts.diagrams command surface.",
+      "next_step": "Retain as the renderer for generated pipeline dataflow Mermaid/SVG artifacts; keep it supporting unless promoted to a standalone scripts.diagrams command surface. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/diagrams/render/generate_pipeline_dataflows.py:14; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
+      "review_by": "2026-12-18"
     },
     "scripts/docker-setup.ps1": {
       "decision": "compatibility_wrapper",
@@ -681,21 +681,21 @@
     },
     "scripts/docs/common/markdown.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as a shared markdown parsing helper imported by docs checks and docs KPI reporting; keep it non-active unless it is promoted to a standalone docs command surface. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",
+      "next_step": "Retain as a shared markdown parsing helper imported by docs checks and docs KPI reporting; keep it non-active unless it is promoted to a standalone docs command surface. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/docs/checks/check_links.py:84; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-docs",
-      "review_by": "2026-11-17"
+      "review_by": "2026-12-18"
     },
     "scripts/docs/common/paths.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as a shared docs path-policy helper consumed by docs tooling; keep it non-active unless it becomes a documented standalone docs command surface. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",
+      "next_step": "Retain as a shared docs path-policy helper consumed by docs tooling; keep it non-active unless it becomes a documented standalone docs command surface. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/docs/checks/check_links.py:92; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-docs",
-      "review_by": "2026-11-17"
+      "review_by": "2026-12-18"
     },
     "scripts/docs/common/xlsx.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as a shared workbook helper consumed by docs matrix tooling; keep it non-active unless workbook mutation becomes a documented standalone docs command surface. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",
+      "next_step": "Retain as a shared workbook helper consumed by docs matrix tooling; keep it non-active unless workbook mutation becomes a documented standalone docs command surface. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/docs/matrix/build_matrix_dicts.py:25; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-docs",
-      "review_by": "2026-11-17"
+      "review_by": "2026-12-18"
     },
     "scripts/docs/fixers/fix_links_auto.py": {
       "decision": "compatibility_wrapper",
@@ -705,15 +705,15 @@
     },
     "scripts/docs/fixers/fix_links_explicit.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as an internal implementation module invoked through the canonical docs command surface; keep it supporting unless it becomes a documented standalone entrypoint.",
+      "next_step": "Retain as an internal implementation module invoked through the canonical docs command surface; keep it supporting unless it becomes a documented standalone entrypoint. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/docs/__main__.py:60; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
+      "review_by": "2026-12-18"
     },
     "scripts/docs/fixers/link_warnings.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as an internal implementation module invoked through the canonical docs command surface; keep it supporting unless it becomes a documented standalone entrypoint.",
+      "next_step": "Retain as an internal implementation module invoked through the canonical docs command surface; keep it supporting unless it becomes a documented standalone entrypoint. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/docs/__main__.py:61; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
+      "review_by": "2026-12-18"
     },
     "scripts/docs/fixers/repo_identity.py": {
       "decision": "compatibility_wrapper",
@@ -723,15 +723,15 @@
     },
     "scripts/docs/fixers/sentence_audit.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as an internal implementation module invoked through the canonical docs command surface; keep it supporting unless it becomes a documented standalone entrypoint.",
+      "next_step": "Retain as an internal implementation module invoked through the canonical docs command surface; keep it supporting unless it becomes a documented standalone entrypoint. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/docs/__main__.py:62; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
+      "review_by": "2026-12-18"
     },
     "scripts/docs/matrix/build_matrix_dicts.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as a matrix-generation helper used by canonical docs tooling; keep it supporting unless it becomes a documented standalone entrypoint.",
+      "next_step": "Retain as a matrix-generation helper used by canonical docs tooling; keep it supporting unless it becomes a documented standalone entrypoint. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/docs/__main__.py:54; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
+      "review_by": "2026-12-18"
     },
     "scripts/docs/matrix/enrich_normalization_details.py": {
       "decision": "compatibility_wrapper",
@@ -789,15 +789,15 @@
     },
     "scripts/docs/matrix/normalize_values.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as a matrix-generation helper used by canonical docs tooling; keep it supporting unless it becomes a documented standalone entrypoint.",
+      "next_step": "Retain as a matrix-generation helper used by canonical docs tooling; keep it supporting unless it becomes a documented standalone entrypoint. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/docs/__main__.py:57; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
+      "review_by": "2026-12-18"
     },
     "scripts/docs/matrix/structural_contract.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the internal structural-contract library for documentation matrix generation and its architecture guard; keep it supporting because it is not a standalone command.",
+      "next_step": "Retain as the internal structural-contract library for documentation matrix generation and its architecture guard; keep it supporting because it is not a standalone command. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/docs/matrix/export_structural_contract.py:19; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-docs",
-      "review_by": "2026-09-30"
+      "review_by": "2026-12-18"
     },
     "scripts/docs/passports/duplicate_audit.py": {
       "decision": "shared_helper_module",
@@ -837,15 +837,15 @@
     },
     "scripts/docs/passports/rename_underscore_to_hyphen.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the implementation behind the canonical `python -m scripts.docs rename-passport-paths` command; keep contributor execution routed through the docs command surface.",
+      "next_step": "Retain as the implementation behind the canonical `python -m scripts.docs rename-passport-paths` command; keep contributor execution routed through the docs command surface. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/docs/__main__.py:66; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
+      "review_by": "2026-12-18"
     },
     "scripts/docs/passports/source_facts.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the shared source-fact extraction helper used by passport and diagram tooling; keep it supporting unless it becomes a documented standalone entrypoint.",
+      "next_step": "Retain as the shared source-fact extraction helper used by passport and diagram tooling; keep it supporting unless it becomes a documented standalone entrypoint. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/diagrams/render/pipeline_dataflow_ir.py:21; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
+      "review_by": "2026-12-18"
     },
     "scripts/docs/passports/validation.py": {
       "decision": "shared_helper_module",
@@ -861,15 +861,15 @@
     },
     "scripts/engineering/ci/_compatibility_registry.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the internal compatibility-registry loader imported by telemetry and reporting modules; keep it supporting because it has no standalone command surface.",
+      "next_step": "Retain as the internal compatibility-registry loader imported by telemetry and reporting modules; keep it supporting because it has no standalone command surface. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/engineering/ci/_compatibility_telemetry.py:25; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
+      "review_by": "2026-12-18"
     },
     "scripts/engineering/ci/_compatibility_telemetry.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the internal compatibility telemetry library imported by governed CI reports; keep it supporting because it has no standalone command surface.",
+      "next_step": "Retain as the internal compatibility telemetry library imported by governed CI reports; keep it supporting because it has no standalone command surface. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/engineering/ci/quality_integral_gate.py:30; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
+      "review_by": "2026-12-18"
     },
     "scripts/engineering/ci/_python_dependency_changes.py": {
       "decision": "shared_helper_module",
@@ -1011,9 +1011,9 @@
     },
     "scripts/engineering/common/cli_dispatch.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the shared CLI dispatch helper for canonical scripts.engineering and adjacent routers; promote it to active inventory once helper modules receive explicit catalog classification. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",
+      "next_step": "Retain as the shared CLI dispatch helper for canonical scripts.engineering and adjacent routers; promote it to active inventory once helper modules receive explicit catalog classification. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/ai/mcp/__main__.py:20; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-11-17"
+      "review_by": "2026-12-18"
     },
     "scripts/engineering/common/platform.py": {
       "decision": "shared_helper_module",
@@ -1209,9 +1209,9 @@
     },
     "scripts/engineering/qa/check_duplication_complexity_exemptions.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the governed duplication/complexity exemption registry validator behind the QA router and CI workflow; keep it supporting unless it is promoted to an operator-facing command.",
+      "next_step": "Retain as the governed duplication/complexity exemption registry validator behind the QA router and CI workflow; keep it supporting unless it is promoted to an operator-facing command. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/engineering/qa/__main__.py:112; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
+      "review_by": "2026-12-18"
     },
     "scripts/engineering/qa/check_test_audit_preflight.py": {
       "decision": "legacy_manual_utility",
@@ -1221,9 +1221,9 @@
     },
     "scripts/engineering/qa/config_surface_governance.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the shared config-surface governance helper while canonical matrix generation and adjacent backlog scripts still import its sanctioned partial-key policy; fold it into a broader schema/governance helper only if those surfaces consolidate. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",
+      "next_step": "Retain as the shared config-surface governance helper while canonical matrix generation and adjacent backlog scripts still import its sanctioned partial-key policy; fold it into a broader schema/governance helper only if those surfaces consolidate. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/engineering/qa/report_config_surface_backlog.py:20; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-11-17"
+      "review_by": "2026-12-18"
     },
     "scripts/engineering/qa/count_source_lines.py": {
       "decision": "legacy_manual_utility",
@@ -1275,9 +1275,9 @@
     },
     "scripts/engineering/qa/docker_stability_campaign/runner.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the CLI orchestration implementation behind the supporting opt-in Docker stability campaign facade; keep it supporting while host-disruptive execution remains explicitly scheduled.",
+      "next_step": "Retain as the CLI orchestration implementation behind the supporting opt-in Docker stability campaign facade; keep it supporting while host-disruptive execution remains explicitly scheduled. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/engineering/qa/run_docker_stability_campaign.py:15; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-10-15"
+      "review_by": "2026-12-18"
     },
     "scripts/engineering/qa/docker_stability_campaign/soak.py": {
       "decision": "shared_helper_module",
@@ -1305,15 +1305,15 @@
     },
     "scripts/engineering/qa/extract_uniprot_semantic_payload_vocab.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the governed vocabulary-extraction helper while UniProt semantic payload inventory docs and parity checks still consume this generated support surface; only fold it into a broader schema/docs generator when that pipeline is consolidated. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",
+      "next_step": "Retain as the governed vocabulary-extraction helper while UniProt semantic payload inventory docs and parity checks still consume this generated support surface; only fold it into a broader schema/docs generator when that pipeline is consolidated. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/engineering/qa/report_non_chembl_observed_value_inventory.py:25; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-11-17"
+      "review_by": "2026-12-18"
     },
     "scripts/engineering/qa/file_discovery.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the shared filesystem discovery helper consumed by QA inventory and report generators; fold it into a broader canonical discovery helper only if those generators consolidate on a different traversal surface. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",
+      "next_step": "Retain as the shared filesystem discovery helper consumed by QA inventory and report generators; fold it into a broader canonical discovery helper only if those generators consolidate on a different traversal surface. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/engineering/qa/import_graph_inventory.py:24; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-11-17"
+      "review_by": "2026-12-18"
     },
     "scripts/engineering/qa/generate_dashboard_content_contract.py": {
       "decision": "shared_helper_module",
@@ -1341,15 +1341,15 @@
     },
     "scripts/engineering/qa/hotspot_family_metrics.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the hotspot-family metrics helper consumed by QA report generation and architecture ratchet tests; only move or inline it if the hotspot baseline/report flow is consolidated into a different canonical helper surface. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",
+      "next_step": "Retain as the hotspot-family metrics helper consumed by QA report generation and architecture ratchet tests; only move or inline it if the hotspot baseline/report flow is consolidated into a different canonical helper surface. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/engineering/qa/report_hotspot_family_baseline.py:14; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-11-17"
+      "review_by": "2026-12-18"
     },
     "scripts/engineering/qa/import_graph_inventory.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the shared first-party import-graph helper consumed by QA inventory reports; fold it into a broader canonical graph helper surface only if the inventory/reporting pipeline is consolidated. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",
+      "next_step": "Retain as the shared first-party import-graph helper consumed by QA inventory reports; fold it into a broader canonical graph helper surface only if the inventory/reporting pipeline is consolidated. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/engineering/qa/report_compatibility_importer_census.py:1145; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-11-17"
+      "review_by": "2026-12-18"
     },
     "scripts/engineering/qa/observability_closure_campaign_cli.py": {
       "decision": "shared_helper_module",
@@ -1395,9 +1395,9 @@
     },
     "scripts/engineering/qa/private_import_exception_metadata.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the metadata checker behind the private-import architecture ratchet; keep the architecture test as the entrypoint and do not promote this module to a standalone command.",
+      "next_step": "Retain as the metadata checker behind the private-import architecture ratchet; keep the architecture test as the entrypoint and do not promote this module to a standalone command. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/engineering/qa/report_private_import_inventory.py:23; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-architecture",
-      "review_by": "2026-11-17"
+      "review_by": "2026-12-18"
     },
     "scripts/engineering/qa/refresh_test_governance_baseline.py": {
       "decision": "legacy_manual_utility",
@@ -1407,33 +1407,33 @@
     },
     "scripts/engineering/qa/report_adr_enforcement_matrix.py": {
       "decision": "legacy_manual_utility",
-      "next_step": "Retain as a bounded ADR enforcement matrix reporter while architecture governance tests and generated QA evidence still depend on this surface; promote it into the canonical scripts.engineering.qa command router or retire it after ADR evidence generation consolidates. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",
+      "next_step": "Retain as a bounded ADR enforcement matrix reporter while architecture governance tests and generated QA evidence still depend on this surface; promote it into the canonical scripts.engineering.qa command router or retire it after ADR evidence generation consolidates. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/engineering/quality/architecture_quality_scorecard.py:14; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-11-17"
+      "review_by": "2026-12-18"
     },
     "scripts/engineering/qa/report_architecture_debt_remote_main_baseline.py": {
       "decision": "legacy_manual_utility",
-      "next_step": "Retain as a bounded remote-main baseline comparison utility for architecture-debt governance while closure campaigns still need reproducible baseline evidence; promote or retire it when the debt baseline workflow is consolidated under the canonical QA report surface. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",
+      "next_step": "Retain as a bounded remote-main baseline comparison utility for architecture-debt governance while closure campaigns still need reproducible baseline evidence; promote or retire it when the debt baseline workflow is consolidated under the canonical QA report surface. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/engineering/qa/__main__.py:176; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-11-17"
+      "review_by": "2026-12-18"
     },
     "scripts/engineering/qa/report_architecture_quality_scorecard.py": {
       "decision": "legacy_manual_utility",
-      "next_step": "Retain as a bounded architecture scorecard reporter while closeout audits and debt-governance artifacts still depend on the direct script surface; promote it into the canonical scripts.engineering.qa command router or retire it after scorecard generation fully consolidates there. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",
+      "next_step": "Retain as a bounded architecture scorecard reporter while closeout audits and debt-governance artifacts still depend on the direct script surface; promote it into the canonical scripts.engineering.qa command router or retire it after scorecard generation fully consolidates there. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/engineering/qa/refresh_governance_artifacts.py:357; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-11-17"
+      "review_by": "2026-12-18"
     },
     "scripts/engineering/qa/report_architecture_suite_burndown.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the implementation behind python -m scripts.engineering.qa report-architecture-suite-burndown; keep contributor execution routed through the unified QA dispatcher.",
+      "next_step": "Retain as the implementation behind python -m scripts.engineering.qa report-architecture-suite-burndown; keep contributor execution routed through the unified QA dispatcher. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/engineering/qa/__main__.py:156; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
+      "review_by": "2026-12-18"
     },
     "scripts/engineering/qa/report_artifact_duplication_audit.py": {
       "decision": "legacy_manual_utility",
-      "next_step": "Retain as a bounded manual artifact-duplication audit utility while architecture governance tests and generated quality artifacts still depend on this exact surface; promote it into the canonical scripts.engineering.qa reporting lane or retire it after duplication governance consolidates elsewhere. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",
+      "next_step": "Retain as a bounded manual artifact-duplication audit utility while architecture governance tests and generated quality artifacts still depend on this exact surface; promote it into the canonical scripts.engineering.qa reporting lane or retire it after duplication governance consolidates elsewhere. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/engineering/qa/__main__.py:164; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-11-17"
+      "review_by": "2026-12-18"
     },
     "scripts/engineering/qa/report_basedpyright_suppression_inventory.py": {
       "decision": "legacy_manual_utility",
@@ -1443,21 +1443,21 @@
     },
     "scripts/engineering/qa/report_cast_any_typing_census.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the deterministic cast(Any) typing-census implementation behind python -m scripts.engineering.qa report-cast-any-typing-census (AUD-006/#10596); keep operator execution routed through the unified QA dispatcher while architecture tests import the computation helpers directly. Promote to active only with an explicit active-surface budget reduction elsewhere.",
+      "next_step": "Retain as the deterministic cast(Any) typing-census implementation behind python -m scripts.engineering.qa report-cast-any-typing-census (AUD-006/#10596); keep operator execution routed through the unified QA dispatcher while architecture tests import the computation helpers directly. Promote to active only with an explicit active-surface budget reduction elsewhere. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/engineering/qa/__main__.py:183; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-architecture",
-      "review_by": "2026-09-30"
+      "review_by": "2026-12-18"
     },
     "scripts/engineering/qa/report_chembl_observed_value_inventory.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the deterministic ChEMBL Bronze observed-value inventory implementation behind python -m scripts.engineering.qa report-chembl-observed-value-inventory; keep operator execution routed through the unified QA dispatcher while unit tests import the computation helpers directly. Promote to active only with an explicit active-surface budget reduction elsewhere.",
+      "next_step": "Retain as the deterministic ChEMBL Bronze observed-value inventory implementation behind python -m scripts.engineering.qa report-chembl-observed-value-inventory; keep operator execution routed through the unified QA dispatcher while unit tests import the computation helpers directly. Promote to active only with an explicit active-surface budget reduction elsewhere. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/engineering/qa/__main__.py:169; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
+      "review_by": "2026-12-18"
     },
     "scripts/engineering/qa/report_config_surface_backlog.py": {
       "decision": "legacy_manual_utility",
-      "next_step": "Retain only as a bounded historical backlog-report utility for the Stream B config-surface burn-down; either route it through a governed reporting workflow or retire it once the burn-down campaign is formally closed. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",
+      "next_step": "Retain only as a bounded historical backlog-report utility for the Stream B config-surface burn-down; either route it through a governed reporting workflow or retire it once the burn-down campaign is formally closed. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/engineering/qa/report_live_residual_snapshot.py:76; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-11-17"
+      "review_by": "2026-12-18"
     },
     "scripts/engineering/qa/report_dashboard_promql_scope.py": {
       "decision": "shared_helper_module",
@@ -1479,21 +1479,21 @@
     },
     "scripts/engineering/qa/report_domain_io_taint_inventory.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as a bounded architecture-audit evidence helper consumed by the read-only architecture audit lane; keep it non-active unless it becomes a separately documented public QA command surface.",
+      "next_step": "Retain as a bounded architecture-audit evidence helper consumed by the read-only architecture audit lane; keep it non-active unless it becomes a separately documented public QA command surface. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/engineering/qa/__main__.py:140; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-architecture",
-      "review_by": "2026-09-30"
+      "review_by": "2026-12-18"
     },
     "scripts/engineering/qa/report_domain_ports_inventory.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the implementation behind the canonical scripts.engineering.qa report-domain-ports-inventory command; keep the module supporting while the QA router remains the active entrypoint.",
+      "next_step": "Retain as the implementation behind the canonical scripts.engineering.qa report-domain-ports-inventory command; keep the module supporting while the QA router remains the active entrypoint. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/engineering/qa/__main__.py:143; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-architecture",
-      "review_by": "2026-09-30"
+      "review_by": "2026-12-18"
     },
     "scripts/engineering/qa/report_flaky_test_burndown_review.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the deterministic implementation behind the governed scripts.engineering.qa report-flaky-test-burndown-review command; keep the module supporting while the QA router remains the canonical active entrypoint.",
+      "next_step": "Retain as the deterministic implementation behind the governed scripts.engineering.qa report-flaky-test-burndown-review command; keep the module supporting while the QA router remains the canonical active entrypoint. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/engineering/qa/__main__.py:146; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-10-15"
+      "review_by": "2026-12-18"
     },
     "scripts/engineering/qa/report_invariant_audit_rebaseline.py": {
       "decision": "legacy_manual_utility",
@@ -1521,15 +1521,15 @@
     },
     "scripts/engineering/qa/report_port_adapter_factory_coverage.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as a bounded architecture-audit evidence helper consumed by the read-only architecture audit lane; keep it non-active unless it becomes a separately documented public QA command surface.",
+      "next_step": "Retain as a bounded architecture-audit evidence helper consumed by the read-only architecture audit lane; keep it non-active unless it becomes a separately documented public QA command surface. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/engineering/qa/__main__.py:149; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-architecture",
-      "review_by": "2026-09-30"
+      "review_by": "2026-12-18"
     },
     "scripts/engineering/qa/report_test_governance_audit.py": {
       "decision": "legacy_manual_utility",
-      "next_step": "Retain as a bounded manual test-governance report utility while testing guidance still references the direct script path; promote it into the canonical scripts.engineering.qa surface or retire it after the broader test-governance workflow is consolidated. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",
+      "next_step": "Retain as a bounded manual test-governance report utility while testing guidance still references the direct script path; promote it into the canonical scripts.engineering.qa surface or retire it after the broader test-governance workflow is consolidated. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command .github/workflows/tests.yml:439; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-11-17"
+      "review_by": "2026-12-18"
     },
     "scripts/engineering/qa/report_topology_source_binding.py": {
       "decision": "legacy_manual_utility",
@@ -1545,15 +1545,15 @@
     },
     "scripts/engineering/qa/report_vcr_corpus_budget.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the implementation behind python -m scripts.engineering.qa report-vcr-corpus-budget; keep contributor execution routed through the unified QA dispatcher.",
+      "next_step": "Retain as the implementation behind python -m scripts.engineering.qa report-vcr-corpus-budget; keep contributor execution routed through the unified QA dispatcher. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/engineering/qa/__main__.py:155; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
+      "review_by": "2026-12-18"
     },
     "scripts/engineering/qa/report_weak_assert_inventory.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the implementation behind python -m scripts.engineering.qa report-weak-assert-inventory; keep contributor execution routed through the unified QA dispatcher.",
+      "next_step": "Retain as the implementation behind python -m scripts.engineering.qa report-weak-assert-inventory; keep contributor execution routed through the unified QA dispatcher. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/engineering/qa/__main__.py:154; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
+      "review_by": "2026-12-18"
     },
     "scripts/engineering/qa/requalify_external_resource_inventory.py": {
       "decision": "shared_helper_module",
@@ -1563,9 +1563,9 @@
     },
     "scripts/engineering/qa/run_architecture_audit_read_only.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the bounded read-only architecture-audit coordinator; keep it non-active while it is a governance helper rather than a general developer bootstrap entrypoint.",
+      "next_step": "Retain as the bounded read-only architecture-audit coordinator; keep it non-active while it is a governance helper rather than a general developer bootstrap entrypoint. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/engineering/qa/__main__.py:207; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-architecture",
-      "review_by": "2026-09-30"
+      "review_by": "2026-12-18"
     },
     "scripts/engineering/qa/run_docker_stability_campaign.py": {
       "decision": "legacy_manual_utility",
@@ -1593,9 +1593,9 @@
     },
     "scripts/engineering/qa/technical_debt_audit_registry.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the SHA-pinned technical-debt audit lifecycle resolver and validation helper consumed by closeout guards and TDX publishing; keep it supporting unless it becomes a separately budgeted active operator workflow.",
+      "next_step": "Retain as the SHA-pinned technical-debt audit lifecycle resolver and validation helper consumed by closeout guards and TDX publishing; keep it supporting unless it becomes a separately budgeted active operator workflow. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/engineering/qa/__main__.py:204; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-architecture",
-      "review_by": "2026-09-30"
+      "review_by": "2026-12-18"
     },
     "scripts/engineering/qa/validate_dashboard_content_contract.py": {
       "decision": "shared_helper_module",
@@ -1785,15 +1785,15 @@
     },
     "scripts/engineering/repo/_branch_cleanup_policy.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the shared branch-cleanup classification policy helper consumed by the governed branch cleanup command and unit tests; keep it side-effect free and fold it into branch_cleanup.py only if the cleanup workflow is retired.",
+      "next_step": "Retain as the shared branch-cleanup classification policy helper consumed by the governed branch cleanup command and unit tests; keep it side-effect free and fold it into branch_cleanup.py only if the cleanup workflow is retired. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/engineering/repo/branch_cleanup.py:47; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
+      "review_by": "2026-12-18"
     },
     "scripts/engineering/repo/_root_governance.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the shared root-governance helper consumed by structure auditors and cleanup tooling; fold it into a broader canonical governance helper surface only if root policy loaders are consolidated further. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",
+      "next_step": "Retain as the shared root-governance helper consumed by structure auditors and cleanup tooling; fold it into a broader canonical governance helper surface only if root policy loaders are consolidated further. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/engineering/diagnostics/audit_structure.py:32; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-11-17"
+      "review_by": "2026-12-18"
     },
     "scripts/engineering/repo/apply_branch_cleanup_phases_0_2.sh": {
       "decision": "legacy_manual_utility",
@@ -1935,9 +1935,9 @@
     },
     "scripts/ops/observability/check_prometheus_rules_health.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the Prometheus rule-health implementation used by validate_live_observability.py; keep the canonical operator workflow routed through the aggregate live validator.",
+      "next_step": "Retain as the Prometheus rule-health implementation used by validate_live_observability.py; keep the canonical operator workflow routed through the aggregate live validator. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/engineering/qa/check_prometheus_rules.py:717; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-observability",
-      "review_by": "2026-09-30"
+      "review_by": "2026-12-18"
     },
     "scripts/ops/observability/grafana/_apply_ds2_all.py": {
       "decision": "legacy_manual_utility",
@@ -1965,9 +1965,9 @@
     },
     "scripts/ops/observability/grafana/_evidence_readability.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the internal readability pass imported by render_nav_bus.py; it has no standalone command and must stay behind the canonical dashboard generator.",
+      "next_step": "Retain as the internal readability pass imported by render_nav_bus.py; it has no standalone command and must stay behind the canonical dashboard generator. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/ops/observability/grafana/render_nav_bus.py:2627; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
+      "review_by": "2026-12-18"
     },
     "scripts/ops/observability/grafana/_incident_explanations.py": {
       "decision": "shared_helper_module",
@@ -2085,9 +2085,9 @@
     },
     "scripts/ops/observability/grafana/capture_acceptance.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the layout/accessibility assessment backend used by check-grafana-audit-preflight; route matrix report assembly through the scripts.ops dispatcher instead of counting the backend twice.",
+      "next_step": "Retain as the layout/accessibility assessment backend used by check-grafana-audit-preflight; route matrix report assembly through the scripts.ops dispatcher instead of counting the backend twice. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py:1947; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
+      "review_by": "2026-12-18"
     },
     "scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh": {
       "decision": "legacy_manual_utility",
@@ -2097,9 +2097,9 @@
     },
     "scripts/ops/observability/grafana/capture_provenance.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the immutable source/attachment verifier imported by the canonical check-grafana-audit-preflight command and capture acceptance backend; no separate operator entrypoint.",
+      "next_step": "Retain as the immutable source/attachment verifier imported by the canonical check-grafana-audit-preflight command and capture acceptance backend; no separate operator entrypoint. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/ops/observability/grafana/capture_acceptance.py:655; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
+      "review_by": "2026-12-18"
     },
     "scripts/ops/observability/grafana/check_dashboard_panel_fill.py": {
       "decision": "shared_helper_module",
@@ -2115,9 +2115,9 @@
     },
     "scripts/ops/observability/grafana/dashboard_state_fixture_v2.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the dashboard_state_fixture_v2 loader used by rerender --fixture-case (#8984); not a standalone entrypoint.",
+      "next_step": "Retain as the dashboard_state_fixture_v2 loader used by rerender --fixture-case (#8984); not a standalone entrypoint. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/ops/observability/grafana/rerender_grafana_screenshots.py:709; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-11-17"
+      "review_by": "2026-12-18"
     },
     "scripts/ops/observability/grafana/ensure_quarantine_explorer.py": {
       "decision": "compatibility_wrapper",
@@ -2163,9 +2163,9 @@
     },
     "scripts/ops/observability/grafana/recover_renderer.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the renderer-recovery implementation behind the platform wrappers and runtime manager; keep it supporting unless promoted to a governed standalone operator command.",
+      "next_step": "Retain as the renderer-recovery implementation behind the platform wrappers and runtime manager; keep it supporting unless promoted to a governed standalone operator command. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/ops/runtime/docker/runtime_manager.py:2804; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-observability",
-      "review_by": "2026-09-30"
+      "review_by": "2026-12-18"
     },
     "scripts/ops/observability/grafana/recover_renderer.sh": {
       "decision": "legacy_manual_utility",
@@ -2283,9 +2283,9 @@
     },
     "scripts/ops/observability/trust_validation_fixture_materialization.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the fixture-materialization implementation imported by the bounded Trust validation generator; keep it supporting and route operator execution through generate_trust_validation_fixtures.py.",
+      "next_step": "Retain as the fixture-materialization implementation imported by the bounded Trust validation generator; keep it supporting and route operator execution through generate_trust_validation_fixtures.py. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/ops/observability/grafana/generate_trust_validation_fixtures.py:33; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-observability",
-      "review_by": "2026-09-30"
+      "review_by": "2026-12-18"
     },
     "scripts/ops/observability/validate_live_observability.py": {
       "decision": "legacy_manual_utility",
@@ -2349,9 +2349,9 @@
     },
     "scripts/ops/runtime/docker/runtime_manager.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as a Docker runtime manager helper for container lifecycle management; keep it supporting unless it becomes a governed CI workflow or first-class ops entrypoint.",
+      "next_step": "Retain as a Docker runtime manager helper for container lifecycle management; keep it supporting unless it becomes a governed CI workflow or first-class ops entrypoint. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/ops/runtime/docker/docker_runtime_probe.py:41; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
+      "review_by": "2026-12-18"
     },
     "scripts/ops/runtime/mcp/apply-shared-to-grok.ps1": {
       "decision": "legacy_manual_utility",
@@ -2439,9 +2439,9 @@
     },
     "scripts/schema/generation/generate_protein_class_l1_target_type_artifacts.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the deterministic protein-class L1 target-type artifact generator consumed by generated-artifact drift tests; promote to an active scripts.schema command only if it becomes a documented public schema generation surface.",
+      "next_step": "Retain as the deterministic protein-class L1 target-type artifact generator consumed by generated-artifact drift tests; promote to an active scripts.schema command only if it becomes a documented public schema generation surface. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/schema/__main__.py:43; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
+      "review_by": "2026-12-18"
     },
     "scripts/schema/generation/generate_typed_arrow_schema_sources.py": {
       "decision": "shared_helper_module",
