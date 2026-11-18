@@ -255,7 +255,7 @@ class ChEMBLSubcellularFractionGoldSchema(StrictGoldContractSchema):
 
 
 class ChEMBLTargetGoldSchemaV31(ChEMBLTargetGoldSchema):
-    """Require the complete additive column shape while allowing no assignment."""
+    """Expose the additive IUPHAR columns. Each new field stays nullable."""
 
     iuphar_target_id: Series[str] = pa.Field(nullable=True)
     iuphar_class: Series[str] = pa.Field(nullable=True)

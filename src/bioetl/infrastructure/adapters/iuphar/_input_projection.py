@@ -122,6 +122,8 @@ def target_input_eligibility(
     if taxon is not None and taxon not in species:
         return taxon, "unsupported_taxon"
     source_taxon = _SOURCE_TAXA.get(_text(data.get("organism")) or "")
+    if taxon is None and source_taxon is not None:
+        return None, "missing_taxonomy_for_known_organism"
     if taxon is not None and source_taxon is not None and taxon != source_taxon:
         return taxon, "taxonomy_name_conflict"
     return taxon, None

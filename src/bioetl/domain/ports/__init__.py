@@ -6,6 +6,7 @@ from importlib import import_module
 
 from bioetl.domain.ports._facade_support import build_export_modules
 
+_TARGET_PORTS = ("TargetClassificationEvidencePort", "TargetClassificationPort")
 _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
     "bioetl.domain.ports.adr": (
         "AdrDocument",
@@ -77,10 +78,7 @@ _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
         "HealthStatePort",
         "HealthStatusLiteral",
     ),
-    "bioetl.domain.ports.idmapping": (
-        "IDMappingPort",
-        "IDMappingSourceReaderPort",
-    ),
+    "bioetl.domain.ports.idmapping": ("IDMappingPort", "IDMappingSourceReaderPort"),
     "bioetl.domain.ports.metadata": (
         "BronzeMetadataInput",
         "GoldMetadataInput",
@@ -111,10 +109,7 @@ _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
         "PublicationMetadataStrategy",
     ),
     "bioetl.domain.ports.protein_classification": ("ProteinClassificationPort",),
-    "bioetl.domain.ports.target_classification": (
-        "TargetClassificationEvidencePort",
-        "TargetClassificationPort",
-    ),
+    "bioetl.domain.ports.target_classification": _TARGET_PORTS,
     "bioetl.domain.ports.quality": (
         "BronzeDQAnalyzerPort",
         "BronzeDQConfigPort",

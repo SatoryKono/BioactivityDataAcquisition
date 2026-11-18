@@ -103,8 +103,16 @@ def _inside(root: Path, relative: object) -> Path:
     if Path(value).is_absolute():
         raise ValueError("Stage-0 paths must be relative")
     result = (root / value).resolve()
-    if not result.is_relative_to(root.resolve()) or result == root.resolve():
+    resolved_root = root.resolve()
+    if not result.is_relative_to(resolved_root) or result == resolved_root:
         raise ValueError("Stage-0 artifact escapes its root")
+    if any(
+        part.lower() == ".env"
+        or part.lower().startswith(".env.")
+        or part.lower().endswith(".env")
+        for part in result.relative_to(resolved_root).parts
+    ):
+        raise ValueError("environment files cannot enter a Stage-0 bundle")
     return result
 
 

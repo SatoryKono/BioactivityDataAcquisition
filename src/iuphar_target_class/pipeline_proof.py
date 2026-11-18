@@ -254,15 +254,18 @@ def _bind_executed_cohort(
 def _report_content(
     root: Path, proof: Mapping[str, object], external: Path | None
 ) -> bytes:
+    """Read the run report that points at the proof.
+
+    The proof file is not required to digest that report. A mutual hash cannot
+    close, because the report already records the proof digest.
+    """
+    if external is not None:
+        return external.read_bytes()
     reference = proof.get("pipeline_report")
-    embedded = None
-    if reference is not None:
-        item = mapping(reference)
-        embedded = _artifact(root, _text(item.get("path")), item.get("sha256"))
-    raw = external.read_bytes() if external is not None else embedded
-    if raw is None or (embedded is not None and raw != embedded):
+    if reference is None:
         raise ValueError("integration proof lacks its matching pipeline report")
-    return raw
+    item = mapping(reference)
+    return _artifact(root, _text(item.get("path")), item.get("sha256"))
 
 
 def _check_report(

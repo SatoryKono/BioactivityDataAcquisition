@@ -116,7 +116,10 @@ def _verified_labels(request: IntegrationAcceptanceRequest) -> _ReferenceSpecifi
     raw = request.expected_labels.read_bytes()
     if sha256_bytes(raw) != request.expected_labels_sha256:
         raise ValueError("expected-label digest mismatch")
-    spec = cast("_ReferenceSpecification", json.loads(raw))
+    loaded = json.loads(raw)
+    if not isinstance(loaded, dict):
+        raise ValueError("reference specification must be a JSON object")
+    spec = cast("_ReferenceSpecification", loaded)
     if (
         spec.get("artifact") != "bioetl_iuphar_reference_cases"
         or spec.get("schema_version") not in {1, 2}

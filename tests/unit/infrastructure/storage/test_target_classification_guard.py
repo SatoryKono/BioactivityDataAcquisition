@@ -1,5 +1,7 @@
 """Real Delta schemas prevent destructive writes across target profiles."""
 
+from __future__ import annotations
+
 from pathlib import Path
 
 import pyarrow as pa

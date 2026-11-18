@@ -1,5 +1,7 @@
 """Actual loader, admitted synthetic V2 bytes and physical Delta rehearsal."""
 
+from __future__ import annotations
+
 from dataclasses import replace
 from pathlib import Path
 from shutil import copytree, ignore_patterns

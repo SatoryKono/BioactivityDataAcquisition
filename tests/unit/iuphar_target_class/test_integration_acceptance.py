@@ -13,6 +13,7 @@ from iuphar_target_class.integration_acceptance import (
     run_integration_acceptance,
     verify_pipeline_proof,
     _check_reference_case,
+    _verified_labels,
 )
 from iuphar_target_class.matching import CatalogTarget
 from iuphar_target_class.models import ProviderAnnotation, RawTargetRow, RunProvenance
@@ -671,3 +672,19 @@ def test_report_must_bind_actual_snapshot_versions_rows_and_proof(
             request.pipeline_report,
             provenance=request.provenance,
         )
+
+
+def test_reference_specification_must_be_a_json_object(tmp_path):
+    labels = tmp_path / "labels.json"
+    raw = b"[]"
+    labels.write_bytes(raw)
+    request = IntegrationAcceptanceRequest(
+        stage0_manifest=labels,
+        expected_labels=labels,
+        expected_labels_sha256=sha256_bytes(raw),
+        snapshot_manifest_sha256="a" * 64,
+        provenance=RunProvenance("snapshot", None, None, None, "t", "t"),
+        run_id="blocked",
+    )
+    with pytest.raises(ValueError, match="JSON object"):
+        _verified_labels(request)

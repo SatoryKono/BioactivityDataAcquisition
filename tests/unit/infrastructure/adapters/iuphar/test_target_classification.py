@@ -264,6 +264,10 @@ def test_an_ec_input_does_not_replace_direct_iuphar(tmp_path):
         ({"taxonomy_id": 10116, "organism": "Rattus norvegicus"}, "unsupported_taxon"),
         ({"taxonomy_id": True}, "invalid_taxonomy_id"),
         ({"organism": "Mus musculus"}, "taxonomy_name_conflict"),
+        (
+            {"taxonomy_id": None, "organism": "Mus musculus"},
+            "missing_taxonomy_for_known_organism",
+        ),
     ],
 )
 def test_unsupported_inputs_keep_identity_without_assigning_class(

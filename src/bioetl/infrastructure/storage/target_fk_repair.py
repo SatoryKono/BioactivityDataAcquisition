@@ -376,5 +376,7 @@ def publish_repair_candidate(
         ],
     }
     manifest = destination / "manifest.json"
-    manifest.write_bytes(_json_bytes(document) + b"\n")
+    temporary = manifest.with_name(".manifest.json.tmp")
+    temporary.write_bytes(_json_bytes(document) + b"\n")
+    temporary.replace(manifest)
     return manifest
