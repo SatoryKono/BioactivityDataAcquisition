@@ -230,3 +230,45 @@ with Path(sys.argv[1]).open("a+b") as handle:
     assert locked_reads == [71, 71]
     assert try_lock() == 0
     assert 'model = "user-model"' in default_config.read_text(encoding="utf-8")
+
+
+def test_removed_default_checkout_does_not_block_unrelated_generation(
+    routes, tmp_path, monkeypatch
+):
+    root, path, data = routes
+    (root / ".git").rmdir()
+    home = tmp_path / "home"
+    default = home / ".config/pc-agent/codex-routes.json"
+    default.parent.mkdir(parents=True)
+    default.write_text(json.dumps(data), encoding="utf-8")
+    monkeypatch.setattr(Path, "home", lambda: home)
+    monkeypatch.delenv("BIOETL_CODEX_ROUTES_FILE", raising=False)
+    baseline = {"memory": {"command": "baseline"}}
+    assert apply_local_routes(baseline, tmp_path) is baseline
+    with pytest.raises(FileNotFoundError):
+        apply_local_routes(baseline, tmp_path, manifest=path)
+    monkeypatch.setenv("BIOETL_CODEX_ROUTES_FILE", str(default))
+    with pytest.raises(FileNotFoundError):
+        apply_local_routes(baseline, tmp_path)
+
+
+def test_managed_toml_headers_are_parsed_with_comments_quotes_and_multiline_values():
+    import tomllib
+
+    original = (
+        'model = "user-model"\n'
+        'notes = """unchanged\n[mcp_servers.memory.tools.fake] # not a header\n"""\n'
+        '[mcp_servers.memory] # transport\ncommand = "old"\n'
+        '[mcp_servers."memory".tools."read_graph"] # policy\napproval_mode = "approve"\n'
+        '[mcp_servers."custom.name"] # unmanaged\ncommand = "custom"\n'
+        "notes = '''unchanged\n[mcp_servers.memory] # also a value\n'''\n"
+    )
+    expected = tomllib.loads(original)
+    stripped = setup_mcp._strip_managed_mcp_blocks(original, {"memory"})
+    result = tomllib.loads(stripped + '\n[mcp_servers.memory]\ncommand = "new"\n')
+    assert result["model"] == expected["model"]
+    assert result["notes"] == expected["notes"]
+    assert (
+        result["mcp_servers"]["custom.name"] == expected["mcp_servers"]["custom.name"]
+    )
+    assert result["mcp_servers"]["memory"] == {"command": "new"}

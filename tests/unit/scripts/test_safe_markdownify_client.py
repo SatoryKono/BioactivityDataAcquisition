@@ -229,6 +229,273 @@ def test_concurrent_initialization_cannot_exceed_existing_session_limit():
     assert len(accepted) == len(set(accepted)) == markdownify.SESSION_LIMIT
 
 
+def test_metadata_available_format_is_disabled_when_the_frozen_probe_fails(monkeypatch):
+    attempts = []
+
+    def convert(spec, extension, raw):
+        attempts.append((extension, raw))
+        if extension == ".pdf":
+            raise ValueError("converter dependency imports fail")
+        if extension == ".xlsx":
+            return "conversion returned no expected content"
+        return markdownify.snapshots.QUALIFICATION_TEXT
+
+    monkeypatch.setattr(markdownify, "_convert_bytes", convert)
+    spec = {"converter": "frozen-converter"}
+    evidence = markdownify._qualify_converter(spec, {"pdf", "docx", "xlsx"})
+    assert evidence["results"] == {
+        "pdf-to-markdown": "FAIL",
+        "docx-to-markdown": "PASS",
+        "pptx-to-markdown": "UNAVAILABLE",
+        "xlsx-to-markdown": "FAIL",
+        "html-to-markdown": "PASS",
+        "get-markdown-file": "PASS",
+    }
+    assert {extension for extension, _ in attempts} == {
+        ".pdf",
+        ".docx",
+        ".xlsx",
+        ".html",
+    }
+    spec.update(
+        qualification=evidence, enabled_tools=markdownify._enabled_tools(evidence)
+    )
+    assert markdownify._qualification_matches(spec)
+    spec["enabled_tools"].append("pdf-to-markdown")
+    assert not markdownify._qualification_matches(spec)
+
+
+def test_probe_timeouts_disable_the_format_without_enabling_metadata_fallback(
+    monkeypatch,
+):
+    from subprocess import TimeoutExpired
+
+    def timeout(*args):
+        raise TimeoutExpired("owned converter", 90)
+
+    monkeypatch.setattr(markdownify, "_convert_bytes", timeout)
+    evidence = markdownify._qualify_converter({"converter": "pinned"}, {"pdf"})
+    assert markdownify._enabled_tools(evidence) == ["get-markdown-file"]
+
+
+def test_qualification_cannot_be_reused_for_another_converter():
+    evidence = {
+        "schema": 1,
+        "converter": "previous-snapshot",
+        "results": dict.fromkeys(markdownify.EXTENSIONS, "PASS"),
+    }
+    spec = {
+        "converter": "new-snapshot",
+        "qualification": evidence,
+        "enabled_tools": list(markdownify.EXTENSIONS),
+    }
+    assert not markdownify._qualification_matches(spec)
+
+
+def test_conversion_and_qualification_share_the_same_owned_worker(
+    monkeypatch, tmp_path
+):
+    raw = b"synthetic source content"
+    monkeypatch.setattr(markdownify.files, "read_confined", lambda *_: raw)
+    worker = Mock(return_value="converted content")
+    monkeypatch.setattr(markdownify, "_convert_bytes", worker)
+    spec = {"enabled_tools": ["pdf-to-markdown"], "binding": {"root": str(tmp_path)}}
+    assert (
+        markdownify.convert(spec, "pdf-to-markdown", {"filepath": "probe.pdf"})
+        == "converted content"
+    )
+    worker.assert_called_once_with(spec, ".pdf", raw)
+
+
+@pytest.mark.parametrize("extension", [".docx", ".pptx", ".xlsx"])
+def test_office_qualification_samples_are_self_contained_packages(extension):
+    import zipfile
+    import xml.etree.ElementTree as ET
+
+    raw = markdownify.snapshots.qualification_sample(extension)
+    with zipfile.ZipFile(BytesIO(raw)) as package:
+        names = package.namelist()
+        assert "[Content_Types].xml" in names and "_rels/.rels" in names
+        for name in names:
+            ET.fromstring(package.read(name))
+        assert any(
+            markdownify.snapshots.QUALIFICATION_TEXT.encode() in package.read(name)
+            for name in names
+        )
+        assert all(
+            not name.startswith("/") and ".." not in name.split("/") for name in names
+        )
+
+
+def test_prepare_publishes_only_formats_that_passed_the_frozen_probe(
+    tmp_path, monkeypatch
+):
+    from contextlib import nullcontext
+    from types import SimpleNamespace
+
+    state = tmp_path / "private-state"
+    state.mkdir()
+    written = {}
+    core = SimpleNamespace(
+        STATE=state,
+        private_directory=lambda: None,
+        LifetimeLock=lambda _: nullcontext(),
+        credential=lambda **_: "unused-fixture",
+        write_json=lambda path, value: written.update(value),
+    )
+    monkeypatch.setattr(markdownify, "core", core)
+    monkeypatch.setattr(
+        markdownify, "configure", lambda _: ("id", {"root": str(tmp_path)})
+    )
+    monkeypatch.setattr(markdownify.snapshots, "closure", lambda *args: None)
+    monkeypatch.setattr(
+        markdownify.snapshots, "build", lambda *args: tmp_path / "frozen"
+    )
+    monkeypatch.setattr(markdownify, "pins", lambda _: {"pinned": "digest"})
+    sock = Mock()
+    sock.getsockname.return_value = ("127.0.0.1", 12345)
+    manager = Mock()
+    manager.__enter__ = Mock(return_value=sock)
+    manager.__exit__ = Mock(return_value=None)
+    monkeypatch.setattr(markdownify.socket, "socket", lambda: manager)
+    monkeypatch.setattr(markdownify.socket, "SO_EXCLUSIVEADDRUSE", 0, raising=False)
+
+    def convert(spec, extension, raw):
+        if extension == ".html":
+            return markdownify.snapshots.QUALIFICATION_TEXT
+        raise ValueError("metadata was present but worker failed")
+
+    monkeypatch.setattr(markdownify, "_convert_bytes", convert)
+    profile = markdownify.prepare(tmp_path)
+    assert profile["enabled_tools"] == ["html-to-markdown", "get-markdown-file"]
+    assert profile == written
+    assert markdownify._qualification_matches(profile)
+
+
+def test_busy_conversion_is_not_queued_or_executed(handler, monkeypatch):
+    convert = Mock()
+    monkeypatch.setattr(markdownify, "convert", convert)
+    with handler._gate:
+        result = handler._call_tool({"params": {"name": "pdf-to-markdown"}})
+    assert result["isError"] and "busy" in result["content"][0]["text"]
+    convert.assert_not_called()
+
+
+def test_stale_stop_marker_does_not_end_the_generation_watcher(tmp_path, monkeypatch):
+    from types import SimpleNamespace
+
+    marker = tmp_path / markdownify.STOP_REQUEST
+    marker.write_text('{"generation": "previous"}', encoding="utf-8")
+    monkeypatch.setattr(
+        markdownify,
+        "core",
+        SimpleNamespace(
+            STATE=tmp_path, read_json=lambda path: json.loads(path.read_bytes())
+        ),
+    )
+    sleeps = []
+
+    def sleep(_):
+        sleeps.append(True)
+        marker.write_text('{"generation": "current"}', encoding="utf-8")
+
+    monkeypatch.setattr(markdownify.time, "sleep", sleep)
+    server, draining = Mock(), Event()
+    markdownify._watch_stop(server, {"generation": "current"}, Lock(), draining)
+    assert sleeps and draining.is_set()
+    server.shutdown.assert_called_once_with()
+
+
+def test_expired_inner_session_reinitializes_without_replaying_the_tool(monkeypatch):
+    initialization = {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "initialize",
+        "params": {"protocolVersion": "2025-06-18"},
+    }
+    original = {
+        "jsonrpc": "2.0",
+        "id": 2,
+        "method": "tools/call",
+        "params": {"name": "pdf-to-markdown"},
+    }
+    calls = []
+
+    def request(spec, method, path, value, session=None):
+        calls.append((value, session))
+        if value is original:
+            raise markdownify._SessionExpired("fixture expiry")
+        if value["method"] == "initialize":
+            return {"result": {"protocolVersion": "2025-06-18"}}, "renewed"
+        assert value["method"] == "notifications/initialized"
+        return None, None
+
+    monkeypatch.setattr(markdownify, "request", request)
+    result, session = markdownify._forward_request(
+        {}, original, "expired", initialization
+    )
+    assert session == "renewed" and result["id"] == 2 and "error" in result
+    assert sum(value is original for value, _ in calls) == 1
+    assert calls[1][1] is None and calls[2][1] == "renewed"
+    assert calls[1][0]["params"] == initialization["params"]
+
+
+def test_preauth_connections_have_a_capacity_and_an_absolute_read_deadline(monkeypatch):
+    import socket
+    from threading import Condition, Thread
+
+    monkeypatch.setattr(markdownify, "HTTP_CONNECTION_LIMIT", 2)
+    monkeypatch.setattr(markdownify, "HTTP_READ_SECONDS", 1)
+    changed = Condition()
+    active = [0]
+
+    def handler(connection, *_):
+        with changed:
+            active[0] += 1
+            changed.notify_all()
+        try:
+            while connection.recv(1):
+                pass
+        finally:
+            with changed:
+                active[0] -= 1
+                changed.notify_all()
+
+    server = markdownify._BoundedHTTPServer(("127.0.0.1", 0), handler)
+    thread = Thread(
+        target=server.serve_forever, kwargs={"poll_interval": 0.01}, daemon=True
+    )
+    thread.start()
+    connections = []
+    try:
+        for _ in range(2):
+            connections.append(
+                socket.create_connection(server.server_address, timeout=3)
+            )
+        with changed:
+            assert changed.wait_for(lambda: active[0] == 2, timeout=3)
+        extra = socket.create_connection(server.server_address, timeout=3)
+        connections.append(extra)
+        try:
+            assert extra.recv(1) == b""
+        except ConnectionResetError:
+            pass
+        with changed:
+            assert changed.wait_for(lambda: active[0] == 0, timeout=3)
+        assert server._slots.acquire(timeout=2)
+        assert server._slots.acquire(timeout=2)
+        assert not server._slots.acquire(blocking=False)
+        server._slots.release()
+        server._slots.release()
+    finally:
+        for connection in connections:
+            connection.close()
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=3)
+    assert not thread.is_alive()
+
+
 def test_busy_converter_refuses_without_waiting_or_running(handler, monkeypatch):
     convert = Mock()
     monkeypatch.setattr(markdownify, "convert", convert)
@@ -245,63 +512,65 @@ def test_busy_converter_refuses_without_waiting_or_running(handler, monkeypatch)
 def test_connection_cap_applies_before_handler_thread_creation(monkeypatch):
     server = object.__new__(markdownify._BoundedHTTPServer)
     server._slots = markdownify.threading.BoundedSemaphore(2)
+    server._deadlines = {}
+    server._expired_readers = set()
+    server._deadline_lock = Lock()
+    requests = {name: Mock() for name in ("first", "second", "excess", "replacement")}
     server.shutdown_request = Mock()
     start = Mock()
     monkeypatch.setattr(markdownify.ThreadingHTTPServer, "process_request", start)
-    server.process_request("first", None)
-    server.process_request("second", None)
-    server.process_request("excess", None)
+    server.process_request(requests["first"], None)
+    server.process_request(requests["second"], None)
+    server.process_request(requests["excess"], None)
     assert start.call_count == 2
-    server.shutdown_request.assert_called_once_with("excess")
+    server.shutdown_request.assert_called_once_with(requests["excess"])
     worker = Mock(side_effect=RuntimeError("handler failure"))
     monkeypatch.setattr(
         markdownify.ThreadingHTTPServer, "process_request_thread", worker
     )
     with pytest.raises(RuntimeError, match="handler failure"):
-        server.process_request_thread("first", None)
-    server.process_request("replacement", None)
+        server.process_request_thread(requests["first"], None)
+    server.process_request(requests["replacement"], None)
     assert start.call_count == 3
 
 
 def test_failed_thread_start_releases_connection_capacity(monkeypatch):
     server = object.__new__(markdownify._BoundedHTTPServer)
     server._slots = markdownify.threading.BoundedSemaphore(1)
+    server.shutdown_request = Mock()
     monkeypatch.setattr(
         markdownify.ThreadingHTTPServer,
         "process_request",
         Mock(side_effect=RuntimeError("cannot start thread")),
     )
     with pytest.raises(RuntimeError, match="cannot start thread"):
-        server.process_request(None, None)
+        server.process_request(Mock(), None)
     assert server._slots.acquire(blocking=False)
 
 
-def test_header_deadline_closes_slow_connection_and_is_cancelled(handler, monkeypatch):
-    timer = Mock()
-    callbacks = []
-
-    def create_timer(seconds, callback):
-        assert seconds == markdownify.HTTP_HEADER_SECONDS
-        callbacks.append(callback)
-        return timer
-
-    handler.connection = Mock()
-    monkeypatch.setattr(markdownify.threading, "Timer", create_timer)
-    monkeypatch.setattr(
-        markdownify.BaseHTTPRequestHandler,
-        "handle_one_request",
-        lambda self: callbacks[0](),
-    )
-    handler.handle_one_request()
-    handler.connection.shutdown.assert_called_once_with(markdownify.socket.SHUT_RDWR)
-    timer.start.assert_called_once()
+def test_read_deadline_cannot_dispatch_after_expiration():
+    server = object.__new__(markdownify._BoundedHTTPServer)
+    server._deadlines = {}
+    server._expired_readers = set()
+    server._deadline_lock = Lock()
+    connection, timer = Mock(), Mock()
+    server._deadlines[connection] = timer
+    server._expire_reader(connection)
+    with pytest.raises(TimeoutError):
+        server.finish_reading(connection, completed=True)
+    connection.shutdown.assert_called_once_with(markdownify.socket.SHUT_RDWR)
     timer.cancel.assert_called_once()
-    assert handler.authorized() is False
+    connection.reset_mock()
+    server._deadlines[connection] = Mock()
+    server.finish_reading(connection, completed=True)
+    server._expire_reader(connection)
+    connection.shutdown.assert_not_called()
 
 
 def test_foreign_stop_marker_does_not_disable_current_generation_watcher(
     tmp_path, monkeypatch
 ):
+    (tmp_path / markdownify.STOP_REQUEST).write_text("{}", encoding="utf-8")
     requests = iter([{"generation": "old"}, {"generation": "current"}])
     monkeypatch.setattr(
         markdownify,
@@ -405,11 +674,13 @@ def test_only_session_404_has_a_reinitialization_signal(monkeypatch, status, err
     connection.close.assert_called_once()
 
 
-def test_completed_headers_cancel_deadline_before_conversion(handler):
-    handler._header_expired = Event()
-    handler._header_timer = Mock()
-    assert handler.authorized() is True
-    handler._header_timer.cancel.assert_called_once()
+def test_completed_body_cancels_deadline_before_conversion(handler):
+    handler.server = Mock(spec=markdownify._BoundedHTTPServer)
+    handler.connection = Mock()
+    handler._finish_reading()
+    handler.server.finish_reading.assert_called_once_with(
+        handler.connection, completed=True
+    )
 
 
 def test_expired_session_without_initialization_cannot_recover_or_replay(monkeypatch):
@@ -494,3 +765,23 @@ def test_stop_marker_is_published_under_the_generation_transition_lock(
     )
     markdownify._stop(tmp_path)
     assert not held
+
+
+def test_stdio_decodes_native_windows_bytes_as_utf8_even_with_cp1251_wrapper():
+    from io import TextIOWrapper
+
+    request = {
+        "id": 1,
+        "method": "tools/call",
+        "params": {"name": "get-markdown-file", "arguments": {"filepath": "данные.md"}},
+    }
+    wire = json.dumps(request, ensure_ascii=False).encode("utf-8") + b"\n"
+    with TextIOWrapper(BytesIO(wire), encoding="cp1251") as redirected:
+        assert list(markdownify._stdio_requests(redirected)) == [request]
+
+
+def test_stdio_size_limit_counts_utf8_bytes_and_rejects_invalid_utf8():
+    with pytest.raises(ValueError, match="Oversized"):
+        list(markdownify._stdio_requests(StringIO("я" * (600 * 1024))))
+    with pytest.raises(UnicodeDecodeError):
+        list(markdownify._stdio_requests(BytesIO(b'"\xff"\n')))

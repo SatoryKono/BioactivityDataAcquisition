@@ -988,35 +988,49 @@ def _render_codex_mcp_toml(servers: dict[str, dict[str, Any]]) -> str:
     return "\n".join(lines)
 
 
+def _toml_statements(content: str) -> Iterator[tuple[str, dict[str, Any]]]:
+    """Let TOML parsing identify complete statements, including multiline strings."""
+    pending: list[str] = []
+    for line in content.splitlines(keepends=True):
+        pending.append(line)
+        statement = "".join(pending)
+        try:
+            parsed = tomllib.loads(statement)
+        except tomllib.TOMLDecodeError:
+            continue
+        yield statement, parsed
+        pending.clear()
+    if pending:
+        raise ValueError("Incomplete TOML statement; configuration preserved")
+
+
 def _strip_managed_mcp_blocks(content: str, managed_server_names: set[str]) -> str:
-    section_re = re.compile(r"^\[mcp_servers\.([A-Za-z0-9_-]+)(?:\.[^\]\r\n]+)?\]\s*$")
+    # Validate the full document first. Each independent statement is parsed to
+    # distinguish a table header from identical text inside a multiline value.
+    tomllib.loads(content)
     kept: list[str] = []
     skip = False
-    skip_marker_block = False
-
-    for line in content.splitlines():
-        stripped = line.strip()
+    marker_block = False
+    for statement, parsed in _toml_statements(content):
+        stripped = statement.strip()
         if stripped == MANAGED_BLOCK_BEGIN:
-            skip_marker_block = True
+            marker_block = True
             skip = False
             continue
-        if skip_marker_block:
+        if marker_block:
             if stripped == MANAGED_BLOCK_END:
-                skip_marker_block = False
+                marker_block = False
             continue
-
-        section_match = section_re.match(stripped)
         if stripped.startswith("["):
-            skip = bool(
-                section_match and section_match.group(1) in managed_server_names
+            tables = parsed.get("mcp_servers", {})
+            skip = isinstance(tables, dict) and bool(
+                managed_server_names.intersection(tables)
             )
-
         if not skip:
-            kept.append(line)
-
-    while kept and not kept[-1].strip():
-        kept.pop()
-    return "\n".join(kept)
+            kept.append(statement)
+    if marker_block:
+        raise ValueError("Unclosed managed MCP block; configuration preserved")
+    return "".join(kept).rstrip()
 
 
 def _write_user_toml(path: Path, rendered: str, *, before: bytes | None) -> None:

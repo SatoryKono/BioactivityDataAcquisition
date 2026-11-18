@@ -103,7 +103,12 @@ def apply_local_routes(
     data = json.loads(path.read_text(encoding="utf-8"))
     if set(data) != {"schema", "git_common", "entries"} or data["schema"] != 1:
         raise ValueError("Invalid native MCP route manifest")
-    expected = _physical(Path(data["git_common"]))
+    try:
+        expected = _physical(Path(data["git_common"]))
+    except FileNotFoundError:
+        if explicit:
+            raise
+        return servers  # A removed checkout cannot own the default host route.
     if not _repository_binding_matches(expected, workspace, strict=explicit):
         return servers
     result = deepcopy(servers)

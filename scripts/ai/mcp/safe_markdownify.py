@@ -33,12 +33,12 @@ SITE = "D:/github/BioactivityDataAcquisition/.venv-win/Lib/site-packages"
 TRANSITION_LOCK = "transition.lock"
 STATUS_RECORD = "status.json"
 STOP_REQUEST = "stop.request"
-HTTP_HEADER_SECONDS = 5
-HTTP_CONNECTION_LIMIT = 64
 HEALTH_PATH = "/health"
 MAX_RESPONSE_BYTES = 2 * 1024 * 1024
 SESSION_LIMIT = 64
 SESSION_IDLE_SECONDS = 15 * 60
+HTTP_CONNECTION_LIMIT = 64
+HTTP_READ_SECONDS = 5
 
 
 def module(name, path):
@@ -139,9 +139,11 @@ def specification(root):
     key, binding = configure(root)
     spec = core.read_json(core.STATE / "profile.json")
     if (
-        spec["id"] != key
+        spec.get("schema") != 2
+        or spec["id"] != key
         or spec["binding"] != binding
         or spec["pins"] != pins(spec["converter"])
+        or not _qualification_matches(spec)
     ):
         raise PermissionError("Markdownify profile/runtime drift")
     return spec
@@ -172,37 +174,56 @@ def prepare(root):
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
             sock.bind(("127.0.0.1", 0))
             port = sock.getsockname()[1]
-        enabled = [
-            name
-            for name, suffix in EXTENSIONS.items()
-            if suffix in {".md", ".html", *("." + x for x in qualified)}
-        ]
         spec = {
+            "schema": 2,
             "id": key,
             "binding": binding,
             "port": port,
             "converter": str(converter),
-            "enabled_tools": enabled,
             "pins": pins(converter),
         }
+        spec["qualification"] = _qualify_converter(spec, qualified)
+        spec["enabled_tools"] = _enabled_tools(spec["qualification"])
         core.credential(create=True)
         core.write_json(path, spec)
         return spec
 
 
+def _enabled_tools(qualification):
+    return [name for name in EXTENSIONS if qualification["results"].get(name) == "PASS"]
+
+
+def _qualification_matches(spec):
+    evidence = spec.get("qualification", {})
+    results = evidence.get("results", {})
+    return (
+        evidence.get("schema") == 1
+        and evidence.get("converter") == Path(spec["converter"]).name
+        and set(results) == set(EXTENSIONS)
+        and all(value in {"PASS", "FAIL", "UNAVAILABLE"} for value in results.values())
+        and spec["enabled_tools"] == _enabled_tools(evidence)
+    )
+
+
+def _qualify_converter(spec, available):
+    results = dict.fromkeys(EXTENSIONS, "UNAVAILABLE")
+    results["get-markdown-file"] = "PASS"
+    candidates = {".html", *("." + name for name in available)}
+    for name, extension in EXTENSIONS.items():
+        if extension not in candidates:
+            continue
+        try:
+            output = _convert_bytes(
+                spec, extension, snapshots.qualification_sample(extension)
+            )
+            results[name] = "PASS" if snapshots.QUALIFICATION_TEXT in output else "FAIL"
+        except (OSError, ValueError, subprocess.SubprocessError):
+            results[name] = "FAIL"
+    return {"schema": 1, "converter": Path(spec["converter"]).name, "results": results}
+
+
 class _SessionExpired(PermissionError):
-    """The owner is reachable but the private protocol session has expired."""
-
-
-def _response_value(response, method, path, session):
-    data = response.read(MAX_RESPONSE_BYTES + 1)
-    if len(data) > MAX_RESPONSE_BYTES:
-        raise PermissionError("Markdownify response exceeds transport bound")
-    if response.status == 404 and session and method == "POST" and path == "/mcp":
-        raise _SessionExpired("Markdownify session expired; no replay")
-    if response.status >= 400:
-        raise PermissionError("Markdownify request refused; no replay")
-    return (json.loads(data) if data else None), response.getheader("Mcp-Session-Id")
+    """A session-scoped 404 requires a fresh handshake, never replay."""
 
 
 def request(spec, method, path, body=None, session=None):
@@ -211,6 +232,7 @@ def request(spec, method, path, body=None, session=None):
         raise PermissionError("Markdownify owner identity unavailable")
     connection = http.client.HTTPConnection("127.0.0.1", spec["port"], timeout=100)
     connection.connect()
+    connection.auto_open = False
     local_port = connection.sock.getsockname()[1]
     matched = [
         row
@@ -234,7 +256,17 @@ def request(spec, method, path, body=None, session=None):
         connection.request(
             method, path, json.dumps(body) if body is not None else None, headers
         )
-        return _response_value(connection.getresponse(), method, path, session)
+        response = connection.getresponse()
+        data = response.read(MAX_RESPONSE_BYTES + 1)
+        if len(data) > MAX_RESPONSE_BYTES:
+            raise PermissionError("Markdownify response exceeds transport bound")
+        if response.status == 404 and session and method == "POST" and path == "/mcp":
+            raise _SessionExpired("Markdownify session expired")
+        if response.status >= 400:
+            raise PermissionError("Markdownify request refused; no replay")
+        return (json.loads(data) if data else None), response.getheader(
+            "Mcp-Session-Id"
+        )
     finally:
         connection.close()
 
@@ -255,6 +287,8 @@ def _owner_ready(spec, record):
 def _launch_owner(root, record, launched):
     with core.LifetimeLock(core.STATE / TRANSITION_LOCK):
         current = _optional_status_record()
+        if (core.STATE / STOP_REQUEST).exists():
+            raise PermissionError("Markdownify profile is administratively stopped")
         if current != record:
             return False
         if launched:
@@ -319,9 +353,14 @@ def convert(spec, name, args):
     raw = files.read_confined(Path(spec["binding"]["root"]), source)
     if name == "get-markdown-file":
         return raw.decode("utf-8-sig")
+    return _convert_bytes(spec, EXTENSIONS[name], raw)
+
+
+def _convert_bytes(spec, extension, raw):
+    """Execute a pinned worker on an owner-private snapshot, including probes."""
     job = core.STATE / ("job-" + uuid.uuid4().hex)
     job.mkdir(mode=0o700)
-    snapshot = job / ("input" + EXTENSIONS[name])
+    snapshot = job / ("input" + extension)
     snapshot.write_bytes(raw)
     output_path = job / "output.md"
     env = {
@@ -454,25 +493,67 @@ def _response_bytes(value):
 
 
 class _BoundedHTTPServer(ThreadingHTTPServer):
+    """Limit unauthenticated connections and total header/body read time."""
+
+    daemon_threads = True
+    allow_reuse_address = False
+
     def __init__(self, *args, **kwargs):
         self._slots = threading.BoundedSemaphore(HTTP_CONNECTION_LIMIT)
+        self._deadlines = {}
+        self._expired_readers = set()
+        self._deadline_lock = threading.Lock()
         super().__init__(*args, **kwargs)
 
-    def process_request(self, request, address):
+    def process_request(self, request_socket, client_address):
         if not self._slots.acquire(blocking=False):
-            self.shutdown_request(request)
+            self.shutdown_request(request_socket)
             return
         try:
-            super().process_request(request, address)
+            request_socket.settimeout(HTTP_READ_SECONDS)
+            super().process_request(request_socket, client_address)
         except BaseException:
             self._slots.release()
+            self.shutdown_request(request_socket)
             raise
 
-    def process_request_thread(self, request, address):
+    def _expire_reader(self, request_socket):
+        with self._deadline_lock:
+            if request_socket not in self._deadlines:
+                return
+            self._expired_readers.add(request_socket)
+            try:
+                request_socket.shutdown(socket.SHUT_RDWR)
+            except OSError:
+                return  # The same owned connection has already closed.
+
+    def finish_reading(self, request_socket, *, completed=False):
+        with self._deadline_lock:
+            timer = self._deadlines.pop(request_socket, None)
+            expired = request_socket in self._expired_readers
+            self._expired_readers.discard(request_socket)
+            if timer is not None:
+                timer.cancel()
+        if completed and expired:
+            raise TimeoutError("HTTP read deadline expired before dispatch")
+
+    def process_request_thread(self, request_socket, client_address):
+        timer = threading.Timer(
+            HTTP_READ_SECONDS, self._expire_reader, (request_socket,)
+        )
+        timer.daemon = True
+        with self._deadline_lock:
+            self._deadlines[request_socket] = timer
+            timer.start()
         try:
-            super().process_request_thread(request, address)
+            super().process_request_thread(request_socket, client_address)
         finally:
+            self.finish_reading(request_socket)
             self._slots.release()
+
+    def handle_error(self, _request_socket, _client_address):
+        # Authentication failures, disconnects and read deadlines expose no paths.
+        return None
 
 
 class _MarkdownifyHandler(BaseHTTPRequestHandler):
@@ -492,24 +573,6 @@ class _MarkdownifyHandler(BaseHTTPRequestHandler):
         # Requests contain credentials and paths; never emit access logs.
         pass
 
-    def handle_one_request(self):
-        self._header_expired = threading.Event()
-
-        def expire():
-            self._header_expired.set()
-            try:
-                self.connection.shutdown(socket.SHUT_RDWR)
-            except OSError:
-                pass
-
-        self._header_timer = threading.Timer(HTTP_HEADER_SECONDS, expire)
-        self._header_timer.daemon = True
-        self._header_timer.start()
-        try:
-            super().handle_one_request()
-        finally:
-            self._header_timer.cancel()
-
     def reply(self, status, value=None, session=None):
         raw = _response_bytes(value)
         self.send_response(status)
@@ -521,22 +584,26 @@ class _MarkdownifyHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(raw)
 
-    def authorized(self):
-        if getattr(self, "_header_expired", None) is not None:
-            self._header_timer.cancel()
-            if self._header_expired.is_set():
-                return False
+    def authorized(self, *, verify_runtime=True):
         if not secrets.compare_digest(
             self.headers.get("Authorization", ""), "Bearer " + self._token
         ):
             self.reply(401)
             return False
-        specification(self._workspace)
+        if verify_runtime:
+            self._finish_reading()
+            specification(self._workspace)
         return True
+
+    def _finish_reading(self):
+        server = getattr(self, "server", None)
+        if isinstance(server, _BoundedHTTPServer):
+            server.finish_reading(self.connection, completed=True)
 
     def do_GET(self):
         if not self.authorized():
             return
+        self._finish_reading()
         if self.path == HEALTH_PATH:
             self.reply(
                 200,
@@ -551,20 +618,29 @@ class _MarkdownifyHandler(BaseHTTPRequestHandler):
 
     def do_DELETE(self):
         if self.authorized():
+            self._finish_reading()
             self._sessions.discard(self.headers.get("Mcp-Session-Id"))
             self.reply(200)
 
     def do_POST(self):
-        if not self.authorized():
+        if not self.authorized(verify_runtime=False):
             return
         if self.path != "/mcp":
             self.reply(404)
             return
-        length = int(self.headers.get("Content-Length", "0"))
-        if not 0 < length <= 1024 * 1024:
-            self.reply(413)
+        try:
+            length = int(self.headers.get("Content-Length", "0"))
+            if not 0 < length <= 1024 * 1024:
+                self.reply(413)
+                return
+            request_value = json.loads(self.rfile.read(length))
+            if not isinstance(request_value, dict):
+                raise ValueError("Object required")
+        except (OSError, ValueError):
+            self.reply(400)
             return
-        request_value = json.loads(self.rfile.read(length))
+        self._finish_reading()
+        specification(self._workspace)
         self._dispatch_request(request_value)
 
     def _dispatch_request(self, request_value):
@@ -621,28 +697,23 @@ class _MarkdownifyHandler(BaseHTTPRequestHandler):
                 "content": [
                     {
                         "type": "text",
-                        "text": "Local converter is busy; request not queued",
+                        "text": "Markdownify is busy; request not queued or executed",
                     }
                 ],
             }
         try:
-            try:
-                if self._draining.is_set():
-                    raise PermissionError("Markdownify is draining")
-                params = request_value["params"]
-                text = convert(self._spec, params["name"], params.get("arguments", {}))
-                result = {"content": [{"type": "text", "text": text}]}
-            except Exception:
-                result = {
-                    "isError": True,
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": "Local file access/conversion refused",
-                        }
-                    ],
-                }
-            return result
+            if self._draining.is_set():
+                raise PermissionError("Markdownify is draining")
+            params = request_value["params"]
+            text = convert(self._spec, params["name"], params.get("arguments", {}))
+            return {"content": [{"type": "text", "text": text}]}
+        except Exception:
+            return {
+                "isError": True,
+                "content": [
+                    {"type": "text", "text": "Local file access/conversion refused"}
+                ],
+            }
         finally:
             self._gate.release()
 
@@ -707,10 +778,13 @@ def serve(root):
         server.server_close()
 
 
-def _reinitialize(spec, initialization):
-    _, session = request(spec, "POST", "/mcp", initialization)
-    if not session:
-        raise PermissionError("Markdownify reinitialization returned no session")
+def _renew_session(spec, initialization):
+    if initialization is None:
+        raise PermissionError("Expired session has no verified initialization")
+    handshake = dict(initialization)
+    response, session = request(spec, "POST", "/mcp", handshake)
+    if not session or not isinstance(response, dict) or "result" not in response:
+        raise PermissionError("Markdownify reinitialization refused")
     request(
         spec,
         "POST",
@@ -723,24 +797,40 @@ def _reinitialize(spec, initialization):
 
 def _forward_request(spec, value, session, initialization):
     try:
-        return request(spec, "POST", "/mcp", value, session)
+        response, next_session = request(spec, "POST", "/mcp", value, session)
+        return response, next_session or session
     except _SessionExpired:
         if initialization is None:
             raise
-        session = _reinitialize(spec, initialization)
-        result = (
+        replacement = _renew_session(spec, initialization)
+        response = (
             None
-            if value.get("id") is None
+            if "id" not in value
             else {
                 "jsonrpc": "2.0",
                 "id": value["id"],
                 "error": {
                     "code": -32000,
-                    "message": "Private session expired and was reinitialized; original request was not replayed",
+                    "message": "Session renewed; original request was not replayed or executed",
                 },
             }
         )
-        return result, session
+        return response, replacement
+
+
+def _stdio_requests(stream):
+    # -I ignores PYTHONUTF8; redirected Windows stdin may otherwise use CP1251.
+    binary = getattr(stream, "buffer", stream)
+    limit = 1024 * 1024
+    while True:
+        raw = binary.readline(limit + 1)
+        if not raw:
+            return
+        if isinstance(raw, str):
+            raw = raw.encode("utf-8")
+        if len(raw) > limit:
+            raise ValueError("Oversized Markdownify request")
+        yield json.loads(raw.decode("utf-8"))
 
 
 def client(root):
@@ -753,36 +843,32 @@ def client(root):
     session = None
     initialization = None
     try:
-        for line in getattr(sys.stdin, "buffer", sys.stdin):
-            if len(line) > 1024 * 1024:
-                raise ValueError("Oversized Markdownify request")
-            if isinstance(line, bytes):
-                line = line.decode("utf-8")
-            value = json.loads(line)
-            result, next_session = _forward_request(
-                spec, value, session, initialization
-            )
-            if value.get("method") == "initialize":
+        for value in _stdio_requests(sys.stdin):
+            result, session = _forward_request(spec, value, session, initialization)
+            if value.get("method") == "initialize" and result and "result" in result:
                 initialization = value
-            session = next_session or session
             if result is not None:
                 print(json.dumps(result), flush=True)
     finally:
         if session:
-            request(spec, "DELETE", "/mcp", session=session)
+            try:
+                request(spec, "DELETE", "/mcp", session=session)
+            except _SessionExpired:
+                pass  # An expired session already owns no server resources.
 
 
 def _start(root):
     value = specification(root)
-    marker = core.STATE / STOP_REQUEST
-    if marker.exists():
-        record = core.read_json(core.STATE / STATUS_RECORD)
-        if (
-            psutil.pid_exists(record["owner_pid"])
-            or core.read_json(marker).get("generation") != record["generation"]
-        ):
-            raise PermissionError("Markdownify stop has not completed")
-        marker.unlink()
+    with core.LifetimeLock(core.STATE / TRANSITION_LOCK):
+        marker = core.STATE / STOP_REQUEST
+        if marker.exists():
+            record = core.read_json(core.STATE / STATUS_RECORD)
+            if (
+                psutil.pid_exists(record["owner_pid"])
+                or core.read_json(marker).get("generation") != record["generation"]
+            ):
+                raise PermissionError("Markdownify stop has not completed")
+            marker.unlink()
     ensure(root)
     print(json.dumps({"ready": True, "id": value["id"]}))
 

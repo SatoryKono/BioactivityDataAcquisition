@@ -264,3 +264,22 @@ def test_child_keeps_validated_session_subdirectory(
     assert len(seen) == 1
     assert seen[0][0][:3] == [str(binary), "--cd", str(cwd)]
     assert seen[0][1] == cwd
+
+
+@pytest.mark.parametrize("change", ["relative", "interpreter", "source"])
+def test_session_refuses_unqualified_selector_before_launch(
+    session_binding, tmp_path, change
+):
+    root, manifest, data, config = session_binding
+    entry = data["entries"]["memory"]
+    if change == "relative":
+        entry["args"][3] = "session_client.py"
+    elif change == "interpreter":
+        entry["command"] = "python"
+    else:
+        Path(entry["args"][3]).write_bytes(b"changed dispatcher source")
+    manifest.write_text(json.dumps(data), encoding="utf-8")
+    with pytest.raises(PermissionError, match="qualified|source changed|dispatcher"):
+        session_overrides(
+            config, root, manifest=manifest, markdownify=tmp_path / "absent.json"
+        )
