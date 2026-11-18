@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-18T10:28:27.407102+00:00",
+  "generated_at": "2026-11-18T10:54:20.538585+00:00",
   "summary": {
     "total_scripts": 754,
     "status_counts": {
@@ -2778,7 +2778,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_6159_6169_closeout.py",
-          "line": 357,
+          "line": 353,
           "source_group": "tests",
           "text": "\"scripts/ai/gemini/setup-bash-alias.sh\": \"legacy_manual_utility\","
         }
@@ -3234,7 +3234,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1890,
+          "line": 1895,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/check.sh\": ("
         }
@@ -4078,7 +4078,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1881,
+          "line": 1886,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.ps1\": (MCP_WRAPPER_CONTRACTS_TEST,),"
         },
@@ -4133,7 +4133,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1880,
+          "line": 1885,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.sh\": (MCP_WRAPPER_CONTRACTS_TEST,),"
         },
@@ -4178,7 +4178,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1879,
+          "line": 1884,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\": (NPM_RUNTIME_TEST,),"
         },
@@ -4233,7 +4233,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1878,
+          "line": 1883,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\": (NPM_RUNTIME_TEST,),"
         },
@@ -5081,7 +5081,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1886,
+          "line": 1891,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/exec_windows_ps1_wrapper.sh\": ("
         },
@@ -5500,7 +5500,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1882,
+          "line": 1887,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/run_owned_stdio.ps1\": ("
         },
@@ -6974,7 +6974,7 @@
         },
         {
           "path": "tests/unit/scripts/qa/test_lifecycle_review_output_destinations.py",
-          "line": 11,
+          "line": 13,
           "source_group": "tests",
           "text": "from scripts.data_quality import run_silver_gold_filter_parity as parity"
         }
@@ -9792,7 +9792,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_6159_6169_closeout.py",
-          "line": 359,
+          "line": 355,
           "source_group": "tests",
           "text": "\"scripts/docs/matrix/enrich_normalization_details.py\": \"compatibility_wrapper\","
         }
@@ -9829,7 +9829,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_6159_6169_closeout.py",
-          "line": 360,
+          "line": 356,
           "source_group": "tests",
           "text": "\"scripts/docs/matrix/export_structural_contract.py\": \"compatibility_wrapper\","
         }
@@ -9866,7 +9866,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_6159_6169_closeout.py",
-          "line": 361,
+          "line": 357,
           "source_group": "tests",
           "text": "\"scripts/docs/matrix/filter_rows.py\": \"compatibility_wrapper\","
         }
@@ -9903,7 +9903,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_6159_6169_closeout.py",
-          "line": 362,
+          "line": 358,
           "source_group": "tests",
           "text": "\"scripts/docs/matrix/generate_field_matrix.py\": \"compatibility_wrapper\","
         },
@@ -10104,7 +10104,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": "scripts/docs/matrix/export_structural_contract.py",
@@ -10126,9 +10126,15 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_6159_6169_closeout.py",
-          "line": 358,
+          "line": 354,
           "source_group": "tests",
           "text": "\"scripts/docs/matrix/structural_contract.py\": \"shared_helper_module\","
+        },
+        {
+          "path": "tests/architecture/test_tech_debt_issues_6159_6169_closeout.py",
+          "line": 369,
+          "source_group": "tests",
+          "text": "review_dates = {\"scripts/docs/matrix/structural_contract.py\": \"2026-12-18\"}"
         },
         {
           "path": "tests/unit/scripts/test_chembl_matrix_structural_contract.py",
@@ -11272,7 +11278,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1868,
+          "line": 1873,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/nightly_shadow_archive.py\": NIGHTLY_SHADOW_TESTS,"
         },
@@ -11443,7 +11449,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1746,
+          "line": 1751,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/presubmit_gate.py\": ("
         },
@@ -11486,7 +11492,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1909,
+          "line": 1914,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/publish_docker_image.sh\": ("
         },
@@ -12516,7 +12522,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": "scripts/engineering/qa/report_architecture_suite_burndown.py",
@@ -12538,7 +12544,13 @@
         },
         {
           "path": "tests/unit/scripts/qa/test_lifecycle_review_output_destinations.py",
-          "line": 13,
+          "line": 15,
+          "source_group": "tests",
+          "text": "from scripts.engineering.common import report_outputs"
+        },
+        {
+          "path": "tests/unit/scripts/qa/test_lifecycle_review_output_destinations.py",
+          "line": 16,
           "source_group": "tests",
           "text": "from scripts.engineering.common.report_outputs import write_report_outputs"
         }
@@ -21586,7 +21598,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_6159_6169_closeout.py",
-          "line": 369,
+          "line": 365,
           "source_group": "tests",
           "text": "\"scripts/engineering/repo/apply_branch_cleanup_phases_0_2.sh\": ("
         }
@@ -23259,7 +23271,7 @@
       "references": [
         {
           "path": "tests/architecture/test_tech_debt_issues_6159_6169_closeout.py",
-          "line": 363,
+          "line": 359,
           "source_group": "tests",
           "text": "\"scripts/migrations/archive/ci_optimizations/apply-ci-optimizations-fixed.ps1\": ("
         }
@@ -23278,7 +23290,7 @@
       "references": [
         {
           "path": "tests/architecture/test_tech_debt_issues_6159_6169_closeout.py",
-          "line": 366,
+          "line": 362,
           "source_group": "tests",
           "text": "\"scripts/migrations/archive/ci_optimizations/apply-ci-optimizations.ps1\": ("
         }
@@ -25900,7 +25912,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 2232,
+          "line": 2237,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },

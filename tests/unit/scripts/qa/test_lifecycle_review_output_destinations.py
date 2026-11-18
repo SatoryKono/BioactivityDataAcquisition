@@ -4,15 +4,87 @@ from __future__ import annotations
 
 import importlib
 import json
+import os
+import stat
 from pathlib import Path
 
 import pytest
 
 from scripts.data_quality import run_silver_gold_filter_parity as parity
 from scripts.engineering.common import repo_paths
+from scripts.engineering.common import report_outputs
 from scripts.engineering.common.report_outputs import write_report_outputs
 
 pytestmark = pytest.mark.unit
+
+
+def test_report_outputs_invalid_markdown_parent_preserves_json(tmp_path: Path) -> None:
+    json_out = tmp_path / "report.json"
+    json_out.write_text("old json", encoding="utf-8")
+    blocked = tmp_path / "blocked"
+    blocked.write_text("ordinary file", encoding="utf-8")
+    with pytest.raises(FileExistsError):
+        write_report_outputs(
+            {"new": True},
+            json_out=json_out,
+            md_out=blocked / "report.md",
+            markdown="new markdown",
+            root=tmp_path,
+        )
+    assert json_out.read_text(encoding="utf-8") == "old json"
+    assert blocked.read_text(encoding="utf-8") == "ordinary file"
+
+
+@pytest.mark.skipif(os.name == "nt", reason="POSIX permission mode contract")
+def test_report_outputs_preserve_existing_permissions(tmp_path: Path) -> None:
+    json_out, md_out = tmp_path / "report.json", tmp_path / "report.md"
+    for path, mode in ((json_out, 0o640), (md_out, 0o644)):
+        path.write_text("old", encoding="utf-8")
+        path.chmod(mode)
+    write_report_outputs(
+        {"new": True},
+        json_out=json_out,
+        md_out=md_out,
+        markdown="new",
+        root=tmp_path,
+    )
+    assert stat.S_IMODE(json_out.stat().st_mode) == 0o640
+    assert stat.S_IMODE(md_out.stat().st_mode) == 0o644
+
+
+@pytest.mark.skipif(os.name == "nt", reason="POSIX directory symlink substitution")
+def test_report_outputs_reject_substitution_before_confined_write(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    root, outside = tmp_path / "repo", tmp_path / "outside"
+    parent = root / "reports"
+    parent.mkdir(parents=True)
+    outside.mkdir()
+    protected = outside / "report.json"
+    protected.write_text("protected", encoding="utf-8")
+    writer = report_outputs.write_text_confined
+
+    def substitute(
+        path: Path, data: str, *, root: Path, allow_external_absolute: bool
+    ) -> Path:
+        parent.rename(root / "original-reports")
+        parent.symlink_to(outside, target_is_directory=True)
+        return writer(
+            path, data, root=root, allow_external_absolute=allow_external_absolute
+        )
+
+    monkeypatch.setattr(report_outputs, "write_text_confined", substitute)
+    with pytest.raises(ValueError, match="refusing path outside"):
+        write_report_outputs(
+            {"new": True},
+            json_out=Path("reports/report.json"),
+            md_out=Path("reports/report.md"),
+            markdown="new",
+            root=root,
+        )
+    assert protected.read_text(encoding="utf-8") == "protected"
+    assert not (outside / "report.md").exists()
 
 
 def test_report_outputs_reject_second_relative_escape_before_publication(
