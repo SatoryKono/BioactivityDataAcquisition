@@ -6,7 +6,7 @@ ______________________________________________________________________
 
 ---
 name: "new-pipeline"
-description: "Scaffold a new BioETL provider or entity pipeline, including configs, wiring, docs, and tests. Use py-config-bot only for configuration of an existing pipeline."
+description: "Scaffold a new BioETL provider or entity pipeline, including configs, wiring, docs, and tests. For an existing pipeline use py-config-bot."
 ---
 
 # New Pipeline
