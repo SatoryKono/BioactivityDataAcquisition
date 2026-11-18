@@ -32,7 +32,7 @@ from bioetl.composition.runtime_builders.config_access import load_pipeline_conf
 from bioetl.composition.bootstrap.assembly.storage import (
     preflight_workflow_target_dependencies,
 )
-from bioetl.composition.services.target_classification_config import (
+from bioetl.composition.services.target_classification_runtime import (
     resolve_target_runtime_config,
     validate_target_runtime_dependency,
 )
@@ -353,7 +353,7 @@ def test_target_preflight_uses_actual_writer_paths_even_when_off(
 
 
 def test_target_exact_replay_restores_saved_profile(shadow_config, monkeypatch):
-    from bioetl.composition.services.target_classification_replay import (
+    from bioetl.composition.services.target_classification_identity import (
         restore_target_replay_config,
     )
 
@@ -361,7 +361,7 @@ def test_target_exact_replay_restores_saved_profile(shadow_config, monkeypatch):
         pipeline_name="chembl_target", resolved_config=shadow_config.model_dump()
     )
     monkeypatch.setattr(
-        "bioetl.composition.services.target_classification_replay._resolve_replay_parent_manifest",
+        "bioetl.composition.services.target_classification_identity._resolve_replay_parent_manifest",
         lambda **kwargs: parent,
     )
     ctx = SimpleNamespace(

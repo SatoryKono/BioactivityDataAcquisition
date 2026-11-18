@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.composition.services.target_classification_config import (
+from bioetl.composition.services.target_classification_runtime import (
     resolve_target_runtime_config,
 )
 from bioetl.infrastructure.config.target_classification_profile import (

@@ -17,7 +17,7 @@ from bioetl.composition.bootstrap.assembly.storage import (
     build_target_classification_session,
     load_target_runtime_profile,
 )
-from bioetl.composition.services.target_classification_config import (
+from bioetl.composition.services.target_classification_runtime import (
     validate_target_runtime_dependency,
 )
 from bioetl.domain.contracts.gold.chembl_target_classification import (
