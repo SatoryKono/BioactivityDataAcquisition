@@ -160,10 +160,10 @@ class BaseChemblTransformer(PreSilverAdapterMixin, BaseTransformer):
             record = self._prepare_record(record)
             primary_id = self._resolve_primary_id(record)
             business_data = self._extract_business_data(record, primary_id)
-            return self._transform_identity_business_data(
+            return self._transform_prepared_business_data(
                 context=context,
                 source_id=str(primary_id),
-                identity_field=self.primary_id_field,
+                identity_record={self.primary_id_field: str(primary_id)},
                 index=index,
                 business_data=business_data,
             )

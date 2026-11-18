@@ -158,7 +158,7 @@ def test_store_refuses_a_projection_from_another_profile_before_publishing(
 def test_interrupted_artifact_publication_leaves_no_final_partial_file(
     classification_boundary, monkeypatch
 ):
-    from bioetl.infrastructure.control_plane import _evidence_location_publish as atomic
+    from bioetl.infrastructure.control_plane import evidence_location_publish as atomic
 
     _, store, result, _, root = classification_boundary
     publish = atomic._publish_new_file_exclusive

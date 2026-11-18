@@ -52,10 +52,10 @@ class UniProtProteinTransformer(  # pyright: ignore[reportIncompatibleMethodOver
             accession = str(self._get_required_field(record, "primaryAccession"))
             entry_name = self._get_entry_name(record)
             business_data = self._build_business_data(record, accession, entry_name)
-            return self._transform_identity_business_data(
+            return self._transform_prepared_business_data(
                 context=context,
                 source_id=accession,
-                identity_field="accession",
+                identity_record={"accession": accession},
                 index=index,
                 business_data=business_data,
             )
