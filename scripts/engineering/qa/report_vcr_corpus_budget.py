@@ -143,6 +143,7 @@ def main(argv: list[str] | None = None) -> int:
     json_out = resolve_output_path(args.json_out, root=REPO_ROOT)
     md_out = resolve_output_path(args.md_out, root=REPO_ROOT)
     json_out.parent.mkdir(parents=True, exist_ok=True)
+    md_out.parent.mkdir(parents=True, exist_ok=True)
     json_out.write_text(
         json.dumps(report, indent=2, ensure_ascii=False) + chr(10), encoding="utf-8"
     )
