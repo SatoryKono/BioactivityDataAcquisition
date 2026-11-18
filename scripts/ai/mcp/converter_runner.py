@@ -20,8 +20,11 @@ for current, directories, files in os.walk(root, followlinks=False):
         path = Path(current) / name
         if getattr(path.lstat(), "st_file_attributes", 0) & 0x400 or path.is_symlink():
             raise SystemExit("Converter path changed")
-    actual.update((Path(current) / name).relative_to(root).as_posix()
-                  for name in files if Path(current) / name != root / "converter.json")
+    actual.update(
+        (Path(current) / name).relative_to(root).as_posix()
+        for name in files
+        if Path(current) / name != root / "converter.json"
+    )
 if actual != set(manifest["files"]):
     raise SystemExit("Converter file set changed")
 for relative, expected in manifest["files"].items():
@@ -31,8 +34,12 @@ for relative, expected in manifest["files"].items():
         raise SystemExit("Converter dependency changed")
 source = Path(sys.argv[1])
 private = Path.home() / "AppData/Local/pc-agent/mcp-shared/markdownify-bioetl-v1"
-if (not source.is_relative_to(private) or not source.parent.name.startswith("job-")
-        or not source.name.startswith("input.") or source.resolve(strict=True) != source):
+if (
+    not source.is_relative_to(private)
+    or not source.parent.name.startswith("job-")
+    or not source.name.startswith("input.")
+    or source.resolve(strict=True) != source
+):
     raise SystemExit("Converter requires an owner-private job snapshot")
 sys.path.append(str(root / "site-packages"))
 from markitdown import MarkItDown

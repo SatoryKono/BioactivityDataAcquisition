@@ -20,9 +20,13 @@ MAX_FILE_BYTES = 32 * 1024 * 1024
 def confined_path(root: Path, supplied: str) -> Path:
     """Reject traversal, alternate data streams, aliases and sibling prefixes."""
     path = Path(supplied)
-    if (not path.is_absolute() or ".." in path.parts or "\x00" in supplied
-            or supplied.startswith(("\\\\", "//"))
-            or any(":" in part for part in path.parts[1:])):
+    if (
+        not path.is_absolute()
+        or ".." in path.parts
+        or "\x00" in supplied
+        or supplied.startswith(("\\\\", "//"))
+        or any(":" in part for part in path.parts[1:])
+    ):
         raise PermissionError("Unsupported local file path")
     if path == root or not path.is_relative_to(root):
         raise PermissionError("File is outside the registered physical root")
@@ -35,7 +39,10 @@ def confined_path(root: Path, supplied: str) -> Path:
 
 
 def read_confined(
-    root: Path, supplied: str, *, limit: int = MAX_FILE_BYTES,
+    root: Path,
+    supplied: str,
+    *,
+    limit: int = MAX_FILE_BYTES,
     after_open: Callable[[], None] | None = None,
 ) -> bytes:
     """Validate final path, attributes and link count, then read the same handle."""
@@ -45,25 +52,52 @@ def read_confined(
         raise ValueError("Invalid file size bound")
     path = confined_path(root, supplied)
     kernel = ctypes.WinDLL("kernel32", use_last_error=True)
-    kernel.CreateFileW.argtypes = [wintypes.LPCWSTR, wintypes.DWORD, wintypes.DWORD,
-                                  wintypes.LPVOID, wintypes.DWORD, wintypes.DWORD, wintypes.HANDLE]
+    kernel.CreateFileW.argtypes = [
+        wintypes.LPCWSTR,
+        wintypes.DWORD,
+        wintypes.DWORD,
+        wintypes.LPVOID,
+        wintypes.DWORD,
+        wintypes.DWORD,
+        wintypes.HANDLE,
+    ]
     kernel.CreateFileW.restype = wintypes.HANDLE
     kernel.CloseHandle.argtypes = [wintypes.HANDLE]
     kernel.CloseHandle.restype = wintypes.BOOL
-    kernel.GetFinalPathNameByHandleW.argtypes = [wintypes.HANDLE, wintypes.LPWSTR, wintypes.DWORD, wintypes.DWORD]
+    kernel.GetFinalPathNameByHandleW.argtypes = [
+        wintypes.HANDLE,
+        wintypes.LPWSTR,
+        wintypes.DWORD,
+        wintypes.DWORD,
+    ]
     kernel.GetFinalPathNameByHandleW.restype = wintypes.DWORD
 
     class Information(ctypes.Structure):
-        _fields_ = [("attributes", wintypes.DWORD), ("creation", wintypes.FILETIME),
-                    ("access", wintypes.FILETIME), ("write", wintypes.FILETIME),
-                    ("volume", wintypes.DWORD), ("size_high", wintypes.DWORD),
-                    ("size_low", wintypes.DWORD), ("links", wintypes.DWORD),
-                    ("index_high", wintypes.DWORD), ("index_low", wintypes.DWORD)]
+        _fields_ = [
+            ("attributes", wintypes.DWORD),
+            ("creation", wintypes.FILETIME),
+            ("access", wintypes.FILETIME),
+            ("write", wintypes.FILETIME),
+            ("volume", wintypes.DWORD),
+            ("size_high", wintypes.DWORD),
+            ("size_low", wintypes.DWORD),
+            ("links", wintypes.DWORD),
+            ("index_high", wintypes.DWORD),
+            ("index_low", wintypes.DWORD),
+        ]
 
-    kernel.GetFileInformationByHandle.argtypes = [wintypes.HANDLE, ctypes.POINTER(Information)]
+    kernel.GetFileInformationByHandle.argtypes = [
+        wintypes.HANDLE,
+        ctypes.POINTER(Information),
+    ]
     kernel.GetFileInformationByHandle.restype = wintypes.BOOL
-    kernel.ReadFile.argtypes = [wintypes.HANDLE, wintypes.LPVOID, wintypes.DWORD,
-                               ctypes.POINTER(wintypes.DWORD), wintypes.LPVOID]
+    kernel.ReadFile.argtypes = [
+        wintypes.HANDLE,
+        wintypes.LPVOID,
+        wintypes.DWORD,
+        ctypes.POINTER(wintypes.DWORD),
+        wintypes.LPVOID,
+    ]
     kernel.ReadFile.restype = wintypes.BOOL
 
     def verify(handle, expected: Path, directory: bool) -> Information:
@@ -105,11 +139,13 @@ def read_confined(
         while True:
             buffer = ctypes.create_string_buffer(min(65536, limit + 1 - total))
             count = wintypes.DWORD()
-            if not kernel.ReadFile(handle, buffer, len(buffer), ctypes.byref(count), None):
+            if not kernel.ReadFile(
+                handle, buffer, len(buffer), ctypes.byref(count), None
+            ):
                 raise ctypes.WinError(ctypes.get_last_error())
             if not count.value:
                 break
-            chunks.append(buffer.raw[:count.value])
+            chunks.append(buffer.raw[: count.value])
             total += count.value
             if total > limit:
                 raise PermissionError("File exceeds bound")

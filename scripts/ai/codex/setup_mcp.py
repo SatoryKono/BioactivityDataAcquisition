@@ -949,13 +949,22 @@ def _render_one_mcp_server_toml(name: str, server: dict[str, Any]) -> list[str]:
             raise ValueError("Invalid existing MCP tool policy")
         rendered_tools = []
         for tool, policy in tools.items():
-            if not isinstance(policy, dict) or set(policy) - {"enabled", "approval_mode"}:
-                raise ValueError("Unsupported existing MCP tool policy; preserve config")
+            if not isinstance(policy, dict) or set(policy) - {
+                "enabled",
+                "approval_mode",
+            }:
+                raise ValueError(
+                    "Unsupported existing MCP tool policy; preserve config"
+                )
             fields = []
             for field, value in policy.items():
                 if not isinstance(value, (bool, str)):
                     raise ValueError("Invalid existing MCP tool policy value")
-                literal = str(value).lower() if isinstance(value, bool) else _toml_string(value)
+                literal = (
+                    str(value).lower()
+                    if isinstance(value, bool)
+                    else _toml_string(value)
+                )
                 fields.append(f"{_toml_key(field)} = {literal}")
             rendered_tools.append(f"{_toml_key(tool)} = {{ " + ", ".join(fields) + " }")
         lines.append("tools = { " + ", ".join(rendered_tools) + " }")
@@ -1024,7 +1033,9 @@ def _write_user_toml(path: Path, rendered: str, *, before: bytes | None) -> None
             os.fsync(stream.fileno())
         current = path.read_bytes() if path.exists() else None
         if current != before:
-            raise ValueError("Concurrent Codex config edit; existing settings preserved")
+            raise ValueError(
+                "Concurrent Codex config edit; existing settings preserved"
+            )
         os.replace(pending, path)
     finally:
         pending.unlink(missing_ok=True)
@@ -1049,11 +1060,32 @@ def _write_codex_config(
     existing_servers = tomllib.loads(existing).get("mcp_servers", {})
     for name, server in servers.items():
         previous = existing_servers.get(name, {})
-        known = {"command", "args", "url", "cwd", "env", "env_http_headers", "startup_timeout_sec",
-                 "enabled", "enabled_tools", "disabled_tools", "tools", "tool_timeout_sec"}
+        known = {
+            "command",
+            "args",
+            "url",
+            "cwd",
+            "env",
+            "env_http_headers",
+            "startup_timeout_sec",
+            "enabled",
+            "enabled_tools",
+            "disabled_tools",
+            "tools",
+            "tool_timeout_sec",
+        }
         if set(previous) - known:
-            raise ValueError("Unsupported existing MCP settings; config preserved for explicit review")
-        for field in ("enabled", "enabled_tools", "disabled_tools", "tools", "startup_timeout_sec", "tool_timeout_sec"):
+            raise ValueError(
+                "Unsupported existing MCP settings; config preserved for explicit review"
+            )
+        for field in (
+            "enabled",
+            "enabled_tools",
+            "disabled_tools",
+            "tools",
+            "startup_timeout_sec",
+            "tool_timeout_sec",
+        ):
             if field in previous:
                 server[field] = deepcopy(previous[field])
     managed_or_retired_names = set(

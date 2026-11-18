@@ -7,7 +7,10 @@ import pytest
 
 from scripts.ai.mcp.safe_file import read_confined
 
-pytestmark = [pytest.mark.unit, pytest.mark.skipif(os.name != "nt", reason="Windows file handles")]
+pytestmark = [
+    pytest.mark.unit,
+    pytest.mark.skipif(os.name != "nt", reason="Windows file handles"),
+]
 
 
 @pytest.fixture
@@ -50,9 +53,17 @@ def test_junction_escape_rejected(files):
     junction = root / "junction"
     # Native PowerShell only; no cross-shell enumeration or destructive command.
     command = "$ErrorActionPreference='Stop'; New-Item -ItemType Junction -Path $env:BIOETL_TEST_JUNCTION -Target $env:BIOETL_TEST_TARGET | Out-Null"
-    env = {**os.environ, "BIOETL_TEST_JUNCTION": str(junction), "BIOETL_TEST_TARGET": str(secret.parent)}
-    result = subprocess.run(["powershell.exe", "-NoProfile", "-Command", command],
-                            env=env, capture_output=True, timeout=30)
+    env = {
+        **os.environ,
+        "BIOETL_TEST_JUNCTION": str(junction),
+        "BIOETL_TEST_TARGET": str(secret.parent),
+    }
+    result = subprocess.run(
+        ["powershell.exe", "-NoProfile", "-Command", command],
+        env=env,
+        capture_output=True,
+        timeout=30,
+    )
     assert result.returncode == 0, "Junction fixture creation failed"
     try:
         with pytest.raises(PermissionError):
@@ -64,12 +75,14 @@ def test_junction_escape_rejected(files):
 def test_path_swap_after_open_cannot_expose_foreign_bytes(files):
     root, document, secret = files
     attempted = []
+
     def swap():
         with pytest.raises(PermissionError):
             document.unlink()
         with pytest.raises(PermissionError):
             os.replace(secret, document)
         attempted.append(True)
+
     assert read_confined(root, str(document), after_open=swap) == b"allowed content"
     assert attempted and secret.read_bytes() == b"foreign sentinel"
 

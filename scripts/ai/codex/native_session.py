@@ -35,7 +35,10 @@ def qualified_binary(path, expected):
     physical(path)
     if path.name.lower() != "codex.exe" or not path.is_relative_to(approved):
         raise PermissionError("Use the qualified app-owned native Codex executable")
-    if re.fullmatch("[0-9a-f]{64}", expected) is None or hashlib.sha256(path.read_bytes()).hexdigest() != expected:
+    if (
+        re.fullmatch("[0-9a-f]{64}", expected) is None
+        or hashlib.sha256(path.read_bytes()).hexdigest() != expected
+    ):
         raise PermissionError("Native Codex executable drift")
     return path
 
@@ -55,8 +58,12 @@ def ref_environment(parent, values, mode):
 
 def validate_ref(config, mode):
     entry = config.get("mcp_servers", {}).get("ref", {})
-    if entry.get("url") != REF_URL or any(entry.get(k) for k in ("headers", "http_headers", "bearer_token_env_var")):
-        raise PermissionError("Ref route needs an explicit separate authorization review")
+    if entry.get("url") != REF_URL or any(
+        entry.get(k) for k in ("headers", "http_headers", "bearer_token_env_var")
+    ):
+        raise PermissionError(
+            "Ref route needs an explicit separate authorization review"
+        )
     expected = {"x-ref-api-key": "REF_TOOL_API_KEY"} if mode == "api-key" else {}
     if entry.get("env_http_headers", {}) != expected:
         raise PermissionError("Ref API-key and OAuth routes must remain separate")
@@ -72,11 +79,19 @@ def toml_value(value):
     if isinstance(value, list):
         return "[" + ",".join(toml_value(item) for item in value) + "]"
     if isinstance(value, dict):
-        return "{" + ",".join(json.dumps(key) + "=" + toml_value(item) for key, item in value.items()) + "}"
+        return (
+            "{"
+            + ",".join(
+                json.dumps(key) + "=" + toml_value(item) for key, item in value.items()
+            )
+            + "}"
+        )
     raise ValueError("Unsupported native session setting")
 
 
-def session_overrides(config, root, *, manifest=None, markdownify=None, acceptance=False):
+def session_overrides(
+    config, root, *, manifest=None, markdownify=None, acceptance=False
+):
     """Use supported CLI-scoped fields without changing the global user TOML."""
     from scripts.ai.codex.local_mcp_routes import apply_local_routes, common_directory
 
@@ -88,34 +103,55 @@ def session_overrides(config, root, *, manifest=None, markdownify=None, acceptan
     servers = config.get("mcp_servers", {})
     if any(name not in servers for name in ("memory", "ast-grep")):
         raise PermissionError("Required native session servers are not configured")
-    selected = apply_local_routes({name: servers[name] for name in ("memory", "ast-grep")}, root, manifest=manifest)
+    selected = apply_local_routes(
+        {name: servers[name] for name in ("memory", "ast-grep")},
+        root,
+        manifest=manifest,
+    )
     if manifest.read_bytes() != raw:
         raise PermissionError("Session transport binding changed")
     for name, entry in selected.items():
         args = entry.get("args", [])
-        if (len(args) != 5 or args[:3] != ["-I", "-S", "-B"]
-                or Path(args[3]).name != "session_client.py" or args[4] != name):
-            raise PermissionError("Native session requires its reviewed inherited-cwd selector")
+        if (
+            len(args) != 5
+            or args[:3] != ["-I", "-S", "-B"]
+            or Path(args[3]).name != "session_client.py"
+            or args[4] != name
+        ):
+            raise PermissionError(
+                "Native session requires its reviewed inherited-cwd selector"
+            )
     if acceptance:
         entry = dict(selected["memory"])
         entry["args"] = list(entry["args"])
         if entry["args"][-1:] != ["memory"]:
-            raise PermissionError("Acceptance graph requires the reviewed session selector")
+            raise PermissionError(
+                "Acceptance graph requires the reviewed session selector"
+            )
         entry["args"][-1] = "memory-acceptance"
         selected["memory-acceptance"] = entry
     source = markdownify or Path.home() / ".config/pc-agent/markdownify-bioetl.json"
     if source.exists():
         value = json.loads(physical(source).read_bytes())
-        if (value.get("schema") != 1 or Path(value["workspace"]) != root
-                or Path(value["git_common"]) != common_directory(root)
-                or value.get("server") != "Markdownify-BioETL"):
-            raise PermissionError("Markdownify session binding does not match this workspace")
+        if (
+            value.get("schema") != 1
+            or Path(value["workspace"]) != root
+            or Path(value["git_common"]) != common_directory(root)
+            or value.get("server") != "Markdownify-BioETL"
+        ):
+            raise PermissionError(
+                "Markdownify session binding does not match this workspace"
+            )
         entry = value["entry"]
-        if (set(entry) - {"command", "args", "startup_timeout_sec", "tool_timeout_sec"}
-                or not isinstance(entry.get("command"), str)
-                or not isinstance(entry.get("args"), list)
-                or not all(isinstance(item, str) for item in entry["args"])):
-            raise PermissionError("Markdownify session binding must be credential-free stdio")
+        if (
+            set(entry) - {"command", "args", "startup_timeout_sec", "tool_timeout_sec"}
+            or not isinstance(entry.get("command"), str)
+            or not isinstance(entry.get("args"), list)
+            or not all(isinstance(item, str) for item in entry["args"])
+        ):
+            raise PermissionError(
+                "Markdownify session binding must be credential-free stdio"
+            )
         if value["server"] in servers and servers[value["server"]] != entry:
             raise PermissionError("Existing unrelated Markdownify entry needs review")
         selected[value["server"]] = entry
@@ -126,7 +162,9 @@ def session_overrides(config, root, *, manifest=None, markdownify=None, acceptan
 
 
 def workspace():
-    root = next((p for p in (Path.cwd(), *Path.cwd().parents) if (p / ".git").exists()), None)
+    root = next(
+        (p for p in (Path.cwd(), *Path.cwd().parents) if (p / ".git").exists()), None
+    )
     if root is None:
         raise PermissionError("Native session requires its actual project cwd")
     path = Path("D:/pc-agent/tools/shared-mcp/ast-workspace-profile.py")
@@ -143,30 +181,57 @@ def main(argv=None):
     parser.add_argument("--sha256", required=True)
     parser.add_argument("--auth", choices=("api-key", "oauth"), default="api-key")
     parser.add_argument("--check", action="store_true")
-    parser.add_argument("--acceptance", action="store_true", help="Enable the separate registered acceptance graph")
+    parser.add_argument(
+        "--acceptance",
+        action="store_true",
+        help="Enable the separate registered acceptance graph",
+    )
     args = parser.parse_args(argv)
     root, canonical = workspace()
     binary = qualified_binary(args.executable, args.sha256)
-    config = tomllib.loads((Path.home() / ".codex/config.toml").read_text(encoding="utf-8"))
+    config = tomllib.loads(
+        (Path.home() / ".codex/config.toml").read_text(encoding="utf-8")
+    )
     validate_ref(config, args.auth)
     overrides = session_overrides(config, root, acceptance=args.acceptance)
     from dotenv import dotenv_values
 
-    values = dotenv_values(physical(canonical / ".env")) if args.auth == "api-key" else {}
+    values = (
+        dotenv_values(physical(canonical / ".env")) if args.auth == "api-key" else {}
+    )
     environment = ref_environment(os.environ, values, args.auth)
     if args.check:
-        print(json.dumps({"workspace": str(root), "executable": str(binary), "auth": args.auth,
-                          "root_credential_present": bool(environment.get("REF_TOOL_API_KEY")),
-                          "session_overrides": len(overrides) // 2,
-                          "spawned": False, "native_request": "NOT_TESTED"}))
+        print(
+            json.dumps(
+                {
+                    "workspace": str(root),
+                    "executable": str(binary),
+                    "auth": args.auth,
+                    "root_credential_present": bool(
+                        environment.get("REF_TOOL_API_KEY")
+                    ),
+                    "session_overrides": len(overrides) // 2,
+                    "spawned": False,
+                    "native_request": "NOT_TESTED",
+                }
+            )
+        )
         return 0
-    return subprocess.call([str(binary), "--cd", str(root), *overrides], cwd=root, env=environment,
-                           stdin=sys.stdin.buffer, stdout=sys.stdout.buffer, stderr=sys.stderr.buffer)
+    return subprocess.call(
+        [str(binary), "--cd", str(root), *overrides],
+        cwd=root,
+        env=environment,
+        stdin=sys.stdin.buffer,
+        stdout=sys.stdout.buffer,
+        stderr=sys.stderr.buffer,
+    )
 
 
 if __name__ == "__main__":
     try:
         raise SystemExit(main())
     except Exception:
-        sys.stderr.write("Native session launch refused; no credential printed or fallback selected.\n")
+        sys.stderr.write(
+            "Native session launch refused; no credential printed or fallback selected.\n"
+        )
         raise SystemExit(64) from None

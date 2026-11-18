@@ -52,37 +52,71 @@ def bootstrap_host():
     core = module("markdownify_primitives", HOST / "supervisor.py")
     scope = module("markdownify_scope", HOST / "project-memory-scope.py")
     roots = module("markdownify_roots", HOST / "ast-workspace-profile.py")
-    runtime = module("markdownify_runtime_dependencies", HOST / "project-memory-runtime.py")
-EXTENSIONS = {"pdf-to-markdown": ".pdf", "docx-to-markdown": ".docx", "pptx-to-markdown": ".pptx",
-              "xlsx-to-markdown": ".xlsx", "html-to-markdown": ".html", "get-markdown-file": ".md"}
-TOOLS = [{"name": name, "description": "Read or convert a handle-verified project file",
-          "inputSchema": {"type": "object", "properties": {"filepath": {"type": "string"}},
-                          "required": ["filepath"], "additionalProperties": False},
-          "annotations": {"readOnlyHint": True, "openWorldHint": False}}
-         for name in EXTENSIONS]
+    runtime = module(
+        "markdownify_runtime_dependencies", HOST / "project-memory-runtime.py"
+    )
+
+
+EXTENSIONS = {
+    "pdf-to-markdown": ".pdf",
+    "docx-to-markdown": ".docx",
+    "pptx-to-markdown": ".pptx",
+    "xlsx-to-markdown": ".xlsx",
+    "html-to-markdown": ".html",
+    "get-markdown-file": ".md",
+}
+TOOLS = [
+    {
+        "name": name,
+        "description": "Read or convert a handle-verified project file",
+        "inputSchema": {
+            "type": "object",
+            "properties": {"filepath": {"type": "string"}},
+            "required": ["filepath"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True, "openWorldHint": False},
+    }
+    for name in EXTENSIONS
+]
 
 
 def identity(root):
     bootstrap_host()
     root = roots.physical_root(root)
-    value = {"schema": 1, "root": str(root), "account": scope.account_sid(),
-             "device": root.stat().st_dev, "inode": root.stat().st_ino,
-             "git_common": str(roots.CANONICAL / ".git")}
+    value = {
+        "schema": 1,
+        "root": str(root),
+        "account": scope.account_sid(),
+        "device": root.stat().st_dev,
+        "inode": root.stat().st_ino,
+        "git_common": str(roots.CANONICAL / ".git"),
+    }
     return hashlib.sha256(scope.canonical(value)).hexdigest(), value
 
 
 def configure(root):
     key, binding = identity(root)
-    core.STATE = Path.home() / "AppData/Local/pc-agent/mcp-shared/markdownify-bioetl-v1" / key
+    core.STATE = (
+        Path.home() / "AppData/Local/pc-agent/mcp-shared/markdownify-bioetl-v1" / key
+    )
     scope.physical(core.STATE, exists=False)
     return key, binding
 
 
 def pins(converter):
-    paths = [HERE / "safe_markdownify.py", HERE / "safe_file.py", HOST / "supervisor.py",
-             HERE / "converter_snapshot.py", HERE / "converter_runner.py", HOST / "project-memory-runtime.py",
-             HOST / "project-memory-scope.py", HOST / "ast-workspace-profile.py", PYTHON,
-             Path(converter) / "converter.json"]
+    paths = [
+        HERE / "safe_markdownify.py",
+        HERE / "safe_file.py",
+        HOST / "supervisor.py",
+        HERE / "converter_snapshot.py",
+        HERE / "converter_runner.py",
+        HOST / "project-memory-runtime.py",
+        HOST / "project-memory-scope.py",
+        HOST / "ast-workspace-profile.py",
+        PYTHON,
+        Path(converter) / "converter.json",
+    ]
     snapshots.verify(Path(converter))
     result = {str(path): core.sha(path) for path in paths}
     result.update(runtime.python_hashes())
@@ -92,7 +126,11 @@ def pins(converter):
 def specification(root):
     key, binding = configure(root)
     spec = core.read_json(core.STATE / "profile.json")
-    if spec["id"] != key or spec["binding"] != binding or spec["pins"] != pins(spec["converter"]):
+    if (
+        spec["id"] != key
+        or spec["binding"] != binding
+        or spec["pins"] != pins(spec["converter"])
+    ):
         raise PermissionError("Markdownify profile/runtime drift")
     return spec
 
@@ -115,14 +153,26 @@ def prepare(root):
                 qualified.add(extension)
             except (KeyError, ValueError):
                 pass  # Unavailable formats remain unadvertised and disabled.
-        converter = snapshots.build(Path("D:/pc-agent/tools/markdownify-converter-versions"), site, qualified)
+        converter = snapshots.build(
+            Path("D:/pc-agent/tools/markdownify-converter-versions"), site, qualified
+        )
         with socket.socket() as sock:
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
             sock.bind(("127.0.0.1", 0))
             port = sock.getsockname()[1]
-        enabled = [name for name, suffix in EXTENSIONS.items() if suffix in {".md", ".html", *("." + x for x in qualified)}]
-        spec = {"id": key, "binding": binding, "port": port, "converter": str(converter),
-                "enabled_tools": enabled, "pins": pins(converter)}
+        enabled = [
+            name
+            for name, suffix in EXTENSIONS.items()
+            if suffix in {".md", ".html", *("." + x for x in qualified)}
+        ]
+        spec = {
+            "id": key,
+            "binding": binding,
+            "port": port,
+            "converter": str(converter),
+            "enabled_tools": enabled,
+            "pins": pins(converter),
+        }
         core.credential(create=True)
         core.write_json(path, spec)
         return spec
@@ -135,23 +185,35 @@ def request(spec, method, path, body=None, session=None):
     connection = http.client.HTTPConnection("127.0.0.1", spec["port"], timeout=100)
     connection.connect()
     local_port = connection.sock.getsockname()[1]
-    matched = [row for row in psutil.net_connections(kind="tcp")
-               if row.status == "ESTABLISHED" and row.laddr.ip == "127.0.0.1"
-               and row.laddr.port == spec["port"] and row.raddr
-               and row.raddr.port == local_port]
+    matched = [
+        row
+        for row in psutil.net_connections(kind="tcp")
+        if row.status == "ESTABLISHED"
+        and row.laddr.ip == "127.0.0.1"
+        and row.laddr.port == spec["port"]
+        and row.raddr
+        and row.raddr.port == local_port
+    ]
     if not matched or any(row.pid != record["owner_pid"] for row in matched):
         connection.close()
         raise PermissionError("Markdownify socket identity unavailable")
-    headers = {"Authorization": "Bearer " + core.credential(), "Content-Type": "application/json"}
+    headers = {
+        "Authorization": "Bearer " + core.credential(),
+        "Content-Type": "application/json",
+    }
     if session:
         headers["Mcp-Session-Id"] = session
     try:
-        connection.request(method, path, json.dumps(body) if body is not None else None, headers)
+        connection.request(
+            method, path, json.dumps(body) if body is not None else None, headers
+        )
         response = connection.getresponse()
         data = response.read(2 * 1024 * 1024 + 1)
         if len(data) > 2 * 1024 * 1024 or response.status >= 400:
             raise PermissionError("Markdownify request refused; no replay")
-        return (json.loads(data) if data else None), response.getheader("Mcp-Session-Id")
+        return (json.loads(data) if data else None), response.getheader(
+            "Mcp-Session-Id"
+        )
     finally:
         connection.close()
 
@@ -162,7 +224,11 @@ def ensure(root):
         raise PermissionError("Markdownify profile is administratively stopped")
     launched = False
     for _ in range(160):
-        record = core.read_json(core.STATE / "status.json") if (core.STATE / "status.json").exists() else {}
+        record = (
+            core.read_json(core.STATE / "status.json")
+            if (core.STATE / "status.json").exists()
+            else {}
+        )
         pid, birth = record.get("owner_pid"), record.get("owner_birth")
         if pid and core.process_birth(pid) == birth:
             try:
@@ -175,20 +241,46 @@ def ensure(root):
             raise PermissionError("Reused or unknown Markdownify PID")
         else:
             with core.LifetimeLock(core.STATE / "transition.lock"):
-                current = core.read_json(core.STATE / "status.json") if (core.STATE / "status.json").exists() else {}
+                current = (
+                    core.read_json(core.STATE / "status.json")
+                    if (core.STATE / "status.json").exists()
+                    else {}
+                )
                 if current != record:
                     continue
                 if launched:
-                    raise PermissionError("Markdownify exited during startup; no launch loop")
-                child = subprocess.Popen([str(PYTHON), "-I", "-S", "-B", str(HERE / "safe_markdownify.py"),
-                                          "serve", "--root", str(root)], cwd=HERE,
-                                         stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                                         creationflags=core.WINDOWS_HIDE | subprocess.CREATE_NEW_PROCESS_GROUP)
+                    raise PermissionError(
+                        "Markdownify exited during startup; no launch loop"
+                    )
+                child = subprocess.Popen(
+                    [
+                        str(PYTHON),
+                        "-I",
+                        "-S",
+                        "-B",
+                        str(HERE / "safe_markdownify.py"),
+                        "serve",
+                        "--root",
+                        str(root),
+                    ],
+                    cwd=HERE,
+                    stdin=subprocess.DEVNULL,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    creationflags=core.WINDOWS_HIDE
+                    | subprocess.CREATE_NEW_PROCESS_GROUP,
+                )
                 birth = core.process_birth(child.pid)
                 if birth is None:
                     raise PermissionError("Markdownify launch identity unknown")
-                core.write_json(core.STATE / "status.json", {"owner_pid": child.pid, "owner_birth": birth,
-                                                            "generation": uuid.uuid4().hex})
+                core.write_json(
+                    core.STATE / "status.json",
+                    {
+                        "owner_pid": child.pid,
+                        "owner_birth": birth,
+                        "generation": uuid.uuid4().hex,
+                    },
+                )
                 launched = True
         time.sleep(0.2)
     raise TimeoutError("Markdownify startup deadline; no fallback")
@@ -208,16 +300,43 @@ def convert(spec, name, args):
     snapshot = job / ("input" + EXTENSIONS[name])
     snapshot.write_bytes(raw)
     output_path = job / "output.md"
-    env = {key: value for key, value in os.environ.items()
-           if key.upper() in {"SYSTEMROOT", "WINDIR", "PATH", "USERPROFILE", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP", "PATHEXT"}}
+    env = {
+        key: value
+        for key, value in os.environ.items()
+        if key.upper()
+        in {
+            "SYSTEMROOT",
+            "WINDIR",
+            "PATH",
+            "USERPROFILE",
+            "APPDATA",
+            "LOCALAPPDATA",
+            "TEMP",
+            "TMP",
+            "PATHEXT",
+        }
+    }
     env["PYTHONUTF8"] = "1"
     owned = core.Job()
     child = None
     try:
         with output_path.open("xb") as output_stream:
-            child = subprocess.Popen([str(PYTHON), "-I", "-S", "-B", str(Path(spec["converter"]) / "converter_runner.py"), str(snapshot)], cwd=job, env=env,
-                                     stdin=subprocess.DEVNULL, stdout=output_stream, stderr=subprocess.DEVNULL,
-                                     creationflags=core.WINDOWS_HIDE)
+            child = subprocess.Popen(
+                [
+                    str(PYTHON),
+                    "-I",
+                    "-S",
+                    "-B",
+                    str(Path(spec["converter"]) / "converter_runner.py"),
+                    str(snapshot),
+                ],
+                cwd=job,
+                env=env,
+                stdin=subprocess.DEVNULL,
+                stdout=output_stream,
+                stderr=subprocess.DEVNULL,
+                creationflags=core.WINDOWS_HIDE,
+            )
             owned.attach(child)
             child.wait(timeout=90)
         with output_path.open("rb") as output_stream:
@@ -241,9 +360,11 @@ def serve(root):
         for _ in range(100):
             if (core.STATE / "status.json").is_file():
                 record = core.read_json(core.STATE / "status.json")
-                if record.get("owner_pid") == os.getpid() and record.get("owner_birth") == core.process_birth(os.getpid()):
+                if record.get("owner_pid") == os.getpid() and record.get(
+                    "owner_birth"
+                ) == core.process_birth(os.getpid()):
                     break
-            time.sleep(.05)
+            time.sleep(0.05)
         else:
             raise PermissionError("Markdownify launch was not published")
         token = core.credential()
@@ -267,7 +388,9 @@ def serve(root):
                 self.wfile.write(raw)
 
             def authorized(self):
-                if not secrets.compare_digest(self.headers.get("Authorization", ""), "Bearer " + token):
+                if not secrets.compare_digest(
+                    self.headers.get("Authorization", ""), "Bearer " + token
+                ):
                     self.reply(401)
                     return False
                 specification(root)
@@ -277,7 +400,14 @@ def serve(root):
                 if not self.authorized():
                     return
                 if self.path == "/health":
-                    self.reply(200, {"ready": True, "service": "markdownify-bioetl", "generation": record["generation"]})
+                    self.reply(
+                        200,
+                        {
+                            "ready": True,
+                            "service": "markdownify-bioetl",
+                            "generation": record["generation"],
+                        },
+                    )
                 elif self.path != "/health":
                     self.reply(405)
 
@@ -306,8 +436,14 @@ def serve(root):
                         return
                     session = uuid.uuid4().hex
                     sessions.add(session)
-                    result = {"protocolVersion": "2025-06-18", "capabilities": {"tools": {}},
-                              "serverInfo": {"name": "markdownify-bioetl", "version": "1.0.0"}}
+                    result = {
+                        "protocolVersion": "2025-06-18",
+                        "capabilities": {"tools": {}},
+                        "serverInfo": {
+                            "name": "markdownify-bioetl",
+                            "version": "1.0.0",
+                        },
+                    }
                 elif session not in sessions:
                     self.reply(404)
                     return
@@ -315,7 +451,13 @@ def serve(root):
                     self.reply(202)
                     return
                 elif method == "tools/list":
-                    result = {"tools": [tool for tool in TOOLS if tool["name"] in spec["enabled_tools"]]}
+                    result = {
+                        "tools": [
+                            tool
+                            for tool in TOOLS
+                            if tool["name"] in spec["enabled_tools"]
+                        ]
+                    }
                 elif method == "ping":
                     result = {}
                 elif method == "tools/call":
@@ -324,32 +466,55 @@ def serve(root):
                             if draining.is_set():
                                 raise PermissionError("Markdownify is draining")
                             params = request_value["params"]
-                            text = convert(spec, params["name"], params.get("arguments", {}))
+                            text = convert(
+                                spec, params["name"], params.get("arguments", {})
+                            )
                             result = {"content": [{"type": "text", "text": text}]}
                         except Exception:
-                            result = {"isError": True, "content": [{"type": "text", "text": "Local file access/conversion refused"}]}
+                            result = {
+                                "isError": True,
+                                "content": [
+                                    {
+                                        "type": "text",
+                                        "text": "Local file access/conversion refused",
+                                    }
+                                ],
+                            }
                 else:
-                    self.reply(200, {"jsonrpc": "2.0", "id": identifier, "error": {"code": -32601, "message": "Unsupported method"}})
+                    self.reply(
+                        200,
+                        {
+                            "jsonrpc": "2.0",
+                            "id": identifier,
+                            "error": {"code": -32601, "message": "Unsupported method"},
+                        },
+                    )
                     return
-                self.reply(200, {"jsonrpc": "2.0", "id": identifier, "result": result}, session)
+                self.reply(
+                    200, {"jsonrpc": "2.0", "id": identifier, "result": result}, session
+                )
 
-        server = ThreadingHTTPServer(("127.0.0.1", spec["port"]), Handler, bind_and_activate=False)
+        server = ThreadingHTTPServer(
+            ("127.0.0.1", spec["port"]), Handler, bind_and_activate=False
+        )
         server.allow_reuse_address = False
         server.socket.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
         server.server_bind()
         server.server_activate()
         server.daemon_threads = True
+
         def stop_when_requested():
             marker = core.STATE / "stop.request"
             while not marker.exists():
-                time.sleep(.2)
+                time.sleep(0.2)
             if core.read_json(marker).get("generation") != record["generation"]:
                 return
             draining.set()
             with gate:
                 server.shutdown()
+
         threading.Thread(target=stop_when_requested, daemon=True).start()
-        server.serve_forever(poll_interval=.2)
+        server.serve_forever(poll_interval=0.2)
         server.server_close()
 
 
@@ -357,7 +522,9 @@ def client(root):
     spec = specification(root)
     health, _ = request(spec, "GET", "/health")
     if not health.get("ready"):
-        raise PermissionError("Markdownify owner requires explicit administrative start")
+        raise PermissionError(
+            "Markdownify owner requires explicit administrative start"
+        )
     session = None
     try:
         for line in sys.stdin:
@@ -375,14 +542,19 @@ def client(root):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("mode", choices=("prepare", "serve", "status", "client", "start", "stop"))
+    parser.add_argument(
+        "mode", choices=("prepare", "serve", "status", "client", "start", "stop")
+    )
     parser.add_argument("--root", type=Path)
     args = parser.parse_args(argv)
     bootstrap_host()
     if args.mode == "client":
         if args.root is not None:
             raise PermissionError("Client root override is forbidden")
-        root = next((p for p in (Path.cwd(), *Path.cwd().parents) if (p / ".git").exists()), None)
+        root = next(
+            (p for p in (Path.cwd(), *Path.cwd().parents) if (p / ".git").exists()),
+            None,
+        )
         if root is None:
             raise PermissionError("No session workspace")
         roots.physical_root(root)
@@ -399,7 +571,10 @@ def main(argv=None):
         marker = core.STATE / "stop.request"
         if marker.exists():
             record = core.read_json(core.STATE / "status.json")
-            if psutil.pid_exists(record["owner_pid"]) or core.read_json(marker).get("generation") != record["generation"]:
+            if (
+                psutil.pid_exists(record["owner_pid"])
+                or core.read_json(marker).get("generation") != record["generation"]
+            ):
                 raise PermissionError("Markdownify stop has not completed")
             marker.unlink()
         ensure(args.root)
@@ -409,12 +584,14 @@ def main(argv=None):
         record = core.read_json(core.STATE / "status.json")
         if core.process_birth(record["owner_pid"]) != record["owner_birth"]:
             raise PermissionError("Markdownify owner identity not proven")
-        core.write_json(core.STATE / "stop.request", {"generation": record["generation"]})
+        core.write_json(
+            core.STATE / "stop.request", {"generation": record["generation"]}
+        )
         for _ in range(200):
             if not psutil.pid_exists(record["owner_pid"]):
                 print(json.dumps({"state": "STOPPED"}))
                 return
-            time.sleep(.2)
+            time.sleep(0.2)
         print(json.dumps({"state": "DRAIN_PENDING"}))
     else:
         value = specification(args.root)
@@ -425,5 +602,7 @@ if __name__ == "__main__":
     try:
         main()
     except Exception:
-        sys.stderr.write("Safe Markdownify operation refused; no credential or fallback exposed.\n")
+        sys.stderr.write(
+            "Safe Markdownify operation refused; no credential or fallback exposed.\n"
+        )
         raise SystemExit(64) from None

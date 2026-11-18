@@ -27,23 +27,32 @@ def _transition_lock(owner, directory):
     with ExitStack() as stack:
         while True:
             try:
-                stack.enter_context(owner.core.LifetimeLock(directory / "transition.lock"))
+                stack.enter_context(
+                    owner.core.LifetimeLock(directory / "transition.lock")
+                )
                 break
             except RuntimeError as error:
-                if str(error) != "Another owner holds the lifetime lock" or time.monotonic() >= deadline:
+                if (
+                    str(error) != "Another owner holds the lifetime lock"
+                    or time.monotonic() >= deadline
+                ):
                     raise
-                time.sleep(.025)
+                time.sleep(0.025)
         yield
 
 
 def digest(value):
-    return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+    return hashlib.sha256(
+        json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
+    ).hexdigest()
 
 
 def records(owner, entry):
     directory = Path(entry["state"])
-    return {name: owner.state.read(directory / (name + ".json"), max_bytes=32 * 1024 * 1024)
-            for name in ("profile", "active", "blocked", "status", "owner-launch", "work")}
+    return {
+        name: owner.state.read(directory / (name + ".json"), max_bytes=32 * 1024 * 1024)
+        for name in ("profile", "active", "blocked", "status", "owner-launch", "work")
+    }
 
 
 def coordination(owner, entry):
@@ -56,7 +65,10 @@ def coordination(owner, entry):
 
 
 def process_verdict(owner, observed, *, self_owner=False):
-    identities = [owner.state.identity(observed["status"], role) for role in ("owner", "gateway", "backend")]
+    identities = [
+        owner.state.identity(observed["status"], role)
+        for role in ("owner", "gateway", "backend")
+    ]
     launch = owner.state.identity(observed["owner-launch"], "owner")
     if observed["status"] is not None and identities[0] == "ABSENT":
         identities[0] = "UNKNOWN"
@@ -64,7 +76,10 @@ def process_verdict(owner, observed, *, self_owner=False):
         launch = "UNKNOWN"
     if "UNKNOWN" in [*identities, launch]:
         return "BLOCK_PROCESS_IDENTITY_UNKNOWN"
-    for record, state in ((observed["status"], identities[0]), (observed["owner-launch"], launch)):
+    for record, state in (
+        (observed["status"], identities[0]),
+        (observed["owner-launch"], launch),
+    ):
         if state == "ALIVE" and not (self_owner and record["owner_pid"] == os.getpid()):
             return "BLOCK_OWNER_ACTIVE"
     if "ALIVE" in identities[1:]:
@@ -77,16 +92,21 @@ def block_identity(observed, coord):
     if active:
         return active["id"]
     if observed["blocked"] is not None:
-        return "legacy-" + digest({k: observed[k] for k in ("blocked", "status", "work")})
+        return "legacy-" + digest(
+            {k: observed[k] for k in ("blocked", "status", "work")}
+        )
     return None
 
 
 def snapshot(owner, entry, value):
     observed = records(owner, entry)
-    return {"profile": entry["id"], "version": str(owner.HERE),
-            "records": {name: digest(record) for name, record in observed.items()},
-            "graph": owner.state.graph_stamp(value),
-            "coordination": digest(coordination(owner, entry))}, observed
+    return {
+        "profile": entry["id"],
+        "version": str(owner.HERE),
+        "records": {name: digest(record) for name, record in observed.items()},
+        "graph": owner.state.graph_stamp(value),
+        "coordination": digest(coordination(owner, entry)),
+    }, observed
 
 
 def plan(owner, entry, value):
@@ -100,29 +120,48 @@ def plan(owner, entry, value):
             reason = "BLOCK_NOT_BLOCKED"
         elif any(item["block_id"] == block for item in coord["history"]):
             reason = "BLOCK_ALREADY_RESOLVED"
-        elif (work.get("schema") != 2 or work.get("profile") != entry["id"]
-              or work.get("generation") != previous.get("generation")
-              or not isinstance(previous.get("generation"), str)
-              or re.fullmatch("[0-9a-f]{32}", previous["generation"]) is None):
+        elif (
+            work.get("schema") != 2
+            or work.get("profile") != entry["id"]
+            or work.get("generation") != previous.get("generation")
+            or not isinstance(previous.get("generation"), str)
+            or re.fullmatch("[0-9a-f]{32}", previous["generation"]) is None
+        ):
             reason = "BLOCK_INSUFFICIENT_LEGACY_EVIDENCE"
-        elif (coord["history"] and coord["history"][-1]["phase"] == "LAUNCHING"
-              and previous.get("generation") != coord["history"][-1]["new_generation"]):
+        elif (
+            coord["history"]
+            and coord["history"][-1]["phase"] == "LAUNCHING"
+            and previous.get("generation") != coord["history"][-1]["new_generation"]
+        ):
             reason = "BLOCK_INCOMPLETE_SUCCESSOR_HISTORY"
         elif work.get("graph") != bound["graph"]:
             reason = "BLOCK_GRAPH_RECEIPT_MISMATCH"
-        elif (work.get("phase") == "starting" and type(work.get("accepted_count")) is int
-              and work["accepted_count"] == 0 and work.get("request_id") is None
-              and work.get("mutating") is False):
+        elif (
+            work.get("phase") == "starting"
+            and type(work.get("accepted_count")) is int
+            and work["accepted_count"] == 0
+            and work.get("request_id") is None
+            and work.get("mutating") is False
+        ):
             reason = "PROVEN_STARTUP_WITHOUT_REQUESTS"
-        elif (work.get("phase") == "idle" and type(work.get("accepted_count")) is int
-              and work["accepted_count"] >= 0):
+        elif (
+            work.get("phase") == "idle"
+            and type(work.get("accepted_count")) is int
+            and work["accepted_count"] >= 0
+        ):
             reason = "PROVEN_IDLE_RECEIPT"
         else:
             reason = "BLOCK_UNKNOWN_OUTCOME"
     eligible = reason in {"PROVEN_STARTUP_WITHOUT_REQUESTS", "PROVEN_IDLE_RECEIPT"}
-    result = {"schema": 2, "snapshot": bound, "block_id": block, "reason": reason,
-              "eligible": eligible, "old_generation": previous.get("generation"),
-              "new_generation": uuid.uuid4().hex if eligible else None}
+    result = {
+        "schema": 2,
+        "snapshot": bound,
+        "block_id": block,
+        "reason": reason,
+        "eligible": eligible,
+        "old_generation": previous.get("generation"),
+        "new_generation": uuid.uuid4().hex if eligible else None,
+    }
     result["plan_id"] = digest(result)
     return result
 
@@ -130,30 +169,52 @@ def plan(owner, entry, value):
 def apply(owner, entry, value, proposed):
     directory = Path(entry["state"])
     with _transition_lock(owner, directory):
-        graph_lock = Path(value["profile"]["graph"]).with_name(".memory.service-owner.lock")
+        graph_lock = Path(value["profile"]["graph"]).with_name(
+            ".memory.service-owner.lock"
+        )
         with owner.core.LifetimeLock(graph_lock):
             coord = coordination(owner, entry)
-            if any(item["plan_id"] == proposed.get("plan_id") for item in coord["history"]):
+            if any(
+                item["plan_id"] == proposed.get("plan_id") for item in coord["history"]
+            ):
                 raise ValueError("Recovery plan already applied; no changes")
             checked = plan(owner, entry, value)
-            if (proposed.get("schema") != 2 or not checked["eligible"]
-                    or set(proposed) != set(checked) or proposed.get("eligible") is not True
-                    or checked["snapshot"] != proposed.get("snapshot")
-                    or checked["block_id"] != proposed.get("block_id")
-                    or checked["reason"] != proposed.get("reason")
-                    or checked["old_generation"] != proposed.get("old_generation")
-                    or digest({k: v for k, v in proposed.items() if k != "plan_id"}) != proposed.get("plan_id")):
+            if (
+                proposed.get("schema") != 2
+                or not checked["eligible"]
+                or set(proposed) != set(checked)
+                or proposed.get("eligible") is not True
+                or checked["snapshot"] != proposed.get("snapshot")
+                or checked["block_id"] != proposed.get("block_id")
+                or checked["reason"] != proposed.get("reason")
+                or checked["old_generation"] != proposed.get("old_generation")
+                or digest({k: v for k, v in proposed.items() if k != "plan_id"})
+                != proposed.get("plan_id")
+            ):
                 raise ValueError("Stale or unsupported recovery plan; no changes")
             generation = proposed.get("new_generation")
             used = {checked["old_generation"]}
-            used.update(item[key] for item in coord["history"] for key in ("old_generation", "new_generation"))
-            if (not isinstance(generation, str) or len(generation) != 32
-                    or any(ch not in "0123456789abcdef" for ch in generation)
-                    or generation in used):
+            used.update(
+                item[key]
+                for item in coord["history"]
+                for key in ("old_generation", "new_generation")
+            )
+            if (
+                not isinstance(generation, str)
+                or len(generation) != 32
+                or any(ch not in "0123456789abcdef" for ch in generation)
+                or generation in used
+            ):
                 raise ValueError("Invalid successor generation")
-            grant = {"id": uuid.uuid4().hex, "plan_id": proposed["plan_id"], "block_id": proposed["block_id"],
-                     "old_generation": proposed["old_generation"], "new_generation": generation,
-                     "snapshot": proposed["snapshot"], "phase": "RESOLVED"}
+            grant = {
+                "id": uuid.uuid4().hex,
+                "plan_id": proposed["plan_id"],
+                "block_id": proposed["block_id"],
+                "old_generation": proposed["old_generation"],
+                "new_generation": generation,
+                "snapshot": proposed["snapshot"],
+                "phase": "RESOLVED",
+            }
             coord["history"].append(grant)
             coord["active_block"] = None
             # One atomic publication is the commit boundary. No legacy file is deleted.
@@ -170,7 +231,9 @@ def blocked(owner, entry):
     if raw is None:
         return False
     raw_hash = digest(raw)
-    return not any(item["snapshot"]["records"]["blocked"] == raw_hash for item in coord["history"])
+    return not any(
+        item["snapshot"]["records"]["blocked"] == raw_hash for item in coord["history"]
+    )
 
 
 def decision(owner, entry, value, *, self_owner=False):
@@ -184,9 +247,10 @@ def decision(owner, entry, value, *, self_owner=False):
         expected = last["snapshot"]
         if reason:
             return reason
-        if (owner.state.graph_stamp(value) != expected["graph"]
-                or any(digest(observed[name]) != expected["records"][name]
-                       for name in ("profile", "active", "blocked", "status", "work"))):
+        if owner.state.graph_stamp(value) != expected["graph"] or any(
+            digest(observed[name]) != expected["records"][name]
+            for name in ("profile", "active", "blocked", "status", "work")
+        ):
             return "BLOCK_RECOVERY_EVIDENCE_DRIFT"
         return "SAFE_RECONCILED_START"
     if last and last["phase"] == "LAUNCHING":
@@ -221,13 +285,23 @@ def observe(owner, entry, value, generation, *, idle=False):
         phase = "IDLE" if idle else "RUNNING"
         if last["phase"] == phase:
             return
-        if last.get("owner_pid") != os.getpid() or owner.core.process_birth(os.getpid()) != last.get("owner_birth"):
+        if last.get("owner_pid") != os.getpid() or owner.core.process_birth(
+            os.getpid()
+        ) != last.get("owner_birth"):
             raise ValueError("Recovery generation owner changed")
         work = owner.state.read(directory / "work.json") or {}
-        if (work.get("schema") != 2 or work.get("profile") != entry["id"]
-                or work.get("generation") != generation
-                or (idle and (work.get("phase") != "idle"
-                              or work.get("graph") != owner.state.graph_stamp(value)))):
+        if (
+            work.get("schema") != 2
+            or work.get("profile") != entry["id"]
+            or work.get("generation") != generation
+            or (
+                idle
+                and (
+                    work.get("phase") != "idle"
+                    or work.get("graph") != owner.state.graph_stamp(value)
+                )
+            )
+        ):
             raise ValueError("Recovery generation has no idle receipt")
         last["phase"] = phase
         owner.state.write(directory / COORDINATION, coord)
@@ -237,6 +311,9 @@ def record_block(owner, entry, reason):
     directory = Path(entry["state"])
     with _transition_lock(owner, directory):
         coord = coordination(owner, entry)
-        coord["active_block"] = {"id": uuid.uuid4().hex, "reason": reason,
-                                 "records": {k: digest(v) for k, v in records(owner, entry).items()}}
+        coord["active_block"] = {
+            "id": uuid.uuid4().hex,
+            "reason": reason,
+            "records": {k: digest(v) for k, v in records(owner, entry).items()},
+        }
         owner.state.write(directory / COORDINATION, coord)

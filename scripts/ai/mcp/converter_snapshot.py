@@ -12,7 +12,6 @@ import uuid
 from pathlib import Path
 
 
-
 def digest(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -26,14 +25,24 @@ def verify(root):
     for current, directories, files in os.walk(root, followlinks=False):
         for name in [*directories, *files]:
             path = Path(current) / name
-            if getattr(path.lstat(), "st_file_attributes", 0) & 0x400 or path.is_symlink():
+            if (
+                getattr(path.lstat(), "st_file_attributes", 0) & 0x400
+                or path.is_symlink()
+            ):
                 raise ValueError("Converter snapshot contains a reparse point")
-        actual.update((Path(current) / name).relative_to(root).as_posix()
-                      for name in files if Path(current) / name != root / "converter.json")
+        actual.update(
+            (Path(current) / name).relative_to(root).as_posix()
+            for name in files
+            if Path(current) / name != root / "converter.json"
+        )
     if actual != set(manifest["files"]):
         raise ValueError("Converter snapshot file set changed")
     for relative, expected in manifest["files"].items():
-        if Path(relative).is_absolute() or ".." in Path(relative).parts or digest(root / relative) != expected:
+        if (
+            Path(relative).is_absolute()
+            or ".." in Path(relative).parts
+            or digest(root / relative) != expected
+        ):
             raise ValueError("Converter snapshot dependency drift")
     return manifest
 
@@ -41,9 +50,14 @@ def verify(root):
 def closure(site, extras=()):
     """Resolve only installed, version-compatible dependencies for selected formats."""
     from packaging.requirements import Requirement
+
     def normalize(name):
         return re.sub(r"[-_.]+", "-", name).lower()
-    installed = {normalize(d.metadata["Name"]): d for d in importlib.metadata.distributions(path=[str(site)])}
+
+    installed = {
+        normalize(d.metadata["Name"]): d
+        for d in importlib.metadata.distributions(path=[str(site)])
+    }
     pending = [("markitdown", set(extras))]
     selected = {}
     packages = {}
@@ -58,11 +72,22 @@ def closure(site, extras=()):
         packages[name] = distribution.version
         for raw in distribution.requires or []:
             requirement = Requirement(raw)
-            if requirement.marker is None or any(requirement.marker.evaluate({"extra": extra}) for extra in {"", *selected[name]}):
+            if requirement.marker is None or any(
+                requirement.marker.evaluate({"extra": extra})
+                for extra in {"", *selected[name]}
+            ):
                 if normalize(requirement.name) not in installed:
-                    raise ValueError("Converter dependency missing: " + requirement.name)
-                if requirement.specifier and installed[normalize(requirement.name)].version not in requirement.specifier:
-                    raise ValueError("Converter dependency version mismatch: " + requirement.name)
+                    raise ValueError(
+                        "Converter dependency missing: " + requirement.name
+                    )
+                if (
+                    requirement.specifier
+                    and installed[normalize(requirement.name)].version
+                    not in requirement.specifier
+                ):
+                    raise ValueError(
+                        "Converter dependency version mismatch: " + requirement.name
+                    )
                 pending.append((requirement.name, set(requirement.extras)))
     return installed, selected, packages
 
@@ -91,8 +116,16 @@ def build(destination, site, extras=()):
                 raise ValueError("Converter dependency changed during copying")
     runner = Path(__file__).with_name("converter_runner.py")
     shutil.copyfile(runner, staging / "converter_runner.py")
-    manifest = {"schema": 1, "packages": packages, "formats": sorted(extras),
-                "files": {p.relative_to(staging).as_posix(): digest(p) for p in sorted(staging.rglob("*")) if p.is_file()}}
+    manifest = {
+        "schema": 1,
+        "packages": packages,
+        "formats": sorted(extras),
+        "files": {
+            p.relative_to(staging).as_posix(): digest(p)
+            for p in sorted(staging.rglob("*"))
+            if p.is_file()
+        },
+    }
     raw = json.dumps(manifest, sort_keys=True, separators=(",", ":")).encode()
     (staging / "converter.json").write_bytes(raw)
     target = destination / hashlib.sha256(raw).hexdigest()
