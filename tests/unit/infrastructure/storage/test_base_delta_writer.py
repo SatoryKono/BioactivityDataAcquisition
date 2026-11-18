@@ -391,8 +391,8 @@ class TestBaseDeltaWriterAsync:
         ``pyarrow.parquet.read_table`` instead of a full Arrow table conversion.
         """
         expected_records = [{"id": "1", "name": "test"}]
-        mock_arrow_table = MagicMock()
-        mock_arrow_table.to_pylist.return_value = expected_records
+        # Real Arrow payload: schema alignment projects via Table.select().
+        mock_arrow_table = pa.table({"id": ["1"], "name": ["test"]})
         mock_scanner = MagicMock()
         del mock_scanner.to_reader
         mock_dataset = MagicMock()
@@ -403,6 +403,9 @@ class TestBaseDeltaWriterAsync:
         mock_delta_table.file_uris.return_value = [
             "file:///C:/tmp/part-0.parquet",
         ]
+        mock_delta_table.schema.return_value.to_arrow.return_value = pa.schema(
+            [("id", pa.string()), ("name", pa.string())]
+        )
         mock_delta_table.to_pyarrow_table.side_effect = AssertionError(
             "native full-table scan must not be used"
         )
@@ -421,6 +424,12 @@ class TestBaseDeltaWriterAsync:
                 "bioetl.infrastructure.storage.delta.table_ops.pq.read_table",
                 return_value=mock_arrow_table,
             ) as mock_pq_read,
+            patch(
+                "bioetl.infrastructure.storage.delta.table_ops.pq.read_schema",
+                side_effect=pa.ArrowInvalid(
+                    "Unrecognized filesystem type in URI: C:/tmp/part-0.parquet"
+                ),
+            ),
         ):
             result = await writer.read_table("existing_table", columns=["id", "name"])
 
