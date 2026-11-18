@@ -7,6 +7,7 @@ hashes detect stale evidence, not a malicious user able to forge local files.
 from __future__ import annotations
 
 from collections.abc import Mapping
+from concurrent.futures import ThreadPoolExecutor
 import hashlib
 import importlib.metadata
 import json
@@ -165,28 +166,38 @@ def protected_state(root: Path, base: str = "origin/main") -> dict[str, str]:
     )
 
     base = validate_revision_token(base)
-    _reject_gitlink_revisions(root, "HEAD", base)
-    indexes = [
-        _index_material(root, view, reject_hidden=False) for view in _index_views(root)
-    ]
-    if check_checkout_state(root):
-        raise ValueError("checkout state is not qualified")
-    return {
-        "head_sha": _git(root, "rev-parse", "--verify", "HEAD^{commit}")
-        .strip()
-        .decode("ascii"),
-        "base_sha": _git(root, "rev-parse", "--verify", base + "^{commit}")
-        .strip()
-        .decode("ascii"),
-        "history_sha256": digest(sorted(_shallow_boundaries(root))),
-        "index_sha256": digest(
-            [
-                {key: hashlib.sha256(value).hexdigest() for key, value in item.items()}
-                for item in indexes
-            ]
-        ),
-        "dotenv_sha256": digest(_dotenv_material(root)),
-    }
+    # These read-only probes share no mutable process environment or cache.
+    # Await every result before callbacks; each bookend samples again afresh.
+    views = _index_views(root)
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        gitlinks = pool.submit(_reject_gitlink_revisions, root, "HEAD", base)
+        indexes = [
+            pool.submit(_index_material, root, view, reject_hidden=False)
+            for view in views
+        ]
+        checkout = pool.submit(check_checkout_state, root)
+        head = pool.submit(_git, root, "rev-parse", "--verify", "HEAD^{commit}")
+        base_sha = pool.submit(_git, root, "rev-parse", "--verify", base + "^{commit}")
+        history = pool.submit(_shallow_boundaries, root)
+        dotenv = pool.submit(_dotenv_material, root)
+        gitlinks.result()
+        if checkout.result():
+            raise ValueError("checkout state is not qualified")
+        return {
+            "head_sha": head.result().strip().decode("ascii"),
+            "base_sha": base_sha.result().strip().decode("ascii"),
+            "history_sha256": digest(sorted(history.result())),
+            "index_sha256": digest(
+                [
+                    {
+                        key: hashlib.sha256(value).hexdigest()
+                        for key, value in future.result().items()
+                    }
+                    for future in indexes
+                ]
+            ),
+            "dotenv_sha256": digest(dotenv.result()),
+        }
 
 
 def _path_state(

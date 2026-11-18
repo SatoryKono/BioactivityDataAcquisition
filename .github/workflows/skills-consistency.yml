@@ -210,6 +210,7 @@ jobs:
             tests/unit/scripts/test_readonly_message.py \
             tests/unit/scripts/test_offline_precommit.py \
             tests/unit/scripts/test_hook_installation.py \
+            tests/unit/scripts/repo/test_hook_receipts.py \
             tests/unit/scripts/repo/test_process_deadline.py \
             -q --no-cov \
             --junitxml="$run_dir/tests.xml"

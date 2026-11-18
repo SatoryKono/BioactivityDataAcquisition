@@ -253,3 +253,19 @@ def test_semantic_message_input_cannot_be_an_option_or_worktree_file(
         name = "--help"
     with pytest.raises(ValueError, match="outside_metadata"):
         reader._invoke(f.root, name)
+
+
+def test_stale_bytecode_cannot_override_the_verified_message_source(message_checkout):
+    import importlib.util
+    from importlib._bootstrap_external import _code_to_timestamp_pyc
+
+    f = message_checkout
+    relative = reader.MODULES[-1][1]
+    source = f.root / relative
+    code = compile("def main(argv): return 0", str(source), "exec")
+    stat = source.stat()
+    cache = Path(importlib.util.cache_from_source(str(source)))
+    cache.parent.mkdir(exist_ok=True)
+    cache.write_bytes(_code_to_timestamp_pyc(code, int(stat.st_mtime), stat.st_size))
+    f.message.write_text("invalid header\n")
+    assert reader._invoke(f.root, str(f.message))[0] == 1

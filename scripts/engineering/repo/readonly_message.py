@@ -174,7 +174,14 @@ def _invoke(root: Path, filename: str) -> tuple[int, bytes]:
                 raise ValueError("message_source_loader_unavailable")
             module = importlib.util.module_from_spec(spec)
             sys.modules[name] = module
-            spec.loader.exec_module(module)
+            content = path.read_bytes()
+            if (
+                hashlib.sha256(content.replace(b"\r\n", b"\n")).hexdigest()
+                != SOURCE_HASHES[relative]
+            ):
+                raise ValueError("message_sources_changed")
+            # Execute exactly the bytes just qualified, never a stale .pyc.
+            exec(compile(content, str(path), "exec"), module.__dict__)
             loaded[name] = module
             if "." in name:
                 parent, attr = name.rsplit(".", 1)

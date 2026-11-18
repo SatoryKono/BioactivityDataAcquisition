@@ -136,6 +136,8 @@ framework execution. The qualified metadata-only checker does not hide or inspec
 unstaged source files: it cannot write them, so framework mutation-detection diffs
 and a second project-Python startup are unnecessary in this scope. Fresh runtime
 index/HEAD/base/env bookends and changed-index protected checks remain mandatory.
+Independent read-only bookend probes overlap in four bounded worker slots; every
+probe is awaited and each bookend samples fresh state without cross-event reuse.
 Missing or skipped message input cannot qualify execution. This is not a native
 AI permission boundary, cache waiver or authorization to mutate an env file.
 The qualified adapter replaces pre-commit
