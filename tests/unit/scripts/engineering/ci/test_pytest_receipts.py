@@ -447,6 +447,103 @@ def pytest_configure(config):
     assert len(nodeids) == len(set(nodeids)) == 1
 
 
+def test_local_worker_chdir_uses_controller_receipt_directory(
+    receipts: Path, tmp_path: Path
+) -> None:
+    pytest.importorskip("xdist")
+    test_file = tmp_path / "test_local_chdir.py"
+    _write(test_file, "def test_one():\n    assert True\n")
+    worker = tmp_path.parent / (tmp_path.name + "-worker")
+    worker.mkdir()
+    completed = _pytest(
+        test_file,
+        Path("receipts"),
+        "--dist",
+        "load",
+        "--tx",
+        f"popen//chdir={worker}",
+        "--rsyncdir",
+        str(tmp_path),
+        "--basetemp",
+        str(tmp_path / "nested-base"),
+        cwd=tmp_path,
+    )
+
+    assert completed.returncode == 0, completed.stdout + completed.stderr
+    payload = _load(receipts, worker="gw0")
+    assert payload["role"] == "worker"
+    assert payload["completeness"] == "complete"
+    assert not (worker / "receipts").exists()
+
+
+def test_proxied_popen_worker_does_not_wait_for_local_receipt(
+    receipts: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    plugin = object.__new__(ReceiptPlugin)
+    plugin.write_receipt = False
+    plugin.receipt_dir = receipts
+    plugin.run_id, plugin.attempt, plugin.pass_name = "run1", "1", "direct"
+    node = SimpleNamespace(
+        gateway=SimpleNamespace(id="gw0", spec=SimpleNamespace(popen=True, via="proxy"))
+    )
+    monkeypatch.setattr(
+        "scripts.engineering.ci.pytest_receipts._WORKER_RECEIPT_FINALIZATION_SECONDS", 0
+    )
+
+    plugin.pytest_testnodedown(node, None)
+    assert not receipts.exists()
+
+
+def test_xdist_waits_for_slow_worker_receipt_finalization(
+    receipts: Path, tmp_path: Path
+) -> None:
+    pytest.importorskip("xdist")
+    test_file = tmp_path / "test_dist_slow.py"
+    _write(test_file, "def test_one():\n    assert True\n")
+    _write(
+        tmp_path / "slow_worker_receipt.py",
+        """
+import time
+import pytest
+from scripts.engineering.ci import pytest_receipts
+
+@pytest.hookimpl(trylast=True)
+def pytest_configure(config):
+    if not hasattr(config, 'workerinput'):
+        return
+    original = pytest_receipts.write_receipt_file
+    def delayed_write(directory, payload):
+        time.sleep(12)
+        return original(directory, payload)
+    pytest_receipts.write_receipt_file = delayed_write
+""",
+    )
+    env = os.environ.copy()
+    env["PYTHONPATH"] = os.pathsep.join([str(tmp_path), env.get("PYTHONPATH", "")])
+    completed = _pytest(
+        test_file,
+        receipts,
+        "-n",
+        "2",
+        "--dist",
+        "load",
+        "-p",
+        "slow_worker_receipt",
+        "--basetemp",
+        str(tmp_path / "nested-base"),
+        env=env,
+    )
+    assert completed.returncode == 0, completed.stdout + completed.stderr
+    files = list(receipts.rglob("receipt.json"))
+    assert len(files) == 2, completed.stdout + completed.stderr
+    payloads = [json.loads(path.read_text(encoding="utf-8")) for path in files]
+    assert all(item["role"] == "worker" for item in payloads)
+    assert all(item["worker"] != "master" for item in payloads)
+    assert all(item["completeness"] == "complete" for item in payloads)
+    nodeids = [nodeid for item in payloads for nodeid in item["results"]]
+    assert len(nodeids) == len(set(nodeids)) == 1
+
+
 @pytest.mark.parametrize("dist_args", [("--dist", "load"), ("--dist=load",)])
 def test_dist_without_workers_still_writes_receipt(
     receipts: Path,
