@@ -79,19 +79,6 @@ class _PreSilverStagingFlowMixin:
             business_data=business_data,
         )
 
-    def _stage_prepared_business_data(
-        self,
-        *,
-        source_id: str,
-        identity_record: JsonDict,
-        business_data: JsonDict,
-    ) -> PreSilverRecord:
-        return self._build_pre_silver_from_business_data(
-            source_id=source_id,
-            identity_record=identity_record,
-            business_data=business_data,
-        )
-
     def _stage_identity_business_data(
         self,
         *,
@@ -99,23 +86,10 @@ class _PreSilverStagingFlowMixin:
         identity_field: str,
         business_data: JsonDict,
     ) -> PreSilverRecord:
-        return self._stage_prepared_business_data(
+        return self._build_pre_silver_from_business_data(
             source_id=source_id,
             identity_record={identity_field: source_id},
             business_data=business_data,
-        )
-
-    def _build_pre_silver_from_normalized_business_data(
-        self,
-        *,
-        business_data: JsonDict,
-        resolve_entity_id: Callable[[JsonDict], str],
-    ) -> PreSilverRecord:
-        normalized_business_data = self._normalize_business_data(business_data)
-        entity_id = resolve_entity_id(normalized_business_data)
-        return self._build_pre_silver_payload(
-            entity_id=entity_id,
-            business_data=normalized_business_data,
         )
 
     def _stage_optional_normalized_business_data(
@@ -126,9 +100,11 @@ class _PreSilverStagingFlowMixin:
     ) -> PreSilverRecord | None:
         if business_data is None:
             return None
-        return self._build_pre_silver_from_normalized_business_data(
-            business_data=business_data,
-            resolve_entity_id=resolve_entity_id,
+        normalized_business_data = self._normalize_business_data(business_data)
+        entity_id = resolve_entity_id(normalized_business_data)
+        return self._build_pre_silver_payload(
+            entity_id=entity_id,
+            business_data=normalized_business_data,
         )
 
 

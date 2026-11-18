@@ -115,7 +115,7 @@ class _PreSilverFinalizationFlowMixin:
         self._publish_business_evidence(context, index)
         return projected
 
-    def _finalize_business_data_with_entity_id(
+    def _finalize_staged_business_data(
         self,
         *,
         context: PipelineContext,
@@ -130,21 +130,6 @@ class _PreSilverFinalizationFlowMixin:
             entity_id=entity_id,
             index=index,
             normalized_business_data=normalized_business_data,
-        )
-
-    def _finalize_staged_business_data(
-        self,
-        *,
-        context: PipelineContext,
-        entity_id: str,
-        index: int,
-        business_data: JsonDict,
-    ) -> JsonDict:
-        return self._finalize_business_data_with_entity_id(
-            context=context,
-            entity_id=entity_id,
-            index=index,
-            business_data=business_data,
         )
 
     def _finalize_prepared_business_data(
@@ -174,19 +159,14 @@ class _PreSilverFinalizationFlowMixin:
         index: int,
         business_data: JsonDict,
     ) -> SilverRecord:
-        return cast(
-            "SilverRecord",
-            cast(
-                object,
-                self._finalize_prepared_business_data(
-                    context=context,
-                    source_id=source_id,
-                    identity_record=identity_record,
-                    index=index,
-                    business_data=business_data,
-                ),
-            ),
+        finalized = self._finalize_prepared_business_data(
+            context=context,
+            source_id=source_id,
+            identity_record=identity_record,
+            index=index,
+            business_data=business_data,
         )
+        return cast("SilverRecord", cast(object, finalized))
 
     def _transform_identity_business_data(
         self,
@@ -205,23 +185,6 @@ class _PreSilverFinalizationFlowMixin:
             business_data=business_data,
         )
 
-    def _finalize_normalized_business_data(
-        self,
-        *,
-        context: PipelineContext,
-        index: int,
-        business_data: JsonDict,
-        resolve_entity_id: Callable[[JsonDict], str],
-    ) -> JsonDict:
-        normalized_business_data = self._normalize_business_data(business_data)
-        entity_id = resolve_entity_id(normalized_business_data)
-        return self._project_hashed_silver_record(
-            context=context,
-            entity_id=entity_id,
-            index=index,
-            normalized_business_data=normalized_business_data,
-        )
-
     def _transform_optional_normalized_business_data(
         self,
         *,
@@ -232,18 +195,15 @@ class _PreSilverFinalizationFlowMixin:
     ) -> SilverRecord | None:
         if business_data is None:
             return None
-        return cast(
-            "SilverRecord",
-            cast(
-                object,
-                self._finalize_normalized_business_data(
-                    context=context,
-                    index=index,
-                    business_data=business_data,
-                    resolve_entity_id=resolve_entity_id,
-                ),
-            ),
+        normalized_business_data = self._normalize_business_data(business_data)
+        entity_id = resolve_entity_id(normalized_business_data)
+        finalized = self._project_hashed_silver_record(
+            context=context,
+            entity_id=entity_id,
+            index=index,
+            normalized_business_data=normalized_business_data,
         )
+        return cast("SilverRecord", cast(object, finalized))
 
 
 __all__ = ["_PreSilverFinalizationFlowMixin"]
