@@ -208,8 +208,16 @@ Responses retain the 2 MiB transport limit and encode ordinary Unicode as UTF-8.
 An oversized JSON envelope returns a bounded tool error rather than closing a
 successful conversion's connection. At most 64 sessions are admitted together.
 Sessions expire after 15 minutes without a request; active requests renew that
-lease. An expired client must initialize a new session after the normal reconnect
-boundary. Expiration does not restart the owner or replay a previous tool call.
+lease. After a session-bound HTTP 404, the private bridge initializes a new session
+without the old ID and reports an explicit error for the interrupted call. It
+keeps the stdio connection available for subsequent requests. Expiration does not
+restart the owner or replay a previous tool call.
+
+The HTTP listener admits at most 64 handler connections before authentication;
+incomplete headers have a five-second deadline. A concurrent conversion receives
+a bounded busy result instead of waiting behind another conversion. Stop markers
+are published under the generation transition lock; a marker from a previous
+generation does not disable the current owner's stop watcher.
 
 Only installed, version-compatible format dependencies are qualified and copied
 into a checked converter snapshot. Plugins and unavailable formats stay disabled.
