@@ -19,6 +19,8 @@ from pathlib import Path, PurePosixPath
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
+from scripts.ops.observability.grafana.trusted_docker import docker_path
+
 UNAPPROVED_RELEASE_IMAGE = "Unapproved immutable release image"
 INVALID_IMAGE_INSPECTION = "Invalid image inspection"
 INVALID_HOST_IMAGE = "Invalid host image"
@@ -149,6 +151,141 @@ def _validate_release_inventory(
     )
 
 
+def _capture_facts(capture: JsonObject) -> JsonObject:
+    """Separate generator revision from immutable CI capture facts."""
+    generator = capture.get("generator_sha256")
+    require(
+        isinstance(generator, str) and bool(re.fullmatch(r"[0-9a-f]{64}", generator)),
+        "Invalid promotion generator digest",
+    )
+    return {key: value for key, value in capture.items() if key != "generator_sha256"}
+
+
+def _validate_capture_history(host: JsonObject, promotion: JsonObject) -> None:
+    """Reject conflicting metadata for a capture, including archived releases."""
+    manifests = [host] + [
+        provenance.json_object(provenance.json_object(entry)["host_manifest"])
+        for entry in provenance.json_list(host.get("release_history", []))
+    ]
+    identity = (promotion["ci_run_id"], promotion["ci_run_attempt"])
+    for manifest in manifests:
+        previous = manifest.get("release_promotion")
+        if previous is None:
+            continue
+        capture = provenance.json_object(previous)
+        if (capture["ci_run_id"], capture["ci_run_attempt"]) == identity:
+            require(
+                _capture_facts(capture) == _capture_facts(promotion),
+                "Existing promotion conflicts with this capture",
+            )
+
+
+def _validate_committed_legacy_pair(original: dict[str, bytes]) -> None:
+    """Bootstrap old metadata only from the same immutable committed snapshot."""
+    commit = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True, timeout=20
+    ).strip()
+    require(bool(re.fullmatch(r"[0-9a-f]{40}", commit)), "Invalid legacy source commit")
+    for path in (HOST_PATH, MANAGED_PATH):
+        committed = subprocess.check_output(
+            ["git", "show", commit + ":" + path], cwd=ROOT, timeout=20
+        )
+        require(
+            original[path].replace(b"\r\n", b"\n") == committed.replace(b"\r\n", b"\n"),
+            "Mixed release manifest: restore both legacy snapshots from evidence/before",
+        )
+
+
+def _validate_manifest_pair(
+    host: JsonObject, managed: JsonObject, original: dict[str, bytes]
+) -> None:
+    """Do not archive a partially written qualification as a coherent pair."""
+    capture = host.get("release_promotion")
+    if capture is None:
+        return  # Preserve pre-promotion history without inventing a qualification.
+    capture = provenance.json_object(capture)
+    source = provenance.json_object(host["delivery_source"])
+    mate = provenance.json_object(managed["delivery_source"])
+    require(
+        source.get("candidate_ci") == capture
+        and source["source_ref"] == mate["source_ref"] == capture["source_commit"],
+        "Mixed release manifest qualification",
+    )
+    if "candidate_ci" in mate:
+        require(mate["candidate_ci"] == capture, "Mixed release manifest capture")
+    else:
+        _validate_committed_legacy_pair(original)
+
+
+def _prepare_release_history(
+    result: JsonObject,
+    host: JsonObject,
+    managed: JsonObject,
+    original: dict[str, bytes],
+    promotion: JsonObject,
+    image: str,
+    managed_image: str,
+) -> bool:
+    """Validate existing pins and archive a new qualification without altering it."""
+    _validate_capture_history(host, promotion)
+    _validate_manifest_pair(host, managed, original)
+    image_changed = host["image"] != image
+    if not image_changed:
+        provenance.json_object(host.get("release_promotion"))
+        require(
+            managed["image"] == managed_image and managed["parent_image"] == image,
+            "Existing managed release differs",
+        )
+    if not image_changed and host.get("release_promotion") == promotion:
+        return False
+    history = provenance.json_list(copy.deepcopy(host.get("release_history", [])))
+    prior_host = copy.deepcopy(host)
+    prior_host.pop("release_history", None)
+    history.append(
+        {
+            "host_manifest": prior_host,
+            "managed_manifest": copy.deepcopy(managed),
+            "managed_recipe": original[RECIPE_PATH].decode(),
+            "compose": {path: original[path].decode() for path in COMPOSE_PATHS},
+        }
+    )
+    result["release_history"] = history
+    return image_changed
+
+
+def release_outputs_match(
+    outputs: dict[str, bytes], original: dict[str, bytes]
+) -> bool:
+    """Compare all bytes except the independently rebuilt diagnostic config ID.
+
+    live_managed_parity still verifies registry identity, runtime configuration,
+    parent layers and the complete filesystem before this comparison.
+    The actual rebuilt ID remains in the original evidence and generated receipt.
+    """
+    normalized = []
+    for files in (outputs, original):
+        values = dict(files)
+        payload = values[MANAGED_PATH]
+        manifest = provenance.json_object(json.loads(payload))
+        receipt = provenance.json_object(
+            provenance.json_object(manifest["delivery_source"])["artifact_parity"]
+        )
+        digest = provenance.text(
+            receipt["built_image_config_digest"], "Missing rebuilt config digest"
+        )
+        require(
+            bool(re.fullmatch(provenance.SHA256_DIGEST_PATTERN, digest)),
+            "Invalid rebuilt config digest",
+        )
+        needle = b'"built_image_config_digest": ' + json.dumps(digest).encode()
+        require(payload.count(needle) == 1, "Ambiguous rebuilt config digest")
+        values[MANAGED_PATH] = payload.replace(
+            needle, b'"built_image_config_digest": "<independent rebuild>"', 1
+        )
+        normalized.append(values)
+    return normalized[0] == normalized[1]
+
+
 def build_release_files(
     original: dict[str, bytes],
     run: JsonObject,
@@ -206,23 +343,14 @@ def build_release_files(
         "default_delivery_ci_claimed": False,
         "runtime_rollout_claimed": False,
     }
-    if host["image"] != image:
+    image_changed = _prepare_release_history(
+        result, host, managed, original, promotion, image, managed_image
+    )
+    if image_changed:
         require(
             managed["parent_image"] == host["image"],
             "Existing managed parent is inconsistent",
         )
-        history = provenance.json_list(copy.deepcopy(host.get("release_history", [])))
-        prior_host = copy.deepcopy(host)
-        prior_host.pop("release_history", None)
-        history.append(
-            {
-                "host_manifest": prior_host,
-                "managed_manifest": copy.deepcopy(managed),
-                "managed_recipe": original[RECIPE_PATH].decode(),
-                "compose": {path: original[path].decode() for path in COMPOSE_PATHS},
-            }
-        )
-        result["release_history"] = history
         recipe = original[RECIPE_PATH].decode()
         require(
             recipe.count(
@@ -251,15 +379,6 @@ def build_release_files(
             "Candidate artifact parity verified in CI; "
             "default delivery CI and runtime rollout remain separate."
         )
-    else:
-        require(
-            host.get("release_promotion") == promotion,
-            "Existing promotion conflicts with this capture",
-        )
-        require(
-            managed["image"] == managed_image and managed["parent_image"] == image,
-            "Existing managed release differs",
-        )
     validate_delivery_bindings(outputs, image, managed_image)
     result["image"] = image
     provenance.json_object(result["artifact_sha256"]).update(inputs)
@@ -285,6 +404,7 @@ def build_release_files(
     managed["dockerfile_sha256"] = sha256(outputs[RECIPE_PATH])
     managed["delivery_source"] = {
         "source_ref": run["head_sha"],
+        "candidate_ci": promotion,
         "artifact_parity": managed_receipt,
     }
     outputs[HOST_PATH] = (json.dumps(result, indent=2) + "\n").encode()
@@ -360,16 +480,7 @@ def live_managed_parity(
     from scripts.ops.observability.grafana.router_managed_image import verify
     from scripts.ops.observability.grafana.router_rootfs import filesystem_records
 
-    candidates = (
-        (
-            Path("C:/Program Files/Docker/Docker/resources/bin/docker.exe"),
-            Path("E:/Programs/Docker/resources/bin/docker.exe"),
-        )
-        if sys.platform == "win32"
-        else (Path("/usr/bin/docker"),)
-    )
-    docker = next((path for path in candidates if path.is_file()), None)
-    require(docker is not None, "Trusted Docker executable is unavailable")
+    docker = docker_path()
     commands: list[dict[str, object]] = []
 
     def execute(*args: str) -> bytes:
@@ -592,7 +703,10 @@ def main(argv: list[str] | None = None) -> int:
             "Concurrent release file change: " + path,
         )
     if args.check:
-        require(outputs == originals, "Coupled release artifacts are stale")
+        require(
+            release_outputs_match(outputs, originals),
+            "Coupled release artifacts are stale",
+        )
     else:
         for path, content in outputs.items():
             (ROOT / path).write_bytes(content)
