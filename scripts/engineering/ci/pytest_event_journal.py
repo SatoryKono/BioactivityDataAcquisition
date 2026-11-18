@@ -58,6 +58,9 @@ import subprocess
 import sys
 import uuid
 from collections import Counter, defaultdict
+from collections.abc import Iterator
+from contextlib import contextmanager
+from contextvars import ContextVar
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -268,12 +271,32 @@ def _replace_assignment(match: re.Match[str]) -> str:
 
 
 def _replace_prefix(match: re.Match[str]) -> str:
-    return _correlation_tag(match.group(0))
+    return _fingerprint_or_seal(match.group(0))
 
 
 # Password values stay sealed for the process lifetime. Removing or rotating
 # the env var must not make an earlier value eligible for plaintext or HMAC.
 _RETAINED_BLOCKED: set[str] = set()
+_BLOCKED_SNAPSHOT: ContextVar[tuple[str, ...] | None] = ContextVar(
+    "journal_blocked_snapshot", default=None
+)
+
+
+@contextmanager
+def _redaction_snapshot(retained: set[str] | None = None) -> Iterator[None]:
+    """Refresh password values once per event or standalone tree traversal."""
+    if _BLOCKED_SNAPSHOT.get() is not None:
+        yield
+        return
+    snapshot = _blocked_env_needles()
+    if retained is not None:
+        retained.update(snapshot)
+        snapshot = tuple(sorted(retained, key=len, reverse=True))
+    token = _BLOCKED_SNAPSHOT.set(snapshot)
+    try:
+        yield
+    finally:
+        _BLOCKED_SNAPSHOT.reset(token)
 
 
 def _clear_retained_blocked() -> None:
@@ -317,6 +340,9 @@ def _blocked_env_needles() -> tuple[str, ...]:
     Newly recognized values are added. Removing or replacing an environment
     variable does not drop a value that was already observed.
     """
+    snapshot = _BLOCKED_SNAPSHOT.get()
+    if snapshot is not None:
+        return snapshot
     blocked, _keyed = _partition_env_needles()
     _retain_blocked(blocked)
     if not _RETAINED_BLOCKED:
@@ -436,9 +462,10 @@ def _redact_text(text: str, needles: tuple[str, ...]) -> str:
         )
         for form in forms:
             redacted = redacted.replace(form, replacement)
-    redacted = _seal_blocked_text(redacted, blocked)
+    # Capture complete unknown credentials before sealing password substrings.
     redacted = _SECRET_ASSIGNMENT.sub(_replace_assignment, redacted)
-    return _SECRET_PREFIX.sub(_replace_prefix, redacted)
+    redacted = _SECRET_PREFIX.sub(_replace_prefix, redacted)
+    return _seal_blocked_text(redacted, blocked)
 
 
 def _redact_args(args: list[str], needles: tuple[str, ...]) -> list[str]:
@@ -514,6 +541,11 @@ def _redact_keyed_tree(value: Any, needles: tuple[str, ...]) -> Any:
 
 
 def _redact_structured(value: Any, needles: tuple[str, ...]) -> Any:
+    with _redaction_snapshot():
+        return _redact_structured_snapshot(value, needles)
+
+
+def _redact_structured_snapshot(value: Any, needles: tuple[str, ...]) -> Any:
     if isinstance(value, dict):
         redacted: dict[str, Any] = {}
         for key, item in value.items():
@@ -524,10 +556,10 @@ def _redact_structured(value: Any, needles: tuple[str, ...]) -> Any:
             elif _SECRET_KEY.search(name) is not None:
                 redacted[safe_name] = _redact_keyed_tree(item, needles)
             else:
-                redacted[safe_name] = _redact_structured(item, needles)
+                redacted[safe_name] = _redact_structured_snapshot(item, needles)
         return redacted
     if isinstance(value, (list, tuple)):
-        return [_redact_structured(item, needles) for item in value]
+        return [_redact_structured_snapshot(item, needles) for item in value]
     if isinstance(value, str):
         return _redact_text(value, needles)
     return value
@@ -613,6 +645,8 @@ class EventJournalPlugin:
         self.path = path
         self.identity = identity
         self._needles = _keyed_env_needles()
+        self._blocked = set(_blocked_env_needles())
+        self._nodeid_refs: dict[str, int] = {}
         self._file: Any = None
         self._closed = False
         self._io_error: str | None = None
@@ -637,19 +671,21 @@ class EventJournalPlugin:
     def record(self, event_type: str, data: dict[str, Any]) -> None:
         if self._closed or self._file is None:
             return
-        payload: dict[str, Any] = {
-            "schema_version": SCHEMA_VERSION,
-            "timestamp": _utc_now(),
-            "event": event_type,
-            "identity": _redact_structured(self.identity, self._needles),
-        }
-        redacted_data = _redact_structured(data, self._needles)
-        if isinstance(redacted_data, dict):
-            payload.update(redacted_data)
-        line = _line_for_storage(
-            json.dumps(payload, sort_keys=True, ensure_ascii=True) + "\n",
-            self._needles,
-        )
+        data = self._reference_nodeids(event_type, data)
+        with _redaction_snapshot(self._blocked):
+            payload: dict[str, Any] = {
+                "schema_version": SCHEMA_VERSION,
+                "timestamp": _utc_now(),
+                "event": event_type,
+                "identity": _redact_structured(self.identity, self._needles),
+            }
+            redacted_data = _redact_structured(data, self._needles)
+            if isinstance(redacted_data, dict):
+                payload.update(redacted_data)
+            line = _line_for_storage(
+                json.dumps(payload, sort_keys=True, ensure_ascii=True) + "\n",
+                self._needles,
+            )
         try:
             self._file.write(line)
             self._file.flush()
@@ -658,6 +694,30 @@ class EventJournalPlugin:
             self._mark_io_error(f"write_failed:{exc.errno}")
             return
         self._line_count += 1
+
+    def _reference_nodeids(
+        self, event_type: str, data: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Use collection positions, never password-derived digests, as references."""
+        if event_type == "collection_finished":
+            nodeids = data.get("nodeids")
+            if isinstance(nodeids, list) and all(
+                isinstance(item, str) for item in nodeids
+            ):
+                self._nodeid_refs = {
+                    nodeid: index for index, nodeid in enumerate(sorted(set(nodeids)))
+                }
+                return {
+                    **data,
+                    "nodeid_refs": [self._nodeid_refs[item] for item in nodeids],
+                }
+        if (
+            event_type == "outcome"
+            and isinstance(data.get("nodeid"), str)
+            and data["nodeid"] in self._nodeid_refs
+        ):
+            return {**data, "nodeid_ref": self._nodeid_refs[data["nodeid"]]}
+        return data
 
     def finalize(self) -> None:
         if self._closed:
@@ -1122,7 +1182,15 @@ def _nodeids_well_formed(event: dict[str, Any]) -> bool:
         return True
     if not isinstance(nodeids, list):
         return False
-    return all(isinstance(nodeid, str) for nodeid in nodeids)
+    refs = event.get("nodeid_refs")
+    return all(isinstance(nodeid, str) for nodeid in nodeids) and (
+        refs is None
+        or (
+            isinstance(refs, list)
+            and len(refs) == len(nodeids)
+            and all(_is_non_negative_int(ref) for ref in refs)
+        )
+    )
 
 
 def _outcome_fields_well_formed(event: dict[str, Any]) -> bool:
@@ -1135,6 +1203,7 @@ def _outcome_fields_well_formed(event: dict[str, Any]) -> bool:
         and _optional_str(event, "origin_worker")
         and _optional_count(event, "retry_index")
         and _optional_count(event, "instance_ordinal")
+        and _optional_count(event, "nodeid_ref")
         and _optional_count(event, "exitstatus")
     )
 
@@ -2280,6 +2349,64 @@ def _shared_receipt_identity_reasons(receipts: list[dict[str, Any]]) -> list[str
     return reasons
 
 
+def _stable_nodeid_events(
+    selected: list[str] | None, events: list[dict[str, Any]]
+) -> tuple[list[str] | None, list[dict[str, Any]]]:
+    """Match rotated display names through optional positional references.
+
+    Original collection conflicts are checked before this step. Legacy receipts
+    keep their text matching. Changed names get an opaque position label without
+    hashing the raw nodeid or restoring a newly recognized password in a verdict.
+    """
+    if selected is None:
+        return selected, events
+    collection = next(
+        (
+            event
+            for event in events
+            if event.get("event") == "collection_finished"
+            and isinstance(event.get("nodeid_refs"), list)
+            and sorted(event.get("nodeids", [])) == sorted(selected)
+        ),
+        None,
+    )
+    if collection is None:
+        return selected, events
+    names, refs = collection["nodeids"], collection["nodeid_refs"]
+    if len(names) != len(refs) or any(type(ref) is not int or ref < 0 for ref in refs):
+        return selected, events
+    mapping = dict(zip(refs, names, strict=True))
+    if any(mapping[ref] != name for ref, name in zip(refs, names, strict=True)):
+        return selected, events
+    changed = {
+        event["nodeid_ref"]
+        for event in events
+        if event.get("event") == "outcome"
+        and type(event.get("nodeid_ref")) is int
+        and event["nodeid_ref"] in mapping
+        and event.get("nodeid") != mapping[event["nodeid_ref"]]
+    }
+    if not changed:
+        return selected, events
+    # An opaque label cannot collide with an existing collected name.
+    prefix = "journal-selection:"
+    while any(name.startswith(prefix) for name in names):
+        prefix = ":" + prefix
+    canonical = {
+        ref: f"{prefix}{ref}" if ref in changed else name
+        for ref, name in mapping.items()
+    }
+    normalized = [
+        {**event, "nodeid": canonical[event["nodeid_ref"]]}
+        if event.get("event") == "outcome"
+        and type(event.get("nodeid_ref")) is int
+        and event["nodeid_ref"] in canonical
+        else event
+        for event in events
+    ]
+    return sorted(canonical[ref] for ref in refs), normalized
+
+
 def reconcile_pass(receipts: list[dict[str, Any]], *, pass_name: str) -> dict[str, Any]:
     """Reconcile one runner pass. See module docstring for the status rules."""
     if not receipts:
@@ -2300,13 +2427,14 @@ def reconcile_pass(receipts: list[dict[str, Any]], *, pass_name: str) -> dict[st
     reasons.extend(_controller_order_reasons(events))
     reasons.extend(_malformed_session_finish(events))
     reasons.extend(_cmdline_finish_reasons(events))
-    reasons.extend(_phase_order_reasons(events))
     reasons.extend(_pytest_exit_reasons(flags))
     reasons.extend(_unconfigure_reasons(events))
     selected, deselected, collection_errors, collection_conflict = _selected_nodeids(
         events,
         allow_worker_collection=_intact_controller_receipt(receipts),
     )
+    selected, events = _stable_nodeid_events(selected, events)
+    reasons.extend(_phase_order_reasons(events))
     outcomes, outcome_reasons = _dedup_outcomes(events)
     reasons.extend(outcome_reasons)
     if _missing_origin_workers(receipts, events):

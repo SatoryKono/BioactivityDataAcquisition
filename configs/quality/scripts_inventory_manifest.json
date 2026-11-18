@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-17T20:40:52.695701+00:00",
+  "generated_at": "2026-11-18T05:59:05.106299+00:00",
   "summary": {
     "total_scripts": 753,
     "status_counts": {
@@ -1243,7 +1243,7 @@
         },
         {
           "path": "tests/unit/scripts/test_mcp_readiness.py",
-          "line": 953,
+          "line": 954,
           "source_group": "tests",
           "text": "from scripts.ai.codex.mcp_http_probe import HttpProbeClient"
         }
@@ -3240,7 +3240,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1862,
+          "line": 1877,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/check.sh\": ("
         }
@@ -4084,7 +4084,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1853,
+          "line": 1868,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.ps1\": (MCP_WRAPPER_CONTRACTS_TEST,),"
         },
@@ -4139,7 +4139,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1852,
+          "line": 1867,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.sh\": (MCP_WRAPPER_CONTRACTS_TEST,),"
         },
@@ -4184,7 +4184,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1851,
+          "line": 1866,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\": (NPM_RUNTIME_TEST,),"
         },
@@ -4239,7 +4239,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1850,
+          "line": 1865,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\": (NPM_RUNTIME_TEST,),"
         },
@@ -5087,7 +5087,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1858,
+          "line": 1873,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/exec_windows_ps1_wrapper.sh\": ("
         },
@@ -5506,7 +5506,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1854,
+          "line": 1869,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/run_owned_stdio.ps1\": ("
         },
@@ -8217,7 +8217,7 @@
         },
         {
           "path": "tests/architecture/test_diagram_regression_workflow.py",
-          "line": 258,
+          "line": 261,
           "source_group": "tests",
           "text": "wrapper = Path(\"scripts/diagrams/render.ps1\")"
         }
@@ -10689,7 +10689,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 290,
+          "line": 315,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci pr-lane-results assert-steps \\"
         }
@@ -11070,7 +11070,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 347,
+          "line": 372,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks defer-validator --validator schema-artifacts"
         },
@@ -11272,7 +11272,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1840,
+          "line": 1855,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/nightly_shadow_archive.py\": NIGHTLY_SHADOW_TESTS,"
         },
@@ -11376,7 +11376,7 @@
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 881,
+          "line": 906,
           "source_group": "ci",
           "text": "uv run --with packaging==26.3 --no-sync --frozen --no-build python -m scripts.engineering.ci.pr_lane_results build \\"
         },
@@ -11443,7 +11443,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1729,
+          "line": 1744,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/presubmit_gate.py\": ("
         },
@@ -11486,7 +11486,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1881,
+          "line": 1896,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/publish_docker_image.sh\": ("
         },
@@ -11593,7 +11593,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 41,
+      "reference_count": 53,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -11620,6 +11620,12 @@
           "text": "from scripts.engineering.ci.pytest_event_journal import ("
         },
         {
+          "path": "tests/architecture/ci/conftest.py",
+          "line": 12,
+          "source_group": "tests",
+          "text": "from scripts.engineering.ci import pytest_event_journal as journal"
+        },
+        {
           "path": "tests/architecture/ci/test_event_journal.py",
           "line": 13,
           "source_group": "tests",
@@ -11636,12 +11642,6 @@
           "line": 535,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.pytest_event_journal import ("
-        },
-        {
-          "path": "tests/architecture/ci/test_event_journal.py",
-          "line": 905,
-          "source_group": "tests",
-          "text": "from scripts.engineering.ci.pytest_event_journal import _redact_text"
         }
       ],
       "owner": "@bioetl-platform",
@@ -11903,13 +11903,13 @@
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 409,
+          "line": 434,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target tests/architecture --reports-dir reports/quality --receipt-run-id arch --receipt-attempt 1 --parallel-mar"
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 468,
+          "line": 493,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci.run_pytest_resilient --target \"${targets[@]}\" --reports-dir reports/quality --receipt-run-id affected --receipt-attempt 1 --parallel-timeout"
         },
@@ -13872,7 +13872,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1322,
+          "line": 1337,
           "source_group": "scripts",
           "text": "\"scripts/engineering/dev/zed_mypy.py\","
         },
@@ -13896,13 +13896,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 636,
+          "line": 637,
           "source_group": "tests",
           "text": "\"scripts/engineering/dev/zed_mypy.py\","
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 649,
+          "line": 650,
           "source_group": "tests",
           "text": "if path == \"scripts/engineering/dev/zed_mypy.py\":"
         }
@@ -14031,7 +14031,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 200,
+          "line": 225,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.diagnostics audit-structure --path ."
         },
@@ -14967,7 +14967,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 394,
+          "line": 419,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa check-c901 \\"
         },
@@ -21351,13 +21351,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 919,
+          "line": 920,
           "source_group": "tests",
           "text": "\"src/bioetl/infrastructure/quality/scoring.py\","
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 920,
+          "line": 921,
           "source_group": "tests",
           "text": "\"scripts/engineering/quality/scoring.py\","
         },
@@ -21774,7 +21774,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 17,
+      "reference_count": 19,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -21784,13 +21784,19 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 175,
+          "line": 190,
           "source_group": "ci",
-          "text": "run: uv run --frozen --no-build python scripts/engineering/repo/check_github_actions_runtime_policy.py --pr-required-pins --check"
+          "text": "checker=\"${RUNNER_TEMP}/check_github_actions_runtime_policy.py\""
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 697,
+          "line": 195,
+          "source_group": "ci",
+          "text": "cp \"${gate}/scripts/engineering/repo/check_github_actions_runtime_policy.py\" \"${checker}\""
+        },
+        {
+          "path": ".github/workflows/pr-required.yml",
+          "line": 722,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.repo.check_github_actions_runtime_policy --osv-json osv-results.json"
         },
@@ -21817,12 +21823,6 @@
           "line": 177,
           "source_group": "docs",
           "text": "2. Replace failing references with vetted pinned SHAs from CI runtime policy (see `scripts/engineering/repo/check_github_actions_runtime_policy.py`)."
-        },
-        {
-          "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1980,
-          "source_group": "scripts",
-          "text": "\"scripts/engineering/repo/check_github_actions_runtime_policy.py\": ("
         }
       ]
     },
@@ -23138,7 +23138,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 1267,
+          "line": 1268,
           "source_group": "tests",
           "text": "\"scripts/memory/run_workflow.sh\","
         }
@@ -24951,7 +24951,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": "scripts/ops/observability/grafana/_audit_presentation.py",
@@ -24980,6 +24980,12 @@
         {
           "path": "tests/integration/observability/test_evening_dashboard_queries.py",
           "line": 261,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.grafana._incident_explanations import ("
+        },
+        {
+          "path": "tests/integration/test_incident_explanations.py",
+          "line": 245,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._incident_explanations import ("
         }
@@ -25197,7 +25203,7 @@
       "references": [
         {
           "path": "docs/03-guides/dashboards/panels/bioetl-run-explorer-v1-panels.md",
-          "line": 78,
+          "line": 80,
           "source_group": "docs",
           "text": "`python -m scripts.ops.observability.grafana._run_explorer_columns` applies only"
         },
@@ -25839,7 +25845,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 2204,
+          "line": 2219,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },
