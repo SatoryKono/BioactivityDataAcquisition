@@ -60,6 +60,7 @@ class _PreSilverStagingFlowMixin:
                 self, "_enrich_normalized_business_data", None
             ),
             publish_business_evidence=getattr(self, "_publish_business_evidence", None),
+            discard_business_evidence=getattr(self, "_discard_business_evidence", None),
         )
 
     def _build_pre_silver_from_business_data(

@@ -221,6 +221,8 @@ def load_target_aware_pipeline_config(
                 current_config=yaml_config,
                 resolve_parent=resolve_parent,
             )
-        yaml_config = resolve_target_runtime_config(yaml_config)
+        yaml_config = resolve_target_runtime_config(
+            yaml_config, exact_replay=bool(getattr(ctx, "exact_replay", False))
+        )
     validate_pk_contract_fn(yaml_config)
     return yaml_config

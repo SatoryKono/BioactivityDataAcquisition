@@ -72,7 +72,9 @@ def build_preflight_service(
 def _validate_target_dependencies(
     pipeline: BasePipeline, config: PipelineYamlConfig
 ) -> None:
-    validate_target_runtime_dependency(config)
+    validate_target_runtime_dependency(
+        config, exact_replay=bool(getattr(pipeline.runtime, "exact_replay", False))
+    )
     if pipeline.runtime.dry_run:
         return
     storage = pipeline.services.storage

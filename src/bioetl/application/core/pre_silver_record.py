@@ -62,7 +62,7 @@ class PreSilverEnrichmentProtocol(Protocol):
 
 
 class PreSilverEvidenceProtocol(Protocol):
-    """Application-owned publication of evidence for a finalized row."""
+    """Application-owned lifecycle callback for evidence attached to a row."""
 
     def __call__(self, context: PipelineContext, index: int) -> None: ...
 
@@ -78,3 +78,4 @@ class PreSilverRecord:
     apply_silver_filter: PreSilverFilterProtocol | None = None
     enrich_normalized_business_data: PreSilverEnrichmentProtocol | None = None
     publish_business_evidence: PreSilverEvidenceProtocol | None = None
+    discard_business_evidence: PreSilverEvidenceProtocol | None = None

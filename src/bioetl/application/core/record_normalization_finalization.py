@@ -72,43 +72,47 @@ def finalize_pre_silver_record(
     normalized_business_data = normalizer.normalize_business_data(
         pre_silver.business_data
     )
-    if pre_silver.enrich_normalized_business_data is not None:
-        normalized_business_data = pre_silver.enrich_normalized_business_data(
-            context, index, normalized_business_data
+    try:
+        if pre_silver.enrich_normalized_business_data is not None:
+            normalized_business_data = pre_silver.enrich_normalized_business_data(
+                context, index, normalized_business_data
+            )
+        version_hashes = normalizer.compute_content_hashes_by_version(
+            normalized_business_data
         )
-    version_hashes = normalizer.compute_content_hashes_by_version(
-        normalized_business_data
-    )
-    content_hash = _active_content_hash(
-        normalizer,
-        normalized_business_data,
-        version_hashes,
-    )
-    silver_record = pre_silver.build_silver_record(
-        context,
-        pre_silver.entity_id,
-        content_hash,
-        index,
-        normalized_business_data,
-    )
-    silver_record = normalizer.project_normalization_findings(
-        silver_record,
-        context=context,
-        index=index,
-    )
-    if normalizer._should_project_hashes_by_version():
-        silver_record["_content_hashes_by_version"] = version_hashes
-    if pre_silver.apply_structural_policy is not None:
-        projected_record = pre_silver.apply_structural_policy(
+        content_hash = _active_content_hash(
+            normalizer,
+            normalized_business_data,
+            version_hashes,
+        )
+        silver_record = pre_silver.build_silver_record(
             context,
-            silver_record,
+            pre_silver.entity_id,
+            content_hash,
             index,
+            normalized_business_data,
         )
-        if projected_record is None:
-            return None
-        silver_record = projected_record
-    if pre_silver.apply_silver_filter is not None:
-        pre_silver.apply_silver_filter(context, silver_record, index)
-    if pre_silver.publish_business_evidence is not None:
-        pre_silver.publish_business_evidence(context, index)
-    return silver_record
+        silver_record = normalizer.project_normalization_findings(
+            silver_record,
+            context=context,
+            index=index,
+        )
+        if normalizer._should_project_hashes_by_version():
+            silver_record["_content_hashes_by_version"] = version_hashes
+        if pre_silver.apply_structural_policy is not None:
+            projected_record = pre_silver.apply_structural_policy(
+                context,
+                silver_record,
+                index,
+            )
+            if projected_record is None:
+                return None
+            silver_record = projected_record
+        if pre_silver.apply_silver_filter is not None:
+            pre_silver.apply_silver_filter(context, silver_record, index)
+        if pre_silver.publish_business_evidence is not None:
+            pre_silver.publish_business_evidence(context, index)
+        return silver_record
+    finally:
+        if pre_silver.discard_business_evidence is not None:
+            pre_silver.discard_business_evidence(context, index)

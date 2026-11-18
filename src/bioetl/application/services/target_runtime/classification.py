@@ -58,6 +58,10 @@ class TargetClassificationRunState:
             return business_data
         return {**business_data, **result.projection}
 
+    def discard(self, context: PipelineContext, index: int) -> None:
+        """Release unpublished evidence when row finalization ends."""
+        self._pending.pop(self._key(context, index), None)
+
     def publish(self, context: PipelineContext, index: int) -> None:
         """Publish from the application finalizer, after successful row finalization."""
         key = self._key(context, index)

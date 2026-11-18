@@ -51,6 +51,8 @@ ROOT = Path(__file__).resolve().parents[4]
     "argv",
     [
         ["python.exe", "-m", "bioetl", "run", "--pipeline", "chembl_target"],
+        ["python", "-m", "bioetl.interfaces.cli", "run", "--pipeline", "chembl_target"],
+        ["python", "-m", "bioetl.interfaces.cli", "workflow", "run", "chembl_baseline"],
         ["D:/repo/.venv/Scripts/bioetl.exe", "run", "--pipeline=chembl_target"],
         ["bioetl.exe", "workflow", "run", "chembl_baseline"],
         ["bioetl", "run", "chembl_target"],
@@ -76,6 +78,8 @@ def test_managed_writer_detection_recognizes_actual_argv(argv, monkeypatch):
         ["bioetl", "workflow", "run", "--help"],
         ["bioetl", "run", "--pipeline", "chembl_assay"],
         ["python", "unrelated.py", "run", "chembl_target"],
+        ["python", "unrelated.py", "bioetl.interfaces.cli", "run", "chembl_target"],
+        ["python", "-m", "bioetl.interfaces.cli", "workflow", "run", "--help"],
         ["bioetl", "workflow", "list"],
     ],
 )

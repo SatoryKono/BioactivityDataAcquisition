@@ -27,7 +27,7 @@ class _PreSilverFinalizationFlowMixin:
     def _enrich_normalized_business_data(
         self, context: PipelineContext, index: int, business_data: JsonDict
     ) -> JsonDict:
-        """Default no-op; target classification overrides only this pure seam."""
+        """Default no-op for providers without business enrichment."""
         del context, index
         return business_data
 
@@ -112,7 +112,6 @@ class _PreSilverFinalizationFlowMixin:
             context=context,
             index=index,
         )
-        self._publish_business_evidence(context, index)
         return projected
 
     def _finalize_staged_business_data(

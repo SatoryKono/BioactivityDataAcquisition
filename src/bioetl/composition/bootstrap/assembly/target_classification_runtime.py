@@ -30,14 +30,16 @@ from bioetl.infrastructure.schemas.pipeline_contract_policy import (
 )
 
 
-def resolve_target_runtime_config(config: PipelineYamlConfig) -> PipelineYamlConfig:
+def resolve_target_runtime_config(
+    config: PipelineYamlConfig, *, exact_replay: bool = False
+) -> PipelineYamlConfig:
     """Choose one typed schema/hash profile, respecting a workflow's pinned input."""
     if not isinstance(config, PipelineYamlConfig) or (
         config.provider,
         config.entity_type,
     ) != ("chembl", "target"):
         return config
-    binding = get_target_classification_dependency()
+    binding = None if exact_replay else get_target_classification_dependency()
     if binding is not None:
         payload = binding.get("target_config")
         if not isinstance(payload, Mapping):
@@ -46,12 +48,14 @@ def resolve_target_runtime_config(config: PipelineYamlConfig) -> PipelineYamlCon
     return resolve_target_classification_profile(config).resolved_yaml_config
 
 
-def validate_target_runtime_dependency(config: object) -> None:
+def validate_target_runtime_dependency(
+    config: object, *, exact_replay: bool = False
+) -> None:
     """Recheck pinned bytes immediately before a target run can clear outputs."""
     if not isinstance(config, PipelineYamlConfig):
         return
     profile = load_target_runtime_profile(config)
-    stored = get_target_classification_dependency()
+    stored = None if exact_replay else get_target_classification_dependency()
     if stored is None or profile is None:
         return
     if (

@@ -63,7 +63,14 @@ def assert_no_managed_writers() -> None:
 
 def _bioetl_arguments(argv: Sequence[str]) -> list[str]:
     for index, arg in enumerate(argv):
-        if Path(arg).name.lower() in {"bioetl", "bioetl.exe", "bioetl-script.py"}:
+        is_cli_module = (
+            arg == "bioetl.interfaces.cli" and index > 0 and argv[index - 1] == "-m"
+        )
+        if is_cli_module or Path(arg).name.lower() in {
+            "bioetl",
+            "bioetl.exe",
+            "bioetl-script.py",
+        }:
             return list(argv[index + 1 :])
     return []
 

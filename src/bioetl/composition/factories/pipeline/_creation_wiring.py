@@ -105,7 +105,9 @@ def _resolve_yaml_config(
         inputs.request.config or deps.load_pipeline_config(inputs.pipeline_name),
     )
     if inputs.pipeline_name == "chembl_target":
-        return resolve_target_runtime_config(resolved)
+        return resolve_target_runtime_config(
+            resolved, exact_replay=inputs.request.runtime.exact_replay
+        )
     return resolved
 
 

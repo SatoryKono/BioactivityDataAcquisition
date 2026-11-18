@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from dataclasses import replace
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
@@ -37,6 +38,7 @@ from bioetl.composition.bootstrap.assembly.target_classification_runtime import 
     validate_target_runtime_dependency,
 )
 from bioetl.composition.bootstrap.assembly.target_classification_identity import (
+    load_target_aware_pipeline_config,
     target_classification_config_source_refs,
     target_classification_source_refs,
 )
@@ -310,6 +312,53 @@ async def test_shadow_preserves_old_output_and_staged_direct_parity(
     assert evidence["input_row_ids"] == ["chembl.target:CHEMBL1"]
 
 
+@pytest.mark.asyncio
+@pytest.mark.parametrize("failure", ["structural_policy", "silver_filter", "direct"])
+async def test_rejected_target_rows_release_pending_classification(
+    shadow_config, tmp_path, monkeypatch, failure
+):
+    transformer = _transformer(shadow_config, tmp_path / "evidence")
+    assert isinstance(transformer, TargetTransformer)
+    session = transformer._target_classification_session
+    assert session is not None
+    context = _context()
+    raw = {
+        "target_chembl_id": "CHEMBL1",
+        "target_type": "SINGLE PROTEIN",
+        "pref_name": "known enzyme",
+        "tax_id": 9606,
+        "organism": "Homo sapiens",
+        "species_group_flag": False,
+    }
+
+    def reject(*args, **kwargs):
+        assert session._pending
+        raise ValueError("test row rejection")
+
+    def drop(*args, **kwargs):
+        assert session._pending
+        return None
+
+    if failure == "direct":
+        monkeypatch.setattr(transformer, "_apply_structural_policy", reject)
+        with pytest.raises(ValueError, match="test row rejection"):
+            await transformer.transform(context, raw, 0)
+    else:
+        payload = await transformer.transform_pre_silver(context, raw, 0)
+        assert payload is not None
+        normalizer = RecordNormalizationProcessor("chembl", "target")
+        if failure == "structural_policy":
+            payload = replace(payload, apply_structural_policy=drop)
+            assert normalizer.finalize_pre_silver(payload, context, 0) is None
+        else:
+            payload = replace(payload, apply_silver_filter=reject)
+            with pytest.raises(ValueError, match="test row rejection"):
+                normalizer.finalize_pre_silver(payload, context, 0)
+
+    assert not session._pending
+    assert not session._published
+
+
 @pytest.mark.parametrize("dry_run", [False, True])
 def test_target_preflight_uses_actual_writer_paths_even_when_off(
     monkeypatch, tmp_path, dry_run
@@ -352,11 +401,9 @@ def test_target_preflight_uses_actual_writer_paths_even_when_off(
     gold._resolve_table_path.assert_called_once_with("chembl.target")
 
 
-def test_target_exact_replay_restores_saved_profile(shadow_config):
-    from bioetl.composition.bootstrap.assembly.target_classification_identity import (
-        restore_target_replay_config,
-    )
-
+def test_target_exact_replay_prefers_parent_to_current_workflow_binding(
+    shadow_config, tmp_path
+):
     parent = SimpleNamespace(
         pipeline_name="chembl_target", resolved_config=shadow_config.model_dump()
     )
@@ -365,13 +412,36 @@ def test_target_exact_replay_restores_saved_profile(shadow_config):
         exact_replay=True,
         replay_of_manifest_id="parent-manifest",
     )
-    restored = restore_target_replay_config(
-        ctx=ctx,
-        settings=SimpleNamespace(),
-        current_config=load_pipeline_config("chembl_target"),
-        resolve_parent=lambda **kwargs: parent,
+    current_config = load_pipeline_config("chembl_target")
+    token = bind_target_classification_dependency(
+        {"target_config": current_config.model_dump()}
     )
-    assert restored.target_classification == shadow_config.target_classification
+    try:
+        restored = load_target_aware_pipeline_config(
+            "chembl_target",
+            lambda _: current_config,
+            lambda _: None,
+            ctx=ctx,
+            settings=SimpleNamespace(),
+            resolve_parent=lambda **kwargs: parent,
+        )
+        assert restored.target_classification == shadow_config.target_classification
+        assert (
+            resolve_target_runtime_config(restored).target_classification.mode == "off"
+        )
+        assert (
+            resolve_target_runtime_config(
+                restored, exact_replay=True
+            ).target_classification
+            == shadow_config.target_classification
+        )
+        validate_target_runtime_dependency(restored, exact_replay=True)
+
+        (tmp_path / "targets.json").write_text("[]")
+        with pytest.raises(ValueError, match="hash|SHA|digest"):
+            validate_target_runtime_dependency(restored, exact_replay=True)
+    finally:
+        reset_target_classification_dependency(token)
 
 
 def test_workflow_resume_restores_and_forbids_replacing_pinned_dependency(
