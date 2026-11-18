@@ -824,6 +824,14 @@ class EventJournalPlugin:
         nodeids = sorted(str(item.nodeid) for item in items)
         self.record("collection_finished", {"nodeids": nodeids})
 
+    @pytest.hookimpl(optionalhook=True)
+    def pytest_xdist_node_collection_finished(self, ids: list[str]) -> None:
+        # The controller does not collect. Keep only the same positional map
+        # used by workers; their actual collection receipts remain authoritative.
+        self._nodeid_refs = {
+            nodeid: index for index, nodeid in enumerate(sorted(set(ids)))
+        }
+
     def pytest_deselected(self, items: list[Any]) -> None:
         nodeids = sorted(str(item.nodeid) for item in items)
         self.record("deselected", {"nodeids": nodeids})

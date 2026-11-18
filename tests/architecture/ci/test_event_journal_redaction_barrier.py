@@ -12,6 +12,45 @@ import pytest
 pytestmark = pytest.mark.architecture
 
 
+@pytest.mark.parametrize("workers", [1, 2])
+def test_live_xdist_late_password_keeps_controller_outcomes_selected(
+    tmp_path: Path, workers: int
+) -> None:
+    from tests.architecture.ci.test_event_journal import _live_verdict, _run_journal
+
+    config = tmp_path / "pytest.ini"
+    config.write_text("[pytest]\n", encoding="utf-8")
+    result = _run_journal(
+        tmp_path,
+        "import pytest\n"
+        "@pytest.fixture(autouse=True)\n"
+        "def discover(monkeypatch):\n"
+        "    monkeypatch.setenv('REVIEW_PASSWORD', 'late-nodeid-password')\n"
+        "@pytest.mark.parametrize('value', ['late-nodeid-password'])\n"
+        "def test_first(value):\n"
+        "    assert value\n"
+        "@pytest.mark.parametrize('value', ['late-nodeid-password'])\n"
+        "def test_second(value):\n"
+        "    assert value\n",
+        [
+            "-c",
+            str(config),
+            "--basetemp",
+            str(tmp_path / "temp"),
+            "-p",
+            "xdist.plugin",
+            "-n",
+            str(workers),
+        ],
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    verdict = _live_verdict(tmp_path)
+    assert verdict["status"] == "complete", verdict["reasons"]
+    assert verdict["tests_passed"] is True
+    assert len(verdict["passes"]["parallel"]["terminals"]) == 2
+    assert "late-nodeid-password" not in json.dumps(verdict)
+
+
 def _identity() -> dict[str, Any]:
     return {
         "workflow_run_id": "run-1",
