@@ -39,10 +39,6 @@ from bioetl.application.services.run_reports.source_identity import (
     resolve_runtime_source_identity,
     runtime_path_to_local_path,
 )
-from bioetl.composition.observability_runtime import (
-    create_run_report_store,
-    load_repository_source_environment,
-)
 
 DEFAULT_CONTRACT = Path("configs/quality/docker_runtime_contracts.yaml")
 _WSL_EXE = "wsl.exe"
@@ -313,6 +309,10 @@ def _dashboard_source_repository_environment(
 ) -> Mapping[str, object]:
     if repository_environment is not None:
         return dict(repository_environment)
+    from bioetl.composition.observability_runtime import (
+        load_repository_source_environment,
+    )
+
     source_names = {
         identity_environment,
         *(
@@ -1783,6 +1783,8 @@ def _dashboard_report_source_findings(
     reports_source = expected_environment.get(reports_environment)
     if not reports_source:
         return []
+    from bioetl.composition.observability_runtime import create_run_report_store
+
     report_root = host_filesystem_path(reports_source, root=root) / "run-reports"
     source_check = inspect_report_root_source_identity(
         report_root=report_root,
