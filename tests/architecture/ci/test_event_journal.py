@@ -523,8 +523,11 @@ def _run_journal(
     journal = tmp_path / "journal"
     test_file = tmp_path / "test_sample.py"
     test_file.write_text(body, encoding="utf-8")
+    config_file = tmp_path / "pytest.ini"
+    config_file.write_text("[pytest]\naddopts =\n", encoding="utf-8")
     child_env = _drop_inherited_xdist(os.environ.copy())
     child_env.pop("EXPECTED_CHECKOUT_SHA", None)
+    child_env.pop("PYTEST_ADDOPTS", None)
     child_env["BIOETL_JOURNAL_INVOCATION_ID"] = "inv-live"
     child_env["BIOETL_JOURNAL_PASS"] = "parallel"
     child_env["BIOETL_JOURNAL_JOB"] = "serial-coverage"
@@ -545,6 +548,9 @@ def _run_journal(
             sys.executable,
             "-m",
             "pytest",
+            "-c",
+            str(config_file),
+            f"--basetemp={tmp_path / 'child-temp'}",
             str(test_file),
             "--noconftest",
             "-p",
@@ -864,7 +870,10 @@ def test_deselected_tests_are_not_required_to_finish(tmp_path: Path) -> None:
     assert verdict["unexplained"] == []
 
 
-def test_live_marker_expression_records_the_selected_test(tmp_path: Path) -> None:
+def test_live_marker_expression_records_the_selected_test(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("PYTEST_ADDOPTS", "--strict-markers")
     result = _run_journal(
         tmp_path,
         "import pytest\n\n"

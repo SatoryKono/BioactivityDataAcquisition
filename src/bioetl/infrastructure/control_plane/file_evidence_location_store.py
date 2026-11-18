@@ -31,13 +31,13 @@ from bioetl.domain.ports import (
     RunEvidenceLocationReadPort,
     RunEvidenceLocationRegisterPort,
 )
-from bioetl.infrastructure.control_plane._evidence_location_publish import (
-    publish_bytes_if_absent,
-    read_existing_bytes,
-)
 from bioetl.infrastructure.control_plane.evidence_location_path_safety import (
     EVIDENCE_LOCATION_CATALOG_PATH_FIELD,
     assert_path_within_trusted_base,
+)
+from bioetl.infrastructure.control_plane.evidence_location_publish import (
+    publish_bytes_if_absent,
+    read_existing_bytes,
 )
 
 __all__ = ["FileEvidenceLocationStore"]

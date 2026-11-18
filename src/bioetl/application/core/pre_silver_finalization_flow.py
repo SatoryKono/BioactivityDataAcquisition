@@ -168,23 +168,6 @@ class _PreSilverFinalizationFlowMixin:
         )
         return cast("SilverRecord", cast(object, finalized))
 
-    def _transform_identity_business_data(
-        self,
-        *,
-        context: PipelineContext,
-        source_id: str,
-        identity_field: str,
-        index: int,
-        business_data: JsonDict,
-    ) -> SilverRecord:
-        return self._transform_prepared_business_data(
-            context=context,
-            source_id=source_id,
-            identity_record={identity_field: source_id},
-            index=index,
-            business_data=business_data,
-        )
-
     def _transform_optional_normalized_business_data(
         self,
         *,

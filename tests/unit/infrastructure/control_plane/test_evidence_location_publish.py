@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from bioetl.infrastructure.control_plane import _evidence_location_publish as publish
+from bioetl.infrastructure.control_plane import evidence_location_publish as publish
 
 pytestmark = pytest.mark.unit
 
