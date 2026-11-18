@@ -1940,7 +1940,7 @@ def _grafana_late_cutover_ownership(
             "-c",
             _GRAFANA_LATE_CUTOVER_CLAIM,
             "bioetl-late-cutover",
-            "ack-restart" if acknowledge_restart else "claim" if claim else "check",
+            _grafana_cutover_mode(acknowledge_restart=acknowledge_restart, claim=claim),
         ],
         ROOT,
         timeout,
@@ -2085,6 +2085,54 @@ def _grafana_bootstrap_identity_matches(
     return bool(expected and expected == actual)
 
 
+def _grafana_cutover_mode(*, acknowledge_restart: bool, claim: bool) -> str:
+    if acknowledge_restart:
+        return "ack-restart"
+    if claim:
+        return "claim"
+    return "check"
+
+
+def _grafana_full_profile_decision(
+    payload: Mapping[str, Any] | None,
+) -> bool | None:
+    """True when status is full, False when recovery cannot succeed, else wait."""
+    if not isinstance(payload, Mapping):
+        return None
+    profile = str(payload.get("dashboard_profile") or "").strip()
+    ops_http = str(payload.get("ops_http") or "").strip()
+    if profile == "full" and ops_http == "ready":
+        return True
+    reason = str(payload.get("reason") or "").strip()
+    if not reason or reason in {_GRAFANA_TIMEOUT_RETRY_REASON, "identity_matched"}:
+        return None
+    return False
+
+
+def _grafana_local_health_ok(runner: Runner, *, timeout: float) -> bool:
+    """Require a live Grafana health payload, not only the bootstrap status file."""
+    if timeout <= 0:
+        return False
+    result = runner(
+        [
+            "docker",
+            "exec",
+            _GRAFANA_CONTAINER,
+            "wget",
+            "-qO-",
+            "-T",
+            "3",
+            # NOSONAR - loopback health URL inside the Grafana container
+            "http://127.0.0.1:3000/api/health",
+        ],
+        ROOT,
+        timeout,
+    )
+    return result.returncode == 0 and bool(
+        re.search(r'"database"\s*:\s*"ok"', result.stdout or "")
+    )
+
+
 def _wait_for_grafana_full_profile(
     runner: Runner,
     *,
@@ -2100,17 +2148,14 @@ def _wait_for_grafana_full_profile(
             runner,
             timeout=min(5.0, remaining),
         )
-        if readable and isinstance(payload, Mapping):
-            profile = str(payload.get("dashboard_profile") or "").strip()
-            reason = str(payload.get("reason") or "").strip()
-            if profile == "full" and str(payload.get("ops_http") or "") == "ready":
-                return True
-            if (
-                reason
-                and reason != _GRAFANA_TIMEOUT_RETRY_REASON
-                and reason != "identity_matched"
-            ):
-                return False
+        decision = _grafana_full_profile_decision(payload if readable else None)
+        if decision is False:
+            return False
+        if decision is True and _grafana_local_health_ok(
+            runner,
+            timeout=_remaining_timeout(deadline, clock, limit=5.0),
+        ):
+            return True
         remaining = _remaining_timeout(deadline, clock)
         if remaining <= 0:
             return False
@@ -2184,7 +2229,19 @@ def _post_start_grafana_bootstrap_gate(
         clock=clock,
     ):
         return False
+    return _restart_grafana_after_identity_match(
+        runner, deadline=deadline, sleep=sleep, clock=clock
+    )
 
+
+def _restart_grafana_after_identity_match(
+    runner: Runner,
+    *,
+    deadline: float,
+    sleep: Sleeper,
+    clock: Clock,
+) -> bool | None:
+    """Restart Grafana once identity matches. None means the full profile is live."""
     restart_timeout = _remaining_timeout(deadline, clock, limit=30.0)
     if restart_timeout <= 0:
         return False
@@ -2192,13 +2249,10 @@ def _post_start_grafana_bootstrap_gate(
     if ownership == "full":
         return None
     if ownership == "active":
-        return (
-            None
-            if _wait_for_grafana_full_profile(
-                runner, deadline=deadline, sleep=sleep, clock=clock
-            )
-            else False
+        completed = _wait_for_grafana_full_profile(
+            runner, deadline=deadline, sleep=sleep, clock=clock
         )
+        return None if completed else False
     if ownership != "acquired":
         return False
     restart_timeout = _remaining_timeout(deadline, clock, limit=30.0)
@@ -2261,31 +2315,50 @@ def _post_start_grafana_ops_cutover(
         payload, runner, deadline=deadline, sleep=sleep, clock=clock
     )
     if watcher_ready is not None:
-        return {
-            "action": "grafana_ops_http_cutover",
-            "status": "full" if watcher_ready else "deferred",
-            "recovery_ownership": "watcher",
-            "previous_reason": str(payload.get("reason") or ""),
-            "previous_dashboard_profile": str(payload.get("dashboard_profile") or ""),
-        }
+        return _grafana_cutover_report(
+            payload,
+            status="full" if watcher_ready else "deferred",
+            ownership="watcher",
+        )
     if not _grafana_bootstrap_identity_matches(
         runner,
         deadline=deadline,
         clock=clock,
     ):
         return None
+    return _finish_grafana_ops_cutover(
+        payload, runner, deadline=deadline, sleep=sleep, clock=clock
+    )
 
-    restart_timeout = _remaining_timeout(deadline, clock, limit=30.0)
-    if restart_timeout <= 0:
-        return None
-    ownership = _grafana_late_cutover_ownership(runner, timeout=restart_timeout)
-    result: dict[str, Any] = {
+
+def _grafana_cutover_report(
+    payload: Mapping[str, Any],
+    *,
+    status: str,
+    ownership: str,
+) -> dict[str, Any]:
+    return {
         "action": "grafana_ops_http_cutover",
-        "status": "deferred",
+        "status": status,
         "recovery_ownership": ownership,
         "previous_reason": str(payload.get("reason") or ""),
         "previous_dashboard_profile": str(payload.get("dashboard_profile") or ""),
     }
+
+
+def _finish_grafana_ops_cutover(
+    payload: Mapping[str, Any],
+    runner: Runner,
+    *,
+    deadline: float,
+    sleep: Sleeper,
+    clock: Clock,
+) -> dict[str, Any] | None:
+    restart_timeout = _remaining_timeout(deadline, clock, limit=30.0)
+    if restart_timeout <= 0:
+        return None
+    ownership = _grafana_late_cutover_ownership(runner, timeout=restart_timeout)
+    result = _grafana_cutover_report(payload, status="deferred", ownership=ownership)
     if ownership == "full":
         result["status"] = "full"
         return result

@@ -21,10 +21,9 @@ import base64
 from dotenv import load_dotenv
 import yaml
 
-if __package__ in {None, ""}:
-    repo_root = str(Path(__file__).resolve().parents[3])
-    if repo_root not in sys.path:
-        sys.path.insert(0, repo_root)
+REPO_ROOT = Path(__file__).resolve().parents[3]
+if __package__ in {None, ""} and str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 from scripts.engineering.qa.report_dashboard_inventory import (
     _normalize_dashboard_payload,
@@ -40,7 +39,6 @@ DEFAULT_OUTPUT_DIR = Path("reports/observability/live-validation")
 DEFAULT_TIMEOUT = 5.0
 EXPECTED_OPS_HTTP_DATASOURCE_UID = "bioetl-ops-http"
 EXPECTED_OPS_HTTP_DATASOURCE_NAME = "BioETL Ops HTTP"
-REPO_ROOT = Path(__file__).resolve().parents[3]
 REPO_ENV_PATH = REPO_ROOT / ".env"
 DASHBOARD_PROFILES = {
     "native": REPO_ROOT / "grafana/dashboards",
@@ -207,9 +205,15 @@ def check_prometheus_targets(prometheus_url: str, timeout: float) -> ValidationR
             if t.get("health") != "up"
         ]
 
+        if missing_jobs:
+            target_status = "fail"
+        elif down_count:
+            target_status = "partial"
+        else:
+            target_status = "pass"
         return ValidationResult(
             check_name="prometheus_targets",
-            status=("fail" if missing_jobs else "partial" if down_count else "pass"),
+            status=target_status,
             message=(
                 f"Prometheus targets: {up_count} up, {down_count} unhealthy, "
                 f"{len(missing_jobs)} configured jobs missing"
@@ -503,6 +507,21 @@ def check_grafana_datasources(
         )
 
 
+def _live_dashboard_model_differs(source: Any, live: Any, uid: str) -> bool:
+    dashboard = live.get("dashboard") if isinstance(live, dict) else None
+    shape_ok = (
+        isinstance(source, dict)
+        and source.get("uid") == uid
+        and isinstance(source.get("panels"), list)
+        and isinstance(dashboard, dict)
+        and dashboard.get("uid") == uid
+        and isinstance(dashboard.get("panels"), list)
+    )
+    if not shape_ok:
+        raise ValueError(f"Malformed dashboard model for {uid}")
+    return _normalize_dashboard_payload(source) != _normalize_dashboard_payload(live)
+
+
 def check_grafana_dashboards(
     grafana_url: str,
     username: str,
@@ -553,19 +572,7 @@ def check_grafana_dashboards(
             live = _fetch_json(
                 f"{grafana_url}/api/dashboards/uid/{uid}", timeout, headers
             )
-            if (
-                not isinstance(source, dict)
-                or source.get("uid") != uid
-                or not isinstance(source.get("panels"), list)
-                or not isinstance(live, dict)
-                or not isinstance(live.get("dashboard"), dict)
-                or live["dashboard"].get("uid") != uid
-                or not isinstance(live["dashboard"].get("panels"), list)
-            ):
-                raise ValueError(f"Malformed dashboard model for {uid}")
-            if _normalize_dashboard_payload(source) != _normalize_dashboard_payload(
-                live
-            ):
+            if _live_dashboard_model_differs(source, live, uid):
                 mismatched_uids.append(uid)
 
         return ValidationResult(

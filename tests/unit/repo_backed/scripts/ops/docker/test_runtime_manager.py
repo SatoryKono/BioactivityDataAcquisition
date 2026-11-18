@@ -393,6 +393,10 @@ def test_grafana_bootstrap_timeout_retry_restarts_when_identity_now_matches(
             runtime_manager._GRAFANA_CONTAINER,
             "wget",
         ]:
+            if any("api/health" in part for part in cmd):
+                return runtime_manager.CommandResult(
+                    list(cmd), 0, stdout='{"database":"ok"}'
+                )
             return runtime_manager.CommandResult(
                 list(cmd),
                 0,
@@ -933,6 +937,10 @@ def _grafana_cutover_runner(
             runtime_manager._GRAFANA_CONTAINER,
             "wget",
         ]:
+            if "http://127.0.0.1:3000/api/health" in cmd:
+                return runtime_manager.CommandResult(
+                    list(cmd), 0, stdout='{"database":"ok"}'
+                )
             return runtime_manager.CommandResult(
                 list(cmd),
                 0,
@@ -1032,6 +1040,50 @@ def test_monitoring_gate_cannot_pass_while_watcher_remains_deferred(
     assert not any(cmd[:2] == ["docker", "restart"] for cmd in commands)
 
 
+def test_full_profile_status_is_not_ready_until_grafana_health_responds() -> None:
+    health_calls = {"n": 0}
+    now = [0.0]
+
+    def runner(
+        command: Sequence[str], cwd: Path, timeout: float
+    ) -> runtime_manager.CommandResult:
+        del cwd, timeout
+        current = list(command)
+        if current[:4] == [
+            "docker",
+            "exec",
+            runtime_manager._GRAFANA_CONTAINER,
+            "cat",
+        ]:
+            return runtime_manager.CommandResult(
+                current,
+                0,
+                stdout=json.dumps(
+                    {
+                        "ops_http": "ready",
+                        "reason": "identity_matched",
+                        "dashboard_profile": "full",
+                    }
+                ),
+            )
+        if any("api/health" in part for part in current):
+            health_calls["n"] += 1
+            if health_calls["n"] == 1:
+                return runtime_manager.CommandResult(current, 1, stderr="down")
+            return runtime_manager.CommandResult(current, 0, stdout='{"database":"ok"}')
+        raise AssertionError(current)
+
+    ready = runtime_manager._wait_for_grafana_full_profile(
+        runner,
+        deadline=10.0,
+        sleep=lambda seconds: now.__setitem__(0, now[0] + seconds),
+        clock=lambda: now[0],
+    )
+
+    assert ready is True
+    assert health_calls["n"] == 2
+
+
 def test_manager_waits_for_live_lease_before_probing_late_main(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -1056,7 +1108,14 @@ def test_manager_waits_for_live_lease_before_probing_late_main(
     assert result is not None
     assert result["status"] == "full"
     assert not any(cmd[:2] == ["docker", "restart"] for cmd in commands)
-    assert not any(len(cmd) > 3 and cmd[3] == "wget" for cmd in commands)
+    assert not any(
+        len(cmd) > 3 and cmd[3] == "wget" and "ops/control-plane/ready" in cmd
+        for cmd in commands
+    )
+    assert any(
+        len(cmd) > 3 and cmd[3] == "wget" and any("api/health" in part for part in cmd)
+        for cmd in commands
+    )
     assert any(cmd[-1] == "check" for cmd in commands)
 
 

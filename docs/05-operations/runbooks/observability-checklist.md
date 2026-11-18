@@ -46,8 +46,8 @@ still be static notices saying `Ops HTTP not provisioned`.
 
 After a soft startup timeout, Grafana checks for late main readiness in the
 background: at most 60 attempts, five-second pauses, three-second HTTP timeouts
-and a 480-second deadline. Once the expected source identity matches again and
-Grafana is healthy for at least ten seconds, recovery requests one Grafana
+and a 480-second deadline. Once the expected source identity matches again and Grafana's health
+endpoint stays ok for ten continuous seconds, recovery requests one Grafana
 restart. Strict audit/render mode retains its fail-closed startup behavior.
 Foreign identity never triggers recovery. An unavailable backend retains the
 fallback and an explicit recovery state.
