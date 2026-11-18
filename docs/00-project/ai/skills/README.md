@@ -71,7 +71,7 @@ gate. Use `--sync` to regenerate only `local/`; it does not rewrite
 - `SKILLS-CATALOG.md` — consolidated skill registry of the 14 live skills, plus a retired-name map
 - `SKILLS-PRACTICAL-INDEX.md` — operational index of those 14 live skills
 
-## Current Runtime Status (2026-11-16)
+## Current Runtime Status (2026-11-18)
 
 - The active project-local Codex skills under `.codex/skills/` are
   `agent-debugging`, `new-pipeline`, `observability-dashboard`,

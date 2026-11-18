@@ -73,7 +73,7 @@ description: "..."             # English, max 200 chars, names the neighboring s
 ---
 ```
 
-`context` and `agent` are not required. See Amendment 2026-11-16.
+`context` and `agent` are not required. See Amendment 2026-11-18.
 
 #### 1.3 Commands (runtime command registry)
 
@@ -188,7 +188,7 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-## Amendment 2026-11-16
+## Amendment 2026-11-18
 
 This amendment supersedes the skill frontmatter fields `context` and `agent`
 from section 1.2. The previous required block was:

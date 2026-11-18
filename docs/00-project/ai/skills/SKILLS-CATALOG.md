@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-11-16'
+  Last verified: '2026-11-18'
 
 ______________________________________________________________________
 
@@ -47,7 +47,7 @@ ______________________________________________________________________
 | `architecture-guardian` | `verify-architecture` |
 | `capability-discovery` | этот каталог и runtime tools |
 | `collecting-evidence` | `research-workflow` phase `evidence` |
-| `creating-pr` / `create-pr` | политика PR репозитория, не skill |
+| `create-pr` | политика PR репозитория, не skill |
 | `deep-research` | `research-workflow` |
 | `documentation-audit` | `py-doc-bot` |
 | `documentation-cascade-audit` | `py-doc-bot` mode `broad` |

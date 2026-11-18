@@ -256,8 +256,8 @@ def test_docs_skill_indexes_list_only_live_runtime_skills() -> None:
         found = _live_index_names(path.read_text(encoding="utf-8"), path)
         if found != expected:
             problems.append(
-                f"{path.relative_to(root).as_posix()}: extra={sorted(found - expected)} "
-                f"missing={sorted(expected - found)}"
+                f"{path.relative_to(root).as_posix()}: "
+                f"extra={sorted(found - expected)} missing={sorted(expected - found)}"
             )
 
     assert problems == []
