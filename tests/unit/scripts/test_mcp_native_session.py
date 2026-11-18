@@ -171,6 +171,90 @@ def test_markdownify_source_cannot_redirect_a_foreign_workspace(
         session_overrides(config, root, manifest=manifest, markdownify=custom)
 
 
+@pytest.fixture
+def markdownify_binding(session_binding, tmp_path, monkeypatch):
+    root, manifest, _, config = session_binding
+    source = b"qualified Markdownify fixture"
+    raw = json.dumps(
+        {
+            "schema": 1,
+            "files": {"safe_markdownify.py": hashlib.sha256(source).hexdigest()},
+        }
+    ).encode()
+    versions = tmp_path / "markdownify-versions"
+    version = versions / hashlib.sha256(raw).hexdigest()
+    version.mkdir(parents=True)
+    (version / "owner.json").write_bytes(raw)
+    client = version / "safe_markdownify.py"
+    client.write_bytes(source)
+    monkeypatch.setattr(native_session, "MARKDOWNIFY_VERSIONS", versions)
+    entry = {
+        "command": str(native_session.BASE_PYTHON),
+        "args": ["-I", "-S", "-B", str(client), "client"],
+        "startup_timeout_sec": 30,
+    }
+    binding = tmp_path / "markdownify.json"
+    binding.write_text(
+        json.dumps(
+            {
+                "schema": 1,
+                "workspace": str(root),
+                "git_common": str(root / ".git"),
+                "server": "Markdownify-BioETL",
+                "entry": entry,
+            }
+        ),
+        encoding="utf-8",
+    )
+    return root, manifest, config, binding, entry
+
+
+@pytest.mark.parametrize(
+    "policy",
+    [
+        {"enabled": False},
+        {"disabled_tools": ["convert_file"]},
+        {"enabled_tools": ["convert_text"]},
+        {"tools": {"convert_file": {"enabled": False, "approval_mode": "approve"}}},
+        {"startup_timeout_sec": 45, "tool_timeout_sec": 90},
+    ],
+)
+def test_markdownify_session_preserves_policy(markdownify_binding, policy):
+    root, manifest, config, binding, entry = markdownify_binding
+    previous = {**entry, **policy}
+    config["mcp_servers"]["Markdownify-BioETL"] = previous
+    before = json.dumps(config, sort_keys=True)
+    overrides = session_overrides(config, root, manifest=manifest, markdownify=binding)
+    selected = {}
+    for value in overrides[1::2]:
+        selected.update(tomllib.loads(value)["mcp_servers"])
+    assert selected["Markdownify-BioETL"] == previous
+    assert json.dumps(config, sort_keys=True) == before
+    selected["Markdownify-BioETL"].update({"enabled": True})
+    assert json.dumps(config, sort_keys=True) == before
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        {"command": "unqualified"},
+        {"args": ["unqualified.py"]},
+        {"url": "https://example.invalid/mcp"},
+        {"env": {"TOKEN": "fixture"}},
+        {"cwd": "/foreign"},
+    ],
+)
+def test_markdownify_policy_does_not_allow_transport_drift(markdownify_binding, change):
+    root, manifest, config, binding, entry = markdownify_binding
+    config["mcp_servers"]["Markdownify-BioETL"] = {
+        **entry,
+        "disabled_tools": ["convert_file"],
+        **change,
+    }
+    with pytest.raises(PermissionError, match="unrelated"):
+        session_overrides(config, root, manifest=manifest, markdownify=binding)
+
+
 def test_default_foreign_markdownify_binding_disables_only_that_server(
     session_binding, tmp_path, monkeypatch
 ):
