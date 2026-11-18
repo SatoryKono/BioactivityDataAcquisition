@@ -152,6 +152,20 @@ def _enrich_contract_policy(
     return PipelineContractPolicy.model_validate(raw)
 
 
+def _target_schemas(
+    enrich: bool,
+) -> tuple[type[Target], pa.Schema, type[TargetSchema], type[ChEMBLTargetGoldSchema]]:
+    """Select all four schema representations as one coherent version."""
+    if enrich:
+        return (
+            TargetV31,
+            CHEMBL_TARGET_SCHEMA_V31,
+            TargetSchemaV31,
+            ChEMBLTargetGoldSchemaV31,
+        )
+    return Target, CHEMBL_TARGET_SCHEMA, TargetSchema, ChEMBLTargetGoldSchema
+
+
 def resolve_target_classification_profile(
     yaml_config: PipelineYamlConfig,
     contract_policy: PipelineContractPolicy | None = None,
@@ -178,13 +192,14 @@ def resolve_target_classification_profile(
     ):
         raise ValueError("target classification schema and contract versions disagree")
     include_fields, exclude_fields = _policy_fields(policy)
+    entity_class, silver_schema, pandera_schema, gold_schema = _target_schemas(enrich)
     return TargetClassificationSchemaProfile(
         config=config,
         contract_version=config.contract_version,
-        entity_class=TargetV31 if enrich else Target,
-        silver_schema=CHEMBL_TARGET_SCHEMA_V31 if enrich else CHEMBL_TARGET_SCHEMA,
-        pandera_silver_schema=TargetSchemaV31 if enrich else TargetSchema,
-        gold_schema=ChEMBLTargetGoldSchemaV31 if enrich else ChEMBLTargetGoldSchema,
+        entity_class=entity_class,
+        silver_schema=silver_schema,
+        pandera_silver_schema=pandera_schema,
+        gold_schema=gold_schema,
         content_hash_include_fields=include_fields,
         content_hash_exclude_fields=exclude_fields,
         resolved_yaml_config=resolved,
