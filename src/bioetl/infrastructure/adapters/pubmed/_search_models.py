@@ -57,30 +57,6 @@ class SearchLogHost(Protocol):
     _logger: LoggerPort
 
 
-def esearch_params(
-    email: str,
-    api_key: str | None,
-    search_term: str,
-    *,
-    retstart: int,
-    retmax: int,
-) -> dict[str, str]:
-    """Build an ESearch query. Omit ``retstart`` on the first page."""
-    params = {
-        "db": "pubmed",
-        "term": search_term,
-        "retmax": str(retmax),
-    }
-    if retstart > 0:
-        params["retstart"] = str(retstart)
-    params["usehistory"] = "y"
-    params["retmode"] = "json"
-    params["email"] = email
-    if api_key and "your_" not in api_key:
-        params["api_key"] = api_key
-    return params
-
-
 def esearch_page_completes(
     collected: list[str],
     page_ids: list[str],
