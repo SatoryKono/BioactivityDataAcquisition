@@ -18,7 +18,7 @@
       "ci_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/44328936552",
       "original_artifact_id": 14439625064,
       "original_zip_sha256": "74a9d663b631d26409331d0143e1daeb92062be51855759784ae78259f8e22b4",
-      "generator_sha256": "7de318b3edfe7bfafb87a412dbf3718f675576a17e15733647af12946a234a8a",
+      "generator_sha256": "461e0d06ad33bc2b89071a4370ffacee615341faa21657e05e3ac14137f2ea86",
       "qualification": "CI_CANDIDATE_IMAGE_ARTIFACT_PARITY",
       "default_delivery_ci_claimed": false,
       "runtime_rollout_claimed": false

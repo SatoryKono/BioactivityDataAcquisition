@@ -295,7 +295,9 @@ class ProvenanceControls(unittest.TestCase):
         for path in (*promotion.COMPOSE_PATHS, promotion.RECIPE_PATH):
             self.assertEqual(second[path], first[path])
         with self.assertRaisesRegex(ValueError, "Existing promotion conflicts"):
-            promotion.build_release_files(second, *case[1:-1], "e" * 64)
+            promotion.build_release_files(
+                second, case[1], {**case[2], "id": 999}, *case[3:]
+            )
 
     def test_requalification_checks_archived_capture_identity(self):
         case = list(release_case())
@@ -303,7 +305,9 @@ class ProvenanceControls(unittest.TestCase):
         later = {**case[1], "id": 12, "head_sha": "c" * 40}
         second = promotion.build_release_files(first, later, *case[2:])
         with self.assertRaisesRegex(ValueError, "Existing promotion conflicts"):
-            promotion.build_release_files(second, *case[1:-1], "e" * 64)
+            promotion.build_release_files(
+                second, case[1], {**case[2], "id": 999}, *case[3:]
+            )
         # Reusing the identical capture is allowed; changing its attempt is new.
         restored = promotion.build_release_files(second, *case[1:])
         self.assertEqual(
@@ -318,6 +322,109 @@ class ProvenanceControls(unittest.TestCase):
             ],
             new_attempt["run_attempt"],
         )
+
+    def test_same_capture_generator_refresh_preserves_history_and_runtime_bindings(
+        self,
+    ):
+        case = release_case()
+        first = promotion.build_release_files(*case)
+        later = {**case[1], "id": 12, "head_sha": "c" * 40}
+        second = promotion.build_release_files(first, later, *case[2:])
+        for original in (first, second):
+            with self.subTest(archived=original is second):
+                before = json.loads(original[promotion.HOST_PATH])
+                refreshed = promotion.build_release_files(
+                    original, *case[1:-1], "e" * 64
+                )
+                host = json.loads(refreshed[promotion.HOST_PATH])
+                managed = json.loads(refreshed[promotion.MANAGED_PATH])
+                self.assertEqual(
+                    host["release_promotion"]["generator_sha256"], "e" * 64
+                )
+                self.assertEqual(host["release_promotion"]["ci_run_id"], case[1]["id"])
+                self.assertEqual(
+                    host["release_promotion"]["ci_run_attempt"], case[1]["run_attempt"]
+                )
+                self.assertEqual(
+                    host["release_history"][:-1], before["release_history"]
+                )
+                prior = copy.deepcopy(before)
+                prior.pop("release_history")
+                self.assertEqual(host["release_history"][-1]["host_manifest"], prior)
+                self.assertEqual(host["acceptance"], before["acceptance"])
+                self.assertEqual(host["image"], before["image"])
+                self.assertEqual(
+                    managed["delivery_source"]["candidate_ci"],
+                    host["release_promotion"],
+                )
+                for path in (*promotion.COMPOSE_PATHS, promotion.RECIPE_PATH):
+                    self.assertEqual(refreshed[path], original[path])
+                self.assertEqual(
+                    promotion.build_release_files(refreshed, *case[1:-1], "e" * 64),
+                    refreshed,
+                )
+                # The delivered generator hash still matters to --check.
+                self.assertFalse(promotion.release_outputs_match(refreshed, original))
+
+    def test_generator_refresh_does_not_mask_other_capture_conflicts(self):
+        case = release_case()
+        first = promotion.build_release_files(*case)
+        later = {**case[1], "id": 12, "head_sha": "c" * 40}
+        second = promotion.build_release_files(first, later, *case[2:])
+        for archived in (False, True):
+            for field, value in (
+                ("source_commit", "d" * 40),
+                ("source_tree", "d" * 40),
+                ("ci_run_url", "https://example.test/foreign"),
+                ("original_artifact_id", 999),
+                ("original_zip_sha256", "d" * 64),
+                ("qualification", "UNQUALIFIED"),
+                ("default_delivery_ci_claimed", True),
+                ("runtime_rollout_claimed", True),
+                ("unexpected_capture_field", "untrusted"),
+            ):
+                with self.subTest(archived=archived, field=field):
+                    files = dict(second if archived else first)
+                    host = json.loads(files[promotion.HOST_PATH])
+                    capture = (
+                        host["release_history"][-1]["host_manifest"][
+                            "release_promotion"
+                        ]
+                        if archived
+                        else host["release_promotion"]
+                    )
+                    capture[field] = value
+                    files[promotion.HOST_PATH] = json.dumps(host).encode()
+                    with self.assertRaisesRegex(
+                        ValueError, "Existing promotion conflicts"
+                    ):
+                        promotion.build_release_files(files, *case[1:-1], "e" * 64)
+
+    def test_generator_refresh_still_rejects_mixed_manifest_pairs(self):
+        case = release_case()
+        first = promotion.build_release_files(*case)
+        refreshed = promotion.build_release_files(first, *case[1:-1], "e" * 64)
+        mixed = {**refreshed, promotion.MANAGED_PATH: first[promotion.MANAGED_PATH]}
+        with self.assertRaisesRegex(ValueError, "Mixed release manifest capture"):
+            promotion.build_release_files(mixed, *case[1:-1], "e" * 64)
+
+    def test_generator_refresh_requires_valid_old_and_new_digests(self):
+        case = release_case()
+        first = promotion.build_release_files(*case)
+        for invalid in (None, "", "e" * 63, "E" * 64, 123):
+            for previous in (False, True):
+                with self.subTest(invalid=invalid, previous=previous):
+                    files = dict(first)
+                    generator = invalid
+                    if previous:
+                        host = json.loads(files[promotion.HOST_PATH])
+                        host["release_promotion"]["generator_sha256"] = invalid
+                        files[promotion.HOST_PATH] = json.dumps(host).encode()
+                        generator = "e" * 64
+                    with self.assertRaisesRegex(
+                        ValueError, "Invalid promotion generator"
+                    ):
+                        promotion.build_release_files(files, *case[1:-1], generator)
 
     def test_existing_image_requires_its_current_capture(self):
         case = release_case()

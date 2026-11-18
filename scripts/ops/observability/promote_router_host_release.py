@@ -151,6 +151,16 @@ def _validate_release_inventory(
     )
 
 
+def _capture_facts(capture: JsonObject) -> JsonObject:
+    """Separate generator revision from immutable CI capture facts."""
+    generator = capture.get("generator_sha256")
+    require(
+        isinstance(generator, str) and bool(re.fullmatch(r"[0-9a-f]{64}", generator)),
+        "Invalid promotion generator digest",
+    )
+    return {key: value for key, value in capture.items() if key != "generator_sha256"}
+
+
 def _validate_capture_history(host: JsonObject, promotion: JsonObject) -> None:
     """Reject conflicting metadata for a capture, including archived releases."""
     manifests = [host] + [
@@ -165,7 +175,8 @@ def _validate_capture_history(host: JsonObject, promotion: JsonObject) -> None:
         capture = provenance.json_object(previous)
         if (capture["ci_run_id"], capture["ci_run_attempt"]) == identity:
             require(
-                capture == promotion, "Existing promotion conflicts with this capture"
+                _capture_facts(capture) == _capture_facts(promotion),
+                "Existing promotion conflicts with this capture",
             )
 
 
