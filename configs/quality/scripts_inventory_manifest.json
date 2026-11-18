@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-18T07:30:59.464762+00:00",
+  "generated_at": "2026-11-18T08:20:22.667384+00:00",
   "summary": {
     "total_scripts": 758,
     "status_counts": {
@@ -1237,7 +1237,7 @@
         },
         {
           "path": "tests/unit/scripts/test_mcp_readiness.py",
-          "line": 953,
+          "line": 954,
           "source_group": "tests",
           "text": "from scripts.ai.codex.mcp_http_probe import HttpProbeClient"
         }
@@ -11542,7 +11542,7 @@
         },
         {
           "path": "tests/architecture/ci/test_event_journal.py",
-          "line": 1496,
+          "line": 1501,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import pytest_abort_diagnostic_adapter as adapter"
         },
@@ -11587,7 +11587,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 41,
+      "reference_count": 57,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -11614,6 +11614,12 @@
           "text": "from scripts.engineering.ci.pytest_event_journal import ("
         },
         {
+          "path": "tests/architecture/ci/conftest.py",
+          "line": 12,
+          "source_group": "tests",
+          "text": "from scripts.engineering.ci import pytest_event_journal as journal"
+        },
+        {
           "path": "tests/architecture/ci/test_event_journal.py",
           "line": 13,
           "source_group": "tests",
@@ -11627,15 +11633,9 @@
         },
         {
           "path": "tests/architecture/ci/test_event_journal.py",
-          "line": 535,
+          "line": 537,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.pytest_event_journal import ("
-        },
-        {
-          "path": "tests/architecture/ci/test_event_journal.py",
-          "line": 905,
-          "source_group": "tests",
-          "text": "from scripts.engineering.ci.pytest_event_journal import _redact_text"
         }
       ],
       "owner": "@bioetl-platform",

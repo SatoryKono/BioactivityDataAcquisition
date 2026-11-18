@@ -1214,7 +1214,7 @@ def test_record_redacts_nested_secrets_in_payload(tmp_path: Path) -> None:
     identity = _identity(role="worker", worker_id="gw0")
     path = tmp_path / "journal.jsonl"
     plugin = EventJournalPlugin(config=None, path=path, identity=identity)
-    plugin.secrets = ("supersecret", "swordfish")
+    plugin._needles = ("supersecret", "swordfish")
     plugin.record(
         "custom_event",
         {

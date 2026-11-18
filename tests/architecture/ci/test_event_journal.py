@@ -523,6 +523,8 @@ def _run_journal(
     journal = tmp_path / "journal"
     test_file = tmp_path / "test_sample.py"
     test_file.write_text(body, encoding="utf-8")
+    config_file = tmp_path / "pytest.ini"
+    config_file.write_text("[pytest]\naddopts =\n", encoding="utf-8")
     child_env = _drop_inherited_xdist(os.environ.copy())
     child_env.pop("EXPECTED_CHECKOUT_SHA", None)
     child_env["BIOETL_JOURNAL_INVOCATION_ID"] = "inv-live"
@@ -545,6 +547,9 @@ def _run_journal(
             sys.executable,
             "-m",
             "pytest",
+            "-c",
+            str(config_file),
+            f"--basetemp={tmp_path / 'child-temp'}",
             str(test_file),
             "--noconftest",
             "-p",
@@ -1439,9 +1444,9 @@ def test_matrix_values_are_redacted_before_identity_and_safe_env(
 ) -> None:
     from scripts.engineering.ci.pytest_event_journal import (
         _identity_from_env,
+        _keyed_env_needles,
         _redaction_token,
         _safe_env,
-        _secret_values,
     )
 
     credential = "swordfish-secret"
@@ -1454,13 +1459,13 @@ def test_matrix_values_are_redacted_before_identity_and_safe_env(
         }
     )
     monkeypatch.setenv("BIOETL_JOURNAL_MATRIX", raw)
-    secrets = _secret_values()
-    matrix = _identity_from_env(actual_sha=None, secrets=secrets)["matrix"]
+    needles = _keyed_env_needles()
+    matrix = _identity_from_env(actual_sha=None, needles=needles)["matrix"]
     assert matrix["password"] == "[redacted]"
     assert matrix["wrapped"]["api_key"] == _redaction_token(nested)
     assert matrix["wrapped"]["label"] == "public"
     assert credential not in matrix["note"]
-    blob = _safe_env(secrets)["BIOETL_JOURNAL_MATRIX"]
+    blob = _safe_env(needles)["BIOETL_JOURNAL_MATRIX"]
     assert credential not in blob
     assert nested not in blob
     assert "[redacted]" in blob

@@ -58,6 +58,9 @@ import subprocess
 import sys
 import uuid
 from collections import Counter, defaultdict
+from collections.abc import Iterator
+from contextlib import contextmanager
+from contextvars import ContextVar
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -188,24 +191,24 @@ def _sealed_marker() -> str:
     return _SEALED_REDACTION
 
 
-def _is_password_name(name: str) -> bool:
+def _is_sealed_field(name: str) -> bool:
     return _PASSWORD_NAME.search(name) is not None
 
 
-def _seal_tree(value: Any, secrets: tuple[str, ...]) -> Any:
+def _seal_tree(value: Any, needles: tuple[str, ...]) -> Any:
     if isinstance(value, dict):
         return {
-            _redact_text(str(key), secrets): _seal_tree(item, secrets)
+            _redact_text(str(key), needles): _seal_tree(item, needles)
             for key, item in value.items()
         }
     if isinstance(value, (list, tuple)):
-        return [_seal_tree(item, secrets) for item in value]
+        return [_seal_tree(item, needles) for item in value]
     if value is None:
         return None
     return _sealed_marker()
 
 
-def _password_assignment_replacement(value: str) -> str | None:
+def _sealed_assignment_replacement(value: str) -> str | None:
     """Return the password capture to write, or None when it is already sealed.
 
     Unquoted values stop before ``]``. A stored marker is therefore captured as
@@ -221,11 +224,11 @@ def _password_assignment_replacement(value: str) -> str | None:
     return _SEALED_REDACTION
 
 
-def _redaction_token(captured: str) -> str:
-    """Return a process-keyed fingerprint, not a password hash.
+def _correlation_tag(captured: str) -> str:
+    """Return a process-keyed fingerprint of a non-password needle.
 
-    BLAKE2s stays a keyed correlation tag. SHA-384 here is classified as
-    password hashing of credential-shaped values, and a KDF would run on
+    Password-shaped values never reach this function. BLAKE2s is a keyed
+    correlation tag for the remaining needles. A password KDF would run on
     every journal line.
     """
     digest = hmac.new(
@@ -236,7 +239,12 @@ def _redaction_token(captured: str) -> str:
     return f"[redacted:{digest}]"
 
 
-def _assigned_secret(match: re.Match[str]) -> tuple[int, str]:
+def _redaction_token(captured: str) -> str:
+    """Alias kept for tests that assert the correlation tag."""
+    return _correlation_tag(captured)
+
+
+def _assigned_capture(match: re.Match[str]) -> tuple[int, str]:
     for index in (2, 3, 4):
         value = match.group(index)
         if value is not None:
@@ -246,106 +254,292 @@ def _assigned_secret(match: re.Match[str]) -> tuple[int, str]:
 
 def _replace_assignment(match: re.Match[str]) -> str:
     keyword = match.group(1)
-    index, value = _assigned_secret(match)
+    index, value = _assigned_capture(match)
     prefix = match.group(0)[: match.start(index) - match.start(0)]
     suffix = match.group(0)[match.end(index) - match.start(0) :]
-    if _is_password_name(keyword):
-        replacement = _password_assignment_replacement(value)
+    if _is_sealed_field(keyword) or _contains_needle(value, _blocked_env_needles()):
+        replacement = _sealed_assignment_replacement(value)
         if replacement is None:
             return match.group(0)
         return prefix + replacement + suffix
-    if (
-        _REDACTED_ASSIGNMENT_VALUE.fullmatch(value) is not None
-        or value == _SEALED_REDACTION
-    ):
+    if _REDACTED_ASSIGNMENT_VALUE.fullmatch(value) is not None or value in {
+        _SEALED_REDACTION,
+        "[redacted",
+    }:
         return match.group(0)
-    return prefix + _redaction_token(value) + suffix
+    return prefix + _correlation_tag(value) + suffix
 
 
 def _replace_prefix(match: re.Match[str]) -> str:
-    return _redaction_token(match.group(0))
+    return _fingerprint_or_seal(match.group(0))
+
+
+# Password values stay sealed for the process lifetime. Removing or rotating
+# the env var must not make an earlier value eligible for plaintext or HMAC.
+_RETAINED_BLOCKED: set[str] = set()
+_BLOCKED_SNAPSHOT: ContextVar[tuple[str, ...] | None] = ContextVar(
+    "journal_blocked_snapshot", default=None
+)
+
+
+@contextmanager
+def _redaction_snapshot(retained: set[str] | None = None) -> Iterator[None]:
+    """Refresh password values once per event or standalone tree traversal."""
+    if _BLOCKED_SNAPSHOT.get() is not None:
+        yield
+        return
+    snapshot = _blocked_env_needles()
+    if retained is not None:
+        retained.update(snapshot)
+        snapshot = tuple(sorted(retained, key=len, reverse=True))
+    token = _BLOCKED_SNAPSHOT.set(snapshot)
+    try:
+        yield
+    finally:
+        _BLOCKED_SNAPSHOT.reset(token)
+
+
+def _clear_retained_blocked() -> None:
+    """Drop the password inventory. Tests isolate one journal lifetime."""
+    _RETAINED_BLOCKED.clear()
+
+
+def _retain_blocked(values: tuple[str, ...]) -> None:
+    _RETAINED_BLOCKED.update(value for value in values if value)
+
+
+def _partition_env_needles() -> tuple[tuple[str, ...], tuple[str, ...]]:
+    """Split env needles into constant-sealed values and fingerprintable ones.
+
+    Sealed names (``password``, ``passwd``, ``passphrase``) are classified
+    before ``_SECRET_KEY``. That pattern does not contain ``passphrase``.
+    """
+    blocked: set[str] = set()
+    keyed: set[str] = set()
+    for key, value in os.environ.items():
+        if len(value) < 8:
+            continue
+        if _is_sealed_field(key):
+            blocked.add(value)
+            continue
+        if _SECRET_KEY.search(key) is None:
+            continue
+        keyed.add(value)
+    blocked_values = tuple(sorted(blocked, key=len, reverse=True))
+    keyed_values = tuple(
+        sorted(
+            (value for value in keyed if value not in blocked), key=len, reverse=True
+        )
+    )
+    return blocked_values, keyed_values
+
+
+def _blocked_env_needles() -> tuple[str, ...]:
+    """Return every password value seen in this process, longest first.
+
+    Newly recognized values are added. Removing or replacing an environment
+    variable does not drop a value that was already observed.
+    """
+    snapshot = _BLOCKED_SNAPSHOT.get()
+    if snapshot is not None:
+        return snapshot
+    blocked, _keyed = _partition_env_needles()
+    _retain_blocked(blocked)
+    if not _RETAINED_BLOCKED:
+        return ()
+    return tuple(sorted(_RETAINED_BLOCKED, key=len, reverse=True))
+
+
+def _keyed_env_needles() -> tuple[str, ...]:
+    blocked, keyed = _partition_env_needles()
+    _retain_blocked(blocked)
+    return tuple(
+        sorted(
+            (value for value in keyed if value not in _RETAINED_BLOCKED),
+            key=len,
+            reverse=True,
+        )
+    )
 
 
 def _secret_values() -> tuple[str, ...]:
-    values = {
-        value
-        for key, value in os.environ.items()
-        if len(value) >= 8 and _SECRET_KEY.search(key) is not None
-    }
-    return tuple(sorted(values, key=len, reverse=True))
+    """Return fingerprintable env needles. Password values are excluded."""
+    return _keyed_env_needles()
 
 
-def _secret_needles(secret: str) -> tuple[str, ...]:
-    """Return the raw secret and its JSON-escaped form.
+def _encoded_forms(captured: str) -> tuple[str, ...]:
+    """Return the raw needle and its JSON-escaped form.
 
     ``json.dumps(..., ensure_ascii=True)`` turns a quote or newline into
     ``\\"`` or ``\\n``. The stored line then no longer contains the raw
     value, but parsing the line restores it.
     """
-    encoded = json.dumps(secret, ensure_ascii=True)
+    encoded = json.dumps(captured, ensure_ascii=True)
     fragment = encoded[1:-1]
-    if not fragment or fragment == secret:
-        return (secret,)
-    return (secret, fragment)
+    if not fragment or fragment == captured:
+        return (captured,)
+    return (captured, fragment)
 
 
-def _contains_known_secret(text: str, known_secrets: tuple[str, ...]) -> bool:
-    """True when text still holds a secret or its JSON encoding."""
-    for secret in known_secrets:
-        if not secret:
+def _contains_needle(text: str, known: tuple[str, ...]) -> bool:
+    """True when text still holds a needle or its JSON encoding."""
+    for captured in known:
+        if not captured:
             continue
-        if any(needle and needle in text for needle in _secret_needles(secret)):
+        if any(form and form in text for form in _encoded_forms(captured)):
             return True
     return False
 
 
-def _line_for_storage(line: str, known_secrets: tuple[str, ...]) -> str:
-    """Replace a line that still contains a raw secret.
+def _blocked_record(known: tuple[str, ...]) -> str:
+    blocked = (
+        '{"event":"redaction_blocked","schema_version":' + str(SCHEMA_VERSION) + "}\n"
+    )
+    if _contains_needle(blocked, known):
+        return "{}\n"
+    return blocked
 
-    A marker that itself contains a secret is re-fingerprinted so the
-    label and digest cannot preserve it. A quote or newline inside a
-    secret is matched in its JSON-escaped form as well.
-    """
-    stored = line
-    for marker in set(_REDACTION_MARKER.findall(stored)):
-        if _contains_known_secret(marker, known_secrets):
-            # Re-fingerprint the entire marker so a colliding secret cannot
-            # survive in either its label or its digest.
-            replacement = _redaction_token(marker).replace("[redacted:", "[", 1)
-            stored = stored.replace(marker, replacement)
-    if _contains_known_secret(stored, known_secrets):
-        blocked = (
-            '{"event":"redaction_blocked","schema_version":'
-            + str(SCHEMA_VERSION)
-            + "}\n"
-        )
-        if _contains_known_secret(blocked, known_secrets):
-            return "{}\n"
-        return blocked
-    # Replace each known value even when absent so the stored line is the
-    # replace result, not the input object that still carries the value.
-    for captured in known_secrets:
+
+def _seal_blocked_text(text: str, blocked: tuple[str, ...]) -> str:
+    """Replace password-shaped needles with a constant. Never fingerprints them."""
+    sealed = text
+    for captured in blocked:
         if not captured:
             continue
-        for needle in _secret_needles(captured):
-            if needle:
-                stored = stored.replace(needle, _redaction_token(captured))
-    if _contains_known_secret(stored, known_secrets):
+        for form in _encoded_forms(captured):
+            if form and form in sealed:
+                sealed = sealed.replace(form, _SEALED_REDACTION)
+    return sealed
+
+
+def _line_for_storage(line: str, known: tuple[str, ...]) -> str:
+    """Persist a line that no longer contains a raw needle.
+
+    Password-shaped env values are not fingerprinted. A line that still
+    contains one is replaced by a constant record. Other needles may be
+    replaced with a correlation tag. A quote or newline inside a needle is
+    matched in its JSON-escaped form as well.
+    """
+    blocked = _blocked_env_needles()
+    if _contains_needle(line, blocked):
+        return _blocked_record(blocked)
+    stored = line
+    for marker in set(_REDACTION_MARKER.findall(stored)):
+        if _contains_needle(marker, known):
+            # Re-tag the entire marker so a colliding needle cannot survive
+            # in either its label or its digest.
+            replacement = _correlation_tag(marker).replace("[redacted:", "[", 1)
+            stored = stored.replace(marker, replacement)
+    if _contains_needle(stored, known):
+        return _blocked_record(known)
+    # Replace each known value even when absent so the stored line is the
+    # replace result, not the input object that still carries the value.
+    for captured in known:
+        if not captured or _contains_needle(captured, blocked):
+            continue
+        for form in _encoded_forms(captured):
+            if form:
+                stored = stored.replace(form, _correlation_tag(captured))
+    if _contains_needle(stored, known) or _contains_needle(stored, blocked):
         return "{}\n"
     return stored
 
 
-def _redact_text(text: str, secrets: tuple[str, ...]) -> str:
-    redacted = text
-    for secret in secrets:
-        if secret and secret in redacted:
-            redacted = redacted.replace(secret, _redaction_token(secret))
-    redacted = _SECRET_ASSIGNMENT.sub(_replace_assignment, redacted)
-    return _SECRET_PREFIX.sub(_replace_prefix, redacted)
+def _literal_redaction_spans(
+    text: str, values: tuple[str, ...], blocked: tuple[str, ...], *, seal: bool
+) -> list[tuple[int, int, bool, str | None]]:
+    spans: list[tuple[int, int, bool, str | None]] = []
+    for captured in values:
+        if not captured:
+            continue
+        sealed = seal or _contains_needle(captured, blocked)
+        for form in _encoded_forms(captured):
+            start = text.find(form)
+            while start >= 0:
+                spans.append((start, start + len(form), sealed, captured))
+                start = text.find(form, start + 1)
+    return spans
 
 
-def _redact_args(args: list[str], secrets: tuple[str, ...]) -> list[str]:
-    return [_redact_text(token, secrets) for token in args]
+def _credential_redaction_spans(
+    text: str, blocked: tuple[str, ...]
+) -> list[tuple[int, int, bool, str | None]]:
+    spans: list[tuple[int, int, bool, str | None]] = []
+    for match in _SECRET_ASSIGNMENT.finditer(text):
+        index, value = _assigned_capture(match)
+        sealed = _is_sealed_field(match.group(1))
+        if sealed:
+            if _sealed_assignment_replacement(value) is None:
+                continue
+        elif _REDACTED_ASSIGNMENT_VALUE.fullmatch(value) is not None or value in {
+            "[redacted",
+            _SEALED_REDACTION,
+        }:
+            continue
+        spans.append(
+            (
+                match.start(index),
+                match.end(index),
+                sealed or _contains_needle(value, blocked),
+                None,
+            )
+        )
+    for match in _SECRET_PREFIX.finditer(text):
+        spans.append(
+            (
+                match.start(),
+                match.end(),
+                _contains_needle(match.group(0), blocked),
+                None,
+            )
+        )
+    return spans
+
+
+def _render_redaction_spans(
+    text: str, spans: list[tuple[int, int, bool, str | None]]
+) -> str:
+    merged: list[tuple[int, int, bool, str | None]] = []
+    for start, end, sealed, raw in sorted(spans, key=lambda span: (span[0], span[1])):
+        if not merged or start >= merged[-1][1]:
+            merged.append((start, end, sealed, raw))
+            continue
+        left, right, was_sealed, previous_raw = merged.pop()
+        # Preserve the original known value for an encoded whole-value match.
+        original = previous_raw if end <= right else raw if start == left else None
+        merged.append((left, max(right, end), was_sealed or sealed, original))
+    parts: list[str] = []
+    offset = 0
+    for start, end, sealed, raw in merged:
+        parts.append(text[offset:start])
+        fragment = text[start:end]
+        if sealed:
+            replacement = _SEALED_REDACTION
+            if _REDACTED_ASSIGNMENT_VALUE.fullmatch(fragment) and not fragment.endswith(
+                "]"
+            ):
+                replacement = "[redacted"
+        else:
+            replacement = _correlation_tag(fragment if raw is None else raw)
+        parts.append(replacement)
+        offset = end
+    parts.append(text[offset:])
+    return "".join(parts)
+
+
+def _redact_text(text: str, needles: tuple[str, ...]) -> str:
+    blocked = _blocked_env_needles()
+    # Discover every match in the original text. A replacement must not hide
+    # another credential's keyword or split a longer known value. Any sealed
+    # match seals the entire overlapping span before fingerprinting can run.
+    spans = _literal_redaction_spans(text, needles, blocked, seal=False)
+    spans.extend(_literal_redaction_spans(text, blocked, blocked, seal=True))
+    spans.extend(_credential_redaction_spans(text, blocked))
+    return _render_redaction_spans(text, spans)
+
+
+def _redact_args(args: list[str], needles: tuple[str, ...]) -> list[str]:
+    return [_redact_text(item, needles) for item in args]
 
 
 def _utc_now() -> str:
@@ -390,77 +584,88 @@ def _parse_matrix(raw: str) -> Any:
     return None
 
 
-def _redact_secret_value(value: Any, secrets: tuple[str, ...]) -> Any:
+def _fingerprint_or_seal(value: str) -> str:
+    if _contains_needle(value, _blocked_env_needles()):
+        return _SEALED_REDACTION
+    return _correlation_tag(value)
+
+
+def _redact_keyed_tree(value: Any, needles: tuple[str, ...]) -> Any:
     if isinstance(value, str):
-        return _redaction_token(value)
+        return _fingerprint_or_seal(value)
     if isinstance(value, dict):
         redacted: dict[str, Any] = {}
         for key, item in value.items():
             name = str(key)
-            safe_name = _redact_text(name, secrets)
-            if _is_password_name(name):
-                redacted[safe_name] = _seal_tree(item, secrets)
+            safe_name = _redact_text(name, needles)
+            if _is_sealed_field(name):
+                redacted[safe_name] = _seal_tree(item, needles)
             else:
-                redacted[safe_name] = _redact_secret_value(item, secrets)
+                redacted[safe_name] = _redact_keyed_tree(item, needles)
         return redacted
     if isinstance(value, (list, tuple)):
-        return [_redact_secret_value(item, secrets) for item in value]
+        return [_redact_keyed_tree(item, needles) for item in value]
     if value is None:
         return None
-    return _redaction_token(str(value))
+    return _fingerprint_or_seal(str(value))
 
 
-def _redact_structured(value: Any, secrets: tuple[str, ...]) -> Any:
+def _redact_structured(value: Any, needles: tuple[str, ...]) -> Any:
+    with _redaction_snapshot():
+        return _redact_structured_snapshot(value, needles)
+
+
+def _redact_structured_snapshot(value: Any, needles: tuple[str, ...]) -> Any:
     if isinstance(value, dict):
         redacted: dict[str, Any] = {}
         for key, item in value.items():
             name = str(key)
-            safe_name = _redact_text(name, secrets)
-            if _is_password_name(name):
-                redacted[safe_name] = _seal_tree(item, secrets)
+            safe_name = _redact_text(name, needles)
+            if _is_sealed_field(name):
+                redacted[safe_name] = _seal_tree(item, needles)
             elif _SECRET_KEY.search(name) is not None:
-                redacted[safe_name] = _redact_secret_value(item, secrets)
+                redacted[safe_name] = _redact_keyed_tree(item, needles)
             else:
-                redacted[safe_name] = _redact_structured(item, secrets)
+                redacted[safe_name] = _redact_structured_snapshot(item, needles)
         return redacted
     if isinstance(value, (list, tuple)):
-        return [_redact_structured(item, secrets) for item in value]
+        return [_redact_structured_snapshot(item, needles) for item in value]
     if isinstance(value, str):
-        return _redact_text(value, secrets)
+        return _redact_text(value, needles)
     return value
 
 
-def _redacted_matrix(raw: str, secrets: tuple[str, ...]) -> Any:
+def _redacted_matrix(raw: str, needles: tuple[str, ...]) -> Any:
     parsed = _parse_matrix(raw)
     if not isinstance(parsed, dict):
         return None
-    return _redact_structured(parsed, secrets)
+    return _redact_structured(parsed, needles)
 
 
-def _matrix_env_text(raw: str, secrets: tuple[str, ...]) -> str:
-    redacted = _redacted_matrix(raw, secrets)
+def _matrix_env_text(raw: str, needles: tuple[str, ...]) -> str:
+    redacted = _redacted_matrix(raw, needles)
     if redacted is None:
-        return _redact_text(raw, secrets)
+        return _redact_text(raw, needles)
     return json.dumps(redacted, sort_keys=True, ensure_ascii=True)
 
 
-def _safe_env(secrets: tuple[str, ...]) -> dict[str, str]:
+def _safe_env(needles: tuple[str, ...]) -> dict[str, str]:
     redacted: dict[str, str] = {}
     for key in sorted(_SAFE_ENV_KEYS):
         if key not in os.environ:
             continue
         raw = os.environ[key]
         if key == "BIOETL_JOURNAL_MATRIX":
-            redacted[key] = _matrix_env_text(raw, secrets)
+            redacted[key] = _matrix_env_text(raw, needles)
             continue
-        redacted[key] = _redact_text(raw, secrets)
+        redacted[key] = _redact_text(raw, needles)
     return redacted
 
 
 def _identity_from_env(
     *,
     actual_sha: str | None,
-    secrets: tuple[str, ...],
+    needles: tuple[str, ...],
 ) -> dict[str, Any]:
     matrix_raw = os.environ.get("BIOETL_JOURNAL_MATRIX", "")
     job = os.environ.get("BIOETL_JOURNAL_JOB") or os.environ.get("GITHUB_JOB") or ""
@@ -470,32 +675,32 @@ def _identity_from_env(
     expected_sha = os.environ.get("EXPECTED_CHECKOUT_SHA") or None
     return {
         "workflow_run_id": _redact_text(
-            os.environ.get("GITHUB_RUN_ID") or "local", secrets
+            os.environ.get("GITHUB_RUN_ID") or "local", needles
         ),
         "workflow_run_attempt": _redact_text(
-            os.environ.get("GITHUB_RUN_ATTEMPT") or "local", secrets
+            os.environ.get("GITHUB_RUN_ATTEMPT") or "local", needles
         ),
-        "job": _redact_text(job, secrets),
-        "matrix": _redacted_matrix(matrix_raw, secrets),
+        "job": _redact_text(job, needles),
+        "matrix": _redacted_matrix(matrix_raw, needles),
         "actual_checkout_sha": actual_sha,
         "expected_checkout_sha": (
-            None if expected_sha is None else _redact_text(expected_sha, secrets)
+            None if expected_sha is None else _redact_text(expected_sha, needles)
         ),
-        "invocation_id": _redact_text(invocation, secrets),
+        "invocation_id": _redact_text(invocation, needles),
         "pass_name": _redact_text(
-            os.environ.get("BIOETL_JOURNAL_PASS") or "unspecified", secrets
+            os.environ.get("BIOETL_JOURNAL_PASS") or "unspecified", needles
         ),
-        "worker_id": _redact_text(worker, secrets),
+        "worker_id": _redact_text(worker, needles),
         "role": role,
     }
 
 
-def _selection_from_config(config: Any, secrets: tuple[str, ...]) -> dict[str, Any]:
+def _selection_from_config(config: Any, needles: tuple[str, ...]) -> dict[str, Any]:
     option = config.option
     maxfail = getattr(option, "maxfail", None)
     return {
-        "args": _redact_args([str(arg) for arg in config.args], secrets),
-        "marker": _redact_text(str(getattr(option, "markexpr", "") or ""), secrets),
+        "args": _redact_args([str(arg) for arg in config.args], needles),
+        "marker": _redact_text(str(getattr(option, "markexpr", "") or ""), needles),
         "collect_only": bool(getattr(option, "collectonly", False)),
         "exitfirst": bool(getattr(option, "exitfirst", False)),
         "maxfail": int(maxfail) if isinstance(maxfail, int) else None,
@@ -509,7 +714,9 @@ class EventJournalPlugin:
         self.config = config
         self.path = path
         self.identity = identity
-        self.secrets = _secret_values()
+        self._needles = _keyed_env_needles()
+        self._blocked = set(_blocked_env_needles())
+        self._nodeid_refs: dict[str, int] = {}
         self._file: Any = None
         self._closed = False
         self._io_error: str | None = None
@@ -521,7 +728,7 @@ class EventJournalPlugin:
             self._mark_io_error(f"open_failed:{exc.errno}")
 
     def _mark_io_error(self, message: str) -> None:
-        redacted = _redact_text(message, self.secrets)
+        redacted = _redact_text(message, self._needles)
         self._io_error = redacted
         sys.stderr.write(f"EventJournal: {redacted}\n")
         if self._file is not None and not self._closed:
@@ -534,19 +741,21 @@ class EventJournalPlugin:
     def record(self, event_type: str, data: dict[str, Any]) -> None:
         if self._closed or self._file is None:
             return
-        payload: dict[str, Any] = {
-            "schema_version": SCHEMA_VERSION,
-            "timestamp": _utc_now(),
-            "event": event_type,
-            "identity": _redact_structured(self.identity, self.secrets),
-        }
-        redacted_data = _redact_structured(data, self.secrets)
-        if isinstance(redacted_data, dict):
-            payload.update(redacted_data)
-        line = _line_for_storage(
-            json.dumps(payload, sort_keys=True, ensure_ascii=True) + "\n",
-            self.secrets,
-        )
+        data = self._reference_nodeids(event_type, data)
+        with _redaction_snapshot(self._blocked):
+            payload: dict[str, Any] = {
+                "schema_version": SCHEMA_VERSION,
+                "timestamp": _utc_now(),
+                "event": event_type,
+                "identity": _redact_structured(self.identity, self._needles),
+            }
+            redacted_data = _redact_structured(data, self._needles)
+            if isinstance(redacted_data, dict):
+                payload.update(redacted_data)
+            line = _line_for_storage(
+                json.dumps(payload, sort_keys=True, ensure_ascii=True) + "\n",
+                self._needles,
+            )
         try:
             self._file.write(line)
             self._file.flush()
@@ -555,6 +764,30 @@ class EventJournalPlugin:
             self._mark_io_error(f"write_failed:{exc.errno}")
             return
         self._line_count += 1
+
+    def _reference_nodeids(
+        self, event_type: str, data: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Use collection positions, never password-derived digests, as references."""
+        if event_type == "collection_finished":
+            nodeids = data.get("nodeids")
+            if isinstance(nodeids, list) and all(
+                isinstance(item, str) for item in nodeids
+            ):
+                self._nodeid_refs = {
+                    nodeid: index for index, nodeid in enumerate(sorted(set(nodeids)))
+                }
+                return {
+                    **data,
+                    "nodeid_refs": [self._nodeid_refs[item] for item in nodeids],
+                }
+        if (
+            event_type == "outcome"
+            and isinstance(data.get("nodeid"), str)
+            and data["nodeid"] in self._nodeid_refs
+        ):
+            return {**data, "nodeid_ref": self._nodeid_refs[data["nodeid"]]}
+        return data
 
     def finalize(self) -> None:
         if self._closed:
@@ -590,6 +823,14 @@ class EventJournalPlugin:
     def record_selected(self, items: list[Any]) -> None:
         nodeids = sorted(str(item.nodeid) for item in items)
         self.record("collection_finished", {"nodeids": nodeids})
+
+    @pytest.hookimpl(optionalhook=True)
+    def pytest_xdist_node_collection_finished(self, ids: list[str]) -> None:
+        # The controller does not collect. Keep only the same positional map
+        # used by workers; their actual collection receipts remain authoritative.
+        self._nodeid_refs = {
+            nodeid: index for index, nodeid in enumerate(sorted(set(ids)))
+        }
 
     def pytest_deselected(self, items: list[Any]) -> None:
         nodeids = sorted(str(item.nodeid) for item in items)
@@ -850,11 +1091,11 @@ def pytest_configure(config: Any) -> None:
     if not journal_dir:
         return
     publish_redaction_key()
-    secrets = _secret_values()
+    needles = _keyed_env_needles()
     actual_sha, sha_error = measure_checkout_sha()
     workerinput = getattr(config, "workerinput", {})
     invocation = workerinput.get("BIOETL_JOURNAL_INVOCATION_ID")
-    identity = _identity_from_env(actual_sha=actual_sha, secrets=secrets)
+    identity = _identity_from_env(actual_sha=actual_sha, needles=needles)
     if invocation:
         identity["invocation_id"] = invocation
     config._event_journal_invocation = identity["invocation_id"]
@@ -869,9 +1110,9 @@ def pytest_configure(config: Any) -> None:
     plugin.record(
         "session_start",
         {
-            "selection": _selection_from_config(config, secrets),
+            "selection": _selection_from_config(config, needles),
             "sha_error": sha_error,
-            "safe_env": _safe_env(secrets),
+            "safe_env": _safe_env(needles),
             "allow_no_tests": os.environ.get("BIOETL_JOURNAL_ALLOW_NO_TESTS") == "1",
         },
     )
@@ -1019,7 +1260,15 @@ def _nodeids_well_formed(event: dict[str, Any]) -> bool:
         return True
     if not isinstance(nodeids, list):
         return False
-    return all(isinstance(nodeid, str) for nodeid in nodeids)
+    refs = event.get("nodeid_refs")
+    return all(isinstance(nodeid, str) for nodeid in nodeids) and (
+        refs is None
+        or (
+            isinstance(refs, list)
+            and len(refs) == len(nodeids)
+            and all(_is_non_negative_int(ref) for ref in refs)
+        )
+    )
 
 
 def _outcome_fields_well_formed(event: dict[str, Any]) -> bool:
@@ -1032,6 +1281,7 @@ def _outcome_fields_well_formed(event: dict[str, Any]) -> bool:
         and _optional_str(event, "origin_worker")
         and _optional_count(event, "retry_index")
         and _optional_count(event, "instance_ordinal")
+        and _optional_count(event, "nodeid_ref")
         and _optional_count(event, "exitstatus")
     )
 
@@ -2177,6 +2427,64 @@ def _shared_receipt_identity_reasons(receipts: list[dict[str, Any]]) -> list[str
     return reasons
 
 
+def _stable_nodeid_events(
+    selected: list[str] | None, events: list[dict[str, Any]]
+) -> tuple[list[str] | None, list[dict[str, Any]]]:
+    """Match rotated display names through optional positional references.
+
+    Original collection conflicts are checked before this step. Legacy receipts
+    keep their text matching. Changed names get an opaque position label without
+    hashing the raw nodeid or restoring a newly recognized password in a verdict.
+    """
+    if selected is None:
+        return selected, events
+    collection = next(
+        (
+            event
+            for event in events
+            if event.get("event") == "collection_finished"
+            and isinstance(event.get("nodeid_refs"), list)
+            and sorted(event.get("nodeids", [])) == sorted(selected)
+        ),
+        None,
+    )
+    if collection is None:
+        return selected, events
+    names, refs = collection["nodeids"], collection["nodeid_refs"]
+    if len(names) != len(refs) or any(type(ref) is not int or ref < 0 for ref in refs):
+        return selected, events
+    mapping = dict(zip(refs, names, strict=True))
+    if any(mapping[ref] != name for ref, name in zip(refs, names, strict=True)):
+        return selected, events
+    changed = {
+        event["nodeid_ref"]
+        for event in events
+        if event.get("event") == "outcome"
+        and type(event.get("nodeid_ref")) is int
+        and event["nodeid_ref"] in mapping
+        and event.get("nodeid") != mapping[event["nodeid_ref"]]
+    }
+    if not changed:
+        return selected, events
+    # An opaque label cannot collide with an existing collected name.
+    prefix = "journal-selection:"
+    while any(name.startswith(prefix) for name in names):
+        prefix = ":" + prefix
+    canonical = {
+        ref: f"{prefix}{ref}" if ref in changed else name
+        for ref, name in mapping.items()
+    }
+    normalized = [
+        {**event, "nodeid": canonical[event["nodeid_ref"]]}
+        if event.get("event") == "outcome"
+        and type(event.get("nodeid_ref")) is int
+        and event["nodeid_ref"] in canonical
+        else event
+        for event in events
+    ]
+    return sorted(canonical[ref] for ref in refs), normalized
+
+
 def reconcile_pass(receipts: list[dict[str, Any]], *, pass_name: str) -> dict[str, Any]:
     """Reconcile one runner pass. See module docstring for the status rules."""
     if not receipts:
@@ -2197,13 +2505,14 @@ def reconcile_pass(receipts: list[dict[str, Any]], *, pass_name: str) -> dict[st
     reasons.extend(_controller_order_reasons(events))
     reasons.extend(_malformed_session_finish(events))
     reasons.extend(_cmdline_finish_reasons(events))
-    reasons.extend(_phase_order_reasons(events))
     reasons.extend(_pytest_exit_reasons(flags))
     reasons.extend(_unconfigure_reasons(events))
     selected, deselected, collection_errors, collection_conflict = _selected_nodeids(
         events,
         allow_worker_collection=_intact_controller_receipt(receipts),
     )
+    selected, events = _stable_nodeid_events(selected, events)
+    reasons.extend(_phase_order_reasons(events))
     outcomes, outcome_reasons = _dedup_outcomes(events)
     reasons.extend(outcome_reasons)
     if _missing_origin_workers(receipts, events):
