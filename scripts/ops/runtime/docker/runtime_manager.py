@@ -1894,7 +1894,11 @@ already_full() {
     fi
   fi
   wget -qO- -T 3 http://127.0.0.1:3000/api/health >/dev/null 2>&1 || return 1
-  ready="$(wget -qO- -T 3 http://bioetl:8000/ops/control-plane/ready 2>/dev/null)" || return 1
+  ops_base="${BIOETL_OPS_HTTP_URL:-}"
+  [ -n "$ops_base" ] || ops_base="http://bioetl:8000"
+  ops_base="${ops_base%/}"
+  printf '%s' "$ops_base" | grep -Eq '^https?://[A-Za-z0-9._:-]+$' || ops_base="http://bioetl:8000"
+  ready="$(wget -qO- -T 3 "$ops_base/ops/control-plane/ready" 2>/dev/null)" || return 1
   printf '%s' "$ready" | grep -Eq "\"runtime_source_id\"[[:space:]]*:[[:space:]]*\"$source_id\""
 }
 lease_is_active() {
@@ -2020,6 +2024,21 @@ def _grafana_bootstrap_timeout_retry_needed(
     )
 
 
+def _explicit_monitoring_profile_incomplete(
+    payload: Mapping[str, Any] | None,
+) -> bool:
+    """A terminal incomplete profile cannot satisfy an explicit monitoring start."""
+    if not isinstance(payload, Mapping):
+        return False
+    profile = str(payload.get("dashboard_profile") or "").strip()
+    ops_http = str(payload.get("ops_http") or "").strip()
+    if profile == "full" and ops_http == "ready":
+        return False
+    if _grafana_bootstrap_timeout_retry_needed(payload):
+        return False
+    return True
+
+
 def _grafana_expected_runtime_source_id(runner: Runner, *, timeout: float) -> str:
     result = runner(
         [
@@ -2041,6 +2060,17 @@ def _grafana_expected_runtime_source_id(runner: Runner, *, timeout: float) -> st
     return ""
 
 
+_OPS_READY_BASE_RE = re.compile(r"https?://[A-Za-z0-9._:-]+\Z")
+
+
+def _grafana_ops_ready_url() -> str:
+    """Ops ready URL from BIOETL_OPS_HTTP_URL, otherwise the compose default."""
+    raw = os.environ.get("BIOETL_OPS_HTTP_URL", "").strip().rstrip("/")
+    if _OPS_READY_BASE_RE.fullmatch(raw) is None:
+        raw = "http://bioetl:8000"
+    return f"{raw}/ops/control-plane/ready"
+
+
 def _grafana_ops_ready_runtime_source_id(runner: Runner, *, timeout: float) -> str:
     result = runner(
         [
@@ -2052,7 +2082,7 @@ def _grafana_ops_ready_runtime_source_id(runner: Runner, *, timeout: float) -> s
             "-T",
             "3",
             # NOSONAR - docker-internal HTTP URL is safe (ADR-010 local-only)
-            "http://bioetl:8000/ops/control-plane/ready",
+            _grafana_ops_ready_url(),
         ],
         ROOT,
         timeout,
@@ -2267,7 +2297,11 @@ def _post_start_grafana_bootstrap_gate(
         runner,
         timeout=initial_timeout,
     )
-    if not readable or not _grafana_bootstrap_timeout_retry_needed(payload):
+    if not readable or not isinstance(payload, Mapping):
+        return
+    if _explicit_monitoring_profile_incomplete(payload):
+        return False
+    if not _grafana_bootstrap_timeout_retry_needed(payload):
         return
     watcher_ready = _wait_for_active_grafana_watcher(
         payload, runner, deadline=deadline, sleep=sleep, clock=clock

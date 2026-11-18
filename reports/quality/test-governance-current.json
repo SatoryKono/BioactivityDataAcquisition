@@ -798,20 +798,7 @@
     }
   },
   "assertless_total_candidates": 67,
-  "budget_violations": [
-    {
-      "actual": 1,
-      "budget": "duplicate_test_names_max",
-      "expected_max": 0,
-      "metric": "duplicate_test_names"
-    },
-    {
-      "actual": 2,
-      "budget": "duplicate_test_name_occurrences_max",
-      "expected_max": 0,
-      "metric": "duplicate_test_name_occurrences"
-    }
-  ],
+  "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -956,30 +943,16 @@
     }
   },
   "date_today_call_sites": 0,
-  "duplicate_test_name_inventory": [
-    {
-      "classification": "cross_file",
-      "count": 2,
-      "lane_counts": {
-        "unit": 2
-      },
-      "locations": [
-        "tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py:74",
-        "tests/unit/scripts/ops/observability/test_validate_live_observability.py:743"
-      ],
-      "name": "test_direct_script_help_bootstraps_repository_imports",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    }
-  ],
+  "duplicate_test_name_inventory": [],
   "duplicate_test_name_inventory_summary": {
-    "cross_file_groups": 1,
-    "duplicate_occurrences": 2,
+    "cross_file_groups": 0,
+    "duplicate_occurrences": 0,
     "mixed_groups": 0,
     "same_file_groups": 0,
-    "total_duplicate_names": 1
+    "total_duplicate_names": 0
   },
-  "duplicate_test_name_occurrences": 2,
-  "duplicate_test_names": 1,
+  "duplicate_test_name_occurrences": 0,
+  "duplicate_test_names": 0,
   "fixture_asset_duplication": {
     "duplicate_files": 0,
     "duplicate_groups": 0,
@@ -1695,30 +1668,16 @@
       }
     },
     "date_today_call_sites": 0,
-    "duplicate_test_name_inventory": [
-      {
-        "classification": "cross_file",
-        "count": 2,
-        "lane_counts": {
-          "unit": 2
-        },
-        "locations": [
-          "tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py:74",
-          "tests/unit/scripts/ops/observability/test_validate_live_observability.py:743"
-        ],
-        "name": "test_direct_script_help_bootstraps_repository_imports",
-        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-      }
-    ],
+    "duplicate_test_name_inventory": [],
     "duplicate_test_name_inventory_summary": {
-      "cross_file_groups": 1,
-      "duplicate_occurrences": 2,
+      "cross_file_groups": 0,
+      "duplicate_occurrences": 0,
       "mixed_groups": 0,
       "same_file_groups": 0,
-      "total_duplicate_names": 1
+      "total_duplicate_names": 0
     },
-    "duplicate_test_name_occurrences": 2,
-    "duplicate_test_names": 1,
+    "duplicate_test_name_occurrences": 0,
+    "duplicate_test_names": 0,
     "fixture_asset_duplication": {
       "duplicate_files": 0,
       "duplicate_groups": 0,
@@ -1797,30 +1756,21 @@
       "top_level_directory_count": 16,
       "top_level_directory_count_including_pycache": 16
     },
-    "top_duplicate_test_names": [
-      {
-        "count": 2,
-        "examples": [
-          "tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py:74",
-          "tests/unit/scripts/ops/observability/test_validate_live_observability.py:743"
-        ],
-        "name": "test_direct_script_help_bootstraps_repository_imports"
-      }
-    ],
+    "top_duplicate_test_names": [],
     "total_test_files": 3342,
-    "total_test_functions": 33492,
+    "total_test_functions": 33493,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "77ac5e0564a231cf8f98ae447882a9b63e641f740bd79667e270be295fbe4e2b",
+  "source_tree_sha256": "27c723937545c36bf4d7cdd3d0170aaad5a0e0f9be766f706ec69fb25638a581",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 67,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
-    "duplicate_test_name_occurrences": 2,
-    "duplicate_test_names": 1,
+    "duplicate_test_name_occurrences": 0,
+    "duplicate_test_names": 0,
     "intentional_no_exception_contract": 66,
     "markerless_examples": [],
     "markerless_test_functions": 0,
@@ -1874,18 +1824,9 @@
     "top_level_directory_count": 16,
     "top_level_directory_count_including_pycache": 16
   },
-  "top_duplicate_test_names": [
-    {
-      "count": 2,
-      "examples": [
-        "tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py:74",
-        "tests/unit/scripts/ops/observability/test_validate_live_observability.py:743"
-      ],
-      "name": "test_direct_script_help_bootstraps_repository_imports"
-    }
-  ],
+  "top_duplicate_test_names": [],
   "total_test_files": 3342,
-  "total_test_functions": 33492,
+  "total_test_functions": 33493,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
