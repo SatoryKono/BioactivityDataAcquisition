@@ -2,15 +2,11 @@
 
 from __future__ import annotations
 
-from bioetl.application.core.wiring.registry import (
-    TargetClassifiedTransformer,
-    TargetTransformer,
-)
-from bioetl.composition.runtime_builders.config_access import get_settings
-from bioetl.composition.bootstrap.runtime.composite_control_plane_bundle import (
-    build_target_classification_session,
-)
 
+from bioetl.composition.services.target_classification_transformer import (
+    select_target_transformer,
+    configure_target_transformer,
+)
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
@@ -23,13 +19,6 @@ from bioetl.composition.factories.transformer_dependencies import (
 from bioetl.domain.behavior.identity_service import EntityIdentityGenerator
 from bioetl.infrastructure.config.contract_policy_loader import (
     load_pipeline_contract_policy,
-)
-from bioetl.infrastructure.config.target_classification_profile import (
-    TargetClassificationSchemaProfile,
-    resolve_target_classification_profile,
-)
-from bioetl.infrastructure.schemas.pipeline_contract_policy import (
-    PipelineContractPolicy,
 )
 
 if TYPE_CHECKING:
@@ -73,7 +62,8 @@ class TransformerBuilder:
             contract_policy,
             pandera_silver_schema,
             target_profile,
-        ) = self._with_target_classification(
+        ) = select_target_transformer(
+            self.pipeline_name,
             transformer_class,
             yaml_config,
             contract_policy,
@@ -112,53 +102,8 @@ class TransformerBuilder:
             dependencies=dependencies,
             **publication_vocabulary_kwargs(transformer_class),
         )
-        if target_profile is not None and target_profile.config.enabled:
-            if not isinstance(transformer, TargetTransformer):
-                raise TypeError("target classification requires a TargetTransformer")
-            session = build_target_classification_session(
-                yaml_config, settings or get_settings()
-            )
-            if session is not None:
-                transformer.configure_target_classification(session)
+        configure_target_transformer(transformer, yaml_config, target_profile, settings)
         return transformer
-
-    def _with_target_classification(
-        self,
-        transformer_class: type[BaseTransformer],
-        yaml_config: PipelineYamlConfig,
-        contract_policy: ContractPolicyProtocol | None,
-        pandera_silver_schema: object | None,
-    ) -> tuple[
-        type[BaseTransformer],
-        PipelineYamlConfig,
-        ContractPolicyProtocol | None,
-        object | None,
-        TargetClassificationSchemaProfile | None,
-    ]:
-        if self.pipeline_name != "chembl_target":
-            return (
-                transformer_class,
-                yaml_config,
-                contract_policy,
-                pandera_silver_schema,
-                None,
-            )
-        target_profile = resolve_target_classification_profile(
-            yaml_config,
-            contract_policy
-            if isinstance(contract_policy, PipelineContractPolicy)
-            else None,
-        )
-        selected = transformer_class
-        if target_profile.config.mode == "enrich":
-            selected = TargetClassifiedTransformer
-        return (
-            selected,
-            target_profile.resolved_yaml_config,
-            target_profile.contract_policy,
-            target_profile.pandera_silver_schema,
-            target_profile,
-        )
 
     def _load_contract_policy(
         self, entity_type: str | None

@@ -22,7 +22,7 @@ from bioetl.infrastructure.observability.metrics_server_adapter import (
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.time import SystemClock
 from bioetl.composition.runtime_builders import control_plane_root
-from bioetl.composition.bootstrap.runtime.composite_control_plane_bundle import (
+from bioetl.composition.bootstrap.assembly.storage import (
     load_target_runtime_profile,
 )
 from bioetl.composition.factories.dq.composite_validation import (

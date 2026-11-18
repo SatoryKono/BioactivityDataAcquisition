@@ -2,13 +2,9 @@
 
 from __future__ import annotations
 
-from bioetl.infrastructure.config.pipeline_config_api import PipelineYamlConfig
-from bioetl.composition.bootstrap.runtime.composite_control_plane_bundle import (
-    hydrate_target_runtime_config,
-)
 
 from pathlib import Path
-from typing import TYPE_CHECKING, overload
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 from bioetl.composition.control_plane_paths import control_plane_root
@@ -101,44 +97,6 @@ def _resolve_replay_parent_manifest(
             f"run_id '{replay_of_run_id}'"
         )
     return manifest
-
-
-@overload
-def restore_target_replay_config(
-    *, ctx: PipelineRunContext, settings: Settings, current_config: PipelineYamlConfig
-) -> PipelineYamlConfig: ...
-
-
-@overload
-def restore_target_replay_config(
-    *, ctx: PipelineRunContext, settings: Settings, current_config: object
-) -> object: ...
-
-
-def restore_target_replay_config(
-    *, ctx: PipelineRunContext, settings: Settings, current_config: object
-) -> object:
-    """Restore the saved target profile rather than consulting a newer default."""
-    if ctx.pipeline_name != "chembl_target" or not bool(
-        getattr(ctx, "exact_replay", False)
-    ):
-        return current_config
-
-    if not isinstance(current_config, PipelineYamlConfig):
-        return current_config
-    has_parent = bool(
-        getattr(ctx, "replay_of_manifest_id", None)
-        or getattr(ctx, "replay_of_run_id", None)
-    )
-    if not has_parent and not current_config.target_classification.to_domain().enabled:
-        return current_config
-    parent = _resolve_replay_parent_manifest(ctx=ctx, settings=settings)
-    if parent.pipeline_name != "chembl_target":
-        raise ValueError("target replay parent pipeline mismatch")
-    if not parent.resolved_config:
-        raise ValueError("target replay parent has no pinned resolved configuration")
-
-    return hydrate_target_runtime_config(parent.resolved_config)
 
 
 def _resolve_parent_bronze_date(*, manifest: RunManifest, settings: Settings) -> str:

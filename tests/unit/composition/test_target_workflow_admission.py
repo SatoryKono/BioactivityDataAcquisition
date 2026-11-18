@@ -21,7 +21,7 @@ from bioetl.application.services.workflow.control_plane.mutation_plan import (
     build_workflow_mutation_plan,
 )
 from bioetl.composition.runtime_builders.config_access import load_pipeline_config
-from bioetl.composition.bootstrap.runtime.composite_control_plane_bundle import (
+from bioetl.composition.bootstrap.assembly.storage import (
     preflight_workflow_target_dependencies,
 )
 from bioetl.composition.bootstrap.cli.lock import (

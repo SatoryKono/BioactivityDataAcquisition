@@ -29,12 +29,16 @@ from bioetl.composition.factories.services._record_processor_policy_support impo
     extract_hash_policy_by_version,
 )
 from bioetl.composition.runtime_builders.config_access import load_pipeline_config
-from bioetl.composition.bootstrap.runtime.composite_control_plane_bundle import (
+from bioetl.composition.bootstrap.assembly.storage import (
     preflight_workflow_target_dependencies,
+)
+from bioetl.composition.services.target_classification_config import (
     resolve_target_runtime_config,
+    validate_target_runtime_dependency,
+)
+from bioetl.composition.services.target_classification_identity import (
     target_classification_config_source_refs,
     target_classification_source_refs,
-    validate_target_runtime_dependency,
 )
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
@@ -181,7 +185,7 @@ async def test_enrich_uses_v31_schema_and_identical_direct_staged_hash(
     from bioetl.composition.factories.storage._layer_writers import (
         load_contract_rollout_policy,
     )
-    from bioetl.composition.bootstrap.runtime.composite_control_plane_bundle import (
+    from bioetl.composition.services.target_classification_identity import (
         target_classification_normalization_identity,
     )
 
@@ -349,7 +353,7 @@ def test_target_preflight_uses_actual_writer_paths_even_when_off(
 
 
 def test_target_exact_replay_restores_saved_profile(shadow_config, monkeypatch):
-    from bioetl.composition.runtime_builders._exact_replay_cached_bronze_context import (
+    from bioetl.composition.services.target_classification_replay import (
         restore_target_replay_config,
     )
 
@@ -357,7 +361,7 @@ def test_target_exact_replay_restores_saved_profile(shadow_config, monkeypatch):
         pipeline_name="chembl_target", resolved_config=shadow_config.model_dump()
     )
     monkeypatch.setattr(
-        "bioetl.composition.runtime_builders._exact_replay_cached_bronze_context._resolve_replay_parent_manifest",
+        "bioetl.composition.services.target_classification_replay._resolve_replay_parent_manifest",
         lambda **kwargs: parent,
     )
     ctx = SimpleNamespace(

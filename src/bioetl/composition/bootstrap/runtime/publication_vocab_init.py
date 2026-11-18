@@ -7,7 +7,6 @@ from pathlib import Path
 from bioetl.composition.factories.transformer_dependencies import (
     load_publication_controlled_vocabulary,
 )
-
 from bioetl.domain.mapping.publication_controlled_vocabulary import (
     initialize_publication_controlled_vocabulary as initialize_registry,
 )

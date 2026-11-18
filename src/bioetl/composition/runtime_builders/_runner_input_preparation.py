@@ -11,7 +11,7 @@ from bioetl.composition.runtime_builders._exact_replay_cached_bronze_context imp
     bind_cached_bronze_context as _bind_cached_bronze_context,
     resolve_exact_replay_cached_bronze_context as _resolve_exact_replay_cached_bronze_context,
 )
-from bioetl.composition.runtime_builders._effective_config_graph_support import (
+from bioetl.composition.services.target_classification_replay import (
     load_target_aware_pipeline_config,
 )
 from bioetl.composition.runtime_builders._inputs_resolution_support import (
@@ -54,17 +54,6 @@ class PreparedRunnerContext:
 class ResolvedRunnerDerivedInputs:
     runtime_config: RuntimeConfig
     filter_config: InputFilterConfig | None
-
-
-def _resolve_settings_for_runner(
-    *,
-    ctx: PipelineRunContext,
-    get_settings_fn: Callable[[], Settings],
-) -> Settings:
-    return _apply_tracing_override_impl(
-        settings=get_settings_fn(),
-        enabled=getattr(ctx, "tracing_enabled_override", None),
-    )
 
 
 def _resolve_required_persistence_profile(
@@ -143,9 +132,9 @@ def prepare_runner_context(
     validate_pk_contract_fn: Callable[[PipelineYamlConfig], None],
 ) -> PreparedRunnerContext:
     """Resolve the shared settings/context/yaml/observability runner inputs."""
-    settings = _resolve_settings_for_runner(
-        ctx=ctx,
-        get_settings_fn=get_settings_fn,
+    settings = _apply_tracing_override_impl(
+        settings=get_settings_fn(),
+        enabled=getattr(ctx, "tracing_enabled_override", None),
     )
     _validate_runner_data_root_policy(
         ctx=ctx,

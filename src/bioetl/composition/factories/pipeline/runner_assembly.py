@@ -19,14 +19,14 @@ from bioetl.composition.bootstrap_contexts import DQConfigsContext
 from bioetl.composition.factories.pipeline._runner_assembly_support import (
     RunnerAssemblyContext as _RunnerAssemblyContext,
     assemble_runner_parts as _assemble_runner_parts_impl,
-    build_batch_executor as _build_batch_executor_impl,
-    build_lock_runtime_service as _build_lock_runtime_service_impl,
-    build_observer as _build_observer_impl,
-    build_preflight_service as _build_preflight_service_impl,
-    build_runner_constructor_payload as _build_runner_constructor_payload_impl,
+    build_batch_executor as _build_batch_executor,
+    build_lock_runtime_service as _build_lock_runtime_service,
+    build_observer as _build_observer,
+    build_preflight_service as _build_preflight_service,
+    build_runner_constructor_payload as _build_runner_constructor_payload,
 )
 from bioetl.composition.factories.pipeline_support.checkpoint_metadata_helpers import (
-    build_current_checkpoint_metadata,
+    build_current_checkpoint_metadata as _build_current_checkpoint_metadata,
 )
 from bioetl.composition.factories.pipeline_support.checkpoint_policy_helpers import (
     resolve_checkpoint_compatibility_policy,
@@ -34,12 +34,10 @@ from bioetl.composition.factories.pipeline_support.checkpoint_policy_helpers imp
 from bioetl.composition.factories.pipeline.postrun_assembly import build_postrun_service
 from bioetl.composition.factories.pipeline.runner_constructor import (
     RunnerAssemblyParts,
-    create_pipeline_runner_from_payload,
+    create_pipeline_runner_from_payload as _create_pipeline_runner,
 )
 from bioetl.composition.factories.services.factory import ServicesBuilder
-from bioetl.domain.locking import LockContextHolder
 from bioetl.domain.medallion import LoadingStrategy
-from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 from bioetl.infrastructure.time import SystemClock
 
 if TYPE_CHECKING:
@@ -47,18 +45,11 @@ if TYPE_CHECKING:
     import pyarrow as pa
 
     from bioetl.application.core.base import BasePipeline
-    from bioetl.application.core.batch_executor import BatchExecutor
     from bioetl.application.core.lifecycle import (
         CheckpointRuntimeService,
-        LockRuntimeService,
     )
     from bioetl.application.core.postrun import PostrunService
-    from bioetl.application.core.preflight import PreflightService
     from bioetl.application.core.runner import PipelineRunner
-    from bioetl.application.observability.observer import PipelineObserver
-    from bioetl.composition.factories.pipeline.runner_constructor import (
-        RunnerConstructorPayload,
-    )
     from bioetl.composition.observability import ObservabilityBundle
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.types import GoldSchemaType
@@ -97,63 +88,6 @@ def _build_checkpoint_manager(
     )
 
 
-def _build_current_checkpoint_metadata(pipeline: BasePipeline) -> CheckpointMetadata:
-    return build_current_checkpoint_metadata(pipeline)
-
-
-def _build_lock_runtime_service(
-    context: _RunnerAssemblyContext,
-    *,
-    checkpoint_manager: CheckpointRuntimeService,
-    context_holder: LockContextHolder,
-) -> LockRuntimeService:
-    return _build_lock_runtime_service_impl(
-        context,
-        checkpoint_manager=checkpoint_manager,
-        context_holder=context_holder,
-    )
-
-
-def _build_lock_manager(
-    context: _RunnerAssemblyContext,
-    *,
-    checkpoint_manager: CheckpointRuntimeService,
-    context_holder: LockContextHolder,
-) -> LockRuntimeService:
-    return _build_lock_runtime_service(
-        context,
-        checkpoint_manager=checkpoint_manager,
-        context_holder=context_holder,
-    )
-
-
-def _build_preflight_service(context: _RunnerAssemblyContext) -> PreflightService:
-    return _build_preflight_service_impl(context)
-
-
-def _build_observer(context: _RunnerAssemblyContext) -> PipelineObserver:
-    return _build_observer_impl(context)
-
-
-def _build_batch_executor(
-    context: _RunnerAssemblyContext,
-    *,
-    checkpoint_manager: CheckpointRuntimeService,
-    lock_runtime_service: LockRuntimeService,
-    observer: PipelineObserver,
-) -> BatchExecutor:
-    return _build_batch_executor_impl(
-        context,
-        checkpoint_manager=checkpoint_manager,
-        lock_runtime_service=lock_runtime_service,
-        observer=observer,
-    )
-
-
-def _create_pipeline_runner(payload: RunnerConstructorPayload) -> PipelineRunner:
-    return create_pipeline_runner_from_payload(payload)
-
-
 def _build_postrun_service(
     context: _RunnerAssemblyContext,
     *,
@@ -165,19 +99,6 @@ def _build_postrun_service(
         lifecycle_service=lifecycle_service,
         dq_configs=context.dq_configs_extractor(context.yaml_config),
         tracer=context.observability.tracer,
-    )
-
-
-def _build_runner_constructor_payload(
-    *,
-    pipeline: BasePipeline,
-    observability: ObservabilityBundle,
-    parts: RunnerAssemblyParts,
-) -> RunnerConstructorPayload:
-    return _build_runner_constructor_payload_impl(
-        pipeline=pipeline,
-        observability=observability,
-        parts=parts,
     )
 
 

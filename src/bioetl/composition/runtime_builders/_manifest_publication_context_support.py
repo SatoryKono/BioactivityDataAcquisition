@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.composition.bootstrap.runtime.composite_control_plane_bundle import (
+from bioetl.composition.services.target_classification_identity import (
     apply_target_contract_identity,
 )
 
@@ -109,30 +109,14 @@ def resolve_manifest_publication_context(
         pipeline_name=ctx.pipeline_name,
         yaml_config=inputs.yaml_config,
     )
-    contract_ref = f"{provider}.{entity}"
-    if reproducibility_context is None:
-        reproducibility_context = resolve_manifest_reproducibility_context(
-            ctx=ctx,
-            inputs=inputs,
-            provider=provider,
-            entity=entity,
-            contract_ref=contract_ref,
-        )
-    if contract_identity is None:
-        contract_identity = resolve_contract_identity(
-            provider=provider,
-            entity=entity,
-            strict=contract_identity_requires_strict_resolution(
-                exact_replay_requested=bool(getattr(ctx, "exact_replay", False)),
-                required_persistence_profile=(
-                    reproducibility_context.required_persistence_profile
-                ),
-            ),
-        )
-    if ctx.pipeline_name == "chembl_target":
-        contract_identity = apply_target_contract_identity(
-            inputs.yaml_config, contract_identity
-        )
+    reproducibility_context, contract_identity = ensure_manifest_publication_identity(
+        ctx=ctx,
+        inputs=inputs,
+        provider=provider,
+        entity=entity,
+        reproducibility_context=reproducibility_context,
+        contract_identity=contract_identity,
+    )
     return ResolvedManifestPublicationContext(
         provider=provider,
         entity=entity,
