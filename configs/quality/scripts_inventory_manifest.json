@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-18T11:14:56.151267+00:00",
+  "generated_at": "2026-11-18T15:11:47.340295+00:00",
   "summary": {
     "total_scripts": 754,
     "status_counts": {
@@ -4190,13 +4190,13 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py",
-          "line": 133,
+          "line": 148,
           "source_group": "tests",
           "text": "for name in (\"mcp_filesystem_wrapper.sh\", \"mcp_filesystem_wrapper.ps1\"):"
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py",
-          "line": 220,
+          "line": 235,
           "source_group": "tests",
           "text": "script = ROOT / \"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\""
         }
@@ -4245,13 +4245,13 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py",
-          "line": 133,
+          "line": 148,
           "source_group": "tests",
           "text": "for name in (\"mcp_filesystem_wrapper.sh\", \"mcp_filesystem_wrapper.ps1\"):"
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py",
-          "line": 250,
+          "line": 265,
           "source_group": "tests",
           "text": "script = ROOT / \"scripts/ai/mcp/mcp_filesystem_wrapper.sh\""
         },
@@ -11670,13 +11670,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pytest_receipts.py",
-          "line": 14,
+          "line": 15,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.pytest_receipts import ("
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pytest_receipts.py",
-          "line": 964,
+          "line": 1062,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.pytest_receipts import write_runner_terminal_receipt"
         }
@@ -25912,13 +25912,13 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py",
-          "line": 149,
+          "line": 164,
           "source_group": "tests",
           "text": "ROOT / \"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\""
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py",
-          "line": 362,
+          "line": 377,
           "source_group": "tests",
           "text": "ROOT / \"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\""
         }
@@ -26936,7 +26936,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py",
-          "line": 406,
+          "line": 421,
           "source_group": "tests",
           "text": "ROOT / \"scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.ps1\""
         },

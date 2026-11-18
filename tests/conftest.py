@@ -660,17 +660,33 @@ def _configure_wsl_timeout(config: pytest.Config) -> None:
     if not _is_wsl():
         return
 
+    threaded_call = getattr(
+        asyncio.to_thread, "_bioetl_original_to_thread", asyncio.to_thread
+    )
+
     async def _run_inline[ResultT](
         func: Callable[..., ResultT],
         /,
         *args: object,
         **kwargs: object,
     ) -> ResultT:
+        if isinstance(
+            getattr(func, "__self__", None),
+            (
+                threading.Thread,
+                threading.Event,
+                threading.Condition,
+                threading.Semaphore,
+                threading.Barrier,
+            ),
+        ):
+            return await threaded_call(func, *args, **kwargs)
         return func(*args, **kwargs)
 
     # Python 3.13 on the WSL cloud-mounted checkout can lose the event-loop
     # completion callback after a default-executor worker has already finished.
     # Tests then hang indefinitely in otherwise completed local filesystem I/O.
+    vars(_run_inline)["_bioetl_original_to_thread"] = threaded_call
     asyncio.to_thread = _run_inline
 
     # Increase timeout from default 60s to 180s on WSL
