@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-18T07:30:59.464762+00:00",
+  "generated_at": "2026-11-18T08:21:55.792814+00:00",
   "summary": {
     "total_scripts": 758,
     "status_counts": {
@@ -4096,7 +4096,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
-          "line": 1043,
+          "line": 1044,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.ps1\","
         }
@@ -4145,7 +4145,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
-          "line": 1044,
+          "line": 1045,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.sh\","
         }
@@ -5093,7 +5093,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
-          "line": 1045,
+          "line": 1046,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/support/exec_windows_ps1_wrapper.sh\","
         }
@@ -5512,7 +5512,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
-          "line": 1046,
+          "line": 1047,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/support/run_owned_stdio.ps1\","
         }
@@ -13510,7 +13510,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
-          "line": 1886,
+          "line": 1887,
           "source_group": "tests",
           "text": "[\"scripts/engineering/dev/setup_bioetl_wsl.ps1\"], repo_root=root"
         },
@@ -22845,7 +22845,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
-          "line": 1868,
+          "line": 1869,
           "source_group": "tests",
           "text": "\"scripts/engineering/repo/process_supervisor.py\","
         },
