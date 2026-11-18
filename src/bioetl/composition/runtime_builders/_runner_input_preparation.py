@@ -10,11 +10,9 @@ from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.runtime_builders._exact_replay_cached_bronze_context import (
     bind_cached_bronze_context as _bind_cached_bronze_context,
     resolve_exact_replay_cached_bronze_context as _resolve_exact_replay_cached_bronze_context,
-)
-from bioetl.composition.runtime_builders.exact_replay_parent_manifest import (
     resolve_replay_parent_manifest,
 )
-from bioetl.composition.runtime_builders.target_classification_identity import (
+from bioetl.composition.factories.pipeline.target_classification_identity import (
     load_target_aware_pipeline_config,
 )
 from bioetl.composition.runtime_builders._inputs_resolution_support import (

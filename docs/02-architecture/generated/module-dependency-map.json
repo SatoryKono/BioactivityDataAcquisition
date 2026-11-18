@@ -1,12 +1,12 @@
 {
   "summary": {
-    "scanned_modules": 2654,
-    "total_internal_imports": 8787,
+    "scanned_modules": 2653,
+    "total_internal_imports": 8784,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 330,
     "violations": 0,
-    "source_fingerprint": "b759ef3746efb8f6fe22b6c063b2bffc5a9ae217454ec7146fe0b1d8d4f4c8a6"
+    "source_fingerprint": "d7e7f183dbfa035842b793eb521a8dba26c8563dfa0fa7ba043f1b73557c7887"
   },
   "layer_edges": [
     {
@@ -24,19 +24,19 @@
     {
       "source": "composition",
       "target": "application",
-      "imports": 253,
+      "imports": 254,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "composition",
-      "imports": 691,
+      "imports": 686,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "domain",
-      "imports": 336,
+      "imports": 337,
       "allowed": true
     },
     {
@@ -147,12 +147,12 @@
     {
       "source": "composition.factories",
       "target": "application.core",
-      "imports": 51
+      "imports": 52
     },
     {
       "source": "composition.runtime_builders",
       "target": "domain.control_plane",
-      "imports": 46
+      "imports": 43
     },
     {
       "source": "infrastructure.storage",
@@ -161,8 +161,13 @@
     },
     {
       "source": "composition.factories",
+      "target": "infrastructure.config",
+      "imports": 40
+    },
+    {
+      "source": "composition.factories",
       "target": "domain.ports",
-      "imports": 37
+      "imports": 38
     },
     {
       "source": "application.composite",
@@ -172,11 +177,6 @@
     {
       "source": "composition.bootstrap",
       "target": "domain.ports",
-      "imports": 36
-    },
-    {
-      "source": "composition.factories",
-      "target": "infrastructure.config",
       "imports": 36
     },
     {
@@ -230,11 +230,6 @@
       "imports": 27
     },
     {
-      "source": "composition.runtime_builders",
-      "target": "infrastructure.config",
-      "imports": 26
-    },
-    {
       "source": "infrastructure.adapters",
       "target": "domain.ports",
       "imports": 26
@@ -267,6 +262,11 @@
     {
       "source": "application.services",
       "target": "domain.exceptions",
+      "imports": 23
+    },
+    {
+      "source": "composition.runtime_builders",
+      "target": "infrastructure.config",
       "imports": 23
     },
     {

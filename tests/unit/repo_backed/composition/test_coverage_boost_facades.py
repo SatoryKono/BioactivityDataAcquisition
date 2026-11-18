@@ -49,9 +49,6 @@ from bioetl.composition.runtime_builders import (
     _exact_replay_cached_bronze_context as replay_context,
 )
 from bioetl.composition.runtime_builders import (
-    exact_replay_parent_manifest as replay_parent,
-)
-from bioetl.composition.runtime_builders import (
     run_manifest_data_roots as data_roots,
 )
 
@@ -1009,7 +1006,7 @@ def test_exact_replay_prefers_published_ledger_snapshot_over_manifest_fallback()
 def test_exact_replay_resolution_helpers_cover_parent_lookup_and_date_errors(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    original_resolve_parent_manifest = replay_parent.resolve_replay_parent_manifest
+    original_resolve_parent_manifest = replay_context.resolve_replay_parent_manifest
     original_resolve_parent_bronze_date = replay_context._resolve_parent_bronze_date
     settings = SimpleNamespace(
         bronze_path="/tmp/bronze",
@@ -1060,7 +1057,7 @@ def test_exact_replay_resolution_helpers_cover_parent_lookup_and_date_errors(
         )
 
     monkeypatch.setattr(
-        replay_parent,
+        replay_context,
         "FileRunManifestStore",
         lambda base_path: SimpleNamespace(
             get=lambda manifest_id: None,
@@ -1068,7 +1065,7 @@ def test_exact_replay_resolution_helpers_cover_parent_lookup_and_date_errors(
         ),
     )
     monkeypatch.setattr(
-        replay_parent, "control_plane_root", lambda settings, leaf: Path("/tmp") / leaf
+        replay_context, "control_plane_root", lambda settings, leaf: Path("/tmp") / leaf
     )
     with pytest.raises(RuntimeError, match="manifest_id 'manifest-404'"):
         original_resolve_parent_manifest(
