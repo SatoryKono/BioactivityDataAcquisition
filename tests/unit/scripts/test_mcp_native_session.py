@@ -337,6 +337,10 @@ def ref_launch(session_binding, monkeypatch, tmp_path):
         "command": "unrelated-installed-client",
         "enabled": True,
     }
+    config["mcp_servers"]["custom.name"] = {
+        "command": "unrelated-custom-client",
+        "enabled": True,
+    }
     home = tmp_path / "ref-home"
     config_path = home / ".codex/config.toml"
     config_path.parent.mkdir(parents=True)
@@ -395,6 +399,8 @@ def test_ref_only_disables_other_servers_without_changing_settings():
             },
             "memory": {"command": "unrelated", "enabled": True},
             "Markdownify-BioETL": {"command": "unrelated", "enabled": False},
+            "custom.name": {"command": "unrelated", "enabled": True},
+            'custom."\U0001f9ea"': {"command": "unrelated", "enabled": True},
         }
     }
     original = deepcopy(config)
@@ -402,10 +408,14 @@ def test_ref_only_disables_other_servers_without_changing_settings():
     overrides = ref_only_overrides(config)
 
     effective = deepcopy(config)
-    for override in overrides[1::2]:
-        for name, changes in tomllib.loads(override)["mcp_servers"].items():
-            assert set(changes) == {"enabled"}
-            effective["mcp_servers"][name].update(changes)
+    assert len(overrides) == 2
+    assert overrides[0] == "--config"
+    assert overrides[1].startswith("mcp_servers=")
+    entries = tomllib.loads(overrides[1])["mcp_servers"]
+    assert entries.keys() == original["mcp_servers"].keys()
+    for name, changes in entries.items():
+        assert set(changes) == {"enabled"}
+        effective["mcp_servers"][name].update(changes)
     assert config == original
     assert {
         name for name, entry in effective["mcp_servers"].items() if entry["enabled"]
@@ -416,11 +426,9 @@ def test_ref_only_disables_other_servers_without_changing_settings():
     )
 
 
-@pytest.mark.parametrize(
-    "name", ["", "memory.enabled", 'other"', "other\nref", "../ref"]
-)
-def test_ref_only_rejects_names_that_cannot_be_safe_override_paths(name):
-    config = {"mcp_servers": {"ref": {}, name: {}}}
+@pytest.mark.parametrize(("name", "entry"), [("", {}), (1, {}), ("custom.name", True)])
+def test_ref_only_rejects_invalid_server_entries(name, entry):
+    config = {"mcp_servers": {"ref": {}, name: entry}}
     with pytest.raises(PermissionError, match="safe configured server names"):
         ref_only_overrides(config)
 
@@ -474,14 +482,15 @@ def test_ref_only_does_not_load_unrelated_markdownify_binding(
     assert call["argv"][1:3] == ["--cd", str(ref_launch["root"])]
     assert call["ref_key"] == "fixture-ref-key"
     assert "fixture-ref-key" not in " ".join(call["argv"])
-    entries = {}
-    for override in call["argv"][4::2]:
-        entries.update(tomllib.loads(override)["mcp_servers"])
+    assert call["argv"][3] == "--config"
+    assert len(call["argv"]) == 5
+    entries = tomllib.loads(call["argv"][4])["mcp_servers"]
     assert {name: entry["enabled"] for name, entry in entries.items()} == {
         "memory": False,
         "ast-grep": False,
         "ref": True,
         "Markdownify-BioETL": False,
+        "custom.name": False,
     }
     assert ref_launch["config_path"].read_bytes() == original_config
 

@@ -83,7 +83,7 @@ def validate_ref(config, mode):
 
 def toml_value(value):
     if isinstance(value, str):
-        return json.dumps(value, ensure_ascii=False)
+        return json.dumps(value, ensure_ascii=False).replace("\x7f", r"\u007f")
     if isinstance(value, bool):
         return str(value).lower()
     if isinstance(value, (int, float)):
@@ -94,7 +94,7 @@ def toml_value(value):
         return (
             "{"
             + ",".join(
-                json.dumps(key) + "=" + toml_value(item) for key, item in value.items()
+                toml_value(key) + "=" + toml_value(item) for key, item in value.items()
             )
             + "}"
         )
@@ -106,18 +106,14 @@ def ref_only_overrides(config):
     servers = config.get("mcp_servers", {})
     if not isinstance(servers, dict) or "ref" not in servers:
         raise PermissionError("Ref-only requires a configured Ref entry")
-    result = []
+    enabled = {}
     for name, entry in servers.items():
-        if (
-            not isinstance(name, str)
-            or re.fullmatch(r"[A-Za-z0-9_-]+", name) is None
-            or not isinstance(entry, dict)
-        ):
+        if not isinstance(name, str) or not name or not isinstance(entry, dict):
             raise PermissionError("Ref-only requires safe configured server names")
-        result.extend(
-            ["--config", f"mcp_servers.{name}.enabled={toml_value(name == 'ref')}"]
-        )
-    return result
+        enabled[name] = {"enabled": name == "ref"}
+    # Codex splits override paths on dots, including dots inside quoted keys.
+    # Put server names in the TOML value so each key remains literal.
+    return ["--config", "mcp_servers=" + toml_value(enabled)]
 
 
 def _validate_markdownify_client(entry):
