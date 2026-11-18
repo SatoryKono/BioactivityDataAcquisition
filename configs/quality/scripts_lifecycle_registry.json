@@ -2544,6 +2544,12 @@
       "next_step": "Retain as a state-bound local validation helper behind scripts.engineering.repo checks; never promote local observations to runtime or CI admission.",
       "owner": "@bioetl-platform",
       "review_by": "2027-02-12"
+    },
+    "scripts/engineering/common/report_outputs.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain the shared JSON/Markdown publisher used by architecture-suite, VCR-corpus and weak-assert reporters. It resolves both destinations before publication and reuses confined atomic text output; added with exercised distinct-destination regressions during the 2026-11-18 lifecycle review.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-18"
     }
   },
   "schema_version": "1.0"

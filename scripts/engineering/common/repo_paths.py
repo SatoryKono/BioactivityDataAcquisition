@@ -194,6 +194,8 @@ def write_text_confined(
             handle.write(data)  # NOSONAR - confined parent of rebuilt path
             handle.flush()
             os.fsync(handle.fileno())
+        if resolved.exists():
+            os.chmod(temporary, resolved.stat().st_mode & 0o7777)
         os.replace(temporary, resolved)  # NOSONAR - confined parent of rebuilt path
     except BaseException:
         temporary.unlink(missing_ok=True)
