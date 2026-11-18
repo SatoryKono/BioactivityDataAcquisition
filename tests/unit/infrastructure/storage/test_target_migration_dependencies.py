@@ -225,6 +225,43 @@ def test_collects_both_old_shadow_and_new_enrich_profiles(deployment):
     ).as_posix() in dependencies
 
 
+@pytest.mark.parametrize("mode", ["shadow", "enrich"])
+def test_legacy_receipt_is_preserved_only_for_shadow(deployment, mode):
+    workspace, configs, output, _ = deployment
+    old, bundle = synthetic_snapshot_bundle(workspace / "old-inputs")
+    receipt = synthetic_reference_receipt(
+        bundle.snapshot_sha256, root=old / "legacy-artifacts"
+    )
+    receipt["schema_version"] = 1
+    del receipt["artifact_references"]
+    receipt_path = old / "legacy-acceptance.json"
+    write_fixture_json(receipt_path, receipt)
+    profile_path = old / "profile.json"
+    profile = json.loads(profile_path.read_bytes())
+    profile["acceptance"] = {"path": receipt_path.name, "sha256": _sha(receipt_path)}
+    write_fixture_json(profile_path, profile)
+    _config(configs[0], profile_path, mode)
+    if mode == "enrich":
+        with pytest.raises(ValueError, match="acceptance schema 2"):
+            collect_target_dependencies(workspace=workspace, configs=configs)
+        return
+    dependencies = collect_target_dependencies(workspace=workspace, configs=configs)
+    assert dependencies[receipt_path.relative_to(workspace).as_posix()] == _sha(
+        receipt_path
+    )
+    assert (output / "enrich-profile.json").relative_to(
+        workspace
+    ).as_posix() in dependencies
+    backup = workspace / "backup"
+    copied = backup_target_dependencies(
+        workspace=workspace, dependencies=dependencies, destination=backup
+    )
+    verify_target_dependencies(workspace, copied)
+    assert (
+        backup / receipt_path.relative_to(workspace)
+    ).read_bytes() == receipt_path.read_bytes()
+
+
 def test_off_or_absent_classification_requires_no_profile(tmp_path):
     config = tmp_path / "legacy.yaml"
     config.write_text("pipeline: {}\n")

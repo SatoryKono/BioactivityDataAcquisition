@@ -189,7 +189,12 @@ class _DependencyCollector:
             self.reference(evidence_root, reference)
 
     def acceptance(self, path: Path, document: Mapping[str, object]) -> None:
-        _header(document, "bioetl_iuphar_acceptance", (2,))
+        _header(document, "bioetl_iuphar_acceptance", (1, 2))
+        # Historical shadow receipts bind hashes without a typed file closure.
+        # Preserve their pinned bytes; load_profile still validates the receipt
+        # and requires schema 2 whenever the configuration activates enrich.
+        if document["schema_version"] == 1:
+            return
         references = document.get("artifact_references")
         if not isinstance(references, list) or not references:
             raise ValueError("target acceptance needs resolvable artifact references")
