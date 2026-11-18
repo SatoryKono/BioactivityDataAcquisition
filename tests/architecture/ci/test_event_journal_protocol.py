@@ -73,11 +73,11 @@ def test_environment_identity_assignments_are_not_written_as_plaintext(
     from scripts.engineering.ci.pytest_event_journal import (
         EventJournalPlugin,
         _identity_from_env,
-        _secret_values,
+        _keyed_env_needles,
     )
 
     monkeypatch.setenv(env_name, value)
-    identity = _identity_from_env(actual_sha=None, secrets=_secret_values())
+    identity = _identity_from_env(actual_sha=None, needles=_keyed_env_needles())
     path = tmp_path / "receipt.jsonl"
     plugin = EventJournalPlugin(None, path, identity)
     plugin.record("session_start", {})
@@ -88,15 +88,15 @@ def test_environment_identity_assignments_are_not_written_as_plaintext(
 def test_identity_env_strings_are_redacted(monkeypatch: pytest.MonkeyPatch) -> None:
     from scripts.engineering.ci.pytest_event_journal import (
         _identity_from_env,
+        _keyed_env_needles,
         _safe_env,
-        _secret_values,
     )
 
     monkeypatch.setenv("BIOETL_JOURNAL_PASS", "password=swordfish")
     monkeypatch.setenv("BIOETL_JOURNAL_INVOCATION_ID", "token=topsecretvalue")
     monkeypatch.setenv("PYTEST_XDIST_WORKER", "gw0")
-    secrets = _secret_values()
-    identity = _identity_from_env(actual_sha="a" * 40, secrets=secrets)
+    needles = _keyed_env_needles()
+    identity = _identity_from_env(actual_sha="a" * 40, needles=needles)
     blob = json.dumps(identity, sort_keys=True)
     assert "swordfish" not in blob
     assert "topsecretvalue" not in blob
@@ -105,7 +105,7 @@ def test_identity_env_strings_are_redacted(monkeypatch: pytest.MonkeyPatch) -> N
     assert "[redacted:" in str(identity["invocation_id"])
     assert identity["worker_id"] == "gw0"
     assert identity["role"] == "worker"
-    safe = json.dumps(_safe_env(secrets), sort_keys=True)
+    safe = json.dumps(_safe_env(needles), sort_keys=True)
     assert "swordfish" not in safe
     assert "topsecretvalue" not in safe
 
