@@ -5,6 +5,9 @@ from __future__ import annotations
 
 import os
 import tempfile
+from collections.abc import Iterator
+from contextlib import contextmanager
+from dataclasses import dataclass
 from pathlib import Path
 from typing import IO
 
@@ -167,20 +170,29 @@ def read_text_confined_or_none(
     return resolved.read_text(encoding=encoding)  # NOSONAR - confined path
 
 
-def write_text_confined(
+@dataclass(frozen=True)
+class StagedTextOutput:
+    """A prepared text file whose publication is explicitly deferred."""
+
+    destination: Path
+    temporary: Path
+
+    def publish(self) -> Path:
+        """Atomically replace the destination with the prepared contents."""
+        os.replace(self.temporary, self.destination)
+        return self.destination
+
+
+@contextmanager
+def stage_text_confined(
     path: str | Path,
     data: str,
     *,
     root: Path | None = None,
     encoding: str = "utf-8",
     allow_external_absolute: bool = False,
-) -> Path:
-    """Write *data* to *path* after confining it under *root* (S8707).
-
-    Parent directories are created inside the helper. Returns the confined
-    (rebuilt) path for callers that need it in messages; it is a fresh path
-    joined under the resolved root, not the original CLI value.
-    """
+) -> Iterator[StagedTextOutput]:
+    """Prepare a confined output and clean its temporary file on context exit."""
     resolved = confined_io_path(
         path, root=root, allow_external_absolute=allow_external_absolute
     )
@@ -194,13 +206,35 @@ def write_text_confined(
             handle.write(data)  # NOSONAR - confined parent of rebuilt path
             handle.flush()
             os.fsync(handle.fileno())
-        if resolved.exists():
-            os.chmod(temporary, resolved.stat().st_mode & 0o7777)
-        os.replace(temporary, resolved)  # NOSONAR - confined parent of rebuilt path
-    except BaseException:
+        if os.name == "posix":
+            try:
+                mode = resolved.stat().st_mode & 0o777
+            except FileNotFoundError:
+                pass
+            else:
+                os.chmod(temporary, mode)
+        yield StagedTextOutput(resolved, temporary)
+    finally:
         temporary.unlink(missing_ok=True)
-        raise
-    return resolved
+
+
+def write_text_confined(
+    path: str | Path,
+    data: str,
+    *,
+    root: Path | None = None,
+    encoding: str = "utf-8",
+    allow_external_absolute: bool = False,
+) -> Path:
+    """Atomically publish text after confining its path and preparing parents."""
+    with stage_text_confined(
+        path,
+        data,
+        root=root,
+        encoding=encoding,
+        allow_external_absolute=allow_external_absolute,
+    ) as output:
+        return output.publish()
 
 
 def read_bytes_confined(
