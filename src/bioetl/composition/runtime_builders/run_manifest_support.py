@@ -7,9 +7,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from bioetl.composition.control_plane_paths import control_plane_root, resolve_data_root
-from bioetl.composition.runtime_builders._exact_replay_cached_bronze_context import (
-    resolve_replay_parent_manifest,
-)
 
 from bioetl.composition.runtime_builders._run_context_values import (
     resolve_run_context_values,
@@ -55,7 +52,6 @@ __all__ = [
     "create_control_plane_refs_for_manifest",
     "resolve_contract_identity",
     "resolve_replay_capability",
-    "resolve_replay_parent_manifest",
     "resolve_replay_parentage",
     "resolve_run_context_values",
     "validate_reproducible_sink_modes",

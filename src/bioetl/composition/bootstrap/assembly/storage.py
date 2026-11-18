@@ -52,7 +52,7 @@ from bioetl.composition.bootstrap.cli.lock import (
     validate_workflow_target_mutations,
 )
 from bioetl.composition.runtime_builders.config_access import load_pipeline_config
-from bioetl.composition.runtime_builders.run_manifest_support import (
+from bioetl.composition.runtime_builders.input_snapshot_resolution import (
     resolve_replay_parent_manifest,
 )
 from bioetl.domain.filtering.silver_config import FORBIDDEN_SILVER_SEMANTIC_FILTER_KEYS
