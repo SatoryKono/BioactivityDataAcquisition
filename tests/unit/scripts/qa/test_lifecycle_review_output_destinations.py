@@ -12,7 +12,6 @@ import pytest
 
 from scripts.data_quality import run_silver_gold_filter_parity as parity
 from scripts.engineering.common import repo_paths
-from scripts.engineering.common import report_outputs
 from scripts.engineering.common.report_outputs import write_report_outputs
 
 pytestmark = pytest.mark.unit
@@ -63,18 +62,14 @@ def test_report_outputs_reject_substitution_before_confined_write(
     outside.mkdir()
     protected = outside / "report.json"
     protected.write_text("protected", encoding="utf-8")
-    writer = report_outputs.write_text_confined
+    confine = repo_paths.confined_io_path
 
-    def substitute(
-        path: Path, data: str, *, root: Path, allow_external_absolute: bool
-    ) -> Path:
+    def substitute(path: Path, *, root: Path, allow_external_absolute: bool) -> Path:
         parent.rename(root / "original-reports")
         parent.symlink_to(outside, target_is_directory=True)
-        return writer(
-            path, data, root=root, allow_external_absolute=allow_external_absolute
-        )
+        return confine(path, root=root, allow_external_absolute=allow_external_absolute)
 
-    monkeypatch.setattr(report_outputs, "write_text_confined", substitute)
+    monkeypatch.setattr(repo_paths, "confined_io_path", substitute)
     with pytest.raises(ValueError, match="refusing path outside"):
         write_report_outputs(
             {"new": True},
@@ -85,6 +80,83 @@ def test_report_outputs_reject_substitution_before_confined_write(
         )
     assert protected.read_text(encoding="utf-8") == "protected"
     assert not (outside / "report.md").exists()
+
+
+def test_report_outputs_second_staging_failure_preserves_both_files(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    json_out = tmp_path / "json/report.json"
+    md_out = tmp_path / "markdown/report.md"
+    for path in (json_out, md_out):
+        path.parent.mkdir()
+        path.write_text("old", encoding="utf-8")
+    create = repo_paths.tempfile.mkstemp
+
+    def fail_markdown(*, prefix: str, suffix: str, dir: Path) -> tuple[int, str]:
+        if dir == md_out.parent:
+            raise PermissionError("Markdown directory rejects file creation")
+        return create(prefix=prefix, suffix=suffix, dir=dir)
+
+    monkeypatch.setattr(repo_paths.tempfile, "mkstemp", fail_markdown)
+    with pytest.raises(PermissionError, match="rejects file creation"):
+        write_report_outputs(
+            {"new": True},
+            json_out=json_out,
+            md_out=md_out,
+            markdown="new",
+            root=tmp_path,
+        )
+    assert json_out.read_text(encoding="utf-8") == "old"
+    assert md_out.read_text(encoding="utf-8") == "old"
+    assert not list(tmp_path.rglob(".bioetl-*.tmp"))
+
+
+@pytest.mark.skipif(os.name != "posix", reason="POSIX permission transfer")
+def test_report_outputs_old_file_disappears_during_mode_read(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    json_out = tmp_path / "report.json"
+    json_out.write_text("old", encoding="utf-8")
+    original_stat = Path.stat
+
+    def removed_stat(path: Path, *, follow_symlinks: bool = True) -> os.stat_result:
+        if path == json_out:
+            path.unlink(missing_ok=True)
+            raise FileNotFoundError("Old report was removed")
+        return original_stat(path, follow_symlinks=follow_symlinks)
+
+    monkeypatch.setattr(Path, "stat", removed_stat)
+    write_report_outputs(
+        {"new": True},
+        json_out=json_out,
+        md_out=tmp_path / "report.md",
+        markdown="new",
+        root=tmp_path,
+    )
+    assert json.loads(json_out.read_text(encoding="utf-8")) == {"new": True}
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Windows readonly destination")
+def test_report_outputs_readonly_failure_cleans_staged_files(tmp_path: Path) -> None:
+    json_out = tmp_path / "report.json"
+    json_out.write_text("old", encoding="utf-8")
+    json_out.chmod(stat.S_IREAD)
+    try:
+        with pytest.raises(PermissionError):
+            write_report_outputs(
+                {"new": True},
+                json_out=json_out,
+                md_out=tmp_path / "report.md",
+                markdown="new",
+                root=tmp_path,
+            )
+        assert json_out.read_text(encoding="utf-8") == "old"
+        assert not (tmp_path / "report.md").exists()
+        assert not list(tmp_path.glob(".bioetl-*.tmp"))
+    finally:
+        json_out.chmod(stat.S_IREAD | stat.S_IWRITE)
 
 
 def test_report_outputs_reject_second_relative_escape_before_publication(
