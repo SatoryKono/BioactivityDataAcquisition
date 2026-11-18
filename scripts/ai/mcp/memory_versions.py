@@ -357,41 +357,45 @@ def build(owner, entry, value):
     staging = VERSIONS / ("building-" + uuid.uuid4().hex)
     staging.mkdir()
     try:
-        _copy_runtime_dependencies(owner, hashes, staging)
-        service = staging / "tools/shared-mcp"
-        source = Path(__file__).with_name(RECONCILIATION_SOURCE)
-        shutil.copyfile(source, service / "project-memory-reconciliation.py")
-        for file in service.glob("*"):
-            if file.suffix not in {".py", ".mjs"}:
-                continue
-            text = file.read_text(encoding="utf-8").replace("\r\n", "\n")
-            text = _adapt_service_text(file, text)
-            file.write_text(text, encoding="utf-8", newline="\n")
-        manifest = {
-            "schema": 2,
-            "recipe": {
-                "builder_sha256": sha(Path(__file__)),
-                "legacy_input": hashes,
-                "reconciliation_sha256": sha(source),
-            },
-            "files": {
-                p.relative_to(staging).as_posix(): sha(p)
-                for p in sorted(staging.rglob("*"))
-                if p.is_file()
-            },
-        }
-        raw = canonical(manifest)
-        identity = hashlib.sha256(raw).hexdigest()
-        target = VERSIONS / identity
-        (staging / BUNDLE_MANIFEST).write_bytes(raw)
-        return _publish_bundle(staging, target)
-    except BaseException as error:
-        try:
-            if staging.exists():
+        return _build_version(owner, hashes, staging)
+    except BaseException:
+        if staging.exists():
+            try:
                 _discard_duplicate_build(staging)
-        except (OSError, ValueError):
-            error.add_note("Could not remove the uncommitted runtime staging directory")
+            except Exception:
+                pass  # Preserve the build error when safe cleanup cannot complete.
         raise
+
+
+def _build_version(owner, hashes, staging):
+    _copy_runtime_dependencies(owner, hashes, staging)
+    service = staging / "tools/shared-mcp"
+    source = Path(__file__).with_name(RECONCILIATION_SOURCE)
+    shutil.copyfile(source, service / "project-memory-reconciliation.py")
+    for file in service.glob("*"):
+        if file.suffix not in {".py", ".mjs"}:
+            continue
+        text = file.read_text(encoding="utf-8").replace("\r\n", "\n")
+        text = _adapt_service_text(file, text)
+        file.write_text(text, encoding="utf-8", newline="\n")
+    manifest = {
+        "schema": 2,
+        "recipe": {
+            "builder_sha256": sha(Path(__file__)),
+            "legacy_input": hashes,
+            "reconciliation_sha256": sha(source),
+        },
+        "files": {
+            p.relative_to(staging).as_posix(): sha(p)
+            for p in sorted(staging.rglob("*"))
+            if p.is_file()
+        },
+    }
+    raw = canonical(manifest)
+    identity = hashlib.sha256(raw).hexdigest()
+    target = VERSIONS / identity
+    (staging / BUNDLE_MANIFEST).write_bytes(raw)
+    return _publish_bundle(staging, target)
 
 
 def _discard_duplicate_build(staging):
@@ -782,6 +786,8 @@ def _selected_binding(bundle_binding, transaction):
         "legacy",
     }:
         raise PermissionError("Profile runtime binding is disabled or unsupported")
+    if bundle_binding["state"] == "active" and transaction is None:
+        raise PermissionError("Active runtime has no committed migration transaction")
     if transaction is not None and not _binding_matches_transaction(
         bundle_binding, transaction
     ):
@@ -790,8 +796,6 @@ def _selected_binding(bundle_binding, transaction):
         )
     if bundle_binding["state"] == "legacy":
         return None
-    if transaction is None:
-        raise PermissionError("Active runtime binding has no committed transaction")
     bundle = Path(bundle_binding["bundle"])
     if bundle.parent != VERSIONS or bundle.name != bundle_binding["version"]:
         raise PermissionError("Profile runtime version mismatch")

@@ -143,38 +143,37 @@ def _validate_markdownify_client(entry):
     )
 
 
-def _markdownify_user_policies(entry, existing):
-    from scripts.ai.codex.local_mcp_routes import MCP_POLICY_FIELDS
-
-    if existing is None:
-        return {}
-    transport = {
-        key: value for key, value in existing.items() if key not in MCP_POLICY_FIELDS
-    }
-    if transport != {"command": entry["command"], "args": entry["args"]}:
-        raise PermissionError("Existing unrelated Markdownify entry needs review")
-    return {key: existing[key] for key in MCP_POLICY_FIELDS & existing.keys()}
-
-
-def _markdownify_entry(source, root, servers, *, explicit):
+def _markdownify_entry(source, root, servers, *, explicit=True):
     from scripts.ai.codex.local_mcp_routes import common_directory
 
     if not source.exists():
         return None
     value = json.loads(physical(source).read_bytes())
-    workspace = Path(value["workspace"])
-    registered_common = Path(value["git_common"])
-    name = "Markdownify-BioETL"
     if (
-        value.get("schema") != 1
-        or value.get("server") != name
-        or not workspace.is_absolute()
-        or not registered_common.is_absolute()
+        not isinstance(value, dict)
+        or value.get("schema") != 1
+        or value.get("server") != "Markdownify-BioETL"
+        or not isinstance(value.get("workspace"), str)
+        or not Path(value["workspace"]).is_absolute()
     ):
         raise PermissionError("Invalid Markdownify session binding")
-    if workspace != root and not explicit:
-        return (name, {"enabled": False}) if name in servers else None
-    if workspace != root or common_directory(root, expected=registered_common) is None:
+    if (
+        not explicit
+        and value.get("schema") == 1
+        and isinstance(value.get("workspace"), str)
+        and Path(value["workspace"]) != root
+    ):
+        return (
+            ("Markdownify-BioETL", {"enabled": False})
+            if "Markdownify-BioETL" in servers
+            else None
+        )
+    if (
+        value.get("schema") != 1
+        or Path(value["workspace"]) != root
+        or value.get("server") != "Markdownify-BioETL"
+        or common_directory(root, expected=Path(value["git_common"])) is None
+    ):
         raise PermissionError(
             "Markdownify session binding does not match this workspace"
         )
@@ -189,8 +188,22 @@ def _markdownify_entry(source, root, servers, *, explicit):
             "Markdownify session binding must be credential-free stdio"
         )
     _validate_markdownify_client(entry)
-    policy = _markdownify_user_policies(entry, servers.get(name))
-    return name, {**entry, **policy}
+    return value["server"], _markdownify_policy(entry, servers.get(value["server"]))
+
+
+def _markdownify_policy(entry, previous):
+    from scripts.ai.codex.local_mcp_routes import MCP_POLICY_FIELDS
+
+    if previous is None:
+        return entry
+    if not isinstance(previous, dict) or {
+        key: value for key, value in previous.items() if key not in MCP_POLICY_FIELDS
+    } != {key: value for key, value in entry.items() if key not in MCP_POLICY_FIELDS}:
+        raise PermissionError("Existing unrelated Markdownify entry needs review")
+    return {
+        **entry,
+        **{key: value for key, value in previous.items() if key in MCP_POLICY_FIELDS},
+    }
 
 
 def _check_client_manifest(script, manifest_name, required_source):
@@ -297,13 +310,17 @@ def session_overrides(
 
 
 def workspace():
-    from scripts.ai.mcp.session_client import session_root
-
+    root = next(
+        (p for p in (Path.cwd(), *Path.cwd().parents) if os.path.lexists(p / ".git")),
+        None,
+    )
+    if root is None:
+        raise PermissionError("Native session requires its actual project cwd")
     path = Path("D:/pc-agent/tools/shared-mcp/ast-workspace-profile.py")
     spec = importlib.util.spec_from_file_location("native_session_workspace", path)
     roots = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(roots)
-    root = session_root(physical(Path.cwd()), roots.physical_root)
+    root = roots.physical_root(physical(root))
     return root, roots.CANONICAL
 
 
