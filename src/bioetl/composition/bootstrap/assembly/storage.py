@@ -49,7 +49,7 @@ from bioetl.application.services.workflow.control_plane.mutation_plan import (
 from bioetl.composition.bootstrap.cli.lock import validate_workflow_target_mutations
 from bioetl.composition.runtime_builders.config_access import load_pipeline_config
 from bioetl.composition.runtime_builders._exact_replay_cached_bronze_context import (
-    resolve_replay_parent_manifest_refs,
+    resolve_replay_parent_manifest,
 )
 from bioetl.domain.filtering.silver_config import FORBIDDEN_SILVER_SEMANTIC_FILTER_KEYS
 from bioetl.infrastructure.adapters.iuphar import (
@@ -345,11 +345,7 @@ def _workflow_replay_target_config(
         if options.exact_replay and (
             options.replay_of_manifest_id or options.replay_of_run_id
         ):
-            parent = resolve_replay_parent_manifest_refs(
-                replay_of_manifest_id=options.replay_of_manifest_id,
-                replay_of_run_id=options.replay_of_run_id,
-                settings=settings,
-            )
+            parent = resolve_replay_parent_manifest(ctx=options, settings=settings)
             if parent.pipeline_name != "chembl_target" or not parent.resolved_config:
                 raise ValueError(
                     "target replay parent has no matching pinned configuration"

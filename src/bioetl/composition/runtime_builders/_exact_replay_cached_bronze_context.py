@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-
 from pathlib import Path
 from typing import TYPE_CHECKING
 from uuid import UUID
@@ -24,31 +23,18 @@ from bioetl.infrastructure.control_plane import FileRunLedgerStore, FileRunManif
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
+    from bioetl.domain.workflow import WorkflowRunOptionsConfig
     from bioetl.infrastructure.config.settings_api import Settings
 
 
 def resolve_replay_parent_manifest(
     *,
-    ctx: PipelineRunContext,
+    ctx: PipelineRunContext | WorkflowRunOptionsConfig,
     settings: Settings,
 ) -> RunManifest:
-    """Load the persisted parent run manifest for an exact-replay request."""
-    return resolve_replay_parent_manifest_refs(
-        replay_of_manifest_id=_optional_text(
-            getattr(ctx, "replay_of_manifest_id", None)
-        ),
-        replay_of_run_id=_optional_text(getattr(ctx, "replay_of_run_id", None)),
-        settings=settings,
-    )
-
-
-def resolve_replay_parent_manifest_refs(
-    *,
-    replay_of_manifest_id: str | None,
-    replay_of_run_id: str | None,
-    settings: Settings,
-) -> RunManifest:
-    """Resolve persisted replay selectors without manufacturing a child run identity."""
+    """Load a persisted replay parent from pipeline or workflow run options."""
+    replay_of_manifest_id = _optional_text(getattr(ctx, "replay_of_manifest_id", None))
+    replay_of_run_id = _optional_text(getattr(ctx, "replay_of_run_id", None))
     manifest_store = FileRunManifestStore(
         base_path=control_plane_root(settings, "run_manifest")
     )
