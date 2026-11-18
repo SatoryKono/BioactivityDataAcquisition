@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+from types import SimpleNamespace
 
 import pytest
 
@@ -82,3 +83,51 @@ def test_selected_profile_does_not_modify_neighbor_binding(tmp_path, bundle, mon
     assert versions.select_bundle(tmp_path, "target") == bundle
     assert versions.select_bundle(tmp_path, "neighbor") is None
     assert neighbor.read_bytes() == before
+
+
+@pytest.fixture
+def predecessor(tmp_path):
+    def read(path, **_kwargs):
+        return json.loads(path.read_bytes()) if path.exists() else None
+    owner = SimpleNamespace(state=SimpleNamespace(read=read))
+    entry = {"id": "target"}
+    binding = {"schema": 2, "state": "active", "version": "a" * 64, "bundle": "prior-version"}
+    prior = {"id": "b" * 32, "phase": "COMMITTED", "after_entry": entry, "version": "a" * 64}
+    (tmp_path / "runtime-binding.json").write_text(json.dumps(binding), encoding="utf-8")
+    (tmp_path / "migration-v2.json").write_text(json.dumps(prior), encoding="utf-8")
+    return owner, entry, binding, prior
+
+
+@pytest.mark.parametrize("expected", [None, "legacy", "c" * 64])
+def test_upgrade_requires_the_exact_reviewed_predecessor(tmp_path, predecessor, expected):
+    owner, entry, _, _ = predecessor
+    before = {path: path.read_bytes() for path in tmp_path.iterdir()}
+    with pytest.raises(ValueError, match="explicit"):
+        versions.previous_migration(owner, tmp_path, entry, expected)
+    assert {path: path.read_bytes() for path in tmp_path.iterdir()} == before
+
+
+def test_interrupted_prior_migration_cannot_be_replaced(tmp_path, predecessor):
+    owner, entry, _, prior = predecessor
+    prior["phase"] = "PREPARING"
+    path = tmp_path / "migration-v2.json"
+    path.write_text(json.dumps(prior), encoding="utf-8")
+    before = path.read_bytes()
+    with pytest.raises(ValueError, match="does not match"):
+        versions.previous_migration(owner, tmp_path, entry, "a" * 64)
+    assert path.read_bytes() == before
+
+
+def test_predecessor_entry_mismatch_keeps_its_history(tmp_path, predecessor):
+    owner, _, _, _ = predecessor
+    with pytest.raises(ValueError, match="does not match"):
+        versions.previous_migration(owner, tmp_path, {"id": "another-target"}, "a" * 64)
+
+
+def test_rollback_to_an_older_bundle_retains_that_bundle_identity(tmp_path, predecessor):
+    owner, entry, binding, prior = predecessor
+    prior.update(phase="ROLLED_BACK", version="d" * 64,
+                 before={"entry": entry, "runtime_binding": binding})
+    (tmp_path / "migration-v2.json").write_text(json.dumps(prior), encoding="utf-8")
+    selected, history = versions.previous_migration(owner, tmp_path, entry, "a" * 64)
+    assert selected == binding and history == prior

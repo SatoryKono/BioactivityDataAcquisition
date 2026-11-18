@@ -12,10 +12,28 @@ import hashlib
 import json
 import os
 import re
+import time
 import uuid
+from contextlib import ExitStack, contextmanager
 from pathlib import Path
 
 COORDINATION = "recovery-v2.json"
+
+
+@contextmanager
+def _transition_lock(owner, directory):
+    """Wait for bounded control-plane contention, never repeat an entered body."""
+    deadline = time.monotonic() + 5
+    with ExitStack() as stack:
+        while True:
+            try:
+                stack.enter_context(owner.core.LifetimeLock(directory / "transition.lock"))
+                break
+            except RuntimeError as error:
+                if str(error) != "Another owner holds the lifetime lock" or time.monotonic() >= deadline:
+                    raise
+                time.sleep(.025)
+        yield
 
 
 def digest(value):
@@ -111,7 +129,7 @@ def plan(owner, entry, value):
 
 def apply(owner, entry, value, proposed):
     directory = Path(entry["state"])
-    with owner.core.LifetimeLock(directory / "transition.lock"):
+    with _transition_lock(owner, directory):
         graph_lock = Path(value["profile"]["graph"]).with_name(".memory.service-owner.lock")
         with owner.core.LifetimeLock(graph_lock):
             coord = coordination(owner, entry)
@@ -178,7 +196,7 @@ def decision(owner, entry, value, *, self_owner=False):
 
 def launch_generation(owner, entry, value):
     directory = Path(entry["state"])
-    with owner.core.LifetimeLock(directory / "transition.lock"):
+    with _transition_lock(owner, directory):
         coord = coordination(owner, entry)
         last = coord["history"][-1] if coord["history"] else None
         if not last or last["phase"] in {"RUNNING", "IDLE"}:
@@ -195,7 +213,7 @@ def launch_generation(owner, entry, value):
 
 def observe(owner, entry, value, generation, *, idle=False):
     directory = Path(entry["state"])
-    with owner.core.LifetimeLock(directory / "transition.lock"):
+    with _transition_lock(owner, directory):
         coord = coordination(owner, entry)
         last = coord["history"][-1] if coord["history"] else None
         if not last or last["new_generation"] != generation:
@@ -217,7 +235,7 @@ def observe(owner, entry, value, generation, *, idle=False):
 
 def record_block(owner, entry, reason):
     directory = Path(entry["state"])
-    with owner.core.LifetimeLock(directory / "transition.lock"):
+    with _transition_lock(owner, directory):
         coord = coordination(owner, entry)
         coord["active_block"] = {"id": uuid.uuid4().hex, "reason": reason,
                                  "records": {k: digest(v) for k, v in records(owner, entry).items()}}

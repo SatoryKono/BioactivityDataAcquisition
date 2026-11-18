@@ -217,3 +217,47 @@ def test_missing_owner_identity_is_unknown_instead_of_absent(fixture):
     del previous["owner_birth"]
     owner.state.write(path, previous)
     assert recovery.plan(owner, entry, value)["reason"] == "BLOCK_PROCESS_IDENTITY_UNKNOWN"
+
+
+def test_generation_waits_for_transition_lock_before_consuming_a_grant(fixture, monkeypatch):
+    owner, entry, value, _ = fixture
+    proposed = recovery.plan(owner, entry, value)
+    recovery.apply(owner, entry, value, proposed)
+    original_lock = owner.core.LifetimeLock
+    attempts = []
+    def temporarily_busy(path):
+        attempts.append(path)
+        if len(attempts) <= 2:
+            raise RuntimeError("Another owner holds the lifetime lock")
+        return original_lock(path)
+    monkeypatch.setattr(owner.core, "LifetimeLock", temporarily_busy)
+    generation = recovery.launch_generation(owner, entry, value)
+    assert generation == proposed["new_generation"]
+    assert len(attempts) == 3
+    assert recovery.coordination(owner, entry)["history"][-1]["phase"] == "LAUNCHING"
+
+
+def test_lock_deadline_does_not_consume_the_recovery_grant(fixture, monkeypatch):
+    owner, entry, value, _ = fixture
+    proposed = recovery.plan(owner, entry, value)
+    recovery.apply(owner, entry, value, proposed)
+    path = Path(entry["state"]) / recovery.COORDINATION
+    before = path.read_bytes()
+    ticks = iter([0, 6])
+    monkeypatch.setattr(recovery.time, "monotonic", lambda: next(ticks))
+    def busy(_):
+        raise RuntimeError("Another owner holds the lifetime lock")
+    monkeypatch.setattr(owner.core, "LifetimeLock", busy)
+    with pytest.raises(RuntimeError, match="Another owner"):
+        recovery.launch_generation(owner, entry, value)
+    assert path.read_bytes() == before
+
+
+def test_exception_inside_a_transition_is_never_replayed(fixture):
+    owner, entry, _, _ = fixture
+    attempts = []
+    with pytest.raises(RuntimeError, match="Another owner"):
+        with recovery._transition_lock(owner, Path(entry["state"])):
+            attempts.append(True)
+            raise RuntimeError("Another owner holds the lifetime lock")
+    assert attempts == [True]

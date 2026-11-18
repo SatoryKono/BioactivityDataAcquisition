@@ -133,6 +133,29 @@ compatible target metadata and never rewinds a graph or committed operation.
 Changed v2 coordination or legacy runtime drift disables the target until
 compatible forward recovery. Neighboring profiles keep their original pins.
 
+An upgrade of an already versioned profile requires its exact `--from-version`.
+The current descriptor, binding and committed (or rolled-back) transaction must
+agree. The previous transaction is archived inside that profile before a new
+pending record is published. Partial or mismatched predecessors stay closed.
+Compatible rollback restores the previous binding, including a previous bundle;
+it does not implicitly select legacy. Historical transactions and graphs remain.
+
+The versioned HTTP bridge verifies the complete runtime before sending a
+request. Health GETs therefore have a bounded 120-second verification budget;
+the legacy five-second budget can expire before network IO starts on a cold
+host. This changes only idempotent health checks. Tool requests are never
+automatically replayed, and the caller's overall timeout still applies.
+Administrative owner startup has a 300-second readiness budget, with 180 seconds
+for gateway/backend initialization. These bounds cover the same cold verification
+before serving. Shutdown and unknown-process rejection rules remain unchanged;
+per-connection clients still connect only to an explicitly started ready owner.
+
+Recovery transitions wait up to five seconds to acquire the control-plane lock.
+Only acquisition is retried. An exception inside the critical section propagates
+without repeating its body; a lock deadline does not consume a recovery grant.
+This prevents the supervisor from exiting merely because `ensure` briefly holds
+the same transition lock during startup or observation.
+
 `reconcile-plan` is read-only. Its complete output contains private graph and
 coordination fingerprints: keep it in the target profile's private
 `reconcile-plans` directory rather than a public report. `reconcile-apply`

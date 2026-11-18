@@ -120,6 +120,9 @@ def connect(identity, fixture=False):
                         'reconciler.record_block(runtime_owner(), entry, "RESTART_BUDGET_EXHAUSTED")')
     text = replace_once(text, '"project-memory-owner.py",',
                         '"project-memory-owner.py",\n        "project-memory-reconciliation.py",\n        "project-memory-scoped-client.py",')
+    text = replace_once(text, "deadline = time.monotonic() + 45", "deadline = time.monotonic() + 300")
+    text = replace_once(text, "deadline = time.monotonic() + 30\n            try:",
+                        "deadline = time.monotonic() + 180\n            try:")
     return text
 
 
@@ -210,6 +213,13 @@ def build(owner, entry, value):
             text = replace_once(text, "owner.ensure(args.profile, fixture)", "owner.connect(args.profile, fixture)")
         if file.name == "project-memory-gateway.mjs":
             text = adapt_gateway(text)
+        if file.name == "project-memory-connection.mjs":
+            # Each health bridge verifies the entire closure before network IO.
+            # A cold verification can exceed the legacy five-second GET budget.
+            text = replace_once(text, "AbortSignal.timeout(5000)", "AbortSignal.timeout(120_000)")
+        if file.name == "github-grok-broker.mjs":
+            text = replace_once(text, "this.client.connect(this.transport,{timeout:60000})",
+                                "this.client.connect(this.transport,{timeout:180000})")
         if file.suffix == ".py":
             text = text.replace('"C:/Users/Fedor/AppData/Local/Programs/Python/Python313/python.exe"',
                                 '(HERE.parents[1] / "runtime/python/python.exe")')
@@ -277,7 +287,35 @@ def dormant(owner, entry, value):
     return owner.state.graph_stamp(value)
 
 
-def migrate(owner, identity, bundle, *, fixture=False):
+def previous_migration(owner, directory, entry, expected_version):
+    """Require an explicit, consistent predecessor before replacing its journal."""
+    binding = owner.state.read(directory / "runtime-binding.json")
+    prior = owner.state.read(directory / "migration-v2.json", max_bytes=32 * 1024 * 1024)
+    if binding is None and prior is None:
+        if expected_version is not None:
+            raise ValueError("Unexpected predecessor version")
+        return None, None
+    if (not binding or not prior or binding.get("schema") != 2
+            or binding.get("state") not in {"active", "legacy"}):
+        raise ValueError("Incomplete predecessor migration; preserve its records")
+    current = binding["version"] if binding["state"] == "active" else "legacy"
+    if expected_version != current:
+        raise ValueError("Existing runtime requires its explicit --from-version")
+    if prior.get("phase") == "COMMITTED":
+        consistent = prior.get("after_entry") == entry and prior.get("version") == current
+    elif prior.get("phase") == "ROLLED_BACK":
+        before = prior.get("before", {})
+        consistent = (before.get("entry") == entry
+                      and binding == before.get("runtime_binding", {"schema": 2, "state": "legacy"}))
+    else:
+        consistent = False
+    identity = prior.get("id", "")
+    if not consistent or len(identity) != 32 or any(c not in "0123456789abcdef" for c in identity):
+        raise ValueError("Predecessor migration does not match current profile")
+    return binding, prior
+
+
+def migrate(owner, identity, bundle, *, fixture=False, from_version=None):
     new_owner = bundle_owner(bundle, owner.registry.ROOT if fixture else None)
     entry, value = owner.specification(identity, fixture)
     directory = Path(entry["state"])
@@ -285,14 +323,16 @@ def migrate(owner, identity, bundle, *, fixture=False):
         with owner.core.LifetimeLock(directory / "transition.lock"):
             with owner.core.LifetimeLock(Path(value["profile"]["graph"]).with_name(".memory.service-owner.lock")):
                 stamp = dormant(owner, entry, value)
-                if (directory / "runtime-binding.json").exists():
-                    raise ValueError("Existing runtime binding requires explicit migration review")
+                binding, prior = previous_migration(owner, directory, entry, from_version)
+                if binding and binding.get("state") == "active" and Path(binding["bundle"]) == bundle:
+                    raise ValueError("Runtime version is already selected")
                 index_path = owner.registry.ROOT / "profiles.json"
                 index = owner.state.read(index_path)
                 if index.get(identity) != entry:
                     raise ValueError("Concurrent profile registration change")
                 before = {"entry": entry, "descriptor": value, "active": owner.state.read(directory / "active.json", max_bytes=32 * 1024 * 1024),
-                          "graph": stamp, "coordination": owner.state.read(directory / "recovery-v2.json")}
+                          "graph": stamp, "coordination": owner.state.read(directory / "recovery-v2.json"),
+                          "runtime_binding": binding or {"schema": 2, "state": "legacy"}}
                 updated = deepcopy(value)
                 updated["service_pins"] = new_owner.registry.provider.hashes()
                 descriptor_raw = new_owner.state.scope.canonical(updated) + b"\n"
@@ -301,8 +341,17 @@ def migrate(owner, identity, bundle, *, fixture=False):
                 transaction = {"id": uuid.uuid4().hex, "phase": "PREPARING", "before": before,
                                "after_entry": new_entry, "bundle": str(bundle), "version": bundle.name}
                 path = directory / "migration-v2.json"
-                if path.exists():
-                    raise ValueError("Prior migration journal retained; no automatic replacement")
+                if prior is not None:
+                    history = directory / "migration-history"
+                    owner.state.scope.physical(history, exists=False)
+                    history.mkdir(exist_ok=True)
+                    archive = history / (prior["id"] + ".json")
+                    if archive.exists():
+                        if owner.state.read(archive, max_bytes=32 * 1024 * 1024) != prior:
+                            raise ValueError("Archived migration differs; preserve current state")
+                    else:
+                        owner.state.write(archive, prior)
+                    transaction["previous_migration"] = {"path": str(archive), "sha256": sha(archive)}
                 owner.state.write(path, transaction)
                 owner.state.write(directory / "profile.json", updated)
                 owner.state.write(directory / "active.json", active)
@@ -324,7 +373,7 @@ def rollback(owner, identity):
             with owner.core.LifetimeLock(Path(value["profile"]["graph"]).with_name(".memory.service-owner.lock")):
                 dormant(owner, entry, value)
                 path = directory / "migration-v2.json"
-                transaction = owner.state.read(path)
+                transaction = owner.state.read(path, max_bytes=32 * 1024 * 1024)
                 if transaction is None or transaction["phase"] != "COMMITTED":
                     raise ValueError("Migration is not committed; preserve journal")
                 current = owner.state.read(directory / "recovery-v2.json")
@@ -345,7 +394,7 @@ def rollback(owner, identity):
                 owner.state.write(directory / "active.json", before["active"])
                 index[identity] = before["entry"]
                 owner.state.write(index_path, index)
-                owner.state.write(directory / "runtime-binding.json", {"schema": 2, "state": "legacy"})
+                owner.state.write(directory / "runtime-binding.json", before.get("runtime_binding", {"schema": 2, "state": "legacy"}))
                 transaction["phase"] = "ROLLED_BACK"
                 owner.state.write(path, transaction)
                 return {"profile": identity, "state": "ROLLED_BACK", "graph_preserved": True}
@@ -423,6 +472,7 @@ def main(argv=None):
     parser.add_argument("--bundle", type=Path)
     parser.add_argument("--plan", type=Path)
     parser.add_argument("--fixture-registry", type=Path)
+    parser.add_argument("--from-version", help="Exact active version, or legacy after a compatible rollback")
     args = parser.parse_args(argv)
     if args.action == "verify":
         manifest = verify(args.bundle)
@@ -444,7 +494,10 @@ def main(argv=None):
         if args.action == "migrate":
             if not args.bundle:
                 parser.error("migrate requires --bundle")
-            print(json.dumps(migrate(owner, args.profile, args.bundle, fixture=fixture)))
+            prior_bundle = select_bundle(owner.registry.ROOT, args.profile)
+            if prior_bundle is not None:
+                owner = bundle_owner(prior_bundle, args.fixture_registry)
+            print(json.dumps(migrate(owner, args.profile, args.bundle, fixture=fixture, from_version=args.from_version)))
             return
         bundle = select_bundle(owner.registry.ROOT, args.profile)
         if bundle is None:
