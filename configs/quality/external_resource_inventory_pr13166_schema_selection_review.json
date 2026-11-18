@@ -1,8 +1,9 @@
 {
   "schema_version": 1,
-  "catalog_ref": "1ef8782c5921dd1e648ec28ad72ba3be93b9c15a",
-  "source_ref": "9a2a04608736368144363c0dbac304a3e912d468",
+  "catalog_ref": "2292b20e5ec0d1e7cb1a366b99f835b8e26fd5f0",
+  "source_ref": "71502c316cebdd4ce9fdba61cd26d04f71ccc932",
   "source_reviews": {
-    "src/bioetl/infrastructure/adapters/iuphar/_input_projection.py": "Extract pure taxonomy/name consistency validation without changing eligibility results or precedence; no resource ownership, acquisition, cleanup, or runtime qualification changes."
+    "src/bioetl/application/core/pre_silver_finalization_flow.py": "Inline private single-caller forwarding steps and simplify type-only casts; normalization, enrichment-before-hash, structural/filter/evidence publication order and resource ownership are unchanged.",
+    "src/bioetl/application/core/pre_silver_staging_flow.py": "Inline private single-caller forwarding steps and simplify type-only casts; normalization, enrichment-before-hash, structural/filter/evidence publication order and resource ownership are unchanged."
   }
 }
