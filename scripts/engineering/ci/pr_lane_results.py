@@ -1276,6 +1276,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             ".github/workflows/branch-hygiene.yml",
             ".github/workflows/chembl-baseline-smoke.yml",
             ".github/workflows/codeql.yml",
+            ".github/workflows/coderabbit.yml",
             ".github/workflows/commit-lint.yml",
             ".github/workflows/consolidation-gates.yml",
             ".github/workflows/contract-governance-fast-check.yml",
