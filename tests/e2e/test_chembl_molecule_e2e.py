@@ -27,10 +27,8 @@
 # PD6 residual test mock/fixture surface — product NewTypes/Ports stay strict (#7048).
 """E2E tests for ChEMBL Molecule pipeline.
 
-Tests the complete pipeline execution from fetch to Gold layer.
-Uses VCR cassettes for HTTP requests and local file storage.
-
-Cassettes location: tests/fixtures/vcr/chembl/
+Tests production transformation, strict Gold writes and SCD2 with recorded
+public Bronze fields. HTTP is forbidden; live extraction has separate tests.
 """
 
 from __future__ import annotations
@@ -52,6 +50,7 @@ from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 from .conftest import (
     _clear_runtime_config_caches,
+    _read_delta_records,
     create_test_context,
     get_gold_records,
     get_silver_records,
@@ -178,3 +177,49 @@ async def test_chembl_molecule_identical_cached_run_is_scd2_idempotent(
     assert {row["molecule_id"]: tuple(row[k] for k in fields) for row in before} == {
         row["molecule_id"]: tuple(row[k] for k in fields) for row in after
     }
+
+
+@pytest.mark.parametrize("invalid_phase", [1.5, 4.9])
+async def test_invalid_phase_is_quarantined_without_contaminating_gold(
+    e2e_data_dir: Path,
+    molecule_cache: Path,
+    molecule_sample: dict,
+    invalid_phase: float,
+) -> None:
+    """A controlled invalid variant retains its field-specific DQ reason."""
+    invalid = {**molecule_sample["records"][0], "max_phase": invalid_phase}
+    batch = next(molecule_cache.rglob("*.jsonl.zst"))
+    payload = zstd.ZstdDecompressor().decompress(batch.read_bytes())
+    batch.write_bytes(
+        zstd.ZstdCompressor().compress(payload + json.dumps(invalid).encode() + b"\n")
+    )
+    context = replace(_cached_context(molecule_cache), limit=3)
+    await bootstrap_pipeline_runner(context).run()
+
+    silver = await get_silver_records(e2e_data_dir, "chembl_molecule")
+    gold = await get_gold_records(e2e_data_dir, "chembl_molecule")
+    expected = molecule_sample["expected_phases"]
+    assert {row["molecule_id"]: row["max_phase"] for row in silver} == expected
+    assert {row["molecule_id"]: row["max_phase"] for row in gold} == expected
+    assert len(silver) == len(gold) == 2
+    _assert_gold_contract(gold)
+    rejected = await _read_delta_records(e2e_data_dir / "output" / "quarantine")
+    assert len(rejected) == 1
+    assert rejected[0]["error_code"] == "INVALID_DATA"
+    assert "max_phase" in json.loads(rejected[0]["error_details"])["message"]
+    assert json.loads(rejected[0]["payload"])["max_phase"] == invalid_phase
+    reports = list((e2e_data_dir / "run-reports").rglob("pipeline-run-report.json"))
+    assert len(reports) == 1
+    report = json.loads(reports[0].read_text(encoding="utf-8"))
+    silver_stage = next(
+        stage for stage in report["funnel"] if stage["stage_id"] == "silver"
+    )
+    assert silver_stage["unaccounted"] == 0
+    assert silver_stage["removals"] == [
+        {
+            "reason_code": "INVALID_DATA:max_phase",
+            "reason_family": "dq",
+            "outcome": "quarantined",
+            "count": 1,
+        }
+    ]

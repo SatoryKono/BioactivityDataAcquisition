@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.3.0
+Version: 1.4.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-10-15'
+  Last verified: '2026-11-18'
 
 ______________________________________________________________________
 
@@ -34,7 +34,7 @@ ______________________________________________________________________
 | --------------- | ----- | --------------------------------------------- |
 | `molecule_id`   | `str` | Уникальный ChEMBL ID (например, `CHEMBL25`)   |
 | `pref_name`     | `str` | Предпочтительное название                     |
-| `max_phase`     | `int` | Максимальная фаза клинических испытаний (0-4) |
+| `max_phase`     | `float \| null` | Reviewed provider code: `{-1, 0, 0.5, 1, 2, 3, 4}` |
 | `molecule_type` | `str` | Тип молекулы (Small molecule, Protein, etc.)  |
 | `availability_type` | `int` | Reviewed provider-code surface with canonical universe `{-2,-1,0,1,2}` |
 | `chirality`     | `int` | Reviewed provider-code surface with canonical universe `{-1,0,1,2}` |
@@ -83,6 +83,15 @@ ______________________________________________________________________
 - `molecule_properties` → канонические поля свойств (`logp`, `molecular_weight`, и т.д.)
 - `molecule_structures` → структурные поля (`canonical_smiles`, `standard_inchi`, `inchi_key`)
 
+### Коды фаз и нормализация
+
+ChEMBL может передавать `max_phase` десятичной строкой: `"4.0"`, `"-1.0"`,
+`"0.5"`. Application mapping сохраняет исходное значение до domain profile:
+целые допустимые коды нормализуются без потери смысла, `0.5` остаётся дробным.
+`None`, псевдо-null и нечисловой текст следуют действующей nullable policy
+профиля; недопустимые числовые коды (`1.5`, `4.9`, `5`) дают
+`INVALID_DATA:max_phase`. Усечение через `int` недопустимо.
+
 ### Entity ID
 
 ```python
@@ -103,7 +112,14 @@ ______________________________________________________________________
 | Порог | Условие      | Действие   |
 | ----- | ------------ | ---------- |
 | Soft  | > 5% ошибок  | WARNING    |
-| Hard  | > 20% ошибок | FAIL BATCH |
+| Hard  | > 50% ошибок | FAIL BATCH |
+
+Пороги задаёт provider config `configs/providers/chembl.yaml`; entity DQ
+dispositions сохраняются. Условия Gold в `configs/entities/chembl/molecule.yaml`:
+`molecule_type="Small molecule"`, `structure_type="MOL"`, `inorganic_flag=0`,
+обязательный `molecule_id`. Поле `potential_duplicate` не является частью
+Molecule Silver и не используется для допуска в Gold. После фильтрации запись
+обязана пройти строгий Gold-контракт; Gold хранит версии SCD2.
 
 ______________________________________________________________________
 
@@ -119,6 +135,13 @@ bioetl run --pipeline chembl_molecule --limit 1000
 # Полная перезагрузка
 bioetl run --pipeline chembl_molecule --run-type rebuild
 ```
+
+Исправленный код не восстанавливает уже записанные NULL-фазы автоматически.
+См. [восстановление из Bronze](../../../05-operations/runbooks/chembl-molecule-phase-recovery.md):
+новая обработка использует отдельные каталоги и новые manifests. Схема Gold,
+алгоритм и перечень hash-полей сохраняются; исправленные бизнес-значения меняют
+`content_hash`, а удаление ошибочного фильтра меняет effective-config digest
+и фактический состав Gold. Source-profile extraction params остаются прежними.
 
 ______________________________________________________________________
 

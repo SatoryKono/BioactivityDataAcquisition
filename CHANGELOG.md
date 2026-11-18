@@ -18,6 +18,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **ChEMBL molecule phases and Gold (#13197, #13198):** preserve decimal
+  `max_phase` provider values, including `0.5`, until reviewed domain
+  normalization; reject invalid numeric codes without truncation. Remove the
+  Gold condition on absent `potential_duplicate`. Existing damaged Silver and
+  derived datasets require isolated reprocessing from Bronze; corrected phases
+  change content hashes and Gold eligibility changes the output cohort.
+  Gold schemas, hash algorithms and source extraction policy are unchanged.
+  See [Bronze recovery](docs/05-operations/runbooks/chembl-molecule-phase-recovery.md).
+
 - **Selected run status:** a missing non-UUID token, including a compact stamp
   such as `20261102T181217`, stays `run_not_found` / `UNKNOWN`. It is no longer
   reported as `QUERY ERROR` / `request_failed`. An explicit UUID and a saved

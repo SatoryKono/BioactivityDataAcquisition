@@ -23,6 +23,10 @@ and related audit artifacts.
 ## Transformation Notes
 
 - `molecule_id` remains the business key carried into `entity_id`.
+- `max_phase` is nullable numeric with reviewed codes
+  `{-1, 0, 0.5, 1, 2, 3, 4}`. Decimal provider strings reach domain normalization
+  without integer truncation; invalid numeric codes produce
+  `INVALID_DATA:max_phase`.
 - Structure payloads are flattened into canonical molecule fields for the
   persisted contract.
 - Historical migration-only field renames are archive concerns, not part of the
@@ -34,3 +38,7 @@ and related audit artifacts.
   normalization profile for ChEMBL molecule publication.
 - DQ warnings are recorded through `_dq_warn`; occurrence-level reproducibility
   anchors are published outside the row contract.
+- Gold eligibility requires `Small molecule`, `MOL`, `inorganic_flag=0` and
+  `molecule_id`; it does not depend on absent `potential_duplicate`.
+  The strict Gold schema and hash field policy are unchanged. Previously
+  damaged outputs require [isolated Bronze recovery](../../../../05-operations/runbooks/chembl-molecule-phase-recovery.md).

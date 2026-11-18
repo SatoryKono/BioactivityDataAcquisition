@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-09-25'
+  Last verified: '2026-11-18'
 
 ______________________________________________________________________
 
@@ -41,6 +41,10 @@ ______________________________________________________________________
   `molecule-hierarchy` as the active contract.
 - For quality rules, aliases, and flattened field groups, use the provider
   reference and entity config above.
+- `max_phase` is nullable numeric with reviewed codes `{-1, 0, 0.5, 1, 2, 3, 4}`;
+  decimal provider strings reach normalization without integer truncation.
+- Gold requires `Small molecule`, `MOL`, `inorganic_flag=0` and a molecule ID.
+  Existing damaged outputs require [isolated Bronze recovery](../../../05-operations/runbooks/chembl-molecule-phase-recovery.md).
 
 ## Contract References
 
