@@ -40,6 +40,9 @@ from bioetl.infrastructure.adapters.common.deduplication import (
     deduplicate_preserving_order,
 )
 from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
+from bioetl.infrastructure.adapters.uniprot.response_parser import (
+    UniProtProteinPageError,
+)
 from bioetl.infrastructure.adapters.uniprot._client_support import (
     _create_uniprot_adapter,
 )
@@ -531,7 +534,8 @@ def test_build_params_parse_response_and_repr(adapter):
 
     bad_response = MagicMock()
     bad_response.status_code = 500
-    assert adapter._parse_response(bad_response) == ([], None)
+    with pytest.raises(UniProtProteinPageError, match="status 500"):
+        adapter._parse_response(bad_response)
 
     assert "without API key" in repr(adapter)
     logger = adapter.logger
@@ -636,3 +640,47 @@ async def test_fetch_filtered_empty_ids_returns_nothing(adapter):
     async for record in adapter.fetch_filtered("protein", [], "accession"):
         records.append(record)
     assert records == []
+
+
+def _protein_page(records: list[dict[str, str]], cursor: str | None) -> MagicMock:
+    response = MagicMock()
+    response.status_code = 200
+    response.json.return_value = {"results": records, "nextCursor": cursor}
+    return response
+
+
+@pytest.mark.asyncio
+async def test_fetch_proteins_second_page_error_is_not_cursor_end(
+    adapter, mock_http_client
+):
+    """A failed second page must raise instead of ending the cursor."""
+    assert adapter.strict_error_handling is False
+    failed = MagicMock()
+    failed.status_code = 500
+    mock_http_client.get = AsyncMock(
+        side_effect=[
+            _protein_page([{"primaryAccession": "P1"}], "cursor-2"),
+            failed,
+        ]
+    )
+
+    records = []
+    with pytest.raises(UniProtProteinPageError, match="status 500"):
+        async for record in adapter._fetch_proteins("q", limit=None):
+            records.append(record)
+
+    assert records == [{"primaryAccession": "P1"}]
+    assert mock_http_client.get.await_count == 2
+
+
+@pytest.mark.asyncio
+async def test_fetch_proteins_request_error_is_not_empty_success(
+    adapter, mock_http_client
+):
+    """A transport failure must not look like an empty final page."""
+    assert adapter.strict_error_handling is False
+    mock_http_client.get = AsyncMock(side_effect=RuntimeError("boom"))
+
+    with pytest.raises(RuntimeError, match="boom"):
+        async for _record in adapter._fetch_proteins("q", limit=None):
+            pass
