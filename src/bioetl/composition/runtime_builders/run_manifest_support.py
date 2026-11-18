@@ -7,6 +7,9 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from bioetl.composition.control_plane_paths import control_plane_root, resolve_data_root
+from bioetl.composition.runtime_builders._exact_replay_cached_bronze_context import (
+    resolve_replay_parent_manifest,
+)
 
 from bioetl.composition.runtime_builders._run_context_values import (
     resolve_run_context_values,
@@ -52,6 +55,7 @@ __all__ = [
     "create_control_plane_refs_for_manifest",
     "resolve_contract_identity",
     "resolve_replay_capability",
+    "resolve_replay_parent_manifest",
     "resolve_replay_parentage",
     "resolve_run_context_values",
     "validate_reproducible_sink_modes",
@@ -143,11 +147,6 @@ def create_control_plane_refs_for_manifest(
     )
 
 
-def _artifact_path_string(path: Path) -> str:
-    """Return portable artifact paths with normalized separators."""
-    return path.as_posix()
-
-
 def build_planned_artifacts(
     *,
     settings: Settings,
@@ -163,15 +162,15 @@ def build_planned_artifacts(
     planned = [
         RunArtifactRef(
             layer="bronze",
-            path=_artifact_path_string(output_root / "bronze" / provider / entity),
+            path=(output_root / "bronze" / provider / entity).as_posix(),
         ),
         RunArtifactRef(
             layer="silver",
-            path=_artifact_path_string(output_root / "silver" / provider / entity),
+            path=(output_root / "silver" / provider / entity).as_posix(),
         ),
         RunArtifactRef(
             layer="gold",
-            path=_artifact_path_string(output_root / "gold" / provider / entity),
+            path=(output_root / "gold" / provider / entity).as_posix(),
         ),
     ]
     if debug_export_root and run_id and pipeline_name:
@@ -181,9 +180,9 @@ def build_planned_artifacts(
         planned.append(
             RunArtifactRef(
                 layer="debug_export",
-                path=_artifact_path_string(
+                path=(
                     configured_root / workflow_id / pipeline_name / run_id
-                ),
+                ).as_posix(),
             )
         )
     return tuple(planned)
