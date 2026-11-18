@@ -36,6 +36,47 @@ ______________________________________________________________________
 
 ## Procedure
 
+### Grafana remains in the Prometheus-only fallback after startup
+
+Healthy containers alone do not establish dashboard readiness. Inspect
+`/var/lib/grafana/bioetl-bootstrap-status.json` inside `bioetl-grafana`.
+The full profile requires `ops_http=ready`, `reason=identity_matched`,
+`source_id_matched=1` and `dashboard_profile=full`. Five dashboard UIDs can
+still be static notices saying `Ops HTTP not provisioned`.
+
+After a soft startup timeout, Grafana checks for late main readiness in the
+background: at most 60 attempts, five-second pauses, three-second HTTP timeouts
+and a 480-second deadline. Once the expected source identity matches again and
+Grafana is healthy for at least ten seconds, recovery requests one Grafana
+restart. Strict audit/render mode retains its fail-closed startup behavior.
+Foreign identity never triggers recovery. An unavailable backend retains the
+fallback and an explicit recovery state.
+
+The recovery directory is `/var/lib/grafana/bioetl-late-cutover`. Its
+`<expected-source-id>.lease` describes activity for one process incarnation;
+`<expected-source-id>.claim` is an atomic, persistent restart claim shared with
+the runtime manager. The claim is cleared only after full bootstrap, local
+Grafana health and matching identity are confirmed. A failed recovery retains
+the claim to prevent restart loops. Inspect the bootstrap reason, main
+readiness, source identity and container logs before an operator explicitly
+resets that empty claim directory. Do not remove volumes or reset claims as
+part of routine startup.
+
+Validate the exact deployed dashboard profile explicitly. Native deployments
+use `--dashboard-profile native`; the adaptive deployment uses:
+
+```powershell
+.\.venv-win\Scripts\python.exe -m scripts.ops.observability.validate_live_observability --prometheus-url http://127.0.0.1:9090 --grafana-url http://127.0.0.1:3000 --dashboard-profile adaptive
+.\.venv-win\Scripts\python.exe scripts/ops/runtime/docker/verify_report_bind.py --pipeline chembl_assay --require-ops
+```
+
+The live validator requires all configured scrape jobs, current `bioetl_*`
+samples, nonempty healthy BioETL rules, the six sentinel recording expressions,
+working Ops HTTP datasource access and full dashboard model parity. Its
+sentinel expression check does not compare every rule expression. Preserve
+warnings about stale data or missing observations until their underlying
+evidence is recovered; a full dashboard profile does not resolve those alerts.
+
 ### CURRENT telemetry missing after a monitoring restart
 
 `1. Trust` answers whether the selected Run ID can be exactly replayed from saved inputs. CURRENT Monitor Readiness, Replay, Ledger, Telemetry and coverage live on Pipeline Diagnostics. They do not change exact-replay readiness. Selected-run Trust can remain OK while those cards report INCOMPLETE, UNKNOWN or CRIT.

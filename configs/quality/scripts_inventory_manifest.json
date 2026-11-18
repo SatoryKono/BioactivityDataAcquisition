@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-17T13:29:45.608417+00:00",
+  "generated_at": "2026-11-17T19:45:07.631370+00:00",
   "summary": {
     "total_scripts": 753,
     "status_counts": {
@@ -12,7 +12,7 @@
       "agents": 12,
       "build": 18,
       "ci": 77,
-      "docs": 300,
+      "docs": 304,
       "other": 27,
       "scripts": 646,
       "skills": 13,
@@ -1926,7 +1926,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 67,
+      "reference_count": 66,
       "references": [
         {
           "path": "Makefile",
@@ -3240,7 +3240,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1847,
+          "line": 1861,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/check.sh\": ("
         }
@@ -4084,7 +4084,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1838,
+          "line": 1852,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.ps1\": (MCP_WRAPPER_CONTRACTS_TEST,),"
         },
@@ -4102,7 +4102,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
-          "line": 949,
+          "line": 970,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.ps1\","
         }
@@ -4139,7 +4139,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1837,
+          "line": 1851,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.sh\": (MCP_WRAPPER_CONTRACTS_TEST,),"
         },
@@ -4151,7 +4151,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
-          "line": 950,
+          "line": 971,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.sh\","
         }
@@ -4184,7 +4184,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1836,
+          "line": 1850,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\": (NPM_RUNTIME_TEST,),"
         },
@@ -4239,7 +4239,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1835,
+          "line": 1849,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\": (NPM_RUNTIME_TEST,),"
         },
@@ -5087,7 +5087,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1843,
+          "line": 1857,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/exec_windows_ps1_wrapper.sh\": ("
         },
@@ -5099,7 +5099,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
-          "line": 951,
+          "line": 972,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/support/exec_windows_ps1_wrapper.sh\","
         }
@@ -5506,7 +5506,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1839,
+          "line": 1853,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/run_owned_stdio.ps1\": ("
         },
@@ -5518,7 +5518,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
-          "line": 952,
+          "line": 973,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/support/run_owned_stdio.ps1\","
         }
@@ -8957,7 +8957,7 @@
         "ORCHESTRATION",
         "py-doc-bot"
       ],
-      "reference_count": 220,
+      "reference_count": 222,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -9107,8 +9107,14 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
+        {
+          "path": "docs/03-guides/docs-verification.md",
+          "line": 95,
+          "source_group": "docs",
+          "text": "1. `python -m scripts.docs.checks.check_docstrings --summary`"
+        },
         {
           "path": "scripts/docs/README.md",
           "line": 50,
@@ -9138,8 +9144,14 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 8,
       "references": [
+        {
+          "path": "docs/03-guides/docs-verification.md",
+          "line": 93,
+          "source_group": "docs",
+          "text": "1. `python -m scripts.docs.checks.check_drift --ports --classes --runtime-mirrors --freshness --modules --ai-surfaces`"
+        },
         {
           "path": "scripts/docs/README.md",
           "line": 49,
@@ -9195,7 +9207,7 @@
       "agent_usage": [
         "py-doc-bot"
       ],
-      "reference_count": 40,
+      "reference_count": 41,
       "references": [
         {
           "path": ".codex/skills/py-doc-bot/SKILL.md",
@@ -9223,7 +9235,7 @@
         },
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1447,
+          "line": 1460,
           "source_group": "docs",
           "text": "автоматические docs-проверки (`python -m scripts.docs check-links` и"
         },
@@ -9252,8 +9264,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
+        {
+          "path": "docs/03-guides/docs-verification.md",
+          "line": 96,
+          "source_group": "docs",
+          "text": "1. `python -m scripts.docs.checks.documentation_cleanup_inventory --check`"
+        },
         {
           "path": "scripts/docs/README.md",
           "line": 52,
@@ -9340,8 +9358,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
+        {
+          "path": "docs/03-guides/docs-verification.md",
+          "line": 89,
+          "source_group": "docs",
+          "text": "With no skip flags, `scripts/docs/checks/verify.py` runs these steps:"
+        },
         {
           "path": "scripts/docs/README.md",
           "line": 46,
@@ -11248,7 +11272,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1825,
+          "line": 1839,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/nightly_shadow_archive.py\": NIGHTLY_SHADOW_TESTS,"
         },
@@ -11419,7 +11443,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1714,
+          "line": 1728,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/presubmit_gate.py\": ("
         },
@@ -11462,7 +11486,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1866,
+          "line": 1880,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/publish_docker_image.sh\": ("
         },
@@ -12496,7 +12520,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 270,
+          "line": 338,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/.wsl-vpn-fix.ps1`                   | Recover Windows-side VPN proxy settings for WSL interoperability                          |"
         }
@@ -12511,7 +12535,7 @@
       "references": [
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1810,
+          "line": 1834,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.dev run-tests cov"
         },
@@ -12707,7 +12731,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 228,
+          "line": 296,
           "source_group": "scripts",
           "text": "| `install-deps`       | `scripts/engineering/dev/install_deps.py`                    | Auxiliary helper script, not a full project bootstrap            |"
         },
@@ -12732,7 +12756,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 233,
+          "line": 301,
           "source_group": "scripts",
           "text": "| `mock-metrics`       | `scripts/engineering/dev/metrics_mock_server.py`             | Start mock metrics server                                        |"
         },
@@ -12830,7 +12854,7 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 79,
+          "line": 147,
           "source_group": "scripts",
           "text": "bash scripts/engineering/dev/pretest_guardrails.sh --mode check --scope full"
         }
@@ -12894,7 +12918,7 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 86,
+          "line": 154,
           "source_group": "scripts",
           "text": "JUnit output uses `scripts/engineering/dev/pytest_junit_subtests.py`, loaded"
         },
@@ -12934,13 +12958,13 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 229,
+          "line": 297,
           "source_group": "scripts",
           "text": "| `probe-quality`      | `scripts/engineering/dev/quality_gate_probe.py`              | Measure narrow pytest/mypy startup latency and timeout behavior  |"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 266,
+          "line": 334,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/quality_gate_probe.py`              | Diagnose narrow pytest/mypy startup latency and timeout behavior                          |"
         },
@@ -12961,13 +12985,13 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 234,
+          "line": 302,
           "source_group": "scripts",
           "text": "| `mock-quarantine`    | `scripts/engineering/dev/quarantine_explorer_mock_server.py` | Start mock quarantine explorer API server                        |"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 267,
+          "line": 335,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/quarantine_explorer_mock_server.py` | Start mock `/ops/quarantine/*` endpoints for Silver Reject Explorer smoke checks          |"
         },
@@ -13318,13 +13342,13 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 939,
+          "line": 940,
           "source_group": "docs",
           "text": "| 5   | `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream` | Выполнить ускоренный coverage/sharded прогон |"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 940,
+          "line": 941,
           "source_group": "docs",
           "text": "| 6   | `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=term-missing` | В"
         }
@@ -13345,7 +13369,7 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 259,
+          "line": 327,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/run_tests.ps1`                      | Run tests (PowerShell variant)                                                            |"
         },
@@ -13402,13 +13426,13 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 231,
+          "line": 299,
           "source_group": "scripts",
           "text": "| `run-tests`          | `scripts/engineering/dev/run_tests.py`                       | Run tests                                                        |"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 235,
+          "line": 303,
           "source_group": "scripts",
           "text": "| `test-changed`       | `scripts/engineering/dev/run_tests.py changed`               | Run tests for changed files only                                 |"
         },
@@ -13447,7 +13471,7 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 258,
+          "line": 326,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/run_tests.sh`                       | Run tests (shell variant)                                                                 |"
         },
@@ -13486,13 +13510,13 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 275,
+          "line": 343,
           "source_group": "scripts",
           "text": "Canonical entrypoint: `scripts/engineering/dev/setup_bioetl_wsl.ps1`."
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
-          "line": 1751,
+          "line": 1772,
           "source_group": "tests",
           "text": "[\"scripts/engineering/dev/setup_bioetl_wsl.ps1\"], repo_root=root"
         },
@@ -13663,13 +13687,13 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 57,
+          "line": 125,
           "source_group": "scripts",
           "text": ".\\scripts\\engineering\\dev\\sync_pycharm_ide_templates.ps1"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 58,
+          "line": 126,
           "source_group": "scripts",
           "text": ".\\scripts\\engineering\\dev\\sync_pycharm_ide_templates.ps1 -DryRun"
         }
@@ -13714,13 +13738,13 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 62,
+          "line": 130,
           "source_group": "scripts",
           "text": "bash scripts/engineering/dev/sync_pycharm_ide_templates.sh"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 63,
+          "line": 131,
           "source_group": "scripts",
           "text": "bash scripts/engineering/dev/sync_pycharm_ide_templates.sh --dry-run"
         }
@@ -13752,7 +13776,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 11,
       "references": [
         {
           "path": "scripts/engineering/dev/zed_lint_imports.py",
@@ -13798,9 +13822,9 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 352,
+          "line": 397,
           "source_group": "tests",
-          "text": "assert env_verify[\"args\"] == [\"scripts/engineering/dev/zed_env_doctor.py\"]"
+          "text": "\"scripts/engineering/dev/zed_env_doctor.py\""
         }
       ],
       "owner": "@bioetl-platform",
@@ -13813,7 +13837,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/engineering/dev/zed_run.py",
@@ -13826,18 +13850,6 @@
           "line": 21,
           "source_group": "tests",
           "text": "\"zed_lint_imports.py\","
-        },
-        {
-          "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 358,
-          "source_group": "tests",
-          "text": "assert arch[\"args\"] == [\"scripts/engineering/dev/zed_lint_imports.py\"]"
-        },
-        {
-          "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 415,
-          "source_group": "tests",
-          "text": "assert \"zed_lint_imports.py\" in serialized"
         }
       ],
       "owner": "@bioetl-platform",
@@ -13860,7 +13872,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1307,
+          "line": 1321,
           "source_group": "scripts",
           "text": "\"scripts/engineering/dev/zed_mypy.py\","
         },
@@ -13901,7 +13913,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/engineering/dev/zed_run.py",
@@ -13917,15 +13929,9 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 76,
+          "line": 93,
           "source_group": "tests",
           "text": "return runpy.run_path(str(DEV_SCRIPTS / \"zed_pytest_lane.py\"))"
-        },
-        {
-          "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 285,
-          "source_group": "tests",
-          "text": "lane_script = \"scripts/engineering/dev/zed_pytest_lane.py\""
         }
       ]
     },
@@ -13934,31 +13940,13 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 1,
       "references": [
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_helper_entrypoints.py",
           "line": 24,
           "source_group": "tests",
           "text": "\"zed_run.py\","
-        },
-        {
-          "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 327,
-          "source_group": "tests",
-          "text": "\"scripts/engineering/dev/zed_run.py\","
-        },
-        {
-          "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 379,
-          "source_group": "tests",
-          "text": "\"scripts/engineering/dev/zed_run.py\","
-        },
-        {
-          "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 393,
-          "source_group": "tests",
-          "text": "\"scripts/engineering/dev/zed_run.py\","
         }
       ],
       "owner": "@bioetl-platform",
@@ -13971,7 +13959,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/engineering/dev/zed_run.py",
@@ -13984,18 +13972,6 @@
           "line": 25,
           "source_group": "tests",
           "text": "\"zed_vulture.py\","
-        },
-        {
-          "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 372,
-          "source_group": "tests",
-          "text": "assert dead_code[\"args\"] == [\"scripts/engineering/dev/zed_vulture.py\"]"
-        },
-        {
-          "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 417,
-          "source_group": "tests",
-          "text": "assert \"zed_vulture.py\" in serialized"
         }
       ],
       "owner": "@bioetl-platform",
@@ -14008,7 +13984,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 4,
       "references": [
         {
           "path": "scripts/engineering/dev/zed_run.py",
@@ -14024,27 +14000,15 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 82,
+          "line": 99,
           "source_group": "tests",
           "text": "str(ROOT / \"scripts\" / \"engineering\" / \"dev\" / \"zed_xenon.py\")"
         },
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 101,
+          "line": 118,
           "source_group": "tests",
           "text": "source = (ROOT / \"scripts\" / \"engineering\" / \"dev\" / \"zed_xenon.py\").read_text("
-        },
-        {
-          "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 365,
-          "source_group": "tests",
-          "text": "assert complexity[\"args\"] == [\"scripts/engineering/dev/zed_xenon.py\"]"
-        },
-        {
-          "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 416,
-          "source_group": "tests",
-          "text": "assert \"zed_xenon.py\" in serialized"
         }
       ],
       "owner": "@bioetl-platform",
@@ -16079,13 +16043,13 @@
       "references": [
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1545,
+          "line": 1569,
           "source_group": "docs",
           "text": "| **Файл:строки**      | Точная ссылка на код (`runner.py:116-123`)    |"
         },
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1557,
+          "line": 1581,
           "source_group": "docs",
           "text": "- **Файл**: `runner.py:116-123` (175 строк, 9 методов)"
         },
@@ -16545,7 +16509,7 @@
         },
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1668,
+          "line": 1692,
           "source_group": "docs",
           "text": "- `python scripts/engineering/qa/generate_architecture_dependency_map.py --update`"
         },
@@ -17966,7 +17930,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": "scripts/engineering/qa/README.md",
@@ -17979,6 +17943,12 @@
           "line": 217,
           "source_group": "scripts",
           "text": "\"report-dashboard-inventory\": \"scripts.engineering.qa.report_dashboard_inventory\","
+        },
+        {
+          "path": "scripts/ops/observability/validate_live_observability.py",
+          "line": 24,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.qa.report_dashboard_inventory import ("
         },
         {
           "path": "tests/integration/test_dashboard_qa_check_gates.py",
@@ -18665,7 +18635,7 @@
         },
         {
           "path": "docs/02-architecture/decisions/ADR-042-testing-strategy-matrix.md",
-          "line": 178,
+          "line": 182,
           "source_group": "docs",
           "text": "- [Module coverage inventory generator](../../../scripts/engineering/qa/report_module_coverage_inventory.py)"
         },
@@ -21856,7 +21826,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1965,
+          "line": 1979,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/check_github_actions_runtime_policy.py\": ("
         }
@@ -22819,7 +22789,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
-          "line": 1733,
+          "line": 1754,
           "source_group": "tests",
           "text": "\"scripts/engineering/repo/process_supervisor.py\","
         }
@@ -24250,7 +24220,7 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 132,
+          "line": 200,
           "source_group": "scripts",
           "text": "- `bash scripts/engineering/dev/run_pytest.sh` runs `bash scripts/ops/launchers/codex/setup_plugins.sh --pytest-only`"
         },
@@ -24632,7 +24602,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
@@ -24648,9 +24618,15 @@
         },
         {
           "path": "scripts/ops/observability/validate_live_observability.py",
-          "line": 204,
+          "line": 235,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.check_prometheus_rules_health import ("
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_validate_live_observability.py",
+          "line": 504,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability import check_prometheus_rules_health as rules"
         },
         {
           "path": "tests/unit/scripts/ops/test_check_prometheus_rules_health.py",
@@ -25875,7 +25851,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 2177,
+          "line": 2195,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },
@@ -26340,7 +26316,7 @@
         },
         {
           "path": "scripts/ops/runtime/docker/runtime_manager.py",
-          "line": 2491,
+          "line": 2658,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana import recover_renderer as rr"
         },
@@ -27322,7 +27298,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_validate_live_observability.py",
-          "line": 22,
+          "line": 25,
           "source_group": "tests",
           "text": "from scripts.ops.observability import validate_live_observability as vlo"
         }
@@ -27994,7 +27970,7 @@
       "agent_usage": [
         "observability-dashboard"
       ],
-      "reference_count": 16,
+      "reference_count": 17,
       "references": [
         {
           "path": ".codex/skills/observability-dashboard/SKILL.md",
@@ -28033,16 +28009,16 @@
           "text": "6. Operator re-check: `python scripts/ops/runtime/docker/verify_report_bind.py`."
         },
         {
+          "path": "docs/05-operations/runbooks/observability-checklist.md",
+          "line": 70,
+          "source_group": "docs",
+          "text": ".\\.venv-win\\Scripts\\python.exe scripts/ops/runtime/docker/verify_report_bind.py --pipeline chembl_assay --require-ops"
+        },
+        {
           "path": "docs/DOCKER_QUICKSTART.md",
           "line": 221,
           "source_group": "docs",
           "text": "python scripts/ops/runtime/docker/verify_report_bind.py --pipeline chembl_assay"
-        },
-        {
-          "path": "grafana/README.md",
-          "line": 2711,
-          "source_group": "other",
-          "text": "`python scripts/ops/runtime/docker/verify_report_bind.py --pipeline chembl_assay`."
         }
       ]
     },

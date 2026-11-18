@@ -6,6 +6,7 @@ Addresses OBS-003: Live Grafana/Prometheus Validation Gap
 
 import argparse
 import json
+import math
 import os
 import sys
 from dataclasses import dataclass, asdict
@@ -14,9 +15,15 @@ from pathlib import Path
 from typing import Any, Literal
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
+from urllib.parse import urlencode
 import base64
 
 from dotenv import load_dotenv
+import yaml
+
+from scripts.engineering.qa.report_dashboard_inventory import (
+    _normalize_dashboard_payload,
+)
 
 # Configuration
 DEFAULT_PROMETHEUS_URL = "http://localhost:9090"
@@ -28,7 +35,12 @@ DEFAULT_OUTPUT_DIR = Path("reports/observability/live-validation")
 DEFAULT_TIMEOUT = 5.0
 EXPECTED_OPS_HTTP_DATASOURCE_UID = "bioetl-ops-http"
 EXPECTED_OPS_HTTP_DATASOURCE_NAME = "BioETL Ops HTTP"
-REPO_ENV_PATH = Path(__file__).resolve().parents[3] / ".env"
+REPO_ROOT = Path(__file__).resolve().parents[3]
+REPO_ENV_PATH = REPO_ROOT / ".env"
+DASHBOARD_PROFILES = {
+    "native": REPO_ROOT / "grafana/dashboards",
+    "adaptive": REPO_ROOT / "grafana/dashboards-adaptive",
+}
 
 
 def _load_repo_environment() -> None:
@@ -149,7 +161,7 @@ def check_prometheus_health(prometheus_url: str, timeout: float) -> ValidationRe
 
 
 def check_prometheus_targets(prometheus_url: str, timeout: float) -> ValidationResult:
-    """Check Prometheus targets status."""
+    """Require every configured scrape job and healthy active targets."""
     try:
         targets_url = f"{prometheus_url}/api/v1/targets"
         data = _fetch_json(targets_url, timeout)
@@ -163,28 +175,47 @@ def check_prometheus_targets(prometheus_url: str, timeout: float) -> ValidationR
             )
 
         active_targets = data.get("data", {}).get("activeTargets", [])
+        if not isinstance(active_targets, list):
+            raise ValueError("Prometheus activeTargets must be a list")
+        config = yaml.safe_load(
+            (REPO_ROOT / "grafana/prometheus.yml").read_text(encoding="utf-8")
+        )
+        expected_jobs = {item["job_name"] for item in config["scrape_configs"]}
+        if not expected_jobs:
+            raise ValueError("No expected Prometheus scrape jobs configured")
+        active_jobs = {
+            target.get("scrapePool") or target.get("labels", {}).get("job")
+            for target in active_targets
+        }
+        missing_jobs = sorted(expected_jobs - active_jobs)
         up_count = sum(1 for t in active_targets if t.get("health") == "up")
-        down_count = sum(1 for t in active_targets if t.get("health") == "down")
+        down_count = len(active_targets) - up_count
 
         down_targets = [
             {
                 "job": t.get("labels", {}).get("job", "unknown"),
                 "instance": t.get("labels", {}).get("instance", "unknown"),
                 "last_error": t.get("lastError", "no error"),
+                "health": t.get("health", "unknown"),
             }
             for t in active_targets
-            if t.get("health") == "down"
+            if t.get("health") != "up"
         ]
 
         return ValidationResult(
             check_name="prometheus_targets",
-            status="pass" if down_count == 0 else "partial",
-            message=f"Prometheus targets: {up_count} up, {down_count} down",
+            status=("fail" if missing_jobs else "partial" if down_count else "pass"),
+            message=(
+                f"Prometheus targets: {up_count} up, {down_count} unhealthy, "
+                f"{len(missing_jobs)} configured jobs missing"
+            ),
             details={
                 "total_targets": len(active_targets),
                 "up_targets": up_count,
                 "down_targets": down_count,
                 "down_targets_details": down_targets,
+                "expected_jobs": sorted(expected_jobs),
+                "missing_jobs": missing_jobs,
             },
         )
     except Exception as e:
@@ -209,6 +240,8 @@ def check_prometheus_rules_health(
             prometheus_url=prometheus_url,
             timeout=timeout,
             fail_on_metric_signals=True,
+            expr_parity=True,
+            skip_if_unreachable=False,
         )
         details = {
             "bioetl_groups": report.bioetl_groups,
@@ -225,14 +258,27 @@ def check_prometheus_rules_health(
                 for i in report.issues
             ],
             "query_errors": report.query_errors,
+            "expr_parity_checked": report.expr_parity_checked,
+            "expr_parity_skipped": report.expr_parity_skipped,
+            "expr_parity_issues": report.expr_parity_issues,
+            "tracked_rules_sha256": report.tracked_rules_sha256,
         }
-        if report.ok:
+        if (
+            report.ok
+            and report.bioetl_groups > 0
+            and report.bioetl_rules > 0
+            and report.expr_parity_checked
+            and not report.expr_parity_skipped
+            and not report.expr_parity_issues
+            and not report.skipped_unreachable
+        ):
             return ValidationResult(
                 check_name="prometheus_rules_health",
                 status="pass",
                 message=(
                     f"BioETL rules healthy "
-                    f"({report.bioetl_groups} groups, {report.bioetl_rules} rules)"
+                    f"({report.bioetl_groups} groups, {report.bioetl_rules} rules; "
+                    "six sentinel recording expressions match source)"
                 ),
                 details=details,
             )
@@ -240,8 +286,7 @@ def check_prometheus_rules_health(
             check_name="prometheus_rules_health",
             status="fail",
             message=(
-                "Partial BioETL rule errors detected "
-                "(Prometheus may still be healthy; metrics are skipped silently)"
+                "BioETL rule coverage, health or sentinel expression parity failed"
             ),
             details=details,
         )
@@ -255,7 +300,7 @@ def check_prometheus_rules_health(
 
 
 def check_prometheus_metrics(prometheus_url: str, timeout: float) -> ValidationResult:
-    """Check if Prometheus has any metrics."""
+    """Require current BioETL samples, independently of retained metric names."""
     try:
         label_url = f"{prometheus_url}/api/v1/label/__name__/values"
         data = _fetch_json(label_url, timeout)
@@ -269,15 +314,38 @@ def check_prometheus_metrics(prometheus_url: str, timeout: float) -> ValidationR
             )
 
         metric_names = data.get("data", [])
-        bioetl_metrics = [m for m in metric_names if "bioetl" in m.lower()]
+        if not isinstance(metric_names, list) or not all(
+            isinstance(name, str) for name in metric_names
+        ):
+            raise ValueError("Prometheus metric names must be a list of strings")
+        bioetl_metrics = [m for m in metric_names if m.startswith("bioetl_")]
+        query = urlencode({"query": 'count({__name__=~"bioetl_.+"})'})
+        current = _fetch_json(f"{prometheus_url}/api/v1/query?{query}", timeout)
+        if current.get("status") != "success":
+            raise ValueError("Prometheus current BioETL samples query failed")
+        result = current.get("data", {})
+        if result.get("resultType") != "vector":
+            raise ValueError("Prometheus current BioETL samples must be a vector")
+        samples = result.get("result", [])
+        if not isinstance(samples, list) or len(samples) > 1:
+            raise ValueError(
+                "Prometheus BioETL count query must return at most one sample"
+            )
+        sample_count = float(samples[0]["value"][1]) if samples else 0.0
+        if not math.isfinite(sample_count) or sample_count < 0:
+            raise ValueError("Invalid current BioETL sample count")
 
         return ValidationResult(
             check_name="prometheus_metrics",
-            status="pass" if len(metric_names) > 0 else "fail",
-            message=f"Prometheus has {len(metric_names)} total metrics, {len(bioetl_metrics)} BioETL metrics",
+            status="pass" if sample_count > 0 else "fail",
+            message=(
+                f"Prometheus has {sample_count:g} current BioETL samples "
+                f"({len(bioetl_metrics)} retained BioETL metric names)"
+            ),
             details={
                 "total_metrics": len(metric_names),
                 "bioetl_metrics": len(bioetl_metrics),
+                "current_bioetl_samples": sample_count,
                 "sample_metrics": metric_names[:10] if metric_names else [],
             },
         )
@@ -351,15 +419,41 @@ def check_grafana_datasources(
             )
 
         datasource_names = [ds.get("name", "unknown") for ds in data]
-        datasource_uids = [str(ds.get("uid") or "") for ds in data]
         prometheus_ds = any("prometheus" in name.lower() for name in datasource_names)
         ops_http_ds = any(
-            uid == EXPECTED_OPS_HTTP_DATASOURCE_UID
-            and name == EXPECTED_OPS_HTTP_DATASOURCE_NAME
-            for uid, name in zip(datasource_uids, datasource_names, strict=True)
+            ds.get("uid") == EXPECTED_OPS_HTTP_DATASOURCE_UID
+            and ds.get("name") == EXPECTED_OPS_HTTP_DATASOURCE_NAME
+            and ds.get("type") == "yesoreyeram-infinity-datasource"
+            for ds in data
         )
+        ops_http_ready = False
+        if ops_http_ds:
+            ready = _fetch_json(
+                f"{grafana_url}/api/datasources/proxy/uid/"
+                f"{EXPECTED_OPS_HTTP_DATASOURCE_UID}/ops/control-plane/ready",
+                timeout,
+                headers,
+            )
+            source_id = ready.get("runtime_source_id", "")
+            ops_http_ready = (
+                isinstance(source_id, str)
+                and len(source_id) == 64
+                and all(character in "0123456789abcdef" for character in source_id)
+                and all(
+                    ready.get(port) is True
+                    for port in (
+                        "run_manifest_port",
+                        "run_ledger_port",
+                        "workflow_manifest_port",
+                        "checkpoint_port",
+                        "validation_evidence_service",
+                    )
+                )
+            )
         if prometheus_ds and ops_http_ds:
-            status: Literal["pass", "fail", "partial"] = "pass"
+            status: Literal["pass", "fail", "partial"] = (
+                "pass" if ops_http_ready else "fail"
+            )
         elif prometheus_ds:
             status = "partial"
         else:
@@ -370,13 +464,15 @@ def check_grafana_datasources(
             status=status,
             message=(
                 f"Grafana has {len(datasource_names)} datasources, "
-                f"Prometheus: {prometheus_ds}, Ops HTTP: {ops_http_ds}"
+                f"Prometheus: {prometheus_ds}, Ops HTTP: {ops_http_ds}, "
+                f"Ops backend ready: {ops_http_ready}"
             ),
             details={
                 "total_datasources": len(datasource_names),
                 "datasource_names": datasource_names,
                 "has_prometheus": prometheus_ds,
                 "has_ops_http": ops_http_ds,
+                "ops_http_ready": ops_http_ready,
             },
         )
     except HTTPError as e:
@@ -403,9 +499,14 @@ def check_grafana_datasources(
 
 
 def check_grafana_dashboards(
-    grafana_url: str, username: str, password: str, timeout: float
+    grafana_url: str,
+    username: str,
+    password: str,
+    timeout: float,
+    *,
+    dashboard_profile: str = "native",
 ) -> ValidationResult:
-    """Check Grafana dashboards."""
+    """Compare deployed shipped models with an explicitly selected profile."""
     if not password.strip():
         return ValidationResult(
             check_name="grafana_dashboards",
@@ -418,6 +519,7 @@ def check_grafana_dashboards(
             details={"error": "missing_grafana_password"},
         )
     try:
+        dashboard_root = DASHBOARD_PROFILES[dashboard_profile]
         dashboards_url = f"{grafana_url}/api/search?query=&type=dash-db"
         headers = {"Authorization": _auth_header(username, password)}
         data = _fetch_json(dashboards_url, timeout, headers)
@@ -436,15 +538,42 @@ def check_grafana_dashboards(
             EXPECTED_BIOETL_DASHBOARD_UIDS.difference(dashboard_uids)
         )
         expected_count = len(EXPECTED_BIOETL_DASHBOARD_UIDS)
+        mismatched_uids = []
+        for uid in sorted(EXPECTED_BIOETL_DASHBOARD_UIDS):
+            if uid in missing_bioetl_dashboard_uids:
+                continue
+            source = json.loads(
+                (dashboard_root / f"{uid}.json").read_text(encoding="utf-8")
+            )
+            live = _fetch_json(
+                f"{grafana_url}/api/dashboards/uid/{uid}", timeout, headers
+            )
+            if (
+                not isinstance(source, dict)
+                or source.get("uid") != uid
+                or not isinstance(source.get("panels"), list)
+                or not isinstance(live, dict)
+                or not isinstance(live.get("dashboard"), dict)
+                or live["dashboard"].get("uid") != uid
+                or not isinstance(live["dashboard"].get("panels"), list)
+            ):
+                raise ValueError(f"Malformed dashboard model for {uid}")
+            if _normalize_dashboard_payload(source) != _normalize_dashboard_payload(
+                live
+            ):
+                mismatched_uids.append(uid)
 
         return ValidationResult(
             check_name="grafana_dashboards",
-            status="pass" if not missing_bioetl_dashboard_uids else "partial",
+            status=(
+                "fail" if missing_bioetl_dashboard_uids or mismatched_uids else "pass"
+            ),
             message=(
                 f"Grafana has {len(dashboard_uids)} dashboards, "
                 f"{len(bioetl_dashboards)} BioETL dashboards "
                 f"({expected_count} shipped UIDs expected; "
-                f"{len(missing_bioetl_dashboard_uids)} missing)"
+                f"{len(missing_bioetl_dashboard_uids)} missing; "
+                f"{len(mismatched_uids)} models differ from {dashboard_profile})"
             ),
             details={
                 "total_dashboards": len(dashboard_uids),
@@ -456,6 +585,8 @@ def check_grafana_dashboards(
                     EXPECTED_BIOETL_DASHBOARD_UIDS
                 ),
                 "missing_bioetl_dashboard_uids": missing_bioetl_dashboard_uids,
+                "dashboard_profile": dashboard_profile,
+                "mismatched_dashboard_uids": mismatched_uids,
             },
         )
     except HTTPError as e:
@@ -523,6 +654,8 @@ def run_validation(
     grafana_username: str,
     grafana_password: str,
     timeout: float,
+    *,
+    dashboard_profile: str = "native",
 ) -> ValidationReport:
     """Run complete observability validation."""
     results = []
@@ -543,7 +676,11 @@ def run_validation(
     )
     results.append(
         check_grafana_dashboards(
-            grafana_url, grafana_username, grafana_password, timeout
+            grafana_url,
+            grafana_username,
+            grafana_password,
+            timeout,
+            dashboard_profile=dashboard_profile,
         )
     )
 
@@ -602,6 +739,12 @@ def main():
         help="Request timeout in seconds",
     )
     parser.add_argument(
+        "--dashboard-profile",
+        choices=tuple(DASHBOARD_PROFILES),
+        default="native",
+        help="Explicit source profile for deployed dashboard model parity",
+    )
+    parser.add_argument(
         "--output-dir",
         type=Path,
         default=DEFAULT_OUTPUT_DIR,
@@ -625,6 +768,7 @@ def main():
         grafana_username=args.grafana_username,
         grafana_password=args.grafana_password,
         timeout=args.timeout,
+        dashboard_profile=args.dashboard_profile,
     )
 
     # Print results
