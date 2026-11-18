@@ -287,12 +287,12 @@ def test_hotspot_family_fan_in_census_matches_live_ast_graph() -> None:
     }
     assert control_plane["at_budget_module_count"] == 0
     assert runtime_builders["files"] == 55
-    # Target-specific replay wiring now lives outside the generic builder family.
-    # Keep the original observed fan-in census and unchanged bounded-growth caps.
+    # The public snapshot API re-exports the existing parent resolver.
+    # Keep the observed census while retaining the unchanged fan-in cap.
     assert runtime_builders["internal_fan_in_census"]["distribution"] == {
         "0": 3,
-        "1": 28,
-        "2": 24,
+        "1": 27,
+        "2": 25,
     }
     assert runtime_builders["internal_fan_in_census"]["max_fan_in"] == 2
     assert runtime_builders["at_budget_module_count"] == 0
