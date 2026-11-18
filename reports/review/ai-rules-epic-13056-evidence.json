@@ -1,0 +1,840 @@
+{
+  "schema_version": 1,
+  "task_id": "epic-13056-closeout-20261118",
+  "claim": "partial",
+  "trust_tier": "local_single_host",
+  "source_sha": "d414d98f6169b48e7dda6e9995a25027503c39f9",
+  "observed_at": "2026-11-18T13:31:47.141742+00:00",
+  "tests": [
+    {
+      "platform": "windows-contracts",
+      "cases": 397,
+      "passed": 391,
+      "skipped": [
+        {
+          "name": "test_disabled_foreign_hook_is_not_activated",
+          "reason": "POSIX executable-bit discovery"
+        },
+        {
+          "name": "test_descendant_is_stopped_on_timeout_and_normal_parent_exit[True-True]",
+          "reason": "setsid is POSIX-specific; Windows descendants use a job"
+        },
+        {
+          "name": "test_descendant_is_stopped_on_timeout_and_normal_parent_exit[True-False]",
+          "reason": "setsid is POSIX-specific; Windows descendants use a job"
+        },
+        {
+          "name": "test_event_reader_resolves_symlink_before_boundary_check",
+          "reason": "host does not allow fixture symlinks"
+        },
+        {
+          "name": "test_symlink_replacement_during_open_is_refused",
+          "reason": "POSIX atomic O_NOFOLLOW qualification"
+        },
+        {
+          "name": "test_mcp_report_path_rejects_symlink_escape",
+          "reason": "symlink creation is unavailable: [WinError 1314] A required privilege is not held by the client: 'D:\\\\github\\\\BioactivityDataAcquisition\\\\reports\\\\local\\\\epic-13056-closeout-20261118\\\\pytest-windows\\\\test_mcp_report_path_rejects_s0-outside' -> 'D:\\\\github\\\\BioactivityDataAcquisition\\\\reports\\\\local\\\\epic-13056-closeout-20261118\\\\pytest-windows\\\\test_mcp_report_path_rejects_s0\\\\reports\\\\quality\\\\external'"
+        }
+      ],
+      "failures": 0,
+      "source_sha": "d414d98f6169b48e7dda6e9995a25027503c39f9"
+    },
+    {
+      "platform": "wsl-contracts",
+      "cases": 231,
+      "passed": 231,
+      "skipped": [],
+      "failures": 0,
+      "source_sha": "d414d98f6169b48e7dda6e9995a25027503c39f9"
+    }
+  ],
+  "checks": [
+    {
+      "name": "memory-pre-task",
+      "argv": [
+        "D:\\github\\BioactivityDataAcquisition\\.venv-win\\Scripts\\python.exe",
+        "-B",
+        "-m",
+        "memory.tooling.workflow",
+        "pre-task",
+        "--task-id",
+        "epic-13056-closeout",
+        "--title",
+        "Verify issue 13056 acceptance",
+        "--query",
+        "13056 hooks rules loading",
+        "--profile",
+        "architecture",
+        "--skip-refresh-if-missing",
+        "--skip-session-note",
+        "--json"
+      ],
+      "exit_code": 1,
+      "seconds": 9.222301399990101
+    },
+    {
+      "name": "static-doctor",
+      "argv": [
+        "D:\\github\\BioactivityDataAcquisition\\.venv-win\\Scripts\\python.exe",
+        "-B",
+        "scripts/ai/codex/doctor.py",
+        "static",
+        "--no-write",
+        "--json"
+      ],
+      "exit_code": 0,
+      "seconds": 1.9860995000053663
+    },
+    {
+      "name": "rules-doctor",
+      "argv": [
+        "D:\\github\\BioactivityDataAcquisition\\.venv-win\\Scripts\\python.exe",
+        "-B",
+        "scripts/ai/codex/doctor.py",
+        "rules",
+        "--no-write",
+        "--json"
+      ],
+      "exit_code": 2,
+      "seconds": 1.3414316999987932
+    },
+    {
+      "name": "codex-junie-parity",
+      "argv": [
+        "D:\\github\\BioactivityDataAcquisition\\.venv-win\\Scripts\\python.exe",
+        "-B",
+        "scripts/ai/junie/check_junie_mirror.py",
+        "--check"
+      ],
+      "exit_code": 0,
+      "seconds": 1.2070082999998704
+    },
+    {
+      "name": "full-tree",
+      "argv": [
+        "D:\\github\\BioactivityDataAcquisition\\.venv-win\\Scripts\\python.exe",
+        "-B",
+        "scripts/engineering/repo/check_no_partial_tree.py",
+        "--base",
+        "origin/main",
+        "--tip",
+        "HEAD"
+      ],
+      "exit_code": 0,
+      "seconds": 1.2352851000032388
+    },
+    {
+      "name": "budget-current",
+      "argv": [
+        "D:\\github\\BioactivityDataAcquisition\\.venv-win\\Scripts\\python.exe",
+        "-B",
+        "scripts/engineering/repo/budget_guard.py",
+        "--base",
+        "origin/main",
+        "--tip",
+        "HEAD"
+      ],
+      "exit_code": 0,
+      "seconds": 0.9481780000060098
+    },
+    {
+      "name": "budget-historical",
+      "argv": [
+        "D:\\github\\BioactivityDataAcquisition\\.venv-win\\Scripts\\python.exe",
+        "-B",
+        "scripts/engineering/repo/budget_guard.py",
+        "--base",
+        "c3818114beca66129db6ca97e78196314d854308",
+        "--tip",
+        "HEAD"
+      ],
+      "exit_code": 2,
+      "seconds": 3.7694801000034204
+    },
+    {
+      "name": "module-source-hash",
+      "argv": [
+        "D:\\github\\BioactivityDataAcquisition\\.venv-win\\Scripts\\python.exe",
+        "-B",
+        "-m",
+        "scripts.engineering.qa",
+        "report-module-coverage",
+        "--check",
+        "--allow-missing-coverage-xml"
+      ],
+      "exit_code": 0,
+      "seconds": 53.860535400002846
+    },
+    {
+      "name": "read-only-architecture",
+      "argv": [
+        "D:\\github\\BioactivityDataAcquisition\\.venv-win\\Scripts\\python.exe",
+        "-B",
+        "-m",
+        "scripts.engineering.qa",
+        "run-architecture-audit-read-only"
+      ],
+      "exit_code": 1,
+      "seconds": 208.4993855000066
+    }
+  ],
+  "runtime_observations": {
+    "observed_at": "2026-11-18T12:43:37.838514+00:00",
+    "source": "d414d98f6169b48e7dda6e9995a25027503c39f9",
+    "observations": [
+      {
+        "runtime": "codex",
+        "binary_sha256": "4f91ae86895ff124760d70ed1630e2354ca874765c9bb61ae524b600327efc17",
+        "version": "codex-cli 0.167.0-alpha.3.2",
+        "version_exit": 0,
+        "model_turn_created": false,
+        "prompt_render_exit": 0,
+        "whole_body_in_render": {
+          "AGENTS.md": true,
+          ".codex/agents/CODEX-RUNTIME.md": false,
+          ".codex/agents/py-audit-bot.md": false,
+          ".codex/skills/py-audit-bot/SKILL.md": false
+        }
+      },
+      {
+        "runtime": "devin",
+        "binary_sha256": "bd2704d32669887a15164725d043e2d3aa18c529920ebe341fb6b70eabac2d30",
+        "version": "devin 3000.11.3 (9c803229faa4)",
+        "version_exit": 0,
+        "model_turn_created": false,
+        "rules_resolver_exit": 0,
+        "root_body_resolved": true,
+        "native_enforcement": "NOT_PROVEN"
+      },
+      {
+        "runtime": "junie",
+        "default_pointer_present": false,
+        "native_loading": "NOT_PROVEN",
+        "shim_executed": false
+      },
+      {
+        "runtime": "opencode",
+        "activation": false,
+        "native_execution": "NOT_PROVEN"
+      }
+    ],
+    "raw_prompt_config_saved": false,
+    "limits": "Resolver/render evidence does not prove model obedience or native role enforcement."
+  },
+  "windows_host_attempts": [
+    {
+      "attempt": "host-v2",
+      "source_sha": "d414d98f6169b48e7dda6e9995a25027503c39f9",
+      "evidence": {
+        "status": "INCOMPLETE_NOT_QUALIFIED",
+        "results": [
+          {
+            "name": "probe-branch",
+            "argv": [
+              "git",
+              "switch",
+              "-c",
+              "codex/epic-13056-host-probe-v2-20261118",
+              "d414d98f6169b48e7dda6e9995a25027503c39f9"
+            ],
+            "exit_code": 0,
+            "seconds": 2.3114853000006406,
+            "controlled_messages": []
+          },
+          {
+            "name": "bare-remote",
+            "argv": [
+              "git",
+              "init",
+              "--bare",
+              "D:\\github\\BioactivityDataAcquisition\\reports\\local\\epic-13056-closeout-20261118\\host-v2\\host-push-remote.git"
+            ],
+            "exit_code": 0,
+            "seconds": 0.084767100008321,
+            "controlled_messages": []
+          },
+          {
+            "name": "seed-remote",
+            "argv": [
+              "git",
+              "-C",
+              "D:\\github\\BioactivityDataAcquisition\\reports\\local\\epic-13056-closeout-20261118\\host-v2\\host-push-remote.git",
+              "update-ref",
+              "refs/heads/qualification",
+              "d414d98f6169b48e7dda6e9995a25027503c39f9"
+            ],
+            "exit_code": 0,
+            "seconds": 0.12973519999650307,
+            "controlled_messages": []
+          },
+          {
+            "name": "stage-probe",
+            "argv": [
+              "git",
+              "add",
+              "--",
+              "reports\\review\\ai-rules-epic-13056-acceptance.md"
+            ],
+            "exit_code": 0,
+            "seconds": 0.122297099995194,
+            "controlled_messages": []
+          },
+          {
+            "name": "nonempty-commit",
+            "argv": [
+              "git",
+              "commit",
+              "-m",
+              "test(hooks): qualify installed Windows callbacks"
+            ],
+            "exit_code": 0,
+            "seconds": 19.56614520000585,
+            "controlled_messages": []
+          },
+          {
+            "name": "local-push",
+            "argv": [
+              "git",
+              "push",
+              "D:\\github\\BioactivityDataAcquisition\\reports\\local\\epic-13056-closeout-20261118\\host-v2\\host-push-remote.git",
+              "HEAD:refs/heads/qualification"
+            ],
+            "exit_code": 1,
+            "seconds": 180.79324020000058,
+            "controlled_messages": [
+              "BioETL hook ERROR: timeout; inspect with hook doctor and scoped checks."
+            ]
+          }
+        ],
+        "owned_callbacks_present": false,
+        "probe_branch_and_changes_preserved": true,
+        "foreign_callbacks_preserved": true,
+        "env_bytes_unchanged": true
+      }
+    },
+    {
+      "attempt": "host-v3",
+      "source_sha": "d414d98f6169b48e7dda6e9995a25027503c39f9",
+      "evidence": {
+        "status": "INCOMPLETE_NOT_QUALIFIED",
+        "results": [
+          {
+            "name": "probe-branch",
+            "argv": [
+              "git",
+              "switch",
+              "-c",
+              "codex/epic-13056-host-probe-v3-20261118",
+              "d414d98f6169b48e7dda6e9995a25027503c39f9"
+            ],
+            "exit_code": 0,
+            "seconds": 1.848897699994268,
+            "controlled_messages": []
+          },
+          {
+            "name": "bare-remote",
+            "argv": [
+              "git",
+              "init",
+              "--bare",
+              "D:\\github\\BioactivityDataAcquisition\\reports\\local\\epic-13056-closeout-20261118\\host-v3\\host-push-remote.git"
+            ],
+            "exit_code": 0,
+            "seconds": 0.04851420001068618,
+            "controlled_messages": []
+          },
+          {
+            "name": "seed-remote",
+            "argv": [
+              "git",
+              "-C",
+              "D:\\github\\BioactivityDataAcquisition\\reports\\local\\epic-13056-closeout-20261118\\host-v3\\host-push-remote.git",
+              "update-ref",
+              "refs/heads/qualification",
+              "d414d98f6169b48e7dda6e9995a25027503c39f9"
+            ],
+            "exit_code": 0,
+            "seconds": 0.052511100002448075,
+            "controlled_messages": []
+          },
+          {
+            "name": "stage-probe",
+            "argv": [
+              "git",
+              "add",
+              "--",
+              "reports\\review\\ai-rules-epic-13056-acceptance.md"
+            ],
+            "exit_code": 0,
+            "seconds": 0.1182400000107009,
+            "controlled_messages": []
+          },
+          {
+            "name": "nonempty-commit",
+            "argv": [
+              "git",
+              "commit",
+              "-m",
+              "test(hooks): qualify installed Windows callbacks"
+            ],
+            "exit_code": 0,
+            "seconds": 16.015071799993166,
+            "controlled_messages": []
+          },
+          {
+            "name": "local-push",
+            "argv": [
+              "git",
+              "push",
+              "D:\\github\\BioactivityDataAcquisition\\reports\\local\\epic-13056-closeout-20261118\\host-v3\\host-push-remote.git",
+              "HEAD:refs/heads/qualification"
+            ],
+            "exit_code": 1,
+            "seconds": 180.5919176000025,
+            "controlled_messages": [
+              "BioETL hook ERROR: timeout; inspect with hook doctor and scoped checks."
+            ]
+          }
+        ],
+        "owned_callbacks_present": false,
+        "probe_branch_and_changes_preserved": true,
+        "foreign_callbacks_preserved": true,
+        "env_bytes_unchanged": true
+      }
+    }
+  ],
+  "push_diagnostics": [
+    {
+      "hook": "detect-secrets-baseline",
+      "argv": [
+        "D:\\github\\BioactivityDataAcquisition\\.venv-win\\Scripts\\python.exe",
+        "-B",
+        "-m",
+        "pre_commit",
+        "run",
+        "detect-secrets-baseline",
+        "--hook-stage",
+        "pre-push",
+        "--from-ref",
+        "d414d98f6169b48e7dda6e9995a25027503c39f9",
+        "--to-ref",
+        "HEAD",
+        "--verbose"
+      ],
+      "exit_code": 0,
+      "seconds": 26.5689080000011
+    },
+    {
+      "hook": "mypy-strict",
+      "argv": [
+        "D:\\github\\BioactivityDataAcquisition\\.venv-win\\Scripts\\python.exe",
+        "-B",
+        "-m",
+        "pre_commit",
+        "run",
+        "mypy-strict",
+        "--hook-stage",
+        "pre-push",
+        "--from-ref",
+        "d414d98f6169b48e7dda6e9995a25027503c39f9",
+        "--to-ref",
+        "HEAD",
+        "--verbose"
+      ],
+      "exit_code": 0,
+      "seconds": 54.67761300000711
+    },
+    {
+      "hook": "bandit",
+      "argv": [
+        "D:\\github\\BioactivityDataAcquisition\\.venv-win\\Scripts\\python.exe",
+        "-B",
+        "-m",
+        "pre_commit",
+        "run",
+        "bandit",
+        "--hook-stage",
+        "pre-push",
+        "--from-ref",
+        "d414d98f6169b48e7dda6e9995a25027503c39f9",
+        "--to-ref",
+        "HEAD",
+        "--verbose"
+      ],
+      "exit_code": 0,
+      "seconds": 26.50994589999027
+    },
+    {
+      "hook": "architecture-smoke",
+      "argv": [
+        "D:\\github\\BioactivityDataAcquisition\\.venv-win\\Scripts\\python.exe",
+        "-B",
+        "-m",
+        "pre_commit",
+        "run",
+        "architecture-smoke",
+        "--hook-stage",
+        "pre-push",
+        "--from-ref",
+        "d414d98f6169b48e7dda6e9995a25027503c39f9",
+        "--to-ref",
+        "HEAD",
+        "--verbose"
+      ],
+      "exit_code": 0,
+      "seconds": 45.248856699996395
+    },
+    {
+      "hook": "check-dashboard-operator-readability",
+      "argv": [
+        "D:\\github\\BioactivityDataAcquisition\\.venv-win\\Scripts\\python.exe",
+        "-B",
+        "-m",
+        "pre_commit",
+        "run",
+        "check-dashboard-operator-readability",
+        "--hook-stage",
+        "pre-push",
+        "--from-ref",
+        "d414d98f6169b48e7dda6e9995a25027503c39f9",
+        "--to-ref",
+        "HEAD",
+        "--verbose"
+      ],
+      "exit_code": 0,
+      "seconds": 1.6661699999967823
+    },
+    {
+      "hook": "check-dashboard-first-window-noscroll",
+      "argv": [
+        "D:\\github\\BioactivityDataAcquisition\\.venv-win\\Scripts\\python.exe",
+        "-B",
+        "-m",
+        "pre_commit",
+        "run",
+        "check-dashboard-first-window-noscroll",
+        "--hook-stage",
+        "pre-push",
+        "--from-ref",
+        "d414d98f6169b48e7dda6e9995a25027503c39f9",
+        "--to-ref",
+        "HEAD",
+        "--verbose"
+      ],
+      "exit_code": 0,
+      "seconds": 1.203741599994828
+    },
+    {
+      "hook": "check-dashboard-qa-check-gates",
+      "argv": [
+        "D:\\github\\BioactivityDataAcquisition\\.venv-win\\Scripts\\python.exe",
+        "-B",
+        "-m",
+        "pre_commit",
+        "run",
+        "check-dashboard-qa-check-gates",
+        "--hook-stage",
+        "pre-push",
+        "--from-ref",
+        "d414d98f6169b48e7dda6e9995a25027503c39f9",
+        "--to-ref",
+        "HEAD",
+        "--verbose"
+      ],
+      "exit_code": 0,
+      "seconds": 1.4879415999894263
+    },
+    {
+      "hook": "check-dashboard-requirement-coverage",
+      "argv": [
+        "D:\\github\\BioactivityDataAcquisition\\.venv-win\\Scripts\\python.exe",
+        "-B",
+        "-m",
+        "pre_commit",
+        "run",
+        "check-dashboard-requirement-coverage",
+        "--hook-stage",
+        "pre-push",
+        "--from-ref",
+        "d414d98f6169b48e7dda6e9995a25027503c39f9",
+        "--to-ref",
+        "HEAD",
+        "--verbose"
+      ],
+      "exit_code": 0,
+      "seconds": 1.3229680999938864
+    }
+  ],
+  "environment_probe_measurement": {
+    "source": "d414d98f6169b48e7dda6e9995a25027503c39f9",
+    "measurements": [
+      {
+        "mode": "all_hooks",
+        "probes": 46,
+        "healthy": true,
+        "seconds": 2.4884369000064908
+      },
+      {
+        "mode": "distinct_environments",
+        "probes": 6,
+        "healthy": true,
+        "seconds": 0.18840269999054726
+      }
+    ],
+    "checks_unchanged": true,
+    "limits": "One local observation; not a causal whole-hook speed claim."
+  },
+  "full_wsl_host_admission": "NOT_RUN",
+  "ci_for_documentation_head": "NOT_RUN",
+  "proof_or_stop_admit": "STOP",
+  "limits": [
+    "No model turns or new runtime installation",
+    "Platform skips remain SKIP",
+    "Framework no-files skips remain SKIP despite exit 0",
+    "Local evidence does not attest GitHub CI",
+    "No env contents, hashes, raw prompt or config exported"
+  ],
+  "native_traced_push": {
+    "exit_code": 1,
+    "seconds": 180.84309769999527,
+    "scope": "Native push trace; diagnostic installation always rolled back."
+  },
+  "synthetic_native_push": {
+    "exit_code": 0,
+    "tip_received": true,
+    "seconds": 21.603276599998935,
+    "scope": "Actual native Git push through production callback mechanism with synthetic system checks; not full-project admission."
+  },
+  "framework_protocol": {
+    "source_sha": "d414d98f6169b48e7dda6e9995a25027503c39f9",
+    "argv": [
+      "D:\\github\\BioactivityDataAcquisition\\.venv-win\\Scripts\\python.exe",
+      "-B",
+      "-m",
+      "scripts.engineering.repo.offline_precommit",
+      "pre-push",
+      "D:/github/BioactivityDataAcquisition/.git/hooks",
+      "qualification",
+      "D:\\github\\BioactivityDataAcquisition\\reports\\local\\epic-13056-closeout-20261118\\host-v3\\host-push-remote.git"
+    ],
+    "exit_code": 0,
+    "seconds": 100.26691520000168,
+    "events": [
+      {
+        "seconds": 28.840749000009964,
+        "line": "Detect hardcoded secrets against baseline.......................................................Passed"
+      },
+      {
+        "seconds": 33.110236600012286,
+        "line": "Run strict mypy gate on product and engineering quality code....................................Passed"
+      },
+      {
+        "seconds": 60.367342000012286,
+        "line": "Run Bandit security scan on src/bioetl..........................................................Passed"
+      },
+      {
+        "seconds": 100.18661730000167,
+        "line": "Fast architecture smoke checks..................................................................Passed"
+      },
+      {
+        "seconds": 100.18712970000342,
+        "line": "Check dashboard copy roles, datetime format, and first-window no-scroll.....(no files to check)Skipped"
+      },
+      {
+        "seconds": 100.18757770000957,
+        "line": "Check first-window panels have no internal scroll (DASH-FIT-004)............(no files to check)Skipped"
+      },
+      {
+        "seconds": 100.18837519999943,
+        "line": "Check dashboard PromQL duplicate, performance, inventory, and scope gates...(no files to check)Skipped"
+      },
+      {
+        "seconds": 100.1889979000116,
+        "line": "Check DASH-* requirement coverage pytest gates..............................(no files to check)Skipped"
+      }
+    ],
+    "scope": "Protocol diagnosis outside outer hook watchdog; not Git event admission."
+  },
+  "pipeline_observations": [
+    {
+      "phase": "check_no_partial_tree.py",
+      "event": "start",
+      "seconds": 2.2558476999984123
+    },
+    {
+      "phase": "check_no_partial_tree.py",
+      "event": "end",
+      "duration": 0.9528648999985307,
+      "status": "PASS",
+      "reason": "completed",
+      "returncode": 0
+    },
+    {
+      "phase": "budget_guard.py",
+      "event": "start",
+      "seconds": 3.209692800010089
+    },
+    {
+      "phase": "budget_guard.py",
+      "event": "end",
+      "duration": 0.7003479999984847,
+      "status": "PASS",
+      "reason": "completed",
+      "returncode": 0
+    },
+    {
+      "phase": "offline_precommit.py",
+      "event": "start",
+      "seconds": 3.9109084000083385
+    },
+    {
+      "phase": "offline_precommit.py",
+      "event": "end",
+      "duration": 123.3003311999928,
+      "status": "PASS",
+      "reason": "completed",
+      "returncode": 0
+    },
+    {
+      "result": 0,
+      "seconds": 127.97150500000862,
+      "scope": "Diagnostic direct call; not native Git dispatch admission."
+    }
+  ],
+  "follow_up_governance": [
+    {
+      "name": "family-update",
+      "argv": [
+        "D:\\github\\BioactivityDataAcquisition\\.venv-win\\Scripts\\python.exe",
+        "-B",
+        "-m",
+        "scripts.engineering.qa",
+        "report-family-baseline",
+        "--update"
+      ],
+      "exit_code": 0,
+      "seconds": 2.088496899988968
+    },
+    {
+      "name": "family-check",
+      "argv": [
+        "D:\\github\\BioactivityDataAcquisition\\.venv-win\\Scripts\\python.exe",
+        "-B",
+        "-m",
+        "scripts.engineering.qa",
+        "report-family-baseline",
+        "--check"
+      ],
+      "exit_code": 0,
+      "seconds": 1.7558712999889394
+    },
+    {
+      "name": "config-backlog-update",
+      "argv": [
+        "D:\\github\\BioactivityDataAcquisition\\.venv-win\\Scripts\\python.exe",
+        "-B",
+        "-m",
+        "scripts.engineering.qa.report_config_surface_backlog"
+      ],
+      "exit_code": 0,
+      "seconds": 7.982072400001925
+    },
+    {
+      "name": "debt-update",
+      "argv": [
+        "D:\\github\\BioactivityDataAcquisition\\.venv-win\\Scripts\\python.exe",
+        "-B",
+        "-m",
+        "scripts.engineering.qa",
+        "report-debt-governance-gates",
+        "--update"
+      ],
+      "exit_code": 0,
+      "seconds": 28.84159369999543
+    },
+    {
+      "name": "debt-check",
+      "argv": [
+        "D:\\github\\BioactivityDataAcquisition\\.venv-win\\Scripts\\python.exe",
+        "-B",
+        "-m",
+        "scripts.engineering.qa",
+        "report-debt-governance-gates",
+        "--check"
+      ],
+      "exit_code": 0,
+      "seconds": 36.785829600004945
+    },
+    {
+      "name": "budget-after-refresh",
+      "argv": [
+        "D:\\github\\BioactivityDataAcquisition\\.venv-win\\Scripts\\python.exe",
+        "-B",
+        "-m",
+        "scripts.engineering.repo.budget_guard",
+        "--base",
+        "origin/main",
+        "--worktree"
+      ],
+      "exit_code": 0,
+      "seconds": 1.0156124999921303
+    }
+  ],
+  "scc_focused_retest": {
+    "argv": [
+      "D:/github/BioactivityDataAcquisition/.venv-win/Scripts/python.exe",
+      "-B",
+      "-m",
+      "pytest",
+      "tests/architecture/test_runtime_import_scc.py",
+      "-q",
+      "--tb=short",
+      "-o",
+      "addopts=",
+      "--artifact-selection=all",
+      "-p",
+      "no:cacheprovider"
+    ],
+    "cwd": "D:/github/BioactivityDataAcquisition-worktrees/rules-13052",
+    "started_at": "2026-11-18T13:38:08.186701+00:00",
+    "exit_code": 0,
+    "elapsed_seconds": 51.00843219998933,
+    "finished_at": "2026-11-18T13:38:59.195317+00:00"
+  },
+  "scc_exact_retest": {
+    "argv": [
+      "D:/github/BioactivityDataAcquisition/.venv-win/Scripts/python.exe",
+      "-B",
+      "-m",
+      "pytest",
+      "-p",
+      "no:cacheprovider",
+      "tests/architecture/test_runtime_import_scc.py",
+      "-q"
+    ],
+    "cwd": "D:/github/BioactivityDataAcquisition-worktrees/rules-13052",
+    "started_at": "2026-11-18T13:42:12.792795+00:00",
+    "exit_code": 0,
+    "elapsed_seconds": 50.45750950000365,
+    "finished_at": "2026-11-18T13:43:03.250457+00:00"
+  },
+  "pre_refresh_proof_verification": {
+    "bundle": "D:\\github\\BioactivityDataAcquisition-worktrees\\rules-13052\\reports\\quality\\proof-or-stop\\epic-13056-closeout-20261118\\bundle.json",
+    "bundle_digest": "29b76c3bfeef0fee5c63e5b67bed176c0045aad8f5b529dcfd7e09fb6da77ea9",
+    "claim": "done",
+    "claim_qualified": false,
+    "degradations": [
+      "trust_tier:local_single_host"
+    ],
+    "errors": [
+      "missing_receipt:debt",
+      "missing_receipt:governance",
+      "missing_receipt:tests"
+    ],
+    "exit_code": 2,
+    "outcome": "STOP",
+    "run_id": "epic-13056-closeout-20261118",
+    "schema_version": 1
+  },
+  "proof_scope": "Pre-refresh documentation working tree. No completed or CI-qualified claim; subsequent source changes require fresh binding."
+}
