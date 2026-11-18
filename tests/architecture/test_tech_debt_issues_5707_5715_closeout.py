@@ -37,22 +37,10 @@ TELEMETRY_BASELINE = ROOT / "configs" / "quality" / "test_telemetry_baseline.yam
 TELEMETRY_COVERAGE = ROOT / "reports" / "test-telemetry" / "coverage-summary.json"
 TELEMETRY_SLOWEST = ROOT / "reports" / "test-telemetry" / "slowest-tests.json"
 DELEGATION_HELPER = (
-    ROOT
-    / "src"
-    / "bioetl"
-    / "infrastructure"
-    / "adapters"
-    / "decorators"
-    / "_data_source_delegation.py"
+    ROOT / "src/bioetl/infrastructure/adapters/decorators/_data_source_delegation.py"
 )
 CIRCUIT_BREAKER = (
-    ROOT
-    / "src"
-    / "bioetl"
-    / "infrastructure"
-    / "adapters"
-    / "decorators"
-    / "circuit_breaker.py"
+    ROOT / "src/bioetl/infrastructure/adapters/decorators/circuit_breaker.py"
 )
 RETRY = (
     ROOT / "src" / "bioetl" / "infrastructure" / "adapters" / "decorators" / "retry.py"
