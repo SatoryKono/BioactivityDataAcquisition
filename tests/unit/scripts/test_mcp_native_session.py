@@ -173,6 +173,35 @@ def test_markdownify_source_cannot_redirect_a_foreign_workspace(
         session_overrides(config, root, manifest=manifest, markdownify=custom)
 
 
+def test_default_foreign_markdownify_binding_disables_only_that_server(
+    session_binding, tmp_path, monkeypatch
+):
+    root, manifest, _, config = session_binding
+    home = tmp_path / "home"
+    path = home / ".config/pc-agent/markdownify-bioetl.json"
+    path.parent.mkdir(parents=True)
+    path.write_text(
+        json.dumps(
+            {
+                "schema": 1,
+                "workspace": str(tmp_path / "foreign"),
+                "git_common": str(root / ".git"),
+                "server": "Markdownify-BioETL",
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(Path, "home", lambda: home)
+    config["mcp_servers"]["Markdownify-BioETL"] = {"command": "unrelated"}
+    overrides = session_overrides(config, root, manifest=manifest)
+    entries = {}
+    for override in overrides[1::2]:
+        entries.update(tomllib.loads(override)["mcp_servers"])
+    assert entries["memory"]["args"][-1] == "memory"
+    assert entries["ast-grep"]["args"][-1] == "ast-grep"
+    assert entries["Markdownify-BioETL"] == {"enabled": False}
+
+
 def test_session_uses_explicit_environment_manifest(
     session_binding, monkeypatch, tmp_path
 ):
@@ -468,8 +497,16 @@ def test_ref_only_does_not_load_unrelated_markdownify_binding(
 
     monkeypatch.setattr(native_session, "session_overrides", scoped)
     original_config = ref_launch["config_path"].read_bytes()
-    with pytest.raises(PermissionError, match="workspace|unavailable"):
-        native_session._run(ref_launch["argv"])
+    if binding_state == "unavailable":
+        with pytest.raises(PermissionError, match="unavailable"):
+            native_session._run(ref_launch["argv"])
+    else:
+        assert native_session._run(ref_launch["argv"]) == 0
+        [ordinary_call] = ref_launch["calls"]
+        assert (
+            'mcp_servers.Markdownify-BioETL={"enabled"=false}' in ordinary_call["argv"]
+        )
+        ref_launch["calls"].clear()
     assert len(scoped_calls) == 1
     assert not ref_launch["calls"]
 

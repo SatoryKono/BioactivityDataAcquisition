@@ -55,6 +55,8 @@ configuration. A profile may omit optional servers without enabling them.
 User TOML is validated before atomic publication. Detected concurrent edits
 abort publication. Existing per-tool approval settings and enabled/disabled
 tool lists are preserved; unsupported existing fields require explicit review.
+When a profile omits a managed server, its policy remains in an inactive comment
+inside the managed TOML block and is restored when that server returns.
 Unchanged output does not replace the file. Back up only changed fields in
 owner-private storage and compare current values before restoring them.
 
@@ -93,8 +95,10 @@ supported per-invocation `--config` transport tables. It preserves existing tool
 approval policies. This path leaves the global user TOML unchanged; subsequent
 generator synchronization cannot erase these invocation-scoped overrides.
 The Markdownify binding must match the exact physical workspace and Git common
-directory. Do not substitute an arbitrary stdio command or a mutable checkout
-path for the reviewed installed selector.
+directory. A default binding for another workspace disables only Markdownify in
+the current session. An explicitly requested foreign binding is refused. Do
+not substitute an arbitrary stdio command or a mutable checkout path for the
+reviewed installed selector.
 
 The native session selector accepts a service name and inherits its real cwd.
 There is no client `--root` override. The nearest Git marker must identify the
@@ -258,6 +262,9 @@ links, unsupported reparse points and alternate data streams. Directory handles
 deny rename while the final file is checked and read through the same handle.
 Converters receive a bounded private snapshot, never the original path. Worker
 processes run in owned Jobs with isolated Python and no service credential.
+HTML invokes the HTML converter directly. A worker that misses the cleanup
+deadline leaves a private cleanup record. A later conversion removes only its
+validated snapshot after verifying the original process has exited.
 
 Responses retain the 2 MiB transport limit and encode ordinary Unicode as UTF-8.
 An oversized JSON envelope returns a bounded tool error rather than closing a
@@ -271,6 +278,10 @@ header/body read deadline. A conversion acquires its execution slot without
 waiting; a busy owner returns a tool error before doing conversion work.
 Generation transitions and stop publication share one lock. A stale stop marker
 keeps the watcher waiting for the current generation's marker.
+The owner publishes its bound loopback port with its generation. If the
+preferred port is occupied, it binds an available loopback port. Startup health
+checks share a 32-second budget. Stop validates the profile and owner identity
+even if the converter snapshot has drifted.
 An administrative restart archives a stopped generation before retiring its
 status. A known different birth for a reused PID proves the former owner is gone;
 that foreign process is left untouched. Unknown birth and a still-live matching

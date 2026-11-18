@@ -143,18 +143,25 @@ def _validate_markdownify_client(entry):
     )
 
 
-def _markdownify_entry(source, root, servers):
+def _markdownify_entry(source, root, servers, *, explicit):
     from scripts.ai.codex.local_mcp_routes import common_directory
 
     if not source.exists():
         return None
     value = json.loads(physical(source).read_bytes())
+    workspace = Path(value["workspace"])
+    registered_common = Path(value["git_common"])
+    name = "Markdownify-BioETL"
     if (
         value.get("schema") != 1
-        or Path(value["workspace"]) != root
-        or value.get("server") != "Markdownify-BioETL"
-        or common_directory(root, expected=Path(value["git_common"])) is None
+        or value.get("server") != name
+        or not workspace.is_absolute()
+        or not registered_common.is_absolute()
     ):
+        raise PermissionError("Invalid Markdownify session binding")
+    if workspace != root and not explicit:
+        return (name, {"enabled": False}) if name in servers else None
+    if workspace != root or common_directory(root, expected=registered_common) is None:
         raise PermissionError(
             "Markdownify session binding does not match this workspace"
         )
@@ -266,7 +273,9 @@ def session_overrides(
         entry["args"][-1] = "memory-acceptance"
         selected["memory-acceptance"] = entry
     source = markdownify or Path.home() / ".config/pc-agent/markdownify-bioetl.json"
-    optional = _markdownify_entry(source, root, servers)
+    optional = _markdownify_entry(
+        source, root, servers, explicit=markdownify is not None
+    )
     if optional is not None:
         selected[optional[0]] = optional[1]
     result = []
@@ -276,16 +285,13 @@ def session_overrides(
 
 
 def workspace():
-    root = next(
-        (p for p in (Path.cwd(), *Path.cwd().parents) if (p / ".git").exists()), None
-    )
-    if root is None:
-        raise PermissionError("Native session requires its actual project cwd")
+    from scripts.ai.mcp.session_client import session_root
+
     path = Path("D:/pc-agent/tools/shared-mcp/ast-workspace-profile.py")
     spec = importlib.util.spec_from_file_location("native_session_workspace", path)
     roots = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(roots)
-    root = roots.physical_root(physical(root))
+    root = session_root(physical(Path.cwd()), roots.physical_root)
     return root, roots.CANONICAL
 
 
