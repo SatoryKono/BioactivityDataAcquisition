@@ -71,7 +71,7 @@ Checks, containment и лимиты 30/10/180 s не ослаблялись.
 | 5 | Guardrails и бюджеты | Full-tree и сравнение бюджетов current base→HEAD проходят. Исторический budget guard возвращает ERROR на новой policy, отсутствующей в старом base; это не PASS исторического диапазона. Эта задача не повышает бюджеты. |
 | 6 | Inventories, mirrors, SHA и CI | Static doctor, Codex–Junie parity и module source hash проходят на source SHA. CI на main `f444a6b8…`: runtime checks и bounded Proof-or-Stop ADMIT подтверждены ниже. Это не приёмка failing native host-последовательностей и не CI нового документационного head. |
 | 7 | Эффект #13033 | ASSESSED_INCONCLUSIVE. Сохранены исходные измерения; новые model turns не выполнялись. Причинная экономия контекста и улучшение качества не доказаны. |
-| 8 | Проверенный откат | Изолированные installer/ownership/timeout tests прошли на обеих платформах. Реальный rollback после timeout прошёл на Windows и WSL; исходное отсутствие owned callbacks восстановлено. Положительная последовательность reinstall/commit/push на обеих платформах не завершена. |
+| 8 | Проверенный откат | Изолированные installer/ownership/timeout tests прошли на обеих платформах. Реальный rollback после timeout прошёл на Windows и WSL; исходное отсутствие owned callbacks восстановлено. Положительная Windows последовательность завершена на source `30c1bfc…` в последующей записи ниже; WSL-последовательность остаётся незавершённой. |
 
 ## CI принятого main и границы ADMIT
 
@@ -232,3 +232,47 @@ staged probe и клон сохранены. Службы не перезапу�
 
 CI итогового публикуемого head и применимый closeout оцениваются отдельно;
 исторические ADMIT, STOP и INCONCLUSIVE выше не переименовываются.
+
+
+## Linux: полное дерево и повторные CLI
+
+Следующий код кандидата: `0258de49888a349b889880885b2e23f18090b3df`.
+Coalesced Linux framework сохраняет каждый configured check и свежий финальный
+diff. Source comparisons используют восемь bounded native Git workers: все пути
+индекса покрыты, before/after index должны совпасть, суммарный срок scan — 10 s.
+Ruff format теперь возвращает ненулевой код после изменения файла. Неизвестные
+команды, источники или протокол возвращают обычный framework path.
+
+В уже контролируемом Linux worker две исходные tree/budget CLI могут выполняться
+параллельно с прежними аргументами. Оба результата ожидаются перед callbacks;
+порядок отказов сохранён. Повторная проверка changed-index остаётся свежей.
+Windows и вызовы вне owned worker сохраняют subprocess path. Проверки не
+кэшируются между событиями; сроки 30/10/180 s и защитные бюджеты не увеличены.
+
+После последнего изменения: WSL **58 passed / 0 skipped**; Windows **57 passed /
+1 POSIX-only skip**. Предыдущий полный overlapping набор adapters прошёл
+**187 passed / 5 skipped**. Это локальные наборы рабочего дерева до соответствующих
+коммитов, не CI текущего head и не сумма уникальных тестов. Отдельно проверены
+вызовы Git, callback-staged budget increases, ожидание обоих параллельных guards,
+порядок ошибок и остановка detached descendants. Source/module/argv drift,
+неожиданный return value и exception приводят к отказу либо обычному subprocess
+fallback, без выдачи unavailable за PASS.
+
+Native WSL captures `e22a374…` и `57e09ef…` сохранены как FAIL/INCOMPLETE:
+whole command соответственно 30.95 и 31.05 s с cleanup при сроке hook 30 s.
+Во втором capture финальный полный source scan закончился почти у срока;
+положительная commit/push/reinstall последовательность не достигнута. После
+отказов owned callbacks отсутствуют, env bytes сохранены; staged probes
+заархивированы отдельными коммитами `480c46d…` и `91729b3…`. Эти результаты не
+переносятся на новый параллельный кандидат и не переименовываются в PASS.
+
+Полная native квалификация `0258de4…` — **NOT_RUN**. Наблюдаемый принятый main
+`1db42441dbcf942e8b3b0651964ecf9ce0f592d3` содержит независимое исправление
+ChEMBL. Локальная интеграция main, push/draft PR и CI ожидают явного разрешения:
+automatic approval review отклонила операции до исполнения. Новая внешняя ветка
+и PR этой попыткой не созданы. Подготовленное описание draft явно сохраняет
+PARTIAL / OPEN; merge PR и production activation не разрешены.
+
+Native Windows PASS выше относится к source `30c1bfc…`; повтор на окончательном
+коде нужен отдельно. Исторические CI ADMIT, локальный STOP и sealed INCONCLUSIVE
+остаются в своих исходных scope. #13056 остаётся OPEN.
