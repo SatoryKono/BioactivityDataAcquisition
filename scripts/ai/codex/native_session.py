@@ -25,16 +25,6 @@ MARKDOWNIFY_CLIENT = "safe_markdownify.py"
 MARKDOWNIFY_VERSIONS = Path("D:/pc-agent/tools/markdownify-owner-versions")
 SESSION_VERSIONS = Path("D:/pc-agent/tools/codex-session-versions")
 SHA256_PATTERN = "[0-9a-f]{64}"
-MCP_POLICY_FIELDS = frozenset(
-    {
-        "enabled",
-        "enabled_tools",
-        "disabled_tools",
-        "tools",
-        "startup_timeout_sec",
-        "tool_timeout_sec",
-    }
-)
 
 
 def physical(path):
@@ -187,6 +177,8 @@ def _markdownify_entry(source, root, servers, *, explicit=True):
 
 
 def _markdownify_policy(entry, previous):
+    from scripts.ai.codex.local_mcp_routes import MCP_POLICY_FIELDS
+
     if previous is None:
         return entry
     if not isinstance(previous, dict) or {
