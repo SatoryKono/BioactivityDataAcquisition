@@ -98,13 +98,17 @@ def _align_table_to_schema(
 ) -> pa.Table:
     """Fill schema-evolved columns missing from older Parquet payloads as typed nulls."""
     target = list(schema.names) if columns is None else list(columns)
+    schema_names = set(schema.names)
     for name in target:
-        if name in result.column_names:
+        if name in result.column_names or name not in schema_names:
             continue
         result = result.append_column(
             name, pa.nulls(result.num_rows, type=schema.field(name).type)
         )
-    return result.select(target)
+    selectable = [name for name in target if name in result.column_names]
+    if not selectable:
+        return result
+    return result.select(selectable)
 
 
 def _physical_columns_for_read(
@@ -120,11 +124,49 @@ def _physical_columns_for_read(
     ]
 
 
+def _list_available_parquet_columns(path: str) -> set[str] | None:
+    """Return Parquet column names, or None when the schema probe is unavailable."""
+    try:
+        return set(pq.read_schema(path).names)
+    except (OSError, ValueError, pa.ArrowInvalid, pa.ArrowIOError):
+        # Windows-style URIs can fail schema probes on non-Windows hosts; defer
+        # filtering to pq.read_table and typed null alignment.
+        return None
+
+
 def _empty_row_table(row_count: int) -> pa.Table:
     """Build a zero-column Arrow table with a fixed row count for typed null fills."""
     return pa.table(
         {"__bioetl_row_pad__": pa.nulls(row_count, type=pa.null())}
     ).drop_columns(["__bioetl_row_pad__"])
+
+
+def _parquet_row_count(path: str) -> int:
+    try:
+        return int(pq.read_metadata(path).num_rows)
+    except (OSError, ValueError, pa.ArrowInvalid, pa.ArrowIOError):
+        return 0
+
+
+def _read_physical_parquet(
+    path: str,
+    columns: list[str] | None,
+    partition_columns: frozenset[str],
+) -> pa.Table:
+    """Read active-file physical columns, tolerating unavailable schema probes."""
+    available = _list_available_parquet_columns(path)
+    if available is None:
+        if columns is None:
+            return pq.read_table(path, use_threads=False)
+        physical = [name for name in columns if name not in partition_columns]
+        if physical:
+            return pq.read_table(path, columns=physical, use_threads=False)
+        return _empty_row_table(_parquet_row_count(path))
+
+    physical_columns = _physical_columns_for_read(columns, partition_columns, available)
+    if physical_columns:
+        return pq.read_table(path, columns=physical_columns, use_threads=False)
+    return _empty_row_table(_parquet_row_count(path))
 
 
 def _append_partition_columns(
@@ -165,14 +207,7 @@ def _read_active_file(
     """
     path = resolve_parquet_file_uri(file_uri)
     partition_columns = frozenset(partition_info.columns if partition_info else [])
-    physical_columns = _physical_columns_for_read(
-        columns, partition_columns, set(pq.read_schema(path).names)
-    )
-    if physical_columns:
-        result = pq.read_table(path, columns=physical_columns, use_threads=False)
-    else:
-        # Partition-only or schema-evolved-only projection: keep row count.
-        result = _empty_row_table(pq.read_metadata(path).num_rows)
+    result = _read_physical_parquet(path, columns, partition_columns)
 
     if partition_info is not None:
         result = _append_partition_columns(
