@@ -207,8 +207,11 @@ recovery rules. A terminated LAUNCHING generation can produce its own incident
 only when its status and complete zero-request startup receipt match that
 successor and the retained graph stamp. It requires a new plan/grant; the previous
 grant remains consumed. An idle receipt requires an explicit `mutating=false`.
-A pending RESOLVED or LAUNCHING grant blocks runtime migration until its reviewed
-launch is handled. No uncertain request is replayed.
+A pending RESOLVED grant blocks runtime migration until its reviewed launch is
+handled. A LAUNCHING generation also blocks migration unless the dormant-process,
+zero-request startup and matching-graph checks in Rollback/Recovery prove the
+bounded forward-upgrade exception. That upgrade preserves the consumed grant and
+requires a new reconciliation before launch. No uncertain request is replayed.
 
 For an older v2 reconciler that reports BLOCK_NOT_BLOCKED after an interrupted
 LAUNCHING generation, the current administrative `reconcile-incident` command
@@ -311,6 +314,13 @@ when their current values still match this deployment's expected values.
 Use profile-local Memory rollback after the compatibility and dormant-process
 checks. Preserve graphs, claims, block history, migration journals and recipes.
 An incompatible rollback or incomplete migration leaves the target closed.
+A predecessor stopped in `LAUNCHING` may be upgraded with its explicit
+`--from-version` only when all processes are proven dormant, its original v2
+startup receipt proves zero accepted requests and no mutation, and its graph
+stamp still matches the launch snapshot. Migration preserves the unresolved
+coordination record; it issues no grant and replays no request. Use the new
+runtime's explicit reconcile-plan/reconcile-apply procedure before launching.
+Missing, idle, changed-generation or nonzero-request receipts remain blocked.
 For `PREPARING` or `ROLLING_BACK`, there is currently no automatic completion or
 cancellation command. Do not retry migrate/rollback or edit records to bypass
 `select_bundle`. Escalate to repository/runtime owner `@SatoryKono` together with

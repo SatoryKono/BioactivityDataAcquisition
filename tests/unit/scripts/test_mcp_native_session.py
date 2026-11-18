@@ -287,3 +287,34 @@ def test_native_operational_cli_returns_redacted_failure(monkeypatch, capsys):
         == 64
     )
     assert "private workspace diagnostic" not in capsys.readouterr().err
+
+
+@pytest.mark.parametrize(
+    "change", ["relative", "foreign", "interpreter", "drift", "manifest"]
+)
+def test_native_selector_requires_the_physical_pinned_installation(
+    session_binding, tmp_path, monkeypatch, change
+):
+    root, manifest, data, config = session_binding
+    entry = data["entries"]["memory"]
+    if change == "relative":
+        entry["args"][3] = "session_client.py"
+    elif change == "foreign":
+        foreign = tmp_path / "session_client.py"
+        foreign.write_bytes(b"# same basename, unrelated script\n")
+        entry["args"][3] = str(foreign)
+    elif change == "interpreter":
+        entry["command"] = "python"
+    elif change == "drift":
+        Path(entry["args"][3]).write_bytes(b"# changed after qualification\n")
+    else:
+        Path(entry["args"][3]).with_name("dispatcher.json").unlink()
+    manifest.write_text(json.dumps(data), encoding="utf-8")
+    cwd = root / "docs"
+    cwd.mkdir()
+    monkeypatch.chdir(cwd)
+    with pytest.raises(PermissionError, match="selector|dispatcher"):
+        session_overrides(
+            config, root, manifest=manifest, markdownify=tmp_path / "absent.json"
+        )
+    assert Path.cwd() == cwd

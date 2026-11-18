@@ -487,9 +487,30 @@ def _predecessor_consistent(binding, prior, entry, current):
     return False
 
 
-def _check_pending_recovery(owner, directory):
+def _upgradeable_interrupted_launch(owner, directory, recovery_state, graph):
+    current = load(
+        "migration_reconciliation", Path(__file__).with_name(RECONCILIATION_SOURCE)
+    )
+    last = recovery_state["history"][-1]
+    if (
+        graph is None
+        or recovery_state.get("active_block")
+        or last.get("snapshot", {}).get("graph") != graph
+    ):
+        return False
+    observed = current.records(owner, {"state": str(directory)})
+    return (
+        current.process_verdict(owner, observed) is None
+        and current._interrupted_launch_block(observed, recovery_state) is not None
+    )
+
+
+def _check_pending_recovery(owner, directory, graph=None):
     recovery_state = owner.state.read(directory / RECOVERY_RECORD) or {}
     history = recovery_state.get("history", [])
+    if history and history[-1].get("phase") == "LAUNCHING":
+        if _upgradeable_interrupted_launch(owner, directory, recovery_state, graph):
+            return
     if history and history[-1].get("phase") in {"RESOLVED", "LAUNCHING"}:
         raise ValueError("Recovery grant awaits its reviewed launch; migration refused")
 
@@ -544,7 +565,7 @@ def migrate(
                 Path(value["profile"]["graph"]).with_name(".memory.service-owner.lock")
             ):
                 stamp = dormant(owner, entry, value)
-                _check_pending_recovery(owner, directory)
+                _check_pending_recovery(owner, directory, stamp)
                 binding, prior = previous_migration(
                     owner,
                     directory,

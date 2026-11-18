@@ -531,3 +531,38 @@ def test_identifying_an_incident_does_not_mutate_unproven_startup(
     with pytest.raises(ValueError, match="No proven"):
         recovery.identify_interrupted_launch(owner, entry, value)
     assert (directory / recovery.COORDINATION).read_bytes() == before
+
+
+@pytest.mark.parametrize("receipt", ["idle", "missing", "wrong-generation"])
+def test_historical_legacy_block_cannot_replace_an_unproven_launch_incident(
+    fixture, receipt
+):
+    owner, entry, value, stamp = fixture
+    directory = Path(entry["state"])
+    proposed = recovery.plan(owner, entry, value)
+    recovery.apply(owner, entry, value, proposed)
+    generation = recovery.launch_generation(owner, entry, value)
+    owner.state.write(
+        directory / "status.json",
+        {"generation": generation, "owner_pid": 123456, "owner_birth": 1},
+    )
+    work = {
+        "schema": 2,
+        "profile": entry["id"],
+        "generation": generation,
+        "phase": "idle",
+        "accepted_count": 1,
+        "mutating": False,
+        "request_id": None,
+        "graph": stamp,
+    }
+    if receipt == "wrong-generation":
+        work.update(phase="starting", accepted_count=0, generation="f" * 32)
+    owner.state.write(directory / "work.json", None if receipt == "missing" else work)
+    before = (directory / recovery.COORDINATION).read_bytes()
+    assert owner.state.read(directory / "blocked.json") is not None
+    second = recovery.plan(owner, entry, value)
+    assert not second["eligible"] and second["block_id"] is None
+    with pytest.raises(ValueError):
+        recovery.apply(owner, entry, value, second)
+    assert (directory / recovery.COORDINATION).read_bytes() == before

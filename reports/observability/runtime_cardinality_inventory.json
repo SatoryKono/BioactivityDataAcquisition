@@ -1176,7 +1176,6 @@
     "bioetl_audit_query_events_total": [
       "docs/02-architecture/observability-layers.md",
       "docs/03-guides/dashboards/panel-contract-inventory.json",
-      "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
@@ -1191,7 +1190,6 @@
     "bioetl_audit_write_events_total": [
       "docs/02-architecture/observability-layers.md",
       "docs/03-guides/dashboards/panel-contract-inventory.json",
-      "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
@@ -1274,7 +1272,6 @@
     ],
     "bioetl_checkpoint_compatibility_events_total": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
-      "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
@@ -1283,7 +1280,6 @@
     ],
     "bioetl_checkpoint_load_events_total": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
-      "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
@@ -1300,7 +1296,6 @@
     "bioetl_checkpoint_operator_operations_total": [
       "docs/02-architecture/observability-layers.md",
       "docs/03-guides/dashboards/panel-contract-inventory.json",
-      "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
@@ -1315,7 +1310,6 @@
     ],
     "bioetl_checkpoint_save_events_total": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
-      "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
@@ -1389,7 +1383,6 @@
     "bioetl_control_plane_current_status_trusted": [
       "docs/03-guides/dashboards/dashboard-v2-usage.md",
       "docs/03-guides/dashboards/design-system.md",
-      "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
       "grafana/README.md"
     ],
     "bioetl_control_plane_integrity_pair_present": [
@@ -1403,7 +1396,6 @@
     ],
     "bioetl_control_plane_ledger_appends_total": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
-      "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
@@ -1412,7 +1404,6 @@
     ],
     "bioetl_control_plane_ledger_fail_severity_30m": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
-      "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
       "grafana/dashboards/bioetl-incident-v1.json"
     ],
     "bioetl_control_plane_ledger_present": [
@@ -1432,7 +1423,6 @@
     ],
     "bioetl_control_plane_manifest_fail_severity_30m": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
-      "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
       "grafana/dashboards/bioetl-incident-v1.json"
     ],
     "bioetl_control_plane_manifest_present": [
@@ -1444,7 +1434,6 @@
     "bioetl_control_plane_manifest_writes_total": [
       "docs/03-guides/dashboards/contracts/selector-contracts.yaml",
       "docs/03-guides/dashboards/panel-contract-inventory.json",
-      "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
@@ -1458,7 +1447,6 @@
     "bioetl_control_plane_reads_total": [
       "docs/03-guides/dashboards/dashboard-v2-usage.md",
       "docs/03-guides/dashboards/panel-contract-inventory.json",
-      "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
@@ -1479,13 +1467,11 @@
     "bioetl_control_plane_telemetry_missing_5m": [
       "docs/03-guides/dashboards/contracts/observability-states.md",
       "docs/03-guides/dashboards/panel-contract-inventory.json",
-      "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
       "docs/03-guides/metrics-monitoring.md",
       "grafana/dashboards/bioetl-incident-v1.json"
     ],
     "bioetl_control_plane_terminal_events_total": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
-      "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
@@ -1820,7 +1806,6 @@
     ],
     "bioetl_lineage_fragments_emitted_total": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
-      "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
@@ -1829,7 +1814,6 @@
     ],
     "bioetl_lineage_refs_missing_total": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
-      "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
@@ -1838,7 +1822,6 @@
     ],
     "bioetl_manifest_ledger_failures_15m": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
-      "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
       "grafana/dashboards/bioetl-incident-v1.json"
     ],
     "bioetl_manifest_ledger_integrity_ratio": [
@@ -2115,7 +2098,6 @@
     ],
     "bioetl_replay_drift_events_total": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
-      "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
       "docs/04-reference/observability/metrics-catalog.md",
       "grafana/dashboards/bioetl-incident-v1.json"
     ],
@@ -2128,13 +2110,11 @@
     ],
     "bioetl_replay_lag_seconds": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
-      "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
       "docs/04-reference/observability/metrics-catalog.md",
       "grafana/dashboards/bioetl-incident-v1.json"
     ],
     "bioetl_replay_reconstructability_events_total": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
-      "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
@@ -2142,7 +2122,6 @@
     ],
     "bioetl_replay_safety_blockers_15m": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
-      "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
       "grafana/dashboards/bioetl-incident-v1.json"
     ],
     "bioetl_rt_stage_ratio": [
@@ -2426,12 +2405,10 @@
     ],
     "bioetl_trust_replay_blocker_events_total": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
-      "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
       "grafana/dashboards/bioetl-incident-v1.json"
     ],
     "bioetl_trust_replay_blocker_integrity": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
-      "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
       "grafana/dashboards/bioetl-incident-v1.json"
     ],
     "bioetl_vacuum_files_removed_total": [

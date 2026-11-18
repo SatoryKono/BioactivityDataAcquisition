@@ -160,7 +160,10 @@ def _markdownify_entry(source, root, servers):
 
 def _check_client_manifest(script, manifest_name, required_source):
     directory = physical(script.parent)
-    raw = (directory / manifest_name).read_bytes()
+    try:
+        raw = (directory / manifest_name).read_bytes()
+    except FileNotFoundError:
+        raise PermissionError("Qualified selector manifest is absent") from None
     manifest = json.loads(raw)
     if hashlib.sha256(raw).hexdigest() != directory.name or manifest.get("schema") != 1:
         raise PermissionError("Qualified selector manifest changed")

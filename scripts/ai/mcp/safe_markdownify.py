@@ -227,6 +227,17 @@ class _SessionExpired(PermissionError):
     """A session-scoped 404 requires a fresh handshake, never replay."""
 
 
+def _response_value(response, method, path, session):
+    data = response.read(MAX_RESPONSE_BYTES + 1)
+    if len(data) > MAX_RESPONSE_BYTES:
+        raise PermissionError("Markdownify response exceeds transport bound")
+    if response.status == 404 and session and method == "POST" and path == "/mcp":
+        raise _SessionExpired("Markdownify session expired; no replay")
+    if response.status >= 400:
+        raise PermissionError("Markdownify request refused; no replay")
+    return (json.loads(data) if data else None), response.getheader("Mcp-Session-Id")
+
+
 def request(spec, method, path, body=None, session=None):
     payload = (
         None
@@ -264,15 +275,7 @@ def request(spec, method, path, body=None, session=None):
         headers["Mcp-Session-Id"] = session
     try:
         connection.request(method, path, payload, headers)
-        response = connection.getresponse()
-        data = response.read(MAX_RESPONSE_BYTES + 1)
-        if response.status == 404 and session is not None:
-            raise _SessionExpired("Markdownify session expired")
-        if len(data) > MAX_RESPONSE_BYTES or response.status >= 400:
-            raise PermissionError("Markdownify request refused; no replay")
-        return (json.loads(data) if data else None), response.getheader(
-            "Mcp-Session-Id"
-        )
+        return _response_value(connection.getresponse(), method, path, session)
     finally:
         connection.close()
 
@@ -757,10 +760,11 @@ class _MarkdownifyHandler(BaseHTTPRequestHandler):
 def _watch_stop(server, record, gate, draining):
     marker = core.STATE / STOP_REQUEST
     while True:
-        if (
-            marker.exists()
-            and core.read_json(marker).get("generation") == record["generation"]
-        ):
+        try:
+            requested = core.read_json(marker)
+        except FileNotFoundError:
+            requested = {}
+        if requested.get("generation") == record["generation"]:
             draining.set()
             with gate:
                 server.shutdown()
@@ -828,13 +832,17 @@ def _renew_session(spec, initialization):
             {"jsonrpc": "2.0", "method": "notifications/initialized"},
             session,
         )
-    except Exception:
-        try:
-            request(spec, "DELETE", "/mcp", session=session)
-        except Exception:
-            pass  # Preserve the original handshake failure after best-effort cleanup.
+    except BaseException:
+        _discard_session(spec, session)
         raise
     return session
+
+
+def _discard_session(spec, session):
+    try:
+        request(spec, "DELETE", "/mcp", session=session)
+    except Exception:
+        pass  # Best effort; preserve the original handshake failure.
 
 
 def _forward_request(spec, value, session, initialization):
