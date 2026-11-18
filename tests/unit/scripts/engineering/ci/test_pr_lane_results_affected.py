@@ -1883,3 +1883,17 @@ def test_security_backport_inputs_select_executable_security_contracts(
     owner = "tests/architecture/test_picomatch_backport.py"
     assert owner in affected_pytest_targets([changed], repo_root=root)
     assert owner in build_shadow_compare([changed], repo_root=root)["selected"]
+
+
+def test_lifecycle_review_report_has_specific_impact_owners() -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = "reports/codex/review_py-audit-bot_20261118_1200_review.md"
+    owners = {
+        "tests/architecture/test_documentation_cleanup_inventory.py",
+        "tests/architecture/test_scripts_lifecycle_registry.py",
+        "tests/unit/scripts/qa/test_lifecycle_review_output_destinations.py",
+    }
+    assert owners <= set(affected_pytest_targets([report], repo_root=root))
+    assert owners <= set(build_shadow_compare([report], repo_root=root)["selected"])
+    with pytest.raises(ValueError, match="unmapped"):
+        build_shadow_compare(["reports/codex/unregistered-review.md"], repo_root=root)
