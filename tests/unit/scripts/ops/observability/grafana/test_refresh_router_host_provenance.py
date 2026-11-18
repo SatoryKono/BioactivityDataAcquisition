@@ -196,6 +196,7 @@ def release_case():
         "parent_image": IMAGE,
         "declared_image": IMAGE.replace(DIGEST, "f" * 64),
         "rootfs_sha256": DIGEST,
+        "built_image_config_digest": "sha256:" + "c" * 64,
     }
     return (
         original,
@@ -211,6 +212,47 @@ def release_case():
 
 
 class ProvenanceControls(unittest.TestCase):
+    def test_check_ignores_only_the_independent_rebuild_config_id(self):
+        case = list(release_case())
+        first = promotion.build_release_files(*case)
+        case[7] = {**case[7], "built_image_config_digest": "sha256:" + "d" * 64}
+        second = promotion.build_release_files(first, *case[1:])
+        self.assertNotEqual(first, second)
+        self.assertTrue(promotion.release_outputs_match(second, first))
+        self.assertEqual(
+            json.loads(second[promotion.MANAGED_PATH])["delivery_source"][
+                "artifact_parity"
+            ]["built_image_config_digest"],
+            "sha256:" + "d" * 64,
+        )
+        for field in ("rootfs_sha256", "declared_image", "scenes_installed"):
+            changed = dict(second)
+            manifest = json.loads(changed[promotion.MANAGED_PATH])
+            manifest["delivery_source"]["artifact_parity"][field] = "tampered"
+            changed[promotion.MANAGED_PATH] = (
+                json.dumps(manifest, indent=2) + "\n"
+            ).encode()
+            self.assertFalse(promotion.release_outputs_match(changed, first))
+        changed = {**second, promotion.RECIPE_PATH: b"different recipe\n"}
+        self.assertFalse(promotion.release_outputs_match(changed, first))
+
+    def test_same_image_requalification_preserves_previous_capture(self):
+        case = list(release_case())
+        first = promotion.build_release_files(*case)
+        previous = json.loads(first[promotion.HOST_PATH])
+        case[1] = {**case[1], "id": 12, "head_sha": "c" * 40}
+        second = promotion.build_release_files(first, *case[1:])
+        current = json.loads(second[promotion.HOST_PATH])
+        self.assertEqual(current["image"], previous["image"])
+        self.assertEqual(current["release_promotion"]["ci_run_id"], 12)
+        archived = current["release_history"][-1]["host_manifest"]
+        self.assertEqual(archived["release_promotion"], previous["release_promotion"])
+        self.assertEqual(current["acceptance"], previous["acceptance"])
+        for path in (*promotion.COMPOSE_PATHS, promotion.RECIPE_PATH):
+            self.assertEqual(second[path], first[path])
+        with self.assertRaisesRegex(ValueError, "Existing promotion conflicts"):
+            promotion.build_release_files(second, *case[1:-1], "e" * 64)
+
     def test_release_promotion_preserves_history_and_all_coupled_pins(self):
         case = release_case()
         outputs = promotion.build_release_files(*case)
@@ -606,6 +648,15 @@ class ProvenanceControls(unittest.TestCase):
             )
             commit = git("rev-parse", "HEAD").decode().strip()
             inputs, tree = module.source_inputs(root, commit, manifest)
+            patch = (
+                root
+                / "grafana/tooling/router-v7-bridge/grafana-alert-instance-link.patch"
+            )
+            self.assertIn(patch.relative_to(root).as_posix(), inputs)
+            patch.write_bytes(b"changed patch outside plugin roots\n")
+            with self.assertRaisesRegex(ValueError, "differs from actual CI"):
+                module.source_inputs(root, commit, manifest)
+            patch.write_bytes(b"support fixture\n")
             self.assertEqual(
                 inputs,
                 {

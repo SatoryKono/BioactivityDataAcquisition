@@ -151,6 +151,60 @@ def _validate_release_inventory(
     )
 
 
+def _archive_release(
+    result: JsonObject,
+    host: JsonObject,
+    managed: JsonObject,
+    original: dict[str, bytes],
+) -> None:
+    """Preserve the previous qualification, including unchanged image pins."""
+    history = provenance.json_list(copy.deepcopy(host.get("release_history", [])))
+    prior_host = copy.deepcopy(host)
+    prior_host.pop("release_history", None)
+    history.append(
+        {
+            "host_manifest": prior_host,
+            "managed_manifest": copy.deepcopy(managed),
+            "managed_recipe": original[RECIPE_PATH].decode(),
+            "compose": {path: original[path].decode() for path in COMPOSE_PATHS},
+        }
+    )
+    result["release_history"] = history
+
+
+def release_outputs_match(
+    outputs: dict[str, bytes], original: dict[str, bytes]
+) -> bool:
+    """Compare all bytes except the independently rebuilt diagnostic config ID.
+
+    live_managed_parity still verifies registry identity, runtime configuration,
+    parent layers and the complete filesystem before this comparison.
+    The actual rebuilt ID remains in the original evidence and generated receipt.
+    """
+    normalized = []
+    for files in (outputs, original):
+        values = dict(files)
+        payload = values[MANAGED_PATH]
+        manifest = provenance.json_object(json.loads(payload))
+        receipt = provenance.json_object(
+            provenance.json_object(manifest["delivery_source"])["artifact_parity"]
+        )
+        digest = provenance.text(
+            receipt["built_image_config_digest"], "Missing rebuilt config digest"
+        )
+        require(
+            bool(re.fullmatch(provenance.SHA256_DIGEST_PATTERN, digest)),
+            "Invalid rebuilt config digest",
+        )
+        needle = b'"built_image_config_digest": ' + json.dumps(digest).encode()
+        require(payload.count(needle) == 1, "Ambiguous rebuilt config digest")
+        values[MANAGED_PATH] = payload.replace(
+            needle, b'"built_image_config_digest": "<independent rebuild>"', 1
+        )
+        normalized.append(values)
+    return normalized[0] == normalized[1]
+
+
 def build_release_files(
     original: dict[str, bytes],
     run: JsonObject,
@@ -208,23 +262,26 @@ def build_release_files(
         "default_delivery_ci_claimed": False,
         "runtime_rollout_claimed": False,
     }
-    if host["image"] != image:
+    image_changed = host["image"] != image
+    if not image_changed:
+        require(
+            managed["image"] == managed_image and managed["parent_image"] == image,
+            "Existing managed release differs",
+        )
+        previous = provenance.json_object(host.get("release_promotion"))
+        if previous != promotion:
+            require(
+                (previous["ci_run_id"], previous["ci_run_attempt"])
+                != (promotion["ci_run_id"], promotion["ci_run_attempt"]),
+                "Existing promotion conflicts with this capture",
+            )
+    if image_changed or host.get("release_promotion") != promotion:
+        _archive_release(result, host, managed, original)
+    if image_changed:
         require(
             managed["parent_image"] == host["image"],
             "Existing managed parent is inconsistent",
         )
-        history = provenance.json_list(copy.deepcopy(host.get("release_history", [])))
-        prior_host = copy.deepcopy(host)
-        prior_host.pop("release_history", None)
-        history.append(
-            {
-                "host_manifest": prior_host,
-                "managed_manifest": copy.deepcopy(managed),
-                "managed_recipe": original[RECIPE_PATH].decode(),
-                "compose": {path: original[path].decode() for path in COMPOSE_PATHS},
-            }
-        )
-        result["release_history"] = history
         recipe = original[RECIPE_PATH].decode()
         require(
             recipe.count(
@@ -252,15 +309,6 @@ def build_release_files(
         result["acceptance"] = (
             "Candidate artifact parity verified in CI; "
             "default delivery CI and runtime rollout remain separate."
-        )
-    else:
-        require(
-            host.get("release_promotion") == promotion,
-            "Existing promotion conflicts with this capture",
-        )
-        require(
-            managed["image"] == managed_image and managed["parent_image"] == image,
-            "Existing managed release differs",
         )
     validate_delivery_bindings(outputs, image, managed_image)
     result["image"] = image
@@ -585,7 +633,10 @@ def main(argv: list[str] | None = None) -> int:
             "Concurrent release file change: " + path,
         )
     if args.check:
-        require(outputs == originals, "Coupled release artifacts are stale")
+        require(
+            release_outputs_match(outputs, originals),
+            "Coupled release artifacts are stale",
+        )
     else:
         for path, content in outputs.items():
             (ROOT / path).write_bytes(content)
