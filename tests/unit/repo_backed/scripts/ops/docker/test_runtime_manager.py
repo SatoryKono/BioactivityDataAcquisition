@@ -29,10 +29,11 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import stat
 import subprocess
 import sys
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -68,6 +69,85 @@ def _monitoring_spec() -> runtime_manager.StackSpec:
         required_services=("prometheus", "pushgateway", "grafana"),
         expected_images={"grafana": "grafana/grafana:test@sha256:expected"},
     )
+
+
+def _prometheus_only_deferred(reason: str) -> dict[str, str]:
+    return {
+        "ops_http": "deferred",
+        "reason": reason,
+        "dashboard_profile": "prometheus_only",
+    }
+
+
+def _cat_status_runner(
+    commands: list[list[str]], payload: dict[str, str]
+) -> Callable[..., runtime_manager.CommandResult]:
+    def runner(
+        cmd: Sequence[str], _cwd: Path, _timeout: float
+    ) -> runtime_manager.CommandResult:
+        commands.append(list(cmd))
+        if (
+            cmd[:3] == ["docker", "exec", runtime_manager._GRAFANA_CONTAINER]
+            and cmd[3] == "cat"
+        ):
+            return runtime_manager.CommandResult(
+                list(cmd), 0, stdout=json.dumps(payload)
+            )
+        raise AssertionError(f"unexpected {cmd}")
+
+    return runner
+
+
+def _prepare_claim_shell(tmp_path: Path) -> tuple[str, dict[str, str], Path, str]:
+    shell = shutil.which("sh")
+    if shell is None:
+        pytest.skip("POSIX sh is required for the atomic recovery claim test")
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    for name, value in {
+        "cat": "boot",
+        "cut": "100",
+        "sed": "unused",
+        "awk": "200",
+    }.items():
+        fake = fake_bin / name
+        fake.write_text(
+            f"#!/bin/sh\nprintf '%s\\n' '{value}'\n",
+            encoding="utf-8",
+            newline="\n",
+        )
+        fake.chmod(0o755)
+    source_id = "a" * 64
+    recovery_root = tmp_path / "bioetl-late-cutover"
+    recovery_root.mkdir()
+    env = {
+        **os.environ,
+        "PATH": str(fake_bin) + os.pathsep + os.environ.get("PATH", ""),
+        "TEST_BIN": str(fake_bin),
+        "BIOETL_EXPECTED_RUNTIME_SOURCE_ID": source_id,
+        "BIOETL_GRAFANA_BOOTSTRAP_STATUS_FILE": str(tmp_path / "bootstrap-status.json"),
+    }
+    return shell, env, recovery_root, source_id
+
+
+def _claim_script_results(
+    shell: str, env: dict[str, str], *, count: int = 2
+) -> list[tuple[str, str, int]]:
+    processes = [
+        subprocess.Popen(
+            [shell, "-c", runtime_manager._GRAFANA_LATE_CUTOVER_CLAIM],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            env=env,
+        )
+        for _ in range(count)
+    ]
+    results: list[tuple[str, str, int]] = []
+    for process in processes:
+        stdout, stderr = process.communicate(timeout=10)
+        results.append((stdout, stderr, process.returncode))
+    return results
 
 
 def test_direct_script_help_bootstraps_repository_imports(tmp_path: Path) -> None:
@@ -392,11 +472,17 @@ def test_grafana_bootstrap_timeout_retry_restarts_when_identity_now_matches(
             runtime_manager._GRAFANA_CONTAINER,
             "wget",
         ]:
+            if any("api/health" in part for part in cmd):
+                return runtime_manager.CommandResult(
+                    list(cmd), 0, stdout='{"database":"ok"}'
+                )
             return runtime_manager.CommandResult(
                 list(cmd),
                 0,
                 stdout=json.dumps({"runtime_source_id": source_id}),
             )
+        if cmd[:4] == ["docker", "exec", runtime_manager._GRAFANA_CONTAINER, "sh"]:
+            return runtime_manager.CommandResult(list(cmd), 0, stdout="acquired\n")
         if cmd[:2] == ["docker", "restart"]:
             return runtime_manager.CommandResult(list(cmd), 0)
         raise AssertionError(f"unexpected {cmd}")
@@ -462,6 +548,8 @@ def test_grafana_bootstrap_timeout_retry_stops_wait_on_terminal_reason(
                 0,
                 stdout=json.dumps({"runtime_source_id": source_id}),
             )
+        if cmd[:4] == ["docker", "exec", runtime_manager._GRAFANA_CONTAINER, "sh"]:
+            return runtime_manager.CommandResult(list(cmd), 0, stdout="acquired\n")
         if cmd[:2] == ["docker", "restart"]:
             return runtime_manager.CommandResult(list(cmd), 0)
         raise AssertionError(f"unexpected {cmd}")
@@ -476,36 +564,30 @@ def test_grafana_bootstrap_timeout_retry_stops_wait_on_terminal_reason(
         clock=lambda: 0.0,
     )
 
-    assert result is None
+    assert result is False
     assert status_reads["n"] == 2
     assert ["docker", "restart", runtime_manager._GRAFANA_CONTAINER] in commands
 
 
-def test_grafana_bootstrap_timeout_retry_skips_identity_mismatch(
-    monkeypatch: pytest.MonkeyPatch,
+@pytest.mark.parametrize(
+    ("reason", "profile"),
+    [
+        ("identity_mismatch", "prometheus_only"),
+        ("infinity_plugin_install_failed", "prometheus_only"),
+        ("identity_matched", "failed"),
+        ("identity_matched", "not_selected"),
+        ("identity_timeout_or_unreachable", "failed"),
+    ],
+)
+def test_explicit_monitoring_rejects_terminal_incomplete_profile(
+    monkeypatch: pytest.MonkeyPatch, reason: str, profile: str
 ) -> None:
     monkeypatch.delenv("BIOETL_TEST_MODE", raising=False)
     monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
     commands: list[list[str]] = []
-
-    def runner(cmd: Sequence[str], _cwd: Path, _timeout: float):
-        commands.append(list(cmd))
-        if (
-            cmd[:3] == ["docker", "exec", runtime_manager._GRAFANA_CONTAINER]
-            and cmd[3] == "cat"
-        ):
-            return runtime_manager.CommandResult(
-                list(cmd),
-                0,
-                stdout=json.dumps(
-                    {
-                        "ops_http": "deferred",
-                        "reason": "identity_mismatch",
-                        "dashboard_profile": "prometheus_only",
-                    }
-                ),
-            )
-        raise AssertionError(f"unexpected {cmd}")
+    payload = _prometheus_only_deferred(reason)
+    payload["dashboard_profile"] = profile
+    runner = _cat_status_runner(commands, payload)
 
     result = runtime_manager._post_start_grafana_bootstrap_gate(
         spec=_monitoring_spec(),
@@ -515,7 +597,7 @@ def test_grafana_bootstrap_timeout_retry_skips_identity_mismatch(
         clock=lambda: 0.0,
     )
 
-    assert result is None
+    assert result is False
     assert not any(cmd[:2] == ["docker", "restart"] for cmd in commands)
 
 
@@ -576,7 +658,7 @@ def test_grafana_bootstrap_timeout_retry_uses_remaining_budget_for_each_step(
         clock=clock,
     )
 
-    assert result is None
+    assert result is False
     assert observed_timeouts == [2.5, 1.5, 0.5]
 
 
@@ -896,9 +978,12 @@ def _grafana_cutover_runner(
     expected_source_id: str,
     actual_source_id: str | None = None,
     restart_code: int = 0,
+    ownership: str = "acquired",
+    health_payloads: list[object] | None = None,
 ) -> tuple[list[list[str]], runtime_manager.Runner]:
     commands: list[list[str]] = []
     status_reads = {"n": 0}
+    health_reads = {"n": 0}
     actual = expected_source_id if actual_source_id is None else actual_source_id
 
     def runner(cmd: Sequence[str], _cwd: Path, _timeout: float):
@@ -927,286 +1012,25 @@ def _grafana_cutover_runner(
             runtime_manager._GRAFANA_CONTAINER,
             "wget",
         ]:
+            if cmd[-1] == "http://127.0.0.1:3000/api/health":
+                payloads = health_payloads or [{"database": "ok"}]
+                payload = payloads[min(health_reads["n"], len(payloads) - 1)]
+                health_reads["n"] += 1
+                return runtime_manager.CommandResult(
+                    list(cmd), 1 if payload is None else 0, stdout=json.dumps(payload)
+                )
             return runtime_manager.CommandResult(
                 list(cmd),
                 0,
                 stdout=json.dumps({"runtime_source_id": actual}),
             )
+        if cmd[:4] == ["docker", "exec", runtime_manager._GRAFANA_CONTAINER, "sh"]:
+            return runtime_manager.CommandResult(list(cmd), 0, stdout=ownership + "\n")
         if cmd[:2] == ["docker", "restart"]:
             return runtime_manager.CommandResult(list(cmd), restart_code)
         raise AssertionError(f"unexpected {cmd}")
 
     return commands, runner
-
-
-def test_post_start_grafana_cutover_restarts_when_deferred(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    monkeypatch.delenv("BIOETL_TEST_MODE", raising=False)
-    monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
-    source_id = "a" * 64
-    deferred = {
-        "ops_http": "deferred",
-        "reason": "identity_timeout_or_unreachable",
-        "dashboard_profile": "prometheus_only",
-    }
-    ready = {
-        "ops_http": "ready",
-        "reason": "identity_matched",
-        "dashboard_profile": "full",
-    }
-    commands, runner = _grafana_cutover_runner(
-        statuses=[deferred, ready],
-        expected_source_id=source_id,
-    )
-
-    result = runtime_manager._post_start_grafana_ops_cutover(
-        spec=_spec(),
-        runner=runner,
-        timeout=5.0,
-        sleep=lambda _seconds: None,
-        clock=lambda: 0.0,
-    )
-    assert result is not None
-    assert result["restart_returncode"] == 0
-    assert result["previous_reason"] == "identity_timeout_or_unreachable"
-    assert ["docker", "restart", runtime_manager._GRAFANA_CONTAINER] in commands
-
-
-def test_post_start_grafana_cutover_skips_identity_mismatch(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    monkeypatch.delenv("BIOETL_TEST_MODE", raising=False)
-    monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
-    commands: list[list[str]] = []
-
-    def runner(cmd: Sequence[str], _cwd: Path, _timeout: float):
-        commands.append(list(cmd))
-        if (
-            cmd[:3] == ["docker", "exec", runtime_manager._GRAFANA_CONTAINER]
-            and cmd[3] == "cat"
-        ):
-            return runtime_manager.CommandResult(
-                list(cmd),
-                0,
-                stdout=json.dumps(
-                    {
-                        "ops_http": "deferred",
-                        "reason": "identity_mismatch",
-                        "dashboard_profile": "prometheus_only",
-                    }
-                ),
-            )
-        raise AssertionError(f"unexpected {cmd}")
-
-    result = runtime_manager._post_start_grafana_ops_cutover(
-        spec=_spec(),
-        runner=runner,
-        timeout=5.0,
-        sleep=lambda _seconds: None,
-        clock=lambda: 0.0,
-    )
-    assert result is None
-    assert not any(cmd[:2] == ["docker", "restart"] for cmd in commands)
-
-
-def test_post_start_grafana_cutover_skips_when_identity_does_not_match(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    monkeypatch.delenv("BIOETL_TEST_MODE", raising=False)
-    monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
-    deferred = {
-        "ops_http": "deferred",
-        "reason": "identity_timeout_or_unreachable",
-        "dashboard_profile": "prometheus_only",
-    }
-    commands, runner = _grafana_cutover_runner(
-        statuses=[deferred],
-        expected_source_id="a" * 64,
-        actual_source_id="b" * 64,
-    )
-
-    result = runtime_manager._post_start_grafana_ops_cutover(
-        spec=_spec(),
-        runner=runner,
-        timeout=5.0,
-        sleep=lambda _seconds: None,
-        clock=lambda: 0.0,
-    )
-    assert result is None
-    assert not any(cmd[:2] == ["docker", "restart"] for cmd in commands)
-
-
-def test_post_start_grafana_cutover_records_failed_restart(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    monkeypatch.delenv("BIOETL_TEST_MODE", raising=False)
-    monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
-    source_id = "a" * 64
-    deferred = {
-        "ops_http": "deferred",
-        "reason": "identity_timeout_or_unreachable",
-        "dashboard_profile": "prometheus_only",
-    }
-    commands, runner = _grafana_cutover_runner(
-        statuses=[deferred],
-        expected_source_id=source_id,
-        restart_code=1,
-    )
-
-    result = runtime_manager._post_start_grafana_ops_cutover(
-        spec=_spec(),
-        runner=runner,
-        timeout=5.0,
-        sleep=lambda _seconds: None,
-        clock=lambda: 0.0,
-    )
-    assert result is not None
-    assert result["restart_returncode"] == 1
-    assert ["docker", "restart", runtime_manager._GRAFANA_CONTAINER] in commands
-    assert sum(1 for cmd in commands if cmd[:2] == ["docker", "restart"]) == 1
-    assert sum(1 for cmd in commands if len(cmd) > 3 and cmd[3] == "cat") == 1
-
-
-def test_post_start_grafana_cutover_uses_container_constant(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    monkeypatch.delenv("BIOETL_TEST_MODE", raising=False)
-    monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
-    monkeypatch.setattr(runtime_manager, "_GRAFANA_CONTAINER", "grafana-test")
-    source_id = "a" * 64
-    deferred = {
-        "ops_http": "deferred",
-        "reason": "identity_timeout_or_unreachable",
-        "dashboard_profile": "prometheus_only",
-    }
-    ready = {
-        "ops_http": "ready",
-        "reason": "identity_matched",
-        "dashboard_profile": "full",
-    }
-    commands, runner = _grafana_cutover_runner(
-        statuses=[deferred, ready],
-        expected_source_id=source_id,
-    )
-
-    result = runtime_manager._post_start_grafana_ops_cutover(
-        spec=_spec(),
-        runner=runner,
-        timeout=5.0,
-        sleep=lambda _seconds: None,
-        clock=lambda: 0.0,
-    )
-    assert result is not None
-    assert ["docker", "restart", "grafana-test"] in commands
-
-
-def test_post_start_grafana_cutover_skips_when_ops_http_ready(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    monkeypatch.delenv("BIOETL_TEST_MODE", raising=False)
-    monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
-    monkeypatch.setattr(
-        runtime_manager,
-        "_load_grafana_bootstrap_status",
-        lambda *_args, **_kwargs: (
-            {
-                "ops_http": "ready",
-                "reason": "identity_matched",
-                "dashboard_profile": "full",
-            },
-            True,
-        ),
-    )
-
-    def runner(cmd: Sequence[str], _cwd: Path, _timeout: float):
-        raise AssertionError(f"unexpected {cmd}")
-
-    assert (
-        runtime_manager._post_start_grafana_ops_cutover(
-            spec=_spec(),
-            runner=runner,
-            timeout=5.0,
-            sleep=lambda _seconds: None,
-            clock=lambda: 0.0,
-        )
-        is None
-    )
-
-
-def test_post_start_grafana_cutover_skips_under_pytest(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    monkeypatch.setenv("PYTEST_CURRENT_TEST", "test_post_start_grafana_cutover")
-
-    def runner(cmd: Sequence[str], _cwd: Path, _timeout: float):
-        raise AssertionError(f"unexpected {cmd}")
-
-    assert (
-        runtime_manager._post_start_grafana_ops_cutover(
-            spec=_spec(),
-            runner=runner,
-            timeout=5.0,
-        )
-        is None
-    )
-
-
-def test_status_grafana_bootstrap_deferred_is_finding() -> None:
-    findings = runtime_manager._status_grafana_bootstrap_findings(
-        {
-            "ops_http": "deferred",
-            "reason": "identity_mismatch",
-            "dashboard_profile": "prometheus_only",
-        },
-        readable=True,
-        grafana_running=True,
-    )
-    assert findings
-    assert findings[0]["ops_http"] == "deferred"
-    assert findings[0]["reason"] == "identity_mismatch"
-    assert findings[0]["code"] == "GRAFANA_OPS_HTTP_BOOTSTRAP"
-    assert findings[0]["dashboard_profile"] == "prometheus_only"
-    assert (
-        "static Prometheus-only dashboard notices are active" in findings[0]["message"]
-    )
-
-
-def test_status_grafana_bootstrap_ready_has_no_finding() -> None:
-    findings = runtime_manager._status_grafana_bootstrap_findings(
-        {
-            "ops_http": "ready",
-            "reason": "identity_matched",
-            "dashboard_profile": "full",
-        },
-        readable=True,
-        grafana_running=True,
-    )
-    assert findings == []
-
-
-def test_status_grafana_bootstrap_ready_reports_non_full_profile() -> None:
-    findings = runtime_manager._status_grafana_bootstrap_findings(
-        {
-            "ops_http": "ready",
-            "reason": "identity_matched",
-            "dashboard_profile": "failed",
-        },
-        readable=True,
-        grafana_running=True,
-    )
-
-    assert findings[0]["code"] == "GRAFANA_DASHBOARD_PROFILE"
-    assert findings[0]["dashboard_profile"] == "failed"
-
-
-def test_status_grafana_bootstrap_ignored_when_grafana_stopped() -> None:
-    findings = runtime_manager._status_grafana_bootstrap_findings(
-        {"ops_http": "deferred", "reason": "identity_mismatch"},
-        readable=True,
-        grafana_running=False,
-    )
-    assert findings == []
 
 
 def test_readiness_fails_on_restart_oom_and_image_drift() -> None:
@@ -1227,6 +1051,149 @@ def test_readiness_fails_on_restart_oom_and_image_drift() -> None:
         "unexpected_restart",
         "image_identity_drift",
     }
+
+
+@pytest.mark.parametrize(
+    ("restart_count", "ownership", "expected"),
+    [(1, "full", 0), (1, "inactive", 1), (1, "unavailable", 1), (2, "full", 1)],
+)
+def test_monitoring_start_credits_only_one_confirmed_watcher_restart(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    restart_count: int,
+    ownership: str,
+    expected: int,
+) -> None:
+    """Run the full start path with a baseline0 -> watcher1 restart transition."""
+    now = [0.0]
+    collections = [0]
+    proofs: list[tuple[bool, bool]] = []
+
+    def snapshots(*_args, **_kwargs):
+        count = 0 if collections[0] == 0 else restart_count
+        collections[0] += 1
+        return [
+            runtime_manager.ServiceSnapshot(
+                service=service,
+                container_id=service,
+                state="running",
+                health="healthy",
+                restart_count=count if service == "grafana" else 0,
+                oom_killed=False,
+                image="grafana/grafana:test@sha256:expected",
+            )
+            for service in ("grafana", "prometheus", "pushgateway")
+        ], []
+
+    def recovery_proof(_runner, *, timeout, claim, acknowledge_restart=False):
+        assert timeout > 0
+        proofs.append((claim, acknowledge_restart))
+        return ownership
+
+    monkeypatch.setattr(runtime_manager, "collect_snapshots", snapshots)
+    monkeypatch.setattr(
+        runtime_manager, "_grafana_late_cutover_ownership", recovery_proof
+    )
+    result = runtime_manager.start_or_recover(
+        _monitoring_spec(),
+        tmp_path / "missing-contract.yml",
+        tmp_path,
+        recover=False,
+        runner=lambda command, _cwd, _timeout: runtime_manager.CommandResult(
+            list(command), 0
+        ),
+        timeout=2,
+        max_attempts=1,
+        stabilization_seconds=0.1,
+        poll_interval=0.2,
+        sleep=lambda seconds: now.__setitem__(0, now[0] + seconds),
+        clock=lambda: now[0],
+    )
+    assert result == expected
+    assert all(proof == (False, True) for proof in proofs)
+    if restart_count == 1:
+        assert proofs
+    else:
+        assert proofs == []
+    if expected:
+        incident = json.loads(
+            (tmp_path / "docker-incident-monitoring.json").read_text()
+        )
+        assert any(row["cause"] == "unexpected_restart" for row in incident["findings"])
+
+
+@pytest.mark.parametrize(
+    ("state", "ticks", "boot", "current_source", "claimed", "owned", "expected"),
+    [
+        ("complete", "200", "1234-abcd", True, False, False, "full"),
+        ("confirming_full", "200", "1234-abcd", True, True, True, "full"),
+        ("confirming_full", "200", "1234-abcd", True, True, False, "inactive"),
+        ("confirming_full", "200", "1234-abcd", True, False, False, "inactive"),
+        ("disabled", "200", "1234-abcd", True, False, False, "inactive"),
+        ("complete", "201", "1234-abcd", True, False, False, "inactive"),
+        ("complete", "200", "aaaa-bbbb", True, False, False, "inactive"),
+        ("complete", "200", "1234-abcd", False, False, False, "inactive"),
+    ],
+)
+def test_watcher_restart_ack_requires_current_claim_source_and_process(
+    tmp_path: Path, state, ticks, boot, current_source, claimed, owned, expected
+) -> None:
+    shell = shutil.which("sh")
+    if shell is None:
+        pytest.skip("POSIX sh is required for the recovery acknowledgement test")
+    source_id = "a" * 64
+    payload = json.dumps(
+        {
+            "ops_http": "ready",
+            "dashboard_profile": "full",
+            "late_recovery_source_id": source_id,
+            "late_recovery_state": state,
+            "late_recovery_instance": f"42:{ticks}:{boot}",
+        }
+    )
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    scripts = {
+        "cat": (
+            '#!/bin/sh\ncase "$1" in\n*/boot_id) printf "1234-abcd\\n" ;;\n'
+            f"*) printf '%s\\n' '{payload}' ;;\nesac\n"
+        ),
+        "awk": "#!/bin/sh\nprintf '200\\n'\n",
+        "wget": (
+            "#!/bin/sh\nprintf '%s\\n' "
+            f'\'{{"runtime_source_id":"{source_id if current_source else "b" * 64}"}}\'\n'
+        ),
+    }
+    for name, content in scripts.items():
+        executable = fake_bin / name
+        executable.write_text(content, encoding="utf-8", newline="\n")
+        executable.chmod(0o755)
+    claim = tmp_path / "bioetl-late-cutover" / f"{source_id}.claim"
+    if claimed:
+        claim.mkdir(parents=True)
+    if owned:
+        (claim / "owner").write_text("", encoding="utf-8")
+    command = (
+        'PATH="$(cd "$TEST_BIN" && pwd):$PATH"\n'
+        + runtime_manager._GRAFANA_LATE_CUTOVER_CLAIM
+    )
+    result = subprocess.run(
+        [shell, "-c", command, "bioetl-late-cutover", "ack-restart"],
+        capture_output=True,
+        text=True,
+        env={
+            **os.environ,
+            "TEST_BIN": str(fake_bin),
+            "BIOETL_EXPECTED_RUNTIME_SOURCE_ID": source_id,
+            "BIOETL_GRAFANA_BOOTSTRAP_STATUS_FILE": str(tmp_path / "bootstrap.json"),
+        },
+        timeout=10,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.strip() == expected
+    assert claim.is_dir() == claimed
+    assert (claim / "owner").exists() == owned
 
 
 def test_readiness_accepts_matching_repo_digest_when_config_reference_differs() -> None:
@@ -1682,6 +1649,7 @@ def test_recover_continues_when_preflight_only_reports_container_health(
 
     successful_cutover = {
         "action": "grafana_ops_http_cutover",
+        "status": "full",
         "restart_returncode": 0,
         "previous_reason": "identity_timeout_or_unreachable",
         "previous_dashboard_profile": "prometheus_only",
@@ -1710,7 +1678,7 @@ def test_recover_continues_when_preflight_only_reports_container_health(
     cutover_report = tmp_path / "docker-runtime-grafana-ops-cutover.json"
     assert json.loads(cutover_report.read_text(encoding="utf-8")) == successful_cutover
 
-    failed_cutover = {**successful_cutover, "restart_returncode": 1}
+    failed_cutover = {**successful_cutover, "status": "failed", "restart_returncode": 1}
     monkeypatch.setattr(
         runtime_manager,
         "_post_start_grafana_ops_cutover",
@@ -1728,6 +1696,21 @@ def test_recover_continues_when_preflight_only_reports_container_health(
 
     assert nonblocking_result == 0
     assert json.loads(cutover_report.read_text(encoding="utf-8")) == failed_cutover
+
+    deferred_cutover = {**successful_cutover, "status": "deferred"}
+    monkeypatch.setattr(
+        runtime_manager, "_post_start_grafana_ops_cutover", lambda **_: deferred_cutover
+    )
+    deferred_result = runtime_manager.start_or_recover(
+        _spec(expected_images={"bioetl": "bioetl:test@sha256:" + "a" * 64}),
+        Path("contract.yml"),
+        tmp_path,
+        recover=True,
+        runner=runner,
+        sleep=lambda _: None,
+    )
+    assert deferred_result == 0
+    assert json.loads(cutover_report.read_text(encoding="utf-8")) == deferred_cutover
 
 
 def test_recovery_force_recreates_only_after_first_failed_attempt(
@@ -1860,3 +1843,101 @@ def test_recovery_is_bounded_to_three_attempts_and_writes_one_incident(
     assert incident["recent_logs"]["captured"] is True
     # recovery_history records start (and wait when reached) rows
     assert len(incident["recovery_history"]) >= 3
+
+
+@pytest.mark.parametrize(
+    "health_response",
+    [
+        "",
+        "{}",
+        '{"database":"error"}',
+        "invalid",
+        '{"database":"ok"} trailing',
+        '{"nested":{"database":"ok"}}',
+    ],
+)
+def test_full_profile_wait_requires_live_health(health_response: str) -> None:
+    now = [0.0]
+    health_timeouts: list[float] = []
+
+    def runner(cmd: Sequence[str], _cwd: Path, timeout: float):
+        if cmd[3] == "cat":
+            return runtime_manager.CommandResult(
+                list(cmd),
+                0,
+                stdout=json.dumps({"dashboard_profile": "full", "ops_http": "ready"}),
+            )
+        assert cmd[-1] == "http://127.0.0.1:3000/api/health"
+        health_timeouts.append(timeout)
+        return runtime_manager.CommandResult(list(cmd), 0, stdout=health_response)
+
+    assert not runtime_manager._wait_for_grafana_full_profile(
+        runner,
+        deadline=2.0,
+        sleep=lambda seconds: now.__setitem__(0, now[0] + seconds),
+        clock=lambda: now[0],
+    )
+    assert health_timeouts and all(0 < value <= 2 for value in health_timeouts)
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [
+        (None, "http://bioetl:8000/ops/control-plane/ready"),
+        ("", "http://bioetl:8000/ops/control-plane/ready"),
+        ("http://bioetl:8000/", "http://bioetl:8000/ops/control-plane/ready"),
+        (
+            "http://host.docker.internal:8000",
+            "http://host.docker.internal:8000/ops/control-plane/ready",
+        ),
+        (
+            "http://[fd00::10]:8000",
+            "http://[fd00::10]:8000/ops/control-plane/ready",
+        ),
+        (
+            "http://proxy:8000/bioetl",
+            "http://proxy:8000/bioetl/ops/control-plane/ready",
+        ),
+        ("http://user:secret@host", "http://bioetl:8000/ops/control-plane/ready"),
+        ("not a url", "http://bioetl:8000/ops/control-plane/ready"),
+    ],
+)
+def test_grafana_ops_ready_url_uses_validated_base(
+    monkeypatch: pytest.MonkeyPatch, raw: str | None, expected: str
+) -> None:
+    if raw is None:
+        monkeypatch.delenv("BIOETL_OPS_HTTP_URL", raising=False)
+    else:
+        monkeypatch.setenv("BIOETL_OPS_HTTP_URL", raw)
+    assert runtime_manager._grafana_ops_ready_url() == expected
+
+
+@pytest.mark.parametrize(
+    ("health_payloads", "expected"),
+    [
+        ([None, {"database": "ok"}], True),
+        ([None], False),
+        ([{"database": "error"}], False),
+        (["malformed health body"], False),
+    ],
+)
+def test_full_bootstrap_status_requires_live_health_within_deadline(
+    health_payloads, expected
+) -> None:
+    now = [0.0]
+    commands, runner = _grafana_cutover_runner(
+        statuses=[{"ops_http": "ready", "dashboard_profile": "full"}],
+        expected_source_id="a" * 64,
+        health_payloads=health_payloads,
+    )
+    assert (
+        runtime_manager._wait_for_grafana_full_profile(
+            runner,
+            deadline=3,
+            sleep=lambda seconds: now.__setitem__(0, now[0] + seconds),
+            clock=lambda: now[0],
+        )
+        is expected
+    )
+    assert now[0] <= 3
+    assert len([cmd for cmd in commands if cmd[-1].endswith("/api/health")]) == 2

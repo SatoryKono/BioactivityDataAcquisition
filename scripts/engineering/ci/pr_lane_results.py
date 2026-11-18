@@ -67,6 +67,7 @@ GITHUB_ACTIONS_RUNTIME_POLICY_TEST = (
     "tests/architecture/test_github_actions_runtime_policy.py"
 )
 CODEX_NATIVE_RUNTIME_TEST = "tests/architecture/test_codex_native_runtime.py"
+CODEX_SKILL_AGENT_LINKS_TEST = "tests/architecture/test_codex_skill_agent_links.py"
 AI_RUNTIME_GOVERNANCE_LINKS_TEST = (
     "tests/architecture/test_ai_runtime_governance_links.py"
 )
@@ -797,7 +798,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "scripts/ai/codex/native_runtime_contract.py": (
         CODEX_NATIVE_RUNTIME_TEST,
         "tests/architecture/test_codex_agent_catalog_inventory.py",
-        "tests/architecture/test_codex_skill_agent_links.py",
+        CODEX_SKILL_AGENT_LINKS_TEST,
         "tests/architecture/test_grok_subagent_least_privilege.py",
     ),
     "docs/00-project/NORMATIVE_SOURCES.md": (
@@ -1805,6 +1806,17 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         DOCKER_RUNTIME_CONTRACT_TEST,
         "tests/integration/test_grafana_datasource_provisioning.py",
         DASHBOARD_OPERATOR_READABILITY_TEST,
+    ),
+    "grafana/scripts/bootstrap-datasources.sh": (
+        "tests/integration/test_grafana_datasource_provisioning.py",
+    ),
+    "docs/00-project/ai/skills/README.md": (AI_RUNTIME_GOVERNANCE_LINKS_TEST,),
+    "docs/00-project/ai/skills/COMBINED-CATALOG.md": (
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    "docs/00-project/ai/skills/SKILLS-CATALOG.md": (CODEX_SKILL_AGENT_LINKS_TEST,),
+    "docs/00-project/ai/skills/SKILLS-PRACTICAL-INDEX.md": (
+        CODEX_SKILL_AGENT_LINKS_TEST,
     ),
     "docs/05-operations/runbooks/docker-security-baseline.md": (
         DOCKER_RUNTIME_CONTRACT_TEST,

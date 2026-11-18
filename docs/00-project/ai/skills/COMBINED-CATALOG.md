@@ -49,6 +49,6 @@
 ## Связанные
 
 - `SKILLS-CATALOG.md` — канонический 14
-- `SKILLS-PRACTICAL-INDEX.md` — практический top-15
+- `SKILLS-PRACTICAL-INDEX.md` — практический индекс 14 живых skills
 - `README.md` — surface types
 - `scripts/ai/codex/skills-mirror-contract.json` — parity contract

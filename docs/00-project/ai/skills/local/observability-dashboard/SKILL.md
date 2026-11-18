@@ -6,7 +6,7 @@ ______________________________________________________________________
 
 ---
 name: "observability-dashboard"
-description: "Edit, render, validate, or debug BioETL Grafana dashboards and their PromQL panels without starting optional monitoring services unless requested."
+description: "Edit, render, or debug BioETL Grafana dashboards and their PromQL panels. For alert or recording rules use observability-prometheus."
 ---
 
 # Observability Dashboard

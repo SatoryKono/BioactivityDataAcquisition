@@ -957,6 +957,9 @@ def _poll_ready_once(
     last_snapshots, _ = collect_snapshots(
         spec, runner=runner, timeout=min(15.0, remaining)
     )
+    baseline = _confirmed_grafana_restart_baseline(
+        spec, last_snapshots, baseline, runner=runner, deadline=deadline, clock=clock
+    )
     last_findings = readiness_findings(spec, last_snapshots, baseline)
     if last_findings:
         return last_snapshots, last_findings, False
@@ -1855,6 +1858,163 @@ def _post_start_report_bind_gate(*, spec: StackSpec, report_dir: Path) -> int:
 
 _GRAFANA_CONTAINER = "bioetl-grafana"
 _GRAFANA_TIMEOUT_RETRY_REASON = "identity_timeout_or_unreachable"
+# Keep this lease/claim protocol aligned with bootstrap-datasources.sh. The
+# process start time and boot ID prevent a lease surviving a container restart
+# from blocking recovery. The persistent claim prevents a restart loop.
+# Plain mkdir is not an exclusive claim on Ubuntu 26.04 uutils coreutils
+# 0.10.0: two racers can both exit 0. The owner file is the exclusive create.
+_GRAFANA_LATE_CUTOVER_CLAIM = r"""
+mode="${1:-claim}"
+source_id="${BIOETL_EXPECTED_RUNTIME_SOURCE_ID:-}"
+case "$source_id" in ''|*[!0-9a-f]*) exit 1 ;; esac
+[ "${#source_id}" -eq 64 ] || exit 1
+status_file="${BIOETL_GRAFANA_BOOTSTRAP_STATUS_FILE:-/var/lib/grafana/bioetl-bootstrap-status.json}"
+recovery_root="$(dirname "$status_file")/bioetl-late-cutover"
+claim="$recovery_root/$source_id.claim"
+claim_owner="$claim/owner"
+lease="$recovery_root/$source_id.lease"
+already_full() {
+  payload="$(cat "$status_file" 2>/dev/null)" || return 1
+  printf '%s' "$payload" | grep -Eq '"ops_http"[[:space:]]*:[[:space:]]*"ready"' || return 1
+  printf '%s' "$payload" | grep -Eq '"dashboard_profile"[[:space:]]*:[[:space:]]*"full"' || return 1
+  printf '%s' "$payload" | grep -Eq "\"late_recovery_source_id\"[[:space:]]*:[[:space:]]*\"$source_id\"" || return 1
+  if [ "$mode" = "ack-restart" ]; then
+    printf '%s' "$payload" | grep -Eq '"late_recovery_state"[[:space:]]*:[[:space:]]*"(confirming_full|complete)"' || return 1
+    instance="$(printf '%s' "$payload" | sed -n 's/.*"late_recovery_instance"[[:space:]]*:[[:space:]]*"\([0-9][0-9]*:[0-9][0-9]*:[0-9a-f-][0-9a-f-]*\)".*/\1/p')"
+    [ -n "$instance" ] || return 1
+    instance_pid="${instance%%:*}"
+    instance_tail="${instance#*:}"
+    instance_ticks="${instance_tail%%:*}"
+    instance_boot="${instance_tail#*:}"
+    actual_ticks="$(sed 's/^.*) //' "/proc/$instance_pid/stat" 2>/dev/null | awk '{print $20}')"
+    [ "$instance_ticks" = "$actual_ticks" ] || return 1
+    [ "$instance_boot" = "$(cat /proc/sys/kernel/random/boot_id)" ] || return 1
+    if printf '%s' "$payload" | grep -Eq '"late_recovery_state"[[:space:]]*:[[:space:]]*"confirming_full"'; then
+      [ -f "$claim_owner" ] || return 1
+    fi
+  fi
+  wget -qO- -T 3 http://127.0.0.1:3000/api/health >/dev/null 2>&1 || return 1
+  ops_base="${BIOETL_OPS_HTTP_URL:-}"
+  [ -n "$ops_base" ] || ops_base="http://bioetl:8000"
+  ops_base="${ops_base%/}"
+  # Same acceptance as is_valid_ops_http_url: host or bracketed IPv6, optional port and path.
+  if printf '%s' "$ops_base" | grep -Eq '[[:space:]]' \
+    || printf '%s' "$ops_base" | grep -Eq '^https?://[^/]*@' \
+    || ! printf '%s' "$ops_base" | grep -Eq \
+      '^https?://([A-Za-z0-9._-]+|\[[0-9a-fA-F:.]+\])(:[0-9]{1,5})?(/[^[:space:]]*)?$'; then
+    ops_base="http://bioetl:8000"
+  fi
+  ready="$(wget -qO- -T 3 "$ops_base/ops/control-plane/ready" 2>/dev/null)" || return 1
+  printf '%s' "$ready" | grep -Eq "\"runtime_source_id\"[[:space:]]*:[[:space:]]*\"$source_id\""
+}
+lease_is_active() {
+  [ -f "$lease" ] || return 1
+  read -r pid ticks boot deadline < "$lease" || return 1
+  case "$pid:$ticks:$deadline" in *[!0-9:]*) return 1 ;; esac
+  current_boot="$(cat /proc/sys/kernel/random/boot_id)" || return 1
+  now="$(cut -d. -f1 /proc/uptime)" || return 1
+  current_ticks="$(sed 's/^.*) //' "/proc/$pid/stat" 2>/dev/null | awk '{print $20}')"
+  [ -n "$pid" ] && [ -n "$ticks" ] && [ -n "$deadline" ] &&
+    [ "$boot" = "$current_boot" ] && [ "$ticks" = "$current_ticks" ] &&
+    [ "$now" -lt "$deadline" ]
+}
+if already_full; then printf 'full\n'; exit 0; fi
+[ "$mode" != "ack-restart" ] || { printf 'inactive\n'; exit 0; }
+# Check mode must see a live lease even when the persistent claim remains.
+if [ "$mode" = "check" ] && lease_is_active; then printf 'active\n'; exit 0; fi
+if [ -d "$claim" ]; then printf 'claimed\n'; exit 0; fi
+if lease_is_active; then printf 'active\n'; exit 0; fi
+[ "$mode" = "claim" ] || { printf 'inactive\n'; exit 0; }
+mkdir -p "$recovery_root" || exit 1
+# Directory creation may report success for every racer. Elect one owner.
+if mkdir "$claim" 2>/dev/null; then
+  :
+fi
+if [ ! -d "$claim" ]; then
+  printf 'claimed\n'
+  exit 0
+fi
+if (set -C; : > "$claim_owner") 2>/dev/null; then
+  if already_full; then
+    rm -f "$claim_owner" || exit 1
+    rmdir "$claim" || exit 1
+    printf 'full\n'
+  else
+    printf 'acquired\n'
+  fi
+else
+  printf 'claimed\n'
+fi
+"""
+
+
+def _grafana_late_cutover_ownership(
+    runner: Runner,
+    *,
+    timeout: float,
+    claim: bool = True,
+    acknowledge_restart: bool = False,
+) -> str:
+    """Respect the live watcher lease and atomically claim the one restart."""
+    operation = "claim" if claim else "check"
+    if acknowledge_restart:
+        operation = "ack-restart"
+    result = runner(
+        [
+            "docker",
+            "exec",
+            _GRAFANA_CONTAINER,
+            "sh",
+            "-c",
+            _GRAFANA_LATE_CUTOVER_CLAIM,
+            "bioetl-late-cutover",
+            operation,
+        ],
+        ROOT,
+        timeout,
+    )
+    state = (result.stdout or "").strip()
+    if result.returncode == 0 and state in {
+        "active",
+        "acquired",
+        "claimed",
+        "inactive",
+        "full",
+    }:
+        return state
+    return "unavailable"
+
+
+def _confirmed_grafana_restart_baseline(
+    spec: StackSpec,
+    snapshots: Sequence[ServiceSnapshot],
+    baseline: Mapping[str, int],
+    *,
+    runner: Runner,
+    deadline: float,
+    clock: Clock,
+) -> Mapping[str, int]:
+    """Credit one source/claim/process-bound recovery, retaining all other guards."""
+    grafana = next((row for row in snapshots if row.service == "grafana"), None)
+    if (
+        spec.name != "monitoring"
+        or grafana is None
+        or grafana.restart_count != baseline.get("grafana", 0) + 1
+        or grafana.state != "running"
+        or grafana.health != "healthy"
+        or grafana.oom_killed
+    ):
+        return baseline
+    timeout = min(5.0, max(0.0, deadline - clock()))
+    if (
+        timeout <= 0
+        or _grafana_late_cutover_ownership(
+            runner, timeout=timeout, claim=False, acknowledge_restart=True
+        )
+        != "full"
+    ):
+        return baseline
+    return {**baseline, "grafana": grafana.restart_count}
 
 
 def _grafana_bootstrap_timeout_retry_needed(
@@ -1868,6 +2028,21 @@ def _grafana_bootstrap_timeout_retry_needed(
         and str(payload.get("reason") or "").strip() == _GRAFANA_TIMEOUT_RETRY_REASON
         and str(payload.get("dashboard_profile") or "").strip() == "prometheus_only"
     )
+
+
+def _explicit_monitoring_profile_incomplete(
+    payload: Mapping[str, Any] | None,
+) -> bool:
+    """A terminal incomplete profile cannot satisfy an explicit monitoring start."""
+    if not isinstance(payload, Mapping):
+        return False
+    profile = str(payload.get("dashboard_profile") or "").strip()
+    ops_http = str(payload.get("ops_http") or "").strip()
+    if profile == "full" and ops_http == "ready":
+        return False
+    if _grafana_bootstrap_timeout_retry_needed(payload):
+        return False
+    return True
 
 
 def _grafana_expected_runtime_source_id(runner: Runner, *, timeout: float) -> str:
@@ -1891,6 +2066,25 @@ def _grafana_expected_runtime_source_id(runner: Runner, *, timeout: float) -> st
     return ""
 
 
+_OPS_READY_BASE_RE = re.compile(
+    r"https?://(?:[A-Za-z0-9._-]+|\[[0-9a-fA-F:.]+\])"
+    r"(?::[0-9]{1,5})?(?:/[^\s]*)?\Z"
+)
+
+
+def _grafana_ops_ready_url() -> str:
+    """Ops ready URL from BIOETL_OPS_HTTP_URL, otherwise the compose default."""
+    raw = os.environ.get("BIOETL_OPS_HTTP_URL", "").strip().rstrip("/")
+    if (
+        not raw
+        or any(char.isspace() for char in raw)
+        or re.match(r"https?://[^/]*@", raw) is not None
+        or _OPS_READY_BASE_RE.fullmatch(raw) is None
+    ):
+        raw = "http://bioetl:8000"
+    return f"{raw}/ops/control-plane/ready"
+
+
 def _grafana_ops_ready_runtime_source_id(runner: Runner, *, timeout: float) -> str:
     result = runner(
         [
@@ -1902,7 +2096,7 @@ def _grafana_ops_ready_runtime_source_id(runner: Runner, *, timeout: float) -> s
             "-T",
             "3",
             # NOSONAR - docker-internal HTTP URL is safe (ADR-010 local-only)
-            "http://bioetl:8000/ops/control-plane/ready",
+            _grafana_ops_ready_url(),
         ],
         ROOT,
         timeout,
@@ -1953,34 +2147,142 @@ def _grafana_bootstrap_identity_matches(
     return bool(expected and expected == actual)
 
 
+def _grafana_live_health_ready(runner: Runner, *, timeout: float) -> bool:
+    """Require a live healthy database response, not just a bootstrap status file."""
+    result = runner(
+        [
+            "docker",
+            "exec",
+            _GRAFANA_CONTAINER,
+            "wget",
+            "-qO-",
+            "-T",
+            "3",
+            "http://127.0.0.1:3000/api/health",
+        ],
+        ROOT,
+        timeout,
+    )
+    if result.returncode != 0:
+        return False
+    try:
+        payload = json.loads(result.stdout)
+    except (ValueError, TypeError):
+        return False
+    return isinstance(payload, Mapping) and payload.get("database") == "ok"
+
+
+def _grafana_full_profile_state(
+    payload: Mapping[str, Any] | None, *, readable: bool
+) -> str:
+    """Separate saved bootstrap state from the live health confirmation."""
+    if not readable or not isinstance(payload, Mapping):
+        return "pending"
+    profile = str(payload.get("dashboard_profile") or "").strip()
+    if profile == "full" and str(payload.get("ops_http") or "") == "ready":
+        return "full"
+    reason = str(payload.get("reason") or "").strip()
+    if reason not in {"", _GRAFANA_TIMEOUT_RETRY_REASON, "identity_matched"}:
+        return "terminal"
+    return "pending"
+
+
 def _wait_for_grafana_full_profile(
     runner: Runner,
     *,
     deadline: float,
     sleep: Sleeper,
     clock: Clock,
-) -> None:
+) -> bool:
     while True:
         remaining = _remaining_timeout(deadline, clock)
         if remaining <= 0:
-            return
+            return False
         payload, readable = _load_grafana_bootstrap_status(
             runner,
             timeout=min(5.0, remaining),
         )
-        if readable and isinstance(payload, Mapping):
-            profile = str(payload.get("dashboard_profile") or "").strip()
-            reason = str(payload.get("reason") or "").strip()
-            if profile == "full" or (
-                reason
-                and reason != _GRAFANA_TIMEOUT_RETRY_REASON
-                and reason != "identity_matched"
+        state = _grafana_full_profile_state(payload, readable=readable)
+        if state == "full":
+            health_timeout = _remaining_timeout(deadline, clock, limit=3.0)
+            if health_timeout > 0 and _grafana_live_health_ready(
+                runner, timeout=health_timeout
             ):
-                return
+                return True
+        elif state == "terminal":
+            return False
         remaining = _remaining_timeout(deadline, clock)
         if remaining <= 0:
-            return
+            return False
         sleep(min(2.0, remaining))
+
+
+def _wait_for_active_grafana_watcher(
+    payload: Mapping[str, Any] | None,
+    runner: Runner,
+    *,
+    deadline: float,
+    sleep: Sleeper,
+    clock: Clock,
+) -> bool | None:
+    """Wait for a live lease even while main is still unavailable."""
+    if not isinstance(payload, Mapping) or payload.get("late_recovery_state") not in {
+        "waiting",
+        "confirming_full",
+    }:
+        return None
+    timeout = _remaining_timeout(deadline, clock, limit=10.0)
+    if timeout <= 0:
+        return False
+    ownership = _grafana_late_cutover_ownership(runner, timeout=timeout, claim=False)
+    if ownership == "full":
+        return True
+    if ownership == "inactive":
+        return None
+    if ownership != "active":
+        return False
+    return _wait_for_grafana_full_profile(
+        runner, deadline=deadline, sleep=sleep, clock=clock
+    )
+
+
+def _complete_grafana_cutover(
+    runner: Runner,
+    *,
+    deadline: float,
+    sleep: Sleeper,
+    clock: Clock,
+) -> dict[str, Any] | None:
+    """Share the bounded ownership, restart and live-health completion protocol."""
+    timeout = _remaining_timeout(deadline, clock, limit=30.0)
+    if timeout <= 0:
+        return None
+    ownership = _grafana_late_cutover_ownership(runner, timeout=timeout)
+    result: dict[str, Any] = {"status": "deferred", "recovery_ownership": ownership}
+    if ownership == "full":
+        result["status"] = "full"
+        return result
+    if ownership == "active":
+        if _wait_for_grafana_full_profile(
+            runner, deadline=deadline, sleep=sleep, clock=clock
+        ):
+            result["status"] = "full"
+        return result
+    if ownership != "acquired":
+        return result
+    timeout = _remaining_timeout(deadline, clock, limit=30.0)
+    if timeout <= 0:
+        return result
+    restart = runner(["docker", "restart", _GRAFANA_CONTAINER], ROOT, timeout)
+    result["restart_returncode"] = restart.returncode
+    if restart.returncode != 0:
+        result["status"] = "failed"
+        return result
+    if _wait_for_grafana_full_profile(
+        runner, deadline=deadline, sleep=sleep, clock=clock
+    ):
+        result["status"] = "full"
+    return result
 
 
 def _post_start_grafana_bootstrap_gate(
@@ -1990,12 +2292,13 @@ def _post_start_grafana_bootstrap_gate(
     timeout: float = 45.0,
     sleep: Sleeper = time.sleep,
     clock: Clock = time.monotonic,
-) -> None:
+) -> bool | None:
     """Retry Grafana once when bootstrap lost the bioetl start race.
 
-    Soft bootstrap polls Ops HTTP for ~5s and then freezes prometheus_only
-    notices. If identity now matches, restart Grafana so the full provider
-    is selected. Retry failures remain soft so Grafana UI stays available.
+    Soft bootstrap initially publishes prometheus_only notices. A live watcher
+    or one manager-owned restart may select the full provider after identity
+    matches. Unsuccessful recovery fails explicit monitoring startup while the
+    fallback UI remains available.
     """
     if not _grafana_bootstrap_retry_allowed(spec):
         return
@@ -2008,31 +2311,40 @@ def _post_start_grafana_bootstrap_gate(
         runner,
         timeout=initial_timeout,
     )
-    if not readable or not _grafana_bootstrap_timeout_retry_needed(payload):
+    if not readable or not isinstance(payload, Mapping):
         return
+    if _explicit_monitoring_profile_incomplete(payload):
+        return False
+    if not _grafana_bootstrap_timeout_retry_needed(payload):
+        return
+    watcher_ready = _wait_for_active_grafana_watcher(
+        payload, runner, deadline=deadline, sleep=sleep, clock=clock
+    )
+    if watcher_ready is not None:
+        return None if watcher_ready else False
     if not _grafana_bootstrap_identity_matches(
         runner,
         deadline=deadline,
         clock=clock,
     ):
-        return
+        return False
 
-    restart_timeout = _remaining_timeout(deadline, clock, limit=30.0)
-    if restart_timeout <= 0:
-        return
-    restart = runner(
-        ["docker", "restart", _GRAFANA_CONTAINER],
-        ROOT,
-        restart_timeout,
+    completion = _complete_grafana_cutover(
+        runner, deadline=deadline, sleep=sleep, clock=clock
     )
-    if restart.returncode != 0:
-        return
-    _wait_for_grafana_full_profile(
-        runner,
-        deadline=deadline,
-        sleep=sleep,
-        clock=clock,
-    )
+    return None if completion is not None and completion["status"] == "full" else False
+
+
+def _grafana_cutover_report(
+    payload: Mapping[str, Any], completion: Mapping[str, Any]
+) -> dict[str, Any]:
+    """Keep the same operator context for watcher and manager-owned recovery."""
+    return {
+        "action": "grafana_ops_http_cutover",
+        "previous_reason": str(payload.get("reason") or ""),
+        "previous_dashboard_profile": str(payload.get("dashboard_profile") or ""),
+        **completion,
+    }
 
 
 def _post_start_grafana_ops_cutover(
@@ -2045,11 +2357,10 @@ def _post_start_grafana_ops_cutover(
 ) -> dict[str, Any] | None:
     """Restart Grafana after main is healthy when bootstrap lost the start race.
 
-    Docker Desktop starts monitoring in parallel with main. Grafana bootstrap
-    then polls Ops HTTP for ~5s, writes prometheus-only, and never retries
-    until the container restarts. After main is healthy, one restart cuts
-    Grafana over to Infinity + full dashboards. Restart only the start-race
-    timeout; an identity mismatch will not heal by flapping Grafana.
+    The bounded watcher and manager coordinate one restart through a shared
+    claim after the start-race timeout. Identity mismatch never triggers it.
+    This returns diagnostics for optional monitoring; main readiness remains
+    independent of the cutover outcome.
     """
     if spec.name != "main":
         return None
@@ -2072,6 +2383,17 @@ def _post_start_grafana_ops_cutover(
         or not _grafana_bootstrap_timeout_retry_needed(payload)
     ):
         return None
+    watcher_ready = _wait_for_active_grafana_watcher(
+        payload, runner, deadline=deadline, sleep=sleep, clock=clock
+    )
+    if watcher_ready is not None:
+        return _grafana_cutover_report(
+            payload,
+            {
+                "status": "full" if watcher_ready else "deferred",
+                "recovery_ownership": "watcher",
+            },
+        )
     if not _grafana_bootstrap_identity_matches(
         runner,
         deadline=deadline,
@@ -2079,29 +2401,12 @@ def _post_start_grafana_ops_cutover(
     ):
         return None
 
-    restart_timeout = _remaining_timeout(deadline, clock, limit=30.0)
-    if restart_timeout <= 0:
+    completion = _complete_grafana_cutover(
+        runner, deadline=deadline, sleep=sleep, clock=clock
+    )
+    if completion is None:
         return None
-    restart = runner(
-        ["docker", "restart", _GRAFANA_CONTAINER],
-        ROOT,
-        restart_timeout,
-    )
-    result = {
-        "action": "grafana_ops_http_cutover",
-        "restart_returncode": restart.returncode,
-        "previous_reason": str(payload.get("reason") or ""),
-        "previous_dashboard_profile": str(payload.get("dashboard_profile") or ""),
-    }
-    if restart.returncode != 0:
-        return result
-    _wait_for_grafana_full_profile(
-        runner,
-        deadline=deadline,
-        sleep=sleep,
-        clock=clock,
-    )
-    return result
+    return _grafana_cutover_report(payload, completion)
 
 
 def start_or_recover(
@@ -2194,13 +2499,19 @@ def start_or_recover(
             verify_rc = _post_start_report_bind_gate(spec=spec, report_dir=report_dir)
             if verify_rc != 0:
                 return verify_rc
-            _post_start_grafana_bootstrap_gate(
+            grafana_gate = _post_start_grafana_bootstrap_gate(
                 spec=spec,
                 runner=runner,
                 timeout=min(45.0, max(0.1, deadline - clock())),
                 sleep=sleep,
                 clock=clock,
             )
+            if grafana_gate is False:
+                write_report(
+                    report_dir / "docker-runtime-grafana-ops-cutover.json",
+                    {"action": "grafana_ops_http_cutover", "status": "deferred"},
+                )
+                return 1
             cutover = _post_start_grafana_ops_cutover(
                 spec=spec,
                 runner=runner,
@@ -2213,6 +2524,8 @@ def start_or_recover(
                     report_dir / "docker-runtime-grafana-ops-cutover.json",
                     cutover,
                 )
+                # Main is independently ready; optional monitoring diagnostics
+                # must not turn its successful start into a failure.
             return 0
         recent_logs = _capture_recent_logs(
             spec=spec, runner=runner, deadline=deadline, clock=clock
