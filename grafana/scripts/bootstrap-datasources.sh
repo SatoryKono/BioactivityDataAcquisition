@@ -389,6 +389,8 @@ late_recovery_watch() {
           [ "${_late_now}" -lt "${LATE_RECOVERY_DEADLINE}" ] || break
           late_recovery_alive || { late_recovery_finish stopped; return; }
           if [ "${LATE_RECOVERY_STATE}" = "confirming_full" ]; then
+            # owner is the exclusive claim marker; the directory must be empty to clear.
+            rm -f "${LATE_RECOVERY_CLAIM}/owner"
             if rmdir "${LATE_RECOVERY_CLAIM}" 2>/dev/null; then
               late_recovery_finish complete
             else

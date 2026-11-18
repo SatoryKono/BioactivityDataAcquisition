@@ -1276,6 +1276,64 @@ def test_late_cutover_claim_has_one_owner_across_concurrent_processes(
     ]
 
 
+def test_late_cutover_claim_elects_one_owner_when_mkdir_is_not_exclusive(
+    tmp_path: Path,
+) -> None:
+    """Ubuntu 26.04 uutils mkdir can return success to every concurrent creator."""
+    shell = shutil.which("sh")
+    real_mkdir = shutil.which("mkdir")
+    if shell is None or real_mkdir is None:
+        pytest.skip("POSIX sh and mkdir are required for the recovery claim test")
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    shim = fake_bin / "mkdir"
+    shim.write_text(
+        f"""#!/bin/sh
+real="{real_mkdir}"
+if [ "$1" = "-p" ]; then
+  exec "$real" "$@"
+fi
+target="$1"
+"$real" "$target" 2>/dev/null
+arrived="$(dirname "$target")/mkdir-arrived"
+printf '%s\\n' "$$" >> "$arrived"
+i=0
+while [ "$i" -lt 50 ]; do
+  count="$(wc -l < "$arrived" 2>/dev/null || printf '0')"
+  [ "$count" -ge 2 ] && break
+  i=$((i + 1))
+  sleep 0.05
+done
+exit 0
+""",
+        encoding="utf-8",
+        newline="\n",
+    )
+    shim.chmod(0o755)
+    env = {
+        **os.environ,
+        "PATH": str(fake_bin) + os.pathsep + os.environ.get("PATH", ""),
+        "BIOETL_EXPECTED_RUNTIME_SOURCE_ID": "a" * 64,
+        "BIOETL_GRAFANA_BOOTSTRAP_STATUS_FILE": str(tmp_path / "bootstrap-status.json"),
+    }
+    processes = [
+        subprocess.Popen(
+            [shell, "-c", runtime_manager._GRAFANA_LATE_CUTOVER_CLAIM],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            env=env,
+        )
+        for _ in range(2)
+    ]
+    results = [process.communicate(timeout=10) for process in processes]
+    assert all(process.returncode == 0 for process in processes), results
+    assert sorted(stdout.strip() for stdout, _stderr in results) == [
+        "acquired",
+        "claimed",
+    ]
+
+
 @pytest.mark.parametrize("current_source", [True, False])
 def test_late_cutover_claim_rechecks_full_profile_after_acquisition(
     tmp_path: Path, current_source: bool
