@@ -1,7 +1,10 @@
 diff --git a/public/app/features/alerting/unified/rule-list/components/AlertRuleListItem.tsx b/public/app/features/alerting/unified/rule-list/components/AlertRuleListItem.tsx
 --- a/public/app/features/alerting/unified/rule-list/components/AlertRuleListItem.tsx
 +++ b/public/app/features/alerting/unified/rule-list/components/AlertRuleListItem.tsx
-@@ -33,3 +33,4 @@
+@@ -32,5 +32,6 @@
+ import { type RulePluginOrigin } from '../../utils/rules';
+-
++
 +import { withInstancesTab } from './alertRuleLinks';
  import { GroupIntervalIndicator } from './GroupIntervalMetadata';
  import { ListItem } from './ListItem';
