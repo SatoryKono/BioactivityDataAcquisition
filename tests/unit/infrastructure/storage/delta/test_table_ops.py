@@ -236,6 +236,41 @@ def test_windows_read_fills_schema_evolved_columns_as_typed_nulls(
     ]
 
 
+@pytest.mark.parametrize("columns", [["target_type"], ["added"]])
+@pytest.mark.parametrize("damage", ["missing", "corrupt"])
+def test_windows_projection_rejects_unreadable_active_parquet(
+    tmp_path, monkeypatch, columns, damage
+):
+    """A metadata failure must not silently turn a nonempty Delta file into zero rows."""
+    import pyarrow as pa
+    from deltalake import DeltaTable, write_deltalake
+
+    path = tmp_path / "unreadable-active-file"
+    write_deltalake(
+        str(path),
+        pa.table({"entity_id": ["a", "b"], "target_type": ["protein", "protein"]}),
+        partition_by=["target_type"],
+    )
+    write_deltalake(
+        str(path),
+        pa.table({"entity_id": ["c"], "target_type": ["protein"], "added": ["new"]}),
+        mode="append",
+        schema_mode="merge",
+        partition_by=["target_type"],
+    )
+    table = DeltaTable(str(path))
+    for uri in table.file_uris():
+        file = Path(table_ops.resolve_parquet_file_uri(uri))
+        if "added" not in table_ops.pq.read_schema(file).names:
+            if damage == "missing":
+                file.unlink()
+            else:
+                file.write_bytes(b"invalid parquet")
+    monkeypatch.setattr(table_ops, "_can_use_pyarrow_dataset_scanner", lambda: False)
+    with pytest.raises((OSError, pa.ArrowInvalid)):
+        table_ops.read_delta_records(table, columns=columns)
+
+
 def test_parquet_row_count_does_not_hide_metadata_read_errors(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
