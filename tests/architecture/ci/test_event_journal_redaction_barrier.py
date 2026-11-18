@@ -123,3 +123,113 @@ def test_record_redacts_a_secret_nested_in_a_tuple(
     visible = re.sub(r"\[redacted:[0-9a-f]{12}\]", "", text)
     assert secret not in visible
     assert json.dumps(secret, ensure_ascii=True)[1:-1] not in visible
+
+
+def _spy_correlation(monkeypatch: pytest.MonkeyPatch, journal: Any) -> list[str]:
+    seen: list[str] = []
+    original = journal._correlation_tag
+
+    def spy(captured: str) -> str:
+        seen.append(captured)
+        return original(captured)
+
+    monkeypatch.setattr(journal, "_correlation_tag", spy)
+    return seen
+
+
+def test_passphrase_env_value_is_sealed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from scripts.engineering.ci import pytest_event_journal as journal
+
+    phrase = "phrase-canary-value"
+    monkeypatch.setenv("BIOETL_UNIT_PASSPHRASE", phrase)
+    seen = _spy_correlation(monkeypatch, journal)
+    path = tmp_path / "receipt.jsonl"
+    plugin = journal.EventJournalPlugin(None, path, _identity())
+    plugin.record("session_start", {"notes": phrase})
+    assert plugin._file is not None
+    plugin._file.close()
+    text = path.read_text(encoding="utf-8")
+    assert phrase not in text
+    assert phrase not in journal._keyed_env_needles()
+    assert not any(phrase in item for item in seen)
+    payload = json.loads(text)
+    assert payload["event"] == "session_start"
+    assert payload["notes"] == "[redacted]"
+
+
+def test_password_stays_sealed_after_removal(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from scripts.engineering.ci import pytest_event_journal as journal
+
+    password = "ephemeral-canary-42"
+    monkeypatch.setenv("BIOETL_UNIT_PASSWORD", password)
+    seen = _spy_correlation(monkeypatch, journal)
+    path = tmp_path / "receipt.jsonl"
+    plugin = journal.EventJournalPlugin(None, path, _identity())
+    plugin.record("session_start", {"notes": "collect"})
+    monkeypatch.delenv("BIOETL_UNIT_PASSWORD")
+    nodeid = f"test_file.py::test_value[{password}]"
+    plugin.record("outcome", {"nodeid": nodeid})
+    assert plugin._file is not None
+    plugin._file.close()
+    text = path.read_text(encoding="utf-8")
+    assert password not in text
+    assert not any(password in item for item in seen)
+    lines = [json.loads(line) for line in text.splitlines() if line]
+    assert [line["event"] for line in lines] == ["session_start", "outcome"]
+    assert lines[1]["nodeid"] == "test_file.py::test_value[[redacted]]"
+
+
+def test_password_rotation_seals_old_and_new_values(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from scripts.engineering.ci import pytest_event_journal as journal
+
+    original = "rotation-canary-old-value"
+    rotated = "rotation-canary-new-value"
+    monkeypatch.setenv("BIOETL_UNIT_PASSWORD", original)
+    seen = _spy_correlation(monkeypatch, journal)
+    path = tmp_path / "receipt.jsonl"
+    plugin = journal.EventJournalPlugin(None, path, _identity())
+    plugin.record("session_start", {"notes": original})
+    monkeypatch.setenv("BIOETL_UNIT_PASSWORD", rotated)
+    plugin.record(
+        "outcome", {"nodeid": f"test_file.py::test_value[{original}]", "notes": rotated}
+    )
+    assert plugin._file is not None
+    plugin._file.close()
+    text = path.read_text(encoding="utf-8")
+    assert original not in text
+    assert rotated not in text
+    assert not any(original in item or rotated in item for item in seen)
+    lines = [json.loads(line) for line in text.splitlines() if line]
+    assert lines[0]["notes"] == "[redacted]"
+    assert lines[1]["notes"] == "[redacted]"
+    assert lines[1]["nodeid"] == "test_file.py::test_value[[redacted]]"
+
+
+def test_spaced_env_token_does_not_leave_a_suffix(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from scripts.engineering.ci import pytest_event_journal as journal
+
+    token = "Bearer ExampleSensitiveToken123"
+    suffix = "ExampleSensitiveToken123"
+    monkeypatch.setenv("REVIEW_API_TOKEN", token)
+    seen = _spy_correlation(monkeypatch, journal)
+    path = tmp_path / "receipt.jsonl"
+    plugin = journal.EventJournalPlugin(None, path, _identity())
+    plugin.record("session_start", {"notes": f"authorization={token}"})
+    assert plugin._file is not None
+    plugin._file.close()
+    text = path.read_text(encoding="utf-8")
+    assert token not in text
+    assert suffix not in text
+    assert token in seen
+    assert suffix not in seen
+    payload = json.loads(text)
+    assert payload["event"] == "session_start"
+    assert suffix not in payload["notes"]

@@ -271,17 +271,37 @@ def _replace_prefix(match: re.Match[str]) -> str:
     return _correlation_tag(match.group(0))
 
 
+# Password values stay sealed for the process lifetime. Removing or rotating
+# the env var must not make an earlier value eligible for plaintext or HMAC.
+_RETAINED_BLOCKED: set[str] = set()
+
+
+def _clear_retained_blocked() -> None:
+    """Drop the password inventory. Tests isolate one journal lifetime."""
+    _RETAINED_BLOCKED.clear()
+
+
+def _retain_blocked(values: tuple[str, ...]) -> None:
+    _RETAINED_BLOCKED.update(value for value in values if value)
+
+
 def _partition_env_needles() -> tuple[tuple[str, ...], tuple[str, ...]]:
-    """Split env needles into constant-sealed values and fingerprintable ones."""
+    """Split env needles into constant-sealed values and fingerprintable ones.
+
+    Sealed names (``password``, ``passwd``, ``passphrase``) are classified
+    before ``_SECRET_KEY``. That pattern does not contain ``passphrase``.
+    """
     blocked: set[str] = set()
     keyed: set[str] = set()
     for key, value in os.environ.items():
-        if len(value) < 8 or _SECRET_KEY.search(key) is None:
+        if len(value) < 8:
             continue
         if _is_sealed_field(key):
             blocked.add(value)
-        else:
-            keyed.add(value)
+            continue
+        if _SECRET_KEY.search(key) is None:
+            continue
+        keyed.add(value)
     blocked_values = tuple(sorted(blocked, key=len, reverse=True))
     keyed_values = tuple(
         sorted(
@@ -292,13 +312,28 @@ def _partition_env_needles() -> tuple[tuple[str, ...], tuple[str, ...]]:
 
 
 def _blocked_env_needles() -> tuple[str, ...]:
+    """Return every password value seen in this process, longest first.
+
+    Newly recognized values are added. Removing or replacing an environment
+    variable does not drop a value that was already observed.
+    """
     blocked, _keyed = _partition_env_needles()
-    return blocked
+    _retain_blocked(blocked)
+    if not _RETAINED_BLOCKED:
+        return ()
+    return tuple(sorted(_RETAINED_BLOCKED, key=len, reverse=True))
 
 
 def _keyed_env_needles() -> tuple[str, ...]:
-    _blocked, keyed = _partition_env_needles()
-    return keyed
+    blocked, keyed = _partition_env_needles()
+    _retain_blocked(blocked)
+    return tuple(
+        sorted(
+            (value for value in keyed if value not in _RETAINED_BLOCKED),
+            key=len,
+            reverse=True,
+        )
+    )
 
 
 def _secret_values() -> tuple[str, ...]:
@@ -385,15 +420,18 @@ def _line_for_storage(line: str, known: tuple[str, ...]) -> str:
 
 
 def _redact_text(text: str, needles: tuple[str, ...]) -> str:
-    redacted = _seal_blocked_text(text, _blocked_env_needles())
-    redacted = _SECRET_ASSIGNMENT.sub(_replace_assignment, redacted)
+    blocked = _blocked_env_needles()
+    redacted = _seal_blocked_text(text, blocked)
+    # Known needles are replaced before assignment parsing. A capture stops
+    # at whitespace, so a later search would miss the remainder of the value.
     for captured in needles:
         if (
             captured
             and captured in redacted
-            and not _contains_needle(captured, _blocked_env_needles())
+            and not _contains_needle(captured, blocked)
         ):
             redacted = redacted.replace(captured, _correlation_tag(captured))
+    redacted = _SECRET_ASSIGNMENT.sub(_replace_assignment, redacted)
     return _SECRET_PREFIX.sub(_replace_prefix, redacted)
 
 
