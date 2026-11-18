@@ -528,6 +528,11 @@ def _resolve_pre_task_surfaces(
     return resolved_chunks_path, resolved_events_dir, output_root, refresh_report
 
 
+def _optional_path_text(path: Path | None) -> str | None:
+    """Render an optional workflow path without changing its absence semantics."""
+    return str(path) if path else None
+
+
 def pre_task_workflow(
     *,
     task_id: str,
@@ -613,8 +618,8 @@ def pre_task_workflow(
         "persistence_mode": persistence.mode.value,
         "ok": not degraded,
         "query": retrieval_query,
-        "session_note": str(session_path) if session_path else None,
-        "refresh_output_root": str(output_root) if output_root else None,
+        "session_note": _optional_path_text(session_path),
+        "refresh_output_root": _optional_path_text(output_root),
         "refresh_report": refresh_report,
         "retrieval": retrieval,
     }
