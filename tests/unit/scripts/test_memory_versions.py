@@ -95,6 +95,17 @@ def test_wrong_version_binding_is_rejected(tmp_path, bundle, monkeypatch):
         ),
         encoding="utf-8",
     )
+    (directory / versions.MIGRATION_RECORD).write_text(
+        json.dumps(
+            {
+                "id": "reviewed",
+                "phase": "COMMITTED",
+                "bundle": str(bundle),
+                "version": "other",
+            }
+        ),
+        encoding="utf-8",
+    )
     with pytest.raises(PermissionError, match="version mismatch"):
         versions.select_bundle(tmp_path, "profile")
 
@@ -121,6 +132,20 @@ def test_selected_profile_does_not_modify_neighbor_binding(
             json.dumps(binding), encoding="utf-8"
         )
     neighbor = tmp_path / "neighbor/runtime-binding.json"
+    transaction = tmp_path / "target" / versions.MIGRATION_RECORD
+    with pytest.raises(PermissionError, match="no committed transaction"):
+        versions.select_bundle(tmp_path, "target")
+    transaction.write_text(
+        json.dumps(
+            {
+                "id": "reviewed",
+                "phase": "COMMITTED",
+                "bundle": str(bundle),
+                "version": bundle.name,
+            }
+        ),
+        encoding="utf-8",
+    )
     before = neighbor.read_bytes()
     assert versions.select_bundle(tmp_path, "target") == bundle
     assert versions.select_bundle(tmp_path, "neighbor") is None
@@ -611,6 +636,26 @@ def test_verified_duplicate_bundle_releases_its_current_staging(bundle, monkeypa
     assert versions._publish_bundle(staging, bundle) == bundle
     assert not staging.exists()
     versions.verify(bundle)
+
+
+def test_failed_bundle_assembly_cleans_its_staging_only(bundle, monkeypatch):
+    owner = SimpleNamespace(candidate=lambda *_: {"hashes": {}})
+    monkeypatch.setattr(versions, "VERSIONS", bundle.parent)
+    monkeypatch.setattr(versions, "sha", lambda _: "fixture-digest")
+
+    def copy_inputs(_owner, _hashes, staging):
+        service = staging / "tools/shared-mcp"
+        service.mkdir(parents=True)
+        (service / "fixture.py").write_bytes(b"# candidate input\n")
+
+    def reject(_file, _text):
+        raise ValueError("reviewed source drift")
+
+    monkeypatch.setattr(versions, "_copy_runtime_dependencies", copy_inputs)
+    monkeypatch.setattr(versions, "_adapt_service_text", reject)
+    with pytest.raises(ValueError, match="reviewed source drift"):
+        versions.build(owner, {}, {})
+    assert list(bundle.parent.iterdir()) == [bundle]
 
 
 def test_unlisted_file_in_predecessor_bundle_blocks_rollback_before_commit(

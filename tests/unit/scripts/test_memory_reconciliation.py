@@ -101,16 +101,29 @@ def test_complete_recovery_lifecycle_and_ordinary_restart(fixture):
             "profile": "profile",
             "generation": generation,
             "phase": "idle",
+            "mutating": False,
             "accepted_count": 0,
             "graph": stamp,
         },
     )
     recovery.observe(owner, entry, value, generation)
     assert not recovery.blocked(owner, entry)  # ensure returns the existing live owner.
+    idle_receipt = owner.state.read(directory / "work.json")
+    for changes in ({}, {"mutating": True}):
+        work = {**idle_receipt, **changes}
+        if not changes:
+            work.pop("mutating")
+        owner.state.write(directory / "work.json", work)
+        with pytest.raises(ValueError, match="no idle receipt"):
+            recovery.observe(owner, entry, value, generation, idle=True)
+        assert recovery.coordination(owner, entry)["history"][-1]["phase"] == "RUNNING"
+    owner.state.write(directory / "work.json", idle_receipt)
     recovery.observe(owner, entry, value, generation, idle=True)
     assert recovery.coordination(owner, entry)["history"][-1]["phase"] == "IDLE"
     assert recovery.decision(owner, entry, value) == "SAFE_IDLE_RESTART"
     assert (directory / "blocked.json").read_bytes() == original
+    proposed = recovery.plan(owner, entry, value)
+    assert proposed["block_id"] is None and not proposed["eligible"]
 
 
 def test_repeated_apply_is_rejected_without_changes(fixture):

@@ -107,9 +107,20 @@ def test_isolated_worker_writes_exactly_the_checked_utf8_bytes(
     site.mkdir(parents=True)
     runner = Path(snapshots.__file__).with_name("converter_runner.py")
     (staging / runner.name).write_bytes(runner.read_bytes())
-    (site / "markitdown.py").write_text(
+    package = site / "markitdown"
+    package.mkdir()
+    (package / "__init__.py").write_text(
+        "class MarkItDown:\n    def __init__(self, **kwargs): raise AssertionError('unexpected auto-detection')\n"
+        "class StreamInfo:\n    def __init__(self, **kwargs): self.fields = kwargs\n",
+        encoding="utf-8",
+    )
+    (package / "converters.py").write_text(
         f"class Result:\n    text_content = 'x' * {size}\n"
-        "class MarkItDown:\n    def __init__(self, **kwargs): pass\n    def convert(self, path): return Result()\n",
+        "class HtmlConverter:\n"
+        "    def convert(self, stream, info):\n"
+        "        assert stream.read() == b'<p>synthetic input</p>'\n"
+        "        assert info.fields == {'extension': '.html', 'mimetype': 'text/html'}\n"
+        "        return Result()\n",
         encoding="utf-8",
     )
     manifest = {
@@ -133,7 +144,7 @@ def test_isolated_worker_writes_exactly_the_checked_utf8_bytes(
     )
     job.mkdir(parents=True)
     source = job / "input.html"
-    source.write_bytes(b"synthetic input")
+    source.write_bytes(b"<p>synthetic input</p>")
     env = {
         key: value
         for key, value in os.environ.items()
