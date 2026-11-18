@@ -753,9 +753,11 @@ def client(root):
     session = None
     initialization = None
     try:
-        for line in sys.stdin:
+        for line in getattr(sys.stdin, "buffer", sys.stdin):
             if len(line) > 1024 * 1024:
                 raise ValueError("Oversized Markdownify request")
+            if isinstance(line, bytes):
+                line = line.decode("utf-8")
             value = json.loads(line)
             result, next_session = _forward_request(
                 spec, value, session, initialization

@@ -74,17 +74,37 @@ def test_only_exact_qualified_app_binary_is_selected(tmp_path, monkeypatch):
 
 
 @pytest.fixture
-def session_binding(tmp_path):
+def session_binding(tmp_path, monkeypatch):
     root = tmp_path / "repo"
     (root / ".git").mkdir(parents=True)
+    python = tmp_path / "reviewed-python.exe"
+    python.write_bytes(b"qualified interpreter fixture")
+    versions = tmp_path / "selector-versions"
+    directory = versions / "building"
+    directory.mkdir(parents=True)
+    selector = directory / "session_client.py"
+    selector.write_bytes(b"# qualified selector fixture\n")
+    dispatcher = {
+        "schema": 1,
+        "files": {
+            "session_client.py": hashlib.sha256(selector.read_bytes()).hexdigest()
+        },
+        "host_pins": {str(python): hashlib.sha256(python.read_bytes()).hexdigest()},
+    }
+    raw = json.dumps(dispatcher, sort_keys=True).encode()
+    (directory / "dispatcher.json").write_bytes(raw)
+    installed = versions / hashlib.sha256(raw).hexdigest()
+    directory.rename(installed)
+    monkeypatch.setattr(native_session, "SELECTOR_PYTHON", python)
+    monkeypatch.setattr(native_session, "SELECTOR_VERSIONS", versions)
     manifest = tmp_path / "routes.json"
     data = {
         "schema": 1,
         "git_common": str(root / ".git"),
         "entries": {
             name: {
-                "command": "python",
-                "args": ["-I", "-S", "-B", str(tmp_path / "session_client.py"), name],
+                "command": str(python),
+                "args": ["-I", "-S", "-B", str(installed / "session_client.py"), name],
             }
             for name in ("memory", "ast-grep")
         },
@@ -130,6 +150,37 @@ def test_explicit_pinned_root_route_is_not_a_session_binding(session_binding, tm
         session_overrides(
             config, root, manifest=manifest, markdownify=tmp_path / "absent.json"
         )
+
+
+@pytest.mark.parametrize(
+    "change", ["relative", "foreign", "interpreter", "drift", "manifest"]
+)
+def test_native_selector_requires_the_physical_pinned_installation(
+    session_binding, tmp_path, monkeypatch, change
+):
+    root, manifest, data, config = session_binding
+    entry = data["entries"]["memory"]
+    if change == "relative":
+        entry["args"][3] = "session_client.py"
+    elif change == "foreign":
+        foreign = tmp_path / "session_client.py"
+        foreign.write_bytes(b"# same basename, unrelated script\n")
+        entry["args"][3] = str(foreign)
+    elif change == "interpreter":
+        entry["command"] = "python"
+    elif change == "drift":
+        Path(entry["args"][3]).write_bytes(b"# changed after qualification\n")
+    else:
+        Path(entry["args"][3]).with_name("dispatcher.json").unlink()
+    manifest.write_text(json.dumps(data), encoding="utf-8")
+    cwd = root / "docs"
+    cwd.mkdir()
+    monkeypatch.chdir(cwd)
+    with pytest.raises(PermissionError, match="selector|dispatcher"):
+        session_overrides(
+            config, root, manifest=manifest, markdownify=tmp_path / "absent.json"
+        )
+    assert Path.cwd() == cwd
 
 
 def test_markdownify_source_cannot_redirect_a_foreign_workspace(

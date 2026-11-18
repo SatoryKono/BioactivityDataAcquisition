@@ -2,7 +2,7 @@
 
 from email.message import Message
 from concurrent.futures import ThreadPoolExecutor
-from io import BytesIO, StringIO
+from io import BytesIO, StringIO, TextIOWrapper
 import json
 from threading import Event, Lock
 from unittest.mock import Mock
@@ -418,6 +418,43 @@ def test_expired_session_without_initialization_cannot_recover_or_replay(monkeyp
     with pytest.raises(markdownify._SessionExpired):
         markdownify._forward_request({}, {"id": 1, "method": "tools/call"}, "old", None)
     request.assert_called_once()
+
+
+def test_client_decodes_utf8_protocol_bytes_despite_windows_text_encoding(
+    tmp_path, monkeypatch
+):
+    value = {
+        "id": 1,
+        "method": "tools/call",
+        "params": {"arguments": {"filepath": "данные.md"}},
+    }
+    raw = (json.dumps(value, ensure_ascii=False) + "\n").encode("utf-8")
+    stream = TextIOWrapper(BytesIO(raw), encoding="cp1251")
+    monkeypatch.setattr(markdownify.sys, "stdin", stream)
+    monkeypatch.setattr(markdownify, "specification", lambda _: {})
+    seen = []
+
+    def request(spec, method, path, body=None, session=None):
+        if method == "GET":
+            return {"ready": True}, None
+        seen.append(body)
+        return {"id": 1, "result": {}}, None
+
+    monkeypatch.setattr(markdownify, "request", request)
+    markdownify.client(tmp_path)
+    assert seen == [value]
+
+
+def test_client_refuses_non_utf8_bytes_before_dispatch(tmp_path, monkeypatch):
+    monkeypatch.setattr(
+        markdownify.sys, "stdin", TextIOWrapper(BytesIO(b"\xff\n"), encoding="cp1251")
+    )
+    monkeypatch.setattr(markdownify, "specification", lambda _: {})
+    request = Mock(return_value=({"ready": True}, None))
+    monkeypatch.setattr(markdownify, "request", request)
+    with pytest.raises(UnicodeDecodeError):
+        markdownify.client(tmp_path)
+    request.assert_called_once_with({}, "GET", markdownify.HEALTH_PATH)
 
 
 def test_stop_marker_is_published_under_the_generation_transition_lock(

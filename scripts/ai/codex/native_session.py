@@ -19,6 +19,8 @@ import tomllib
 from pathlib import Path
 
 REF_URL = "https://api.ref.tools/mcp"
+SELECTOR_VERSIONS = Path("D:/pc-agent/tools/codex-session-versions")
+SELECTOR_PYTHON = Path.home() / "AppData/Local/Programs/Python/Python313/python.exe"
 
 
 def physical(path):
@@ -123,6 +125,40 @@ def _markdownify_entry(source, root, servers):
     return value["server"], entry
 
 
+def _selector_paths(entry, name):
+    args = entry.get("args", [])
+    if len(args) != 5 or args[:3] != ["-I", "-S", "-B"] or args[4] != name:
+        raise PermissionError(
+            "Native session requires its reviewed inherited-cwd selector"
+        )
+    command = Path(entry["command"])
+    selector = Path(args[3])
+    if (
+        command != SELECTOR_PYTHON
+        or not command.is_absolute()
+        or not selector.is_absolute()
+        or selector.name != "session_client.py"
+        or selector.parent.parent != SELECTOR_VERSIONS
+    ):
+        raise PermissionError(
+            "Native session requires its qualified installed selector"
+        )
+    return command, selector
+
+
+def _validate_selector(entry, name):
+    from scripts.ai.mcp.session_client import _verify_dispatcher
+
+    command, selector = _selector_paths(entry, name)
+    physical(command)
+    physical(selector)
+    manifest = _verify_dispatcher(selector.parent)
+    if "session_client.py" not in manifest["files"] or not any(
+        Path(path) == command for path in manifest["host_pins"]
+    ):
+        raise PermissionError("Installed selector must pin its script and interpreter")
+
+
 def session_overrides(
     config, root, *, manifest=None, markdownify=None, acceptance=False
 ):
@@ -148,16 +184,7 @@ def session_overrides(
     if manifest.read_bytes() != raw:
         raise PermissionError("Session transport binding changed")
     for name, entry in selected.items():
-        args = entry.get("args", [])
-        if (
-            len(args) != 5
-            or args[:3] != ["-I", "-S", "-B"]
-            or Path(args[3]).name != "session_client.py"
-            or args[4] != name
-        ):
-            raise PermissionError(
-                "Native session requires its reviewed inherited-cwd selector"
-            )
+        _validate_selector(entry, name)
     if acceptance:
         entry = dict(selected["memory"])
         entry["args"] = list(entry["args"])

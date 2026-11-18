@@ -29,29 +29,30 @@ def session_root(cwd: Path, validator) -> Path:
     raise PermissionError("No registered session workspace")
 
 
-def _verify_dispatcher():
-    manifest_path = Path(__file__).with_name("dispatcher.json")
-    if manifest_path.is_file():
-        raw = manifest_path.read_bytes()
-        directory = manifest_path.parent
-        manifest = json.loads(raw)
+def _verify_dispatcher(directory=None):
+    manifest_path = (directory or Path(__file__).parent) / "dispatcher.json"
+    if not manifest_path.is_file():
+        if directory is not None:
+            raise PermissionError("Installed session dispatcher manifest is absent")
+        return None
+    raw = manifest_path.read_bytes()
+    directory = manifest_path.parent
+    manifest = json.loads(raw)
+    if hashlib.sha256(raw).hexdigest() != directory.name or manifest.get("schema") != 1:
+        raise PermissionError("Session dispatcher identity changed")
+    for relative, expected in manifest["files"].items():
+        path = directory / relative
         if (
-            hashlib.sha256(raw).hexdigest() != directory.name
-            or manifest.get("schema") != 1
+            Path(relative).is_absolute()
+            or ".." in Path(relative).parts
+            or path.resolve(strict=True) != path
+            or hashlib.sha256(path.read_bytes()).hexdigest() != expected
         ):
-            raise PermissionError("Session dispatcher identity changed")
-        for relative, expected in manifest["files"].items():
-            path = directory / relative
-            if (
-                Path(relative).is_absolute()
-                or ".." in Path(relative).parts
-                or path.resolve(strict=True) != path
-                or hashlib.sha256(path.read_bytes()).hexdigest() != expected
-            ):
-                raise PermissionError("Session dispatcher source changed")
-        for path, expected in manifest["host_pins"].items():
-            if hashlib.sha256(Path(path).read_bytes()).hexdigest() != expected:
-                raise PermissionError("Session dispatcher host dependency changed")
+            raise PermissionError("Session dispatcher source changed")
+    for path, expected in manifest["host_pins"].items():
+        if hashlib.sha256(Path(path).read_bytes()).hexdigest() != expected:
+            raise PermissionError("Session dispatcher host dependency changed")
+    return manifest
 
 
 def _memory_command(service, root):
