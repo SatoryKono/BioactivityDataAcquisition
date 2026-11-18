@@ -749,7 +749,7 @@ def _style_provider_check(panels: list[dict]) -> None:
                             "text": _NO_RUNS_LABEL,
                             "color": "gray",
                         },
-                        "INCOMPLETE": {"text": "INCOMPLETE", "color": "orange"},
+                        "INCOMPLETE": {"text": "INCOMPLETE", "color": "text"},
                     },
                 },
                 {

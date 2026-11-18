@@ -107,11 +107,9 @@ Questions are byte-equal to `DASHBOARD_REQUIREMENTS.md` §7. Ids are §7.1.
 | --- | --- | --- |
 | `bioetl-run-explorer-v1` | Which pipelines ran most recently, and where are their reports? | `3010` |
 | `bioetl-control-plane-v1` | Can the selected run be exactly replayed from saved inputs? | `9422` |
-| `bioetl-overview-v2` | What is the saved assessment of the selected Run ID? | `9603`, `9002` |
-| `bioetl-runtime` | What is the saved runtime assessment of the selected Run ID? | `9998` |
-| `bioetl-provider-health-v2` | Which provider is degraded/failing, and why? | `9461` |
+| `bioetl-overview-v2` | What is the saved assessment, runtime/domain status, identity, and provider evidence of the selected Run ID? | `9603`, `9002` |
 | `bioetl-dq-v2` | What is the DQ assessment of the selected Run ID? | `9406` |
-| `bioetl-incident-v1` | What is the highest-confidence active suspect? | `2010` |
+| `bioetl-incident-v1` | What is the highest-confidence active suspect, and which current/global runtime, provider, or control-plane evidence explains it? | `2010` |
 
 Every cycle checks, for each UID, the fragment sections **Shared palette**,
 **Shared text**, **Shared data and layout**, and that UID's panel table:
@@ -155,7 +153,7 @@ Operator paste values override this table.
 ## Preflight
 
 1. `git status --porcelain`; SHA; branch. Foreign dirty tree → worktree.
-2. Seven UIDs from the fragment. Empty SCOPE → STOP.
+2. Five UIDs from the fragment. Empty SCOPE → STOP.
 3. Re-walk JSON into `panel-matrix.csv` and diff it against the fragment roster.
 4. Run fragment §8 static gates.
 5. `run_id = <UTC>-dash-cycle-<shortsha>`.

@@ -129,7 +129,7 @@ def apply_overall_verdict(payload: dict) -> None:
                                 "OK": "green",
                                 "WARN": "yellow",
                                 "ERROR": "red",
-                                "INCOMPLETE": "orange",
+                                "INCOMPLETE": "text",
                                 "UNKNOWN": "gray",
                                 "N/A": "gray",
                                 _QUERY_ERROR: "red",
