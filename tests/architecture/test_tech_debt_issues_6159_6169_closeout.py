@@ -332,13 +332,9 @@ def test_issue_6169_script_governance_ratchet_has_headroom() -> None:
     # The refreshed manifest has no unreferenced supporting scripts.
     assert len(zero_reference_rows) == outcome["zero_reference_supporting_script_count"]
 
+    required_fields = ("owner", "lifecycle_decision", "review_by", "next_step")
     untriaged_zero_reference_rows = [
-        row
-        for row in zero_reference_rows
-        if not row.get("owner")
-        or not row.get("lifecycle_decision")
-        or not row.get("review_by")
-        or not row.get("next_step")
+        row for row in zero_reference_rows if not all(map(row.get, required_fields))
     ]
     assert (
         len(untriaged_zero_reference_rows)
@@ -370,6 +366,7 @@ def test_issue_6169_script_governance_ratchet_has_headroom() -> None:
             "legacy_manual_utility"
         ),
     }
+    review_dates = {"scripts/docs/matrix/structural_contract.py": "2026-12-18"}
     assert outcome["newly_governed_supporting_scripts"] == list(expected_decisions)
     for script_path, expected_decision in expected_decisions.items():
         row = rows_by_path[script_path]
@@ -383,4 +380,4 @@ def test_issue_6169_script_governance_ratchet_has_headroom() -> None:
         assert row["lifecycle_decision"] == expected_decision
 
         assert lifecycle["decision"] == row["lifecycle_decision"]
-        assert lifecycle["review_by"] == "2026-09-30"
+        assert lifecycle["review_by"] == review_dates.get(script_path, "2026-09-30")

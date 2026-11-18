@@ -55,6 +55,7 @@ BUILD_SUPPORT = (
     "grafana/tooling/router-v7-bridge/package-lock.json",
     "grafana/tooling/router-v7-bridge/index.d.ts",
     "grafana/tooling/router-v7-bridge/README.md",
+    "grafana/tooling/router-v7-bridge/grafana-alert-instance-link.patch",
     "grafana/tooling/router-v7-bridge/bioetl-grafana-router-v7-bridge-0.3.0.tgz",
     ".github/tooling/braces-backport/braces-3.0.4-bioetl.1.tgz",
     "grafana/tooling/router-v7-bridge/verify-host-image.mjs",

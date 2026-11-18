@@ -13,6 +13,7 @@ import re
 import stat
 import subprocess
 import tempfile
+import time
 from collections.abc import Iterator, Mapping
 from pathlib import Path
 from typing import Any
@@ -51,6 +52,7 @@ _OUTPUT_PREFIXES = (
     ".ruff_cache/",
 )
 _SCHEMA_VERSION = 1
+_WORKER_RECEIPT_FINALIZATION_SECONDS = 30.0
 
 
 def _safe_id(value: str, label: str) -> str:
@@ -431,6 +433,11 @@ def _blank_phases() -> dict[str, str | None]:
     return {"setup": None, "call": None, "teardown": None}
 
 
+def _direct_local_worker(node: Any) -> bool:
+    spec = node.gateway.spec
+    return bool(getattr(spec, "popen", None)) and not getattr(spec, "via", None)
+
+
 class ReceiptPlugin:
     """Collect one immutable receipt for this pytest process."""
 
@@ -455,7 +462,7 @@ class ReceiptPlugin:
         self.selected_nodeids: list[str] = []
         self.deselected_nodeids: list[str] = []
         self.collection_errors: list[str] = []
-        self.results: dict[str, dict[str, str | None]] = {}
+        self.results: dict[str, list[dict[str, str | None]]] = {}
         self.source = source_snapshot(self.repo_root, self.receipt_dir)
         self.source_diverged = False
         head = str(self.source["head"])
@@ -480,6 +487,41 @@ class ReceiptPlugin:
                 "worker",
             )
         self.write_receipt = not _is_xdist_controller(config)
+
+    @pytest.hookimpl(optionalhook=True)
+    def pytest_configure_node(self, node: Any) -> None:
+        if not self.write_receipt and _direct_local_worker(node):
+            node.workerinput["bioetl_receipt_dir"] = str(self.receipt_dir)
+
+    @pytest.hookimpl(optionalhook=True)
+    def pytest_testnodedown(self, node: Any, error: Any) -> None:
+        """Keep local workers alive until their last hook finalizes the receipt."""
+        if self.write_receipt or error is not None:
+            return
+        if not _direct_local_worker(node):
+            return
+        worker = _safe_id(str(node.gateway.id), "worker")
+        target = (
+            self.receipt_dir
+            / self.run_id
+            / self.attempt
+            / self.pass_name
+            / worker
+            / "receipt.json"
+        )
+        # xdist reports workerfinished before our post-yield source snapshot.
+        # Await the atomic, readonly publication without changing exit-status order.
+        deadline = time.monotonic() + _WORKER_RECEIPT_FINALIZATION_SECONDS
+        while True:
+            try:
+                mode = target.stat().st_mode
+            except FileNotFoundError:
+                mode = 0
+            if stat.S_ISREG(mode) and not mode & stat.S_IWUSR:
+                return
+            if time.monotonic() >= deadline:
+                raise RuntimeError(f"Worker {worker} did not finalize its receipt")
+            time.sleep(0.05)
 
     def pytest_deselected(self, items: list[Any]) -> None:
         for item in items:
@@ -699,7 +741,7 @@ def write_runner_terminal_receipt(
     Collection and node outcomes stay unknown. The observed error is redacted.
     """
     directory = _resolve_dir(str(receipt_dir))
-    payload = {
+    payload: dict[str, Any] = {
         "schema_version": _SCHEMA_VERSION,
         "role": "runner",
         "run_id": _safe_id(run_id, "run_id"),
@@ -730,7 +772,9 @@ def pytest_addoption(parser: Any) -> None:
 
 
 def pytest_configure(config: Any) -> None:
-    receipt_dir = config.getoption("--receipt-dir")
+    receipt_dir = getattr(config, "workerinput", {}).get(
+        "bioetl_receipt_dir"
+    ) or config.getoption("--receipt-dir")
     if not receipt_dir:
         return
     plugin = ReceiptPlugin(
