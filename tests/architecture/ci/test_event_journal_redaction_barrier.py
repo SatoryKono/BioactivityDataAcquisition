@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 import json
+import sys
+import subprocess
+import os
 import re
 from pathlib import Path
 from typing import Any
@@ -389,12 +392,24 @@ def test_password_discovered_after_collection_keeps_terminal_matching(
                 "sha_error": None,
             },
         )
-        writer.record("collection_finished", {"nodeids": [nodeid] * copies})
+        if worker and writer is plugin:
+            hook = getattr(
+                plugin, "pytest_xdist_node_collection_finished", lambda **_: None
+            )
+            hook(ids=[nodeid] * copies)
+        else:
+            writer.record("collection_finished", {"nodeids": [nodeid] * copies})
+    discovered = False
     for _ in range(copies):
         for when in ("setup", "call", "teardown"):
-            if when == discover_when:
-                monkeypatch.setenv("REVIEW_PASSWORD", password)
+            discovered = discovered or when == discover_when
             for writer in writers:
+                if worker and writer is plugin:
+                    # Controller does not inherit a worker fixture's environment.
+                    monkeypatch.delenv("REVIEW_PASSWORD", raising=False)
+                    journal._clear_retained_blocked()
+                elif discovered:
+                    monkeypatch.setenv("REVIEW_PASSWORD", password)
                 data = {
                     "nodeid": nodeid,
                     "when": when,
@@ -440,8 +455,8 @@ def test_unknown_credential_containing_password_is_sealed_in_full(
     assert not any(password in item for item in seen)
 
 
-@pytest.mark.parametrize("keyword", ["password", "passphrase"])
-@pytest.mark.parametrize("token", ["password", "passphrase"])
+@pytest.mark.parametrize("keyword", ["password", "passphrase", "authorization"])
+@pytest.mark.parametrize("token", ["password", "passphrase", "authorization"])
 def test_token_cannot_hide_a_password_assignment_keyword(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, keyword: str, token: str
 ) -> None:
@@ -513,3 +528,78 @@ def test_password_containing_a_keyed_secret_is_sealed_as_one_value(
     assert (
         json.loads(text.splitlines()[0])["nodeid"] == "test.py::test_case[[redacted]]"
     )
+
+
+def test_real_xdist_worker_password_rotation_keeps_the_run_complete(
+    tmp_path: Path,
+) -> None:
+    from scripts.engineering.ci import pytest_event_journal as journal
+
+    config = tmp_path / "pytest.ini"
+    config.write_text("[pytest]\naddopts =\n", encoding="utf-8")
+    test_file = tmp_path / "test_worker_password.py"
+    test_file.write_text(
+        "import pytest\n"
+        "@pytest.fixture\n"
+        "def worker_password(request, monkeypatch):\n"
+        "    value = request.node.callspec.params['value']\n"
+        "    monkeypatch.setenv('REVIEW_PASSWORD', value)\n"
+        "    return value\n"
+        "@pytest.mark.parametrize('value', ['fixture-password-alpha', 'fixture-password-beta'])\n"
+        "def test_fixture(value, worker_password):\n"
+        "    assert value == worker_password\n"
+        "@pytest.mark.parametrize('value', ['call-password-alpha', 'call-password-beta'])\n"
+        "def test_call(value, monkeypatch):\n"
+        "    monkeypatch.setenv('REVIEW_PASSWORD', value)\n"
+        "    assert True\n",
+        encoding="utf-8",
+    )
+    env = {
+        name: value
+        for name, value in os.environ.items()
+        if not name.startswith("PYTEST_XDIST_")
+        and name
+        not in {"PYTEST_CURRENT_TEST", "EXPECTED_CHECKOUT_SHA", "REVIEW_PASSWORD"}
+    }
+    env.update(
+        PYTEST_DISABLE_PLUGIN_AUTOLOAD="1",
+        PYTHONDONTWRITEBYTECODE="1",
+        PYTHONPATH=str(journal._REPO_ROOT),
+        BIOETL_JOURNAL_PASS="parallel",
+        BIOETL_JOURNAL_INVOCATION_ID="a" * 32,
+    )
+    directory = tmp_path / "journal"
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-B",
+            "-m",
+            "pytest",
+            "-c",
+            str(config),
+            "--noconftest",
+            "-p",
+            "no:cacheprovider",
+            "-p",
+            "xdist.plugin",
+            "-p",
+            "scripts.engineering.ci.pytest_event_journal",
+            "-n",
+            "2",
+            "-q",
+            f"--basetemp={tmp_path / 'child-temp'}",
+            f"--event-journal-dir={directory}",
+            str(test_file),
+        ],
+        cwd=tmp_path,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=90,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    verdict = journal.reconcile_directory(directory, executed_passes=["parallel"])
+    assert verdict["status"] == "complete", verdict
+    assert verdict["tests_passed"] is True
+    assert verdict["passes"]["parallel"]["selected_count"] == 4
