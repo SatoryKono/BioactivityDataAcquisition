@@ -381,7 +381,7 @@
       "generator": null,
       "github_issue_number": null,
       "github_issue_url": null,
-      "inbound_links": 56,
+      "inbound_links": 57,
       "lifecycle": null,
       "outbound_links": 106,
       "owner": "BioETL Team",
@@ -10097,7 +10097,7 @@
       "generator": null,
       "github_issue_number": null,
       "github_issue_url": null,
-      "inbound_links": 9,
+      "inbound_links": 10,
       "lifecycle": null,
       "outbound_links": 12,
       "owner": "BioETL Team",
@@ -41681,7 +41681,7 @@
       "generator": null,
       "github_issue_number": null,
       "github_issue_url": null,
-      "inbound_links": 2,
+      "inbound_links": 3,
       "lifecycle": null,
       "outbound_links": 0,
       "owner": "BioETL Team",
@@ -48093,7 +48093,7 @@
       "generator": null,
       "github_issue_number": null,
       "github_issue_url": null,
-      "inbound_links": 3,
+      "inbound_links": 4,
       "lifecycle": null,
       "outbound_links": 4,
       "owner": "BioETL Team",
@@ -50249,7 +50249,7 @@
       "generator": null,
       "github_issue_number": null,
       "github_issue_url": null,
-      "inbound_links": 2,
+      "inbound_links": 3,
       "lifecycle": null,
       "outbound_links": 0,
       "owner": "BioETL Team",
@@ -95863,7 +95863,7 @@
       "github_issue_url": null,
       "inbound_links": 3,
       "lifecycle": "plans_governance_entrypoint",
-      "outbound_links": 5,
+      "outbound_links": 6,
       "owner": "BioETL Team",
       "path": "docs/plans/README.md",
       "recommended_action": "keep",
@@ -95871,6 +95871,34 @@
       "section": "plans",
       "status": "Active",
       "surface_family": "active",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": "supporting_context",
+      "commit_policy": null,
+      "declared_class": "implementation_plan",
+      "declared_status": "proposed",
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "review-required",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 1,
+      "lifecycle": "supporting_context",
+      "outbound_links": 11,
+      "owner": "BioETL Team",
+      "path": "docs/plans/chembl-molecule-recovery-2026-11-18.md",
+      "recommended_action": "archive-after-migration",
+      "root_doc_kind": null,
+      "section": "plans",
+      "status": "Working",
+      "surface_family": "working",
       "tracking_state": "tracked"
     },
     {
@@ -118435,11 +118463,11 @@
       "plans_governance_entrypoint": 1,
       "published_skill_reference_redirect": 26,
       "reports_workspace_entrypoint": 1,
-      "supporting_context": 1,
+      "supporting_context": 2,
       "working_report": 385
     },
     "by_recommended_action": {
-      "archive-after-migration": 432,
+      "archive-after-migration": 433,
       "generate-automatically": 1069,
       "keep": 2698
     },
@@ -118465,7 +118493,7 @@
       "doc.json": 1,
       "filters": 4,
       "mkdocs.yml": 1,
-      "plans": 3,
+      "plans": 4,
       "reports": 770,
       "security": 2
     },
@@ -118474,17 +118502,17 @@
       "Archived": 1554,
       "Canonical": 77,
       "Generated": 1069,
-      "Working": 726
+      "Working": 727
     },
     "by_surface_family": {
       "active": 773,
       "archive": 1554,
       "canonical": 77,
       "generated": 1069,
-      "working": 726
+      "working": 727
     },
     "by_tracking_state": {
-      "tracked": 4199
+      "tracked": 4200
     },
     "docs_reports_local_count": 84,
     "duplicate_group_count": 80,
@@ -118497,8 +118525,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 4199,
+    "total_doc_like": 4200,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 4199
+    "total_doc_like_tracked": 4200
   }
 }

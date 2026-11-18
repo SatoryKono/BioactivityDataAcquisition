@@ -23,7 +23,8 @@ def exclusion_quality_expression() -> str:
     mapping = json.dumps(limits, separators=(",", ":"))
     return (
         f"($limits := {mapping}; "
-        "$limit := $lookup($limits, quality_evidence.pipeline); "
+        "$limit := $type(quality_evidence.pipeline)='string' "
+        "? $lookup($limits, quality_evidence.pipeline) : []; "
         "$s := quality_evidence.funnel[stage_id in ['bronze','silver','gold']]; "
         "$r := $s.removals[outcome='excluded_by_contract']; "
         "$base := $s[stage_id='bronze'].records_out; "
@@ -34,7 +35,7 @@ def exclusion_quality_expression() -> str:
         "and ($type($base)='number' ? $base >= 0 and $base=$floor($base) : false) "
         "and $count($limit)=2; "
         "$n := $known ? $sum($append([0], $r.count)) : null; "
-        "$known := $known and $n <= $base; "
+        "$known := $known ? $n <= $base : false; "
         "$rate := $known ? ($base=0 ? 0 : $n/$base) : null; "
         "$status := verdict='SELECT RUN' ? 'SELECT RUN' : $known ? ($rate >= $limit[1] ? 'ERROR' : "
         "$rate >= $limit[0] ? 'WARN' : 'OK') : 'UNKNOWN'; "

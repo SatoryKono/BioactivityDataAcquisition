@@ -328,7 +328,7 @@ _OV_EXCL = (
     f"'excluded ' & $string($round(contract_exclusions_rate*100,2)) & '%' : "
     f"(verdict='{_SELECT_RUN}' ? 'N/A — Choose a run' : "
     f"(verdict='{_NO_RUNS}' ? 'NO RECORDS — No runs in scope' : "
-    f"(contract_exclusions_soft_limit = null or contract_exclusions_hard_limit = null "
+    f"($not($type(contract_exclusions_soft_limit) = 'number') or $not($type(contract_exclusions_hard_limit) = 'number') "
     f"? 'Limits unavailable; check config' : 'Accounting incomplete; inspect stages'))), "
     f"'{FRAME}': 'exclusions'}}]"
 )

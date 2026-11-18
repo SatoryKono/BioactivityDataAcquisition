@@ -1,7 +1,7 @@
 # Plans Directory
 
 *Status: Working planning artifacts (non-normative)*
-*Last updated: 2026-11-17 (memory recovery context registered)*
+*Last updated: 2026-11-18 (Molecule recovery context registered)*
 
 This directory holds **active** planning surfaces only. Completed plans live in
 `docs/99-archive/plans/`.
@@ -59,6 +59,9 @@ This is the only document with lifecycle `active_backlog` in `docs/plans/`.
   approved recovery sequence and qualification checkpoints as `supporting_context`.
   Its dated receipts govern acceptance; the primary backlog remains the queue
   for cross-project work.
+- [ChEMBL Molecule recovery](chembl-molecule-recovery-2026-11-18.md) records
+  the proposed normalization/Gold fixes, historical Bronze recovery and
+  separate diagnostic/strict acceptance as `supporting_context`.
 
 
 ### Archived context (DOC-GOV-08)

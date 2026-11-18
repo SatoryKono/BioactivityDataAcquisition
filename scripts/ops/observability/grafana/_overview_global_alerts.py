@@ -66,7 +66,22 @@ def embed_global_alerts(overview: dict[str, Any], incident: dict[str, Any]) -> N
     summary = deepcopy(donors[2005])
     panels = overview["panels"]
     navigation = next(panel for panel in panels if panel["id"] == 1000)
-    note = '<div style="font-size:16px;line-height:18px">Saved run outcome and current pipeline health are separate; review global alerts below.</div>'
+    previous_note = (
+        '<div style="font-size:16px;line-height:18px">'
+        "Saved run outcome and current pipeline health are separate; review global alerts below.</div>"
+    )
+    previous_long_note = previous_note.replace(
+        "</div>",
+        "<br>Source-record age: UNKNOWN (not instrumented). Processing age does not prove source freshness.</div>",
+    )
+    for obsolete in (previous_note, previous_long_note):
+        navigation["options"]["content"] = navigation["options"]["content"].replace(
+            obsolete, ""
+        )
+    note = (
+        '<div style="font-size:16px;line-height:18px">'
+        "Saved verdict ≠ live health. Source-record age: UNKNOWN · not instrumented.</div>"
+    )
     if note not in navigation["options"]["content"]:
         navigation["options"]["content"] += note
     panels[:] = [panel for panel in panels if panel["id"] not in {2005, 32005}]
