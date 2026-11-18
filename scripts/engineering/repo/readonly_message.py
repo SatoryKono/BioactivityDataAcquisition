@@ -137,6 +137,7 @@ def qualified(root: Path, hook_dir: Path) -> bool:
             and hook["language"] == "python"
             and hook.get("pass_filenames", True) is True
             and not hook.get("always_run", False)
+            and not hook.get("log_file")
             and not hook.get("alias", "")
             and not hook.get("files", "")
             and hook.get("exclude", "^$") == "^$"
@@ -235,6 +236,7 @@ def dispatch(
         or hook.src != "local"
         or hook.language != "python"
         or not hook.pass_filenames
+        or bool(hook.log_file)
     ):
         raise ValueError("message_hook_changed")
     language = module.languages["python"]

@@ -728,3 +728,52 @@ def test_empty_supplied_index_is_unqualified(repo, monkeypatch):
     monkeypatch.setenv("GIT_INDEX_FILE", "")
     with pytest.raises(module.EvidenceError, match="empty supplied index"):
         module.check_index_tree(repo, "HEAD")
+
+
+@pytest.mark.parametrize("unavailable", [False, True])
+def test_parallel_immutable_probes_cover_every_commit_and_preserve_failure(
+    monkeypatch, tmp_path, unavailable
+):
+    import threading
+    from collections import Counter
+
+    base = "a" * 40
+    revisions = [str(i) * 40 for i in range(1, 5)]
+    barrier = threading.Barrier(4)
+    seen = Counter()
+    lock = threading.Lock()
+    boundaries = []
+    monkeypatch.setattr(module, "validate_repo", lambda repo: tmp_path)
+    monkeypatch.setattr(
+        module,
+        "resolve_revision",
+        lambda repo, value: base if value == "base" else revisions[-1],
+    )
+
+    def shallow(repo):
+        boundaries.append("fresh")
+        return frozenset()
+
+    monkeypatch.setattr(module, "_shallow_boundaries", shallow)
+    monkeypatch.setattr(
+        module, "_history_commits", lambda *a: [(r, [base]) for r in revisions]
+    )
+    monkeypatch.setattr(module, "_historical_base", lambda *a: base)
+
+    def entries(repo, sha):
+        if sha != base:
+            barrier.wait(timeout=5)
+        with lock:
+            seen[sha] += 1
+        if unavailable and sha == revisions[2]:
+            raise module.EvidenceError("immutable tree unavailable")
+        return dict.fromkeys(module.DIRECTORY_ANCHORS, "tree")
+
+    monkeypatch.setattr(module, "_top_entries", entries)
+    if unavailable:
+        with pytest.raises(module.EvidenceError, match="unavailable"):
+            module.find_collapsing_commits("base", "tip", repo=tmp_path)
+    else:
+        assert module.find_collapsing_commits("base", "tip", repo=tmp_path) == []
+        assert boundaries == ["fresh", "fresh"]
+    assert seen == Counter(dict.fromkeys([base, *revisions], 1))

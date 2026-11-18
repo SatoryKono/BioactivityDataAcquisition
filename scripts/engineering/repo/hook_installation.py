@@ -29,6 +29,7 @@ MODULES = (
     "offline_precommit",
     "readonly_message",
     "coalesced_precommit",
+    "partitioned_diff",
     "hook_runtime",
     "hook_installation",
     "hook_receipts",

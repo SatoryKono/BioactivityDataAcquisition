@@ -154,6 +154,14 @@ An unavailable final diff is an error. Distinct Linux environments are probed
 once per invocation by the framework's complete install key, without reuse
 between events. Windows retains ordinary pre-commit diff/probe dispatch. This
 is bounded command qualification, not proof of an OS permission boundary.
+
+Linux source comparisons use eight bounded native Git diff workers over disjoint
+literal pathspec groups covering the complete index. Index entries must match
+before and after scanning; missing, ambiguous or changed index evidence refuses.
+The total scan deadline remains ten seconds. No sparse/assume-unchanged setting,
+cross-event cache or omitted source prefix is introduced. Full-tree history
+inspection overlaps only immutable ancestor/tree queries in four worker slots;
+it checks every candidate commit and refreshes shallow boundaries afterwards.
 The qualified adapter replaces pre-commit
 stash/checkout with a read-only unstaged-diff check: if the framework would need
 to hide tracked unstaged changes, it refuses before configured callbacks. Stage

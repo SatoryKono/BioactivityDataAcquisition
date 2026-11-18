@@ -27,6 +27,7 @@ from unittest.mock import patch
 QUALIFIED_VERSION = "4.7.0"
 HOOK_TYPES = frozenset({"pre-commit", "pre-push", "commit-msg"})
 BACKEND_PATHS = {
+    "partitioned_diff": "scripts/engineering/repo/partitioned_diff.py",
     "readonly_message": "scripts/engineering/repo/readonly_message.py",
     "coalesced_precommit": "scripts/engineering/repo/coalesced_precommit.py",
 }
@@ -286,25 +287,29 @@ def _quiet_errors() -> Iterator[None]:
 def _read_only_staged_files(patch_dir: str) -> Iterator[None]:
     """Never stash/checkout user changes in a process subject to forced kill."""
     del patch_dir
-    result = subprocess.run(
-        [
-            "git",
-            "-c",
-            "core.fsmonitor=false",
-            "diff",
-            "--quiet",
-            "--no-ext-diff",
-            "--no-textconv",
-            "--ignore-submodules=none",
-            "--",
-        ],
-        env=dict(os.environ, GIT_OPTIONAL_LOCKS="0"),
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-        timeout=10,
-        check=False,
-    )
-    if result.returncode:
+    if sys.platform == "linux":
+        changed = bool(_message_backend("partitioned_diff").scan())
+    else:
+        result = subprocess.run(
+            [
+                "git",
+                "-c",
+                "core.fsmonitor=false",
+                "diff",
+                "--quiet",
+                "--no-ext-diff",
+                "--no-textconv",
+                "--ignore-submodules=none",
+                "--",
+            ],
+            env=dict(os.environ, GIT_OPTIONAL_LOCKS="0"),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=10,
+            check=False,
+        )
+        changed = bool(result.returncode)
+    if changed:
         sys.stderr.write(
             "BioETL hook ERROR: tracked unstaged changes or unavailable diff; preserve changes explicitly outside the hook (no automatic stash).\n"
         )
@@ -321,7 +326,7 @@ def _message_backend(name: str = "readonly_message") -> Any:
         if spec is None or spec.loader is None:
             raise BootstrapRequired("message_backend_unavailable")
         module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
+        exec(compile(source.read_bytes(), str(source), "exec"), module.__dict__)
         return module
     except Exception:
         raise BootstrapRequired("message_backend_unavailable") from None

@@ -208,10 +208,12 @@ jobs:
             tests/unit/scripts/test_hook_inventory.py tests/unit/scripts/test_mcp_routes.py \
             tests/unit/scripts/test_parallel_precommit.py \
             tests/unit/scripts/test_coalesced_precommit.py \
+            tests/unit/scripts/test_partitioned_diff.py \
             tests/unit/scripts/test_readonly_message.py \
             tests/unit/scripts/test_offline_precommit.py \
             tests/unit/scripts/test_hook_installation.py \
             tests/unit/scripts/repo/test_hook_receipts.py \
+            tests/unit/scripts/repo/test_check_no_partial_tree.py \
             tests/unit/scripts/repo/test_process_deadline.py \
             -q --no-cov \
             --junitxml="$run_dir/tests.xml"

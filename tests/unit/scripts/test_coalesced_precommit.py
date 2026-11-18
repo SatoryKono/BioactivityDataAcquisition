@@ -36,7 +36,7 @@ def framework(monkeypatch, tmp_path):
             fail_fast=False,
             always_run=False,
             verbose=False,
-            log_file=None,
+            log_file="",
             language_version="default",
         )
         for name, entry in [
@@ -235,3 +235,40 @@ def test_linux_environment_probe_deduplication_is_exact_and_never_cross_event(
     checks.side_effect = lambda hook: hook.install_key[-1] != ("extra",)
     with pytest.raises(offline.BootstrapRequired, match="unhealthy"):
         offline._require_environments(hooks, None)
+
+
+@pytest.mark.parametrize("kind", ["backend", "scanner"])
+def test_owned_backend_loaders_do_not_accept_stale_bytecode(
+    tmp_path, monkeypatch, kind
+):
+    import importlib.util
+    from importlib._bootstrap_external import _code_to_timestamp_pyc
+
+    folder = tmp_path / "scripts" / "engineering" / "repo"
+    folder.mkdir(parents=True)
+    source = tmp_path / offline.BACKEND_PATHS["partitioned_diff"]
+    source.write_text('def scan(): return b"source"\n')
+    info = source.stat()
+    cache = Path(importlib.util.cache_from_source(str(source)))
+    cache.parent.mkdir(exist_ok=True)
+    stale = compile('def scan(): return b"cached"', str(source), "exec")
+    cache.write_bytes(_code_to_timestamp_pyc(stale, int(info.st_mtime), info.st_size))
+    if kind == "backend":
+        monkeypatch.setattr(
+            offline, "__file__", str(folder / Path(offline.__file__).name)
+        )
+        actual = offline._message_backend("partitioned_diff").scan()
+    else:
+        monkeypatch.setattr(
+            adapter, "__file__", str(folder / Path(adapter.__file__).name)
+        )
+        actual = adapter._fresh_diff()
+    assert actual == b"source"
+
+
+def test_configured_log_writer_is_not_a_qualified_readonly_command(framework):
+    f = framework
+    f.hooks[0].log_file = str(f.root / "hook.log")
+    assert invoke(f) == 0
+    f.scan.assert_not_called()
+    assert f.legacy.call_count == 3

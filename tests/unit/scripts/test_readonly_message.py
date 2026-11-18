@@ -130,6 +130,7 @@ def test_semantic_execution_matches_the_original_cli_and_preserves_sources(
         "command",
         "extra",
         "skip",
+        "log_file",
     ],
 )
 def test_unqualified_message_contract_never_uses_semantic_execution(
@@ -143,6 +144,11 @@ def test_unqualified_message_contract_never_uses_semantic_execution(
         f.state["hooks"]["commit-msg"]["chain_foreign"] = True
     elif change == "legacy":
         (f.hooks / "commit-msg.legacy").write_text("fixture")
+    elif change == "log_file":
+        p = f.root / ".pre-commit-config.yaml"
+        config = yaml.safe_load(p.read_text())
+        config["repos"][0]["hooks"][0]["log_file"] = "unexpected.log"
+        p.write_text(json.dumps(config))
     elif change == "interpreter":
         monkeypatch.setenv("BIOETL_HOOK_PROJECT_PYTHON", str(f.root / "other-python"))
     elif change == "manifest":
@@ -184,7 +190,7 @@ def test_framework_status_is_preserved_without_spawning_or_diff_scans(
         language_version="default",
         always_run=False,
         verbose=False,
-        log_file=None,
+        log_file="",
         fail_fast=False,
     )
     classifier = SimpleNamespace(filenames_for_hook=lambda h: (str(f.message),))

@@ -8,11 +8,10 @@ from __future__ import annotations
 
 from contextlib import ExitStack
 import hashlib
+import importlib.util
 import json
-import os
 from pathlib import Path
 import shlex
-import subprocess
 import sys
 from typing import Any
 from unittest.mock import patch
@@ -168,6 +167,8 @@ def qualified(
         if not active or len({h.id for h in active}) != len(active):
             return False
         for hook in active:
+            if hook.log_file:
+                return False
             if COMMANDS.get(hook.id) != (
                 hook.src,
                 hook.language,
@@ -190,23 +191,16 @@ def qualified(
 
 
 def _fresh_diff() -> bytes:
-    # Unlike framework _get_diff(check=False), unavailable evidence is an error.
-    result = subprocess.run(
-        [
-            "git",
-            "-c",
-            "core.fsmonitor=false",
-            "diff",
-            "--no-ext-diff",
-            "--no-textconv",
-            "--ignore-submodules",
-        ],
-        env=dict(os.environ, GIT_OPTIONAL_LOCKS="0"),
-        capture_output=True,
-        check=True,
-        timeout=10,
+    source = (
+        Path(__file__).resolve().parents[3]
+        / "scripts/engineering/repo/partitioned_diff.py"
     )
-    return result.stdout
+    spec = importlib.util.spec_from_file_location("_bioetl_owned_partitioned", source)
+    if spec is None or spec.loader is None:
+        raise ValueError("partitioned_diff_unavailable")
+    module = importlib.util.module_from_spec(spec)
+    exec(compile(source.read_bytes(), str(source), "exec"), module.__dict__)
+    return bytes(module.scan())
 
 
 def dispatch(
