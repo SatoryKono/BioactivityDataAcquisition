@@ -52,6 +52,13 @@ restart. Strict audit/render mode retains its fail-closed startup behavior.
 Foreign identity never triggers recovery. An unavailable backend retains the
 fallback and an explicit recovery state.
 
+The runtime manager credits at most one Grafana restart above its initial
+baseline, and only for a full recovery receipt bound to the current source,
+process start time and boot ID. Unrelated or repeated restarts, OOM and image
+drift still fail readiness. Monitoring remains optional for a healthy main:
+deferred or failed cutover is recorded without changing main's successful exit
+status. An explicitly requested monitoring start still requires full recovery.
+
 The recovery directory is `/var/lib/grafana/bioetl-late-cutover`. Its
 `<expected-source-id>.lease` describes activity for one process incarnation;
 `<expected-source-id>.claim` is an atomic, persistent restart claim shared with

@@ -1471,6 +1471,145 @@ def test_readiness_fails_on_restart_oom_and_image_drift() -> None:
     }
 
 
+@pytest.mark.parametrize(
+    ("restart_count", "ownership", "expected"),
+    [(1, "full", 0), (1, "inactive", 1), (1, "unavailable", 1), (2, "full", 1)],
+)
+def test_monitoring_start_credits_only_one_confirmed_watcher_restart(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    restart_count: int,
+    ownership: str,
+    expected: int,
+) -> None:
+    """Run the full start path with a baseline0 -> watcher1 restart transition."""
+    now = [0.0]
+    collections = [0]
+    proofs: list[tuple[bool, bool]] = []
+
+    def snapshots(*_args, **_kwargs):
+        count = 0 if collections[0] == 0 else restart_count
+        collections[0] += 1
+        return [
+            runtime_manager.ServiceSnapshot(
+                service=service,
+                container_id=service,
+                state="running",
+                health="healthy",
+                restart_count=count if service == "grafana" else 0,
+                oom_killed=False,
+                image="grafana/grafana:test@sha256:expected",
+            )
+            for service in ("grafana", "prometheus", "pushgateway")
+        ], []
+
+    def recovery_proof(_runner, *, timeout, claim, acknowledge_restart=False):
+        assert timeout > 0
+        proofs.append((claim, acknowledge_restart))
+        return ownership
+
+    monkeypatch.setattr(runtime_manager, "collect_snapshots", snapshots)
+    monkeypatch.setattr(
+        runtime_manager, "_grafana_late_cutover_ownership", recovery_proof
+    )
+    result = runtime_manager.start_or_recover(
+        _monitoring_spec(),
+        tmp_path / "missing-contract.yml",
+        tmp_path,
+        recover=False,
+        runner=lambda command, _cwd, _timeout: runtime_manager.CommandResult(
+            list(command), 0
+        ),
+        timeout=2,
+        max_attempts=1,
+        stabilization_seconds=0.1,
+        poll_interval=0.2,
+        sleep=lambda seconds: now.__setitem__(0, now[0] + seconds),
+        clock=lambda: now[0],
+    )
+    assert result == expected
+    assert all(proof == (False, True) for proof in proofs)
+    if restart_count == 1:
+        assert proofs
+    else:
+        assert proofs == []
+    if expected:
+        incident = json.loads(
+            (tmp_path / "docker-incident-monitoring.json").read_text()
+        )
+        assert any(row["cause"] == "unexpected_restart" for row in incident["findings"])
+
+
+@pytest.mark.parametrize(
+    ("state", "ticks", "boot", "current_source", "claimed", "expected"),
+    [
+        ("complete", "200", "1234-abcd", True, False, "full"),
+        ("confirming_full", "200", "1234-abcd", True, True, "full"),
+        ("confirming_full", "200", "1234-abcd", True, False, "inactive"),
+        ("disabled", "200", "1234-abcd", True, False, "inactive"),
+        ("complete", "201", "1234-abcd", True, False, "inactive"),
+        ("complete", "200", "aaaa-bbbb", True, False, "inactive"),
+        ("complete", "200", "1234-abcd", False, False, "inactive"),
+    ],
+)
+def test_watcher_restart_ack_requires_current_claim_source_and_process(
+    tmp_path: Path, state, ticks, boot, current_source, claimed, expected
+) -> None:
+    shell = shutil.which("sh")
+    if shell is None:
+        pytest.skip("POSIX sh is required for the recovery acknowledgement test")
+    source_id = "a" * 64
+    payload = json.dumps(
+        {
+            "ops_http": "ready",
+            "dashboard_profile": "full",
+            "late_recovery_source_id": source_id,
+            "late_recovery_state": state,
+            "late_recovery_instance": f"42:{ticks}:{boot}",
+        }
+    )
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    scripts = {
+        "cat": (
+            '#!/bin/sh\ncase "$1" in\n*/boot_id) printf "1234-abcd\\n" ;;\n'
+            f"*) printf '%s\\n' '{payload}' ;;\nesac\n"
+        ),
+        "awk": "#!/bin/sh\nprintf '200\\n'\n",
+        "wget": (
+            "#!/bin/sh\nprintf '%s\\n' "
+            f'\'{{"runtime_source_id":"{source_id if current_source else "b" * 64}"}}\'\n'
+        ),
+    }
+    for name, content in scripts.items():
+        executable = fake_bin / name
+        executable.write_text(content, encoding="utf-8", newline="\n")
+        executable.chmod(0o755)
+    claim = tmp_path / "bioetl-late-cutover" / f"{source_id}.claim"
+    if claimed:
+        claim.mkdir(parents=True)
+    command = (
+        'PATH="$(cd "$TEST_BIN" && pwd):$PATH"\n'
+        + runtime_manager._GRAFANA_LATE_CUTOVER_CLAIM
+    )
+    result = subprocess.run(
+        [shell, "-c", command, "bioetl-late-cutover", "ack-restart"],
+        capture_output=True,
+        text=True,
+        env={
+            **os.environ,
+            "TEST_BIN": str(fake_bin),
+            "BIOETL_EXPECTED_RUNTIME_SOURCE_ID": source_id,
+            "BIOETL_GRAFANA_BOOTSTRAP_STATUS_FILE": str(tmp_path / "bootstrap.json"),
+        },
+        timeout=10,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.strip() == expected
+    assert claim.is_dir() == claimed
+
+
 def test_readiness_accepts_matching_repo_digest_when_config_reference_differs() -> None:
     spec = _spec(expected_images={"bioetl": "bioetl:test@sha256:" + "a" * 64})
     snapshot = runtime_manager.ServiceSnapshot(
@@ -1969,7 +2108,7 @@ def test_recover_continues_when_preflight_only_reports_container_health(
         sleep=lambda _seconds: None,
     )
 
-    assert nonblocking_result == 1
+    assert nonblocking_result == 0
     assert json.loads(cutover_report.read_text(encoding="utf-8")) == failed_cutover
 
     deferred_cutover = {**successful_cutover, "status": "deferred"}
@@ -1984,7 +2123,7 @@ def test_recover_continues_when_preflight_only_reports_container_health(
         runner=runner,
         sleep=lambda _: None,
     )
-    assert deferred_result == 1
+    assert deferred_result == 0
     assert json.loads(cutover_report.read_text(encoding="utf-8")) == deferred_cutover
 
 

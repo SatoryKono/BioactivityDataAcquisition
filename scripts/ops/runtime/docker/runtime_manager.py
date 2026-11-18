@@ -957,6 +957,9 @@ def _poll_ready_once(
     last_snapshots, _ = collect_snapshots(
         spec, runner=runner, timeout=min(15.0, remaining)
     )
+    baseline = _confirmed_grafana_restart_baseline(
+        spec, last_snapshots, baseline, runner=runner, deadline=deadline, clock=clock
+    )
     last_findings = readiness_findings(spec, last_snapshots, baseline)
     if last_findings:
         return last_snapshots, last_findings, False
@@ -1859,6 +1862,7 @@ _GRAFANA_TIMEOUT_RETRY_REASON = "identity_timeout_or_unreachable"
 # process start time and boot ID prevent a lease surviving a container restart
 # from blocking recovery. The persistent claim prevents a restart loop.
 _GRAFANA_LATE_CUTOVER_CLAIM = r"""
+mode="${1:-claim}"
 source_id="${BIOETL_EXPECTED_RUNTIME_SOURCE_ID:-}"
 case "$source_id" in ''|*[!0-9a-f]*) exit 1 ;; esac
 [ "${#source_id}" -eq 64 ] || exit 1
@@ -1871,11 +1875,27 @@ already_full() {
   printf '%s' "$payload" | grep -Eq '"ops_http"[[:space:]]*:[[:space:]]*"ready"' || return 1
   printf '%s' "$payload" | grep -Eq '"dashboard_profile"[[:space:]]*:[[:space:]]*"full"' || return 1
   printf '%s' "$payload" | grep -Eq "\"late_recovery_source_id\"[[:space:]]*:[[:space:]]*\"$source_id\"" || return 1
+  if [ "$mode" = "ack-restart" ]; then
+    printf '%s' "$payload" | grep -Eq '"late_recovery_state"[[:space:]]*:[[:space:]]*"(confirming_full|complete)"' || return 1
+    instance="$(printf '%s' "$payload" | sed -n 's/.*"late_recovery_instance"[[:space:]]*:[[:space:]]*"\([0-9][0-9]*:[0-9][0-9]*:[0-9a-f-][0-9a-f-]*\)".*/\1/p')"
+    [ -n "$instance" ] || return 1
+    instance_pid="${instance%%:*}"
+    instance_tail="${instance#*:}"
+    instance_ticks="${instance_tail%%:*}"
+    instance_boot="${instance_tail#*:}"
+    actual_ticks="$(sed 's/^.*) //' "/proc/$instance_pid/stat" 2>/dev/null | awk '{print $20}')"
+    [ "$instance_ticks" = "$actual_ticks" ] || return 1
+    [ "$instance_boot" = "$(cat /proc/sys/kernel/random/boot_id)" ] || return 1
+    if printf '%s' "$payload" | grep -Eq '"late_recovery_state"[[:space:]]*:[[:space:]]*"confirming_full"'; then
+      [ -d "$claim" ] || return 1
+    fi
+  fi
   wget -qO- -T 3 http://127.0.0.1:3000/api/health >/dev/null 2>&1 || return 1
   ready="$(wget -qO- -T 3 http://bioetl:8000/ops/control-plane/ready 2>/dev/null)" || return 1
   printf '%s' "$ready" | grep -Eq "\"runtime_source_id\"[[:space:]]*:[[:space:]]*\"$source_id\""
 }
 if already_full; then printf 'full\n'; exit 0; fi
+[ "$mode" != "ack-restart" ] || { printf 'inactive\n'; exit 0; }
 if [ -d "$claim" ]; then printf 'claimed\n'; exit 0; fi
 if [ -f "$lease" ] && read -r pid ticks boot deadline < "$lease"; then
   case "$pid:$ticks:$deadline" in *[!0-9:]*) exit 1 ;; esac
@@ -1904,7 +1924,11 @@ fi
 
 
 def _grafana_late_cutover_ownership(
-    runner: Runner, *, timeout: float, claim: bool = True
+    runner: Runner,
+    *,
+    timeout: float,
+    claim: bool = True,
+    acknowledge_restart: bool = False,
 ) -> str:
     """Respect the live watcher lease and atomically claim the one restart."""
     result = runner(
@@ -1916,7 +1940,7 @@ def _grafana_late_cutover_ownership(
             "-c",
             _GRAFANA_LATE_CUTOVER_CLAIM,
             "bioetl-late-cutover",
-            "claim" if claim else "check",
+            "ack-restart" if acknowledge_restart else "claim" if claim else "check",
         ],
         ROOT,
         timeout,
@@ -1931,6 +1955,38 @@ def _grafana_late_cutover_ownership(
     }:
         return state
     return "unavailable"
+
+
+def _confirmed_grafana_restart_baseline(
+    spec: StackSpec,
+    snapshots: Sequence[ServiceSnapshot],
+    baseline: Mapping[str, int],
+    *,
+    runner: Runner,
+    deadline: float,
+    clock: Clock,
+) -> Mapping[str, int]:
+    """Credit one source/claim/process-bound recovery, retaining all other guards."""
+    grafana = next((row for row in snapshots if row.service == "grafana"), None)
+    if (
+        spec.name != "monitoring"
+        or grafana is None
+        or grafana.restart_count != baseline.get("grafana", 0) + 1
+        or grafana.state != "running"
+        or grafana.health != "healthy"
+        or grafana.oom_killed
+    ):
+        return baseline
+    timeout = min(5.0, max(0.0, deadline - clock()))
+    if (
+        timeout <= 0
+        or _grafana_late_cutover_ownership(
+            runner, timeout=timeout, claim=False, acknowledge_restart=True
+        )
+        != "full"
+    ):
+        return baseline
+    return {**baseline, "grafana": grafana.restart_count}
 
 
 def _grafana_bootstrap_timeout_retry_needed(
@@ -2378,8 +2434,8 @@ def start_or_recover(
                     report_dir / "docker-runtime-grafana-ops-cutover.json",
                     cutover,
                 )
-                if cutover.get("status") != "full":
-                    return 1
+                # Main is independently ready; optional monitoring diagnostics
+                # must not turn its successful start into a failure.
             return 0
         recent_logs = _capture_recent_logs(
             spec=spec, runner=runner, deadline=deadline, clock=clock
