@@ -1805,6 +1805,19 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/integration/test_grafana_datasource_provisioning.py",
         DASHBOARD_OPERATOR_READABILITY_TEST,
     ),
+    "grafana/scripts/bootstrap-datasources.sh": (
+        "tests/integration/test_grafana_datasource_provisioning.py",
+    ),
+    "docs/00-project/ai/skills/README.md": (AI_RUNTIME_GOVERNANCE_LINKS_TEST,),
+    "docs/00-project/ai/skills/COMBINED-CATALOG.md": (
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    "docs/00-project/ai/skills/SKILLS-CATALOG.md": (
+        "tests/architecture/test_codex_skill_agent_links.py",
+    ),
+    "docs/00-project/ai/skills/SKILLS-PRACTICAL-INDEX.md": (
+        "tests/architecture/test_codex_skill_agent_links.py",
+    ),
     "docs/05-operations/runbooks/docker-security-baseline.md": (
         DOCKER_RUNTIME_CONTRACT_TEST,
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,

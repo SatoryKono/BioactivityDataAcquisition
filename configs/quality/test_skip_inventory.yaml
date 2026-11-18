@@ -312,10 +312,10 @@ entries:
     owner: "@bioetl-observability"
     linked_issue: "#7249"
     lifecycle: permanent_policy
-    reviewed_skip_calls: 1
+    reviewed_skip_calls: 2
     vcr_related: false
-    review_date: "2026-08-19"
-    rationale: Grafana bootstrap integration requires a POSIX sh runtime and skips only when that platform capability is absent.
+    review_date: "2026-11-18"
+    rationale: Grafana bootstrap integration requires a POSIX sh runtime and both entrypoints skip only when that platform capability is absent.
   - path: tests/integration/test_grafana_workflow_descriptions.py
     suite: integration
     category: live_endpoint_unavailability
