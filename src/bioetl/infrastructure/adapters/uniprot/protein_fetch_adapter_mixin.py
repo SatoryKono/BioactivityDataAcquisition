@@ -153,7 +153,7 @@ class UniProtProteinFetchAdapterMixin:
                 as_mixin_host(self)._handle_fetch_error(
                     "protein", query, cursor, error=error
                 )  # Any: mixin host
-                return [], None
+                raise
 
         async for item in as_mixin_host(self).paginated_fetch(
             _pagination_callback, limit=limit
