@@ -15,7 +15,9 @@ from tests.architecture.backport_tarball import (
     assert_consumers_pin_archive,
 )
 
-pytestmark = pytest.mark.architecture
+# Keep the fixed three-second Node/ReDoS deadline outside xdist contention.
+# The architecture lane executes these tests in its existing serial pass.
+pytestmark = [pytest.mark.architecture, pytest.mark.serial]
 BACKPORT = ROOT / ".github/tooling/picomatch-backport"
 CONSUMERS = (
     ".github/tooling/jscpd",
