@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-18T09:27:45.556270+00:00",
+  "generated_at": "2026-11-18T09:47:54.213301+00:00",
   "summary": {
     "total_scripts": 758,
     "status_counts": {
@@ -10098,7 +10098,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": "scripts/docs/matrix/export_structural_contract.py",
@@ -10123,6 +10123,12 @@
           "line": 358,
           "source_group": "tests",
           "text": "\"scripts/docs/matrix/structural_contract.py\": \"shared_helper_module\","
+        },
+        {
+          "path": "tests/architecture/test_tech_debt_issues_6159_6169_closeout.py",
+          "line": 389,
+          "source_group": "tests",
+          "text": "if script_path == \"scripts/docs/matrix/structural_contract.py\""
         },
         {
           "path": "tests/unit/scripts/test_chembl_matrix_structural_contract.py",

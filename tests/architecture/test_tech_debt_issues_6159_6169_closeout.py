@@ -383,4 +383,10 @@ def test_issue_6169_script_governance_ratchet_has_headroom() -> None:
         assert row["lifecycle_decision"] == expected_decision
 
         assert lifecycle["decision"] == row["lifecycle_decision"]
-        assert lifecycle["review_by"] == "2026-09-30"
+        # The approved monthly review advances only this retained helper's date.
+        expected_review_by = (
+            "2026-12-18"
+            if script_path == "scripts/docs/matrix/structural_contract.py"
+            else "2026-09-30"
+        )
+        assert lifecycle["review_by"] == expected_review_by
