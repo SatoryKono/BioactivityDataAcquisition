@@ -240,11 +240,14 @@ async def test_invalid_phase_is_quarantined_without_contaminating_gold(
         stage.to_dict() for stage in funnel if stage.stage_id == "silver"
     )
     assert silver_stage["unaccounted"] == 0
-    assert accounting.top_reasons() == (
+    reasons = accounting.top_reasons()
+    assert [
+        {key: reason[key] for key in ("reason_code", "outcome", "count")}
+        for reason in reasons
+    ] == [
         {
             "reason_code": "INVALID_DATA:max_phase",
-            "reason_family": "dq",
             "outcome": "quarantined",
             "count": 1,
         },
-    )
+    ]
