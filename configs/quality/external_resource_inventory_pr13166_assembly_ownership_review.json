@@ -1,8 +1,11 @@
 {
   "schema_version": 1,
   "catalog_ref": "3ddb5995fbb28255ef97ac648641b537b07f0f83",
-  "source_ref": "03c2a43f4bb0933c82bf70a504839660c2196396",
+  "source_ref": "dc6f894630a50d20d06c16e452f7adbb6beb34b9",
   "source_reviews": {
+    "src/bioetl/infrastructure/adapters/iuphar/_input_projection.py": "Move the unchanged pure field/taxonomy projection into iuphar_target_class.bioetl_input so offline acceptance and runtime use the same eligibility policy. This deleted module has no external resource creation, ownership or lifetime behavior.",
+    "src/bioetl/infrastructure/adapters/iuphar/adapter.py": "Retarget the three existing pure input projection imports to their shared owning module. Runtime eligibility, projection, result ordering and resource ownership are unchanged.",
+    "src/bioetl/infrastructure/adapters/iuphar/canonical_target_rows.py": "Retarget the existing pure project_target_fields import to its shared owning module; exporter validation and Arrow resource lifetimes are unchanged.",
     "src/bioetl/application/core/pre_silver_finalization_flow.py": "Remove a single forwarding identity wrapper; callers pass the identical identity_record mapping directly to the existing prepared-data transformation. Preserve source ID string conversion, transformation ordering and all values.",
     "src/bioetl/application/pipelines/chembl/base_chembl_transformer.py": "Remove a single forwarding identity wrapper; callers pass the identical identity_record mapping directly to the existing prepared-data transformation. Preserve source ID string conversion, transformation ordering and all values.",
     "src/bioetl/application/pipelines/uniprot/transformer.py": "Remove a single forwarding identity wrapper; callers pass the identical identity_record mapping directly to the existing prepared-data transformation. Preserve source ID string conversion, transformation ordering and all values.",
