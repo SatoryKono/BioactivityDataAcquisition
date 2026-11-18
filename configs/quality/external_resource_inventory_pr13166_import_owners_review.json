@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "e6159fd5a27f5d138862eb4c60fe9a5a62a64477",
+  "source_ref": "32c70b127c835a773e57e15e647066ac060a3d10",
+  "source_reviews": {
+    "src/bioetl/composition/bootstrap/runtime/composite_control_plane_bundle.py": "Reviewed the explicit export of the existing hydrate_target_runtime_config binding imported from storage assembly. The function, resource creation, ownership, cleanup, and runtime behavior are unchanged; the export makes the existing typed import explicit without disabling mypy checks.",
+    "src/bioetl/infrastructure/schemas/workflow_config.py": "Reviewed the explicit exports of the existing domain WorkflowConfig, WorkflowStepConfig, and TransformStepConfig imports. No class, validation rule, acquisition, or cleanup behavior changes; existing callers retain the same class objects.",
+    "src/bioetl/infrastructure/storage/target_classification_guard.py": "Reviewed the explicit export of the existing TARGET_CLASSIFICATION_FIELDS tuple imported from the domain configuration owner. The tuple and target compatibility checks are unchanged; no resource acquisition, task, or cleanup is added."
+  }
+}
