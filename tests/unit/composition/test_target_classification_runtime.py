@@ -1070,22 +1070,31 @@ def test_exact_replay_keeps_parent_with_current_workflow_binding(
         reset_target_classification_dependency(token)
 
 
+@pytest.mark.parametrize("parent_mode", ["off", "shadow", "enrich"])
 def test_workflow_preflight_pins_exact_replay_parent(
-    shadow_config, monkeypatch, tmp_path
+    shadow_config, monkeypatch, tmp_path, parent_mode
 ):
     from bioetl.domain.workflow import WorkflowRunOptionsConfig
     from bioetl.infrastructure.config.settings_api import Settings
 
     off = load_pipeline_config("chembl_target")
+    parent_config = (
+        off
+        if parent_mode == "off"
+        else shadow_config
+        if parent_mode == "shadow"
+        else _admitted_synthetic_config(shadow_config)
+    )
+    current = shadow_config if parent_mode == "off" else off
     monkeypatch.setattr(
         "bioetl.composition.bootstrap.assembly.storage.load_pipeline_config",
-        lambda _: off,
+        lambda _: current,
     )
     monkeypatch.setattr(
         "bioetl.composition.bootstrap.assembly.storage.resolve_replay_parent_manifest_refs",
         lambda **kwargs: SimpleNamespace(
             pipeline_name="chembl_target",
-            resolved_config=shadow_config.model_dump(mode="json"),
+            resolved_config=parent_config.model_dump(mode="json"),
         ),
     )
     workflow = WorkflowConfig(
@@ -1105,14 +1114,17 @@ def test_workflow_preflight_pins_exact_replay_parent(
         {},
         settings=Settings(test_mode=True, data_dir=tmp_path / "data", _env_file=None),
     )[TARGET_CLASSIFICATION_DEPENDENCY_KEY]
-    assert binding["target_config"]["target_classification"]["mode"] == "shadow"
-    assert (
-        binding["profile_sha256"]
-        == shadow_config.target_classification.snapshot_manifest_sha256
-    )
+    assert binding["target_config"]["target_classification"]["mode"] == parent_mode
+    if parent_mode == "off":
+        assert "profile_sha256" not in binding
+    else:
+        assert (
+            binding["profile_sha256"]
+            == parent_config.target_classification.snapshot_manifest_sha256
+        )
     token = bind_target_classification_dependency(binding)
     try:
-        validate_target_runtime_dependency(shadow_config)
+        validate_target_runtime_dependency(parent_config)
     finally:
         reset_target_classification_dependency(token)
 
@@ -1149,6 +1161,47 @@ def test_workflow_preflight_rejects_conflicting_replay_dependencies(
         ),
     )
     with pytest.raises(ValueError, match="conflicting classification dependencies"):
+        preflight_workflow_target_dependencies(
+            workflow,
+            {},
+            settings=Settings(
+                test_mode=True, data_dir=tmp_path / "data", _env_file=None
+            ),
+        )
+
+
+@pytest.mark.parametrize(
+    "parent_pipeline,payload", [("chembl_assay", {}), ("chembl_target", {})]
+)
+def test_workflow_preflight_rejects_invalid_target_replay_parent(
+    shadow_config, monkeypatch, tmp_path, parent_pipeline, payload
+):
+    from bioetl.domain.workflow import WorkflowRunOptionsConfig
+    from bioetl.infrastructure.config.settings_api import Settings
+
+    monkeypatch.setattr(
+        "bioetl.composition.bootstrap.assembly.storage.load_pipeline_config",
+        lambda _: shadow_config,
+    )
+    monkeypatch.setattr(
+        "bioetl.composition.bootstrap.assembly.storage.resolve_replay_parent_manifest_refs",
+        lambda **kwargs: SimpleNamespace(
+            pipeline_name=parent_pipeline, resolved_config=payload
+        ),
+    )
+    workflow = WorkflowConfig(
+        "invalid-parent",
+        steps=(
+            WorkflowStepConfig(
+                "replay",
+                "chembl_target",
+                run_options=WorkflowRunOptionsConfig(
+                    exact_replay=True, replay_of_manifest_id="invalid-parent"
+                ),
+            ),
+        ),
+    )
+    with pytest.raises(ValueError, match="no matching pinned configuration"):
         preflight_workflow_target_dependencies(
             workflow,
             {},
