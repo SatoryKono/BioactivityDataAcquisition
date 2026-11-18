@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-18T19:53:19.265985+00:00",
+  "generated_at": "2026-11-18T20:07:19.533683+00:00",
   "summary": {
     "total_scripts": 763,
     "status_counts": {
@@ -5008,7 +5008,7 @@
       "references": [
         {
           "path": "scripts/ai/mcp/memory_versions.py",
-          "line": 359,
+          "line": 360,
           "source_group": "scripts",
           "text": "source = Path(__file__).with_name(\"memory_reconciliation.py\")"
         },

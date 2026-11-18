@@ -32,6 +32,7 @@ SITE_PACKAGES = "Lib/site-packages"
 PROFILE_INDEX = "profiles.json"
 ACTIVE_INDEX = "active.json"
 PROFILE_DESCRIPTOR = "profile.json"
+RECOVERY_RECORD = "recovery-v2.json"
 
 
 def canonical(value):
@@ -452,6 +453,24 @@ def _select_disabled_migration_bundle(owner, identity, from_version):
     return _retained_disabled_bundle(binding, prior or {}, from_version)
 
 
+def _predecessor_consistent(binding, prior, entry, current):
+    if prior.get("phase") == "COMMITTED":
+        return prior.get("after_entry") == entry and prior.get("version") == current
+    if prior.get("phase") == "ROLLED_BACK":
+        before = prior.get("before", {})
+        return before.get("entry") == entry and binding == before.get(
+            "runtime_binding", {"schema": 2, "state": "legacy"}
+        )
+    return False
+
+
+def _check_pending_recovery(owner, directory):
+    recovery_state = owner.state.read(directory / RECOVERY_RECORD) or {}
+    history = recovery_state.get("history", [])
+    if history and history[-1].get("phase") in {"RESOLVED", "LAUNCHING"}:
+        raise ValueError("Recovery grant awaits its reviewed launch; migration refused")
+
+
 def previous_migration(
     owner, directory, entry, expected_version, *, recover_disabled=False
 ):
@@ -475,17 +494,7 @@ def previous_migration(
     current = "legacy" if binding["state"] == "legacy" else binding["version"]
     if expected_version != current:
         raise ValueError("Existing runtime requires its explicit --from-version")
-    if prior.get("phase") == "COMMITTED":
-        consistent = (
-            prior.get("after_entry") == entry and prior.get("version") == current
-        )
-    elif prior.get("phase") == "ROLLED_BACK":
-        before = prior.get("before", {})
-        consistent = before.get("entry") == entry and binding == before.get(
-            "runtime_binding", {"schema": 2, "state": "legacy"}
-        )
-    else:
-        consistent = False
+    consistent = _predecessor_consistent(binding, prior, entry, current)
     identity = prior.get("id", "")
     if (
         not consistent
@@ -512,12 +521,7 @@ def migrate(
                 Path(value["profile"]["graph"]).with_name(".memory.service-owner.lock")
             ):
                 stamp = dormant(owner, entry, value)
-                recovery_state = owner.state.read(directory / "recovery-v2.json") or {}
-                history = recovery_state.get("history", [])
-                if history and history[-1].get("phase") in {"RESOLVED", "LAUNCHING"}:
-                    raise ValueError(
-                        "Recovery grant awaits its reviewed launch; migration refused"
-                    )
+                _check_pending_recovery(owner, directory)
                 binding, prior = previous_migration(
                     owner,
                     directory,
@@ -538,7 +542,7 @@ def migrate(
                         directory / ACTIVE_INDEX, max_bytes=32 * 1024 * 1024
                     ),
                     "graph": stamp,
-                    "coordination": owner.state.read(directory / "recovery-v2.json"),
+                    "coordination": owner.state.read(directory / RECOVERY_RECORD),
                     "runtime_binding": binding or {"schema": 2, "state": "legacy"},
                 }
                 updated = deepcopy(value)
@@ -640,7 +644,7 @@ def rollback(owner, identity):
                         "Concurrent migration or profile change; rollback refused"
                     )
                 dormant(owner, entry, value)
-                current = owner.state.read(directory / "recovery-v2.json")
+                current = owner.state.read(directory / RECOVERY_RECORD)
                 if current != transaction["before"]["coordination"]:
                     owner.state.write(
                         directory / RUNTIME_BINDING,
