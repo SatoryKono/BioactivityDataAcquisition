@@ -80,4 +80,8 @@ def _assert_target_schema_compatibility(
         )
 
 
-__all__ = ["assert_target_table_compatibility", "get_target_table_profile"]
+__all__ = [
+    "TARGET_CLASSIFICATION_FIELDS",
+    "assert_target_table_compatibility",
+    "get_target_table_profile",
+]

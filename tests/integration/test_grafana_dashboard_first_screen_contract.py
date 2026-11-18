@@ -468,7 +468,7 @@ def test_first_screen_scope_and_cta_panels_document_role_and_scope() -> None:
         "bioetl-control-plane-v1.json": (9400, "SELECTED RUN"),
         "bioetl-overview-v2.json": (99, "SELECTED RUN"),
         "bioetl-dq-v2.json": (9400, "SELECTED RUN"),
-        "bioetl-incident-v1.json": (9400, "CURRENT"),
+        "bioetl-incident-v1.json": (9400, "PERIOD END SNAPSHOT"),
     }
     for filename, (pid, badge) in specs.items():
         dashboard = load_dashboard(_DASHBOARD_DIR / filename)

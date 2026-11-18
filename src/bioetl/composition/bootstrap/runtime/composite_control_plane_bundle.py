@@ -58,6 +58,7 @@ class CompositeControlPlaneBundle(ControlPlaneArtifacts):
 __all__ = [
     "CompositeControlPlaneBundle",
     "build_target_classification_session",
+    "hydrate_target_runtime_config",
     "load_target_runtime_profile",
     "preflight_workflow_target_dependencies",
     "resolve_target_runtime_config",
