@@ -402,6 +402,11 @@ late_recovery_watch() {
             late_recovery_finish blocked
             return
           fi
+          # Match the manager's exclusive-create protocol even if mkdir is not exclusive.
+          if ! (set -C; : > "${LATE_RECOVERY_CLAIM}/owner") 2>/dev/null; then
+            late_recovery_finish blocked
+            return
+          fi
           LATE_RECOVERY_STATE="restart_requested"
           write_bootstrap_status
           if ! kill -TERM "${LATE_RECOVERY_FOREGROUND}" 2>/dev/null; then
