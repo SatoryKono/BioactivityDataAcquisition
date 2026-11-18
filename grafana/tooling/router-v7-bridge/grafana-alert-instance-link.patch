@@ -1,0 +1,49 @@
+diff --git a/public/app/features/alerting/unified/rule-list/components/AlertRuleListItem.tsx b/public/app/features/alerting/unified/rule-list/components/AlertRuleListItem.tsx
+--- a/public/app/features/alerting/unified/rule-list/components/AlertRuleListItem.tsx
++++ b/public/app/features/alerting/unified/rule-list/components/AlertRuleListItem.tsx
+@@ -33,3 +33,4 @@
++import { withInstancesTab } from './alertRuleLinks';
+ import { GroupIntervalIndicator } from './GroupIntervalMetadata';
+ import { ListItem } from './ListItem';
+ import { RuleLocation } from './RuleLocation';
+@@ -128,7 +129,7 @@
+     if (instancesCount) {
+       metadata.push(
+         <MetaText icon="layers-alt">
+-          <TextLink href={href + '?tab=instances'} variant="bodySmall" color="primary" inline={false}>
++          <TextLink href={withInstancesTab(href)} variant="bodySmall" color="primary" inline={false}>
+             {pluralize('instance', instancesCount, true)}
+           </TextLink>
+         </MetaText>
+diff --git a/public/app/features/alerting/unified/rule-list/components/alertRuleLinks.ts b/public/app/features/alerting/unified/rule-list/components/alertRuleLinks.ts
+new file mode 100644
+--- /dev/null
++++ b/public/app/features/alerting/unified/rule-list/components/alertRuleLinks.ts
+@@ -0,0 +1,6 @@
++/** Preserve return context, subpaths and fragments when opening Instances. */
++export function withInstancesTab(href: string): string {
++  const url = new URL(href, window.location.origin);
++  url.searchParams.set('tab', 'instances');
++  return url.origin === window.location.origin ? `${url.pathname}${url.search}${url.hash}` : url.href;
++}
+diff --git a/public/app/features/alerting/unified/rule-list/components/AlertRuleListItem.instances.test.tsx b/public/app/features/alerting/unified/rule-list/components/AlertRuleListItem.instances.test.tsx
+new file mode 100644
+--- /dev/null
++++ b/public/app/features/alerting/unified/rule-list/components/AlertRuleListItem.instances.test.tsx
+@@ -0,0 +1,16 @@
++import { withInstancesTab } from './alertRuleLinks';
++
++describe('alert instance navigation', () => {
++  it.each([
++    '/alerting/prometheus/rule/view',
++    '/grafana/alerting/prometheus/rule/view?returnTo=%2Falerting%2Flist%3Fview%3Dgrouped',
++    '/alerting/prometheus/rule/view?returnTo=%2Falerting%2Flist&tab=query#details',
++  ])('selects Instances without corrupting context: %s', (href) => {
++    const before = new URL(href, window.location.origin);
++    const after = new URL(withInstancesTab(href), window.location.origin);
++    expect(after.pathname).toBe(before.pathname);
++    expect(after.hash).toBe(before.hash);
++    expect(after.searchParams.get('returnTo')).toBe(before.searchParams.get('returnTo'));
++    expect(after.searchParams.getAll('tab')).toEqual(['instances']);
++  });
++});

@@ -41,6 +41,14 @@ without `--check` inside that upstream checkout. Run `yarn install --immutable`
 and the production build with Node 24. The patch also changes the plugin loader
 shared router export and removes Router 6 from the upstream lock.
 
+The source build also applies `grafana-alert-instance-link.patch`. Its URL
+helper replaces the `tab` search parameter without corrupting an existing
+`returnTo`, a Grafana subpath or a fragment. The workflow runs the upstream
+Instances navigation test before compiling the frontend. Rebuilding this changed
+frontend produces a new candidate; the existing image pins and historical
+acceptance receipts do not attest this patch and must remain unchanged until the
+candidate qualification and promotion procedure below is completed.
+
 Generate the private dependency artifact with
 `npm pack --ignore-scripts --pack-destination .`. Plugin manifests consume the
 resulting archive as their compat dependency. The upstream Router 7 artifact
