@@ -433,6 +433,11 @@ def _blank_phases() -> dict[str, str | None]:
     return {"setup": None, "call": None, "teardown": None}
 
 
+def _direct_local_worker(node: Any) -> bool:
+    spec = node.gateway.spec
+    return bool(getattr(spec, "popen", None)) and not getattr(spec, "via", None)
+
+
 class ReceiptPlugin:
     """Collect one immutable receipt for this pytest process."""
 
@@ -484,11 +489,16 @@ class ReceiptPlugin:
         self.write_receipt = not _is_xdist_controller(config)
 
     @pytest.hookimpl(optionalhook=True)
+    def pytest_configure_node(self, node: Any) -> None:
+        if not self.write_receipt and _direct_local_worker(node):
+            node.workerinput["bioetl_receipt_dir"] = str(self.receipt_dir)
+
+    @pytest.hookimpl(optionalhook=True)
     def pytest_testnodedown(self, node: Any, error: Any) -> None:
         """Keep local workers alive until their last hook finalizes the receipt."""
         if self.write_receipt or error is not None:
             return
-        if not getattr(node.gateway.spec, "popen", None):
+        if not _direct_local_worker(node):
             return
         worker = _safe_id(str(node.gateway.id), "worker")
         target = (
@@ -762,7 +772,9 @@ def pytest_addoption(parser: Any) -> None:
 
 
 def pytest_configure(config: Any) -> None:
-    receipt_dir = config.getoption("--receipt-dir")
+    receipt_dir = getattr(config, "workerinput", {}).get(
+        "bioetl_receipt_dir"
+    ) or config.getoption("--receipt-dir")
     if not receipt_dir:
         return
     plugin = ReceiptPlugin(

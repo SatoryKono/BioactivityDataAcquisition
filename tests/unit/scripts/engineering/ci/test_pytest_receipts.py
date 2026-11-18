@@ -8,6 +8,7 @@ import stat
 import subprocess
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 from uuid import uuid4
 
 import pytest
@@ -347,6 +348,53 @@ def test_explicit_child_addopts_are_preserved(receipts: Path, tmp_path: Path) ->
     payload = _load(receipts)
     assert len(payload["results"]) == 1
     assert next(iter(payload["results"])).endswith("::test_selected")
+
+
+def test_local_worker_chdir_uses_controller_receipt_directory(
+    receipts: Path, tmp_path: Path
+) -> None:
+    pytest.importorskip("xdist")
+    test_file = tmp_path / "test_local_chdir.py"
+    _write(test_file, "def test_one():\n    assert True\n")
+    worker = tmp_path.parent / (tmp_path.name + "-worker")
+    worker.mkdir()
+    completed = _pytest(
+        test_file,
+        Path("receipts"),
+        "--dist",
+        "load",
+        "--tx",
+        f"popen//chdir={worker}",
+        "--rsyncdir",
+        str(tmp_path),
+        "--basetemp",
+        str(tmp_path / "nested-base"),
+        cwd=tmp_path,
+    )
+
+    assert completed.returncode == 0, completed.stdout + completed.stderr
+    payload = _load(receipts, worker="gw0")
+    assert payload["role"] == "worker"
+    assert payload["completeness"] == "complete"
+    assert not (worker / "receipts").exists()
+
+
+def test_proxied_popen_worker_does_not_wait_for_local_receipt(
+    receipts: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    plugin = object.__new__(ReceiptPlugin)
+    plugin.write_receipt = False
+    plugin.receipt_dir = receipts
+    plugin.run_id, plugin.attempt, plugin.pass_name = "run1", "1", "direct"
+    node = SimpleNamespace(
+        gateway=SimpleNamespace(id="gw0", spec=SimpleNamespace(popen=True, via="proxy"))
+    )
+    monkeypatch.setattr(
+        "scripts.engineering.ci.pytest_receipts._WORKER_RECEIPT_FINALIZATION_SECONDS", 0
+    )
+
+    plugin.pytest_testnodedown(node, None)
+    assert not receipts.exists()
 
 
 def test_xdist_waits_for_slow_worker_receipt_finalization(
