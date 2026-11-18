@@ -1,20 +1,58 @@
 {
   "schema_version": 1,
-  "catalog_ref": "f595452ec9dbc845a3865b5921397f1c2161fe6b",
-  "source_ref": "91c3802161c5e1d7faf15fa72ec4d23bd91a1b0d",
+  "catalog_ref": "3ddb5995fbb28255ef97ac648641b537b07f0f83",
+  "source_ref": "03c2a43f4bb0933c82bf70a504839660c2196396",
   "source_reviews": {
-    "src/bioetl/composition/bootstrap/assembly/target_classification_identity.py": "Own the existing target configuration/identity and transformer assembly here, moved from generic factories without behavioral changes. No new resource definitions, I/O paths, cleanup behavior or runtime qualification.",
-    "src/bioetl/composition/bootstrap/assembly/target_classification_runtime.py": "Own the existing target configuration/identity and transformer assembly here, moved from generic factories without behavioral changes. No new resource definitions, I/O paths, cleanup behavior or runtime qualification.",
-    "src/bioetl/composition/factories/pipeline/_creation_wiring.py": "Retarget imports to the same target-classification capability under its bootstrap/assembly owner. No constructor, resource identity, lifecycle, cleanup or call ordering changes.",
-    "src/bioetl/composition/factories/pipeline/run_context_factory.py": "Retarget imports to the same target-classification capability under its bootstrap/assembly owner. No constructor, resource identity, lifecycle, cleanup or call ordering changes.",
-    "src/bioetl/composition/factories/pipeline/target_classification_identity.py": "Move the same target-specific identity implementation from generic factories to bootstrap/assembly. Preserve the validated readonly RunManifest model, injected replay resolver and all schema/source/config identity checks.",
-    "src/bioetl/composition/factories/pipeline/target_classification_runtime.py": "Retire only this module path by moving the identical implementation into composition/bootstrap/assembly/target_classification_runtime.py. All direct consumers are retargeted to the new owner; no resource lifetime, cleanup or runtime semantics change.",
-    "src/bioetl/composition/factories/pipeline/transformer_builder.py": "Retarget imports to the same target-classification capability under its bootstrap/assembly owner. No constructor, resource identity, lifecycle, cleanup or call ordering changes.",
-    "src/bioetl/composition/factories/services/preflight.py": "Retarget imports to the same target-classification capability under its bootstrap/assembly owner. No constructor, resource identity, lifecycle, cleanup or call ordering changes.",
-    "src/bioetl/composition/runtime_builders/_exact_replay_cached_bronze_context.py": "Use the public manifest resolver directly, reuse the already imported alias of the identical coerce_optional_text function, and inline the single-use Bronze path expression. Preserve store calls, error messages, parent checks and all filesystem paths.",
-    "src/bioetl/composition/runtime_builders/_manifest_publication_context_support.py": "Retarget imports to the same target-classification capability under its bootstrap/assembly owner. No constructor, resource identity, lifecycle, cleanup or call ordering changes.",
-    "src/bioetl/composition/runtime_builders/_run_manifest_creation_support_helpers.py": "Retarget imports to the same target-classification capability under its bootstrap/assembly owner. No constructor, resource identity, lifecycle, cleanup or call ordering changes.",
-    "src/bioetl/composition/runtime_builders/_runner_input_preparation.py": "Retarget imports to the same target-classification capability under its bootstrap/assembly owner. No constructor, resource identity, lifecycle, cleanup or call ordering changes.",
-    "src/bioetl/composition/runtime_builders/effective_config_artifact_builder.py": "Retarget imports to the same target-classification capability under its bootstrap/assembly owner. No constructor, resource identity, lifecycle, cleanup or call ordering changes."
-  }
+    "src/bioetl/application/core/pre_silver_finalization_flow.py": "Remove a single forwarding identity wrapper; callers pass the identical identity_record mapping directly to the existing prepared-data transformation. Preserve source ID string conversion, transformation ordering and all values.",
+    "src/bioetl/application/pipelines/chembl/base_chembl_transformer.py": "Remove a single forwarding identity wrapper; callers pass the identical identity_record mapping directly to the existing prepared-data transformation. Preserve source ID string conversion, transformation ordering and all values.",
+    "src/bioetl/application/pipelines/uniprot/transformer.py": "Remove a single forwarding identity wrapper; callers pass the identical identity_record mapping directly to the existing prepared-data transformation. Preserve source ID string conversion, transformation ordering and all values.",
+    "src/bioetl/composition/runtime_builders/_manifest_publication_context_support.py": "Reuse existing build_manifest_publication_identity_kwargs instead of duplicating its dictionary. Preserve typed keys, values and identity-resolution behavior; no resource or lifetime changes.",
+    "src/bioetl/infrastructure/control_plane/_evidence_location_publish.py": "Move the unchanged exclusive publication implementation into its public owning module and retarget imports. Preserve hard-link create-if-absent, trusted-base validation, fdopen ownership, flush and cleanup paths. No acquisition, qualification or runtime status changes.",
+    "src/bioetl/infrastructure/control_plane/evidence_location_publish.py": "Move the unchanged exclusive publication implementation into its public owning module and retarget imports. Preserve hard-link create-if-absent, trusted-base validation, fdopen ownership, flush and cleanup paths. No acquisition, qualification or runtime status changes.",
+    "src/bioetl/infrastructure/control_plane/file_evidence_location_store.py": "Move the unchanged exclusive publication implementation into its public owning module and retarget imports. Preserve hard-link create-if-absent, trusted-base validation, fdopen ownership, flush and cleanup paths. No acquisition, qualification or runtime status changes."
+  },
+  "exclusion_moves": [
+    {
+      "from": {
+        "file": "src/bioetl/infrastructure/control_plane/_evidence_location_publish.py",
+        "line": 33,
+        "expression": "safe_path.read_bytes()"
+      },
+      "to": {
+        "file": "src/bioetl/infrastructure/control_plane/evidence_location_publish.py",
+        "scope": "read_existing_bytes",
+        "call": "safe_path.read_bytes",
+        "expression": "safe_path.read_bytes()",
+        "reason": "Synchronous pathlib read_bytes for publish preflight; temporary file stream owned inside helper, not a persistent store connection."
+      }
+    },
+    {
+      "from": {
+        "file": "src/bioetl/infrastructure/control_plane/_evidence_location_publish.py",
+        "line": 77,
+        "expression": "tempfile.mkstemp(suffix='.tmp', prefix='.' + target.stem + '_', dir=target.parent)"
+      },
+      "to": {
+        "file": "src/bioetl/infrastructure/control_plane/evidence_location_publish.py",
+        "scope": "publish_bytes_if_absent",
+        "call": "tempfile.mkstemp",
+        "expression": "tempfile.mkstemp(suffix='.tmp', prefix='.' + target.stem + '_', dir=target.parent)",
+        "reason": "Atomic publish temp fd via mkstemp; descriptor ownership transferred to fdopen/close/unlink in the same helper. Static census only (NOT_RUN_12553)."
+      }
+    },
+    {
+      "from": {
+        "file": "src/bioetl/infrastructure/control_plane/_evidence_location_publish.py",
+        "line": 88,
+        "expression": "os.fdopen(fd, 'wb')"
+      },
+      "to": {
+        "file": "src/bioetl/infrastructure/control_plane/evidence_location_publish.py",
+        "scope": "publish_bytes_if_absent",
+        "call": "os.fdopen",
+        "expression": "os.fdopen(fd, 'wb')",
+        "reason": "fdopen of mkstemp descriptor in evidence-location publish helper; same temp ownership as mkstemp site, not a second resource."
+      }
+    }
+  ]
 }
