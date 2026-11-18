@@ -8,7 +8,8 @@
 
 Проверка от 18 ноября 2026 года для
 [#13056](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/13056).
-Источник кода: `d414d98f6169b48e7dda6e9995a25027503c39f9`.
+Источник первоначального прогона: `d414d98f6169b48e7dda6e9995a25027503c39f9`.
+Последующее source-bound продолжение записано отдельно ниже.
 Этот документ не является разрешением закрыть эпик при незавершённой обязательной приёмке.
 
 [PR #13133](https://github.com/SatoryKono/BioactivityDataAcquisition/pull/13133)
@@ -172,3 +173,62 @@ Env-файлы, чужие изменения и callbacks сохраняютс�
 Первый read-only architecture audit сохранён как FAIL. При отдельном focused повторе SCC — 4 passed. Диагностика debt gate установила единственный failing gate `generated_artifact_drift`: устарели `config_surface_backlog` и `hotspot_family_baseline`. Оба отчёта и зависимая проекция debt gates обновлены owning generators. Последующие family/debt `--check` и budget guard для working tree прошли. Измеренный LOC в отчёте отражает уже существующий код; budgets, thresholds и exemptions не менялись. Эти повторы не переименовывают первый полный аудит в PASS.
 
 Для pre-refresh documentation working tree созданы канонические plan, docs receipt и bundle; verifier и локальный closeout facade вернули STOP / claim_qualified=false. В bundle недоставало required receipts `tests`, `governance`, `debt`; local_single_host остаётся отдельной trust degradation. Это отказ приёмки, не разрешение завершить эпик. После последующих generated/report изменений данный bundle не является admission нового состояния; нужен свежий source-bound CI/closeout.
+
+
+## Кандидат параллельного push и metadata-only commit-msg
+
+Продолжение на source `30c1bfcf1dc291e268f64e72b2a2fee9072caa2e`; эпик остаётся **PARTIAL / OPEN**.
+Четыре исходные независимые pre-push команды исполняются одновременно только
+при точном совпадении квалифицированных команд и framework 4.7.0. Framework
+сохраняет фильтрацию, порядок вывода, exit codes и mutation-detection diffs;
+последующие hooks ждут завершения группы. Изменение контракта возвращает serial
+execution. Конфигурационный набор hooks не сокращён.
+
+Семантический commit-msg adapter исполняет исходный parser в выбранном project
+Python. Квалификация проверяет семь исходных package/helper файлов, manifest,
+команду, interpreter и отсутствие foreign message callbacks. Исполняются именно
+проверенные source bytes, без доверия к stale bytecode. Этот metadata-only checker
+не сканирует unstaged source: область явно ограничена Git-метаданными. Остальные
+hooks сохраняют обычный путь. Каждый свежий index/HEAD/base/env bookend ждёт все
+независимые read-only probes; защиты changed-index, env и history сохраняются.
+
+Windows: install/idempotence, неверный header с отказом именно commit-msg,
+непустой commit/push, malformed push protocol, rollback, reinstall и второй
+непустой commit/push прошли. После финального rollback восстановлено исходное
+отсутствие owned callbacks. Кандидат установлен только в private process-scoped
+hooksPath внутри исходного common metadata; это **изолированная квалификация,
+не production activation**. Исходные callbacks форвардились без изменения,
+их bytes/ACL и env-файлы сохранены.
+
+| Native hook в порядке событий | Секунды | Exit code |
+| --- | --- | --- |
+| pre-commit | 17.85 | 0 |
+| commit-msg | 6.82 | 1 |
+| pre-commit | 16.91 | 0 |
+| commit-msg | 6.0 | 0 |
+| pre-push | 114.29 | 0 |
+| pre-commit | 23.01 | 0 |
+| commit-msg | 9.08 | 0 |
+| pre-push | 103.68 | 0 |
+
+Лимиты событий остаются 30/10/180 s; whole Git command включает дополнительные
+стадии и не сравнивается с лимитом одного hook. Первые неудачные кандидаты
+сохранены: reinstall commit-msg timeout; timeout следующего correct message;
+отдельный non-fast-forward fixture rejection после продвижения main. Последний
+не является отказом configured checks и не доказывает полный push.
+
+Локальные overlapping наборы: 96 passed / 3 skipped, receipts 44 passed / 1 skipped,
+runtime/installation/workflow 50 passed / 1 skipped, source-bytes message tests
+16 passed. Это проверки рабочего кандидата до коммитов, а не CI нового head и
+не сумма уникальных тестов. POSIX-only пропуски явно сохранены. Docs links/drift,
+cleanup inventory check, runtime parity, full-tree, budget и source-only debt
+прошли; scripts inventory обновлён штатным генератором после интеграции main.
+
+WSL: один heartbeat выполнился, но следующая попытка metadata profiling вернула
+`Wsl/Service/0x8007274c` до исполнения скрипта. Owned callbacks отсутствуют,
+staged probe и клон сохранены. Службы не перезапускались и не останавливались.
+Новый кандидат в WSL **NOT_RUN**; прежний DrvFS pre-commit timeout остаётся
+неустранённым. Windows sequence не заменяет эту границу и не закрывает #13056.
+
+CI итогового публикуемого head и применимый closeout оцениваются отдельно;
+исторические ADMIT, STOP и INCONCLUSIVE выше не переименовываются.

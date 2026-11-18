@@ -1012,5 +1012,285 @@
       "positive rollback/reinstall sequence not completed on both hosts"
     ],
     "next_required": "Repair or requalify host execution within unchanged checks, guardrails and deadlines; no blind repeat or timeout increase"
+  },
+  "parallel_adapter_followup_20261118": {
+    "observed_at": "2026-11-18T17:59:47.020557+00:00",
+    "source_sha": "30c1bfcf1dc291e268f64e72b2a2fee9072caa2e",
+    "windows": {
+      "status": "PASS_ISOLATED_CANDIDATE_SEQUENCE",
+      "route": "process-scoped private core.hooksPath inside original common metadata; original callbacks forwarded, common installation unchanged",
+      "native_hook_timings": [
+        {
+          "hook": "pre-commit",
+          "seconds": 17.847222,
+          "exit_code": 0
+        },
+        {
+          "hook": "commit-msg",
+          "seconds": 6.821419,
+          "exit_code": 1
+        },
+        {
+          "hook": "pre-commit",
+          "seconds": 16.908786,
+          "exit_code": 0
+        },
+        {
+          "hook": "commit-msg",
+          "seconds": 6.003902,
+          "exit_code": 0
+        },
+        {
+          "hook": "pre-push",
+          "seconds": 114.292249,
+          "exit_code": 0
+        },
+        {
+          "hook": "pre-commit",
+          "seconds": 23.007921,
+          "exit_code": 0
+        },
+        {
+          "hook": "commit-msg",
+          "seconds": 9.078143,
+          "exit_code": 0
+        },
+        {
+          "hook": "pre-push",
+          "seconds": 103.681131,
+          "exit_code": 0
+        }
+      ],
+      "events": [
+        {
+          "name": "probe-branch",
+          "argv": [
+            "git",
+            "switch",
+            "-c",
+            "codex/epic-13056-integrated-bookend-probe-20261118",
+            "30c1bfcf1dc291e268f64e72b2a2fee9072caa2e"
+          ],
+          "exit_code": 0,
+          "seconds": 3.4806385999982012,
+          "controlled_messages": []
+        },
+        {
+          "name": "bare-remote",
+          "argv": [
+            "git",
+            "init",
+            "--bare",
+            "D:\\github\\BioactivityDataAcquisition\\reports\\local\\epic-13056-host-acceptance-20261118\\windows-integrated-bookend-candidate\\host-push-remote.git"
+          ],
+          "exit_code": 0,
+          "seconds": 0.26983109999855515,
+          "controlled_messages": []
+        },
+        {
+          "name": "seed-remote",
+          "argv": [
+            "git",
+            "-c",
+            "core.hooksPath=D:\\github\\BioactivityDataAcquisition\\reports\\local\\epic-13056-host-acceptance-20261118\\windows-integrated-bookend-candidate\\host-push-remote.git\\hooks",
+            "-C",
+            "D:\\github\\BioactivityDataAcquisition\\reports\\local\\epic-13056-host-acceptance-20261118\\windows-integrated-bookend-candidate\\host-push-remote.git",
+            "update-ref",
+            "refs/heads/qualification",
+            "1ff373d0b8ae216e22d90198fb6ce365d3b0b21e"
+          ],
+          "exit_code": 0,
+          "seconds": 0.21620609999808948,
+          "controlled_messages": []
+        },
+        {
+          "name": "stage-probe",
+          "argv": [
+            "git",
+            "add",
+            "--",
+            "reports\\review\\hook-qualification-probe.txt"
+          ],
+          "exit_code": 0,
+          "seconds": 0.5026042000099551,
+          "controlled_messages": []
+        },
+        {
+          "name": "invalid-header-commit",
+          "argv": [
+            "git",
+            "commit",
+            "-m",
+            "invalid header"
+          ],
+          "exit_code": 1,
+          "seconds": 25.07219379999151,
+          "controlled_messages": [
+            "BioETL hook FAIL: configured_check_failed; inspect with hook doctor and scoped checks."
+          ]
+        },
+        {
+          "name": "nonempty-commit",
+          "argv": [
+            "git",
+            "commit",
+            "-m",
+            "test(hooks): qualify installed Windows callbacks"
+          ],
+          "exit_code": 0,
+          "seconds": 26.34945589999552,
+          "controlled_messages": []
+        },
+        {
+          "name": "local-push",
+          "argv": [
+            "git",
+            "push",
+            "--receive-pack=env -u GIT_CONFIG_COUNT -u GIT_CONFIG_PARAMETERS git receive-pack",
+            "D:\\github\\BioactivityDataAcquisition\\reports\\local\\epic-13056-host-acceptance-20261118\\windows-integrated-bookend-candidate\\host-push-remote.git",
+            "HEAD:refs/heads/qualification"
+          ],
+          "exit_code": 0,
+          "seconds": 117.23780489999626,
+          "controlled_messages": []
+        },
+        {
+          "name": "malformed-push",
+          "argv": [
+            "C:/Program Files/Git/bin/sh.exe",
+            "D:\\github\\BioactivityDataAcquisition\\.git\\bioetl-qualification\\integrated-bookend-win-20261118\\hooks\\pre-push",
+            "qualification",
+            "D:\\github\\BioactivityDataAcquisition\\reports\\local\\epic-13056-host-acceptance-20261118\\windows-integrated-bookend-candidate\\host-push-remote.git"
+          ],
+          "exit_code": 2,
+          "seconds": 3.2110305999958655,
+          "controlled_messages": [
+            "BioETL hook ERROR: installation_or_protocol_unqualified; inspect with hook doctor and scoped checks."
+          ]
+        },
+        {
+          "name": "stage-reinstalled-probe",
+          "argv": [
+            "git",
+            "add",
+            "--",
+            "reports\\review\\hook-qualification-probe.txt"
+          ],
+          "exit_code": 0,
+          "seconds": 0.5032737000001362,
+          "controlled_messages": []
+        },
+        {
+          "name": "reinstalled-nonempty-commit",
+          "argv": [
+            "git",
+            "commit",
+            "-m",
+            "test(hooks): verify reinstalled Windows callbacks"
+          ],
+          "exit_code": 0,
+          "seconds": 34.94909299998835,
+          "controlled_messages": []
+        },
+        {
+          "name": "reinstalled-local-push",
+          "argv": [
+            "git",
+            "push",
+            "--receive-pack=env -u GIT_CONFIG_COUNT -u GIT_CONFIG_PARAMETERS git receive-pack",
+            "D:\\github\\BioactivityDataAcquisition\\reports\\local\\epic-13056-host-acceptance-20261118\\windows-integrated-bookend-candidate\\host-push-remote.git",
+            "HEAD:refs/heads/qualification"
+          ],
+          "exit_code": 0,
+          "seconds": 106.7933200999978,
+          "controlled_messages": []
+        },
+        {
+          "name": "return-task-branch",
+          "argv": [
+            "git",
+            "switch",
+            "codex/epic-13056-parallel-push-20261118"
+          ],
+          "exit_code": 0,
+          "seconds": 2.986510700007784,
+          "controlled_messages": []
+        }
+      ],
+      "rollback_original_absence_restored": true,
+      "env_bytes_unchanged": true,
+      "foreign_callbacks_and_acl_unchanged": true,
+      "production_activation": false
+    },
+    "local_checks": [
+      {
+        "name": "message-final-regression",
+        "counts": {
+          "tests": 99,
+          "errors": 0,
+          "failures": 0,
+          "skipped": 3
+        },
+        "sha256": "aaeec6ee16078d5936493795474468664213451dbf30a7e49a0edc704085d4cf",
+        "scope": "local working-tree checks before candidate commits; overlapping suites, not unique test totals"
+      },
+      {
+        "name": "parallel-bookend-unit",
+        "counts": {
+          "tests": 45,
+          "errors": 0,
+          "failures": 0,
+          "skipped": 1
+        },
+        "sha256": "5584b8a84bc03abb5b8fd09246f34b9f26d2109a00f788acf8605e19373bc364",
+        "scope": "local working-tree checks before candidate commits; overlapping suites, not unique test totals"
+      },
+      {
+        "name": "bookend-runtime",
+        "counts": {
+          "tests": 51,
+          "errors": 0,
+          "failures": 0,
+          "skipped": 1
+        },
+        "sha256": "1ad2c8fe8ffcdfc08172e616e5bbe41352a9859f792d51c87dc1bebfcb028657",
+        "scope": "local working-tree checks before candidate commits; overlapping suites, not unique test totals"
+      },
+      {
+        "name": "message-source-bytes",
+        "counts": {
+          "tests": 16,
+          "errors": 0,
+          "failures": 0,
+          "skipped": 0
+        },
+        "sha256": "b575af078bc3564ee5d0bc075837c527a99bc25eb0aefb24956dc0019353139e",
+        "scope": "local working-tree checks before candidate commits; overlapping suites, not unique test totals"
+      }
+    ],
+    "failed_candidates_preserved": [
+      "windows-parallel-candidate: reinstall commit-msg timeout",
+      "windows-parallel-message-candidate: correct commit-msg timeout after valid negative control",
+      "windows-parallel-bookend-candidate: commit PASS; push non-fast-forward fixture rejection, full checks not executed"
+    ],
+    "wsl": {
+      "status": "BLOCKED_TRANSPORT_AND_UNRESOLVED_PRECOMMIT_PERFORMANCE",
+      "error": "Wsl/Service/0x8007274c",
+      "qualification_on_new_candidate": "NOT_RUN",
+      "heartbeat_observation": "one /bin/true succeeded; subsequent metadata profiling failed before script execution",
+      "owned_callbacks_absent": true,
+      "service_restart_or_shutdown": false
+    },
+    "guardrails": {
+      "deadlines_seconds": {
+        "pre-commit": 30,
+        "commit-msg": 10,
+        "pre-push": 180
+      },
+      "budgets_and_exemptions": "unchanged",
+      "native_ai_adapters": "OFF/NOT_PROVEN"
+    },
+    "epic_admission": false,
+    "next_required": "WSL commit/push/rollback/reinstall within original limits; exact-head CI for published code; applicable final closeout before issue closure"
   }
 }
