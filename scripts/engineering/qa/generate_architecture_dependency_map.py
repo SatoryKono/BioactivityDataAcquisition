@@ -53,6 +53,7 @@ LAYER_IMPORT_MATRIX: dict[str, frozenset[str]] = {
 LAYER_ORDER = tuple(LAYER_IMPORT_MATRIX.keys())
 GROUP_EDGE_LIMIT = 55
 _COMPOSITION_RUNTIME_BUILDERS_GROUP = "composition.runtime_builders"
+_COMPOSITION_FACTORIES_GROUP = "composition.factories"
 MODULE_GROUP_OVERRIDES = {
     # The detached backend is part of the canonical observability runtime
     # composition family even though it keeps a focused import surface for CLI.
@@ -78,10 +79,10 @@ MODULE_GROUP_OVERRIDES = {
     # cross-layer imports already exist on composition.factories. Folding them
     # there keeps the shrink-only group-edge total.
     "bioetl.composition.services.target_classification_identity": (
-        "composition.factories"
+        _COMPOSITION_FACTORIES_GROUP
     ),
     "bioetl.composition.services.target_classification_runtime": (
-        "composition.factories"
+        _COMPOSITION_FACTORIES_GROUP
     ),
 }
 TYPE_CHECKING_NAME = "TYPE_CHECKING"

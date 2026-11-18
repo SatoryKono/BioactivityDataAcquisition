@@ -26,6 +26,9 @@ from bioetl.composition.providers.provider_registry import ProviderRegistry
 from bioetl.composition.runtime_builders import (
     _exact_replay_cached_bronze_context as exact_replay,
 )
+from bioetl.composition.runtime_builders import (
+    exact_replay_parent_manifest as replay_parent,
+)
 from bioetl.composition.runtime_builders._exact_replay_cached_bronze_context import (
     bind_cached_bronze_context,
 )
@@ -195,14 +198,14 @@ def test_exact_replay_setattr_and_parent_manifest(
     assert bound.cached_bronze == "new"
 
     store = SimpleNamespace(get=lambda _mid: None, get_by_run_id=lambda _rid: "by-run")
-    monkeypatch.setattr(exact_replay, "FileRunManifestStore", lambda **_k: store)
-    monkeypatch.setattr(exact_replay, "control_plane_root", lambda *_a, **_k: Path("x"))
+    monkeypatch.setattr(replay_parent, "FileRunManifestStore", lambda **_k: store)
+    monkeypatch.setattr(replay_parent, "control_plane_root", lambda *_a, **_k: Path("x"))
     ctx = SimpleNamespace(
         replay_of_manifest_id=None,
         replay_of_run_id="12345678-1234-5678-1234-567812345678",
     )
     assert (
-        exact_replay._resolve_replay_parent_manifest(ctx=ctx, settings=object())  # type: ignore[arg-type]
+        replay_parent.resolve_replay_parent_manifest(ctx=ctx, settings=object())  # type: ignore[arg-type]
         == "by-run"
     )
 
