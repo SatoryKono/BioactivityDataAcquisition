@@ -63,6 +63,27 @@ def _build_contract_identity_kwargs(
     }
 
 
+def _target_contract_identity(
+    pipeline_name: str,
+    yaml_config: PipelineYamlConfig,
+    contract_identity: NormalizedContractIdentity,
+) -> NormalizedContractIdentity:
+    """Apply the target schema and normalization identities together."""
+    if pipeline_name != "chembl_target":
+        return contract_identity
+    target_identity = target_classification_contract_schema_identity(yaml_config)
+    if target_identity is None:
+        return contract_identity
+    normalization = target_classification_normalization_identity(yaml_config)
+    assert normalization is not None
+    return (
+        contract_identity[0],
+        *target_identity,
+        *contract_identity[3:5],
+        *normalization,
+    )
+
+
 @dataclass(frozen=True, slots=True)
 class RunContextFactory:
     """Build ``RunContext`` for metadata coordinator wiring."""
@@ -115,21 +136,9 @@ class RunContextFactory:
             entity=entity,
             strict=strict_contract_identity,
         )
-        if self.pipeline_name == "chembl_target":
-            target_identity = target_classification_contract_schema_identity(
-                yaml_config
-            )
-            if target_identity is not None:
-                normalization = target_classification_normalization_identity(
-                    yaml_config
-                )
-                assert normalization is not None
-                contract_identity = (
-                    contract_identity[0],
-                    *target_identity,
-                    *contract_identity[3:5],
-                    *normalization,
-                )
+        contract_identity = _target_contract_identity(
+            self.pipeline_name, yaml_config, contract_identity
+        )
         resolved_hash = (
             self.config_hash_getter(yaml_config)
             if resolved_config_hash is None
