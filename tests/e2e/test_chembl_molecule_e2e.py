@@ -47,7 +47,10 @@ from bioetl.composition.bootstrap import bootstrap_pipeline_runner
 from bioetl.domain.context import CachedBronzeContext, PipelineRunContext
 from bioetl.domain.contracts.gold import ChEMBLMoleculeGoldSchema
 from bioetl.domain.run_reports.accounting import StageAccountingAccumulator
-from bioetl.domain.run_reports.context import bind_stage_accounting, reset_stage_accounting
+from bioetl.domain.run_reports.context import (
+    bind_stage_accounting,
+    reset_stage_accounting,
+)
 from bioetl.infrastructure.storage.gold.writer_schema_helpers import (
     _project_records_for_gold_schema,
 )
@@ -240,5 +243,5 @@ async def test_invalid_phase_is_quarantined_without_contaminating_gold(
             "reason_family": "dq",
             "outcome": "quarantined",
             "count": 1,
-        }
+        },
     )
