@@ -1,6 +1,8 @@
 """Native route synchronization must preserve isolation and user-owned settings."""
 
 import json
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -158,3 +160,56 @@ def test_toml_publication_has_no_invalid_intermediate_file(tmp_path, monkeypatch
     monkeypatch.setattr(setup_mcp.os, "replace", checked_replace)
     setup_mcp._write_user_toml(path, 'model = "program"\n', before=before)
     assert path.read_bytes() == b'model = "program"\n'
+
+
+def test_codex_config_lock_covers_read_and_publication(routes, monkeypatch, tmp_path):
+    root, manifest, _ = routes
+    home = tmp_path / "home"
+    default_config = home / ".codex/config.toml"
+    default_config.parent.mkdir(parents=True)
+    default_config.write_text('model = "user-model"\n', encoding="utf-8")
+    monkeypatch.setattr(Path, "home", lambda: home)
+    monkeypatch.setenv("BIOETL_CODEX_ROUTES_FILE", str(manifest))
+    lock = default_config.with_name(default_config.name + ".bioetl.lock")
+    probe = """
+import sys
+from pathlib import Path
+
+with Path(sys.argv[1]).open("a+b") as handle:
+    try:
+        if sys.platform == "win32":
+            import msvcrt
+            msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
+        else:
+            import fcntl
+            fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        sys.exit(71)
+"""
+
+    def try_lock():
+        return subprocess.run(
+            [sys.executable, "-I", "-c", probe, str(lock)],
+            timeout=30,
+            check=False,
+        ).returncode
+
+    read = Path.read_bytes
+    publish = setup_mcp._write_user_toml
+    locked_reads = []
+
+    def checked_read(path):
+        if path == default_config:
+            locked_reads.append(try_lock())
+        return read(path)
+
+    def checked_publish(path, rendered, *, before):
+        assert try_lock() == 71
+        publish(path, rendered, before=before)
+
+    monkeypatch.setattr(Path, "read_bytes", checked_read)
+    monkeypatch.setattr(setup_mcp, "_write_user_toml", checked_publish)
+    setup_mcp._write_codex_config(root, profile="stable", transport_mode="shared")
+    assert locked_reads == [71, 71]
+    assert try_lock() == 0
+    assert 'model = "user-model"' in default_config.read_text(encoding="utf-8")

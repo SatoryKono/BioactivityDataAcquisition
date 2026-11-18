@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 
+from scripts.ai.codex import native_session
 from scripts.ai.codex.native_session import (
     qualified_binary,
     ref_environment,
@@ -149,3 +150,66 @@ def test_markdownify_source_cannot_redirect_a_foreign_workspace(
     )
     with pytest.raises(PermissionError, match="workspace"):
         session_overrides(config, root, manifest=manifest, markdownify=custom)
+
+
+def test_session_uses_explicit_environment_manifest(
+    session_binding, monkeypatch, tmp_path
+):
+    root, manifest, _, config = session_binding
+    monkeypatch.setattr(Path, "home", lambda: tmp_path / "empty-home")
+    monkeypatch.setenv("BIOETL_CODEX_ROUTES_FILE", str(manifest))
+
+    overrides = session_overrides(config, root)
+
+    entries = {}
+    for value in overrides[1::2]:
+        entries.update(tomllib.loads(value)["mcp_servers"])
+    assert entries["memory"]["args"][-1] == "memory"
+    assert entries["ast-grep"]["args"][-1] == "ast-grep"
+
+
+def test_child_keeps_validated_session_subdirectory(
+    session_binding, monkeypatch, tmp_path
+):
+    root, manifest, _, _ = session_binding
+    cwd = root / "docs"
+    cwd.mkdir()
+    monkeypatch.chdir(cwd)
+    monkeypatch.setattr(native_session, "workspace", lambda: (root, root))
+    home = tmp_path / "home"
+    cfg = home / ".codex/config.toml"
+    cfg.parent.mkdir(parents=True)
+    cfg.write_text(
+        '[mcp_servers.ref]\nurl = "https://api.ref.tools/mcp"\n'
+        '[mcp_servers.memory]\ncommand = "old-memory"\n'
+        '[mcp_servers.ast-grep]\ncommand = "old-ast"\n'.replace("\\\n", "\n"),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(Path, "home", lambda: home)
+    monkeypatch.setenv("BIOETL_CODEX_ROUTES_FILE", str(manifest))
+    binary = home / "AppData/Local/OpenAI/Codex/bin/qualified/codex.exe"
+    binary.parent.mkdir(parents=True)
+    binary.write_bytes(b"qualified executable fixture")
+    seen = []
+
+    def call(args, *, cwd, **_kwargs):
+        seen.append((args, cwd))
+        return 0
+
+    monkeypatch.setattr(native_session.subprocess, "call", call)
+    assert (
+        native_session.main(
+            [
+                "--executable",
+                str(binary),
+                "--sha256",
+                hashlib.sha256(binary.read_bytes()).hexdigest(),
+                "--auth",
+                "oauth",
+            ]
+        )
+        == 0
+    )
+    assert len(seen) == 1
+    assert seen[0][0][:3] == [str(binary), "--cd", str(cwd)]
+    assert seen[0][1] == cwd

@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+from contextlib import nullcontext
 from types import SimpleNamespace
 
 import pytest
@@ -181,3 +182,116 @@ def test_rollback_to_an_older_bundle_retains_that_bundle_identity(
     (tmp_path / "migration-v2.json").write_text(json.dumps(prior), encoding="utf-8")
     selected, history = versions.previous_migration(owner, tmp_path, entry, "a" * 64)
     assert selected == binding and history == prior
+
+
+@pytest.fixture
+def transition_owner(tmp_path, bundle, monkeypatch):
+    registry = tmp_path / "registry"
+    directory = registry / "target"
+    directory.mkdir(parents=True)
+    graph = tmp_path / "graph.jsonl"
+    graph.write_bytes(b'{"fixture":true}\n')
+
+    def read(path, **_kwargs):
+        return json.loads(path.read_bytes()) if path.exists() else None
+
+    def write(path, value):
+        assert path.is_relative_to(registry)
+        path.write_bytes(versions.canonical(value))
+
+    descriptor = {"profile": {"graph": str(graph)}, "service_pins": {"runtime": "old"}}
+    write(directory / "profile.json", descriptor)
+    write(directory / "active.json", {"hashes": {str(graph): versions.sha(graph)}})
+    write(directory / "recovery-v2.json", {"schema": 2})
+    write(
+        registry / "profiles.json",
+        {
+            directory.name: {
+                "state": str(directory),
+                "descriptor_sha256": versions.sha(directory / "profile.json"),
+            },
+        },
+    )
+
+    def specification(identity, fixture=False):
+        return read(registry / "profiles.json")[identity], read(
+            directory / "profile.json"
+        )
+
+    state = SimpleNamespace(
+        read=read, write=write, scope=SimpleNamespace(canonical=versions.canonical)
+    )
+    owner = SimpleNamespace(
+        state=state,
+        registry=SimpleNamespace(
+            ROOT=registry,
+            provider=SimpleNamespace(hashes=lambda: {"runtime": "new"}),
+        ),
+        core=SimpleNamespace(LifetimeLock=lambda _path: nullcontext()),
+        specification=specification,
+        candidate=lambda _entry, _value: {"hashes": {}},
+    )
+    monkeypatch.setattr(versions, "VERSIONS", bundle.parent)
+    monkeypatch.setattr(versions, "bundle_owner", lambda *_args: owner)
+    monkeypatch.setattr(
+        versions, "dormant", lambda *_args: {"graph_sha256": versions.sha(graph)}
+    )
+    return owner, directory, graph
+
+
+@pytest.mark.parametrize(
+    "operation, pending, completed",
+    [
+        ("migrate", "PREPARING", "COMMITTED"),
+        ("rollback", "ROLLING_BACK", "ROLLED_BACK"),
+    ],
+)
+@pytest.mark.parametrize(
+    "interrupted_write",
+    [
+        "profile.json",
+        "active.json",
+        "profiles.json",
+        "runtime-binding.json",
+        "migration-v2.json",
+    ],
+)
+def test_interrupted_transition_blocks_dispatch(
+    transition_owner,
+    bundle,
+    monkeypatch,
+    operation,
+    pending,
+    completed,
+    interrupted_write,
+):
+    owner, directory, graph = transition_owner
+    identity = directory.name
+    if operation == "rollback":
+        assert versions.migrate(owner, identity, bundle)["state"] == "COMMITTED"
+        assert versions.select_bundle(directory.parent, identity) == bundle
+    else:
+        assert versions.select_bundle(directory.parent, identity) is None
+    original_graph = graph.read_bytes()
+    write = owner.state.write
+
+    def interrupt(path, value):
+        if path.name == interrupted_write and (
+            path.name != "migration-v2.json" or value["phase"] == completed
+        ):
+            raise OSError("synthetic interrupted write")
+        write(path, value)
+
+    monkeypatch.setattr(owner.state, "write", interrupt)
+    with pytest.raises(OSError, match="synthetic interrupted write"):
+        if operation == "migrate":
+            versions.migrate(owner, identity, bundle)
+        else:
+            versions.rollback(owner, identity)
+
+    journal = owner.state.read(directory / "migration-v2.json")
+    assert journal["phase"] == pending
+    assert journal["before"]["graph"]["graph_sha256"] == versions.sha(graph)
+    assert graph.read_bytes() == original_graph
+    with pytest.raises(PermissionError, match="not committed"):
+        versions.select_bundle(directory.parent, identity)

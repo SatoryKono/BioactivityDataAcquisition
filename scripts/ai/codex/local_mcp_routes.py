@@ -81,16 +81,22 @@ def _repository_binding_matches(
     return True
 
 
-def apply_local_routes(
-    servers: dict[str, dict[str, Any]], workspace: Path, *, manifest: Path | None = None
-) -> dict[str, dict[str, Any]]:
-    """Return reviewed stdio overrides; malformed or foreign bindings fail closed."""
+def select_local_routes_manifest(manifest: Path | None = None) -> tuple[Path, bool]:
+    """Use the caller path, then the explicit environment path, then the default."""
     explicit = os.environ.get("BIOETL_CODEX_ROUTES_FILE")
     path = manifest or Path(
         explicit or Path.home() / ".config/pc-agent/codex-routes.json"
     )
+    return path, manifest is not None or bool(explicit)
+
+
+def apply_local_routes(
+    servers: dict[str, dict[str, Any]], workspace: Path, *, manifest: Path | None = None
+) -> dict[str, dict[str, Any]]:
+    """Return reviewed stdio overrides; malformed or foreign bindings fail closed."""
+    path, explicit = select_local_routes_manifest(manifest)
     if not path.exists():
-        if explicit or manifest:
+        if explicit:
             raise ValueError("Configured native MCP route manifest is absent")
         return servers
     _physical(path)
@@ -98,9 +104,7 @@ def apply_local_routes(
     if set(data) != {"schema", "git_common", "entries"} or data["schema"] != 1:
         raise ValueError("Invalid native MCP route manifest")
     expected = _physical(Path(data["git_common"]))
-    if not _repository_binding_matches(
-        expected, workspace, strict=bool(explicit or manifest)
-    ):
+    if not _repository_binding_matches(expected, workspace, strict=explicit):
         return servers
     result = deepcopy(servers)
     if not isinstance(data["entries"], dict):

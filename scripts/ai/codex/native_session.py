@@ -123,9 +123,12 @@ def session_overrides(
     config, root, *, manifest=None, markdownify=None, acceptance=False
 ):
     """Use supported CLI-scoped fields without changing the global user TOML."""
-    from scripts.ai.codex.local_mcp_routes import apply_local_routes
+    from scripts.ai.codex.local_mcp_routes import (
+        apply_local_routes,
+        select_local_routes_manifest,
+    )
 
-    manifest = manifest or Path.home() / ".config/pc-agent/codex-routes.json"
+    manifest, _ = select_local_routes_manifest(manifest)
     raw = physical(manifest).read_bytes()
     binding = json.loads(raw)
     if any(name not in binding.get("entries", {}) for name in ("memory", "ast-grep")):
@@ -196,7 +199,10 @@ def main(argv=None):
         help="Enable the separate registered acceptance graph",
     )
     args = parser.parse_args(argv)
+    session_cwd = physical(Path.cwd())
     root, canonical = workspace()
+    if not session_cwd.is_relative_to(root):
+        raise PermissionError("Session cwd is outside its validated workspace")
     binary = qualified_binary(args.executable, args.sha256)
     config = tomllib.loads(
         (Path.home() / ".codex/config.toml").read_text(encoding="utf-8")
@@ -227,8 +233,8 @@ def main(argv=None):
         )
         return 0
     return subprocess.call(
-        [str(binary), "--cd", str(root), *overrides],
-        cwd=root,
+        [str(binary), "--cd", str(session_cwd), *overrides],
+        cwd=session_cwd,
         env=environment,
         stdin=sys.stdin.buffer,
         stdout=sys.stdout.buffer,

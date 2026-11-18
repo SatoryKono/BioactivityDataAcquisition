@@ -12,7 +12,8 @@ import subprocess
 import sys
 import tomllib
 import uuid
-from collections.abc import Sequence
+from collections.abc import Iterator, Sequence
+from contextlib import contextmanager
 from copy import deepcopy
 from pathlib import Path
 from typing import Any
@@ -1040,6 +1041,31 @@ def _write_user_toml(path: Path, rendered: str, *, before: bytes | None) -> None
         pending.unlink(missing_ok=True)
 
 
+@contextmanager
+def _lock_codex_config(config_path: Path) -> Iterator[None]:
+    """Serialize cooperating writers without removing the shared lock file."""
+    lock_path = config_path.with_name(config_path.name + ".bioetl.lock")
+    with lock_path.open("a+b") as stream:
+        if sys.platform == "win32":
+            import msvcrt
+
+            stream.seek(0)
+            msvcrt.locking(stream.fileno(), msvcrt.LK_LOCK, 1)
+            try:
+                yield
+            finally:
+                stream.seek(0)
+                msvcrt.locking(stream.fileno(), msvcrt.LK_UNLCK, 1)
+        else:
+            import fcntl
+
+            fcntl.flock(stream.fileno(), fcntl.LOCK_EX)
+            try:
+                yield
+            finally:
+                fcntl.flock(stream.fileno(), fcntl.LOCK_UN)
+
+
 def _write_codex_config(
     workspace_root: Path,
     *,
@@ -1054,52 +1080,53 @@ def _write_codex_config(
     os.chmod(config_dir, 0o700)
     config_path = config_dir / "config.toml"
 
-    before = config_path.read_bytes() if config_path.exists() else None
-    existing = before.decode("utf-8") if before is not None else ""
-    existing_servers = tomllib.loads(existing).get("mcp_servers", {})
-    for name, server in servers.items():
-        previous = existing_servers.get(name, {})
-        known = {
-            "command",
-            "args",
-            "url",
-            "cwd",
-            "env",
-            "env_http_headers",
-            "startup_timeout_sec",
-            "enabled",
-            "enabled_tools",
-            "disabled_tools",
-            "tools",
-            "tool_timeout_sec",
-        }
-        if set(previous) - known:
-            raise ValueError(
-                "Unsupported existing MCP settings; config preserved for explicit review"
-            )
-        for field in (
-            "enabled",
-            "enabled_tools",
-            "disabled_tools",
-            "tools",
-            "startup_timeout_sec",
-            "tool_timeout_sec",
-        ):
-            if field in previous:
-                server[field] = deepcopy(previous[field])
-    managed_or_retired_names = set(
-        _canonical_servers(workspace_root, profile="full")
-    ) | set(REMOVED_MCP_SERVER_NAMES)
-    preserved = _strip_managed_mcp_blocks(existing, managed_or_retired_names)
-    managed_block = _render_codex_mcp_toml(servers)
+    with _lock_codex_config(config_path):
+        before = config_path.read_bytes() if config_path.exists() else None
+        existing = before.decode("utf-8") if before is not None else ""
+        existing_servers = tomllib.loads(existing).get("mcp_servers", {})
+        for name, server in servers.items():
+            previous = existing_servers.get(name, {})
+            known = {
+                "command",
+                "args",
+                "url",
+                "cwd",
+                "env",
+                "env_http_headers",
+                "startup_timeout_sec",
+                "enabled",
+                "enabled_tools",
+                "disabled_tools",
+                "tools",
+                "tool_timeout_sec",
+            }
+            if set(previous) - known:
+                raise ValueError(
+                    "Unsupported existing MCP settings; config preserved for explicit review"
+                )
+            for field in (
+                "enabled",
+                "enabled_tools",
+                "disabled_tools",
+                "tools",
+                "startup_timeout_sec",
+                "tool_timeout_sec",
+            ):
+                if field in previous:
+                    server[field] = deepcopy(previous[field])
+        managed_or_retired_names = set(
+            _canonical_servers(workspace_root, profile="full")
+        ) | set(REMOVED_MCP_SERVER_NAMES)
+        preserved = _strip_managed_mcp_blocks(existing, managed_or_retired_names)
+        managed_block = _render_codex_mcp_toml(servers)
 
-    if preserved:
-        rendered = preserved.rstrip() + "\n\n" + managed_block
-    else:
-        rendered = managed_block
+        if preserved:
+            rendered = preserved.rstrip() + "\n\n" + managed_block
+        else:
+            rendered = managed_block
 
-    _write_user_toml(config_path, rendered, before=before)
-    os.chmod(config_path, 0o600)
+        _write_user_toml(config_path, rendered, before=before)
+        os.chmod(config_path, 0o600)
     return config_path
 
 
