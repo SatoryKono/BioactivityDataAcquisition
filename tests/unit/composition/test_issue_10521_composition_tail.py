@@ -570,22 +570,23 @@ def test_exact_replay_assembly_and_factory_seams(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     from bioetl.composition.factories.pipeline import runner_assembly as assembly
-
-    monkeypatch.setattr(assembly, "_build_preflight_service_impl", lambda _ctx: "pre")
-    monkeypatch.setattr(assembly, "_build_observer_impl", lambda _ctx: "obs")
-    monkeypatch.setattr(
-        assembly, "_build_batch_executor_impl", lambda *_a, **_k: "batch"
+    from bioetl.composition.factories.pipeline import (
+        _runner_assembly_support as support,
     )
-    assert assembly._build_preflight_service(object()) == "pre"  # type: ignore[arg-type]
-    assert assembly._build_observer(object()) == "obs"  # type: ignore[arg-type]
-    assert (
-        assembly._build_batch_executor(
-            object(),  # type: ignore[arg-type]
-            checkpoint_manager=object(),  # type: ignore[arg-type]
-            lock_runtime_service=object(),  # type: ignore[arg-type]
-            observer=object(),  # type: ignore[arg-type]
-        )
-        == "batch"
+
+    context = MagicMock(spec=support.RunnerAssemblyContext)
+    parts = MagicMock(spec=assembly.RunnerAssemblyParts)
+    delegate = MagicMock(return_value=parts)
+    monkeypatch.setattr(assembly, "_assemble_runner_parts_impl", delegate)
+    assert assembly._assemble_runner_parts(context) is parts
+    delegate.assert_called_once_with(
+        context,
+        checkpoint_manager_builder=assembly._build_checkpoint_manager,
+        lock_runtime_service_builder=support.build_lock_runtime_service,
+        preflight_service_builder=support.build_preflight_service,
+        observer_builder=support.build_observer,
+        postrun_service_builder=assembly._build_postrun_service,
+        batch_executor_builder=support.build_batch_executor,
     )
 
     from bioetl.composition.factories.services.pipeline_batch_executor_builder import (
