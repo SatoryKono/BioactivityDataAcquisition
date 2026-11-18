@@ -52,6 +52,7 @@ ______________________________________________________________________
 | Runbook                                                 | Description                                        | Priority |
 | ------------------------------------------------------- | -------------------------------------------------- | -------- |
 | [Data Recovery](data-recovery.md)                       | Steps to recover from data corruption or loss (DR) | P0/P1    |
+| [ChEMBL Molecule Phase Recovery](chembl-molecule-phase-recovery.md) | Isolated Bronze reprocessing for lost phases and Gold eligibility | P1 |
 | [Game Day](game-day.md)                                 | Annual DR restore drill; RPO 24h / RTO 4h          | P1       |
 | [Quarantine Management](quarantine-management.md)       | Managing quarantined records                       | P2       |
 | [Bounded Pipeline Smoke (`--limit 100`)](bounded-pipeline-smoke.md) | Sequential catalog smoke: every entity pipeline then every composite pack | P2 |
