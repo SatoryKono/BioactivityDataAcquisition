@@ -1109,7 +1109,9 @@ def test_manager_waits_for_live_lease_before_probing_late_main(
     assert result["status"] == "full"
     assert not any(cmd[:2] == ["docker", "restart"] for cmd in commands)
     assert not any(
-        len(cmd) > 3 and cmd[3] == "wget" and "ops/control-plane/ready" in cmd
+        len(cmd) > 3
+        and cmd[3] == "wget"
+        and any("ops/control-plane/ready" in part for part in cmd)
         for cmd in commands
     )
     assert any(
@@ -2457,3 +2459,27 @@ def test_full_profile_wait_requires_live_health(health_response: str) -> None:
         clock=lambda: now[0],
     )
     assert health_timeouts and all(0 < value <= 2 for value in health_timeouts)
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [
+        (None, "http://bioetl:8000/ops/control-plane/ready"),
+        ("", "http://bioetl:8000/ops/control-plane/ready"),
+        ("http://bioetl:8000/", "http://bioetl:8000/ops/control-plane/ready"),
+        (
+            "http://host.docker.internal:8000",
+            "http://host.docker.internal:8000/ops/control-plane/ready",
+        ),
+        ("http://evil.example/path", "http://bioetl:8000/ops/control-plane/ready"),
+        ("not a url", "http://bioetl:8000/ops/control-plane/ready"),
+    ],
+)
+def test_grafana_ops_ready_url_uses_validated_base(
+    monkeypatch: pytest.MonkeyPatch, raw: str | None, expected: str
+) -> None:
+    if raw is None:
+        monkeypatch.delenv("BIOETL_OPS_HTTP_URL", raising=False)
+    else:
+        monkeypatch.setenv("BIOETL_OPS_HTTP_URL", raw)
+    assert runtime_manager._grafana_ops_ready_url() == expected

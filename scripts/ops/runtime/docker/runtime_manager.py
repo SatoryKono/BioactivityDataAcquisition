@@ -1894,7 +1894,11 @@ already_full() {
     fi
   fi
   wget -qO- -T 3 http://127.0.0.1:3000/api/health >/dev/null 2>&1 || return 1
-  ready="$(wget -qO- -T 3 http://bioetl:8000/ops/control-plane/ready 2>/dev/null)" || return 1
+  ops_base="${BIOETL_OPS_HTTP_URL:-}"
+  [ -n "$ops_base" ] || ops_base="http://bioetl:8000"
+  ops_base="${ops_base%/}"
+  printf '%s' "$ops_base" | grep -Eq '^https?://[A-Za-z0-9._:-]+$' || ops_base="http://bioetl:8000"
+  ready="$(wget -qO- -T 3 "$ops_base/ops/control-plane/ready" 2>/dev/null)" || return 1
   printf '%s' "$ready" | grep -Eq "\"runtime_source_id\"[[:space:]]*:[[:space:]]*\"$source_id\""
 }
 lease_is_active() {
@@ -2038,6 +2042,17 @@ def _grafana_expected_runtime_source_id(runner: Runner, *, timeout: float) -> st
     return ""
 
 
+_OPS_READY_BASE_RE = re.compile(r"https?://[A-Za-z0-9._:-]+\Z")
+
+
+def _grafana_ops_ready_url() -> str:
+    """Ops ready URL from BIOETL_OPS_HTTP_URL, otherwise the compose default."""
+    raw = os.environ.get("BIOETL_OPS_HTTP_URL", "").strip().rstrip("/")
+    if _OPS_READY_BASE_RE.fullmatch(raw) is None:
+        raw = "http://bioetl:8000"
+    return f"{raw}/ops/control-plane/ready"
+
+
 def _grafana_ops_ready_runtime_source_id(runner: Runner, *, timeout: float) -> str:
     result = runner(
         [
@@ -2049,7 +2064,7 @@ def _grafana_ops_ready_runtime_source_id(runner: Runner, *, timeout: float) -> s
             "-T",
             "3",
             # NOSONAR - docker-internal HTTP URL is safe (ADR-010 local-only)
-            "http://bioetl:8000/ops/control-plane/ready",
+            _grafana_ops_ready_url(),
         ],
         ROOT,
         timeout,
