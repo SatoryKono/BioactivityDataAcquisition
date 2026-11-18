@@ -332,6 +332,13 @@ def _launch_owner(root, record, launched):
         return True
 
 
+def _recorded_owner_identity(record):
+    pid, birth = record.get("owner_pid"), record.get("owner_birth")
+    if record and not pid and set(record) != {RETIRED_GENERATION}:
+        raise PermissionError("Markdownify owner identity is unknown")
+    return pid, birth
+
+
 def ensure(root):
     spec = specification(root)
     if (core.STATE / STOP_REQUEST).exists():
@@ -339,9 +346,7 @@ def ensure(root):
     launched = False
     for _ in range(160):
         record = _optional_status_record()
-        pid, birth = record.get("owner_pid"), record.get("owner_birth")
-        if record and not pid and set(record) != {RETIRED_GENERATION}:
-            raise PermissionError("Markdownify owner identity is unknown")
+        pid, birth = _recorded_owner_identity(record)
         if pid and core.process_birth(pid) == birth:
             if _owner_ready(spec, record):
                 return spec
