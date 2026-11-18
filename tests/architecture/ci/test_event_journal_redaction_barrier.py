@@ -417,3 +417,45 @@ def test_inventory_fixture_reset_does_not_unseal_an_active_plugin(
     plugin.finalize()
     assert password not in path.read_text(encoding="utf-8")
     assert not any(password in item for item in seen)
+
+
+@pytest.mark.parametrize("field", ["password", "passphrase"])
+def test_known_token_matching_a_password_field_does_not_hide_its_assignment(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, field: str
+) -> None:
+    from scripts.engineering.ci import pytest_event_journal as journal
+
+    monkeypatch.setenv("BIOETL_UNIT_TOKEN", field)
+    path = tmp_path / "receipt.jsonl"
+    plugin = journal.EventJournalPlugin(None, path, _identity())
+    seen = _spy_correlation(monkeypatch, journal)
+    plugin.record("outcome", {"notes": f"{field}=independent-canary-value"})
+    plugin.finalize()
+    assert "independent-canary-value" not in path.read_text(encoding="utf-8")
+    assert not any("independent-canary-value" in item for item in seen)
+
+
+@pytest.mark.parametrize("encoded", [False, True])
+def test_password_containing_a_keyed_secret_is_sealed_as_one_value(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, encoded: bool
+) -> None:
+    from scripts.engineering.ci import pytest_event_journal as journal
+
+    token = "shared-token-value"
+    password = 'IndependentSensitive123 "' + token + "\nnext"
+    monkeypatch.setenv("REVIEW_PASSWORD", password)
+    monkeypatch.setenv("REVIEW_API_TOKEN", token)
+    seen = _spy_correlation(monkeypatch, journal)
+    path = tmp_path / "receipt.jsonl"
+    plugin = journal.EventJournalPlugin(None, path, _identity())
+    value = json.dumps(password, ensure_ascii=True)[1:-1] if encoded else password
+    plugin.record("outcome", {"nodeid": f"test.py::test_case[{value}]"})
+    plugin.finalize()
+    text = path.read_text(encoding="utf-8")
+    assert "IndependentSensitive123" not in text
+    assert not any(
+        password in item or "IndependentSensitive123" in item for item in seen
+    )
+    assert (
+        json.loads(text.splitlines()[0])["nodeid"] == "test.py::test_case[[redacted]]"
+    )

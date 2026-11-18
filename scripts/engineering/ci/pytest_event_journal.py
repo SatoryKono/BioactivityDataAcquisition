@@ -445,27 +445,97 @@ def _line_for_storage(line: str, known: tuple[str, ...]) -> str:
     return stored
 
 
-def _redact_text(text: str, needles: tuple[str, ...]) -> str:
-    blocked = _blocked_env_needles()
-    redacted = text
-    # Preserve complete known values before sealing their password substrings.
-    for captured in sorted(set(needles), key=len, reverse=True):
+def _literal_redaction_spans(
+    text: str, values: tuple[str, ...], blocked: tuple[str, ...], *, seal: bool
+) -> list[tuple[int, int, bool, str | None]]:
+    spans: list[tuple[int, int, bool, str | None]] = []
+    for captured in values:
         if not captured:
             continue
-        forms = [form for form in _encoded_forms(captured) if form and form in redacted]
-        if not forms:
+        sealed = seal or _contains_needle(captured, blocked)
+        for form in _encoded_forms(captured):
+            start = text.find(form)
+            while start >= 0:
+                spans.append((start, start + len(form), sealed, captured))
+                start = text.find(form, start + 1)
+    return spans
+
+
+def _credential_redaction_spans(
+    text: str, blocked: tuple[str, ...]
+) -> list[tuple[int, int, bool, str | None]]:
+    spans: list[tuple[int, int, bool, str | None]] = []
+    for match in _SECRET_ASSIGNMENT.finditer(text):
+        index, value = _assigned_capture(match)
+        sealed = _is_sealed_field(match.group(1))
+        if sealed:
+            if _sealed_assignment_replacement(value) is None:
+                continue
+        elif _REDACTED_ASSIGNMENT_VALUE.fullmatch(value) is not None or value in {
+            "[redacted",
+            _SEALED_REDACTION,
+        }:
             continue
-        replacement = (
-            _SEALED_REDACTION
-            if _contains_needle(captured, blocked)
-            else _correlation_tag(captured)
+        spans.append(
+            (
+                match.start(index),
+                match.end(index),
+                sealed or _contains_needle(value, blocked),
+                None,
+            )
         )
-        for form in forms:
-            redacted = redacted.replace(form, replacement)
-    # Capture complete unknown credentials before sealing password substrings.
-    redacted = _SECRET_ASSIGNMENT.sub(_replace_assignment, redacted)
-    redacted = _SECRET_PREFIX.sub(_replace_prefix, redacted)
-    return _seal_blocked_text(redacted, blocked)
+    for match in _SECRET_PREFIX.finditer(text):
+        spans.append(
+            (
+                match.start(),
+                match.end(),
+                _contains_needle(match.group(0), blocked),
+                None,
+            )
+        )
+    return spans
+
+
+def _render_redaction_spans(
+    text: str, spans: list[tuple[int, int, bool, str | None]]
+) -> str:
+    merged: list[tuple[int, int, bool, str | None]] = []
+    for start, end, sealed, raw in sorted(spans, key=lambda span: (span[0], span[1])):
+        if not merged or start >= merged[-1][1]:
+            merged.append((start, end, sealed, raw))
+            continue
+        left, right, was_sealed, previous_raw = merged.pop()
+        # Preserve the original known value for an encoded whole-value match.
+        original = previous_raw if end <= right else raw if start == left else None
+        merged.append((left, max(right, end), was_sealed or sealed, original))
+    parts: list[str] = []
+    offset = 0
+    for start, end, sealed, raw in merged:
+        parts.append(text[offset:start])
+        fragment = text[start:end]
+        if sealed:
+            replacement = _SEALED_REDACTION
+            if _REDACTED_ASSIGNMENT_VALUE.fullmatch(fragment) and not fragment.endswith(
+                "]"
+            ):
+                replacement = "[redacted"
+        else:
+            replacement = _correlation_tag(fragment if raw is None else raw)
+        parts.append(replacement)
+        offset = end
+    parts.append(text[offset:])
+    return "".join(parts)
+
+
+def _redact_text(text: str, needles: tuple[str, ...]) -> str:
+    blocked = _blocked_env_needles()
+    # Discover every match in the original text. A replacement must not hide
+    # another credential's keyword or split a longer known value. Any sealed
+    # match seals the entire overlapping span before fingerprinting can run.
+    spans = _literal_redaction_spans(text, needles, blocked, seal=False)
+    spans.extend(_literal_redaction_spans(text, blocked, blocked, seal=True))
+    spans.extend(_credential_redaction_spans(text, blocked))
+    return _render_redaction_spans(text, spans)
 
 
 def _redact_args(args: list[str], needles: tuple[str, ...]) -> list[str]:
