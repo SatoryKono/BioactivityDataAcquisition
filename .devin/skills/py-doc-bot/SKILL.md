@@ -1,6 +1,6 @@
 ---
 name: py-doc-bot
-description: Execute BioETL py-doc-bot profile for role-specific workflow and constraints. This skill serves as a convenient entry point for documentation tasks.
+description: "Update or audit BioETL documentation and runtime mirrors after a known change. For a code defect use py-debug-bot."
 ---
 
 # py-doc-bot

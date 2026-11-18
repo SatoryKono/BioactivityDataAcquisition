@@ -5,8 +5,8 @@ description: Run BioETL post-change validation after edits — mirrors, inventor
 
 # BioETL post-change validation
 
-Policy SSOT: `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`.
-This skill is a checklist, not a second policy.
+Policy: `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`.
+This skill selects that policy. It does not restate the checklist.
 
 ## When to use
 
@@ -14,55 +14,7 @@ This skill is a checklist, not a second policy.
 - Before opening a PR or closing issues
 - After edits under runtime trees or `src/bioetl/**`
 
-## Checklist
+## Steps
 
-1. **Re-scan** impacted code/config/docs/runtime surfaces (search + related tests).
-2. **Runtime source first** — change `.codex/**` / `.junie/**` / `.devin/**` before docs mirrors.
-3. **Mirror parity** — if `.codex/agents/**`, `.codex/skills/**`, `.junie/agents/**`, or `.junie/skills/**` changed:
-
-   ```bash
-   bash scripts/ai/junie/check_junie_mirror.sh --check
-   ```
-
-   Native Windows:
-
-   ```powershell
-   .\.venv-win\Scripts\python.exe scripts/ai/junie/check_junie_mirror.py --check
-   ```
-
-4. **Module coverage inventory** — if `src/bioetl/**/*.py` changed:
-
-   ```powershell
-   .\.venv-win\Scripts\python.exe _refresh_module_coverage_inventory.py
-   ```
-
-   (or the current canonical refresh entry from POST_CHANGE_VALIDATION)
-
-5. **Documentation cleanup inventory** — if markdown/docs changes add, remove,
-   or retarget local links, or change `Owner:` / `Status:` / `Class:` headers:
-
-   ```powershell
-   .\.venv-win\Scripts\python.exe -m scripts.docs generate-cleanup-inventory --update
-   .\.venv-win\Scripts\python.exe -m scripts.docs generate-cleanup-inventory --check
-   ```
-
-   Commit `docs/reports/generated/documentation-cleanup-inventory.{json,md}`
-   with the docs change. `--check` reads the working tree, not HEAD; skipping
-   `--update` fails `test_documentation_cleanup_inventory_check_passes` and
-   stops `architecture-fast`.
-
-6. **Focused tests** for the touched surface (prefer project pytest wrappers).
-7. **Prompt library** — if `docs/00-project/ai/prompts/**` changed:
-
-   ```powershell
-   .\.venv-win\Scripts\python.exe -m scripts.ai.prompts check
-   .\.venv-win\Scripts\python.exe -m scripts.ai.prompts catalog
-   ```
-
-8. **Report** explicitly: checks run, checks skipped, mirror-sync status.
-
-## Guardrails
-
-- Do not increase tech-debt budgets / exemptions / thresholds
-- Do not create or edit `.env` without approval
-- Do not treat memory or vendor diagnostics as sole proof for lifecycle advance
+1. Follow `POST_CHANGE_VALIDATION.md` for the surfaces actually touched.
+2. Report checks run, checks skipped, and mirror-sync status.

@@ -1,6 +1,6 @@
 ---
 name: py-plan-bot
-description: Execute BioETL py-plan-bot profile for role-specific workflow and constraints. This skill serves as a convenient entry point for planning tasks.
+description: "Sequence a BioETL implementation, refactor, or release plan before any edits. For an audit verdict use py-audit-bot."
 ---
 
 # py-plan-bot

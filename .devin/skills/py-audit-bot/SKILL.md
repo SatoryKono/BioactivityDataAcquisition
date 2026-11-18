@@ -1,6 +1,6 @@
 ---
 name: py-audit-bot
-description: Execute BioETL py-audit-bot profile for role-specific workflow and constraints. This skill serves as a convenient entry point for audit tasks.
+description: "Audit BioETL code for compliance, debt, or review findings without applying the fix. For a sequenced change plan use py-plan-bot."
 ---
 
 # py-audit-bot

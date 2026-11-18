@@ -1,6 +1,6 @@
 ---
 name: vcr-record
-description: Record, validate, update, and clean VCR cassettes for BioETL HTTP tests with secret-safety checks.
+description: "Record, update, or sanitize VCR cassettes for BioETL HTTP tests. For failures that are not HTTP cassettes use py-test-bot."
 ---
 
 # VCR Record
