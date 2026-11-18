@@ -121,12 +121,19 @@ def target_input_eligibility(
         return None, "invalid_taxonomy_id"
     if taxon is not None and taxon not in species:
         return taxon, "unsupported_taxon"
-    source_taxon = _SOURCE_TAXA.get(_text(data.get("organism")) or "")
-    if taxon is None and source_taxon is not None:
-        return None, "missing_taxonomy_for_known_organism"
-    if taxon is not None and source_taxon is not None and taxon != source_taxon:
-        return taxon, "taxonomy_name_conflict"
-    return taxon, None
+    return taxon, _taxonomy_name_ineligibility(taxon, data.get("organism"))
+
+
+def _taxonomy_name_ineligibility(taxon: str | None, organism: object) -> str | None:
+    """Check name/taxonomy consistency after the species eligibility check."""
+    source_taxon = _SOURCE_TAXA.get(_text(organism) or "")
+    if source_taxon is None:
+        return None
+    if taxon is None:
+        return "missing_taxonomy_for_known_organism"
+    if taxon != source_taxon:
+        return "taxonomy_name_conflict"
+    return None
 
 
 __all__ = ["plain_target_value", "project_target_fields", "target_input_eligibility"]
