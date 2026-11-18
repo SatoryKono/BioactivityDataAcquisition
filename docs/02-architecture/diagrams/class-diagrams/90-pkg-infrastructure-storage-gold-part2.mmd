@@ -1,13 +1,24 @@
 %% Title: Package Family: infrastructure/storage/gold (Part 2/2)
-%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/storage/gold; part 2/2; modules: io_mixin, io_preparation, metadata_audit, validation_mixin, io_helpers, metadata_mixin.
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/storage/gold; part 2/2; modules: io_protocols, commit_outcome, io_mixin, io_preparation, metadata_audit, validation_mixin.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-10-04
+%% @date    2026-11-17
 %% @level   Package Family / Inventory Slice
-%% @nodes   12
+%% @nodes   17
 %% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
 classDiagram
+
+    namespace io_protocols {
+        class _GoldMergedMetadataWriterProtocol
+        class _GoldMergedWriteHostProtocol
+        class _GoldWriteDispatchTargetProtocol
+    }
+
+    namespace commit_outcome {
+        class GoldDiagnosticsBoundary
+        class GoldOutcomeBoundary
+    }
 
     namespace io_mixin {
         class GoldWriterIOMixin

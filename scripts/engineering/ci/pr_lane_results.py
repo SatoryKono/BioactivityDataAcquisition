@@ -80,6 +80,7 @@ CONFIG_SCHEMA_MIGRATION_STATUS_TEST = (
 )
 RESIDUAL_OSV_TEST = "tests/architecture/test_residual_osv_9853.py"
 BRACES_BACKPORT_TEST = "tests/architecture/test_braces_backport.py"
+PICOMATCH_BACKPORT_TEST = "tests/architecture/test_picomatch_backport.py"
 MYPY_TARGET_CONTRACT_TEST = "tests/architecture/test_mypy_target_contract.py"
 DOCUMENTATION_SYNC_TEST = "tests/architecture/test_documentation_sync.py"
 RUNTIME_AGENT_DOCS_DRIFT_TEST = "tests/architecture/test_runtime_agent_docs_drift.py"
@@ -1275,6 +1276,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             ".github/workflows/branch-hygiene.yml",
             ".github/workflows/chembl-baseline-smoke.yml",
             ".github/workflows/codeql.yml",
+            ".github/workflows/coderabbit.yml",
             ".github/workflows/commit-lint.yml",
             ".github/workflows/consolidation-gates.yml",
             ".github/workflows/contract-governance-fast-check.yml",
@@ -1311,6 +1313,20 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             ".github/workflows/zizmor.yml",
         ),
         (GITHUB_ACTIONS_RUNTIME_POLICY_TEST,),
+    ),
+    ".github/workflows/dashboard-first-window-noscroll.yml": (
+        DASHBOARD_FIRST_WINDOW_NOSCROLL_TEST,
+        GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
+    ),
+    **dict.fromkeys(
+        (
+            "docs/00-project/ai/prompts/fragments/dashboard-requirements-audit.md",
+            "docs/00-project/ai/prompts/library/audit/dashboard.md",
+        ),
+        (
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+            DASHBOARD_FIRST_WINDOW_NOSCROLL_TEST,
+        ),
     ),
     **dict.fromkeys(
         (
@@ -2030,6 +2046,12 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
 # file mapping would need hundreds of entries. Each prefix still maps to real
 # governing tests; fail-closed semantics are unchanged for unmapped paths.
 AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
+    ".github/tooling/picomatch-backport/": (PICOMATCH_BACKPORT_TEST, RESIDUAL_OSV_TEST),
+    ".github/tooling/jscpd/": (
+        BRACES_BACKPORT_TEST,
+        PICOMATCH_BACKPORT_TEST,
+        RESIDUAL_OSV_TEST,
+    ),
     "tests/fixtures/grafana/run_explorer/": (
         "tests/integration/test_run_explorer_request_fixtures.py",
         "tests/integration/test_run_explorer_http_catalog.py",
@@ -2175,11 +2197,13 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
         RESIDUAL_OSV_TEST,
     ),
     "grafana/plugins/bioetl-scenes-app/": (
+        PICOMATCH_BACKPORT_TEST,
         BRACES_BACKPORT_TEST,
         DASHBOARD_SCENES_CONTRACT_TEST,
         RESIDUAL_OSV_TEST,
     ),
     "grafana/plugins/bioetl-selectorshell-panel/": (
+        PICOMATCH_BACKPORT_TEST,
         BRACES_BACKPORT_TEST,
         RESIDUAL_OSV_TEST,
     ),

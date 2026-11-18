@@ -114,7 +114,7 @@ class TestUniProtAdapterErrorPaths:
     async def test_fetch_proteins_logs_error_on_failure(
         self, mock_http_client, mock_logger
     ):
-        """Test that _fetch_proteins logs error when fetch fails."""
+        """A protein page error is logged and raised, even when strict mode is off."""
         from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
 
         with patch.dict(
@@ -135,14 +135,9 @@ class TestUniProtAdapterErrorPaths:
                 ),
             )
 
-            results = [
-                r async for r in adapter._fetch_proteins(query="test", limit=100)
-            ]
+            with pytest.raises(ConnectionError, match="Network error"):
+                _ = [r async for r in adapter._fetch_proteins(query="test", limit=100)]
 
-            # Should return empty results on failure
-            assert results == []
-
-            # Should have logged the error via injected logger
             mock_logger.error.assert_called()
             # Verify the error message contains expected context
             call_args = mock_logger.error.call_args

@@ -1,13 +1,38 @@
 %% Title: Package Family: interfaces/http (Part 2/2)
-%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/interfaces/http; part 2/2; modules: _health_server_control_plane_metrics_refresh, _processed_records_http, _processed_records_table_support, _selector_catalog, control_plane_selector_context, health_server.
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/interfaces/http; part 2/2; modules: types, _control_plane_selector_context_build, _forensic_request_budget, _health_server_checkpoint_freshness, _health_server_control_plane_evidence_routing, _health_server_control_plane_evidence_scope.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-10-04
+%% @date    2026-11-17
 %% @level   Package Family / Inventory Slice
-%% @nodes   9
+%% @nodes   17
 %% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
 classDiagram
+
+    namespace types {
+        class HealthResponse
+        class _StaticHealthMetricsExposition
+    }
+
+    namespace control_plane_selector_context_build {
+        class _SelectionOutcome
+    }
+
+    namespace forensic_request_budget {
+        class ForensicEndpointUnavailable
+    }
+
+    namespace health_server_checkpoint_freshness {
+        class _CheckpointFreshnessHost
+    }
+
+    namespace health_server_control_plane_evidence_routing {
+        class _EvidenceRoutingHost
+    }
+
+    namespace health_server_control_plane_evidence_scope {
+        class EvidenceScopeHost
+    }
 
     namespace health_server_control_plane_metrics_refresh {
         class ControlPlaneMetricsRefresher
@@ -19,6 +44,10 @@ classDiagram
 
     namespace processed_records_table_support {
         class ProcessedRecordRowSpec
+    }
+
+    namespace run_id_resolver {
+        class UniqueScopeResolution
     }
 
     namespace selector_catalog {
@@ -45,5 +74,6 @@ classDiagram
         class InvalidRunReportError
     }
 
+    EvidenceScopeHost <|-- _EvidenceRoutingHost
     HealthServerRoutingMixin <|-- HealthServer
     HealthServerStateMixin <|-- HealthServer

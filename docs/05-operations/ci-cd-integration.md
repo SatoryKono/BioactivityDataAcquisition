@@ -4,7 +4,7 @@ Version: 1.0.3
 Status: active
 Class: published
 Owner: BioETL Team
-Last verified: '2026-10-16'
+Last verified: '2026-11-17'
 
 ______________________________________________________________________
 
@@ -49,7 +49,7 @@ Record the pull-request head SHA and the GitHub Actions run of workflow
 | --- | --- |
 | `classify-changes` | `github.event.pull_request.base.sha`, or `github.sha` when that event field is absent. This is the base SHA. |
 | `pr-gate-complete` | The same base ref as `classify-changes`. |
-| `fast-governance` | `actions/checkout` with no `ref`. GitHub uses `refs/pull/<number>/merge`. |
+| `fast-governance` | Content checkout is `actions/checkout` with no `ref`. GitHub uses `refs/pull/<number>/merge`. The pin checker is a second checkout of `github.event.repository.default_branch`. |
 | `class-lane` | The same default checkout as `fast-governance`. |
 
 On run `38909556660` for head `3ccabb127f84c0e3a9d683dbc6bb594682f49386`,

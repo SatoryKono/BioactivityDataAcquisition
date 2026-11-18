@@ -205,6 +205,10 @@ def _stamp_ranked_suspect_expr(panel: dict, *, summary: bool) -> None:
         if "panelId" in panel["targets"][0]:
             panel["targets"][0].pop("expr", None)
         return
+    # Grafana 12 VARIABLE_REGEX leaves an unknown `$name` unchanged. This
+    # dashboard has no variable `1`, so `$1` reaches Prometheus and Expand
+    # inserts capture group 1. `$$1` is not an escape: the extra `$` stays
+    # and Expand emits the literal `$1`.
     panel["targets"][0]["expr"] = (
         "label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace("
         "bioetl_incident_ranked_evidence,"

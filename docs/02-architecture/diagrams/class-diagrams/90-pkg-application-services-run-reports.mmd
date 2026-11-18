@@ -1,11 +1,11 @@
 %% Title: Package Family: application/services/run_reports
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/services/run_reports; modules: source_identity, composite, control_plane_snapshot, paths, query, writer.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/services/run_reports; modules: source_identity, composite, control_plane_snapshot, evidence_location_paths, paths, query.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-10-04
+%% @date    2026-11-17
 %% @level   Package Family / Inventory Slice
-%% @nodes   7
+%% @nodes   8
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
 
@@ -20,6 +20,10 @@ classDiagram
 
     namespace control_plane_snapshot {
         class CaptureControlPlaneSnapshot
+    }
+
+    namespace evidence_location_paths {
+        class EvidenceRootAliasRegistry
     }
 
     namespace paths {

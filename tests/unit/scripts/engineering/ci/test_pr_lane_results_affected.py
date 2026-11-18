@@ -1861,3 +1861,25 @@ def test_branch_hygiene_runbook_routes_only_to_owned_checks():
             ["docs/05-operations/runbooks/branch-hygiene-wave-unknown.md"],
             repo_root=root,
         )
+
+
+@pytest.mark.parametrize(
+    "changed",
+    [
+        ".github/tooling/jscpd/package-lock.json",
+        ".github/tooling/jscpd/package.json",
+        ".github/tooling/picomatch-backport/BACKPORT.md",
+        ".github/tooling/picomatch-backport/picomatch-4.0.8-bioetl.17.tgz",
+        ".github/tooling/picomatch-backport/provenance.json",
+        ".github/tooling/picomatch-backport/test.cjs",
+        "grafana/plugins/bioetl-scenes-app/package-lock.json",
+        "grafana/plugins/bioetl-selectorshell-panel/package.json",
+    ],
+)
+def test_security_backport_inputs_select_executable_security_contracts(
+    changed: str,
+) -> None:
+    root = Path(__file__).resolve().parents[5]
+    owner = "tests/architecture/test_picomatch_backport.py"
+    assert owner in affected_pytest_targets([changed], repo_root=root)
+    assert owner in build_shadow_compare([changed], repo_root=root)["selected"]

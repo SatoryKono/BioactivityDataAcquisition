@@ -550,6 +550,7 @@ def test_shadow_compare_routes_grafana_npm_projects() -> None:
         "tests/architecture/test_braces_backport.py",
         "tests/architecture/test_circleci_migration_contract.py",
         "tests/architecture/test_dashboard_scenes_contract.py",
+        "tests/architecture/test_picomatch_backport.py",
         "tests/architecture/test_residual_osv_9853.py",
     }
 

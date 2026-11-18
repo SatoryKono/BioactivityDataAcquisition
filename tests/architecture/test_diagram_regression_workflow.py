@@ -150,6 +150,7 @@ def test_docs_workflow_diagram_drift_uses_pr_base_ref() -> None:
     assert "origin/${{ github.base_ref }}" not in workflow
     assert 'git diff --name-only "${base_ref}"...HEAD' in workflow
     drift_block = workflow.split("check-diagram-drift:", maxsplit=1)[1]
+    assert 'git diff --name-only --no-renames "${base_ref}"...HEAD' in drift_block
     assert "origin/main...HEAD" not in drift_block
     assert "docs/02-architecture/diagrams/providers/**/*.mmd" in drift_block
     assert "docs/02-architecture/diagrams/sequence/*.mmd" in drift_block
@@ -160,6 +161,8 @@ def test_docs_workflow_diagram_drift_uses_pr_base_ref() -> None:
     assert "--puppeteer /tmp/puppeteer-config.json" in drift_block
     assert 'REQUIRE_SVGO: "1"' in drift_block
     assert "git diff --exit-code" in drift_block
+    assert 'git ls-files --error-unmatch -- "${expected_svg}"' in drift_block
+    assert '[ -f "${source_path}" ]' in drift_block
     assert "npx -y" not in drift_block
     detect_block = workflow.split("check-diagram-drift:", maxsplit=1)[0]
     assert "docs/02-architecture/diagrams/sequence/*.mmd" not in detect_block

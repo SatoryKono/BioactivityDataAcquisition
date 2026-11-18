@@ -1,11 +1,11 @@
-%% Title: Package Family: domain/control_plane (Part 1/2)
-%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/domain/control_plane; part 1/2; modules: effective_config_artifact, artifact_lifecycle, run_manifest, contract_registry_types.
+%% Title: Package Family: domain/control_plane (Part 1/3)
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/domain/control_plane; part 1/3; modules: effective_config_artifact, artifact_lifecycle, run_evidence_location_models.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-10-04
+%% @date    2026-11-17
 %% @level   Package Family / Inventory Slice
-%% @nodes   30
+%% @nodes   28
 %% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
 classDiagram
 
@@ -34,19 +34,14 @@ classDiagram
         class ControlPlaneArtifactSurface
     }
 
-    namespace run_manifest {
-        class ReplayCapability
-        class RunArtifactRef
-        class RunCodeProvenance
-        class RunInputSnapshotRef
-        class RunManifest
-        class RunSourceRef
-    }
-
-    namespace contract_registry_types {
-        class ContractRegistryEntry
-        class RegistryValidationError
-        class RegistryValidationIssue
-        class RegistryValidationResult
-        class RegistryValidationSeverity
+    namespace run_evidence_location_models {
+        class EvidenceLocationConflictError
+        class EvidenceLocationIdentityConflictError
+        class EvidenceLocationInvalidError
+        class EvidenceLocationKind
+        class EvidenceLocationLookupCode
+        class EvidenceLocationLookupResult
+        class EvidenceLocationRegisterOutcome
+        class EvidenceLocationRegisterResult
+        class RunEvidenceLocation
     }

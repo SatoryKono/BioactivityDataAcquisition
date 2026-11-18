@@ -1,0 +1,76 @@
+%% Title: Package Family: infrastructure/storage/bronze (Part 1/2)
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/storage/bronze; part 1/2; modules: pipeline_helpers, cleanup_metrics, cleanup_planner, metadata_operations, cleanup_core, cleanup_group_apply.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-11-17
+%% @level   Package Family / Inventory Slice
+%% @nodes   30
+%% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
+classDiagram
+
+    namespace pipeline_helpers {
+        class BronzeWriteArtifacts
+        class BronzeWritePostwriteContext
+        class BronzeWritePrepared
+        class BronzeWriteRequest
+        class _BronzeWritePreparationHostProtocol
+    }
+
+    namespace cleanup_metrics {
+        class GroupJournalConflict
+        class GroupJournalFailure
+        class GroupRecoveryResult
+        class GroupSpec
+    }
+
+    namespace cleanup_planner {
+        class BronzeCleanupPlannerMixin
+        class _CleanupCandidate
+        class _CleanupDatePlan
+        class _CleanupPlanScope
+    }
+
+    namespace metadata_operations {
+        class BronzeMetadataWriteRequest
+        class PreparedBronzeMetadataWrite
+        class _BronzeMetadataBundleBuilder
+        class _BronzeMetadataWriteHostProtocol
+    }
+
+    namespace cleanup_core {
+        class BronzeRootLease
+        class _CleanupConflict
+    }
+
+    namespace cleanup_group_apply {
+        class BronzeGroupCleanup
+        class _CleanupPlanHost
+    }
+
+    namespace metadata_assembly {
+        class BronzeLineageMetadataRequest
+        class BronzeMetadataPayloadRequest
+    }
+
+    namespace metrics_mixin {
+        class BronzeWriterMetricsMixin
+        class _BronzeWriterMetricsHost
+    }
+
+    namespace read_cleanup_mixin {
+        class BronzeWriterReadCleanupMixin
+        class BronzeWriterReadMixin
+    }
+
+    namespace reporting_helpers {
+        class BronzeAuditWriteRequest
+        class BronzeMetadataInputRequest
+    }
+
+    namespace cleanup_group_journal {
+        class GroupJournal
+    }
+
+    BronzeCleanupPlannerMixin <|-- BronzeWriterReadCleanupMixin
+    BronzeWriterReadMixin <|-- BronzeWriterReadCleanupMixin

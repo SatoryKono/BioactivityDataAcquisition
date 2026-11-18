@@ -1,11 +1,11 @@
 %% Title: Package Family: application/services/execution
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/services/execution; modules: cli_run_orchestration_models, pipeline_runner_models, cli_run_orchestration_contracts, pipeline_run_execution_service, pipeline_run_lifecycle_service, cli_run_orchestration_service.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/services/execution; modules: cli_run_orchestration_models, pipeline_runner_models, cli_run_orchestration_contracts, pipeline_run_execution_service, pipeline_run_lifecycle_service, workflow_runner_step_execution.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-10-04
+%% @date    2026-11-17
 %% @level   Package Family / Inventory Slice
-%% @nodes   20
+%% @nodes   21
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
 
@@ -40,6 +40,11 @@ classDiagram
         class _PipelineRunLifecycleProtocol
     }
 
+    namespace workflow_runner_step_execution {
+        class TransformStepRuntimeOptions
+        class WorkflowStepDispatchDependencies
+    }
+
     namespace cli_run_orchestration_service {
         class CliRunOrchestrationService
     }
@@ -50,8 +55,4 @@ classDiagram
 
     namespace pipeline_runner_service {
         class PipelineRunnerService
-    }
-
-    namespace workflow_runner_step_execution {
-        class TransformStepRuntimeOptions
     }

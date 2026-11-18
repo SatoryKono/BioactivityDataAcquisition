@@ -295,3 +295,26 @@ async def test_paginated_fetch_no_warning_on_clean_end():
     results = [item async for item in fetcher.paginated_fetch(fetch_page)]
     assert results == []
     fetcher._logger.warning.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_paginated_fetch_page_error_is_not_clean_exhaustion() -> None:
+    """A failed later page must not finish as a normal exhausted cursor."""
+    fetcher = MockFetcher()
+    calls = 0
+
+    async def fetch_page(cursor, _):
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            return [1], "c2"
+        raise RuntimeError("page failed")
+
+    results: list[int] = []
+    with pytest.raises(RuntimeError, match="page failed"):
+        async for item in fetcher.paginated_fetch(fetch_page):
+            results.append(item)
+
+    assert results == [1]
+    assert calls == 2
+    fetcher._logger.warning.assert_not_called()

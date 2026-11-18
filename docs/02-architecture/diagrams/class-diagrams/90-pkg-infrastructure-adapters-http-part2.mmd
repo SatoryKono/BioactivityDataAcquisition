@@ -1,13 +1,33 @@
 %% Title: Package Family: infrastructure/adapters/http (Part 2/2)
-%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/adapters/http; part 2/2; modules: client_retry_mixin, health_tracker, pagination, rate_limiter.
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/adapters/http; part 2/2; modules: _client_retry_request_flow, _health_monitor_transitions, circuit_breaker, client, client_context_mixin, client_retry_mixin.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-10-04
+%% @date    2026-11-17
 %% @level   Package Family / Inventory Slice
-%% @nodes   4
+%% @nodes   8
 %% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
 classDiagram
+
+    namespace client_retry_request_flow {
+        class HTTPClientRetryRequestFlow
+    }
+
+    namespace health_monitor_transitions {
+        class ProviderHealthStateLike
+    }
+
+    namespace circuit_breaker {
+        class CircuitBreakerGuard
+    }
+
+    namespace client {
+        class UnifiedHTTPClient
+    }
+
+    namespace client_context_mixin {
+        class HTTPClientContextMixin
+    }
 
     namespace client_retry_mixin {
         class HTTPClientRetryMixin
@@ -17,10 +37,10 @@ classDiagram
         class ProviderHealthTracker
     }
 
-    namespace pagination {
-        class PaginatedFetcherMixin
-    }
-
     namespace rate_limiter {
         class TokenBucketRateLimiter
     }
+
+    HTTPClientContextMixin <|-- UnifiedHTTPClient
+    HTTPClientRetryMixin <|-- UnifiedHTTPClient
+    HTTPClientRetryRequestFlow <|-- HTTPClientRetryMixin

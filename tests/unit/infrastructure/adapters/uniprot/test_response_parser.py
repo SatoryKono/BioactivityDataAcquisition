@@ -34,6 +34,7 @@ import pytest
 from unittest.mock import MagicMock
 
 from bioetl.infrastructure.adapters.uniprot.response_parser import (
+    UniProtProteinPageError,
     parse_uniprot_protein_response,
 )
 
@@ -60,7 +61,8 @@ def test_parse_uniprot_protein_response_handles_malformed_payload() -> None:
     response.status_code = 200
     response.json.return_value = "bad-payload"
 
-    assert parse_uniprot_protein_response(response) == ([], None)
+    with pytest.raises(UniProtProteinPageError, match="not cursor exhaustion"):
+        parse_uniprot_protein_response(response)
 
 
 def test_parse_uniprot_protein_response_filters_malformed_results_and_cursor() -> None:
@@ -81,5 +83,6 @@ def test_parse_uniprot_protein_response_returns_empty_for_non_200_status() -> No
     response = MagicMock()
     response.status_code = 503
 
-    assert parse_uniprot_protein_response(response) == ([], None)
+    with pytest.raises(UniProtProteinPageError, match="status 503"):
+        parse_uniprot_protein_response(response)
     response.json.assert_not_called()

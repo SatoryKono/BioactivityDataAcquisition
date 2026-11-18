@@ -419,7 +419,14 @@ def test_nightly_replay_checksums_use_run_root_relative_paths() -> None:
 
 def test_coderabbit_installer_guard_ignores_documentation_comments() -> None:
     workflow = CODERABBIT_WORKFLOW.read_text(encoding="utf-8")
+    header = workflow.split("on:", maxsplit=1)[0]
+    document = _load_yaml(CODERABBIT_WORKFLOW)
+    triggers = document.get("on", document.get(True))
 
+    assert isinstance(triggers, dict)
+    assert set(triggers) == {"workflow_dispatch"}
+    assert "workflow_dispatch" in header
+    assert "push" not in header
     assert "cli.coderabbit.ai/install.sh" not in workflow
     assert "sha256sum -c" in workflow
     assert (
@@ -1078,6 +1085,29 @@ def test_osv_high_critical_gate_ignores_medium_and_fails_high() -> None:
     assert policy.collect_blocking_osv_findings(medium) == []
     assert policy.collect_blocking_osv_findings(vector_medium) == []
     assert policy.collect_blocking_osv_findings(high) == ["GHSA-high HIGH demo==1.0"]
+
+    # Picomatch residual allowlisting is forbidden; vulnerable versions stay
+    # fail-closed. Consumers remediates via .github/tooling/picomatch-backport.
+    picomatch_vulnerable = {
+        "results": [
+            {
+                "packages": [
+                    {
+                        "package": {"name": "picomatch", "version": "4.0.7"},
+                        "vulnerabilities": [
+                            {
+                                "id": "GHSA-fc5q-39xc-vjpf",
+                                "database_specific": {"severity": "HIGH"},
+                            }
+                        ],
+                    }
+                ]
+            }
+        ]
+    }
+    assert policy.collect_blocking_osv_findings(picomatch_vulnerable) == [
+        "GHSA-fc5q-39xc-vjpf HIGH picomatch==4.0.7"
+    ]
 
 
 def test_osv_gate_fails_closed_for_unknown_severity() -> None:
