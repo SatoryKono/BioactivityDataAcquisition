@@ -12,7 +12,7 @@ from bioetl.composition.bootstrap.assembly.storage import (
 from bioetl.composition.factories.pipeline.run_context_contract_identity import (
     NormalizedContractIdentity,
 )
-from bioetl.composition.factories.pipeline.target_classification_runtime import (
+from bioetl.composition.bootstrap.assembly.target_classification_runtime import (
     resolve_target_runtime_config,
 )
 from bioetl.domain.context import PipelineRunContext

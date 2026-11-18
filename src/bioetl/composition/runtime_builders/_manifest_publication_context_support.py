@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.composition.factories.pipeline.target_classification_identity import (
+from bioetl.composition.bootstrap.assembly.target_classification_identity import (
     apply_target_contract_identity,
 )
 

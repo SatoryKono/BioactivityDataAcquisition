@@ -12,7 +12,7 @@ from bioetl.composition.runtime_builders._exact_replay_cached_bronze_context imp
     resolve_exact_replay_cached_bronze_context as _resolve_exact_replay_cached_bronze_context,
     resolve_replay_parent_manifest,
 )
-from bioetl.composition.factories.pipeline.target_classification_identity import (
+from bioetl.composition.bootstrap.assembly.target_classification_identity import (
     load_target_aware_pipeline_config,
 )
 from bioetl.composition.runtime_builders._inputs_resolution_support import (

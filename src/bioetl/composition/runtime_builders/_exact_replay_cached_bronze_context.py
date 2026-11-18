@@ -19,7 +19,6 @@ from bioetl.composition.runtime_builders._exact_replay_snapshot_evidence import 
 from bioetl.domain.context import CachedBronzeContext
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 from bioetl.domain.control_plane.run_ledger import INPUT_SNAPSHOT_PUBLISHED_EVENT
-from bioetl.domain.control_plane.snapshot_field_resolution import coerce_optional_text
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.control_plane import FileRunLedgerStore, FileRunManifestStore
 
@@ -37,9 +36,7 @@ def resolve_replay_parent_manifest(
     manifest_store = FileRunManifestStore(
         base_path=control_plane_root(settings, "run_manifest")
     )
-    replay_of_manifest_id = coerce_optional_text(
-        getattr(ctx, "replay_of_manifest_id", None)
-    )
+    replay_of_manifest_id = _optional_text(getattr(ctx, "replay_of_manifest_id", None))
     if replay_of_manifest_id is not None:
         manifest = manifest_store.get(replay_of_manifest_id)
         if manifest is None:
@@ -49,7 +46,7 @@ def resolve_replay_parent_manifest(
             )
         return manifest
 
-    replay_of_run_id = coerce_optional_text(getattr(ctx, "replay_of_run_id", None))
+    replay_of_run_id = _optional_text(getattr(ctx, "replay_of_run_id", None))
     if replay_of_run_id is None:
         raise RuntimeError(
             "Exact replay without --use-cached-bronze requires replay_of_run_id "
@@ -71,9 +68,6 @@ def resolve_replay_parent_manifest(
     return manifest
 
 
-_resolve_replay_parent_manifest = resolve_replay_parent_manifest
-
-
 def resolve_exact_replay_cached_bronze_context(
     *,
     ctx: PipelineRunContext,
@@ -86,7 +80,7 @@ def resolve_exact_replay_cached_bronze_context(
     if bool(getattr(cached_bronze, "enabled", False)):
         return cached_bronze
 
-    parent_manifest = _resolve_replay_parent_manifest(ctx=ctx, settings=settings)
+    parent_manifest = resolve_replay_parent_manifest(ctx=ctx, settings=settings)
     provider = str(parent_manifest.provider).strip()
     entity = str(parent_manifest.entity).strip()
     if parent_manifest.pipeline_name != ctx.pipeline_name:
@@ -99,9 +93,8 @@ def resolve_exact_replay_cached_bronze_context(
         manifest=parent_manifest,
         settings=settings,
     )
-    bronze_root = Path(str(settings.bronze_path)) / provider / entity
     return CachedBronzeContext.from_options(
-        path=str(bronze_root),
+        path=str(Path(str(settings.bronze_path)) / provider / entity),
         date=bronze_date,
     )
 

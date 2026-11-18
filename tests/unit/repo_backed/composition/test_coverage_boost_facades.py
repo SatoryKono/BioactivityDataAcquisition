@@ -1023,7 +1023,7 @@ def test_exact_replay_resolution_helpers_cover_parent_lookup_and_date_errors(
 
     monkeypatch.setattr(
         replay_context,
-        "_resolve_replay_parent_manifest",
+        "resolve_replay_parent_manifest",
         lambda ctx, settings: manifest,
     )
     monkeypatch.setattr(
