@@ -457,6 +457,13 @@ def test_monitoring_compose_exposes_ops_http_soft_gate_env() -> None:
     )
 
 
+def _require_posix_sh() -> str:
+    shell = shutil.which("sh")
+    if shell is None:
+        pytest.skip("POSIX sh is required for the Grafana bootstrap integration test")
+    return shell
+
+
 def _run_bootstrap_profile(
     tmp_path: Path,
     *,
@@ -464,9 +471,7 @@ def _run_bootstrap_profile(
     ready: bool,
     require_ops: bool = False,
 ) -> tuple[subprocess.CompletedProcess[str], Path, Path, Path]:
-    shell = shutil.which("sh")
-    if shell is None:
-        pytest.skip("POSIX sh is required for the Grafana bootstrap integration test")
+    shell = _require_posix_sh()
 
     datasource_target = tmp_path / "datasources"
     datasource_core = tmp_path / "datasources-core"
@@ -593,9 +598,7 @@ def test_bootstrap_strict_timeout_never_launches_late_recovery(tmp_path: Path) -
 
 def _run_late_recovery_case(tmp_path: Path, scenario: str) -> dict:
     """Execute production watcher functions with deterministic clock/HTTP/PID seams."""
-    shell = shutil.which("sh")
-    if shell is None:
-        pytest.skip("POSIX sh is required for the Grafana bootstrap integration test")
+    shell = _require_posix_sh()
     source = Path("grafana/scripts/bootstrap-datasources.sh").read_text(
         encoding="utf-8"
     )
