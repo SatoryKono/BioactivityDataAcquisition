@@ -137,6 +137,8 @@ jobs:
           cache-dependency-path: .github/tooling/jscpd/package-lock.json
 
       - name: Run jscpd for duplication detection
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
         run: |
           set -euo pipefail
           mkdir -p reports/jscpd
