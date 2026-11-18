@@ -46,6 +46,9 @@ import zstandard as zstd
 from bioetl.composition.bootstrap import bootstrap_pipeline_runner
 from bioetl.domain.context import CachedBronzeContext, PipelineRunContext
 from bioetl.domain.contracts.gold import ChEMBLMoleculeGoldSchema
+from bioetl.infrastructure.storage.gold.writer_schema_helpers import (
+    _project_records_for_gold_schema,
+)
 from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 from .conftest import (
@@ -64,6 +67,7 @@ pytestmark = [
 ]
 
 _SCD_COLUMNS = {"_valid_from", "_valid_to", "_is_current", "_version"}
+_OCCURRENCE_COLUMNS = {"_dq_warn", "_dq_error", "_index"}
 
 
 @pytest.fixture
@@ -114,8 +118,16 @@ def _cached_context(path: Path) -> PipelineRunContext:
 def _assert_gold_contract(records: list[dict]) -> None:
     schema = ChEMBLMoleculeGoldSchema.to_schema()
     assert schema.strict is True
-    assert set(records[0]) <= set(schema.columns) | _SCD_COLUMNS
-    frame = pd.DataFrame.from_records(records).drop(columns=list(_SCD_COLUMNS))
+    expected_columns = (set(schema.columns) - _OCCURRENCE_COLUMNS) | _SCD_COLUMNS
+    assert all(set(record) == expected_columns for record in records)
+    # The writer validates the complete contract, then omits occurrence fields
+    # from persisted Gold. Reuse its canonical projection for read-back checks.
+    business = [
+        {key: value for key, value in record.items() if key not in _SCD_COLUMNS}
+        for record in records
+    ]
+    projected = _project_records_for_gold_schema(business, schema=schema)
+    frame = pd.DataFrame.from_records(projected)
     ChEMBLMoleculeGoldSchema.validate(frame, lazy=True)
 
 
