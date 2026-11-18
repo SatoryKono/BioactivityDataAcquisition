@@ -25,7 +25,7 @@
     },
     {
       "evidence_metrics": {
-        "source_module_count": 2653,
+        "source_module_count": 2652,
         "uncovered_module_count": 0
       },
       "id": "ddd_invariants",
@@ -66,13 +66,13 @@
     {
       "evidence_metrics": {
         "expired_compat_count": 0,
-        "twin_pair_count": 0
+        "twin_pair_count": 1
       },
       "id": "naming_package_consistency",
       "name": "Naming / package consistency",
-      "score": 10.0,
+      "score": 9.2,
       "weight": 0.08,
-      "weighted_score": 0.8
+      "weighted_score": 0.736
     },
     {
       "evidence_metrics": {
@@ -183,7 +183,7 @@
     }
   },
   "generated_by": "scripts.engineering.quality.architecture_quality_scorecard",
-  "integral_score": 10.0,
+  "integral_score": 9.94,
   "interpretation": "excellent",
   "metrics": {
     "accepted_adr_count": 61,
@@ -214,11 +214,11 @@
     "retained_public_export_facade_count": 3,
     "runtime_cardinality_review_required_count": 0,
     "runtime_cardinality_threshold_violation_count": 0,
-    "source_module_count": 2653,
+    "source_module_count": 2652,
     "sunset_compat_count": 0,
     "total_duplicate_clusters": 0,
     "transition_compat_count": 0,
-    "twin_pair_count": 0,
+    "twin_pair_count": 1,
     "uncovered_module_count": 0,
     "unmeasured_module_count": 0
   },
@@ -232,7 +232,7 @@
     },
     "compatibility_importer_census": {
       "path": "reports/quality/compatibility-importer-census.json",
-      "snapshot_date": "2026-10-18"
+      "snapshot_date": "2026-11-18"
     },
     "contract_registry_diagnostics": {
       "path": "reports/quality/contract-registry-diagnostics.json",
@@ -250,7 +250,7 @@
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "97b250fc912258658ec14f4e4a6da5a7ea1cbb3bd65268fa1fd318443d7682d7"
+      "source_fingerprint": "5d02948bf6200ca61001600a2e18446ce183804888fa89c956e9ca28fbd688d2"
     },
     "diagnostic_policy": {
       "lazy_import_ratchet": "configs/quality/lazy_import_ratchet.yaml",
@@ -269,7 +269,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "d878c43f265bcf908df0dc925038a025f0d248d0f506d18b01b708a3ec1d601f",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "1692fc34de6bd609f5b7abd5e246bb2c60cac4097a2446aeda827e52b435b564"
+      "source_tree_sha256": "496e0dae975621d4c59ab5fccb9af8cc1c1d553428b8f60dde06970a88bbb79a"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

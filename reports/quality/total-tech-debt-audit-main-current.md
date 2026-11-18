@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `9c4625cfc2587f014e066feed5c84093640c9914`
 
-Evidence surface SHA-256: `32bd678fb346bd7dbe4f4b22846fc59b2280a5e95634207449a2ad9199d407c0`
+Evidence surface SHA-256: `a3e8654c5c8d331667a6e65918072b5f55ce66d4e474d067bf76e569c78dd302`
 
 ## Current evidence summary
 
@@ -24,7 +24,7 @@ This is a metadata rebind, not a new repository-wide audit. The audited SHA
 and audit date above remain historical. Earlier conflicting headline values
 are retained in Git history, not presented as current conclusions here.
 
-Current result: debt-governance gates passing. The current architecture score `10.00`
+Current result: debt-governance gates passing. The current architecture score `9.94`
 replaces the historical score `9.47`; the audited SHA and date remain historical.
 
 Coverage measurements require the complete local 17-shard producer (#11745).
@@ -37,13 +37,13 @@ reported separately in the issue closeout evidence.
 
 Debt-governance gates: **47 pass / 0 fail**
 
-Architecture quality integral score: **10.0** (`excellent`)
+Architecture quality integral score: **9.94** (`excellent`)
 
-source_module_count: **2653**
+source_module_count: **2652**
 
 fully_covered: **2496**
 
-partially_covered: **156**
+partially_covered: **155**
 
 no_executable_lines: **1**
 
@@ -53,13 +53,13 @@ unmeasured: **0**
 
 coverage_xml_missing: **0**
 
-= 2653 == source_module_count
+= 2652 == source_module_count
 
 Contract coverage matrix schema: **contract-coverage-matrix-v3**
 
 Constructor waivers (shrink-only inventory): **1** entries
 
-Compatibility transition/sunset/expired: **0/0/0**; twin pairs: **0**
+Compatibility transition/sunset/expired: **0/0/0**; twin pairs: **1**
 
 Layer violations: **0**
 
@@ -71,9 +71,9 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "9c4625cfc2587f014e066feed5c84093640c9914",
-  "evidence_surface_sha256": "32bd678fb346bd7dbe4f4b22846fc59b2280a5e95634207449a2ad9199d407c0",
+  "evidence_surface_sha256": "a3e8654c5c8d331667a6e65918072b5f55ce66d4e474d067bf76e569c78dd302",
   "metrics": {
-    "architecture_integral_score": 10.0,
+    "architecture_integral_score": 9.94,
     "architecture_interpretation": "excellent",
     "constructor_waiver_count": 1,
     "contract_coverage_schema": "contract-coverage-matrix-v3",
@@ -86,11 +86,11 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
     "fully_covered_module_count": 2496,
     "layer_violation_count": 0,
     "no_executable_lines_module_count": 1,
-    "partially_covered_module_count": 156,
-    "source_module_count": 2653,
+    "partially_covered_module_count": 155,
+    "source_module_count": 2652,
     "sunset_compat_count": 0,
     "transition_compat_count": 0,
-    "twin_pair_count": 0,
+    "twin_pair_count": 1,
     "uncovered_module_count": 0,
     "unmeasured_module_count": 0
   },
