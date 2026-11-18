@@ -24,7 +24,6 @@ from bioetl.composition.bootstrap.assembly.storage import (
 from bioetl.composition.runtime_builders.config_access import get_settings
 from bioetl.infrastructure.config.target_classification_profile import (
     TargetClassificationSchemaProfile,
-    resolve_target_classification_profile,
 )
 from bioetl.infrastructure.schemas.pipeline_contract_policy import (
     PipelineContractPolicy,
