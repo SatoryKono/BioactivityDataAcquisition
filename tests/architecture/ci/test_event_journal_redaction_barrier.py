@@ -233,3 +233,31 @@ def test_spaced_env_token_does_not_leave_a_suffix(
     payload = json.loads(text)
     assert payload["event"] == "session_start"
     assert suffix not in payload["notes"]
+
+
+@pytest.mark.parametrize("escaped", [False, True])
+def test_journal_seals_complete_keyed_value_containing_password(
+    monkeypatch: pytest.MonkeyPatch, escaped: bool
+) -> None:
+    from scripts.engineering.ci import pytest_event_journal as journal
+
+    password = "fixture-overlap-password"
+    value = password + ' independent-fixture-tail"\nnext'
+    monkeypatch.setenv("BIOETL_UNIT_PASSWORD", password)
+    monkeypatch.setenv("BIOETL_UNIT_TOKEN", value)
+    seen: list[str] = []
+    original = journal._correlation_tag
+
+    def spy(captured: str) -> str:
+        seen.append(captured)
+        return original(captured)
+
+    monkeypatch.setattr(journal, "_correlation_tag", spy)
+    text = json.dumps(value, ensure_ascii=True)[1:-1] if escaped else value
+    stored = journal._line_for_storage(
+        journal._redact_text("authorization=" + text, journal._secret_values()),
+        journal._secret_values(),
+    )
+    assert stored == "authorization=[redacted]"
+    assert "independent-fixture-tail" not in stored
+    assert all(password not in captured for captured in seen)

@@ -259,10 +259,10 @@ def _replace_assignment(match: re.Match[str]) -> str:
         if replacement is None:
             return match.group(0)
         return prefix + replacement + suffix
-    if (
-        _REDACTED_ASSIGNMENT_VALUE.fullmatch(value) is not None
-        or value == _SEALED_REDACTION
-    ):
+    if _REDACTED_ASSIGNMENT_VALUE.fullmatch(value) is not None or value in {
+        _SEALED_REDACTION,
+        "[redacted",
+    }:
         return match.group(0)
     return prefix + _correlation_tag(value) + suffix
 
@@ -421,16 +421,22 @@ def _line_for_storage(line: str, known: tuple[str, ...]) -> str:
 
 def _redact_text(text: str, needles: tuple[str, ...]) -> str:
     blocked = _blocked_env_needles()
-    redacted = _seal_blocked_text(text, blocked)
-    # Known needles are replaced before assignment parsing. A capture stops
-    # at whitespace, so a later search would miss the remainder of the value.
-    for captured in needles:
-        if (
-            captured
-            and captured in redacted
-            and not _contains_needle(captured, blocked)
-        ):
-            redacted = redacted.replace(captured, _correlation_tag(captured))
+    redacted = text
+    # Preserve complete known values before sealing their password substrings.
+    for captured in sorted(set(needles), key=len, reverse=True):
+        if not captured:
+            continue
+        forms = [form for form in _encoded_forms(captured) if form and form in redacted]
+        if not forms:
+            continue
+        replacement = (
+            _SEALED_REDACTION
+            if _contains_needle(captured, blocked)
+            else _correlation_tag(captured)
+        )
+        for form in forms:
+            redacted = redacted.replace(form, replacement)
+    redacted = _seal_blocked_text(redacted, blocked)
     redacted = _SECRET_ASSIGNMENT.sub(_replace_assignment, redacted)
     return _SECRET_PREFIX.sub(_replace_prefix, redacted)
 
