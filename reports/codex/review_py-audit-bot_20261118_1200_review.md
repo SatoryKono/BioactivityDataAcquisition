@@ -10,6 +10,7 @@ The previous IUPHAR branch recorded the same source identities at e44ca5d22ecc76
 
 - AUD-001: parity JSON output created the parent before resolving a relative destination. A rejected `../escape/report.json` could create the rejected directory; valid relative output from another working directory also failed. Resolve first, then create the resolved parent. Explicit absolute external destinations remain supported.
 - AUD-002: architecture-suite, VCR-corpus and weak-assert reporters created only the JSON parent. A separate new Markdown directory caused FileNotFoundError. Create both independently resolved output parents.
+- GitHub SonarCloud measured 3.3% new-code duplication after adding the missing parent creation to the three existing duplicate publication blocks (maximum 3%). The common publisher now lives in `scripts/engineering/common/report_outputs.py`, resolving both destinations and reusing the existing confined atomic text writer. Its three current callers and supporting lifecycle entry are explicit; no duplication threshold or exclusion was changed.
 
 ## Validation and limits
 

@@ -10,8 +10,50 @@ import pytest
 
 from scripts.data_quality import run_silver_gold_filter_parity as parity
 from scripts.engineering.common import repo_paths
+from scripts.engineering.common.report_outputs import write_report_outputs
 
 pytestmark = pytest.mark.unit
+
+
+def test_report_outputs_reject_second_relative_escape_before_publication(
+    tmp_path: Path,
+) -> None:
+    root = tmp_path / "repo"
+    root.mkdir()
+
+    with pytest.raises(ValueError, match="refusing path outside"):
+        write_report_outputs(
+            {"status": "pass"},
+            json_out=Path("json/report.json"),
+            md_out=Path("../escape/report.md"),
+            markdown="Report\n",
+            root=root,
+        )
+
+    assert not (root / "json").exists()
+    assert not (tmp_path / "escape").exists()
+
+
+def test_report_outputs_preserve_explicit_external_destinations(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root = tmp_path / "repo"
+    root.mkdir()
+    monkeypatch.setattr(repo_paths, "REPO_ROOT", root)
+    json_out = tmp_path / "external-json/report.json"
+    md_out = tmp_path / "external-markdown/report.md"
+
+    published = write_report_outputs(
+        {"value": "текст"},
+        json_out=json_out,
+        md_out=md_out,
+        markdown="Report\n",
+        root=root,
+    )
+
+    assert published == (json_out, md_out)
+    assert json.loads(json_out.read_text(encoding="utf-8")) == {"value": "текст"}
+    assert md_out.read_text(encoding="utf-8") == "Report\n"
 
 
 def test_parity_rejects_relative_escape_before_creating_parent(
