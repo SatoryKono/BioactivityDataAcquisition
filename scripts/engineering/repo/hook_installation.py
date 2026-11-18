@@ -28,6 +28,7 @@ MODULES = (
     "process_supervisor",
     "offline_precommit",
     "readonly_message",
+    "coalesced_precommit",
     "hook_runtime",
     "hook_installation",
     "hook_receipts",

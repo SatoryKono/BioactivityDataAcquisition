@@ -26,6 +26,11 @@ from unittest.mock import patch
 
 QUALIFIED_VERSION = "4.7.0"
 HOOK_TYPES = frozenset({"pre-commit", "pre-push", "commit-msg"})
+BACKEND_PATHS = {
+    "readonly_message": "scripts/engineering/repo/readonly_message.py",
+    "coalesced_precommit": "scripts/engineering/repo/coalesced_precommit.py",
+}
+
 
 # Tokenized entries from the qualified config; changed commands stay serial.
 QUALIFIED_PUSH_COMMANDS = {
@@ -70,8 +75,16 @@ def _cached_repo(
 def _require_environments(hooks: Sequence[Any], store: Any) -> None:
     del store
     repository = importlib.import_module("pre_commit.repository")
-    if any(not repository._hook_installed(hook) for hook in hooks):
-        raise BootstrapRequired("environment_missing_or_unhealthy")
+    seen = set()
+    for hook in hooks:
+        # Exact framework environment identity, only within this invocation.
+        key = getattr(hook, "install_key", None) if sys.platform == "linux" else None
+        if key is not None and key in seen:
+            continue
+        if not repository._hook_installed(hook):
+            raise BootstrapRequired("environment_missing_or_unhealthy")
+        if key is not None:
+            seen.add(key)
 
 
 def _command_digest(entry: str, args: Sequence[str]) -> str:
@@ -301,12 +314,9 @@ def _read_only_staged_files(patch_dir: str) -> Iterator[None]:
     yield
 
 
-def _message_backend() -> Any:
+def _message_backend(name: str = "readonly_message") -> Any:
     try:
-        source = (
-            Path(__file__).resolve().parents[3]
-            / "scripts/engineering/repo/readonly_message.py"
-        )
+        source = Path(__file__).resolve().parents[3] / BACKEND_PATHS[name]
         spec = importlib.util.spec_from_file_location("_bioetl_owned_message", source)
         if spec is None or spec.loader is None:
             raise BootstrapRequired("message_backend_unavailable")
@@ -332,13 +342,21 @@ def run(hook_type: str, hook_dir: Path, args: Sequence[str]) -> int:
         root = Path.cwd()
         message = _message_backend() if hook_type == "commit-msg" else None
         readonly = bool(message is not None and message.qualified(root, hook_dir))
+        commit = (
+            _message_backend("coalesced_precommit")
+            if hook_type == "pre-commit" and sys.platform == "linux"
+            else None
+        )
+        initial_clean = False
 
         @contextmanager
         def staged_files(patch_dir: str) -> Iterator[None]:
+            nonlocal initial_clean
             if readonly:
                 yield  # Verified header code reads metadata; no source hiding.
             else:
                 with _read_only_staged_files(patch_dir):
+                    initial_clean = True
                     yield
 
         offline = {
@@ -374,6 +392,17 @@ def run(hook_type: str, hook_dir: Path, args: Sequence[str]) -> int:
                             root=root,
                             hook_dir=hook_dir,
                         )
+                    )
+                if commit is not None:
+                    return commit.dispatch(
+                        run_module,
+                        serial,
+                        config,
+                        hooks,
+                        skips,
+                        options,
+                        root=root,
+                        initial_clean=initial_clean,
                     )
                 return _run_qualified_hooks(
                     run_module, serial, config, hooks, skips, options

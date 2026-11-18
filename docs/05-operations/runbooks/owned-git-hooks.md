@@ -140,6 +140,20 @@ Independent read-only bookend probes overlap in four bounded worker slots; every
 probe is awaited and each bookend samples fresh state without cross-event reuse.
 Missing or skipped message input cannot qualify execution. This is not a native
 AI permission boundary, cache waiver or authorization to mutate an env file.
+
+On Linux, the qualified pre-commit path can coalesce repeated whole-tree diffs
+only when every active command matches the known read-only or fail-on-write
+contract. Remote revisions/commands and the root-audit source chain are pinned;
+unknown active hooks, source drift, SKIP or fail-fast retain ordinary execution.
+The read-only staged context supplies the initial clean observation. Every actual
+check still runs, and a fresh checked Git diff after the last successful check
+must be empty. The first nonzero result resumes ordinary per-hook diff checks
+for the rest of the event. Ruff format explicitly exits nonzero after formatting,
+preserving the framework's existing refusal when a formatter changes input.
+An unavailable final diff is an error. Distinct Linux environments are probed
+once per invocation by the framework's complete install key, without reuse
+between events. Windows retains ordinary pre-commit diff/probe dispatch. This
+is bounded command qualification, not proof of an OS permission boundary.
 The qualified adapter replaces pre-commit
 stash/checkout with a read-only unstaged-diff check: if the framework would need
 to hide tracked unstaged changes, it refuses before configured callbacks. Stage
