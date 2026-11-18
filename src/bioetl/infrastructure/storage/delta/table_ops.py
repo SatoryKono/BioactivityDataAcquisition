@@ -105,10 +105,9 @@ def _align_table_to_schema(
         result = result.append_column(
             name, pa.nulls(result.num_rows, type=schema.field(name).type)
         )
-    selectable = [name for name in target if name in result.column_names]
-    if not selectable:
+    if not target:
         return result
-    return result.select(selectable)
+    return result.select(target)
 
 
 def _physical_columns_for_read(
@@ -142,10 +141,8 @@ def _empty_row_table(row_count: int) -> pa.Table:
 
 
 def _parquet_row_count(path: str) -> int:
-    try:
-        return int(pq.read_metadata(path).num_rows)
-    except (OSError, ValueError, pa.ArrowInvalid, pa.ArrowIOError):
-        return 0
+    """Preserve read failures instead of presenting an unreadable file as empty."""
+    return int(pq.read_metadata(path).num_rows)
 
 
 def _read_physical_parquet(
@@ -156,15 +153,16 @@ def _read_physical_parquet(
     """Read active-file physical columns, tolerating unavailable schema probes."""
     available = _list_available_parquet_columns(path)
     if available is None:
-        if columns is None:
-            return pq.read_table(path, use_threads=False)
-        physical = [name for name in columns if name not in partition_columns]
-        if physical:
-            return pq.read_table(path, columns=physical, use_threads=False)
-        return _empty_row_table(_parquet_row_count(path))
-
-    physical_columns = _physical_columns_for_read(columns, partition_columns, available)
-    if physical_columns:
+        physical_columns = (
+            None
+            if columns is None
+            else [name for name in columns if name not in partition_columns]
+        )
+    else:
+        physical_columns = _physical_columns_for_read(
+            columns, partition_columns, available
+        )
+    if physical_columns is None or physical_columns:
         return pq.read_table(path, columns=physical_columns, use_threads=False)
     return _empty_row_table(_parquet_row_count(path))
 

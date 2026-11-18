@@ -236,6 +236,29 @@ def test_windows_read_fills_schema_evolved_columns_as_typed_nulls(
     ]
 
 
+def test_parquet_row_count_does_not_hide_metadata_read_errors(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def unavailable_metadata(path: str) -> None:
+        raise OSError("unreadable active Parquet footer")
+
+    monkeypatch.setattr(table_ops.pq, "read_metadata", unavailable_metadata)
+
+    with pytest.raises(OSError, match="unreadable active Parquet footer"):
+        table_ops._read_physical_parquet("active.parquet", [], frozenset())
+
+
+def test_schema_alignment_rejects_unknown_projected_columns() -> None:
+    import pyarrow as pa
+
+    with pytest.raises(KeyError, match="missing"):
+        table_ops._align_table_to_schema(
+            pa.table({"entity_id": ["row-1"]}),
+            pa.schema([("entity_id", pa.string())]),
+            ["entity_id", "missing"],
+        )
+
+
 def test_resolve_parquet_file_uri_strips_windows_file_uri_prefix() -> None:
     assert (
         table_ops.resolve_parquet_file_uri("file:///C:/tmp/part.parquet")
