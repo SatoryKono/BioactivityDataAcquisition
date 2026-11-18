@@ -102,28 +102,55 @@ def _validate_requirement(requirement, installed, normalize):
 
 def _copy_distribution(staging, site, distribution):
     for relative in distribution.files or []:
-        source = Path(distribution.locate_file(relative)).resolve(strict=True)
-        if not source.is_relative_to(site):
-            continue  # Console entrypoints are replaced by the isolated runner.
-        if "__pycache__" in source.parts or source.suffix == ".pyc":
-            continue
-        if source.name == ".env" or source.name.startswith(".env."):
-            raise ValueError("Converter package contains an environment file")
-        if source.resolve(strict=True) != source or source.is_symlink():
+        _copy_package_file(staging, site, distribution, relative)
+
+
+def _copy_package_file(staging, site, distribution, relative):
+    source = Path(os.path.abspath(distribution.locate_file(relative)))
+    if (
+        not source.is_relative_to(site)
+        or "__pycache__" in source.parts
+        or source.suffix == ".pyc"
+    ):
+        return
+    if source.name == ".env" or source.name.startswith(".env."):
+        raise ValueError("Converter package contains an environment file")
+    for component in reversed((source, *source.parents)):
+        if component.is_symlink() or getattr(component, "is_junction", lambda: False)():
             raise ValueError("Converter package traverses a reparse path")
-        target = staging / "site-packages" / source.relative_to(site)
-        target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(source, target)
-        if digest(source) != digest(target):
-            raise ValueError("Converter dependency changed during copying")
+    if source.resolve(strict=True) != source:
+        raise ValueError("Converter package path is not physical")
+    target = staging / "site-packages" / source.relative_to(site)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(source, target)
+    if digest(source) != digest(target):
+        raise ValueError("Converter dependency changed during copying")
 
 
-def build(destination, site, extras=()):
-    """Copy the exact installed closure for independently qualified formats."""
+def _discard_staging(staging, destination):
+    # Delete only this invocation's exclusive directory, after validating the
+    # final absolute target and every reparse-sensitive child. Never glob caches.
+    if (
+        not staging.is_absolute()
+        or staging.parent != destination
+        or not staging.name.startswith("building-")
+        or staging.resolve(strict=True) != staging
+        or destination.resolve(strict=True) != destination
+    ):
+        raise ValueError("Staging cleanup escaped its owned destination")
+    for current, directories, files in os.walk(staging, followlinks=False):
+        for name in [*directories, *files]:
+            path = Path(current) / name
+            if (
+                getattr(path.lstat(), "st_file_attributes", 0) & 0x400
+                or path.is_symlink()
+            ):
+                raise ValueError("Staging cleanup encountered a reparse point")
+    shutil.rmtree(staging)
+
+
+def _build_snapshot(staging, destination, site, extras):
     installed, selected, packages = closure(site, extras)
-    destination.mkdir(parents=True, exist_ok=True)
-    staging = destination / ("building-" + uuid.uuid4().hex)
-    staging.mkdir()
     for name in selected:
         _copy_distribution(staging, site, installed[name])
     runner = Path(__file__).with_name("converter_runner.py")
@@ -142,9 +169,28 @@ def build(destination, site, extras=()):
     (staging / CONVERTER_MANIFEST).write_bytes(raw)
     target = destination / hashlib.sha256(raw).hexdigest()
     if not target.exists():
-        staging.rename(target)
+        try:
+            staging.rename(target)
+        except OSError:
+            if not target.is_dir():
+                raise
+            # A parallel builder may have published the same content identity.
     verify(target)
     return target
+
+
+def build(destination, site, extras=()):
+    """Copy the installed closure; release only this invocation's temporary copy."""
+    destination.mkdir(parents=True, exist_ok=True)
+    if not destination.is_absolute() or destination.resolve(strict=True) != destination:
+        raise ValueError("Converter destination is not physical")
+    staging = destination / ("building-" + uuid.uuid4().hex)
+    staging.mkdir()
+    try:
+        return _build_snapshot(staging, destination, site, extras)
+    finally:
+        if staging.exists():
+            _discard_staging(staging, destination)
 
 
 QUALIFICATION_TEXT = "BioETL converter qualification"

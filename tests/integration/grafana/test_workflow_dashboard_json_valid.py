@@ -51,7 +51,7 @@ def test_incident_workflow_band_uses_workflow_metrics() -> None:
     panels = _iter_panels(list(dashboard.get("panels") or []))
     titles = {str(panel.get("title") or "") for panel in panels}
     assert any(
-        title.startswith("Review Current Workflow Evidence · ") for title in titles
+        title.startswith("Inspect Current Workflow Evidence · ") for title in titles
     )
     assert "Track Failed Workflow Runs" in titles
     assert "Track Failed Workflow Steps" in titles

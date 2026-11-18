@@ -22,7 +22,6 @@ from bioetl.infrastructure.adapters.pubmed._search_models import (
     MAX_ESEARCH_PAGES,
     append_completed_page,
     esearch_page_completes,
-    esearch_params,
     esearch_result_still_short,
     raise_pubmed_search_truncated,
     reject_esearch_page_cap,
@@ -39,6 +38,30 @@ from .constants import ENTREZ_API_BASE
 __all__ = ["PUBMED_SEARCH_ERRORS", "PubMedSearchMixin"]
 
 _ESEARCH_URL = f"{ENTREZ_API_BASE}esearch.fcgi"
+
+
+def esearch_params(
+    email: str,
+    api_key: str | None,
+    search_term: str,
+    *,
+    retstart: int,
+    retmax: int,
+) -> dict[str, str]:
+    """Build an ESearch query. Omit ``retstart`` on the first page."""
+    params = {
+        "db": "pubmed",
+        "term": search_term,
+        "retmax": str(retmax),
+    }
+    if retstart > 0:
+        params["retstart"] = str(retstart)
+    params["usehistory"] = "y"
+    params["retmode"] = "json"
+    params["email"] = email
+    if api_key and "your_" not in api_key:
+        params["api_key"] = api_key
+    return params
 
 
 class PubMedSearchMixin(PubMedAdapterStateMixin):

@@ -17,11 +17,11 @@ from typing import Any
 def _physical(path: Path) -> Path:
     if not path.is_absolute() or ".." in path.parts:
         raise ValueError("Native MCP route requires a physical absolute path")
-    if path.resolve(strict=True) != path:
-        raise ValueError("Native MCP route traverses a link")
-    for part in (path, *path.parents):
+    for part in reversed((path, *path.parents)):
         if part.is_symlink() or getattr(part, "is_junction", lambda: False)():
             raise ValueError("Native MCP route traverses a reparse point")
+    if path.resolve(strict=True) != path:
+        raise ValueError("Native MCP route traverses a link")
     return path
 
 
@@ -103,14 +103,12 @@ def apply_local_routes(
     data = json.loads(path.read_text(encoding="utf-8"))
     if set(data) != {"schema", "git_common", "entries"} or data["schema"] != 1:
         raise ValueError("Invalid native MCP route manifest")
-    try:
-        expected = _physical(Path(data["git_common"]))
-    except FileNotFoundError:
-        if explicit:
-            raise
-        return servers  # A removed checkout cannot own the default host route.
+    expected = Path(data["git_common"])
+    if not expected.is_absolute() or ".." in expected.parts:
+        raise ValueError("Native MCP Git binding must be absolute")
     if not _repository_binding_matches(expected, workspace, strict=explicit):
         return servers
+    _physical(expected)
     result = deepcopy(servers)
     if not isinstance(data["entries"], dict):
         raise ValueError("Invalid native MCP route entries")

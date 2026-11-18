@@ -1,5 +1,7 @@
 """Private isolated conversion worker. Receives an owner-private snapshot only."""
 
+from __future__ import annotations
+
 import hashlib
 import json
 import os
@@ -45,7 +47,8 @@ sys.path.append(str(root / "site-packages"))
 from markitdown import MarkItDown
 
 text = MarkItDown(enable_plugins=False).convert(str(source)).text_content
-if len(text.encode("utf-8")) > 1024 * 1024:
+output = text.encode("utf-8")
+if len(output) > 1024 * 1024:
     raise SystemExit("Converter output exceeds bound")
-sys.stdout.reconfigure(encoding="utf-8")
-print(text)
+sys.stdout.buffer.write(output)
+sys.stdout.buffer.flush()
