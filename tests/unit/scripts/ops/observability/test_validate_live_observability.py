@@ -740,7 +740,9 @@ def test_cli_dashboard_profile_reaches_validation(
     assert len(list(tmp_path.glob("validation-report-*.json"))) == 1
 
 
-def test_direct_script_help_bootstraps_repository_imports(tmp_path: Path) -> None:
+def test_live_observability_script_help_bootstraps_repository_imports(
+    tmp_path: Path,
+) -> None:
     env = {key: value for key, value in os.environ.items() if key != "PYTHONPATH"}
     result = subprocess.run(
         [sys.executable, str(Path(vlo.__file__).resolve()), "--help"],

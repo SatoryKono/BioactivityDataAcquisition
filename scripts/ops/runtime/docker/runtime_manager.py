@@ -2021,6 +2021,21 @@ def _grafana_bootstrap_timeout_retry_needed(
     )
 
 
+def _explicit_monitoring_profile_incomplete(
+    payload: Mapping[str, Any] | None,
+) -> bool:
+    """A terminal prometheus-only profile does not satisfy an explicit monitoring start."""
+    if not isinstance(payload, Mapping):
+        return False
+    profile = str(payload.get("dashboard_profile") or "").strip()
+    ops_http = str(payload.get("ops_http") or "").strip()
+    if profile == "full" and ops_http == "ready":
+        return False
+    if str(payload.get("reason") or "").strip() == _GRAFANA_TIMEOUT_RETRY_REASON:
+        return False
+    return profile == "prometheus_only"
+
+
 def _grafana_expected_runtime_source_id(runner: Runner, *, timeout: float) -> str:
     result = runner(
         [
@@ -2246,7 +2261,11 @@ def _post_start_grafana_bootstrap_gate(
         runner,
         timeout=initial_timeout,
     )
-    if not readable or not _grafana_bootstrap_timeout_retry_needed(payload):
+    if not readable or not isinstance(payload, Mapping):
+        return
+    if _explicit_monitoring_profile_incomplete(payload):
+        return False
+    if not _grafana_bootstrap_timeout_retry_needed(payload):
         return
     watcher_ready = _wait_for_active_grafana_watcher(
         payload, runner, deadline=deadline, sleep=sleep, clock=clock

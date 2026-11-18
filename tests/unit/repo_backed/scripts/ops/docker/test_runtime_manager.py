@@ -33,7 +33,7 @@ import shutil
 import stat
 import subprocess
 import sys
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -69,6 +69,85 @@ def _monitoring_spec() -> runtime_manager.StackSpec:
         required_services=("prometheus", "pushgateway", "grafana"),
         expected_images={"grafana": "grafana/grafana:test@sha256:expected"},
     )
+
+
+def _prometheus_only_deferred(reason: str) -> dict[str, str]:
+    return {
+        "ops_http": "deferred",
+        "reason": reason,
+        "dashboard_profile": "prometheus_only",
+    }
+
+
+def _cat_status_runner(
+    commands: list[list[str]], payload: dict[str, str]
+) -> Callable[..., runtime_manager.CommandResult]:
+    def runner(
+        cmd: Sequence[str], _cwd: Path, _timeout: float
+    ) -> runtime_manager.CommandResult:
+        commands.append(list(cmd))
+        if (
+            cmd[:3] == ["docker", "exec", runtime_manager._GRAFANA_CONTAINER]
+            and cmd[3] == "cat"
+        ):
+            return runtime_manager.CommandResult(
+                list(cmd), 0, stdout=json.dumps(payload)
+            )
+        raise AssertionError(f"unexpected {cmd}")
+
+    return runner
+
+
+def _prepare_claim_shell(tmp_path: Path) -> tuple[str, dict[str, str], Path, str]:
+    shell = shutil.which("sh")
+    if shell is None:
+        pytest.skip("POSIX sh is required for the atomic recovery claim test")
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    for name, value in {
+        "cat": "boot",
+        "cut": "100",
+        "sed": "unused",
+        "awk": "200",
+    }.items():
+        fake = fake_bin / name
+        fake.write_text(
+            f"#!/bin/sh\nprintf '%s\\n' '{value}'\n",
+            encoding="utf-8",
+            newline="\n",
+        )
+        fake.chmod(0o755)
+    source_id = "a" * 64
+    recovery_root = tmp_path / "bioetl-late-cutover"
+    recovery_root.mkdir()
+    env = {
+        **os.environ,
+        "PATH": str(fake_bin) + os.pathsep + os.environ.get("PATH", ""),
+        "TEST_BIN": str(fake_bin),
+        "BIOETL_EXPECTED_RUNTIME_SOURCE_ID": source_id,
+        "BIOETL_GRAFANA_BOOTSTRAP_STATUS_FILE": str(tmp_path / "bootstrap-status.json"),
+    }
+    return shell, env, recovery_root, source_id
+
+
+def _claim_script_results(
+    shell: str, env: dict[str, str], *, count: int = 2
+) -> list[tuple[str, str, int]]:
+    processes = [
+        subprocess.Popen(
+            [shell, "-c", runtime_manager._GRAFANA_LATE_CUTOVER_CLAIM],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            env=env,
+        )
+        for _ in range(count)
+    ]
+    results: list[tuple[str, str, int]] = []
+    for process in processes:
+        stdout, stderr = process.communicate(timeout=10)
+        results.append((stdout, stderr, process.returncode))
+    return results
 
 
 def test_direct_script_help_bootstraps_repository_imports(tmp_path: Path) -> None:
@@ -490,31 +569,16 @@ def test_grafana_bootstrap_timeout_retry_stops_wait_on_terminal_reason(
     assert ["docker", "restart", runtime_manager._GRAFANA_CONTAINER] in commands
 
 
-def test_grafana_bootstrap_timeout_retry_skips_identity_mismatch(
-    monkeypatch: pytest.MonkeyPatch,
+@pytest.mark.parametrize(
+    "reason", ["identity_mismatch", "infinity_plugin_install_failed"]
+)
+def test_explicit_monitoring_rejects_terminal_prometheus_only_profile(
+    monkeypatch: pytest.MonkeyPatch, reason: str
 ) -> None:
     monkeypatch.delenv("BIOETL_TEST_MODE", raising=False)
     monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
     commands: list[list[str]] = []
-
-    def runner(cmd: Sequence[str], _cwd: Path, _timeout: float):
-        commands.append(list(cmd))
-        if (
-            cmd[:3] == ["docker", "exec", runtime_manager._GRAFANA_CONTAINER]
-            and cmd[3] == "cat"
-        ):
-            return runtime_manager.CommandResult(
-                list(cmd),
-                0,
-                stdout=json.dumps(
-                    {
-                        "ops_http": "deferred",
-                        "reason": "identity_mismatch",
-                        "dashboard_profile": "prometheus_only",
-                    }
-                ),
-            )
-        raise AssertionError(f"unexpected {cmd}")
+    runner = _cat_status_runner(commands, _prometheus_only_deferred(reason))
 
     result = runtime_manager._post_start_grafana_bootstrap_gate(
         spec=_monitoring_spec(),
@@ -524,7 +588,7 @@ def test_grafana_bootstrap_timeout_retry_skips_identity_mismatch(
         clock=lambda: 0.0,
     )
 
-    assert result is None
+    assert result is False
     assert not any(cmd[:2] == ["docker", "restart"] for cmd in commands)
 
 
@@ -1134,36 +1198,11 @@ def test_manager_waits_for_live_lease_before_probing_late_main(
 def test_late_cutover_claim_checks_current_process_and_deadline(
     tmp_path: Path, lease: str | None, expected: str
 ) -> None:
-    shell = shutil.which("sh")
-    if shell is None:
-        pytest.skip("POSIX sh is required for the atomic recovery claim test")
-    fake_bin = tmp_path / "bin"
-    fake_bin.mkdir()
-    for name, value in {
-        "cat": "boot",
-        "cut": "100",
-        "sed": "unused",
-        "awk": "200",
-    }.items():
-        fake = fake_bin / name
-        fake.write_text(
-            f"#!/bin/sh\nprintf '%s\\n' '{value}'\n", encoding="utf-8", newline="\n"
-        )
-        fake.chmod(0o755)
-    source_id = "a" * 64
-    recovery_root = tmp_path / "bioetl-late-cutover"
-    recovery_root.mkdir()
+    shell, env, recovery_root, source_id = _prepare_claim_shell(tmp_path)
     if lease is not None:
         (recovery_root / f"{source_id}.lease").write_text(
             lease + "\n", encoding="utf-8", newline="\n"
         )
-    env = {
-        **os.environ,
-        "PATH": str(fake_bin) + os.pathsep + os.environ.get("PATH", ""),
-        "TEST_BIN": str(fake_bin),
-        "BIOETL_EXPECTED_RUNTIME_SOURCE_ID": source_id,
-        "BIOETL_GRAFANA_BOOTSTRAP_STATUS_FILE": str(tmp_path / "bootstrap-status.json"),
-    }
     command = (
         'PATH="$(cd "$TEST_BIN" && pwd):$PATH"\n'
         + runtime_manager._GRAFANA_LATE_CUTOVER_CLAIM
@@ -1196,36 +1235,11 @@ def test_late_cutover_claim_checks_current_process_and_deadline(
 def test_check_mode_sees_active_lease_while_claim_remains(
     tmp_path: Path,
 ) -> None:
-    shell = shutil.which("sh")
-    if shell is None:
-        pytest.skip("POSIX sh is required for the atomic recovery claim test")
-    fake_bin = tmp_path / "bin"
-    fake_bin.mkdir()
-    for name, value in {
-        "cat": "boot",
-        "cut": "100",
-        "sed": "unused",
-        "awk": "200",
-    }.items():
-        fake = fake_bin / name
-        fake.write_text(
-            f"#!/bin/sh\nprintf '%s\\n' '{value}'\n", encoding="utf-8", newline="\n"
-        )
-        fake.chmod(0o755)
-    source_id = "a" * 64
-    recovery_root = tmp_path / "bioetl-late-cutover"
-    recovery_root.mkdir()
+    shell, env, recovery_root, source_id = _prepare_claim_shell(tmp_path)
     (recovery_root / f"{source_id}.lease").write_text(
         "42 200 boot 150\n", encoding="utf-8", newline="\n"
     )
     (recovery_root / f"{source_id}.claim").mkdir()
-    env = {
-        **os.environ,
-        "PATH": str(fake_bin) + os.pathsep + os.environ.get("PATH", ""),
-        "TEST_BIN": str(fake_bin),
-        "BIOETL_EXPECTED_RUNTIME_SOURCE_ID": source_id,
-        "BIOETL_GRAFANA_BOOTSTRAP_STATUS_FILE": str(tmp_path / "bootstrap-status.json"),
-    }
     script = (
         'PATH="$(cd "$TEST_BIN" && pwd):$PATH"\n'
         + runtime_manager._GRAFANA_LATE_CUTOVER_CLAIM
@@ -1260,19 +1274,9 @@ def test_late_cutover_claim_has_one_owner_across_concurrent_processes(
         "BIOETL_EXPECTED_RUNTIME_SOURCE_ID": "a" * 64,
         "BIOETL_GRAFANA_BOOTSTRAP_STATUS_FILE": str(tmp_path / "bootstrap-status.json"),
     }
-    processes = [
-        subprocess.Popen(
-            [shell, "-c", runtime_manager._GRAFANA_LATE_CUTOVER_CLAIM],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-            env=env,
-        )
-        for _ in range(2)
-    ]
-    results = [process.communicate(timeout=10) for process in processes]
-    assert all(process.returncode == 0 for process in processes), results
-    assert sorted(stdout.strip() for stdout, _stderr in results) == [
+    results = _claim_script_results(shell, env)
+    assert all(code == 0 for _stdout, _stderr, code in results), results
+    assert sorted(stdout.strip() for stdout, _stderr, _code in results) == [
         "acquired",
         "claimed",
     ]
@@ -1318,19 +1322,9 @@ exit 0
         "BIOETL_EXPECTED_RUNTIME_SOURCE_ID": "a" * 64,
         "BIOETL_GRAFANA_BOOTSTRAP_STATUS_FILE": str(tmp_path / "bootstrap-status.json"),
     }
-    processes = [
-        subprocess.Popen(
-            [shell, "-c", runtime_manager._GRAFANA_LATE_CUTOVER_CLAIM],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-            env=env,
-        )
-        for _ in range(2)
-    ]
-    results = [process.communicate(timeout=10) for process in processes]
-    assert all(process.returncode == 0 for process in processes), results
-    assert sorted(stdout.strip() for stdout, _stderr in results) == [
+    results = _claim_script_results(shell, env)
+    assert all(code == 0 for _stdout, _stderr, code in results), results
+    assert sorted(stdout.strip() for stdout, _stderr, _code in results) == [
         "acquired",
         "claimed",
     ]
@@ -1396,25 +1390,9 @@ def test_post_start_grafana_cutover_skips_identity_mismatch(
     monkeypatch.delenv("BIOETL_TEST_MODE", raising=False)
     monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
     commands: list[list[str]] = []
-
-    def runner(cmd: Sequence[str], _cwd: Path, _timeout: float):
-        commands.append(list(cmd))
-        if (
-            cmd[:3] == ["docker", "exec", runtime_manager._GRAFANA_CONTAINER]
-            and cmd[3] == "cat"
-        ):
-            return runtime_manager.CommandResult(
-                list(cmd),
-                0,
-                stdout=json.dumps(
-                    {
-                        "ops_http": "deferred",
-                        "reason": "identity_mismatch",
-                        "dashboard_profile": "prometheus_only",
-                    }
-                ),
-            )
-        raise AssertionError(f"unexpected {cmd}")
+    runner = _cat_status_runner(
+        commands, _prometheus_only_deferred("identity_mismatch")
+    )
 
     result = runtime_manager._post_start_grafana_ops_cutover(
         spec=_spec(),
