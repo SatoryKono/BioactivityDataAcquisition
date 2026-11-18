@@ -306,6 +306,45 @@ def test_optional_markdownify_entry_refuses_unqualified_commands(
         session_overrides(config, root, manifest=manifest, markdownify=source)
 
 
+def test_matching_markdownify_transport_preserves_user_policy(
+    session_binding, tmp_path, monkeypatch
+):
+    root, manifest, _, config = session_binding
+    source = tmp_path / "markdownify.json"
+    entry = {"command": "qualified-python", "args": ["client"], "tool_timeout_sec": 90}
+    source.write_text(
+        json.dumps(
+            {
+                "schema": 1,
+                "workspace": str(root),
+                "git_common": str(root / ".git"),
+                "server": "Markdownify-BioETL",
+                "entry": entry,
+            }
+        ),
+        encoding="utf-8",
+    )
+    checked = []
+    monkeypatch.setattr(native_session, "_validate_markdownify_client", checked.append)
+    policy = {
+        "enabled": False,
+        "disabled_tools": ["pdf-to-markdown"],
+        "tools": {"html-to-markdown": {"approval_mode": "approve"}},
+        "tool_timeout_sec": 30,
+    }
+    existing = {**entry, **policy}
+    config["mcp_servers"]["Markdownify-BioETL"] = existing
+    result = session_overrides(config, root, manifest=manifest, markdownify=source)
+    overrides = {}
+    for item in result[1::2]:
+        overrides.update(tomllib.loads(item)["mcp_servers"])
+    assert overrides["Markdownify-BioETL"] == existing
+    assert checked == [entry]
+    existing["cwd"] = str(root)
+    with pytest.raises(PermissionError, match="unrelated Markdownify"):
+        session_overrides(config, root, manifest=manifest, markdownify=source)
+
+
 def test_native_operational_cli_returns_redacted_failure(monkeypatch, capsys):
     def fail():
         raise PermissionError("private workspace diagnostic")
