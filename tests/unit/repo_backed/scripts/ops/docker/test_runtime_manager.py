@@ -166,6 +166,35 @@ def test_direct_script_help_bootstraps_repository_imports(tmp_path: Path) -> Non
     assert "ensure-networks" in result.stdout
 
 
+def test_direct_script_help_does_not_bootstrap_composition(tmp_path: Path) -> None:
+    script = Path(runtime_manager.__file__).resolve()
+    probe = """
+import importlib.abc
+import runpy
+import sys
+
+class RejectComposition(importlib.abc.MetaPathFinder):
+    def find_spec(self, fullname, path=None, target=None):
+        if fullname == 'bioetl.composition' or fullname.startswith('bioetl.composition.'):
+            raise RuntimeError('CLI help must not bootstrap production composition')
+        return None
+
+sys.meta_path.insert(0, RejectComposition())
+sys.argv = [sys.argv[1], '--help']
+runpy.run_path(sys.argv[0], run_name='__main__')
+"""
+    result = subprocess.run(
+        [sys.executable, "-c", probe, str(script)],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=30,
+    )
+    assert result.returncode == 0, result.stderr
+    assert "ensure-networks" in result.stdout
+
+
 def test_windows_entrypoint_uses_shared_process_local_env_loader() -> None:
     wrapper = (runtime_manager.ROOT / "scripts/ops/docker-setup.ps1").read_text(
         encoding="utf-8"
