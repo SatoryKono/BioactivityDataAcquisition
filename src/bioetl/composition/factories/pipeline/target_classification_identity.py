@@ -1,21 +1,22 @@
 """Target-classification identities shared by run and manifest assembly."""
 
 from __future__ import annotations
-from collections.abc import Callable, Mapping
-from typing import TYPE_CHECKING, Protocol, overload
-from bioetl.composition.bootstrap.assembly.storage import hydrate_target_runtime_config
-from bioetl.composition.factories.pipeline.target_classification_runtime import (
-    resolve_target_runtime_config,
-)
 
-if TYPE_CHECKING:
-    from bioetl.domain.context import PipelineRunContext
-    from bioetl.infrastructure.config.settings_api import Settings
-from bioetl.composition.bootstrap.assembly.storage import load_target_runtime_profile
+from collections.abc import Callable
+from typing import overload
+
+from bioetl.composition.bootstrap.assembly.storage import (
+    hydrate_target_runtime_config,
+    load_target_runtime_profile,
+)
 from bioetl.composition.factories.pipeline.run_context_contract_identity import (
     NormalizedContractIdentity,
 )
-from bioetl.domain.control_plane import RunInputSnapshotRef, RunSourceRef
+from bioetl.composition.factories.pipeline.target_classification_runtime import (
+    resolve_target_runtime_config,
+)
+from bioetl.domain.context import PipelineRunContext
+from bioetl.domain.control_plane import RunInputSnapshotRef, RunManifest, RunSourceRef
 from bioetl.domain.control_plane.effective_config_artifact import ConfigSourceRef
 from bioetl.domain.normalization.profiles.chembl_target_classification import (
     target_v31_normalization_profile,
@@ -23,18 +24,11 @@ from bioetl.domain.normalization.profiles.chembl_target_classification import (
 from bioetl.infrastructure.config.contract_identity_resolution import (
     RunManifestContractIdentity,
 )
+from bioetl.infrastructure.config.pipeline_config_api import PipelineYamlConfig
+from bioetl.infrastructure.config.settings_api import Settings
 from bioetl.infrastructure.config.target_classification_profile import (
     target_v31_schema_hash,
 )
-from bioetl.infrastructure.config.pipeline_config_api import PipelineYamlConfig
-
-
-class _ReplayParent(Protocol):
-    @property
-    def pipeline_name(self) -> str: ...
-
-    @property
-    def resolved_config(self) -> Mapping[str, object]: ...
 
 
 def target_classification_contract_schema_identity(
@@ -164,7 +158,7 @@ def restore_target_replay_config(
     ctx: PipelineRunContext,
     settings: Settings,
     current_config: PipelineYamlConfig,
-    resolve_parent: Callable[..., _ReplayParent],
+    resolve_parent: Callable[..., RunManifest],
 ) -> PipelineYamlConfig: ...
 
 
@@ -174,7 +168,7 @@ def restore_target_replay_config(
     ctx: PipelineRunContext,
     settings: Settings,
     current_config: object,
-    resolve_parent: Callable[..., _ReplayParent],
+    resolve_parent: Callable[..., RunManifest],
 ) -> object: ...
 
 
@@ -183,7 +177,7 @@ def restore_target_replay_config(
     ctx: PipelineRunContext,
     settings: Settings,
     current_config: object,
-    resolve_parent: Callable[..., _ReplayParent],
+    resolve_parent: Callable[..., RunManifest],
 ) -> object:
     """Restore the saved target profile rather than consulting a newer default."""
     if ctx.pipeline_name != "chembl_target" or not bool(
@@ -214,7 +208,7 @@ def load_target_aware_pipeline_config(
     validate_pk_contract_fn: Callable[[PipelineYamlConfig], None],
     ctx: PipelineRunContext | None = None,
     settings: Settings | None = None,
-    resolve_parent: Callable[..., _ReplayParent] | None = None,
+    resolve_parent: Callable[..., RunManifest] | None = None,
 ) -> PipelineYamlConfig:
     yaml_config = load_pipeline_config_fn(pipeline_name)
     if pipeline_name == "chembl_target":

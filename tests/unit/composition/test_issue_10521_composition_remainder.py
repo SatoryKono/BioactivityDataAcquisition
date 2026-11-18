@@ -27,7 +27,7 @@ from bioetl.composition.runtime_builders import (
     _exact_replay_cached_bronze_context as exact_replay,
 )
 from bioetl.composition.runtime_builders import (
-    exact_replay_parent_manifest as replay_parent,
+    _exact_replay_cached_bronze_context as replay_parent,
 )
 from bioetl.composition.runtime_builders._exact_replay_cached_bronze_context import (
     bind_cached_bronze_context,

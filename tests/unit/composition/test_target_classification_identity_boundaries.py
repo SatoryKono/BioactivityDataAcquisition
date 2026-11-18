@@ -7,7 +7,7 @@ from dataclasses import replace
 import pytest
 
 from bioetl.composition.runtime_builders.config_access import load_pipeline_config
-from bioetl.composition.runtime_builders.target_classification_identity import (
+from bioetl.composition.factories.pipeline.target_classification_identity import (
     apply_target_contract_identity,
     target_classification_contract_schema_identity,
     target_classification_normalization_identity,

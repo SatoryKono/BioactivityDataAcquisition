@@ -36,7 +36,7 @@ from bioetl.composition.factories.pipeline.target_classification_runtime import 
     resolve_target_runtime_config,
     validate_target_runtime_dependency,
 )
-from bioetl.composition.runtime_builders.target_classification_identity import (
+from bioetl.composition.factories.pipeline.target_classification_identity import (
     target_classification_config_source_refs,
     target_classification_source_refs,
 )
@@ -185,7 +185,7 @@ async def test_enrich_uses_v31_schema_and_identical_direct_staged_hash(
     from bioetl.composition.factories.storage._layer_writers import (
         load_contract_rollout_policy,
     )
-    from bioetl.composition.runtime_builders.target_classification_identity import (
+    from bioetl.composition.factories.pipeline.target_classification_identity import (
         target_classification_normalization_identity,
     )
 
@@ -353,7 +353,7 @@ def test_target_preflight_uses_actual_writer_paths_even_when_off(
 
 
 def test_target_exact_replay_restores_saved_profile(shadow_config):
-    from bioetl.composition.runtime_builders.target_classification_identity import (
+    from bioetl.composition.factories.pipeline.target_classification_identity import (
         restore_target_replay_config,
     )
 

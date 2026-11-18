@@ -1,39 +1,33 @@
 """Resolve and assemble the target-classification runtime capability."""
 
 from __future__ import annotations
+
 from collections.abc import Mapping
-from bioetl.application.services.target_runtime.scope import (
-    get_target_classification_dependency,
-)
-from bioetl.composition.bootstrap.assembly.storage import (
-    hydrate_target_runtime_config,
-    load_target_runtime_profile,
-)
-from bioetl.infrastructure.config.target_classification_profile import (
-    resolve_target_classification_profile,
-)
-from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
-from typing import TYPE_CHECKING
+
 from bioetl.application.core.wiring.registry import (
     TargetClassifiedTransformer,
     TargetTransformer,
 )
+from bioetl.application.core.wiring.transformer import BaseTransformer
+from bioetl.application.services.target_runtime.scope import (
+    get_target_classification_dependency,
+)
 from bioetl.composition.bootstrap.assembly.storage import (
     build_target_classification_session,
+    hydrate_target_runtime_config,
+    load_target_runtime_profile,
 )
 from bioetl.composition.runtime_builders.config_access import get_settings
+from bioetl.domain.ports import ContractPolicyProtocol
+from bioetl.infrastructure.config.settings_api import Settings
 from bioetl.infrastructure.config.target_classification_profile import (
     TargetClassificationSchemaProfile,
+    resolve_target_classification_profile,
 )
+from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.schemas.pipeline_contract_policy import (
     PipelineContractPolicy,
 )
-
-if TYPE_CHECKING:
-    from bioetl.application.core.wiring.transformer import BaseTransformer
-    from bioetl.domain.ports import ContractPolicyProtocol
-    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
-    from bioetl.infrastructure.config.settings_api import Settings
 
 
 def resolve_target_runtime_config(config: PipelineYamlConfig) -> PipelineYamlConfig:

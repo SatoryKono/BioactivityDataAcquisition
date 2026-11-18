@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import TYPE_CHECKING
+from uuid import UUID
 
 from bioetl.composition.control_plane_paths import control_plane_root
 from bioetl.composition.runtime_builders._cached_bronze_binding import (
@@ -15,17 +16,62 @@ from bioetl.composition.runtime_builders._exact_replay_snapshot_evidence import 
     _optional_text as _optional_text,
     _validated_ledger_snapshot_uri,
 )
-from bioetl.composition.runtime_builders.exact_replay_parent_manifest import (
-    resolve_replay_parent_manifest as _resolve_replay_parent_manifest,
-)
 from bioetl.domain.context import CachedBronzeContext
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 from bioetl.domain.control_plane.run_ledger import INPUT_SNAPSHOT_PUBLISHED_EVENT
-from bioetl.infrastructure.control_plane import FileRunLedgerStore
+from bioetl.domain.control_plane.snapshot_field_resolution import coerce_optional_text
+from bioetl.domain.types import RunID
+from bioetl.infrastructure.control_plane import FileRunLedgerStore, FileRunManifestStore
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
     from bioetl.infrastructure.config.settings_api import Settings
+
+
+def resolve_replay_parent_manifest(
+    *,
+    ctx: PipelineRunContext,
+    settings: Settings,
+) -> RunManifest:
+    """Load the persisted parent run manifest for an exact-replay request."""
+    manifest_store = FileRunManifestStore(
+        base_path=control_plane_root(settings, "run_manifest")
+    )
+    replay_of_manifest_id = coerce_optional_text(
+        getattr(ctx, "replay_of_manifest_id", None)
+    )
+    if replay_of_manifest_id is not None:
+        manifest = manifest_store.get(replay_of_manifest_id)
+        if manifest is None:
+            raise RuntimeError(
+                "Exact replay parent manifest could not be loaded for "
+                f"manifest_id '{replay_of_manifest_id}'"
+            )
+        return manifest
+
+    replay_of_run_id = coerce_optional_text(getattr(ctx, "replay_of_run_id", None))
+    if replay_of_run_id is None:
+        raise RuntimeError(
+            "Exact replay without --use-cached-bronze requires replay_of_run_id "
+            "or replay_of_manifest_id pointing to a persisted parent run"
+        )
+    try:
+        run_id = RunID(UUID(replay_of_run_id))
+    except ValueError as exc:
+        raise RuntimeError(
+            "Exact replay parent run_id must be a valid UUID when replay_of_manifest_id "
+            "is not provided"
+        ) from exc
+    manifest = manifest_store.get_by_run_id(run_id)
+    if manifest is None:
+        raise RuntimeError(
+            "Exact replay parent manifest could not be loaded for "
+            f"run_id '{replay_of_run_id}'"
+        )
+    return manifest
+
+
+_resolve_replay_parent_manifest = resolve_replay_parent_manifest
 
 
 def resolve_exact_replay_cached_bronze_context(
