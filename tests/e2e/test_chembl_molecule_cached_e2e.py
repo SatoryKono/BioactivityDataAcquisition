@@ -29,6 +29,7 @@ from .conftest import (
 pytestmark = pytest.mark.usefixtures("strict_dq_env")
 
 _SCD_COLUMNS = {"_is_current", "_valid_from", "_valid_to", "_version"}
+_OCCURRENCE_COLUMNS = {"_run_id", "_ingestion_ts"}
 _EXPECTED_PHASES = {
     "CHEMBL900001": 4,
     "CHEMBL900002": 0.5,
@@ -186,9 +187,18 @@ async def test_chembl_molecule_cached_outputs_are_deterministic(
     )
     _assert_molecule_outputs(first_silver, first_gold)
     _assert_molecule_outputs(second_silver, second_gold)
-    assert sorted(first_silver, key=lambda row: row["molecule_id"]) == sorted(
-        second_silver, key=lambda row: row["molecule_id"]
-    )
+
+    def business_rows(rows: list[dict]) -> list[dict]:
+        return [
+            {
+                name: value
+                for name, value in row.items()
+                if name not in _OCCURRENCE_COLUMNS
+            }
+            for row in sorted(rows, key=lambda row: row["molecule_id"])
+        ]
+
+    assert business_rows(first_silver) == business_rows(second_silver)
     for first, second in zip(
         sorted(first_gold, key=lambda row: row["molecule_id"]),
         sorted(second_gold, key=lambda row: row["molecule_id"]),
