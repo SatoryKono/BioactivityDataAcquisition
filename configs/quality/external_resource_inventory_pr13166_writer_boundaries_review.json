@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "cdcf73b4b61ced3cc033d38509df7de9956600d4",
+  "source_ref": "cdcf73b4b61ced3cc033d38509df7de9956600d4",
+  "source_reviews": {
+    "src/bioetl/infrastructure/storage/target_migration_validation.py": "Writer admission now recognizes the CLI command boundary and the last source option. Other functions are AST-identical. Existing local configuration reads retain their expressions, scopes, dispositions, and resources."
+  }
+}
