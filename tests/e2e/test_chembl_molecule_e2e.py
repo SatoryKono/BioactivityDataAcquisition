@@ -51,6 +51,7 @@ from .conftest import (
     create_test_context,
     get_gold_records,
     get_silver_records,
+    managed_e2e_data_dir,
     run_pipeline_or_skip_transient,
 )
 from tests.helpers.e2e_schema_assertions import assert_records_have_required_fields
@@ -212,19 +213,10 @@ async def test_chembl_molecule_structural_fields(e2e_data_dir: Path):
 
 
 @pytest.mark.e2e
-@pytest.mark.vcr
+@pytest.mark.vcr(allow_playback_repeats=True)
 @pytest.mark.asyncio
 async def test_chembl_molecule_gold_scd2_idempotent(e2e_data_dir: Path):
-    """E2E: Gold SCD2 build is version-clean and rerun-safe by contract.
-
-    chembl_molecule Gold sink is scd2 (configs/entities/chembl/molecule.yaml).
-    A literal two-run replay cannot reuse one VCR cassette offline (vcrpy
-    forbids playback repeats under record=none), so this test pins the
-    rerun-safe surface that a replay would exercise: a fresh Gold build has
-    one current v1 row per eligible Silver id, and the committed entity
-    config declares the scd2 mode + scd2 idempotency contract that makes an
-    identical rerun a no-op instead of new versions.
-    """
+    """Replay offline into the same root and a fresh independent root."""
     ctx = create_test_context("chembl_molecule", limit=5)
     await run_pipeline_or_skip_transient(ctx)
 
@@ -271,6 +263,41 @@ async def test_chembl_molecule_gold_scd2_idempotent(e2e_data_dir: Path):
     assert gold_sink["idempotency_contract"] == "scd2", (
         f"Gold idempotency contract drift: {gold_sink!r}"
     )
+
+    # Keep the first Delta table intact: a second real pipeline execution must
+    # not append duplicate current rows or increment unchanged versions.
+    await run_pipeline_or_skip_transient(
+        create_test_context("chembl_molecule", limit=5)
+    )
+    repeated = await get_gold_records(e2e_data_dir, "chembl_molecule")
+    assert len(repeated) == len(gold_rows)
+    assert sorted(
+        (r["molecule_id"], r["entity_id"], r["content_hash"], r["max_phase"])
+        for r in repeated
+    ) == sorted(
+        (r["molecule_id"], r["entity_id"], r["content_hash"], r["max_phase"])
+        for r in gold_rows
+    )
+    assert all(r["_is_current"] is True and r["_version"] == 1 for r in repeated)
+
+    # A separate storage root changes occurrence metadata, but not identities,
+    # normalized phases, or semantic content hashes in either layer.
+    fresh_dir = e2e_data_dir.parent / "independent_snapshot"
+    with managed_e2e_data_dir(fresh_dir):
+        await run_pipeline_or_skip_transient(
+            create_test_context("chembl_molecule", limit=5)
+        )
+        for original, replayed in (
+            (silver_rows, await get_silver_records(fresh_dir, "chembl_molecule")),
+            (gold_rows, await get_gold_records(fresh_dir, "chembl_molecule")),
+        ):
+            assert sorted(
+                (r["molecule_id"], r["entity_id"], r["content_hash"], r["max_phase"])
+                for r in replayed
+            ) == sorted(
+                (r["molecule_id"], r["entity_id"], r["content_hash"], r["max_phase"])
+                for r in original
+            )
 
 
 @pytest.mark.parametrize(

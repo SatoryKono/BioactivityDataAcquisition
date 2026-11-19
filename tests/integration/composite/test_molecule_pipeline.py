@@ -91,7 +91,7 @@ def seed_molecule_df() -> pl.DataFrame:
                 "CC(C)CC1=CC=C(C=C1)C(C)C(=O)O",  # Ibuprofen
                 "CC1=C(C=C(C=C1)NC(=O)C2=CC=C(C=C2)CN3CCN(CC3)C)NC4=NC=CC(=N4)C5=CN=CC=C5",  # Imatinib
             ],
-            "max_phase": [4.0, 4.0, 4.0],
+            "max_phase": [4.0, 0.5, 4.0],
             "molecular_weight": [180.16, 206.28, 493.60],
             "logp": [1.19, 3.50, 3.50],
             "therapeutic_flag": [True, True, True],
@@ -220,6 +220,7 @@ class TestCompositeMoleculePipeline:
         # All seed records should be preserved
         assert len(seed_renamed) == 3
         assert "chembl.molecule.molecule_id" in seed_renamed.columns
+        assert seed_renamed["chembl.molecule.max_phase"].to_list() == [4.0, 0.5, 4.0]
 
     def test_enricher_join_by_inchi_key(
         self,
@@ -254,6 +255,9 @@ class TestCompositeMoleculePipeline:
         # 2 records should have PubChem data (aspirin, ibuprofen)
         # 1 record (imatinib) should have nulls for PubChem fields
         assert len(joined) == 3
+        assert joined.filter(pl.col("chembl.molecule.molecule_id") == "CHEMBL192")[
+            "chembl.molecule.max_phase"
+        ].to_list() == [0.5]
 
         # Check that PubChem CID is populated for matched records
         molecule_id_col = "pubchem.compound.molecule_id"
