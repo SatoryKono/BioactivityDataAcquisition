@@ -359,6 +359,75 @@ async def test_rejected_target_rows_release_pending_classification(
     assert not session._published
 
 
+@pytest.mark.asyncio
+@pytest.mark.parametrize("mode", ["shadow", "enrich"])
+@pytest.mark.parametrize("disposition", ["quarantine", "skip", "fail"])
+async def test_runtime_dq_rejection_excludes_target_from_final_evidence(
+    shadow_config, tmp_path, mode, disposition
+):
+    from bioetl.application.core.batch_transformer_attempt_success import (
+        build_transform_success_outcome,
+    )
+    from bioetl.domain.config import DQConfig
+    from bioetl.domain.config.validation_rules import FieldValidation
+    from bioetl.domain.exceptions.validation import ValidationError
+    from bioetl.domain.types.dq_contracts import DQDisposition
+
+    config = (
+        shadow_config if mode == "shadow" else _admitted_synthetic_config(shadow_config)
+    )
+    root = tmp_path / "runtime-dq"
+    transformer = _transformer(config, root)
+    session = transformer._target_classification_session
+    normalizer = RecordNormalizationProcessor("chembl", "target")
+    context = _context()
+    dq = DQConfig(
+        field_validations=(
+            FieldValidation(
+                field="pref_name", validation_type="enum", allowed=("accepted",)
+            ),
+        ),
+        default_disposition_policy=DQDisposition(disposition),
+    )
+
+    async def attempt(identifier, name, index):
+        return await build_transform_success_outcome(
+            context=context,
+            transform=transformer.transform_pre_silver,
+            raw_record={
+                "target_chembl_id": identifier,
+                "pref_name": name,
+                "target_type": "SINGLE PROTEIN",
+                "organism": "Homo sapiens",
+                "tax_id": 9606,
+                "species_group_flag": False,
+                "target_components": [],
+            },
+            index=index,
+            normalization_processor=normalizer,
+            gold_filter=lambda *_: False,
+            gold_transform=lambda _, record: record,
+            dq_config=dq,
+            debug_export_service=None,
+        )
+
+    with pytest.raises(ValidationError, match=f"disposition={disposition}"):
+        await attempt("CHEMBL1", "rejected", 0)
+    assert session._pending == {}
+    assert session._published == {}
+    accepted = await attempt("CHEMBL2", "accepted", 1)
+    assert accepted.silver_record["target_id"] == "CHEMBL2"
+    assert accepted.gold_record is None
+    assert session._pending == {}
+    transformer.finalize_target_classification(context)
+    manifests = list(root.rglob("manifest.json"))
+    assert len(manifests) == 1
+    evidence = json.loads(manifests[0].read_text())
+    assert evidence["status"] == "complete"
+    assert evidence["row_count"] == 1
+    assert evidence["input_row_ids"] == ["chembl.target:CHEMBL2"]
+
+
 @pytest.mark.parametrize("dry_run", [False, True])
 def test_target_preflight_uses_actual_writer_paths_even_when_off(
     monkeypatch, tmp_path, dry_run

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
+from dataclasses import replace
 from inspect import isawaitable
 from typing import TYPE_CHECKING, cast
 
@@ -187,38 +188,52 @@ async def build_transform_success_outcome(
 ) -> RecordTransformOutcome:
     """Build the outcome for a successfully transformed record."""
     transformed = await resolve_transform_result(transform(context, raw_record, index))
-    finalized_record = _finalize_transformed_record(
-        transformed=transformed,
-        normalization_processor=normalization_processor,
-        context=context,
-        index=index,
-    )
-    if finalized_record is None:
-        return empty_outcome()
-    finalized_record = _apply_runtime_dq_outcomes(
-        silver_record=finalized_record,
-        dq_config=dq_config,
-    )
-    gold_record, gold_excluded_by_contract, gold_filter_details = _build_gold_record(
-        context=context,
-        silver_record=finalized_record,
-        gold_filter=gold_filter,
-        gold_transform=gold_transform,
-    )
-    if debug_export_service is not None:
-        debug_export_service.record_transform_success(
-            raw_record=raw_record,
-            record_index=index,
+    staged = transformed if isinstance(transformed, PreSilverRecord) else None
+    if staged is not None:
+        # The complete attempt owns publication; normalization is only one gate.
+        transformed = replace(
+            staged, publish_business_evidence=None, discard_business_evidence=None
+        )
+    try:
+        finalized_record = _finalize_transformed_record(
+            transformed=transformed,
+            normalization_processor=normalization_processor,
+            context=context,
+            index=index,
+        )
+        if finalized_record is None:
+            return empty_outcome()
+        finalized_record = _apply_runtime_dq_outcomes(
+            silver_record=finalized_record,
+            dq_config=dq_config,
+        )
+        gold_record, gold_excluded_by_contract, gold_filter_details = (
+            _build_gold_record(
+                context=context,
+                silver_record=finalized_record,
+                gold_filter=gold_filter,
+                gold_transform=gold_transform,
+            )
+        )
+        if debug_export_service is not None:
+            debug_export_service.record_transform_success(
+                raw_record=raw_record,
+                record_index=index,
+                silver_record=finalized_record,
+                gold_record=gold_record,
+                gold_excluded_by_contract=gold_excluded_by_contract,
+                gold_filter_details=gold_filter_details,
+            )
+        if staged is not None and staged.publish_business_evidence is not None:
+            staged.publish_business_evidence(context, index)
+        return RecordTransformOutcome(
             silver_record=finalized_record,
             gold_record=gold_record,
             gold_excluded_by_contract=gold_excluded_by_contract,
-            gold_filter_details=gold_filter_details,
         )
-    return RecordTransformOutcome(
-        silver_record=finalized_record,
-        gold_record=gold_record,
-        gold_excluded_by_contract=gold_excluded_by_contract,
-    )
+    finally:
+        if staged is not None and staged.discard_business_evidence is not None:
+            staged.discard_business_evidence(context, index)
 
 
 async def resolve_transform_result(
