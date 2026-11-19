@@ -42,9 +42,51 @@ from pathlib import Path
 import pytest
 
 from bioetl.domain.filtering import SilverFilterConfig
+from bioetl.domain.schemas.chembl.molecule import MoleculeSchema
 from bioetl.infrastructure.config.filter_config_loader import FilterConfigLoader
 
 pytestmark = pytest.mark.unit
+
+
+def test_chembl_molecule_gold_uses_available_silver_fields() -> None:
+    """An absent provider field must not make all Molecule ineligible."""
+    _, _, gold, extraction = FilterConfigLoader(Path("configs")).load(
+        "chembl", "molecule"
+    )
+    fields = {flt.column for flt in gold.column_filters}
+    assert fields <= set(MoleculeSchema.to_schema().columns)
+    assert extraction.params == {
+        "molecule_type": "Small molecule",
+        "structure_type": "MOL",
+        "inorganic_flag": 0,
+    }
+    assert gold.should_include(
+        {
+            "molecule_id": "CHEMBL25",
+            "molecule_type": "Small molecule",
+            "structure_type": "MOL",
+            "inorganic_flag": 0,
+        }
+    )
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [("molecule_type", "Protein"), ("structure_type", "SEQ"), ("inorganic_flag", 1)],
+)
+def test_chembl_molecule_gold_preserves_business_rejections(
+    field: str, value: str | int
+) -> None:
+    _, _, gold, _ = FilterConfigLoader(Path("configs")).load("chembl", "molecule")
+    record = {
+        "molecule_id": "CHEMBL25",
+        "molecule_type": "Small molecule",
+        "structure_type": "MOL",
+        "inorganic_flag": 0,
+    }
+    decision = gold.evaluate({**record, field: value})
+    assert not decision.include
+    assert decision.field == field
 
 
 def _write_minimal_filter_defaults(configs_root: Path) -> None:

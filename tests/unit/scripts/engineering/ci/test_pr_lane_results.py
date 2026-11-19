@@ -955,6 +955,26 @@ def test_shadow_compare_keeps_package_discovery_contract_narrow(
     ]
 
 
+@pytest.mark.parametrize(
+    "path",
+    [
+        "docs/04-reference/pipelines/chembl/03-molecule-spec.md",
+        "tests/snapshots/pipeline_configs.json",
+    ],
+)
+def test_shadow_compare_routes_molecule_eligibility_contract(path: str) -> None:
+    """Config eligibility documentation and snapshots retain their drift gate."""
+    repo_root = Path(__file__).resolve().parents[5]
+    selection = build_shadow_compare([path], repo_root=repo_root)
+    assert "tests/architecture/test_config_golden_master.py" in selection["selected"]
+    if path.endswith("03-molecule-spec.md"):
+        assert (
+            "tests/unit/infrastructure/config/test_filter_config_loader.py"
+            in selection["selected"]
+        )
+    assert selection["covers_full_suite"] is False
+
+
 def test_shadow_compare_routes_quality_move_governance_inputs() -> None:
     """Quality-move configs and documentation retain explicit governing tests."""
     repo_root = Path(__file__).resolve().parents[5]
