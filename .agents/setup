@@ -11,18 +11,35 @@ uv sync --locked
 # Node dependencies for docs/tooling; package-lock.json is canonical.
 npm ci
 
-# Official GitHub MCP binary for scripts/ai/mcp/github-mcp-wrapper.sh,
-# installed to its candidate path $HOME/tools/bin. Pinned on purpose;
-# bump deliberately. Read-only mode requires no digest approval.
-GITHUB_MCP_VERSION="2.2.0"
-mkdir -p "${HOME}/tools/bin"
-gh_mcp_tmp="$(mktemp -d)"
-curl -fsSL "https://github.com/github/github-mcp-server/releases/download/v${GITHUB_MCP_VERSION}/github-mcp-server_Linux_x86_64.tar.gz" -o "${gh_mcp_tmp}/ghmcp.tar.gz"
-curl -fsSL "https://github.com/github/github-mcp-server/releases/download/v${GITHUB_MCP_VERSION}/github-mcp-server_${GITHUB_MCP_VERSION}_checksums.txt" -o "${gh_mcp_tmp}/checksums.txt"
-( cd "${gh_mcp_tmp}" && grep "github-mcp-server_Linux_x86_64.tar.gz" checksums.txt | sha256sum -c - )
-tar -xzf "${gh_mcp_tmp}/ghmcp.tar.gz" -C "${HOME}/tools/bin" github-mcp-server
-chmod +x "${HOME}/tools/bin/github-mcp-server"
-rm -rf "${gh_mcp_tmp}"
+# Keep the version selected for the Amp orb. Both immutable release
+# archives are pinned by their GitHub-published SHA-256, never releases/latest.
+# https://github.com/github/github-mcp-server/releases/tag/v2.2.0
+install_github_mcp() (
+  umask 077
+  case "$(uname -s):$(uname -m)" in
+    Linux:x86_64)
+      archive_name="github-mcp-server_Linux_x86_64.tar.gz"
+      archive_sha="157c5664b273e5070126d414f88cbab765630acde588f75dafdf9998c2235c51"
+      ;;
+    Linux:aarch64|Linux:arm64)
+      archive_name="github-mcp-server_Linux_arm64.tar.gz"
+      archive_sha="d21e4fca8603b59d99380f1c332aaea36d73033d52b389867adf2124ee150983"
+      ;;
+    *) echo "amp-setup: unsupported GitHub MCP platform" >&2; exit 64 ;;
+  esac
+  stage="$(mktemp -d "${TMPDIR:-/tmp}/bioetl-amp-github.XXXXXXXX")"
+  trap 'rm -f -- "$stage/archive.tar.gz" "$stage/github-mcp-server"; rmdir -- "$stage"' EXIT
+  curl --proto '=https' --proto-redir '=https' --tlsv1.2 \
+    --fail --silent --show-error --location --retry 2 \
+    --connect-timeout 10 --max-time 120 \
+    --output "$stage/archive.tar.gz" \
+    "https://github.com/github/github-mcp-server/releases/download/v2.2.0/$archive_name"
+  printf '%s  %s\n' "$archive_sha" "$stage/archive.tar.gz" | sha256sum --check - >/dev/null
+  tar -xOzf "$stage/archive.tar.gz" github-mcp-server > "$stage/github-mcp-server"
+  install -D -m 0755 "$stage/github-mcp-server" "$HOME/tools/bin/github-mcp-server"
+  "$HOME/tools/bin/github-mcp-server" --version >/dev/null
+)
+install_github_mcp
 
 # No `git fetch --unshallow`: orbs clone the full branch history by default,
 # which check_no_partial_tree.py requires.

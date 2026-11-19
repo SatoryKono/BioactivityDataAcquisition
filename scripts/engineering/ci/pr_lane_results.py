@@ -187,6 +187,7 @@ MCP_HOST_TRANSPORT_DISPATCH_TEST = (
 MCP_WRAPPER_CONTRACTS_TEST = (
     "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py"
 )
+AMP_ORB_SETUP_TEST = "tests/unit/repo_backed/scripts/ai/mcp/test_amp_orb_setup.py"
 CURSOR_SKILL_SYNC_TEST = "tests/architecture/test_cursor_skill_sync_safety.py"
 SYNC_CURSOR_RULES_TEST = "tests/unit/scripts/test_sync_cursor_rules.py"
 ROOT_HYGIENE_REVIEW_REGISTRY_TEST = (
@@ -545,6 +546,18 @@ MEMORY_BASELINE_TEST_TARGETS: tuple[str, ...] = (
 
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    **dict.fromkeys(
+        (".agents/setup", ".agents/resume", ".amp/settings.json"),
+        (AMP_ORB_SETUP_TEST,),
+    ),
+    "docs/05-operations/runbooks/amp-orbs.md": (
+        AMP_ORB_SETUP_TEST,
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    "configs/quality/root_hygiene_review_registry.yaml": (
+        ROOT_HYGIENE_REVIEW_REGISTRY_TEST,
+        "tests/unit/scripts/repo/test_check_root_hygiene_review_registry.py",
+    ),
     "docs/01-requirements/DASHBOARD_REQUIREMENTS.md": (
         DASHBOARD_OPERATOR_READABILITY_TEST,
         DASHBOARD_FIRST_WINDOW_NOSCROLL_TEST,

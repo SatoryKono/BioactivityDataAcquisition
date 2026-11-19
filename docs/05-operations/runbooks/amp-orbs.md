@@ -56,9 +56,11 @@ table is a defect: fix the UI to match, or update this runbook and
 - Keep Shallow Clone disabled in the Amp project. Amp clones the full
   history by default, as required by `check_no_partial_tree.py`.
 - Installs the pinned official `github-mcp-server` binary (v2.2.0,
-  checksum-verified) into `$HOME/tools/bin` — a candidate path of
+  with fixed SHA-256 for Linux x86_64 and arm64) into `$HOME/tools/bin` — a candidate path of
   `github-mcp-wrapper.sh`; without it the GitHub MCP cannot start in a
   fresh orb. Read-only mode needs no digest approval.
+- Unsupported platforms fail before downloading. A failed checksum leaves
+  an existing binary intact; temporary downloads are removed on failure.
 - No `gh` commands: GitHub is not authenticated while setup runs.
 - No Docker/Redis/monitoring startup (ADR-010, local-only deployment;
   the Docker daemon in an orb stays stopped).
