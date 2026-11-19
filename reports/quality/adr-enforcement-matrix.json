@@ -320,6 +320,7 @@
         "docs/05-operations/monitoring-architecture.md",
         "docs/05-operations/performance-baselines.md",
         "docs/05-operations/performance-tuning.md",
+        "docs/05-operations/runbooks/amp-orbs.md",
         "docs/05-operations/runbooks/backfill-rebuild.md",
         "docs/05-operations/runbooks/bounded-pipeline-smoke.md",
         "docs/05-operations/runbooks/checkpoint-debugging.md",
