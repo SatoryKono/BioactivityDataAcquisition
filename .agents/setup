@@ -51,6 +51,9 @@ install_github_mcp() (
 )
 install_github_mcp
 
+# Separate environment: do not add MCP SDK dependencies to BioETL's runtime.
+bash scripts/ai/mcp/setup_public_fetch.sh
+
 # No `git fetch --unshallow`: orbs clone the full branch history by default,
 # which check_no_partial_tree.py requires.
 # No `gh` commands: GitHub is not authenticated during setup (see

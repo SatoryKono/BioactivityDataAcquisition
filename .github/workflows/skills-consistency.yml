@@ -63,6 +63,78 @@ on:
         type: boolean
 
 jobs:
+  verify-public-fetch-linux:
+    if: github.event_name == 'pull_request'
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-latest, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Set up isolated Fetch Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: "3.13"
+
+      - name: Install canonical uv
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7
+        with:
+          version: "0.11.26"
+
+      - name: Install pinned Linux Fetch and preserve runtime identity
+        shell: bash
+        env:
+          HOME: ${{ runner.temp }}/public-fetch-contract-home
+        run: |
+          set -euo pipefail
+          bash scripts/ai/mcp/setup_public_fetch.sh
+          fingerprint="$(sha256sum scripts/ai/mcp/support/public-fetch-requirements.txt)"
+          fingerprint="${fingerprint%% *}"
+          runtime="$HOME/.local/share/bioetl/public-fetch-v1/$fingerprint/bin/python"
+          "$runtime" -I -S -B scripts/ai/mcp/support/public_fetch_runtime.py \
+            --emit-profile "$RUNNER_TEMP/public-fetch-profile.json"
+          "$runtime" -I -S -B -c 'import json,sys,platform; print(json.dumps({"python":sys.version,"platform":platform.system()}))' \
+            > "$RUNNER_TEMP/public-fetch-runtime.json"
+          sha256sum scripts/ai/mcp/support/public-fetch-requirements.txt \
+            scripts/ai/mcp/support/public_fetch_stdio.py \
+            scripts/ai/mcp/support/public_fetch_transport.py \
+            scripts/ai/mcp/support/public_fetch_runtime.py \
+            scripts/ai/mcp/support/public-fetch-runtime-profiles.json \
+            tests/unit/repo_backed/scripts/ai/mcp/test_public_fetch.py \
+            > "$RUNNER_TEMP/public-fetch-inputs.sha256"
+
+      - name: Exercise isolated Linux transport and SDK without live destinations
+        shell: bash
+        env:
+          HOME: ${{ runner.temp }}/public-fetch-contract-home
+        run: |
+          set -euo pipefail
+          fingerprint="$(sha256sum scripts/ai/mcp/support/public-fetch-requirements.txt)"
+          fingerprint="${fingerprint%% *}"
+          runtime="$HOME/.local/share/bioetl/public-fetch-v1/$fingerprint/bin/python"
+          "$runtime" -I -S -B tests/unit/repo_backed/scripts/ai/mcp/test_public_fetch.py \
+            2>&1 | tee "$RUNNER_TEMP/public-fetch-probes.log"
+
+      - name: Preserve Linux Fetch qualification originals
+        if: always() && !cancelled()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: public-fetch-linux-qualification-${{ matrix.runner }}
+          path: |
+            ${{ runner.temp }}/public-fetch-probes.log
+            ${{ runner.temp }}/public-fetch-runtime.json
+            ${{ runner.temp }}/public-fetch-inputs.sha256
+            ${{ runner.temp }}/public-fetch-profile.json
+          retention-days: 7
+
   verify-native-codex-runtime:
     runs-on: ubuntu-latest
     timeout-minutes: 5
