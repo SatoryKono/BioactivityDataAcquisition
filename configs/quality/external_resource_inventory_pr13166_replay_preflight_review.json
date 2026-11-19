@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "637b4df25de34a9d7c054cf1006635519c8cbfde",
+  "source_ref": "741f52f0adbf7664428e921b7c7cf79da503475e",
+  "source_reviews": {
+    "src/bioetl/composition/bootstrap/assembly/storage.py": "Reviewed parent-aware workflow replay admission. The new preflight invokes the existing control-plane manifest reader before writes; FileRunManifestStore owns and closes its read handles. No new client, background task, process or low-level acquisition is introduced. Profile loading retains its existing operation-scoped owners. Conflicting classification dependencies fail before mutation.",
+    "src/bioetl/composition/runtime_builders/_exact_replay_cached_bronze_context.py": "Reviewed extraction of existing manifest get/get_by_run_id into resolve_replay_parent_manifest_refs. The old context API delegates to the same reader; selectors are explicit and no child run identity is fabricated. FileRunManifestStore acquisition/cleanup ownership is unchanged. Static source review only; runtime qualification remains NOT_RUN_12553."
+  }
+}

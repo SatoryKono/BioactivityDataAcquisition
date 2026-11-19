@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
+from contextlib import ExitStack
 from inspect import isawaitable
 from typing import TYPE_CHECKING, cast
 
@@ -53,25 +54,13 @@ def _finalize_transformed_record(
     index: int,
 ) -> dict[str, object] | None:
     """Finalize transform output through the normalization stage."""
-    if transformed is None:
-        return None
     if isinstance(transformed, PreSilverRecord):
         if normalization_processor is None:
             raise RuntimeError("PreSilverRecord requires RecordNormalizationProcessor")
-        finalized_record: dict[str, object] | None = (
-            normalization_processor.finalize_pre_silver(
-                transformed,
-                context,
-                index,
-            )
-        )
-        return finalized_record
-    if normalization_processor is None:
+        return normalization_processor.finalize_pre_silver(transformed, context, index)
+    if transformed is None or normalization_processor is None:
         return transformed
-    normalized_record: dict[str, object] | None = (
-        normalization_processor.normalize_record(transformed)
-    )
-    return normalized_record
+    return normalization_processor.normalize_record(transformed)
 
 
 def _build_gold_record(
@@ -110,11 +99,8 @@ def _outcome_dq_fields(outcome: object, disposition: object) -> list[str]:
     ]
     if tokens:
         return tokens
-    rule_id = str(getattr(outcome, "rule_id", "") or "")
-    parts = rule_id.split(".")
-    if len(parts) >= 3 and parts[0] == "field" and parts[1]:
-        return [parts[1]]
-    return []
+    parts = str(getattr(outcome, "rule_id", "") or "").split(".")
+    return [parts[1]] if len(parts) >= 3 and parts[0] == "field" and parts[1] else []
 
 
 def _primary_dq_affected_field(
@@ -125,9 +111,7 @@ def _primary_dq_affected_field(
     fields: set[str] = set()
     for outcome in outcomes:
         fields.update(_outcome_dq_fields(outcome, disposition))
-    if not fields:
-        return None
-    return sorted(fields)[0]
+    return min(fields, default=None)
 
 
 def _apply_runtime_dq_outcomes(
@@ -187,38 +171,48 @@ async def build_transform_success_outcome(
 ) -> RecordTransformOutcome:
     """Build the outcome for a successfully transformed record."""
     transformed = await resolve_transform_result(transform(context, raw_record, index))
-    finalized_record = _finalize_transformed_record(
-        transformed=transformed,
-        normalization_processor=normalization_processor,
-        context=context,
-        index=index,
-    )
-    if finalized_record is None:
-        return empty_outcome()
-    finalized_record = _apply_runtime_dq_outcomes(
-        silver_record=finalized_record,
-        dq_config=dq_config,
-    )
-    gold_record, gold_excluded_by_contract, gold_filter_details = _build_gold_record(
-        context=context,
-        silver_record=finalized_record,
-        gold_filter=gold_filter,
-        gold_transform=gold_transform,
-    )
-    if debug_export_service is not None:
-        debug_export_service.record_transform_success(
-            raw_record=raw_record,
-            record_index=index,
+    publish_evidence = None
+    with ExitStack() as cleanup:
+        if isinstance(transformed, PreSilverRecord):
+            publish_evidence = transformed.publish_business_evidence
+            transformed = transformed.defer_business_evidence(cleanup, context, index)
+        finalized_record = _finalize_transformed_record(
+            transformed=transformed,
+            normalization_processor=normalization_processor,
+            context=context,
+            index=index,
+        )
+        if finalized_record is None:
+            return empty_outcome()
+        finalized_record = _apply_runtime_dq_outcomes(
+            silver_record=finalized_record,
+            dq_config=dq_config,
+        )
+        gold_record, gold_excluded_by_contract, gold_filter_details = (
+            _build_gold_record(
+                context=context,
+                silver_record=finalized_record,
+                gold_filter=gold_filter,
+                gold_transform=gold_transform,
+            )
+        )
+        if debug_export_service is not None:
+            debug_export_service.record_transform_success(
+                raw_record=raw_record,
+                record_index=index,
+                silver_record=finalized_record,
+                gold_record=gold_record,
+                gold_excluded_by_contract=gold_excluded_by_contract,
+                gold_filter_details=gold_filter_details,
+            )
+        outcome = RecordTransformOutcome(
             silver_record=finalized_record,
             gold_record=gold_record,
             gold_excluded_by_contract=gold_excluded_by_contract,
-            gold_filter_details=gold_filter_details,
         )
-    return RecordTransformOutcome(
-        silver_record=finalized_record,
-        gold_record=gold_record,
-        gold_excluded_by_contract=gold_excluded_by_contract,
-    )
+        if publish_evidence is not None:
+            publish_evidence(context, index)
+        return outcome
 
 
 async def resolve_transform_result(
@@ -226,10 +220,7 @@ async def resolve_transform_result(
 ) -> dict[str, object] | PreSilverRecord | None:
     """Await transform output when needed and normalize the static type."""
     if isawaitable(transformed_result):
-        return cast(
-            dict[str, object] | PreSilverRecord | None,
-            await transformed_result,
-        )
+        transformed_result = await transformed_result
     return cast(dict[str, object] | PreSilverRecord | None, transformed_result)
 
 

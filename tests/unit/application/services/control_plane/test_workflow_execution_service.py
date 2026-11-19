@@ -584,6 +584,7 @@ async def test_workflow_execution_service_resume_last_skips_completed_steps() ->
         )
     )
     fake_runner = _FakeWorkflowRunner()
+    admitted_plans = []
     service = WorkflowExecutionService(
         workflow_runner=fake_runner,  # type: ignore[arg-type]
         manifest_service=WorkflowManifestService(
@@ -597,6 +598,9 @@ async def test_workflow_execution_service_resume_last_skips_completed_steps() ->
         workflow_lock_port=lock_port,
         now_factory=lambda: FIXED_TEST_TIME,
         run_id_factory=lambda: RunID(UUID("00000000-0000-0000-0000-000000000222")),
+        dependency_preflight=lambda config, context, plan: (
+            admitted_plans.append(plan) or {}
+        ),
     )
 
     result = await service.run_workflow(_build_config(), resume_last=True)
@@ -607,6 +611,8 @@ async def test_workflow_execution_service_resume_last_skips_completed_steps() ->
     assert fake_runner.received_completed_step_ids == frozenset(
         {"chembl_activity_ingest"}
     )
+    assert admitted_plans[0].resumed
+    assert admitted_plans[0].pending_step_ids == {"chembl_assay_ingest"}
 
 
 @pytest.mark.asyncio
@@ -1053,6 +1059,7 @@ async def test_workflow_execution_service_incremental_offset_progression() -> No
         ),
     )
 
+    admitted_offsets = []
     service2 = WorkflowExecutionService(
         workflow_runner=_FakeWorkflowRunner(),  # type: ignore[arg-type]
         manifest_service=WorkflowManifestService(
@@ -1066,10 +1073,14 @@ async def test_workflow_execution_service_incremental_offset_progression() -> No
         workflow_lock_port=_FakeLockPort(),
         now_factory=lambda: FIXED_TEST_TIME,
         run_id_factory=lambda: RunID(UUID("00000000-0000-0000-0000-000000000222")),
+        dependency_preflight=lambda config, context, plan: (
+            admitted_offsets.append(config.defaults.start_offset) or {}
+        ),
     )
 
     result2 = await service2.run_workflow(config_with_limit_2, incremental=True)
     assert result2.status == "success"
+    assert admitted_offsets == [1000]
 
     # Check state after second run
     state2 = state_port.get_latest("chembl_core")

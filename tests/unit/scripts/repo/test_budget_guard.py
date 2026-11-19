@@ -128,7 +128,9 @@ def _git(root: Path, *args: str) -> str:
         capture_output=True,
         text=True,
         encoding="utf-8",
-        timeout=10,
+        # Fixture commits can stall under concurrent coverage-verify load;
+        # keep fail-closed semantics with a larger bound than the old 10s.
+        timeout=60,
     )
     return result.stdout.strip()
 

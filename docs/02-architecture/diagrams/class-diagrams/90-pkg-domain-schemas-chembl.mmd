@@ -1,13 +1,18 @@
 %% Title: Package Family: domain/schemas/chembl
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/domain/schemas/chembl; modules: activity, assay, assay_parameters, cell_line, compound_record, molecule.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/domain/schemas/chembl; modules: target, activity, assay, assay_parameters, cell_line, compound_record.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-10-04
+%% @date    2026-11-18
 %% @level   Package Family / Inventory Slice
-%% @nodes   15
+%% @nodes   16
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
+
+    namespace target {
+        class TargetSchema
+        class TargetSchemaV31
+    }
 
     namespace activity {
         class ActivitySchema
@@ -53,10 +58,6 @@ classDiagram
         class SubcellularFractionSchema
     }
 
-    namespace target {
-        class TargetSchema
-    }
-
     namespace target_component {
         class TargetComponentSchema
     }
@@ -68,3 +69,5 @@ classDiagram
     namespace tissue {
         class TissueSchema
     }
+
+    TargetSchema <|-- TargetSchemaV31

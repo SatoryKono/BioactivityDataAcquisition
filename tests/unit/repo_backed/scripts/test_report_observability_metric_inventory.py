@@ -23,6 +23,24 @@ from scripts.engineering.qa import observability_metric_inventory_scan as invent
 from scripts.engineering.qa import report_observability_metric_inventory as inventory
 
 
+@pytest.fixture(autouse=True)
+def _isolate_fixture_git_ancestors(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    """A plain synthetic tree must not inherit an unrelated ancestor checkout."""
+    from bioetl.infrastructure.observability import metric_inventory_discovery
+
+    original = metric_inventory_discovery.list_git_worktree_files
+
+    def owned_checkout_files(checkout: Path, pathspec: str):
+        requested = checkout / pathspec
+        if requested.is_relative_to(tmp_path) and not checkout.is_relative_to(tmp_path):
+            return None
+        return original(checkout, pathspec)
+
+    monkeypatch.setattr(
+        metric_inventory_discovery, "list_git_worktree_files", owned_checkout_files
+    )
+
+
 def test_collect_metric_inventory_rebuilds_after_public_call(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

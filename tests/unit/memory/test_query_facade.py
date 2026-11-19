@@ -31,6 +31,12 @@ from memory.query import (
 pytestmark = pytest.mark.unit
 
 
+@pytest.fixture(name="tmp_path")
+def _plain_query_corpus_path(memory_local_tmp_path: Path) -> Path:
+    """These synthetic manifests intentionally have no backing repository."""
+    return memory_local_tmp_path
+
+
 def test_query_catalog_returns_sources_view() -> None:
     payload = query_catalog("sources")
     assert payload["kind"] == "catalog"

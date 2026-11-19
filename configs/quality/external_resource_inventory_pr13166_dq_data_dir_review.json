@@ -1,0 +1,10 @@
+{
+  "catalog_ref": "167ed542b1e66397576cc31d0f1ed8cda3a763b4",
+  "schema_version": 1,
+  "source_ref": "64c0797bc57e5be8ef2d0359390325eb4c99bf1a",
+  "source_reviews": {
+    "src/bioetl/composition/factories/dq/context_resolver.py": "Reviewed the combined DQ output path rule. A real Settings object follows the writer storage and table paths. Any other settings object rebases canonical data/output layer directories onto its data_dir, including test mode. Callers that omit settings keep the configured path. The rebase helpers live in this module so the support file stays within the composition file cap. No new client, network endpoint, or task.",
+    "src/bioetl/composition/factories/dq/_context_resolver_support.py": "Reviewed the support helpers. _resolved_dq_output_paths still follows the writer roots for a real Settings object. The data_dir rebase helpers moved to the public resolver; this file does not add a client, file acquisition, or task.",
+    "src/bioetl/composition/factories/pipeline/_runner_assembly_support.py": "Reviewed the runner assembly seam. It passes the active settings into extract_dq_output_paths so test-mode DQ reports follow data_dir and real Settings follow the writer roots. No new client, file acquisition, or task."
+  }
+}

@@ -31,6 +31,9 @@ from bioetl.application.pipelines.chembl.publication_transformer import (
 from bioetl.application.pipelines.chembl.subcellular_fraction_transformer import (
     SubcellularFractionTransformer as SubcellularFractionTransformer,
 )
+from bioetl.application.pipelines.chembl.target_classified_transformer import (
+    TargetClassifiedTransformer as TargetClassifiedTransformer,
+)
 from bioetl.application.pipelines.chembl.target_component_transformer import (
     TargetComponentTransformer as TargetComponentTransformer,
 )

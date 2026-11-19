@@ -20,15 +20,16 @@ if TYPE_CHECKING:
 class _NormalizationProfileLike(Protocol):
     """Minimal profile surface required for content-hash computation."""
 
-    set_like_fields: frozenset[str] = cast(Any, None)  # Any: host attr default (PD6)
-    hash_included_fields: frozenset[str] = cast(
-        Any, None
-    )  # Any: host attr default (PD6)
-    hash_excluded_fields: frozenset[str] = cast(
-        Any, None
-    )  # Any: host attr default (PD6)
-    fields: frozenset[str] = cast(Any, None)  # Any: host attr default (PD6)
-    field_aliases: Mapping[str, str] = cast(Any, None)  # Any: host attr default (PD6)
+    @property
+    def set_like_fields(self) -> frozenset[str]: ...
+    @property
+    def hash_included_fields(self) -> frozenset[str]: ...
+    @property
+    def hash_excluded_fields(self) -> frozenset[str]: ...
+    @property
+    def fields(self) -> frozenset[str]: ...
+    @property
+    def field_aliases(self) -> Mapping[str, str]: ...
 
     def rule_for(self, field_name: str) -> FieldRule | None: ...
 

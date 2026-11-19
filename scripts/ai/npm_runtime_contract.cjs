@@ -10,6 +10,8 @@ const { execFileSync } = require('node:child_process');
 function npmSemver() {
   const candidates = [
     path.join(path.dirname(process.execPath), 'node_modules/npm/package.json'),
+    // Prefix layouts where the node binary sits beside lib/ (e.g. /exec-daemon/node).
+    path.join(path.dirname(process.execPath), 'lib/node_modules/npm/package.json'),
     path.resolve(path.dirname(process.execPath), '../lib/node_modules/npm/package.json'),
     '/usr/share/nodejs/npm/package.json',
   ];

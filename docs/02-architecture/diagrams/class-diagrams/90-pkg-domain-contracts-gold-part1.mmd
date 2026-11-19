@@ -1,13 +1,22 @@
 %% Title: Package Family: domain/contracts/gold (Part 1/2)
-%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/domain/contracts/gold; part 1/2; modules: _chembl_reference_publication_schemas, _chembl_target_lookup_schemas, _chembl_activity_assay_schemas, composite_bioassay, _chembl_molecule_protein_schemas, _composite_gold_common_schema.
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/domain/contracts/gold; part 1/2; modules: _chembl_target_lookup_schemas, _chembl_reference_publication_schemas, _chembl_activity_assay_schemas, composite_bioassay, _chembl_molecule_protein_schemas, _composite_gold_common_schema.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-10-04
+%% @date    2026-11-18
 %% @level   Package Family / Inventory Slice
 %% @nodes   30
 %% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
 classDiagram
+
+    namespace chembl_target_lookup_schemas {
+        class ChEMBLSubcellularFractionGoldSchema
+        class ChEMBLTargetComponentGoldSchema
+        class ChEMBLTargetGoldSchema
+        class ChEMBLTargetGoldSchemaV31
+        class ChEMBLTargetProteinClassificationGoldSchema
+        class ChEMBLTissueGoldSchema
+    }
 
     namespace chembl_reference_publication_schemas {
         class ChEMBLCellLineGoldSchema
@@ -15,14 +24,6 @@ classDiagram
         class ChEMBLPublicationGoldSchema
         class ChEMBLPublicationSimilarityGoldSchema
         class ChEMBLPublicationTermGoldSchema
-    }
-
-    namespace chembl_target_lookup_schemas {
-        class ChEMBLSubcellularFractionGoldSchema
-        class ChEMBLTargetComponentGoldSchema
-        class ChEMBLTargetGoldSchema
-        class ChEMBLTargetProteinClassificationGoldSchema
-        class ChEMBLTissueGoldSchema
     }
 
     namespace chembl_activity_assay_schemas {
@@ -80,10 +81,7 @@ classDiagram
         class OpenAlexPublicationGoldSchema
     }
 
-    namespace publications_pubmed {
-        class PubMedPublicationGoldSchema
-    }
-
+    ChEMBLTargetGoldSchema <|-- ChEMBLTargetGoldSchemaV31
     CompositeGoldCommonSchema <|-- CompositeLookupLineageSchema
     CompositeGoldCommonSchema <|-- CompositeMoleculeGoldSchema
     CompositeLookupLineageSchema <|-- CompositeActivityGoldSchema
@@ -92,7 +90,6 @@ classDiagram
     CompositeLookupLineageSchema <|-- CompositeTargetGoldSchema
     PublicationGoldCommonSchema <|-- CrossRefPublicationGoldSchema
     PublicationGoldCommonSchema <|-- OpenAlexPublicationGoldSchema
-    PublicationGoldCommonSchema <|-- PubMedPublicationGoldSchema
     StrictGoldContractSchema <|-- ChEMBLActivityGoldSchema
     StrictGoldContractSchema <|-- ChEMBLAssayGoldSchema
     StrictGoldContractSchema <|-- ChEMBLAssayParametersGoldSchema

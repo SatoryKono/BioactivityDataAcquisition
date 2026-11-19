@@ -18,9 +18,9 @@
       ],
       "duplication_clusters": 0,
       "files": 207,
-      "total_loc": 25924,
+      "total_loc": 25904,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.385,
+      "helper_function_ratio": 0.379,
       "max_internal_fan_in": 5,
       "max_internal_fan_in_module": "bioetl.application.core.record_processor_config",
       "bounded_growth_budgets": {
@@ -2026,9 +2026,9 @@
       ],
       "duplication_clusters": 0,
       "files": 32,
-      "total_loc": 3851,
+      "total_loc": 3840,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.352,
+      "helper_function_ratio": 0.306,
       "max_internal_fan_in": 2,
       "max_internal_fan_in_module": "bioetl.composition.factories.pipeline.runner_constructor",
       "bounded_growth_budgets": {
@@ -3306,9 +3306,9 @@
       ],
       "duplication_clusters": 0,
       "files": 55,
-      "total_loc": 6693,
+      "total_loc": 6690,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.305,
+      "helper_function_ratio": 0.29,
       "max_internal_fan_in": 2,
       "max_internal_fan_in_module": "bioetl.composition.runtime_builders.runner_inputs",
       "bounded_growth_budgets": {
@@ -3318,8 +3318,8 @@
       "internal_fan_in_census": {
         "distribution": {
           "0": 3,
-          "1": 28,
-          "2": 24
+          "1": 27,
+          "2": 25
         },
         "modules": [
           {
@@ -3385,9 +3385,10 @@
           },
           {
             "module": "bioetl.composition.runtime_builders._exact_replay_cached_bronze_context",
-            "fan_in": 1,
+            "fan_in": 2,
             "runtime_importers": [
-              "bioetl.composition.runtime_builders._runner_input_preparation"
+              "bioetl.composition.runtime_builders._runner_input_preparation",
+              "bioetl.composition.runtime_builders.input_snapshot_resolution"
             ]
           },
           {
@@ -3728,6 +3729,7 @@
         ],
         "max_fan_in": 2,
         "max_modules": [
+          "bioetl.composition.runtime_builders._exact_replay_cached_bronze_context",
           "bioetl.composition.runtime_builders._inputs_resolution_support",
           "bioetl.composition.runtime_builders._manifest_publication_context_support",
           "bioetl.composition.runtime_builders._run_context_values",

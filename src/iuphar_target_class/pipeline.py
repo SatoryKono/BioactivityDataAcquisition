@@ -6,7 +6,7 @@ import hashlib
 import re
 from collections import defaultdict
 from collections.abc import Mapping
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 from types import MappingProxyType
 from typing import Literal
 
@@ -60,6 +60,10 @@ class IndexedSnapshot:
     family_to_class: Mapping[str, str]
     identifier_catalog: frozenset[str]
     complex_ids: frozenset[str]
+    species_annotations: Mapping[tuple[str, str], ProviderAnnotation] = field(
+        default_factory=dict
+    )
+    admission_complete: bool | None = None
 
     @classmethod
     def from_approved_gtopdb(
@@ -71,6 +75,8 @@ class IndexedSnapshot:
         catalog: tuple[CatalogTarget, ...],
         annotations: Mapping[str, ProviderAnnotation],
         complex_ids: frozenset[str] = frozenset(),
+        species_annotations: Mapping[tuple[str, str], ProviderAnnotation] | None = None,
+        admission_complete: bool | None = None,
     ) -> IndexedSnapshot:
         """Bind a frozen provider snapshot to the exact approved release."""
         types, families = approved_class_mappings(release)
@@ -88,6 +94,8 @@ class IndexedSnapshot:
             type_to_class=types,
             family_to_class=families,
             complex_ids=complex_ids,
+            species_annotations=species_annotations,
+            admission_complete=admission_complete,
         )
 
     @classmethod
@@ -103,10 +111,14 @@ class IndexedSnapshot:
         type_to_class: Mapping[str, str],
         family_to_class: Mapping[str, str],
         complex_ids: frozenset[str] = frozenset(),
+        species_annotations: Mapping[tuple[str, str], ProviderAnnotation] | None = None,
+        admission_complete: bool | None = None,
     ) -> IndexedSnapshot:
         """Index all channels once and verify recorded provider payload hashes."""
         lookup, families = _snapshot_indexes(catalog, family_nodes)
         _validate_provider_payloads(annotations)
+        scoped = dict(species_annotations or {})
+        _validate_species_payloads(scoped)
         return cls(
             snapshot_id,
             mapping_version,
@@ -119,6 +131,8 @@ class IndexedSnapshot:
             MappingProxyType(dict(family_to_class)),
             frozenset(value for (kind, value), _ in lookup.items() if kind != "text"),
             complex_ids,
+            MappingProxyType(scoped),
+            admission_complete,
         )
 
 
@@ -144,6 +158,92 @@ def _validate_provider_payloads(annotations: Mapping[str, ProviderAnnotation]) -
         actual = hashlib.sha256(value.raw_payload.encode()).hexdigest()
         if value.target_id != key or value.payload_sha256 != actual:
             raise ValueError("provider record identity or digest mismatch")
+
+
+def _validate_species_payloads(
+    annotations: Mapping[tuple[str, str], ProviderAnnotation],
+) -> None:
+    for (target_id, taxon), annotation in annotations.items():
+        if annotation.taxon != taxon:
+            raise ValueError("provider annotation belongs to another species")
+        _validate_provider_payloads({target_id: annotation})
+
+
+def _annotation(
+    snapshot: IndexedSnapshot, target_id: str, taxon: str | None
+) -> ProviderAnnotation | None:
+    if snapshot.species_annotations:
+        return snapshot.species_annotations.get((target_id, taxon or ""))
+    return snapshot.annotations.get(target_id)
+
+
+def _species_match(
+    row: ValidatedInput, match: MatchResult, snapshot: IndexedSnapshot
+) -> tuple[MatchResult, ProviderAnnotation | None]:
+    key = match.matched_target_id
+    if key is None or not snapshot.species_annotations or row.taxon is not None:
+        return match, _annotation(snapshot, key or "", row.taxon)
+    taxa = _variant_taxa(row, snapshot, key)
+    if len(taxa) == 1:
+        return match, _annotation(snapshot, key, next(iter(taxa)))
+    return replace(
+        match,
+        match_status="insufficient_input",
+        matched_target_id=None,
+        diagnostics=(
+            *match.diagnostics,
+            Diagnostic(
+                "species_identity_required",
+                "warning",
+                "provider identity has several species variants",
+            ),
+        ),
+    ), None
+
+
+def _variant_taxa(
+    row: ValidatedInput, snapshot: IndexedSnapshot, key: str
+) -> set[str | None]:
+    variants = [item for item in snapshot.catalog if item.target_id == key]
+    if row.uniprot_accessions:
+        variants = [
+            item
+            for item in variants
+            if set(item.uniprot_ids).intersection(row.uniprot_accessions)
+        ]
+    return {item.species for item in variants}
+
+
+def _missing_variant(row: ValidatedInput, snapshot: IndexedSnapshot) -> bool:
+    explicit = [item for item in snapshot.catalog if item.target_id == row.target_id]
+    return bool(explicit) and not any(item.species == row.taxon for item in explicit)
+
+
+def _scope_match(
+    row: ValidatedInput, match: MatchResult, snapshot: IndexedSnapshot
+) -> MatchResult:
+    """A provider ID cannot establish coverage for a missing species variant."""
+    if not snapshot.species_annotations or row.taxon is None:
+        return match
+    species = {taxon for _, taxon in snapshot.species_annotations}
+    missing_variant = _missing_variant(row, snapshot)
+    if row.taxon not in species or (not snapshot.complete and missing_variant):
+        return MatchResult(
+            match_status="source_unavailable",
+            matched_target_id=None,
+            candidate_target_ids=match.candidate_target_ids,
+            match_method=match.match_method,
+            match_evidence_ids=match.match_evidence_ids,
+            diagnostics=(
+                *match.diagnostics,
+                Diagnostic(
+                    "source_unavailable",
+                    "warning",
+                    "requested species identity is outside verified matching coverage",
+                ),
+            ),
+        )
+    return match
 
 
 @dataclass(frozen=True, slots=True)
@@ -206,6 +306,16 @@ def _shortlist(query: MatchQuery, ctx: IndexedSnapshot) -> tuple[CatalogTarget, 
     )
     indexes = {i for k, v in keys if v is not None for i in ctx.lookup.get((k, v), ())}
     return tuple(ctx.catalog[i] for i in sorted(indexes))
+
+
+def _conflict_catalog(
+    shortlist: tuple[CatalogTarget, ...], ctx: IndexedSnapshot
+) -> tuple[CatalogTarget, ...]:
+    """Keep every species variant of a shortlisted IUPHAR id visible to conflicts."""
+    ids = {row.target_id for row in shortlist}
+    if not ids:
+        return shortlist
+    return tuple(row for row in ctx.catalog if row.target_id in ids)
 
 
 def _ancestor_records(
@@ -318,10 +428,16 @@ def classify_target(
     )
     subset = _shortlist(query, snapshot)
     hits = collect_candidates(query, subset)
-    match = validate_identity(query, subset, hits, snapshot_complete=snapshot.complete)
+    match = validate_identity(
+        query,
+        _conflict_catalog(subset, snapshot),
+        hits,
+        snapshot_complete=snapshot.complete,
+    )
+    match = _scope_match(row, match, snapshot)
     hits = _publication_hits(query, subset, hits, match)
     match = _match_complex_target(row, match, snapshot)
-    annotation = snapshot.annotations.get(match.matched_target_id or "")
+    match, annotation = _species_match(row, match, snapshot)
     if (
         match.match_status == "matched"
         and annotation is not None
@@ -614,7 +730,9 @@ def _components(row: RowResult, snapshot: IndexedSnapshot) -> tuple[ComponentRow
         return ()
     raw = row.validated.raw_fields.get("component_ids") or ""
     return tuple(
-        _component_row(row.result.input_row_id, component_id, snapshot)
+        _component_row(
+            row.result.input_row_id, component_id, snapshot, row.validated.taxon
+        )
         for component_id in _component_ids(raw)
     )
 
@@ -624,11 +742,14 @@ def _component_ids(raw: str) -> list[str]:
 
 
 def _component_row(
-    input_row_id: str, component_id: str, snapshot: IndexedSnapshot
+    input_row_id: str,
+    component_id: str,
+    snapshot: IndexedSnapshot,
+    taxon: str | None = None,
 ) -> ComponentRow:
     namespace, sep, key = component_id.partition(":")
     annotation = (
-        snapshot.annotations.get(key)
+        _annotation(snapshot, key, taxon)
         if sep and namespace.casefold() == "iuphar"
         else None
     )

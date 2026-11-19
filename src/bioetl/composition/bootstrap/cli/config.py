@@ -6,10 +6,11 @@ from functools import partial
 from pathlib import Path
 from typing import cast
 
-from bioetl.application.services.ops.config_service import ConfigService
 from bioetl.application.services.control_plane.effective_config.service import (
     create_effective_config_service,
 )
+from bioetl.application.services.ops.config_service import ConfigService
+from bioetl.application.services.quality.config_dq_service import DQConfigLoaderProtocol
 from bioetl.composition.bootstrap.cli.noop import create_noop_logger
 from bioetl.composition.bootstrap.cli.service_builders import (
     build_cli_config_service,
@@ -29,8 +30,6 @@ from bioetl.domain.ports import (
     SettingsLoaderPort,
 )
 from bioetl.infrastructure.config.converters import yaml_config_to_domain
-
-from bioetl.application.services.quality.config_dq_service import DQConfigLoaderProtocol
 
 
 def create_registered_pipeline_registry(

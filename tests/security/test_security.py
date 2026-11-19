@@ -423,6 +423,7 @@ class TestPIIHandling:
             "pubmed_client.py",  # NCBI API tool identification
             "_health.py",  # PubMed adapter (NCBI required email)
             "_search.py",  # PubMed adapter (NCBI required email)
+            "_search_models.py",  # PubMed search params (NCBI required email)
             "_fetch.py",  # PubMed adapter (NCBI required email)
             "_state.py",  # PubMed adapter state mixin (NCBI required email)
             "_adapter_factory.py",  # PubMed factory resolves NCBI contact email (EXC-010)

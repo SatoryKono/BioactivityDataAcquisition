@@ -94,14 +94,18 @@ def test_fix_pagebreaks_accepts_validated_root_path(
     assert target.read_text(encoding="utf-8") == "content"
 
 
-def test_uniform_sizes_rejects_write_outside_repo(tmp_path: Path) -> None:
+def test_uniform_sizes_rejects_write_outside_repo(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     module = _load_module(
         _repo_root() / "scripts" / "diagrams" / "fix" / "uniform_diagram_sizes.py",
         "uniform_diagram_sizes_security_module",
     )
 
+    monkeypatch.setattr(module, "SCRIPT_DIR", tmp_path / "repo/scripts/diagrams/fix")
+    outside = tmp_path / "escape.mmd"
     with pytest.raises(ValueError, match="outside"):
-        safe_path = module._ensure_repo_path(tmp_path.parent / "escape.mmd")
+        safe_path = module._ensure_repo_path(outside)
         module._write_repo_text(safe_path, "content")
 
 
@@ -113,8 +117,10 @@ def test_uniform_sizes_accepts_validated_repo_path(
         _repo_root() / "scripts" / "diagrams" / "fix" / "uniform_diagram_sizes.py",
         "uniform_diagram_sizes_security_module_absolute",
     )
-    monkeypatch.setattr(module, "SCRIPT_DIR", tmp_path)
-    target = module._ensure_repo_path(tmp_path / "tmp_uniform_sizes_test.mmd")
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    monkeypatch.setattr(module, "SCRIPT_DIR", repo / "scripts/diagrams/fix")
+    target = module._ensure_repo_path(repo / "tmp_uniform_sizes_test.mmd")
     try:
         module._write_repo_text(target, "content")
         assert target.read_text(encoding="utf-8") == "content"

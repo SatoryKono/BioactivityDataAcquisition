@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from bioetl.composition.bootstrap.assembly.target_classification_identity import (
+    target_run_context_identity,
+)
+
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
@@ -109,6 +113,9 @@ class RunContextFactory:
             provider=self.provider,
             entity=entity,
             strict=strict_contract_identity,
+        )
+        contract_identity = target_run_context_identity(
+            self.pipeline_name, yaml_config, contract_identity
         )
         resolved_hash = (
             self.config_hash_getter(yaml_config)

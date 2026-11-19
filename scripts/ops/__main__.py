@@ -6,6 +6,10 @@ Usage:
     python -m scripts.ops --help
 
 Stable commands:
+    target-fk-repair    Build additive V30 candidates for missing target FKs
+    iuphar-target-cohort Export canonical targets and assemble Stage 0 evidence
+    target-classification-migration
+                       Prepare, promote, or restore paired target tables
     salt-rotate        Rotate PII hashing salt
     check-observability-ports
                        Compare published observability endpoints with container health
@@ -99,6 +103,11 @@ COMMAND_SPECS = {
 
 COMMAND_SPECS.update(
     {
+        "target-fk-repair": module_command("scripts.ops.target_fk_repair"),
+        "iuphar-target-cohort": module_command("scripts.ops.iuphar_target_cohort"),
+        "target-classification-migration": module_command(
+            "scripts.ops.target_classification_migration"
+        ),
         "promote-router-host-release": module_command(
             "scripts.ops.observability.promote_router_host_release"
         ),

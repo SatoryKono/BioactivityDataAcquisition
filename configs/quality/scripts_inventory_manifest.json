@@ -1,22 +1,22 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-19T08:37:54.108118+00:00",
+  "generated_at": "2026-11-19T09:13:50.286908+00:00",
   "summary": {
-    "total_scripts": 763,
+    "total_scripts": 768,
     "status_counts": {
       "active": 334,
-      "supporting": 427,
+      "supporting": 432,
       "temporary_diagnostic": 2
     },
     "reference_group_coverage": {
       "agents": 12,
       "build": 18,
       "ci": 77,
-      "docs": 304,
+      "docs": 306,
       "other": 22,
-      "scripts": 656,
+      "scripts": 661,
       "skills": 13,
-      "tests": 583
+      "tests": 585
     }
   },
   "scripts": [
@@ -271,7 +271,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 142,
+          "line": 151,
           "source_group": "scripts",
           "text": "\"diagnose-codex-wsl\": \"../ai/codex/diagnose_wsl.sh\","
         },
@@ -699,7 +699,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 955,
+          "line": 1041,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/ensure-mcp.sh\","
         }
@@ -1565,13 +1565,13 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 203,
+          "line": 206,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/native_runtime_contract.py\","
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 817,
+          "line": 903,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/native_runtime_contract.py\": ("
         },
@@ -1979,7 +1979,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 143,
+          "line": 152,
           "source_group": "scripts",
           "text": "\"setup-agents\": \"../ai/codex/setup_agents.sh\","
         },
@@ -2192,7 +2192,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 997,
+          "line": 1083,
           "source_group": "scripts",
           "text": "\"scripts/ai/cursor/setup_skills.sh\","
         },
@@ -3071,13 +3071,13 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 204,
+          "line": 207,
           "source_group": "scripts",
           "text": "\"scripts/ai/junie/check_junie_mirror.py\","
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 662,
+          "line": 689,
           "source_group": "scripts",
           "text": "\"scripts/ai/junie/check_junie_mirror.py\": (JUNIE_RUNTIME_CI_TEST,),"
         },
@@ -3120,7 +3120,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 2019,
+          "line": 2037,
           "source_group": "ci",
           "text": "bash scripts/ai/junie/check_junie_mirror.sh --check >> \"$log\" 2>&1"
         },
@@ -3326,7 +3326,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1909,
+          "line": 2003,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/check.sh\": ("
         }
@@ -3519,7 +3519,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 981,
+          "line": 1067,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/github-mcp-wrapper.ps1\","
         },
@@ -3554,7 +3554,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 10,
+      "reference_count": 11,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/MUSE.md",
@@ -3567,6 +3567,12 @@
           "line": 135,
           "source_group": "docs",
           "text": "BIOETL_MCP_VALIDATE_ONLY=1 scripts/ai/mcp/github-mcp-wrapper.sh"
+        },
+        {
+          "path": "docs/05-operations/runbooks/amp-orbs.md",
+          "line": 60,
+          "source_group": "docs",
+          "text": "`github-mcp-wrapper.sh`; without it the GitHub MCP cannot start in a"
         },
         {
           "path": "scripts/ai/.mcp.json",
@@ -3582,7 +3588,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 982,
+          "line": 1068,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/github-mcp-wrapper.sh\","
         },
@@ -3597,12 +3603,6 @@
           "line": 430,
           "source_group": "tests",
           "text": "sh_content = (root / \"scripts/ai/mcp/github-mcp-wrapper.sh\").read_text("
-        },
-        {
-          "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 62,
-          "source_group": "tests",
-          "text": "shell_wrapper = _read(\"scripts/ai/mcp/github-mcp-wrapper.sh\")"
         }
       ]
     },
@@ -3658,7 +3658,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 957,
+          "line": 1043,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_adr_analysis_wrapper.sh\","
         },
@@ -3683,7 +3683,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1004,
+          "line": 1090,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_ast_grep_wrapper.ps1\","
         },
@@ -3732,7 +3732,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1025,
+          "line": 1111,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_ast_grep_wrapper.sh\","
         },
@@ -3769,7 +3769,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1005,
+          "line": 1091,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.ps1\","
         },
@@ -3830,7 +3830,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1006,
+          "line": 1092,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.sh\","
         },
@@ -3912,7 +3912,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 958,
+          "line": 1044,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_code_analyzer_wrapper.sh\","
         }
@@ -3975,7 +3975,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1007,
+          "line": 1093,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_context7_wrapper.ps1\","
         },
@@ -4024,7 +4024,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1026,
+          "line": 1112,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_context7_wrapper.sh\","
         },
@@ -4100,7 +4100,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 959,
+          "line": 1045,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_deja_wrapper.sh\","
         }
@@ -4244,7 +4244,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1900,
+          "line": 1994,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.ps1\": (MCP_WRAPPER_CONTRACTS_TEST,),"
         },
@@ -4262,7 +4262,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
-          "line": 970,
+          "line": 1044,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.ps1\","
         }
@@ -4299,7 +4299,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1899,
+          "line": 1993,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.sh\": (MCP_WRAPPER_CONTRACTS_TEST,),"
         },
@@ -4311,7 +4311,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
-          "line": 971,
+          "line": 1045,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.sh\","
         }
@@ -4344,7 +4344,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1898,
+          "line": 1992,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\": (NPM_RUNTIME_TEST,),"
         },
@@ -4399,7 +4399,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1897,
+          "line": 1991,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\": (NPM_RUNTIME_TEST,),"
         },
@@ -4475,7 +4475,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 960,
+          "line": 1046,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_github_actions_wrapper.sh\","
         },
@@ -4594,7 +4594,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 963,
+          "line": 1049,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_memory_wrapper.ps1\","
         },
@@ -4645,7 +4645,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 964,
+          "line": 1050,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_memory_wrapper.sh\","
         },
@@ -4815,7 +4815,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 965,
+          "line": 1051,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1\","
         },
@@ -4858,7 +4858,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 966,
+          "line": 1052,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\","
         },
@@ -4891,7 +4891,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 967,
+          "line": 1053,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1\","
         },
@@ -5474,7 +5474,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1905,
+          "line": 1999,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/exec_windows_ps1_wrapper.sh\": ("
         },
@@ -5486,7 +5486,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
-          "line": 972,
+          "line": 1046,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/support/exec_windows_ps1_wrapper.sh\","
         }
@@ -5523,7 +5523,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 983,
+          "line": 1069,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/github_project_transport.mjs\","
         },
@@ -5560,7 +5560,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1008,
+          "line": 1094,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/host_transport.mjs\","
         },
@@ -5609,7 +5609,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1009,
+          "line": 1095,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/invoke_host_transport.ps1\","
         },
@@ -5670,7 +5670,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1010,
+          "line": 1096,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/invoke_host_transport.sh\","
         },
@@ -5893,7 +5893,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1901,
+          "line": 1995,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/run_owned_stdio.ps1\": ("
         },
@@ -5905,7 +5905,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
-          "line": 973,
+          "line": 1047,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/support/run_owned_stdio.ps1\","
         }
@@ -6154,7 +6154,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 962,
+          "line": 1048,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/test_env_loading.sh\","
         },
@@ -9779,7 +9779,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 741,
+          "line": 755,
           "source_group": "tests",
           "text": "from scripts.docs.checks import verify"
         },
@@ -11475,7 +11475,7 @@
         },
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-          "line": 247,
+          "line": 253,
           "source_group": "docs",
           "text": "`python -m scripts.engineering.ci.generated_artifact_checks daily --report reports/quality/generated-artifact-daily-selection.json`."
         },
@@ -11518,7 +11518,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1909,
+          "line": 1927,
           "source_group": "ci",
           "text": "python -m scripts.engineering.ci.junit_duration_summary"
         },
@@ -11615,7 +11615,7 @@
         },
         {
           "path": "tests/unit/scripts/qa/test_run_local_coverage_verify.py",
-          "line": 20,
+          "line": 21,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.local_test_telemetry import junit_telemetry_sha256"
         }
@@ -11671,7 +11671,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1887,
+          "line": 1981,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/nightly_shadow_archive.py\": NIGHTLY_SHADOW_TESTS,"
         },
@@ -11771,7 +11771,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 40,
+      "reference_count": 43,
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
@@ -11842,7 +11842,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1765,
+          "line": 1859,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/presubmit_gate.py\": ("
         },
@@ -11885,7 +11885,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1928,
+          "line": 2022,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/publish_docker_image.sh\": ("
         },
@@ -11996,7 +11996,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1534,
+          "line": 1546,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci.pytest_event_journal \\"
         },
@@ -12063,13 +12063,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pytest_receipts.py",
-          "line": 15,
+          "line": 16,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.pytest_receipts import ("
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pytest_receipts.py",
-          "line": 1062,
+          "line": 1104,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.pytest_receipts import write_runner_terminal_receipt"
         }
@@ -12088,7 +12088,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 2111,
+          "line": 2129,
           "source_group": "ci",
           "text": "\"python -m scripts.engineering.ci.quality_integral_gate\" \\"
         },
@@ -12314,7 +12314,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1508,
+          "line": 1520,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -12511,7 +12511,7 @@
         },
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-          "line": 79,
+          "line": 85,
           "source_group": "docs",
           "text": "| S7-d `test_committed_test_telemetry_baseline_is_populated` | telemetry | `pytest tests/architecture/test_test_telemetry_governance.py tests/architecture/test_test_telemetry_baseline.py` | Obtain a c"
         }
@@ -12854,7 +12854,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 322,
+      "reference_count": 323,
       "references": [
         {
           "path": "docs/00-project/ai/skills/_references/local/gh-fix-ci/scripts/inspect_pr_checks.py",
@@ -13217,7 +13217,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 585,
+          "line": 594,
           "source_group": "scripts",
           "text": "\"scripts/engineering/dev/pretest_guardrails.ps1\": (SCOPED_CHECKS_TEST,),"
         },
@@ -13266,7 +13266,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 2097,
+          "line": 2115,
           "source_group": "ci",
           "text": "\"bash scripts/engineering/dev/pretest_guardrails.sh\" \\"
         },
@@ -13940,7 +13940,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 586,
+          "line": 595,
           "source_group": "scripts",
           "text": "\"scripts/engineering/dev/setup_bioetl_wsl.ps1\": ("
         },
@@ -13952,7 +13952,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
-          "line": 1772,
+          "line": 1887,
           "source_group": "tests",
           "text": "[\"scripts/engineering/dev/setup_bioetl_wsl.ps1\"], repo_root=root"
         },
@@ -13975,7 +13975,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 46,
+      "reference_count": 49,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
@@ -14032,7 +14032,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 36,
+      "reference_count": 37,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
@@ -14302,13 +14302,13 @@
       "references": [
         {
           "path": "pyproject.toml",
-          "line": 366,
+          "line": 368,
           "source_group": "build",
           "text": "# (type-checking.yml / run_mypy.* / Zed Type check / zed_mypy.py); memory"
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1357,
+          "line": 1430,
           "source_group": "scripts",
           "text": "\"scripts/engineering/dev/zed_mypy.py\","
         },
@@ -14873,7 +14873,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 164,
+          "line": 167,
           "source_group": "scripts",
           "text": "\"find-complex-functions\": \"scripts.engineering.find_complex_functions\","
         }
@@ -15212,7 +15212,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 206,
+          "line": 209,
           "source_group": "scripts",
           "text": "\"analyze-duplicate-functions\": \"scripts.engineering.qa.analyze_duplicate_functions\","
         }
@@ -15237,7 +15237,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 233,
+          "line": 237,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.assemble_observability_closure_evidence\""
         },
@@ -15283,7 +15283,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 207,
+          "line": 210,
           "source_group": "scripts",
           "text": "\"calibrate-hotspots\": \"scripts.engineering.qa.calibrate_hotspot_budgets\","
         }
@@ -15304,7 +15304,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 106,
+          "line": 109,
           "source_group": "scripts",
           "text": "\"check-app-deps\": \"scripts.engineering.qa.check_application_deps\","
         }
@@ -15343,7 +15343,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 105,
+          "line": 108,
           "source_group": "scripts",
           "text": "\"check-architecture\": \"scripts.engineering.qa.check_architecture\","
         },
@@ -15376,7 +15376,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 149,
+          "line": 152,
           "source_group": "scripts",
           "text": "\"check-branch-coverage\": \"scripts.engineering.qa.check_branch_coverage\","
         },
@@ -15427,13 +15427,13 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 14,
+          "line": 16,
           "source_group": "scripts",
           "text": "check-c901           C901 complexity baseline enforcement"
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 111,
+          "line": 114,
           "source_group": "scripts",
           "text": "\"check-c901\": \"scripts.engineering.qa.check_c901_baseline\","
         },
@@ -15460,7 +15460,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 107,
+          "line": 110,
           "source_group": "scripts",
           "text": "\"check-constructor-args\": \"scripts.engineering.qa.check_constructor_args\","
         },
@@ -15487,7 +15487,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 211,
+          "line": 215,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.check_dashboard_performance_budgets\""
         },
@@ -15514,7 +15514,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 209,
+          "line": 213,
           "source_group": "scripts",
           "text": "\"check-dashboard-visual-semantics\": \"scripts.engineering.qa.check_dashboard_visual_semantics\","
         },
@@ -15583,7 +15583,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 114,
+          "line": 117,
           "source_group": "scripts",
           "text": "\"check-docs-drift\": \"scripts.engineering.qa.check_docs_drift\","
         },
@@ -15616,7 +15616,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 109,
+          "line": 112,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.check_duplication_complexity_exemptions\""
         },
@@ -15653,7 +15653,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 124,
+          "line": 127,
           "source_group": "scripts",
           "text": "\"check-generic-field-ownership\": \"scripts.engineering.qa.check_generic_field_ownership\","
         },
@@ -15680,7 +15680,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 123,
+          "line": 126,
           "source_group": "scripts",
           "text": "\"check-gold-nullable-numeric\": \"scripts.engineering.qa.check_gold_nullable_numeric_compatibility\","
         },
@@ -15713,13 +15713,13 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 15,
+          "line": 17,
           "source_group": "scripts",
           "text": "check-naming-pkg     Package naming consistency check"
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 112,
+          "line": 115,
           "source_group": "scripts",
           "text": "\"check-naming-pkg\": \"scripts.engineering.qa.check_naming_package_consistency\","
         },
@@ -15770,7 +15770,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 125,
+          "line": 128,
           "source_group": "scripts",
           "text": "\"check-ontology-unit-semantics\": \"scripts.engineering.qa.check_ontology_unit_semantics\","
         },
@@ -15797,7 +15797,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 216,
+          "line": 220,
           "source_group": "scripts",
           "text": "\"check-prometheus-rules\": \"scripts.engineering.qa.check_prometheus_rules\","
         },
@@ -15854,7 +15854,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 113,
+          "line": 116,
           "source_group": "scripts",
           "text": "\"check-exemptions\": \"scripts.engineering.qa.check_quality_exemptions\","
         },
@@ -15893,7 +15893,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 122,
+          "line": 125,
           "source_group": "scripts",
           "text": "\"check-semantic-anchor-parity\": \"scripts.engineering.qa.check_semantic_anchor_parity\","
         },
@@ -15920,7 +15920,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 117,
+          "line": 120,
           "source_group": "scripts",
           "text": "\"check-semantic-field-registry\": \"scripts.engineering.qa.check_semantic_field_registry\","
         }
@@ -15935,7 +15935,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 121,
+          "line": 124,
           "source_group": "scripts",
           "text": "\"check-semantic-governance-policy\": \"scripts.engineering.qa.check_semantic_governance_policy\","
         },
@@ -15968,7 +15968,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 119,
+          "line": 122,
           "source_group": "scripts",
           "text": "\"check-semantic-pair-budget\": \"scripts.engineering.qa.check_semantic_pair_matrix_budget\","
         },
@@ -16001,7 +16001,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 118,
+          "line": 121,
           "source_group": "scripts",
           "text": "\"check-semantic-registry-drift\": \"scripts.engineering.qa.check_semantic_registry_drift\","
         },
@@ -16101,7 +16101,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 115,
+          "line": 118,
           "source_group": "scripts",
           "text": "\"check-xwalk-missing-backlog\": \"scripts.engineering.qa.check_xwalk_missing_backlog\","
         },
@@ -16113,7 +16113,7 @@
         },
         {
           "path": "tests/unit/scripts/qa/test_check_xwalk_missing_backlog.py",
-          "line": 19,
+          "line": 20,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.check_xwalk_missing_backlog import ("
         }
@@ -16164,7 +16164,7 @@
         },
         {
           "path": "scripts/schema/analysis/generate_config_matrix.py",
-          "line": 719,
+          "line": 722,
           "source_group": "scripts",
           "text": "Path(\"scripts/engineering/qa/config_surface_governance.py\"),"
         },
@@ -16220,13 +16220,13 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 408,
+          "line": 422,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.debt_governance_gate_evaluators import ("
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 429,
+          "line": 443,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import debt_governance_gate_evaluators as evaluators"
         },
@@ -16263,7 +16263,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_generated_artifact_selection.py",
-          "line": 428,
+          "line": 442,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import debt_governance_gate_report as cli"
         },
@@ -16475,7 +16475,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 86,
+      "reference_count": 87,
       "references": [
         {
           "path": "docs/00-project/RULES.md",
@@ -16645,7 +16645,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 183,
+          "line": 186,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.external_resource_inventory\""
         },
@@ -16712,7 +16712,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 154,
+          "line": 157,
           "source_group": "scripts",
           "text": "\"report-pubchem-property-vocab\": \"scripts.engineering.qa.extract_pubchem_property_vocab\","
         },
@@ -16751,7 +16751,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 155,
+          "line": 158,
           "source_group": "scripts",
           "text": "\"report-publication-nested-vocab\": \"scripts.engineering.qa.extract_publication_nested_vocab\","
         },
@@ -16876,7 +16876,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 126,
+          "line": 129,
           "source_group": "scripts",
           "text": "\"generate-debt-tasks\": \"scripts.engineering.qa.generate_architecture_debt_tasks\","
         },
@@ -17066,7 +17066,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1421,
+          "line": 1433,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa.generate_hotspot_degradation_report \\"
         },
@@ -17102,7 +17102,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 102,
+          "line": 104,
           "source_group": "scripts",
           "text": "_HOTSPOT_REPORT_MODULE = \"scripts.engineering.qa.generate_hotspot_degradation_report\""
         },
@@ -17167,7 +17167,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 120,
+          "line": 123,
           "source_group": "scripts",
           "text": "\"report-semantic-pipeline-audit\": \"scripts.engineering.qa.generate_semantic_pipeline_audit\","
         },
@@ -17327,6 +17327,62 @@
       "next_step": "Retain as the shared first-party import-graph helper consumed by QA inventory reports; fold it into a broader canonical graph helper surface only if the inventory/reporting pipeline is consolidated. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/engineering/qa/report_compatibility_importer_census.py:1145; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18."
     },
     {
+      "path": "scripts/engineering/qa/iuphar_snapshot_build.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 106,
+          "source_group": "scripts",
+          "text": "\"iuphar-snapshot-build\": \"scripts.engineering.qa.iuphar_snapshot_build\","
+        },
+        {
+          "path": "tests/unit/infrastructure/adapters/iuphar/test_snapshot_builder.py",
+          "line": 361,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa.iuphar_snapshot_build import main"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-10",
+      "next_step": "Retain behind python -m scripts.engineering.qa so active_script_count_max stays unchanged."
+    },
+    {
+      "path": "scripts/engineering/qa/iuphar_target_acceptance.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "docs/05-operations/runbooks/iuphar-target-classification.md",
+          "line": 538,
+          "source_group": "docs",
+          "text": "- [Acceptance CLI](../../../scripts/engineering/qa/iuphar_target_acceptance.py)"
+        },
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 212,
+          "source_group": "scripts",
+          "text": "\"iuphar-target-acceptance\": \"scripts.engineering.qa.iuphar_target_acceptance\","
+        },
+        {
+          "path": "tests/unit/scripts/qa/test_iuphar_target_acceptance_cli.py",
+          "line": 7,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa.iuphar_target_acceptance import main"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-10",
+      "next_step": "Retain behind python -m scripts.engineering.qa so active_script_count_max stays unchanged."
+    },
+    {
       "path": "scripts/engineering/qa/lint_terminology.py",
       "type": "py",
       "status": "active",
@@ -17353,7 +17409,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 128,
+          "line": 131,
           "source_group": "scripts",
           "text": "\"check-terminology\": \"scripts.engineering.qa.lint_terminology\","
         },
@@ -17398,7 +17454,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 104,
+          "line": 107,
           "source_group": "scripts",
           "text": "\"check-naming\": \"scripts.engineering.qa.naming_audit\","
         },
@@ -17733,7 +17789,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 127,
+          "line": 130,
           "source_group": "scripts",
           "text": "\"reduce-architecture-debt\": \"scripts.engineering.qa.reduce_architecture_debt\","
         },
@@ -17884,7 +17940,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 168,
+          "line": 171,
           "source_group": "scripts",
           "text": "\"report-adr-enforcement-matrix\": \"scripts.engineering.qa.report_adr_enforcement_matrix\","
         },
@@ -17945,7 +18001,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 173,
+          "line": 176,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_architecture_debt_remote_main_baseline\""
         },
@@ -18031,7 +18087,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 153,
+          "line": 156,
           "source_group": "scripts",
           "text": "\"report-architecture-suite-burndown\": \"scripts.engineering.qa.report_architecture_suite_burndown\","
         }
@@ -18050,7 +18106,7 @@
       "references": [
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-          "line": 157,
+          "line": 163,
           "source_group": "docs",
           "text": "| Architecture artifact duplication | `python -m scripts.engineering.qa.report_artifact_duplication_audit --check` | `python -m scripts.engineering.qa.report_artifact_duplication_audit --json-out repo"
         },
@@ -18062,7 +18118,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 161,
+          "line": 164,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_artifact_duplication_audit\""
         },
@@ -18136,7 +18192,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 180,
+          "line": 183,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_cast_any_typing_census\""
         },
@@ -18173,7 +18229,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 166,
+          "line": 169,
           "source_group": "scripts",
           "text": "\"report-chembl-observed-value-inventory\": \"scripts.engineering.qa.report_chembl_observed_value_inventory\","
         },
@@ -18216,7 +18272,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 133,
+          "line": 136,
           "source_group": "scripts",
           "text": "\"report-compatibility-importer-census\": \"scripts.engineering.qa.report_compatibility_importer_census\","
         },
@@ -18249,7 +18305,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 189,
+          "line": 192,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_composition_protocol_inventory\""
         },
@@ -18288,7 +18344,7 @@
       "references": [
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-          "line": 144,
+          "line": 150,
           "source_group": "docs",
           "text": "| Config duplication/backlog audit | `pytest tests/architecture/test_config_surface_entity_residual_plateau.py` | `python -m scripts.engineering.qa.report_config_surface_backlog` |"
         },
@@ -18349,7 +18405,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 135,
+          "line": 138,
           "source_group": "scripts",
           "text": "\"report-contract-coverage-matrix\": \"scripts.engineering.qa.report_contract_coverage_matrix\","
         },
@@ -18376,7 +18432,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 217,
+          "line": 221,
           "source_group": "scripts",
           "text": "\"report-dashboard-inventory\": \"scripts.engineering.qa.report_dashboard_inventory\","
         },
@@ -18421,7 +18477,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 221,
+          "line": 225,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_dashboard_panel_audit_matrix\""
         },
@@ -18448,7 +18504,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 219,
+          "line": 223,
           "source_group": "scripts",
           "text": "\"report-dashboard-promql-scope\": \"scripts.engineering.qa.report_dashboard_promql_scope\","
         },
@@ -18473,7 +18529,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 218,
+          "line": 222,
           "source_group": "scripts",
           "text": "\"report-dashboard-query-duplicates\": \"scripts.engineering.qa.report_dashboard_query_duplicates\","
         },
@@ -18506,7 +18562,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 224,
+          "line": 228,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_dashboard_scalar_density\""
         },
@@ -18543,7 +18599,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 214,
+          "line": 218,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_dashboard_scenes_parity\""
         },
@@ -18592,7 +18648,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 150,
+          "line": 153,
           "source_group": "scripts",
           "text": "\"report-dead-code-inventory\": \"scripts.engineering.qa.report_dead_code_inventory\","
         },
@@ -18637,7 +18693,7 @@
         },
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-          "line": 160,
+          "line": 166,
           "source_group": "docs",
           "text": "| Debt-governance rollup | `python -m scripts.engineering.qa.report_debt_governance_gates --check` | `python -m scripts.engineering.qa.report_debt_governance_gates --update` |"
         },
@@ -18649,7 +18705,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 175,
+          "line": 178,
           "source_group": "scripts",
           "text": "\"report-debt-governance-gates\": \"scripts.engineering.qa.report_debt_governance_gates\","
         },
@@ -18700,7 +18756,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 137,
+          "line": 140,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_domain_io_taint_inventory\""
         },
@@ -18737,7 +18793,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 140,
+          "line": 143,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_domain_ports_inventory\""
         },
@@ -18780,7 +18836,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 159,
+          "line": 162,
           "source_group": "scripts",
           "text": "\"report-duplication-baseline\": \"scripts.engineering.qa.report_duplication_baseline\","
         },
@@ -18819,7 +18875,7 @@
       "references": [
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-          "line": 158,
+          "line": 164,
           "source_group": "docs",
           "text": "| Flaky-test burndown review | `python -m scripts.engineering.qa.report_flaky_test_burndown_review --check` | `python -m scripts.engineering.qa.report_flaky_test_burndown_review` |"
         },
@@ -18831,7 +18887,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 143,
+          "line": 146,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_flaky_test_burndown_review\""
         },
@@ -18868,7 +18924,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 163,
+          "line": 166,
           "source_group": "scripts",
           "text": "\"report-function-length-inventory\": \"scripts.engineering.qa.report_function_length_inventory\","
         },
@@ -18913,7 +18969,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 157,
+          "line": 160,
           "source_group": "scripts",
           "text": "\"report-family-baseline\": \"scripts.engineering.qa.report_hotspot_family_baseline\","
         },
@@ -18958,7 +19014,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 170,
+          "line": 173,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_invariant_audit_rebaseline\""
         },
@@ -18989,7 +19045,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 192,
+          "line": 195,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_lazy_import_inventory\""
         },
@@ -19028,7 +19084,7 @@
       "references": [
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-          "line": 159,
+          "line": 165,
           "source_group": "docs",
           "text": "| Live residual snapshot | `python -m scripts.engineering.qa.report_live_residual_snapshot --check` | `python -m scripts.engineering.qa.report_live_residual_snapshot` |"
         },
@@ -19055,7 +19111,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 20,
+      "reference_count": 21,
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
@@ -19101,7 +19157,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 148,
+          "line": 151,
           "source_group": "scripts",
           "text": "\"report-module-coverage\": \"scripts.engineering.qa.report_module_coverage_inventory\","
         }
@@ -19135,7 +19191,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 165,
+          "line": 168,
           "source_group": "scripts",
           "text": "\"report-normalization-fallback-inventory\": \"scripts.engineering.qa.report_normalization_fallback_inventory\","
         },
@@ -19186,7 +19242,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 167,
+          "line": 170,
           "source_group": "scripts",
           "text": "\"report-observability-metric-inventory\": \"scripts.engineering.qa.report_observability_metric_inventory\","
         },
@@ -19237,7 +19293,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 227,
+          "line": 231,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_panel_title_inventory\""
         }
@@ -19252,7 +19308,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 134,
+          "line": 137,
           "source_group": "scripts",
           "text": "\"report-pipeline-config-contract-ownership-map\": \"scripts.engineering.qa.report_pipeline_config_contract_ownership\","
         }
@@ -19283,7 +19339,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 146,
+          "line": 149,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_port_adapter_factory_coverage\""
         }
@@ -19302,7 +19358,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 177,
+          "line": 180,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_private_import_inventory\""
         },
@@ -19347,7 +19403,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 132,
+          "line": 135,
           "source_group": "scripts",
           "text": "\"report-provider-contract-drift\": \"scripts.engineering.qa.report_provider_contract_drift\","
         },
@@ -19374,7 +19430,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 195,
+          "line": 198,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_source_tree_manifest\""
         },
@@ -19413,19 +19469,19 @@
         },
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-          "line": 81,
+          "line": 87,
           "source_group": "docs",
           "text": "| test-governance `--check` | governance snapshot | `python -m scripts.engineering.qa.report_test_governance_audit --check` | `python -m scripts.engineering.qa.report_test_governance_audit --json-out "
         },
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-          "line": 150,
+          "line": 156,
           "source_group": "docs",
           "text": "| Test governance snapshots | `python -m scripts.engineering.qa.report_test_governance_audit --check` | `python -m scripts.engineering.qa.report_test_governance_audit --json-out reports/quality/test-g"
         },
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-          "line": 151,
+          "line": 157,
           "source_group": "docs",
           "text": "| Test basename collision inventory | `python -m scripts.engineering.qa.report_test_governance_audit --basename-inventory --check` | `python -m scripts.engineering.qa.report_test_governance_audit --ba"
         },
@@ -19506,7 +19562,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 152,
+          "line": 155,
           "source_group": "scripts",
           "text": "\"report-vcr-corpus-budget\": \"scripts.engineering.qa.report_vcr_corpus_budget\","
         }
@@ -19561,7 +19617,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 130,
+          "line": 133,
           "source_group": "scripts",
           "text": "\"report-vcr-metadata\": \"scripts.engineering.qa.report_vcr_metadata_catalog\","
         },
@@ -19582,7 +19638,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 151,
+          "line": 154,
           "source_group": "scripts",
           "text": "\"report-weak-assert-inventory\": \"scripts.engineering.qa.report_weak_assert_inventory\","
         }
@@ -19601,7 +19657,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 186,
+          "line": 189,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.requalify_external_resource_inventory\""
         },
@@ -19644,7 +19700,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 204,
+          "line": 207,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.run_architecture_audit_read_only\""
         },
@@ -19802,13 +19858,13 @@
         },
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-          "line": 63,
+          "line": 69,
           "source_group": "docs",
           "text": "`python -m scripts.engineering.qa.run_local_coverage_verify --max-workers 1`."
         },
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-          "line": 148,
+          "line": 154,
           "source_group": "docs",
           "text": "| Module coverage measurements | `python -m scripts.engineering.qa.run_local_coverage_verify` completes all 17 local shards on one committed source tree; its manifest records every exit code and the c"
         },
@@ -19853,7 +19909,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 230,
+          "line": 234,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.run_observability_closure_campaign\""
         },
@@ -19916,19 +19972,19 @@
         },
         {
           "path": "docs/05-engineering/test-telemetry-baseline.md",
-          "line": 125,
+          "line": 123,
           "source_group": "docs",
-          "text": "| 4 | `25.934` | `tests.unit.scripts.engineering.ci.test_pr_lane_results_runtime_acceptance_routes::test_runtime_evidence_selects_owning_contract[tests/helpers/runtime_acceptance_12553.py]` | `unit-sc"
+          "text": "| 2 | `16.306` | `tests.unit.scripts.engineering.ci.test_pr_lane_results_runtime_acceptance_routes::test_runtime_evidence_selects_owning_contract[tests/helpers/runtime_acceptance_12553.py]` | `junit-u"
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 850,
+          "line": 936,
           "source_group": "scripts",
           "text": "\"scripts/engineering/qa/runtime_acceptance_12553.py\","
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 852,
+          "line": 938,
           "source_group": "scripts",
           "text": "\"tests/helpers/runtime_acceptance_12553.py\","
         },
@@ -19971,7 +20027,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 851,
+          "line": 937,
           "source_group": "scripts",
           "text": "\"scripts/engineering/qa/runtime_acceptance_12553_coverage.py\","
         },
@@ -20021,7 +20077,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 156,
+          "line": 159,
           "source_group": "scripts",
           "text": "\"sync-integration-vcr-policy\": \"scripts.engineering.qa.sync_integration_vcr_policy\","
         }
@@ -20042,7 +20098,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 201,
+          "line": 204,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.technical_debt_audit_registry\""
         },
@@ -20115,7 +20171,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 239,
+          "line": 243,
           "source_group": "scripts",
           "text": "TEST_HEALTH_MODULE = \"scripts.engineering.qa.test_health\""
         },
@@ -20185,7 +20241,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 116,
+          "line": 119,
           "source_group": "scripts",
           "text": "\"validate-dq-consistency\": \"scripts.engineering.qa.validate_dq_consistency\","
         },
@@ -20271,7 +20327,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 131,
+          "line": 134,
           "source_group": "scripts",
           "text": "\"check-vcr-replay-preflight\": (\"scripts.engineering.qa.vcr.check_replay_preflight\"),"
         },
@@ -20387,7 +20443,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 9,
+          "line": 11,
           "source_group": "scripts",
           "text": "check-naming         Naming convention audit"
         },
@@ -23209,17 +23265,17 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 205,
+          "line": 208,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/process_supervisor.py\","
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 664,
+          "line": 691,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/process_supervisor.py\": ("
         },
@@ -23231,9 +23287,15 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
-          "line": 1754,
+          "line": 1869,
           "source_group": "tests",
           "text": "\"scripts/engineering/repo/process_supervisor.py\","
+        },
+        {
+          "path": "tests/unit/scripts/repo/test_process_deadline.py",
+          "line": 219,
+          "source_group": "tests",
+          "text": "from scripts.engineering.repo import process_supervisor as supervisor"
         }
       ],
       "owner": "@bioetl-platform",
@@ -23250,7 +23312,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 580,
+          "line": 589,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/scoped_checks.py\": ("
         },
@@ -23262,7 +23324,7 @@
         },
         {
           "path": "tests/unit/scripts/repo/test_budget_guard.py",
-          "line": 610,
+          "line": 612,
           "source_group": "tests",
           "text": "from scripts.engineering.repo import scoped_checks"
         },
@@ -23556,7 +23618,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 755,
+          "line": 782,
           "source_group": "scripts",
           "text": "\"scripts/memory/run_workflow.sh\": ("
         },
@@ -24339,6 +24401,25 @@
       ]
     },
     {
+      "path": "scripts/ops/iuphar_target_cohort.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ops/__main__.py",
+          "line": 107,
+          "source_group": "scripts",
+          "text": "\"iuphar-target-cohort\": module_command(\"scripts.ops.iuphar_target_cohort\"),"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-10",
+      "next_step": "Retain behind python -m scripts.ops so active_script_count_max stays unchanged."
+    },
+    {
       "path": "scripts/ops/launchers/codex/codex-exec.bat",
       "type": "bat",
       "status": "active",
@@ -24656,7 +24737,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 681,
+          "line": 708,
           "source_group": "scripts",
           "text": "\"scripts/ops/launchers/codex/setup_plugins.sh\": ("
         },
@@ -24791,7 +24872,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 72,
+          "line": 76,
           "source_group": "scripts",
           "text": "\"salt-rotate\": \"maintenance/security/salt_rotate.py\","
         },
@@ -25002,7 +25083,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 87,
+          "line": 91,
           "source_group": "scripts",
           "text": "\"archive-control-plane\": \"observability/archive_control_plane.py\","
         },
@@ -25027,7 +25108,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 85,
+          "line": 89,
           "source_group": "scripts",
           "text": "\"observability/check_bioetl_prometheus_scrape.py\""
         },
@@ -25091,7 +25172,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 73,
+          "line": 77,
           "source_group": "scripts",
           "text": "\"check-observability-ports\": \"observability/check_published_observability_endpoints.py\","
         },
@@ -26003,7 +26084,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 118,
+          "line": 127,
           "source_group": "scripts",
           "text": "\"scripts.ops.observability.grafana.apply_phase25_srs_prr_budget\""
         },
@@ -26070,7 +26151,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 121,
+          "line": 130,
           "source_group": "scripts",
           "text": "\"scripts.ops.observability.grafana.apply_phase2_remainder\""
         },
@@ -26101,7 +26182,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 124,
+          "line": 133,
           "source_group": "scripts",
           "text": "\"scripts.ops.observability.grafana.apply_phase4_dead_vars\""
         },
@@ -26132,7 +26213,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 127,
+          "line": 136,
           "source_group": "scripts",
           "text": "\"scripts.ops.observability.grafana.apply_phase4_reflow\""
         },
@@ -26181,13 +26262,13 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 877,
+          "line": 963,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/audit_live_grafana_panels.py\": ("
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 77,
+          "line": 81,
           "source_group": "scripts",
           "text": "\"audit-live-grafana\": \"observability/grafana/audit_live_grafana_panels.py\","
         },
@@ -26232,7 +26313,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 76,
+          "line": 80,
           "source_group": "scripts",
           "text": "\"assess-grafana-captures\": \"observability/grafana/capture_acceptance.py\","
         },
@@ -26299,7 +26380,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 2256,
+          "line": 2353,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },
@@ -26373,7 +26454,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 79,
+          "line": 83,
           "source_group": "scripts",
           "text": "\"observability/grafana/check_dashboard_panel_fill.py\""
         },
@@ -26428,7 +26509,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 82,
+          "line": 86,
           "source_group": "scripts",
           "text": "\"observability/grafana/check_grafana_dashboard_audit_preflight.py\""
         },
@@ -26473,7 +26554,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 880,
+          "line": 966,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/dashboard_context_links.py\": ("
         },
@@ -26559,7 +26640,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 89,
+          "line": 93,
           "source_group": "scripts",
           "text": "\"observability/grafana/ensure_quarantine_explorer.py\""
         }
@@ -26665,7 +26746,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 130,
+          "line": 139,
           "source_group": "scripts",
           "text": "\"scripts.ops.observability.grafana.lint_dashboard_phase2\""
         },
@@ -26808,7 +26889,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 115,
+          "line": 124,
           "source_group": "scripts",
           "text": "\"scripts.ops.observability.grafana.refresh_router_delivery\""
         }
@@ -26981,7 +27062,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 74,
+          "line": 78,
           "source_group": "scripts",
           "text": "\"rerender-grafana\": \"observability/grafana/rerender_grafana_screenshots.py\","
         },
@@ -27063,7 +27144,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 112,
+          "line": 121,
           "source_group": "scripts",
           "text": "\"scripts.ops.observability.grafana.router_managed_image\""
         },
@@ -27124,7 +27205,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 109,
+          "line": 118,
           "source_group": "scripts",
           "text": "\"scripts.ops.observability.grafana.router_rootfs\""
         },
@@ -27179,7 +27260,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 92,
+          "line": 96,
           "source_group": "scripts",
           "text": "\"observability/grafana/run_grafana_dashboard_audit_cycle.py\""
         },
@@ -27224,7 +27305,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 75,
+          "line": 79,
           "source_group": "scripts",
           "text": "\"render-grafana-matrix\": (\"observability/grafana/run_grafana_render_matrix.py\"),"
         },
@@ -27528,7 +27609,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 103,
+          "line": 112,
           "source_group": "scripts",
           "text": "\"scripts.ops.observability.promote_router_host_release\""
         },
@@ -27553,7 +27634,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 106,
+          "line": 115,
           "source_group": "scripts",
           "text": "\"scripts.ops.observability.refresh_router_host_provenance\""
         },
@@ -27633,7 +27714,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 133,
+          "line": 142,
           "source_group": "scripts",
           "text": "\"scripts.ops.observability.seed_dc6_pipeline_run_report\""
         },
@@ -27830,7 +27911,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 148,
+          "line": 157,
           "source_group": "scripts",
           "text": "\"deploy\": \"runtime/deploy/deploy-bioetl.sh\","
         }
@@ -28509,7 +28590,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 1019,
+          "line": 1105,
           "source_group": "scripts",
           "text": "\"scripts/ops/runtime/mcp/apply-shared-to-devin.py\","
         },
@@ -28916,7 +28997,7 @@
       "references": [
         {
           "path": "tests/unit/scripts/ops/test_migrate_evidence_locations.py",
-          "line": 21,
+          "line": 20,
           "source_group": "tests",
           "text": "from scripts.ops.runtime.migrate_evidence_locations import ("
         }
@@ -29381,7 +29462,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 146,
+          "line": 155,
           "source_group": "scripts",
           "text": "\"check-skills\": \"support/skills/check_ai_skills_layout.sh\","
         },
@@ -29445,6 +29526,56 @@
       "lifecycle_decision": "compatibility_wrapper",
       "review_by": "2026-11-17",
       "next_step": "Retain only as a backward-compatible wrapper while the canonical Codex skills mirror audit lives under scripts/ai/codex/check_skills_mirror.sh; remove it once operator/docs callers migrate to the canonical path. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17."
+    },
+    {
+      "path": "scripts/ops/target_classification_migration.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "docs/05-operations/runbooks/iuphar-target-classification.md",
+          "line": 539,
+          "source_group": "docs",
+          "text": "- [Physical migration and journal](../../../src/bioetl/infrastructure/storage/target_classification_migration.py)"
+        },
+        {
+          "path": "docs/05-operations/runbooks/iuphar-target-classification.md",
+          "line": 542,
+          "source_group": "docs",
+          "text": "- [Physical migration CLI](../../../scripts/ops/target_classification_migration.py)"
+        },
+        {
+          "path": "scripts/ops/__main__.py",
+          "line": 109,
+          "source_group": "scripts",
+          "text": "\"scripts.ops.target_classification_migration\""
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-10",
+      "next_step": "Retain behind python -m scripts.ops so active_script_count_max stays unchanged."
+    },
+    {
+      "path": "scripts/ops/target_fk_repair.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ops/__main__.py",
+          "line": 106,
+          "source_group": "scripts",
+          "text": "\"target-fk-repair\": module_command(\"scripts.ops.target_fk_repair\"),"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-02-10",
+      "next_step": "Retain behind python -m scripts.ops so active_script_count_max stays unchanged."
     },
     {
       "path": "scripts/optimized_test_runner.py",
@@ -30118,7 +30249,7 @@
         },
         {
           "path": "pyproject.toml",
-          "line": 165,
+          "line": 167,
           "source_group": "build",
           "text": "# JSON Schema validation (scripts/validate_pipeline_configs.py)"
         },

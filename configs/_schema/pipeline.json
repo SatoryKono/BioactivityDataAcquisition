@@ -1719,6 +1719,93 @@
       "title": "SourceProfileYamlConfig",
       "type": "object"
     },
+    "TargetClassificationYamlConfig": {
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "enum": [
+                  "shadow",
+                  "enrich"
+                ]
+              }
+            },
+            "required": [
+              "mode"
+            ]
+          },
+          "then": {
+            "properties": {
+              "snapshot_manifest": {
+                "minLength": 1,
+                "pattern": "\\S",
+                "type": "string"
+              },
+              "snapshot_manifest_sha256": {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              }
+            },
+            "required": [
+              "snapshot_manifest",
+              "snapshot_manifest_sha256"
+            ]
+          }
+        }
+      ],
+      "dependentRequired": {
+        "snapshot_manifest": [
+          "snapshot_manifest_sha256"
+        ],
+        "snapshot_manifest_sha256": [
+          "snapshot_manifest"
+        ]
+      },
+      "description": "Keep unknown keys and unpinned enabled profiles out of runtime wiring.",
+      "properties": {
+        "mode": {
+          "default": "off",
+          "enum": [
+            "off",
+            "shadow",
+            "enrich"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "snapshot_manifest": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Snapshot Manifest"
+        },
+        "snapshot_manifest_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Snapshot Manifest Sha256"
+        }
+      },
+      "title": "TargetClassificationYamlConfig",
+      "type": "object"
+    },
     "TransformConfig": {
       "additionalProperties": false,
       "description": "Configuration for transform versioning and steps.",
@@ -2103,6 +2190,10 @@
     "source_profile": {
       "$ref": "#/$defs/SourceProfileYamlConfig",
       "description": "Versioned source-side extraction policy metadata. It fingerprints extraction_params separately from Silver filtering."
+    },
+    "target_classification": {
+      "$ref": "#/$defs/TargetClassificationYamlConfig",
+      "description": "Offline IUPHAR profile; enabled modes require a pinned manifest."
     },
     "loading_strategy": {
       "anyOf": [

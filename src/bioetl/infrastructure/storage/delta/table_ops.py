@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import shutil
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, cast
 from urllib.parse import unquote, urlparse
@@ -49,21 +50,172 @@ def _read_records_from_active_parquet_files(
     if not file_uris:
         return []
 
-    tables = [
-        pq.read_table(
-            resolve_parquet_file_uri(file_uri),
-            columns=columns,
-            # Threaded parquet reads have hung on some Windows checkouts during
-            # first-touch native library bring-up; keep single-thread IO here.
-            use_threads=False,
+    if columns == []:
+        count = sum(
+            pq.read_metadata(resolve_parquet_file_uri(uri)).num_rows
+            for uri in file_uris
         )
-        for file_uri in file_uris
+        return [{} for _ in range(count)]
+    schema = delta_schema_to_pyarrow(table.schema())
+    partition_info = _partition_info(table, schema=schema)
+    tables = [
+        _read_active_file(uri, columns, partition_info, schema) for uri in file_uris
     ]
     if len(tables) == 1:
         rows: list[BronzeRecord] = tables[0].to_pylist()
         return rows
     concatenated = pa.concat_tables(tables)
     return cast("list[BronzeRecord]", concatenated.to_pylist())
+
+
+@dataclass(frozen=True)
+class _PartitionInfo:
+    root: Path
+    columns: list[str]
+    schema: pa.Schema
+    values: dict[str, dict[str, str | None]]
+
+
+def _partition_info(
+    table: DeltaTable, *, schema: pa.Schema | None = None
+) -> _PartitionInfo | None:
+    columns = table.metadata().partition_columns
+    if not columns:
+        return None
+    return _PartitionInfo(
+        Path(resolve_parquet_file_uri(table.table_uri)).resolve(),
+        columns,
+        schema if schema is not None else delta_schema_to_pyarrow(table.schema()),
+        {
+            item["path"]: item["partition_values"]
+            for item in table.get_add_actions().to_pylist()
+        },
+    )
+
+
+def _align_table_to_schema(
+    result: pa.Table, schema: pa.Schema, columns: list[str] | None
+) -> pa.Table:
+    """Fill schema-evolved columns missing from older Parquet payloads as typed nulls."""
+    target = list(schema.names) if columns is None else list(columns)
+    schema_names = set(schema.names)
+    for name in target:
+        if name in result.column_names or name not in schema_names:
+            continue
+        result = result.append_column(
+            name, pa.nulls(result.num_rows, type=schema.field(name).type)
+        )
+    if not target:
+        return result
+    return result.select(target)
+
+
+def _physical_columns_for_read(
+    columns: list[str] | None,
+    partition_columns: frozenset[str],
+    available: set[str],
+) -> list[str]:
+    """Select readable non-partition columns present in the active Parquet file."""
+    if columns is None:
+        return list(available)
+    return [
+        name for name in columns if name not in partition_columns and name in available
+    ]
+
+
+def _list_available_parquet_columns(path: str) -> set[str] | None:
+    """Return Parquet column names, or None when the schema probe is unavailable."""
+    try:
+        return set(pq.read_schema(path).names)
+    except (OSError, ValueError, pa.ArrowInvalid, pa.ArrowIOError):
+        # Windows-style URIs can fail schema probes on non-Windows hosts; defer
+        # filtering to pq.read_table and typed null alignment.
+        return None
+
+
+def _empty_row_table(row_count: int) -> pa.Table:
+    """Build a zero-column Arrow table with a fixed row count for typed null fills."""
+    return pa.table(
+        {"__bioetl_row_pad__": pa.nulls(row_count, type=pa.null())}
+    ).drop_columns(["__bioetl_row_pad__"])
+
+
+def _parquet_row_count(path: str) -> int:
+    """Preserve read failures instead of presenting an unreadable file as empty."""
+    return int(pq.read_metadata(path).num_rows)
+
+
+def _read_physical_parquet(
+    path: str,
+    columns: list[str] | None,
+    partition_columns: frozenset[str],
+) -> pa.Table:
+    """Read active-file physical columns, tolerating unavailable schema probes."""
+    available = _list_available_parquet_columns(path)
+    if available is None:
+        physical_columns = (
+            None
+            if columns is None
+            else [name for name in columns if name not in partition_columns]
+        )
+    else:
+        physical_columns = _physical_columns_for_read(
+            columns, partition_columns, available
+        )
+    if physical_columns is None or physical_columns:
+        return pq.read_table(path, columns=physical_columns, use_threads=False)
+    return _empty_row_table(_parquet_row_count(path))
+
+
+def _append_partition_columns(
+    result: pa.Table,
+    *,
+    path: str,
+    partition_info: _PartitionInfo,
+    columns: list[str] | None,
+    schema: pa.Schema,
+) -> pa.Table:
+    """Restore partition fields from Delta add-actions with Delta-native types."""
+    relative = Path(path).resolve().relative_to(partition_info.root).as_posix()
+    values = partition_info.values[relative]
+    for name in partition_info.columns:
+        if columns is not None and name not in columns:
+            continue
+        if name in result.column_names:
+            continue
+        value = pa.scalar(values[name]).cast(schema.field(name).type)
+        result = result.append_column(
+            name, pa.array([value.as_py()] * result.num_rows, type=value.type)
+        )
+    return result
+
+
+def _read_active_file(
+    file_uri: str,
+    columns: list[str] | None,
+    partition_info: _PartitionInfo | None,
+    schema: pa.Schema,
+) -> pa.Table:
+    """Restore partition columns from Delta actions, including typed nulls.
+
+    Parquet payloads omit partition fields. Inferring them from Hive directory
+    names loses Delta's types and depends on PyArrow's version-specific defaults.
+    After schema evolution, older active files may also omit newly added columns;
+    fill those as typed nulls before selecting the Delta schema projection.
+    """
+    path = resolve_parquet_file_uri(file_uri)
+    partition_columns = frozenset(partition_info.columns if partition_info else [])
+    result = _read_physical_parquet(path, columns, partition_columns)
+
+    if partition_info is not None:
+        result = _append_partition_columns(
+            result,
+            path=path,
+            partition_info=partition_info,
+            columns=columns,
+            schema=schema,
+        )
+    return _align_table_to_schema(result, schema, columns)
 
 
 def read_delta_records(

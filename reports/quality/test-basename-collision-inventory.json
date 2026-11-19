@@ -1,5 +1,5 @@
 {
-  "duplicate_basename_count": 76,
+  "duplicate_basename_count": 78,
   "duplicate_basenames": {
     "test_adapter.py": [
       "tests/integration/adapters/openalex/test_adapter.py",
@@ -216,7 +216,8 @@
     ],
     "test_pipeline.py": [
       "tests/integration/adapters/openalex/test_pipeline.py",
-      "tests/unit/domain/config/test_pipeline.py"
+      "tests/unit/domain/config/test_pipeline.py",
+      "tests/unit/iuphar_target_class/test_pipeline.py"
     ],
     "test_pipeline_config.py": [
       "tests/unit/application/test_pipeline_config.py",
@@ -296,6 +297,10 @@
       "tests/unit/composition/factories/storage/test_storage_factory.py",
       "tests/unit/infrastructure/test_storage_factory.py"
     ],
+    "test_target_fk_repair.py": [
+      "tests/unit/composition/test_target_fk_repair.py",
+      "tests/unit/infrastructure/storage/test_target_fk_repair.py"
+    ],
     "test_transformations.py": [
       "tests/unit/application/pipelines/test_transformations.py",
       "tests/unit/domain/test_transformations.py"
@@ -331,6 +336,10 @@
     "test_workflow_step_dispatch.py": [
       "tests/unit/application/services/execution/test_workflow_step_dispatch.py",
       "tests/unit/application/services/test_workflow_step_dispatch.py"
+    ],
+    "test_zed_portability.py": [
+      "tests/integration/ide/test_zed_portability.py",
+      "tests/unit/repo_backed/scripts/test_zed_portability.py"
     ]
   }
 }

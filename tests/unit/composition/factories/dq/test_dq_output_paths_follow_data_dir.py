@@ -12,6 +12,7 @@ import pytest
 
 from bioetl.application.services.dq.bronze_analyzer import BronzeDQAnalyzer
 from bioetl.composition.factories.dq.context_resolver import extract_dq_output_paths
+from bioetl.composition.factories.dq.context_resolver import _rebase_dq_layer_path
 from bioetl.composition.factories.pipeline import _runner_assembly_support as assembly
 from bioetl.domain.value_objects.dq_report import DQReportFormat
 from bioetl.infrastructure.export.dq_report_writer import DQReportWriter
@@ -20,6 +21,11 @@ from bioetl.infrastructure.schemas.dq_report_config import BronzeDQReportConfig
 
 def _layer(path: str) -> SimpleNamespace:
     return SimpleNamespace(path=path, flat_structure=False)
+
+
+@pytest.mark.parametrize("configured", [None, ""])
+def test_unset_dq_output_is_not_replaced_by_a_layer_root(tmp_path, configured):
+    assert _rebase_dq_layer_path(configured, tmp_path / "silver") == configured
 
 
 def _yaml_config(

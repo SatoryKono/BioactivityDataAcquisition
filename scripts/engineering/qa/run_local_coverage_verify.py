@@ -149,10 +149,11 @@ SHARDS = (
 
 
 def _measurement_environment() -> dict[str, str]:
-    """Keep temporary Git fixtures independent of the caller's repository."""
+    """Pin the measured checkout and isolate temporary Git fixtures."""
     env = {
         key: value for key, value in os.environ.items() if not key.startswith("GIT_")
     }
+    env["PYTHONPATH"] = os.pathsep.join((str(ROOT / "src"), str(ROOT)))
     env["WSLENV"] = ":".join(
         entry
         for entry in env.get("WSLENV", "").split(":")
@@ -274,11 +275,21 @@ def _write_manifest(path: Path, payload: dict[str, object]) -> None:
 
 
 def _run_logged(command: list[str], log: Path, *, env: dict[str, str]) -> int:
+    execution_env = env
+    if os.name == "nt" and command[0] == _windows_bash():
+        # Let MSYS convert one POSIX path list into native Windows paths.
+        source_paths = ((ROOT / "src").as_posix(), ROOT.as_posix())
+        execution_env = {
+            **env,
+            "PYTHONPATH": ":".join(
+                f"/{path[0].lower()}{path[2:]}" for path in source_paths
+            ),
+        }
     with log.open("w", encoding="utf-8") as stream:
         result = subprocess.run(
             command,
             cwd=ROOT,
-            env=env,
+            env=execution_env,
             stdout=stream,
             stderr=subprocess.STDOUT,
             check=False,

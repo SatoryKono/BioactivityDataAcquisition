@@ -30,6 +30,8 @@ from bioetl.infrastructure.schemas.workflow_config_fk import (
 
 __all__ = [
     "RUN_OPTIONS_OVERRIDE_FIELD_NAMES",
+    "TransformStepConfig",
+    "WorkflowConfig",
     "WorkflowConfigFileSchema",
     "WorkflowConfigSchema",
     "WorkflowDefaultsSchema",
@@ -37,6 +39,7 @@ __all__ = [
     "WorkflowReconcileForeignKeysConfigSchema",
     "WorkflowReconcileRowsConfigSchema",
     "WorkflowRunOptionsSchema",
+    "WorkflowStepConfig",
     "WorkflowTransformStepSchema",
     "validate_workflow_config_payload",
 ]

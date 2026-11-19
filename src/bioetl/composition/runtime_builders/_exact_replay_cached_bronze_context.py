@@ -12,7 +12,7 @@ from bioetl.composition.runtime_builders._cached_bronze_binding import (
 )
 from bioetl.composition.runtime_builders._exact_replay_snapshot_evidence import (
     _extract_bronze_date,
-    _optional_text,
+    _optional_text as _optional_text,
     _validated_ledger_snapshot_uri,
 )
 from bioetl.domain.context import CachedBronzeContext
@@ -23,50 +23,21 @@ from bioetl.infrastructure.control_plane import FileRunLedgerStore, FileRunManif
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
+    from bioetl.domain.workflow import WorkflowRunOptionsConfig
     from bioetl.infrastructure.config.settings_api import Settings
 
 
-def resolve_exact_replay_cached_bronze_context(
+def resolve_replay_parent_manifest(
     *,
-    ctx: PipelineRunContext,
-    settings: Settings,
-    cached_bronze: CachedBronzeContext,
-) -> CachedBronzeContext:
-    """Resolve cached Bronze replay context from parent run evidence when needed."""
-    if not bool(getattr(ctx, "exact_replay", False)):
-        return cached_bronze
-    if bool(getattr(cached_bronze, "enabled", False)):
-        return cached_bronze
-
-    parent_manifest = _resolve_replay_parent_manifest(ctx=ctx, settings=settings)
-    provider = str(parent_manifest.provider).strip()
-    entity = str(parent_manifest.entity).strip()
-    if parent_manifest.pipeline_name != ctx.pipeline_name:
-        raise RuntimeError(
-            "Exact replay parent pipeline mismatch: "
-            f"requested '{ctx.pipeline_name}' but parent manifest belongs to "
-            f"'{parent_manifest.pipeline_name}'"
-        )
-    bronze_date = _resolve_parent_bronze_date(
-        manifest=parent_manifest,
-        settings=settings,
-    )
-    bronze_root = Path(str(settings.bronze_path)) / provider / entity
-    return CachedBronzeContext.from_options(
-        path=str(bronze_root),
-        date=bronze_date,
-    )
-
-
-def _resolve_replay_parent_manifest(
-    *,
-    ctx: PipelineRunContext,
+    ctx: PipelineRunContext | WorkflowRunOptionsConfig,
     settings: Settings,
 ) -> RunManifest:
+    """Load a persisted replay parent from pipeline or workflow run options."""
+    replay_of_manifest_id = _optional_text(getattr(ctx, "replay_of_manifest_id", None))
+    replay_of_run_id = _optional_text(getattr(ctx, "replay_of_run_id", None))
     manifest_store = FileRunManifestStore(
         base_path=control_plane_root(settings, "run_manifest")
     )
-    replay_of_manifest_id = _optional_text(getattr(ctx, "replay_of_manifest_id", None))
     if replay_of_manifest_id is not None:
         manifest = manifest_store.get(replay_of_manifest_id)
         if manifest is None:
@@ -76,7 +47,6 @@ def _resolve_replay_parent_manifest(
             )
         return manifest
 
-    replay_of_run_id = _optional_text(getattr(ctx, "replay_of_run_id", None))
     if replay_of_run_id is None:
         raise RuntimeError(
             "Exact replay without --use-cached-bronze requires replay_of_run_id "
@@ -96,6 +66,37 @@ def _resolve_replay_parent_manifest(
             f"run_id '{replay_of_run_id}'"
         )
     return manifest
+
+
+def resolve_exact_replay_cached_bronze_context(
+    *,
+    ctx: PipelineRunContext,
+    settings: Settings,
+    cached_bronze: CachedBronzeContext,
+) -> CachedBronzeContext:
+    """Resolve cached Bronze replay context from parent run evidence when needed."""
+    if not bool(getattr(ctx, "exact_replay", False)):
+        return cached_bronze
+    if bool(getattr(cached_bronze, "enabled", False)):
+        return cached_bronze
+
+    parent_manifest = resolve_replay_parent_manifest(ctx=ctx, settings=settings)
+    provider = str(parent_manifest.provider).strip()
+    entity = str(parent_manifest.entity).strip()
+    if parent_manifest.pipeline_name != ctx.pipeline_name:
+        raise RuntimeError(
+            "Exact replay parent pipeline mismatch: "
+            f"requested '{ctx.pipeline_name}' but parent manifest belongs to "
+            f"'{parent_manifest.pipeline_name}'"
+        )
+    bronze_date = _resolve_parent_bronze_date(
+        manifest=parent_manifest,
+        settings=settings,
+    )
+    return CachedBronzeContext.from_options(
+        path=str(Path(str(settings.bronze_path)) / provider / entity),
+        date=bronze_date,
+    )
 
 
 def _resolve_parent_bronze_date(*, manifest: RunManifest, settings: Settings) -> str:
@@ -146,6 +147,13 @@ def _collect_manifest_bronze_dates(manifest: RunManifest) -> tuple[str, ...]:
     """Collect the compatibility fallback dates from manifest source refs."""
     dates: set[str] = set()
     for source_ref in manifest.source_refs:
+        if (
+            manifest.pipeline_name == "chembl_target"
+            and source_ref.provider == "iuphar"
+            and source_ref.entity == "target_classification"
+            and source_ref.pipeline_name == manifest.pipeline_name
+        ):
+            continue
         if (
             source_ref.provider != manifest.provider
             or source_ref.entity != manifest.entity

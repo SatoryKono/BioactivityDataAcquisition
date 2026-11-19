@@ -2,6 +2,11 @@
 
 from __future__ import annotations
 
+
+from bioetl.composition.bootstrap.assembly.target_classification_runtime import (
+    select_target_transformer,
+    configure_target_transformer,
+)
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
@@ -21,6 +26,7 @@ if TYPE_CHECKING:
     from bioetl.domain.config import PipelineConfig
     from bioetl.domain.ports import ContractPolicyProtocol, MetricsPort, TracingPort
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+    from bioetl.infrastructure.config.settings_api import Settings
 
 
 @dataclass(frozen=True, slots=True)
@@ -42,10 +48,27 @@ class TransformerBuilder:
         pandera_silver_schema: object | None,
         tracer: TracingPort | None,
         metrics: MetricsPort | None,
+        settings: Settings | None = None,
     ) -> BaseTransformer | None:
         """Build transformer instance or return ``None`` when class is absent."""
         if transformer_class is None:
             return None
+
+        entity_type = self.entity_type_extractor(self.pipeline_name)
+        contract_policy = self._load_contract_policy(entity_type)
+        (
+            transformer_class,
+            yaml_config,
+            contract_policy,
+            pandera_silver_schema,
+            target_profile,
+        ) = select_target_transformer(
+            self.pipeline_name,
+            transformer_class,
+            yaml_config,
+            contract_policy,
+            pandera_silver_schema,
+        )
 
         authoritative_hash_policy = yaml_config.content_hash_policy
         identity_service = EntityIdentityGenerator(
@@ -60,8 +83,6 @@ class TransformerBuilder:
                 else set(yaml_config.content_hash.exclude)
             ),
         )
-        entity_type = self.entity_type_extractor(self.pipeline_name)
-        contract_policy = self._load_contract_policy(entity_type)
         structural_policy = build_structural_policy(
             domain_config=domain_config,
             pandera_silver_schema=pandera_silver_schema,
@@ -73,7 +94,7 @@ class TransformerBuilder:
             contract_policy=contract_policy,
             structural_policy=structural_policy,
         )
-        return transformer_class(
+        transformer = transformer_class(
             provider=self.provider,
             entity_type=entity_type,
             silver_filters=domain_config.silver_filters,
@@ -81,6 +102,8 @@ class TransformerBuilder:
             dependencies=dependencies,
             **publication_vocabulary_kwargs(transformer_class),
         )
+        configure_target_transformer(transformer, yaml_config, target_profile, settings)
+        return transformer
 
     def _load_contract_policy(
         self, entity_type: str | None

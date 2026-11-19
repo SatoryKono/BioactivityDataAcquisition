@@ -112,6 +112,9 @@ INCIDENT_RUNBOOK_ALERT_SEMANTICS_TEST = (
 DOCUMENTATION_CLEANUP_INVENTORY_TEST = (
     "tests/architecture/test_documentation_cleanup_inventory.py"
 )
+TECH_DEBT_ISSUE_6038_GOVERNANCE_TAXONOMY_TEST = (
+    "tests/architecture/test_tech_debt_issue_6038_governance_taxonomy.py"
+)
 NIGHTLY_SHADOW_ARCHIVE_TEST = (
     "tests/unit/scripts/engineering/ci/test_nightly_shadow_archive.py"
 )
@@ -208,6 +211,12 @@ EXPLICIT_SCRIPT_FALLBACK_PATHS = frozenset(
 
 NO_PARTIAL_TREE_TEST = "tests/unit/scripts/repo/test_check_no_partial_tree.py"
 HOOK_INSTALLATION_TEST = "tests/unit/scripts/test_hook_installation.py"
+CONFIG_VALIDATION_SURFACE_TEST = "tests/architecture/test_config_validation_surface.py"
+
+ZED_WORKSPACE_CONFIG_TEST = (
+    "tests/unit/repo_backed/scripts/test_zed_workspace_config.py"
+)
+
 SCOPED_CHECKS_TEST = "tests/unit/scripts/repo/test_scoped_checks.py"
 HOOK_RECEIPTS_TEST = "tests/unit/scripts/repo/test_hook_receipts.py"
 IUPHAR_STAGE0_TEST = "tests/unit/iuphar_target_class/test_stage0_manifest.py"
@@ -586,6 +595,24 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "scripts/engineering/dev/setup_bioetl_wsl.ps1": (
         "tests/unit/scripts/test_wsl_uv_install_integrity.py",
     ),
+    "scripts/engineering/dev/setup_env_windows.ps1": (
+        "tests/unit/scripts/test_zed_env_doctor.py",
+        "tests/unit/repo_backed/scripts/engineering/dev/test_environment_reproducibility.py",
+    ),
+    "scripts/engineering/dev/setup_env_wsl.sh": (
+        "tests/unit/repo_backed/scripts/engineering/dev/test_setup_env_wsl_branches.py",
+    ),
+    "configs/README.md": (
+        CONFIG_VALIDATION_SURFACE_TEST,
+        DOCUMENTATION_SYNC_TEST,
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    "scripts/engineering/dev/README.md": (
+        "tests/integration/ide/test_zed_portability.py",
+        ZED_WORKSPACE_CONFIG_TEST,
+        SCRIPTS_INVENTORY_MANIFEST_TEST,
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
     "docs/05-operations/runbooks/scoped-post-change-checks.md": (
         SCOPED_CHECKS_TEST,
         HOOK_RECEIPTS_TEST,
@@ -748,7 +775,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             CODEX_NATIVE_RUNTIME_TEST,
             JUNIE_RUNTIME_CI_TEST,
             "tests/architecture/test_gitignore_secret_and_agents_policy.py",
-            "tests/architecture/test_tech_debt_issue_6038_governance_taxonomy.py",
+            TECH_DEBT_ISSUE_6038_GOVERNANCE_TAXONOMY_TEST,
             *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
         ),
     ),
@@ -801,6 +828,65 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         ),
         ("tests/unit/iuphar_target_class/test_pipeline.py",),
     ),
+    "src/iuphar_target_class/csv_io.py": (
+        "tests/unit/iuphar_target_class/test_csv_io.py",
+    ),
+    "src/iuphar_target_class/bioetl_input.py": (
+        "tests/unit/iuphar_target_class/test_stage0_v2.py",
+        "tests/unit/iuphar_target_class/test_integration_acceptance.py",
+        "tests/unit/infrastructure/adapters/iuphar/test_target_classification.py",
+        "tests/unit/infrastructure/adapters/iuphar/test_classification_evidence_boundaries.py",
+    ),
+    **dict.fromkeys(
+        (
+            "src/iuphar_target_class/_pipeline_proof_rows.py",
+            "src/iuphar_target_class/pipeline_proof.py",
+            "src/iuphar_target_class/integration_acceptance.py",
+        ),
+        ("tests/unit/iuphar_target_class/test_integration_acceptance.py",),
+    ),
+    "src/iuphar_target_class/reference_coverage.py": (
+        "tests/unit/iuphar_target_class/test_reference_coverage_v2.py",
+    ),
+    **dict.fromkeys(
+        (
+            "docs/00-project/ai/skills/SKILLS-CATALOG.md",
+            "docs/00-project/ai/skills/SKILLS-PRACTICAL-INDEX.md",
+        ),
+        ("tests/architecture/test_codex_skill_agent_links.py",),
+    ),
+    **dict.fromkeys(
+        (
+            "docs/00-project/ai/skills/COMBINED-CATALOG.md",
+            "docs/00-project/ai/skills/README.md",
+        ),
+        DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    "docs/04-reference/contracts/gold-schemas.md": (
+        "tests/architecture/test_gold_strict_validation_policy.py",
+        "tests/architecture/test_issue_12029_remaining_parity_gates.py",
+        TECH_DEBT_ISSUE_6038_GOVERNANCE_TAXONOMY_TEST,
+        "tests/integration/config/test_semantic_field_unification_contract.py",
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    "docs/04-reference/contracts/gold/chembl_target_v3.1.json": (
+        "tests/architecture/test_gold_schema_contracts.py",
+    ),
+    "configs/base/contract_registry.yaml": (
+        "tests/unit/infrastructure/config/test_contract_registry_loader.py",
+        "tests/integration/config/test_non_chembl_contract_registry_coverage.py",
+    ),
+    "configs/field_registry/generic_field_ownership.yaml": (
+        "tests/integration/config/test_generic_field_ownership.py",
+    ),
+    "docs/05-operations/runbooks/index.md": (
+        "tests/architecture/test_doc_crossref_integrity.py",
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    "docs/05-operations/runbooks/iuphar-target-classification.md": (
+        "tests/architecture/test_doc_crossref_integrity.py",
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
     **dict.fromkeys(
         (
             "src/iuphar_target_class/gtopdb_2026_3_1.py",
@@ -821,7 +907,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/architecture/test_grok_subagent_least_privilege.py",
     ),
     "docs/00-project/NORMATIVE_SOURCES.md": (
-        "tests/architecture/test_tech_debt_issue_6038_governance_taxonomy.py",
+        TECH_DEBT_ISSUE_6038_GOVERNANCE_TAXONOMY_TEST,
         AI_RUNTIME_GOVERNANCE_LINKS_TEST,
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
@@ -1056,20 +1142,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "tests/architecture/test_root_hygiene_workflow.py",
         ),
     ),
-    "configs/README.md": (
-        "tests/architecture/test_config_validation_surface.py",
-        DOCUMENTATION_SYNC_TEST,
-        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
-    ),
-    "scripts/engineering/dev/README.md": (
-        "tests/integration/ide/test_zed_portability.py",
-        "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-        SCRIPTS_INVENTORY_MANIFEST_TEST,
-        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
-    ),
-    "configs/quality/config_validation_surface.yaml": (
-        "tests/architecture/test_config_validation_surface.py",
-    ),
+    "configs/quality/config_validation_surface.yaml": (CONFIG_VALIDATION_SURFACE_TEST,),
     ".gitleaks.toml": (
         "tests/architecture/test_secret_shape_and_operator_guide_contracts.py",
         RUNTIME_ACCEPTANCE_12553_TEST,
@@ -1488,6 +1561,27 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "configs/quality/external_resource_inventory_pr12929_domain_accounting_review.json",
             "configs/quality/external_resource_inventory_pr12929_valueerror_review.json",
             "configs/quality/external_resource_inventory_pr13061_review.json",
+            "configs/quality/external_resource_inventory_pr13166_review.json",
+            "configs/quality/external_resource_inventory_pr13166_silver_review.json",
+            "configs/quality/external_resource_inventory_pr13166_packaged_root_review.json",
+            "configs/quality/external_resource_inventory_pr13166_dq_data_dir_review.json",
+            "configs/quality/external_resource_inventory_pr13166_metrics_fold_review.json",
+            "configs/quality/external_resource_inventory_pr13166_pagination_abort_review.json",
+            "configs/quality/external_resource_inventory_pr13166_import_owners_review.json",
+            "configs/quality/external_resource_inventory_pr13166_delta_evolution_review.json",
+            "configs/quality/external_resource_inventory_pr13166_review_findings_review.json",
+            "configs/quality/external_resource_inventory_pr13166_schema_selection_review.json",
+            "configs/quality/external_resource_inventory_pr13166_assembly_ownership_review.json",
+            "configs/quality/external_resource_inventory_pr13166_legacy_receipt_review.json",
+            "configs/quality/external_resource_inventory_pr13166_row_lifecycle_review.json",
+            "configs/quality/external_resource_inventory_pr13166_replay_preflight_review.json",
+            "configs/quality/external_resource_inventory_pr13166_eager_reader_review.json",
+            "configs/quality/external_resource_inventory_pr13166_template_lifecycle_review.json",
+            "configs/quality/external_resource_inventory_pr13166_workflow_replay_review.json",
+            "configs/quality/external_resource_inventory_pr13166_batch_writer_review.json",
+            "configs/quality/external_resource_inventory_pr13166_deferred_evidence_scope_review.json",
+            "configs/quality/external_resource_inventory_pr13166_runtime_dq_review.json",
+            "configs/quality/external_resource_inventory_pr13166_writer_boundaries_review.json",
             "configs/quality/external_resource_inventory_pr13092_review.json",
             "configs/quality/external_resource_inventory_pr13090_lineage_lock_review.json",
             "configs/quality/external_resource_inventory_pr13113_review.json",
@@ -2010,6 +2104,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "docs/reports/ci/stage0_closure.json": (STAGE0_EVIDENCE_TEST,),
     "docs/reports/ci/stage0_closure_report.md": (STAGE0_EVIDENCE_TEST,),
     "reports/mypy_eval.json": (STAGE0_EVIDENCE_TEST,),
+    "tests/snapshots/pipeline_configs.json": (
+        "tests/architecture/test_config_golden_master.py",
+    ),
     "docs/reports/generated/documentation-cleanup-inventory.json": (
         DOCUMENTATION_CLEANUP_INVENTORY_TESTS
     ),
@@ -2083,6 +2180,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
 # file mapping would need hundreds of entries. Each prefix still maps to real
 # governing tests; fail-closed semantics are unchanged for unmapped paths.
 AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
+    "configs/ide/zed/": (
+        "tests/integration/ide/test_zed_portability.py",
+        ZED_WORKSPACE_CONFIG_TEST,
+    ),
     ".github/tooling/picomatch-backport/": (PICOMATCH_BACKPORT_TEST, RESIDUAL_OSV_TEST),
     ".github/tooling/jscpd/": (
         BRACES_BACKPORT_TEST,
@@ -2150,10 +2251,6 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
         "tests/architecture/test_documentation_cleanup_inventory.py",
     ),
     ".vscode/": (TECH_DEBT_5847_5852_CLOSEOUT_TEST,),
-    "configs/ide/zed/": (
-        "tests/integration/ide/test_zed_portability.py",
-        "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-    ),
     ".cursor/": (
         TECH_DEBT_5847_5852_CLOSEOUT_TEST,
         "tests/unit/repo_backed/cursor/test_hook_gate.py",
@@ -2265,6 +2362,12 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
         "tests/architecture/test_diagram_corpus_regression_guards.py",
         "tests/architecture/test_diagram_drift_and_embed_guards.py",
         "tests/architecture/test_diagram_lint_policy_rules.py",
+    ),
+    "docs/02-architecture/generated/pipeline-dataflows/": (
+        "tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py",
+    ),
+    "docs/04-reference/passports/": (
+        "tests/unit/scripts/docs/passports/test_passport_projector.py",
     ),
     "src/memory/episodic/": (
         "tests/architecture/test_ai_session_memory_placement.py",

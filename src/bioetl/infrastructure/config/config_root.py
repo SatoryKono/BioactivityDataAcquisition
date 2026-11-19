@@ -29,6 +29,14 @@ def get_default_repo_root() -> Path:
             candidate / "AGENTS.md"
         ).is_file():
             return candidate
+        runtime_venv = candidate / ".venv"
+        if (runtime_venv / "pyvenv.cfg").is_file() and source_path.is_relative_to(
+            runtime_venv
+        ):
+            # The installed Docker runtime retains configs and its locked venv,
+            # but deliberately omits repository/contributor files. Bind that
+            # layout to the installed module, never to an unrelated cwd.
+            return candidate
     return source_path.parents[4]
 
 

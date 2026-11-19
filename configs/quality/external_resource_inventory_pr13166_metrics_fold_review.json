@@ -1,0 +1,34 @@
+{
+  "catalog_ref": "3ff2de724545acac097a085050529bc4f29172cc",
+  "schema_version": 1,
+  "source_ref": "de2f28ed6b68e530bb863674c46f9a5b730db060",
+  "reference_moves": [
+    {
+      "identity": "iuphar.bioetl.composition.bootstrap.cli.config.file",
+      "fields": ["creation_sites", "production_binding"],
+      "from": {
+        "file": "src/bioetl/composition/bootstrap/cli/config.py",
+        "line": 101,
+        "expression": "path.read_bytes()"
+      },
+      "to": {
+        "file": "src/bioetl/composition/bootstrap/cli/metrics.py",
+        "scope": "_entity_document",
+        "call": "path.read_bytes",
+        "expression": "path.read_bytes()"
+      }
+    }
+  ],
+  "resource_updates": {
+    "iuphar.bioetl.composition.bootstrap.cli.config.file": {
+      "call_path": [
+        "bioetl.composition.bootstrap.cli.metrics -> _entity_document -> path.read_bytes"
+      ],
+      "owner": "bioetl.composition.bootstrap.cli.metrics owns this file acquisition for opt-in IUPHAR target classification"
+    }
+  },
+  "source_reviews": {
+    "src/bioetl/composition/bootstrap/cli/config.py": "Reviewed the CLI config bootstrap after the deployment helpers left this module. It still loads pipeline config only through the config_access seam and does not open a new client, file, or task.",
+    "src/bioetl/composition/bootstrap/cli/metrics.py": "Reviewed the move of target deployment and rehearsal binding into the existing metrics CLI module. The helpers call the already qualified runtime profile loader and local YAML paths. No new client, network endpoint, or task."
+  }
+}

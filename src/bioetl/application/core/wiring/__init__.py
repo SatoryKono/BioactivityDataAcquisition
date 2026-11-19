@@ -49,6 +49,7 @@ _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
         "PublicationTransformer",
         "SemanticScholarPublicationTransformer",
         "SubcellularFractionTransformer",
+        "TargetClassifiedTransformer",
         "TargetComponentTransformer",
         "TargetProteinClassificationTransformer",
         "TargetTransformer",

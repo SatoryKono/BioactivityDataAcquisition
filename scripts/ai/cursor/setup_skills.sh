@@ -95,14 +95,47 @@ path_exists() {
     [[ -e "$path" || -L "$path" ]]
 }
 
+to_windows_path() {
+    local path="$1"
+    if command -v cygpath >/dev/null 2>&1; then
+        cygpath -w "$path"
+        return 0
+    fi
+    if command -v wslpath >/dev/null 2>&1; then
+        wslpath -w "$path"
+        return 0
+    fi
+    return 1
+}
+
+to_unix_path() {
+    local path="$1"
+    if command -v cygpath >/dev/null 2>&1; then
+        cygpath -u "$path" 2>/dev/null || true
+        return 0
+    fi
+    if command -v wslpath >/dev/null 2>&1; then
+        wslpath -u "$path" 2>/dev/null || true
+        return 0
+    fi
+    printf '\n'
+}
+
+invoke_powershell() {
+    local command_text="$1"
+    if command -v wslpath >/dev/null 2>&1; then
+        WSLENV="BIOETL_CURSOR_LINK:BIOETL_CURSOR_TARGET${WSLENV:+:$WSLENV}" \
+            powershell.exe -NoProfile -NonInteractive -Command "$command_text"
+        return
+    fi
+    powershell.exe -NoProfile -NonInteractive -Command "$command_text"
+}
+
 link_targets_match() {
     local actual="$1"
     local expected="$2"
     local actual_unix expected_unix
     [[ "$actual" == "$expected" ]] && return 0
-    if ! command -v cygpath >/dev/null 2>&1; then
-        return 1
-    fi
     case "$actual" in
         /*|[A-Za-z]:*)
             ;;
@@ -110,8 +143,8 @@ link_targets_match() {
             return 1
             ;;
     esac
-    actual_unix="$(cygpath -u "$actual" 2>/dev/null || true)"
-    expected_unix="$(cygpath -u "$expected" 2>/dev/null || true)"
+    actual_unix="$(to_unix_path "$actual")"
+    expected_unix="$(to_unix_path "$expected")"
     [[ -n "$actual_unix" && "$actual_unix" == "$expected_unix" ]]
 }
 
@@ -121,10 +154,11 @@ read_skill_link_target() {
         readlink -- "$link_path"
         return
     fi
-    [[ -d "$link_path" ]] && command -v cygpath >/dev/null 2>&1 &&
-        command -v powershell.exe >/dev/null 2>&1 || return 1
-    BIOETL_CURSOR_LINK="$(cygpath -w "$link_path")" \
-        powershell.exe -NoProfile -NonInteractive -Command \
+    [[ -d "$link_path" ]] && command -v powershell.exe >/dev/null 2>&1 || return 1
+    local win_link
+    win_link="$(to_windows_path "$link_path")" || return 1
+    BIOETL_CURSOR_LINK="$win_link" \
+        invoke_powershell \
         '$item = Get-Item -LiteralPath $env:BIOETL_CURSOR_LINK -Force -ErrorAction Stop; if ($item.LinkType -ne "Junction") { exit 1 }; [Console]::WriteLine([string]($item.Target | Select-Object -First 1))' |
         tr -d '\r'
 }
@@ -150,17 +184,40 @@ is_managed_skill_link() {
     return 1
 }
 
+link_is_windows_native() {
+    local link_path="$1"
+    local win_link
+    if ! command -v powershell.exe >/dev/null 2>&1; then
+        return 0
+    fi
+    win_link="$(to_windows_path "$link_path")" || return 0
+    BIOETL_CURSOR_LINK="$win_link" \
+        invoke_powershell \
+        '$item = Get-Item -LiteralPath $env:BIOETL_CURSOR_LINK -Force -ErrorAction Stop; if ($item.LinkType -notin @("Junction","SymbolicLink")) { exit 1 }'
+}
+
+remove_any_skill_link() {
+    local link_path="$1"
+    if [[ -L "$link_path" ]]; then
+        rm -- "$link_path"
+        return 0
+    fi
+    local win_link
+    if ! command -v powershell.exe >/dev/null 2>&1; then
+        echo "Failed to remove $link_path" >&2
+        return 1
+    fi
+    win_link="$(to_windows_path "$link_path")" || return 1
+    BIOETL_CURSOR_LINK="$win_link" \
+        invoke_powershell \
+        '$ErrorActionPreference = "Stop"; $item = Get-Item -LiteralPath $env:BIOETL_CURSOR_LINK -Force; if ($item.LinkType -ne "Junction") { exit 1 }; [IO.Directory]::Delete($item.FullName)'
+}
+
 remove_managed_skill_link() {
     local target_root="$1" name="$2"
     local link_path="$target_root/$name"
     is_managed_skill_link "$target_root" "$name" || return 1
-    if [[ -L "$link_path" ]]; then
-        rm -- "$link_path"
-    else
-        BIOETL_CURSOR_LINK="$(cygpath -w "$link_path")" \
-            powershell.exe -NoProfile -NonInteractive -Command \
-            '$ErrorActionPreference = "Stop"; $item = Get-Item -LiteralPath $env:BIOETL_CURSOR_LINK -Force; if ($item.LinkType -ne "Junction") { exit 1 }; [IO.Directory]::Delete($item.FullName)'
-    fi
+    remove_any_skill_link "$link_path"
 }
 
 create_skill_link() {
@@ -169,18 +226,21 @@ create_skill_link() {
     local source_path="$3"
     local win_link win_target
     if MSYS=winsymlinks:nativestrict ln -s "$link_target" "$link_path" 2>/dev/null; then
-        return 0
+        if link_is_windows_native "$link_path"; then
+            return 0
+        fi
+        remove_any_skill_link "$link_path"
     fi
-    if ! command -v cygpath >/dev/null 2>&1 || ! command -v powershell.exe >/dev/null 2>&1; then
+    if ! command -v powershell.exe >/dev/null 2>&1; then
         echo "Failed to link $link_path -> $link_target" >&2
         return 1
     fi
-    win_link="$(cygpath -w "$link_path")"
-    win_target="$(cygpath -w "$source_path")"
+    win_link="$(to_windows_path "$link_path")" || return 1
+    win_target="$(to_windows_path "$source_path")" || return 1
     if BIOETL_CURSOR_LINK="$win_link" BIOETL_CURSOR_TARGET="$win_target" \
-        powershell.exe -NoProfile -NonInteractive -Command \
+        invoke_powershell \
         'New-Item -ItemType Junction -Path $env:BIOETL_CURSOR_LINK -Target $env:BIOETL_CURSOR_TARGET -ErrorAction Stop | Out-Null'; then
-        echo "Junction (symlink privilege unavailable): $link_path" >&2
+        echo "Junction (Windows symlink is not native): $link_path" >&2
         return 0
     fi
     echo "Failed to link $link_path -> $link_target" >&2
@@ -260,7 +320,8 @@ link_skill() {
         return 0
     fi
     link_target="$(relative_skill_source "$target_root" "$name" "$kind")"
-    if is_managed_skill_link "$target_root" "$name" "$kind"; then
+    if is_managed_skill_link "$target_root" "$name" "$kind" &&
+        link_is_windows_native "$link_path"; then
         if [[ "$DRY_RUN" -eq 1 ]]; then
             echo "  keep managed: $link_path -> $link_target"
         fi

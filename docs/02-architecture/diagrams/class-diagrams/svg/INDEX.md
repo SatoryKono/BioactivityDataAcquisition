@@ -1,6 +1,6 @@
 # BioETL Diagrams — SVG Index
 
-_Generated: 2026-11-18T03:28:32+03:00_
+_Generated: 2026-11-18T04:06:50+03:00_
 
 ## Domain Ports
 
@@ -374,6 +374,12 @@ _Generated: 2026-11-18T03:28:32+03:00_
 
 ---
 
+## Pkg Composition Bootstrap Cli
+
+![90-pkg-composition-bootstrap-cli](./90-pkg-composition-bootstrap-cli.svg)
+
+---
+
 ## Pkg Composition Bootstrap Runtime
 
 ![90-pkg-composition-bootstrap-runtime](./90-pkg-composition-bootstrap-runtime.svg)
@@ -671,6 +677,12 @@ _Generated: 2026-11-18T03:28:32+03:00_
 ## Pkg Infrastructure Adapters Http Part2
 
 ![90-pkg-infrastructure-adapters-http-part2](./90-pkg-infrastructure-adapters-http-part2.svg)
+
+---
+
+## Pkg Infrastructure Adapters Iuphar
+
+![90-pkg-infrastructure-adapters-iuphar](./90-pkg-infrastructure-adapters-iuphar.svg)
 
 ---
 

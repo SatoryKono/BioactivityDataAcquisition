@@ -137,9 +137,9 @@ def create_factory_runner_from_request(
             settings=settings,
         ),
         yaml_config=concrete_yaml,
+        settings=concrete_settings,
         dq_configs_extractor=lambda config: extract_dq_configs(
             config,
             relaxed_dq=bool(settings.pipeline.relaxed_dq),
         ),
-        settings=concrete_settings,
     )

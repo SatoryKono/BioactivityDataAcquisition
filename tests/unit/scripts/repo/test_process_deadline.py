@@ -209,3 +209,21 @@ def test_late_supervisor_result_is_timeout_even_after_zero_exit() -> None:
     result = runner._supervisor_result(raw, start, start + 10, True)
     assert result.status == "ERROR"
     assert result.reason == "timeout"
+
+
+@pytest.mark.skipif(os.name == "nt", reason="Linux pidfd containment only")
+def test_linux_facilities_accept_libc_pidfd_when_interpreter_omits_bindings(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """CPython may omit os.pidfd_open while glibc still exports the symbols."""
+    from scripts.engineering.repo import process_supervisor as supervisor
+
+    monkeypatch.delattr(os, "pidfd_open", raising=False)
+    monkeypatch.setattr(__import__("signal"), "pidfd_send_signal", None, raising=False)
+    api = supervisor._linux_facilities()
+    fd = api["open"](os.getpid(), 0)
+    try:
+        assert isinstance(fd, int) and fd >= 0
+        api["signal"](fd, 0)
+    finally:
+        os.close(fd)

@@ -1,0 +1,41 @@
+%% Title: Package Family: infrastructure/adapters/iuphar
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/adapters/iuphar; modules: cohort_contract, snapshot_models, _official_targets_csv, adapter, evidence_store, snapshot_evidence.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-11-18
+%% @level   Package Family / Inventory Slice
+%% @nodes   10
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace cohort_contract {
+        class CanonicalCohortExport
+        class CohortConversionError
+        class CohortExportRequest
+    }
+
+    namespace snapshot_models {
+        class LoadedIupharProfile
+        class LoadedIupharSnapshot
+    }
+
+    namespace official_targets_csv {
+        class OfficialProjection
+    }
+
+    namespace adapter {
+        class IupharTargetClassificationAdapter
+    }
+
+    namespace evidence_store {
+        class LocalTargetClassificationEvidenceStore
+    }
+
+    namespace snapshot_evidence {
+        class SourceEvidence
+    }
+
+    namespace snapshot_payload {
+        class SnapshotBundle
+    }

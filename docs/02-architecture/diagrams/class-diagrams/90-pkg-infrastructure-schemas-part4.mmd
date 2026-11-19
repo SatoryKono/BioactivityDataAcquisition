@@ -1,9 +1,9 @@
 %% Title: Package Family: infrastructure/schemas (Part 4/4)
-%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/schemas; part 4/4; modules: _composite_config_merge_schema, composite_config_base, filter_config, dq_config, pipeline_config, pipeline_config_provider.
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/schemas; part 4/4; modules: _composite_config_merge_schema, composite_config_base, filter_config, dq_config, pipeline_config_provider, pipeline_contract_policy.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-11-17
+%% @date    2026-11-18
 %% @level   Package Family / Inventory Slice
 %% @nodes   25
 %% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
@@ -38,11 +38,6 @@ classDiagram
         class ThresholdsConfig
     }
 
-    namespace pipeline_config {
-        class FieldPolicyConfigSchema
-        class PipelineYamlConfig
-    }
-
     namespace pipeline_config_provider {
         class ApiConfig
         class SourceConfig
@@ -53,8 +48,16 @@ classDiagram
         class PipelineContractRollout
     }
 
+    namespace pipeline_config {
+        class PipelineYamlConfig
+    }
+
     namespace source_profile_config {
         class SourceProfileYamlConfig
+    }
+
+    namespace target_classification_config {
+        class TargetClassificationYamlConfig
     }
 
     namespace workflow_config_fk {

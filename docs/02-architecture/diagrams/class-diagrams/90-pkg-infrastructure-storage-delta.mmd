@@ -1,11 +1,11 @@
 %% Title: Package Family: infrastructure/storage/delta
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/storage/delta; modules: arrow_converter, resilience.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/storage/delta; modules: arrow_converter, resilience, table_ops.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-10-04
+%% @date    2026-11-18
 %% @level   Package Family / Inventory Slice
-%% @nodes   4
+%% @nodes   5
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
 
@@ -17,4 +17,8 @@ classDiagram
     namespace resilience {
         class AdaptiveRetryPolicy
         class SilverMergeResiliencePolicy
+    }
+
+    namespace table_ops {
+        class _PartitionInfo
     }

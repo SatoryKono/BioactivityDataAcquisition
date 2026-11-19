@@ -70,7 +70,11 @@ def test_default_repo_root_uses_structural_fallback(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     fake_module = tmp_path / "one" / "two" / "three" / "four" / "config_root.py"
+    source = Mock(spec=Path)
+    source.resolve.return_value = source
+    source.parents = tuple(fake_module.resolve().parents[:5])
     monkeypatch.setattr(config_root, "__file__", str(fake_module))
+    monkeypatch.setattr(config_root, "Path", lambda _: source)
 
     assert config_root.get_default_repo_root() == fake_module.resolve().parents[4]
 

@@ -10,7 +10,16 @@ from typing import TYPE_CHECKING, cast, get_args, get_origin
 from pydantic import BaseModel
 
 from bioetl.composition.bootstrap_contexts import DQConfigsContext, DQOutputPathsContext
+from bioetl.composition.factories.dq.composite_validation import (
+    resolve_target_table_paths,
+)
+from bioetl.composition.factories.storage.factory import (
+    get_layer_configs,
+    resolve_flat_structure_flags,
+    resolve_storage_paths,
+)
 from bioetl.domain.value_objects.dq_report import SilverDQCheckType
+from bioetl.infrastructure.config.settings_api import Settings
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import (
@@ -20,7 +29,6 @@ if TYPE_CHECKING:
         MetricsPort,
         SilverDQConfigPort,
     )
-    from bioetl.infrastructure.config.settings_api import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
@@ -33,14 +41,6 @@ from bioetl.infrastructure.schemas.dq_report_config import (
     GoldSinkConfig,
     SilverSinkConfig,
 )
-
-
-def _rebase_local_data_path(configured: Path, layer_root: Path) -> Path:
-    """Match storage ``rebase_local_data_path`` without a private cross-import."""
-    prefix = ("data", "output", layer_root.name)
-    if layer_root.parent.name == "output" and configured.parts[:3] == prefix:
-        return layer_root.joinpath(*configured.parts[3:])
-    return configured
 
 
 @dataclass(frozen=True, slots=True)
@@ -240,35 +240,27 @@ def extract_dq_output_paths_impl(
     )
 
 
-def _layer_root(settings: object, name: str) -> Path:
-    """Read one settings layer root without a new composition Protocol."""
-    return Path(getattr(settings, name))
-
-
-def rebase_dq_output_paths(
-    paths: DQOutputPathsContext,
-    settings: object,
+def _resolved_dq_output_paths(
+    settings: Settings, config: PipelineYamlConfig
 ) -> DQOutputPathsContext:
-    """Place canonical ``data/output/<layer>/...`` DQ dirs under ``data_dir``."""
-    return DQOutputPathsContext(
-        bronze_path=_rebase_dq_layer_path(
-            paths.bronze_path, _layer_root(settings, "bronze_path")
-        ),
-        silver_path=_rebase_dq_layer_path(
-            paths.silver_path, _layer_root(settings, "silver_path")
-        ),
-        gold_path=_rebase_dq_layer_path(
-            paths.gold_path, _layer_root(settings, "gold_path")
-        ),
-        flat_structure=paths.flat_structure,
+    """Follow the same runtime root, table and flat-path decisions as data writers."""
+    bronze, silver, gold = get_layer_configs(config)
+    use_yaml, bronze_path, _, _ = resolve_storage_paths(settings, bronze, silver, gold)
+    bronze_flat, _, _ = resolve_flat_structure_flags(
+        bronze_config=bronze,
+        silver_config=silver,
+        gold_config=gold,
+        use_yaml_paths=use_yaml,
     )
-
-
-def _rebase_dq_layer_path(configured: str | None, layer_root: Path) -> str | None:
-    """Rebase one configured DQ directory onto its settings layer root."""
-    if not configured:
-        return configured
-    return str(_rebase_local_data_path(Path(configured), Path(layer_root)))
+    if not bronze_flat:
+        bronze_path = bronze_path / config.provider / config.entity_type
+    silver_path, gold_path = resolve_target_table_paths(settings, config)
+    return DQOutputPathsContext(
+        bronze_path=str(bronze_path),
+        silver_path=str(silver_path),
+        gold_path=str(gold_path),
+        flat_structure=True,
+    )
 
 
 def is_dq_report_enabled_impl(config: PipelineYamlConfig) -> bool:

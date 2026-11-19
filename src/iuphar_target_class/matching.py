@@ -111,7 +111,7 @@ def collect_candidates(
     )
     return tuple(
         sorted(
-            found,
+            set(found),
             key=lambda item: (item.target_id, METHOD_ORDER.index(item.match_method)),
         )
     )
@@ -262,7 +262,12 @@ def _decide(
     conflict = _identity_conflict(conflict_channels)
     if conflict is not None:
         return conflict
-    if _missing_identity_input(query, uniprot_species_gap):
+    species_conflict = _variant_species_conflict(query, catalog)
+    if species_conflict is not None:
+        return species_conflict
+    if _missing_identity_input(query, uniprot_species_gap) or _explicit_species_gap(
+        query, catalog
+    ):
         return _result(
             "insufficient_input",
             None,
@@ -312,6 +317,57 @@ def _identity_conflict(
             ("identity_conflict",),
         )
     return None
+
+
+def _variant_species_conflict(
+    query: MatchQuery, catalog: tuple[CatalogTarget, ...]
+) -> MatchResult | None:
+    """A shared public ID cannot hide contradictory species-specific accessions."""
+    if query.organism is None:
+        return None
+    variants = _multiple_species_ids(catalog)
+    for accession in query.uniprot_ids:
+        hits = _wrong_species_hits(query, catalog, accession)
+        if any(item.target_id in variants for item in hits):
+            return _result(
+                "identity_conflict",
+                None,
+                _ids(item.target_id for item in hits),
+                (UNIPROT,),
+                ("identity_conflict",),
+            )
+    return None
+
+
+def _multiple_species_ids(catalog: tuple[CatalogTarget, ...]) -> set[str]:
+    variants: dict[str, set[str | None]] = {}
+    for target in catalog:
+        variants.setdefault(target.target_id, set()).add(target.species)
+    return {key for key, species in variants.items() if len(species) > 1}
+
+
+def _wrong_species_hits(
+    query: MatchQuery, catalog: tuple[CatalogTarget, ...], accession: str
+) -> list[CatalogTarget]:
+    hits = [item for item in catalog if accession in item.uniprot_ids]
+    if any(item.species == query.organism for item in hits):
+        return []
+    return hits
+
+
+def _explicit_species_gap(
+    query: MatchQuery, catalog: tuple[CatalogTarget, ...]
+) -> bool:
+    if query.organism is not None or query.target_id is None:
+        return False
+    variants = [item for item in catalog if item.target_id == query.target_id]
+    if query.uniprot_ids:
+        variants = [
+            item
+            for item in variants
+            if set(item.uniprot_ids).intersection(query.uniprot_ids)
+        ]
+    return len({item.species for item in variants}) > 1
 
 
 def _missing_identity_input(

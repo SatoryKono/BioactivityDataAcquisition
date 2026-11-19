@@ -5,6 +5,9 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from bioetl.composition.runtime_builders._exact_replay_cached_bronze_context import (
+    resolve_replay_parent_manifest,
+)
 from bioetl.composition.runtime_builders.cached_bronze_snapshot_support import (
     build_cached_bronze_input_snapshot_refs,
     require_cached_bronze_input_snapshot_refs,
@@ -33,6 +36,7 @@ __all__ = [
     "resolve_cached_bronze_input_snapshot_refs",
     "resolve_manifest_input_snapshot_refs",
     "resolve_pipeline_input_snapshot_refs",
+    "resolve_replay_parent_manifest",
 ]
 
 

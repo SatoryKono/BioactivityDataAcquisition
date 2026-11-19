@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from importlib import import_module
 
-from bioetl.composition.factories.pipeline.creation_support import (
-    _BuildPipelineServicesFn as _BuildPipelineServicesFn,
-)
+# Keep pipeline creation_support imports lazy via __getattr__.
+# An eager import here recreates creation_support <-> services package cycles
+# when bundle/wiring loads mid-initialization.
 from . import factory as _factory
 
 _PIPELINE_CREATION_EXPORTS = frozenset(

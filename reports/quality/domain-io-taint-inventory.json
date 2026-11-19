@@ -45,21 +45,21 @@
     },
     {
       "kind": "import:pandas",
-      "line": 6,
+      "line": 10,
       "path": "src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py",
       "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
       "symbol": "<module>"
     },
     {
       "kind": "import:pandera",
-      "line": 7,
+      "line": 11,
       "path": "src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py",
       "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
       "symbol": "<module>"
     },
     {
       "kind": "import:pandera",
-      "line": 8,
+      "line": 12,
       "path": "src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py",
       "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
       "symbol": "<module>"
@@ -816,7 +816,7 @@
   ],
   "domain_root": "src/bioetl/domain",
   "generated_by": "scripts.engineering.qa.report_domain_io_taint_inventory",
-  "scanned_file_count": 640,
+  "scanned_file_count": 646,
   "schema_version": 1,
   "violation_count": 0,
   "violations": []

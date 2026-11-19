@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "086b555b3ac641112ea53c03b94187b7a73ac12c",
+  "source_ref": "885a8ae1a9faa4c63e9992ccf9cc5fb1460493cc",
+  "source_reviews": {
+    "src/bioetl/application/core/batch_transformer_attempt_success.py": "Reviewed the complete staged evidence lifecycle: ExitStack always releases pending results; detached normalization callbacks defer publication until runtime DQ, Gold, debug export and outcome construction succeed. No external resource creation expressions, providers or historical dispositions changed. Independent shadow/enrich DQ rejection and downstream failure regressions retained."
+  }
+}

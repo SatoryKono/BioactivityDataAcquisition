@@ -142,6 +142,9 @@ _DERIVED_ENTITY_PARAMETER_PREFIXES: tuple[str, ...] = (
     "contracts.active_version",
     "contracts.rollout",
     "filters.gold_filters.columns.organism_class",
+    # Opt-in chembl_target section. It stays in entity YAML and the pipeline
+    # allowlist, but it is not part of the shared flattened vocabulary.
+    "pipeline.target_classification",
 )
 
 

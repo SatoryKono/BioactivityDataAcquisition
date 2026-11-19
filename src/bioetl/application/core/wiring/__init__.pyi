@@ -86,6 +86,9 @@ from bioetl.application.core.wiring.registry import (
     SubcellularFractionTransformer as SubcellularFractionTransformer,
 )
 from bioetl.application.core.wiring.registry import (
+    TargetClassifiedTransformer as TargetClassifiedTransformer,
+)
+from bioetl.application.core.wiring.registry import (
     TargetComponentTransformer as TargetComponentTransformer,
 )
 from bioetl.application.core.wiring.registry import (

@@ -38,6 +38,12 @@ from bioetl.domain.ports import (
 )
 from bioetl.domain.ports.noop import NoOpMetadataWriter, NoOpMetrics
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
+from bioetl.infrastructure.adapters.iuphar.adapter import (
+    IupharTargetClassificationAdapter,
+)
+from bioetl.infrastructure.adapters.iuphar.evidence_store import (
+    LocalTargetClassificationEvidenceStore,
+)
 from bioetl.infrastructure.observability.logging import StructlogLogger
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.observability.unified_logger import UnifiedLogger
@@ -75,6 +81,10 @@ from bioetl.domain.ports.observability.metrics import MetricsPort
 from bioetl.domain.ports.protein_classification import ProteinClassificationPort
 from bioetl.domain.ports.runtime.locking import LockPort
 from bioetl.domain.ports.stage_accounting import StageAccountingPort
+from bioetl.domain.ports.target_classification import (
+    TargetClassificationEvidencePort,
+    TargetClassificationPort,
+)
 from bioetl.domain.ports.workflow_foreign_key_reconciliation import (
     ForeignKeyReconciliationPort,
 )
@@ -234,6 +244,11 @@ PORT_ADAPTER_CASES = (
     PortAdapterCase(MetricsPublisherPort, MetricsPublisherAdapter),
     PortAdapterCase(MetricsServerPort, MetricsServerAdapter),
     PortAdapterCase(RunReportStorePort, FileRunReportStoreAdapter),
+    PortAdapterCase(TargetClassificationPort, IupharTargetClassificationAdapter),
+    PortAdapterCase(
+        TargetClassificationEvidencePort,
+        LocalTargetClassificationEvidenceStore,
+    ),
 )
 
 
