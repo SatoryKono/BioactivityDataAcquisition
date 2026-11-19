@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-19T07:05:23.921645+00:00",
+  "generated_at": "2026-11-19T08:23:44.700525+00:00",
   "summary": {
     "total_scripts": 768,
     "status_counts": {
@@ -19974,7 +19974,7 @@
           "path": "docs/05-engineering/test-telemetry-baseline.md",
           "line": 123,
           "source_group": "docs",
-          "text": "| 2 | `18.755` | `tests.unit.scripts.engineering.ci.test_pr_lane_results_runtime_acceptance_routes::test_runtime_evidence_selects_owning_contract[tests/helpers/runtime_acceptance_12553.py]` | `junit-u"
+          "text": "| 2 | `16.306` | `tests.unit.scripts.engineering.ci.test_pr_lane_results_runtime_acceptance_routes::test_runtime_evidence_selects_owning_contract[tests/helpers/runtime_acceptance_12553.py]` | `junit-u"
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
