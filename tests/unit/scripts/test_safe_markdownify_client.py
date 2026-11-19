@@ -1680,11 +1680,10 @@ def test_worker_timeout_returns_a_tool_error_and_accepts_the_next_rpc(
 ):
     session = handler._sessions.issue()
     handler.headers["Mcp-Session-Id"] = session
-    monkeypatch.setattr(
-        markdownify,
-        "convert",
-        Mock(side_effect=markdownify.subprocess.TimeoutExpired("private-worker", 70)),
+    convert = Mock(
+        side_effect=markdownify.subprocess.TimeoutExpired("private-worker", 70)
     )
+    monkeypatch.setattr(markdownify, "convert", convert)
     handler._dispatch_request(
         {
             "id": 10,
@@ -1695,6 +1694,9 @@ def test_worker_timeout_returns_a_tool_error_and_accepts_the_next_rpc(
             },
         }
     )
+    convert.assert_called_once_with(
+        handler._spec, "get-markdown-file", {"filepath": "private-file.md"}
+    )
     status, response, returned_session = handler.reply.call_args.args
     assert status == 200 and response["result"]["isError"] is True
     assert returned_session == session
@@ -1704,3 +1706,4 @@ def test_worker_timeout_returns_a_tool_error_and_accepts_the_next_rpc(
         200, {"jsonrpc": "2.0", "id": 11, "result": {}}, session
     )
     assert handler._sessions.touch(session)
+    convert.assert_called_once()

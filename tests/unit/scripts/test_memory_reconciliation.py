@@ -707,8 +707,16 @@ def test_gateway_authorization_receipt_is_published_before_releasing_barrier(
             and data["history"][-1].get("launch_stage") == "AUTHORIZED"
         ):
             receipt = owner.state.read(directory / "work.json")
-            assert receipt["generation"] == generation
-            assert receipt["accepted_count"] == 0
+            assert receipt == {
+                "schema": 2,
+                "profile": entry["id"],
+                "generation": generation,
+                "phase": "starting",
+                "mutating": False,
+                "accepted_count": 0,
+                "request_id": None,
+                "graph": stamp,
+            }
             published.append(generation)
         original(path, data)
 

@@ -225,15 +225,18 @@ def test_unqualified_cleanup_records_preserve_document_and_foreign_data(
     assert {p.name: p.read_bytes() for p in job.iterdir()} == before
 
 
-def _worker_fixture(tmp_path, monkeypatch, *, alive=False):
+def _worker_fixture(tmp_path, monkeypatch, *, owner_state="DEAD", worker_state="DEAD"):
     import os
 
-    def birth(pid):
-        return 42 if alive or pid == os.getpid() else None
-
+    runner = os.getpid()
+    owner_pid, worker_pid = runner + 1, runner + 2
+    states = {runner: "ALIVE", owner_pid: owner_state, worker_pid: worker_state}
+    assert set(states.values()).issubset({"ALIVE", "DEAD", "UNKNOWN"})
     core = SimpleNamespace(
         STATE=tmp_path,
-        process_birth=birth,
+        owner_pid=owner_pid,
+        worker_pid=worker_pid,
+        process_birth=lambda pid: 42 if states.get(pid) == "ALIVE" else None,
         read_json=lambda path: json.loads(path.read_bytes()),
         write_json=lambda path, value: path.write_text(
             json.dumps(value), encoding="utf-8"
@@ -243,36 +246,41 @@ def _worker_fixture(tmp_path, monkeypatch, *, alive=False):
     monkeypatch.setattr(
         markdownify,
         "psutil",
-        SimpleNamespace(pid_exists=lambda pid: alive or pid == os.getpid()),
+        SimpleNamespace(pid_exists=lambda pid: states.get(pid) in {"ALIVE", "UNKNOWN"}),
     )
     return core
 
 
 @pytest.mark.parametrize("phase", ["PREPARED", "SPAWNING", "RUNNING", "CLEANUP"])
+@pytest.mark.parametrize("runner_pid", [77, 78])
 def test_crashed_worker_jobs_are_reclaimed_from_durable_phases_only(
-    tmp_path, monkeypatch, phase
+    tmp_path, monkeypatch, phase, runner_pid
 ):
-    core = _worker_fixture(tmp_path, monkeypatch)
-    job = tmp_path / ("job-" + "b" * 32)
-    job.mkdir()
-    snapshot = job / "input.html"
-    snapshot.write_bytes(b"synthetic document")
-    record = {
-        "schema": 2,
-        "job": job.name,
-        "snapshot": snapshot.name,
-        "owner_pid": 77,
-        "owner_birth": 42,
-        "worker_pid": None if phase in {"PREPARED", "SPAWNING"} else 78,
-        "worker_birth": None if phase in {"PREPARED", "SPAWNING"} else 42,
-        "job_closed": False,
-        "phase": phase,
-    }
-    core.write_json(job / markdownify.PENDING_CLEANUP, record)
-    foreign = tmp_path / "foreign"
-    foreign.write_bytes(b"preserved")
-    markdownify._retry_pending_jobs()
-    assert not job.exists() and foreign.read_bytes() == b"preserved"
+    with monkeypatch.context() as patch:
+        patch.setattr(markdownify.os, "getpid", lambda: runner_pid)
+        core = _worker_fixture(tmp_path, patch)
+        job = tmp_path / ("job-" + "b" * 32)
+        job.mkdir()
+        snapshot = job / "input.html"
+        snapshot.write_bytes(b"synthetic document")
+        record = {
+            "schema": 2,
+            "job": job.name,
+            "snapshot": snapshot.name,
+            "owner_pid": core.owner_pid,
+            "owner_birth": 42,
+            "worker_pid": None
+            if phase in {"PREPARED", "SPAWNING"}
+            else core.worker_pid,
+            "worker_birth": None if phase in {"PREPARED", "SPAWNING"} else 42,
+            "job_closed": False,
+            "phase": phase,
+        }
+        core.write_json(job / markdownify.PENDING_CLEANUP, record)
+        foreign = tmp_path / "foreign"
+        foreign.write_bytes(b"preserved")
+        markdownify._retry_pending_jobs()
+        assert not job.exists() and foreign.read_bytes() == b"preserved"
 
 
 @pytest.mark.parametrize("phase", ["PREPARED", "SPAWNING", "RUNNING", "CLEANUP"])
@@ -280,9 +288,10 @@ def test_crashed_worker_jobs_are_reclaimed_from_durable_phases_only(
 def test_live_or_unknown_worker_journal_is_retained(
     tmp_path, monkeypatch, phase, unknown
 ):
-    core = _worker_fixture(tmp_path, monkeypatch, alive=True)
-    if unknown:
-        core.process_birth = lambda _pid: None
+    identity = "UNKNOWN" if unknown else "ALIVE"
+    core = _worker_fixture(
+        tmp_path, monkeypatch, owner_state=identity, worker_state=identity
+    )
     job = tmp_path / ("job-" + "b" * 32)
     job.mkdir()
     snapshot = job / "input.html"
@@ -291,9 +300,9 @@ def test_live_or_unknown_worker_journal_is_retained(
         "schema": 2,
         "job": job.name,
         "snapshot": snapshot.name,
-        "owner_pid": 77,
+        "owner_pid": core.owner_pid,
         "owner_birth": 42,
-        "worker_pid": None if phase in {"PREPARED", "SPAWNING"} else 78,
+        "worker_pid": None if phase in {"PREPARED", "SPAWNING"} else core.worker_pid,
         "worker_birth": None if phase in {"PREPARED", "SPAWNING"} else 42,
         "job_closed": False,
         "phase": phase,
@@ -327,9 +336,11 @@ def test_job_journal_exists_before_the_first_document_write(tmp_path, monkeypatc
 def test_worker_execution_and_cleanup_reserve_time_for_the_next_rpc(
     tmp_path, monkeypatch
 ):
-    core = _worker_fixture(tmp_path, monkeypatch, alive=True)
+    core = _worker_fixture(
+        tmp_path, monkeypatch, owner_state="ALIVE", worker_state="ALIVE"
+    )
     clock, waits = [0.0], []
-    child, job = Mock(pid=77), Mock()
+    child, job = Mock(pid=core.worker_pid), Mock()
     child.poll.return_value = None
     core.Job = lambda: job
     core.WINDOWS_HIDE = 0
@@ -393,9 +404,9 @@ def test_worker_recovery_recognizes_only_its_own_atomic_record_namespace(
         "schema": 2,
         "job": job.name,
         "snapshot": "input.html",
-        "owner_pid": 77,
+        "owner_pid": core.owner_pid,
         "owner_birth": 42,
-        "worker_pid": 78,
+        "worker_pid": core.worker_pid,
         "worker_birth": 42,
         "job_closed": True,
         "phase": "CLEANUP",
@@ -436,9 +447,9 @@ def test_interrupted_erasure_retains_the_journal_until_all_documents_are_gone(
             "schema": 2,
             "job": job.name,
             "snapshot": "input.html",
-            "owner_pid": 77,
+            "owner_pid": core.owner_pid,
             "owner_birth": 42,
-            "worker_pid": 78,
+            "worker_pid": core.worker_pid,
             "worker_birth": 42,
             "job_closed": True,
             "phase": "CLEANUP",
@@ -453,7 +464,16 @@ def test_interrupted_erasure_retains_the_journal_until_all_documents_are_gone(
         if len(removed) == interruption:
             raise InterruptedError("simulated crash after unlink")
 
+    original_iterdir = Path.iterdir
+
+    def journal_first(path):
+        entries = list(original_iterdir(path))
+        if path == job:
+            entries.sort(key=lambda item: item.name != markdownify.PENDING_CLEANUP)
+        return iter(entries)
+
     with monkeypatch.context() as patch:
+        patch.setattr(Path, "iterdir", journal_first)
         patch.setattr(Path, "unlink", interrupted)
         with pytest.raises(InterruptedError):
             markdownify._erase_worker_job(job, "input.html")
