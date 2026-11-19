@@ -180,9 +180,7 @@ async def test_chembl_molecule_full_cycle(e2e_data_dir: Path):
     )
 
     # Assert - max_phase canonical codes in Gold, matching Silver per id.
-    gold_phases = _assert_canonical_phases(
-        gold_records, entity_label="gold"
-    )
+    gold_phases = _assert_canonical_phases(gold_records, entity_label="gold")
     assert gold_phases <= silver_phases | {None}, (
         f"Gold phases {sorted(gold_phases, key=repr)} exceed Silver phases "
         f"{sorted(silver_phases, key=repr)}"
@@ -245,28 +243,28 @@ async def test_chembl_molecule_gold_scd2_idempotent(e2e_data_dir: Path):
     )
     assert gold_count == silver_count
 
-    # When SCD2 bookkeeping columns are present, every row is current v1.
+    # SCD2 writes must include bookkeeping columns on every current v1 row.
     for row in gold_rows:
-        if "_is_current" in row:
-            assert row["_is_current"] is True, (
-                f"SCD2 row for {row.get('molecule_id')} not current"
-            )
-        if "_version" in row:
-            assert row["_version"] == 1, (
-                f"SCD2 row for {row.get('molecule_id')} over-versioned on "
-                f"fresh build: {row['_version']!r}"
-            )
-        if "_valid_from" in row:
-            assert row["_valid_from"], (
-                f"SCD2 row for {row.get('molecule_id')} missing _valid_from"
-            )
+        assert {"_is_current", "_version", "_valid_from"} <= row.keys(), (
+            f"SCD2 bookkeeping missing for {row.get('molecule_id')}"
+        )
+        assert row["_is_current"] is True, (
+            f"SCD2 row for {row.get('molecule_id')} not current"
+        )
+        assert row["_version"] == 1, (
+            f"SCD2 row for {row.get('molecule_id')} over-versioned on "
+            f"fresh build: {row['_version']!r}"
+        )
+        assert row["_valid_from"], (
+            f"SCD2 row for {row.get('molecule_id')} missing _valid_from"
+        )
 
     # The committed entity config must declare the rerun-safe SCD2 contract.
     repo_root = Path(__file__).resolve().parents[2]
     entity_cfg = yaml.safe_load(
-        (
-            repo_root / "configs" / "entities" / "chembl" / "molecule.yaml"
-        ).read_text(encoding="utf-8")
+        (repo_root / "configs" / "entities" / "chembl" / "molecule.yaml").read_text(
+            encoding="utf-8"
+        )
     )
     gold_sink = entity_cfg["pipeline"]["sink"]["gold"]
     assert gold_sink["mode"] == "scd2", f"Gold sink mode drift: {gold_sink!r}"
