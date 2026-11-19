@@ -11,6 +11,7 @@ import argparse
 import hashlib
 import importlib.util
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -27,7 +28,7 @@ def session_root(cwd: Path, validator) -> Path:
         marker = candidate / ".git"
         if marker.is_symlink() or marker.is_junction():
             raise PermissionError("Session Git marker is a reparse point")
-        if marker.exists():
+        if os.path.lexists(marker):
             return validator(candidate)
     raise PermissionError("No registered session workspace")
 
@@ -97,7 +98,7 @@ def main() -> int:
         sys.flags.isolated and sys.flags.no_site and sys.dont_write_bytecode
     ):
         raise PermissionError("Pinned isolated Python required")
-    _verify_dispatcher()
+    _verify_dispatcher(Path(__file__).parent)
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("service", choices=("memory", "memory-acceptance", "ast-grep"))
     args = parser.parse_args()

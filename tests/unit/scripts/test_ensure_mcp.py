@@ -143,6 +143,12 @@ def test_ensure_keeps_valid_persisted_config_unchanged(
 def test_check_accepts_managed_config_with_active_and_dormant_policies(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    for key in (
+        "BIOETL_CODEX_ROUTES_FILE",
+        "CODEX_MCP_PROFILE",
+        "CODEX_MCP_TRANSPORT_MODE",
+    ):
+        monkeypatch.delenv(key, raising=False)
     workspace, home = tmp_path / "workspace", tmp_path / "home"
     workspace.mkdir()
     home.mkdir()

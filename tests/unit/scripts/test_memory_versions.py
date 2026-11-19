@@ -6,6 +6,7 @@ import argparse
 import hashlib
 import json
 from contextlib import nullcontext
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -95,10 +96,11 @@ def test_wrong_version_binding_is_rejected(tmp_path, bundle, monkeypatch):
         ),
         encoding="utf-8",
     )
-    (directory / versions.MIGRATION_RECORD).write_text(
+    (directory / "migration-v2.json").write_text(
         json.dumps(
             {
-                "id": "reviewed",
+                "schema": 2,
+                "id": "fixture-transaction",
                 "phase": "COMMITTED",
                 "bundle": str(bundle),
                 "version": "other",
@@ -131,14 +133,11 @@ def test_selected_profile_does_not_modify_neighbor_binding(
         (directory / "runtime-binding.json").write_text(
             json.dumps(binding), encoding="utf-8"
         )
-    neighbor = tmp_path / "neighbor/runtime-binding.json"
-    transaction = tmp_path / "target" / versions.MIGRATION_RECORD
-    with pytest.raises(PermissionError, match="no committed transaction"):
-        versions.select_bundle(tmp_path, "target")
-    transaction.write_text(
+    (tmp_path / "target/migration-v2.json").write_text(
         json.dumps(
             {
-                "id": "reviewed",
+                "schema": 2,
+                "id": "completed-fixture",
                 "phase": "COMMITTED",
                 "bundle": str(bundle),
                 "version": bundle.name,
@@ -146,6 +145,7 @@ def test_selected_profile_does_not_modify_neighbor_binding(
         ),
         encoding="utf-8",
     )
+    neighbor = tmp_path / "neighbor/runtime-binding.json"
     before = neighbor.read_bytes()
     assert versions.select_bundle(tmp_path, "target") == bundle
     assert versions.select_bundle(tmp_path, "neighbor") is None
@@ -638,26 +638,6 @@ def test_verified_duplicate_bundle_releases_its_current_staging(bundle, monkeypa
     versions.verify(bundle)
 
 
-def test_failed_bundle_assembly_cleans_its_staging_only(bundle, monkeypatch):
-    owner = SimpleNamespace(candidate=lambda *_: {"hashes": {}})
-    monkeypatch.setattr(versions, "VERSIONS", bundle.parent)
-    monkeypatch.setattr(versions, "sha", lambda _: "fixture-digest")
-
-    def copy_inputs(_owner, _hashes, staging):
-        service = staging / "tools/shared-mcp"
-        service.mkdir(parents=True)
-        (service / "fixture.py").write_bytes(b"# candidate input\n")
-
-    def reject(_file, _text):
-        raise ValueError("reviewed source drift")
-
-    monkeypatch.setattr(versions, "_copy_runtime_dependencies", copy_inputs)
-    monkeypatch.setattr(versions, "_adapt_service_text", reject)
-    with pytest.raises(ValueError, match="reviewed source drift"):
-        versions.build(owner, {}, {})
-    assert list(bundle.parent.iterdir()) == [bundle]
-
-
 def test_unlisted_file_in_predecessor_bundle_blocks_rollback_before_commit(
     transition_owner, bundle, bundle_factory
 ):
@@ -674,8 +654,9 @@ def test_unlisted_file_in_predecessor_bundle_blocks_rollback_before_commit(
 
 
 @pytest.mark.parametrize("valid", [True, False, None])
+@pytest.mark.parametrize("prepared", [False, True])
 def test_interrupted_old_runtime_can_upgrade_only_with_a_zero_request_start_receipt(
-    transition_owner, bundle, bundle_factory, valid, monkeypatch
+    transition_owner, bundle, bundle_factory, valid, monkeypatch, prepared
 ):
     from scripts.ai.mcp import memory_reconciliation as recovery
 
@@ -701,6 +682,10 @@ def test_interrupted_old_runtime_can_upgrade_only_with_a_zero_request_start_rece
             }
         ],
     }
+    if prepared:
+        coord["history"][-1].update(
+            launch_stage="PREPARED", owner_pid=77, owner_birth=1
+        )
     owner.state.write(directory / "recovery-v2.json", coord)
     owner.state.write(
         directory / "status.json",
@@ -743,3 +728,569 @@ def test_interrupted_old_runtime_can_upgrade_only_with_a_zero_request_start_rece
             bundle
         )
     assert graph.read_bytes() == b'{"fixture":true}\n'
+
+
+def test_active_runtime_without_committed_journal_is_refused(
+    tmp_path, bundle, monkeypatch
+):
+    monkeypatch.setattr(versions, "VERSIONS", bundle.parent)
+    directory = tmp_path / "active-profile"
+    directory.mkdir()
+    binding = directory / "runtime-binding.json"
+    binding.write_text(
+        json.dumps(
+            {
+                "schema": 2,
+                "state": "active",
+                "version": bundle.name,
+                "bundle": str(bundle),
+            }
+        ),
+        encoding="utf-8",
+    )
+    before = binding.read_bytes()
+    with pytest.raises(PermissionError, match="no committed migration"):
+        versions.select_bundle(tmp_path, directory.name)
+    assert binding.read_bytes() == before
+    assert not (directory / "migration-v2.json").exists()
+
+
+@pytest.mark.parametrize("cleanup_fails", [False, True])
+def test_failed_build_cleans_only_its_staging_and_preserves_original_error(
+    tmp_path, monkeypatch, cleanup_fails
+):
+    host, root = tmp_path / "host", tmp_path / "versions"
+    host.mkdir()
+    for name in ("project-memory-scoped-client.py", "host-servers.json"):
+        (host / name).write_text("synthetic fixture", encoding="utf-8")
+    root.mkdir()
+    published = root / ("a" * 64)
+    published.mkdir()
+    sentinel = published / "preserved"
+    sentinel.write_bytes(b"published")
+    monkeypatch.setattr(versions, "HOST", host)
+    monkeypatch.setattr(versions, "VERSIONS", root)
+    created = []
+
+    def copy(_owner, _hashes, staging):
+        created.append(staging)
+        service = staging / "tools/shared-mcp"
+        service.mkdir(parents=True)
+        (service / "changed.py").write_text("fixture", encoding="utf-8")
+
+    def fail(*_):
+        raise ValueError("fixture source drift")
+
+    monkeypatch.setattr(versions, "_copy_runtime_dependencies", copy)
+    monkeypatch.setattr(versions, "_adapt_service_text", fail)
+    if cleanup_fails:
+
+        def refuse_cleanup(_):
+            raise OSError("fixture cleanup failure")
+
+        monkeypatch.setattr(versions, "_discard_duplicate_build", refuse_cleanup)
+    owner = SimpleNamespace(candidate=lambda *_: {"hashes": {}})
+    with pytest.raises(ValueError, match="fixture source drift"):
+        versions.build(owner, {}, {})
+    assert len(created) == 1 and created[0].exists() is cleanup_fails
+    assert sentinel.read_bytes() == b"published"
+
+
+def test_failed_bundle_assembly_cleans_its_staging_only(bundle, monkeypatch):
+    owner = SimpleNamespace(candidate=lambda *_: {"hashes": {}})
+    monkeypatch.setattr(versions, "VERSIONS", bundle.parent)
+    monkeypatch.setattr(versions, "sha", lambda _: "fixture-digest")
+
+    def copy_inputs(_owner, _hashes, staging):
+        service = staging / "tools/shared-mcp"
+        service.mkdir(parents=True)
+        (service / "fixture.py").write_bytes(b"# candidate input\n")
+
+    def reject(_file, _text):
+        raise ValueError("reviewed source drift")
+
+    monkeypatch.setattr(versions, "_copy_runtime_dependencies", copy_inputs)
+    monkeypatch.setattr(versions, "_adapt_service_text", reject)
+    with pytest.raises(ValueError, match="reviewed source drift"):
+        versions.build(owner, {}, {})
+    assert list(bundle.parent.iterdir()) == [bundle]
+
+
+@pytest.mark.parametrize(
+    "operation,completed", [("migrate", "COMMITTED"), ("rollback", "ROLLED_BACK")]
+)
+@pytest.mark.parametrize(
+    "point",
+    [
+        "profile.json",
+        "active.json",
+        "profiles.json",
+        "runtime-binding.json",
+        "migration-v2.json",
+    ],
+)
+def test_explicit_recovery_completes_the_same_interrupted_transition(
+    transition_owner, bundle, monkeypatch, operation, completed, point
+):
+    owner, directory, graph = transition_owner
+    identity = directory.name
+    index_path = directory.parent / versions.PROFILE_INDEX
+    index = owner.state.read(index_path)
+    index["neighbor"] = {"preserved": True}
+    owner.state.write(index_path, index)
+    before_graph = graph.read_bytes()
+    if operation == "rollback":
+        legacy = directory / "legacy-runtime.py"
+        legacy.write_bytes(b"# immutable legacy source fixture\n")
+        owner.state.write(
+            directory / versions.ACTIVE_INDEX,
+            {"hashes": {str(legacy): versions.sha(legacy)}},
+        )
+        versions.migrate(owner, identity, bundle)
+        graph.write_bytes(b'{"legitimate_change":"after migration"}\n')
+        before_graph = graph.read_bytes()
+    original_write = owner.state.write
+
+    def fail(path, value):
+        if path.name == point and (
+            point != versions.MIGRATION_RECORD or value["phase"] == completed
+        ):
+            raise OSError("injected transition interruption")
+        original_write(path, value)
+
+    monkeypatch.setattr(owner.state, "write", fail)
+    with pytest.raises(OSError, match="interruption"):
+        if operation == "migrate":
+            versions.migrate(owner, identity, bundle)
+        else:
+            versions.rollback(owner, identity)
+    monkeypatch.setattr(owner.state, "write", original_write)
+    transaction = owner.state.read(directory / versions.MIGRATION_RECORD)
+    original_id = transaction["id"]
+    assert (
+        versions.recover_transition(owner, identity, original_id, fixture=True)["state"]
+        == completed
+    )
+    assert owner.state.read(directory / versions.MIGRATION_RECORD)["id"] == original_id
+    assert owner.state.read(index_path)["neighbor"] == {"preserved": True}
+    assert graph.read_bytes() == before_graph
+    assert versions.select_bundle(directory.parent, identity) == (
+        bundle if operation == "migrate" else None
+    )
+    before = {
+        path: path.read_bytes() for path in directory.rglob("*") if path.is_file()
+    }
+    assert versions.recover_transition(owner, identity, original_id, fixture=True)[
+        "already_completed"
+    ]
+    assert {
+        path: path.read_bytes() for path in directory.rglob("*") if path.is_file()
+    } == before
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        "transaction",
+        "graph",
+        "coordination",
+        "profile",
+        "active",
+        "binding",
+        "live_process",
+        "index",
+    ],
+)
+def test_transition_recovery_refuses_unreviewed_evidence_without_writes(
+    transition_owner, bundle, monkeypatch, change
+):
+    owner, directory, graph = transition_owner
+    write = owner.state.write
+
+    def interrupt(path, value):
+        if path.name == versions.RUNTIME_BINDING:
+            raise OSError("injected binding interruption")
+        write(path, value)
+
+    monkeypatch.setattr(owner.state, "write", interrupt)
+    with pytest.raises(OSError):
+        versions.migrate(owner, directory.name, bundle)
+    monkeypatch.setattr(owner.state, "write", write)
+    transaction = owner.state.read(directory / versions.MIGRATION_RECORD)
+    identity = transaction["id"]
+    if change == "transaction":
+        identity = "wrong-transaction"
+    elif change == "graph":
+        graph.write_bytes(b'{"changed":true}')
+    elif change == "coordination":
+        write(directory / versions.RECOVERY_RECORD, {"schema": 2, "changed": True})
+    elif change in {"profile", "active", "binding"}:
+        filename = {
+            "profile": versions.PROFILE_DESCRIPTOR,
+            "active": versions.ACTIVE_INDEX,
+            "binding": versions.RUNTIME_BINDING,
+        }[change]
+        write(directory / filename, {"unapproved": True})
+    elif change == "index":
+        index = owner.state.read(directory.parent / versions.PROFILE_INDEX)
+        index[directory.name]["unexpected_endpoint"] = 9999
+        write(directory.parent / versions.PROFILE_INDEX, index)
+    elif change == "live_process":
+
+        def alive(*args):
+            raise ValueError("Profile is not proven dormant")
+
+        monkeypatch.setattr(versions, "dormant", alive)
+    before = {
+        path: path.read_bytes()
+        for path in directory.parent.rglob("*")
+        if path.is_file()
+    }
+    with pytest.raises(ValueError):
+        versions.recover_transition(owner, directory.name, identity, fixture=True)
+    assert {
+        path: path.read_bytes()
+        for path in directory.parent.rglob("*")
+        if path.is_file()
+    } == before
+
+
+def test_recovery_itself_can_resume_after_a_second_interruption(
+    transition_owner, bundle, monkeypatch
+):
+    owner, directory, graph = transition_owner
+    write = owner.state.write
+
+    def interrupted(path, value):
+        if path.name == versions.RUNTIME_BINDING:
+            raise OSError("temporary disk failure")
+        write(path, value)
+
+    monkeypatch.setattr(owner.state, "write", interrupted)
+    with pytest.raises(OSError):
+        versions.migrate(owner, directory.name, bundle)
+    transaction = owner.state.read(directory / versions.MIGRATION_RECORD)
+    with pytest.raises(OSError):
+        versions.recover_transition(
+            owner, directory.name, transaction["id"], fixture=True
+        )
+    assert (
+        owner.state.read(directory / versions.MIGRATION_RECORD)["phase"] == "PREPARING"
+    )
+    monkeypatch.setattr(owner.state, "write", write)
+    assert (
+        versions.recover_transition(
+            owner, directory.name, transaction["id"], fixture=True
+        )["state"]
+        == "COMMITTED"
+    )
+    assert graph.read_bytes() == b'{"fixture":true}\n'
+
+
+def test_legacy_without_activation_has_a_defined_rollback_refusal(
+    transition_owner, bundle
+):
+    owner, directory, graph = transition_owner
+    (directory / versions.ACTIVE_INDEX).unlink()
+    versions.migrate(owner, directory.name, bundle)
+    assert (
+        versions.rollback(owner, directory.name)["state"]
+        == "BLOCKED_LEGACY_RUNTIME_DRIFT"
+    )
+    assert graph.read_bytes() == b'{"fixture":true}\n'
+
+
+@pytest.mark.parametrize("raises", [False, True])
+def test_loading_a_bundle_with_bytecode_enabled_preserves_its_exact_files(
+    tmp_path, raises
+):
+    import os
+    import subprocess
+    import sys
+
+    source = tmp_path / "candidate"
+    service = source / "tools/shared-mcp"
+    service.mkdir(parents=True)
+    helper = service / "helper.py"
+    helper.write_text("VALUE=1\n", encoding="utf-8")
+    text = 'import importlib.util\nfrom pathlib import Path\np=Path(__file__).with_name("helper.py")\ns=importlib.util.spec_from_file_location("owned_helper",p)\nm=importlib.util.module_from_spec(s)\ns.loader.exec_module(m)\n'
+    if raises:
+        text += 'raise RuntimeError("injected owner load failure")\n'
+    (service / "project-memory-owner.py").write_text(text, encoding="utf-8")
+    manifest = {
+        "schema": 2,
+        "files": {
+            p.relative_to(source).as_posix(): versions.sha(p)
+            for p in source.rglob("*.py")
+        },
+    }
+    raw = versions.canonical(manifest)
+    (source / versions.BUNDLE_MANIFEST).write_bytes(raw)
+    bundle = tmp_path / hashlib.sha256(raw).hexdigest()
+    source.rename(bundle)
+    module_path = Path(versions.__file__)
+    program = """import sys
+from pathlib import Path
+namespace={"__file__":sys.argv[1],"__name__":"isolated_versions"}
+exec(compile(Path(sys.argv[1]).read_text(encoding="utf-8"),sys.argv[1],"exec"),namespace)
+sys.dont_write_bytecode=False
+expected_failure = sys.argv[3] == "True"
+try:
+    namespace["bundle_owner"](Path(sys.argv[2]))
+except RuntimeError as error:
+    assert expected_failure
+    assert str(error) == "injected owner load failure"
+else:
+    assert not expected_failure, "Expected owner load failure did not occur"
+assert sys.dont_write_bytecode is False
+namespace["verify"](Path(sys.argv[2]))
+"""
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-I",
+            "-S",
+            "-B",
+            "-c",
+            program,
+            str(module_path),
+            str(bundle),
+            str(raises),
+        ],
+        capture_output=True,
+        text=True,
+        timeout=30,
+        env=dict(os.environ, PYTHONDONTWRITEBYTECODE="1"),
+    )
+    assert result.returncode == 0, result.stderr
+    assert not list(bundle.rglob("__pycache__"))
+
+
+def test_migration_guards_late_runtime_imports_and_restores_bytecode_mode(
+    transition_owner, bundle, monkeypatch
+):
+    import sys
+
+    owner, directory, _ = transition_owner
+    original = owner.candidate
+
+    def candidate(*args):
+        assert sys.dont_write_bytecode is True
+        return original(*args)
+
+    monkeypatch.setattr(owner, "candidate", candidate)
+    previous = sys.dont_write_bytecode
+    sys.dont_write_bytecode = False
+    try:
+        assert versions.migrate(owner, directory.name, bundle)["state"] == "COMMITTED"
+        assert sys.dont_write_bytecode is False
+    finally:
+        sys.dont_write_bytecode = previous
+
+
+@pytest.mark.parametrize("guard", ["scope", "claim"])
+def test_partial_transition_still_requires_current_scope_and_graph_claim(
+    transition_owner, bundle, monkeypatch, guard
+):
+    owner, directory, graph = transition_owner
+    descriptor = owner.state.read(directory / versions.PROFILE_DESCRIPTOR)
+    descriptor["profile"]["id"] = directory.name
+    owner.state.write(directory / versions.PROFILE_DESCRIPTOR, descriptor)
+    original = owner.state.write
+
+    def interrupt(path, value):
+        if path.name == versions.RUNTIME_BINDING:
+            raise OSError("injected interruption")
+        original(path, value)
+
+    monkeypatch.setattr(owner.state, "write", interrupt)
+    with pytest.raises(OSError):
+        versions.migrate(owner, directory.name, bundle)
+    monkeypatch.setattr(owner.state, "write", original)
+    transaction = owner.state.read(directory / versions.MIGRATION_RECORD)
+
+    def revalidate(_profile):
+        if guard == "scope":
+            raise ValueError("Current account or branch changed")
+
+    owner.state.scope.revalidate = revalidate
+    owner.registry.claim = lambda _: "approved-graph"
+    before = {
+        path: path.read_bytes()
+        for path in directory.parent.rglob("*")
+        if path.is_file()
+    }
+    with pytest.raises(ValueError, match="account or branch|graph claim"):
+        versions.recover_transition(owner, directory.name, transaction["id"])
+    assert {
+        path: path.read_bytes()
+        for path in directory.parent.rglob("*")
+        if path.is_file()
+    } == before
+    assert graph.read_bytes() == b'{"fixture":true}\n'
+
+
+@pytest.mark.parametrize("identity_state", ["ALIVE", "UNKNOWN", "DEAD"])
+def test_migration_cannot_overtake_a_prepared_owner_before_status_publication(
+    transition_owner, bundle, bundle_factory, monkeypatch, identity_state
+):
+    import os
+    from scripts.ai.mcp import memory_reconciliation as recovery
+
+    owner, directory, graph = transition_owner
+    versions.migrate(owner, directory.name, bundle)
+    stamp = {"graph_sha256": versions.sha(graph)}
+    owner.state.write(
+        directory / "status.json",
+        {"owner_pid": 77, "owner_birth": 1, "generation": "c" * 32},
+    )
+    owner.state.write(
+        directory / "work.json",
+        {
+            "schema": 2,
+            "profile": directory.name,
+            "generation": "c" * 32,
+            "phase": "idle",
+            "accepted_count": 0,
+            "mutating": False,
+            "graph": stamp,
+        },
+    )
+    observed = recovery.records(owner, {"state": str(directory)})
+    owner.state.write(
+        directory / versions.RECOVERY_RECORD,
+        {
+            "schema": 2,
+            "active_block": None,
+            "history": [
+                {
+                    "id": "b" * 32,
+                    "phase": "LAUNCHING",
+                    "launch_stage": "PREPARED",
+                    "owner_pid": os.getpid(),
+                    "owner_birth": 42,
+                    "new_generation": "a" * 32,
+                    "snapshot": {
+                        "profile": directory.name,
+                        "graph": stamp,
+                        "records": {
+                            name: recovery.digest(record)
+                            for name, record in observed.items()
+                        },
+                    },
+                }
+            ],
+        },
+    )
+    owner.state.identity = lambda record, role: (
+        identity_state
+        if record and record.get(role + "_pid") == os.getpid()
+        else "DEAD"
+        if record and role + "_pid" in record
+        else "ABSENT"
+    )
+    successor = bundle_factory(b"VERSION='new'\n")
+    before = {
+        path: path.read_bytes() for path in directory.rglob("*") if path.is_file()
+    }
+    with pytest.raises(ValueError, match="grant awaits"):
+        versions.migrate(owner, directory.name, successor, from_version=bundle.name)
+    assert {
+        path: path.read_bytes() for path in directory.rglob("*") if path.is_file()
+    } == before
+
+
+def test_interrupted_rollback_refuses_changes_since_its_own_graph_snapshot(
+    transition_owner, bundle, monkeypatch
+):
+    owner, directory, graph = transition_owner
+    legacy = directory / "legacy-runtime.py"
+    legacy.write_bytes(b"# immutable legacy source fixture\n")
+    owner.state.write(
+        directory / versions.ACTIVE_INDEX,
+        {"hashes": {str(legacy): versions.sha(legacy)}},
+    )
+    versions.migrate(owner, directory.name, bundle)
+    graph.write_bytes(b'{"legitimate_change":"before rollback"}\n')
+    original = owner.state.write
+
+    def interrupted(path, value):
+        if path.name == versions.PROFILE_DESCRIPTOR:
+            raise OSError("injected rollback interruption")
+        original(path, value)
+
+    with monkeypatch.context() as patch:
+        patch.setattr(owner.state, "write", interrupted)
+        with pytest.raises(OSError, match="rollback interruption"):
+            versions.rollback(owner, directory.name)
+    transaction = owner.state.read(directory / versions.MIGRATION_RECORD)
+    assert transaction["rollback_snapshot"]["graph"] == {
+        "graph_sha256": versions.sha(graph)
+    }
+    graph.write_bytes(b'{"unexpected_change":"during rollback"}\n')
+    before = {
+        path: path.read_bytes()
+        for path in directory.parent.rglob("*")
+        if path.is_file()
+    }
+    with pytest.raises(ValueError, match="Graph changed"):
+        versions.recover_transition(
+            owner, directory.name, transaction["id"], fixture=True
+        )
+    assert {
+        path: path.read_bytes()
+        for path in directory.parent.rglob("*")
+        if path.is_file()
+    } == before
+
+
+@pytest.mark.parametrize("changed_graph", [False, True])
+def test_legacy_interrupted_rollback_requires_its_preserved_graph_snapshot(
+    transition_owner, bundle, monkeypatch, changed_graph
+):
+    owner, directory, graph = transition_owner
+    legacy = directory / "legacy-runtime.py"
+    legacy.write_bytes(b"# immutable legacy source fixture\n")
+    owner.state.write(
+        directory / versions.ACTIVE_INDEX,
+        {"hashes": {str(legacy): versions.sha(legacy)}},
+    )
+    versions.migrate(owner, directory.name, bundle)
+    if changed_graph:
+        graph.write_bytes(b'{"legitimate_change":"after migration"}\n')
+    original = owner.state.write
+
+    def interrupted(path, value):
+        if path.name == versions.PROFILE_DESCRIPTOR:
+            raise OSError("legacy rollback interruption")
+        original(path, value)
+
+    with monkeypatch.context() as patch:
+        patch.setattr(owner.state, "write", interrupted)
+        with pytest.raises(OSError, match="legacy rollback"):
+            versions.rollback(owner, directory.name)
+    transaction = owner.state.read(directory / versions.MIGRATION_RECORD)
+    transaction.pop("rollback_snapshot")  # Earlier runtime journal format.
+    original(directory / versions.MIGRATION_RECORD, transaction)
+    before = {
+        path: path.read_bytes()
+        for path in directory.parent.rglob("*")
+        if path.is_file()
+    }
+    if changed_graph:
+        with pytest.raises(ValueError, match="Graph changed"):
+            versions.recover_transition(
+                owner, directory.name, transaction["id"], fixture=True
+            )
+        assert {
+            path: path.read_bytes()
+            for path in directory.parent.rglob("*")
+            if path.is_file()
+        } == before
+    else:
+        assert (
+            versions.recover_transition(
+                owner, directory.name, transaction["id"], fixture=True
+            )["state"]
+            == "ROLLED_BACK"
+        )

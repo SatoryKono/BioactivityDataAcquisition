@@ -262,13 +262,15 @@ transport_mode = (
     os.environ.get("CODEX_MCP_TRANSPORT_MODE")
     or getattr(module, "DEFAULT_LOCAL_TRANSPORT_MODE", "shared")
 )
-expected, _ = module._managed_codex_projection(
-    content,
-    workspace_root,
-    profile=profile,
-    transport_mode=transport_mode,
+servers = module._codex_runtime_servers(
+    workspace_root, profile=profile, transport_mode=transport_mode,
 )
-if actual != expected.strip():
+managed = set(module._canonical_servers(workspace_root, profile="full")) | set(module.REMOVED_MCP_SERVER_NAMES)
+actual_servers = module.tomllib.loads(content).get("mcp_servers", {})
+if managed.intersection(actual_servers) != set(servers):
+    raise SystemExit("managed MCP profile members differ from the selected profile")
+expected = module._render_retained_codex_block(content, servers, managed).strip()
+if actual != expected:
     raise SystemExit("managed MCP block differs from canonical setup output")
 PY
     return 0

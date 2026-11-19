@@ -98,9 +98,19 @@ def test_staging_cleanup_refuses_a_foreign_absolute_target(tmp_path):
     assert sentinel.read_bytes() == b"original"
 
 
-@pytest.mark.parametrize("size,expected_exit", [(1024 * 1024, 0), (1024 * 1024 + 1, 1)])
+@pytest.mark.parametrize(
+    "size,expected_exit,kind",
+    [
+        (1024 * 1024, 0, "html"),
+        (1024 * 1024 + 1, 1, "html"),
+        (128, 1, "zip-as-html"),
+        (128, 1, "unsupported"),
+        (128, 1, "missing-nonce"),
+        (128, 1, "wrong-nonce"),
+    ],
+)
 def test_isolated_worker_writes_exactly_the_checked_utf8_bytes(
-    tmp_path, size, expected_exit
+    tmp_path, size, expected_exit, kind
 ):
     staging = tmp_path / "staging"
     site = staging / "site-packages"
@@ -110,17 +120,28 @@ def test_isolated_worker_writes_exactly_the_checked_utf8_bytes(
     package = site / "markitdown"
     package.mkdir()
     (package / "__init__.py").write_text(
-        "class MarkItDown:\n    def __init__(self, **kwargs): raise AssertionError('unexpected auto-detection')\n"
-        "class StreamInfo:\n    def __init__(self, **kwargs): self.fields = kwargs\n",
+        f"class Result:\n    text_content = 'x' * {size}\n"
+        "class MarkItDown:\n"
+        "    def __init__(self, **kwargs):\n"
+        "        assert kwargs == {'enable_builtins': False, 'enable_plugins': False}\n"
+        "        self.selected = []\n"
+        "    def register_converter(self, value): self.selected.append(value)\n"
+        "    def convert(self, path):\n"
+        "        assert len(self.selected) == 1 and type(self.selected[0]).__name__ == 'HtmlConverter'\n"
+        "        return Result()\n",
         encoding="utf-8",
     )
     (package / "converters.py").write_text(
-        f"class Result:\n    text_content = 'x' * {size}\n"
-        "class HtmlConverter:\n"
-        "    def convert(self, stream, info):\n"
-        "        assert stream.read() == b'<p>synthetic input</p>'\n"
-        "        assert info.fields == {'extension': '.html', 'mimetype': 'text/html'}\n"
-        "        return Result()\n",
+        "\n".join(
+            "class " + name + ": pass"
+            for name in (
+                "DocxConverter",
+                "HtmlConverter",
+                "PdfConverter",
+                "PptxConverter",
+                "XlsxConverter",
+            )
+        ),
         encoding="utf-8",
     )
     manifest = {
@@ -143,22 +164,43 @@ def test_isolated_worker_writes_exactly_the_checked_utf8_bytes(
         / "AppData/Local/pc-agent/mcp-shared/markdownify-bioetl-v1/profile/job-fixture"
     )
     job.mkdir(parents=True)
-    source = job / "input.html"
-    source.write_bytes(b"<p>synthetic input</p>")
+    source = job / ("input.zip" if kind == "unsupported" else "input.html")
+    if kind == "missing-nonce":
+        pass  # A missing snapshot must not be touched before the launch barrier.
+    elif kind == "zip-as-html":
+        import zipfile
+
+        with zipfile.ZipFile(source, "w") as archive:
+            archive.writestr("nested.md", "synthetic archive content")
+    else:
+        source.write_bytes(b"synthetic input")
     env = {
         key: value
         for key, value in os.environ.items()
         if key.upper() in {"SYSTEMROOT", "WINDIR", "PATH", "TEMP", "TMP"}
     }
-    env.update(HOME=str(home), USERPROFILE=str(home))
+    env.update(
+        HOME=str(home),
+        USERPROFILE=str(home),
+        PC_AGENT_MARKDOWNIFY_LAUNCH_NONCE="a" * 64,
+    )
+    if kind == "missing-nonce":
+        env.pop("PC_AGENT_MARKDOWNIFY_LAUNCH_NONCE")
     result = subprocess.run(
         [sys.executable, "-I", "-S", "-B", str(converter / runner.name), str(source)],
         env=env,
+        input=(("b" if kind == "wrong-nonce" else "a") * 64 + "\n").encode(),
         capture_output=True,
         timeout=30,
     )
     assert result.returncode == expected_exit
     assert result.stdout == (b"x" * size if expected_exit == 0 else b"")
+    if kind == "zip-as-html":
+        assert b"HTML snapshot contains a ZIP archive" in result.stderr
+    if kind == "unsupported":
+        assert b"format is not permitted" in result.stderr
+    if kind in {"missing-nonce", "wrong-nonce"}:
+        assert b"launch barrier was not authorized" in result.stderr
 
 
 def test_parallel_publication_reuses_verified_target_and_discards_only_own_copy(
