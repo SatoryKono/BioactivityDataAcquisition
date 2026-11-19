@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from contextlib import ExitStack
-from dataclasses import replace
 from inspect import isawaitable
 from typing import TYPE_CHECKING, cast
 
@@ -60,20 +59,10 @@ def _finalize_transformed_record(
     if isinstance(transformed, PreSilverRecord):
         if normalization_processor is None:
             raise RuntimeError("PreSilverRecord requires RecordNormalizationProcessor")
-        finalized_record: dict[str, object] | None = (
-            normalization_processor.finalize_pre_silver(
-                transformed,
-                context,
-                index,
-            )
-        )
-        return finalized_record
+        return normalization_processor.finalize_pre_silver(transformed, context, index)
     if normalization_processor is None:
         return transformed
-    normalized_record: dict[str, object] | None = (
-        normalization_processor.normalize_record(transformed)
-    )
-    return normalized_record
+    return normalization_processor.normalize_record(transformed)
 
 
 def _build_gold_record(
@@ -193,16 +182,7 @@ async def build_transform_success_outcome(
     with ExitStack() as cleanup:
         if isinstance(transformed, PreSilverRecord):
             publish_evidence = transformed.publish_business_evidence
-            discard_evidence = transformed.discard_business_evidence
-            if discard_evidence is not None:
-                cleanup.callback(discard_evidence, context, index)
-            if publish_evidence is not None or discard_evidence is not None:
-                # Keep staged evidence under the batch outcome's admission boundary.
-                transformed = replace(
-                    transformed,
-                    publish_business_evidence=None,
-                    discard_business_evidence=None,
-                )
+            transformed = transformed.defer_business_evidence(cleanup, context, index)
         finalized_record = _finalize_transformed_record(
             transformed=transformed,
             normalization_processor=normalization_processor,

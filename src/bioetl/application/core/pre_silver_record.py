@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
+    from contextlib import ExitStack
+
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.types import JsonDict
 
@@ -79,3 +81,20 @@ class PreSilverRecord:
     enrich_normalized_business_data: PreSilverEnrichmentProtocol | None = None
     publish_business_evidence: PreSilverEvidenceProtocol | None = None
     discard_business_evidence: PreSilverEvidenceProtocol | None = None
+
+    def defer_business_evidence(
+        self, cleanup: ExitStack, context: PipelineContext, index: int
+    ) -> PreSilverRecord:
+        """Let the batch attempt own cleanup and publication for this record."""
+        if self.discard_business_evidence is not None:
+            cleanup.callback(self.discard_business_evidence, context, index)
+        if (
+            self.publish_business_evidence is None
+            and self.discard_business_evidence is None
+        ):
+            return self
+        return replace(
+            self,
+            publish_business_evidence=None,
+            discard_business_evidence=None,
+        )
