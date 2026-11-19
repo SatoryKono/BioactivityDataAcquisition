@@ -147,7 +147,8 @@ states are UNKNOWN; a failed or skipped check never counts as PASS.
 1. Repository (one PR): remove the `AGENTS.md` / `.junie/guidelines.md`
    Amp sections, `.amp/settings.json`, `.agents/setup`, `.agents/resume`,
    the `.amp` entries in `repo_structure_catalog.yaml`,
-   `root_hygiene_review_registry.yaml` and `03-file-policy.md`, the `.gitignore` negations, and this runbook;
+   `root_hygiene_review_registry.yaml` and `03-file-policy.md`, the `.gitignore` negations, this runbook, and
+   its `Amp Orbs` entry in the `mkdocs.yml` navigation;
    refresh `documentation-cleanup-inventory` per post-change validation.
 2. Amp side: delete the project secrets, disconnect the GitHub
    integration, and delete or archive the project.
