@@ -31,6 +31,10 @@ UNKNOWN = "configs/quality/external_resource_inventory_pr0_unreviewed.json"
         "configs/quality/external_resource_inventory_pr13166_eager_reader_review.json",
         "configs/quality/external_resource_inventory_pr13166_template_lifecycle_review.json",
         "configs/quality/external_resource_inventory_pr13166_workflow_replay_review.json",
+        "configs/quality/external_resource_inventory_pr13166_batch_writer_review.json",
+        "configs/quality/external_resource_inventory_pr13166_deferred_evidence_scope_review.json",
+        "configs/quality/external_resource_inventory_pr13166_runtime_dq_review.json",
+        "configs/quality/external_resource_inventory_pr13166_writer_boundaries_review.json",
     ],
 )
 def test_pr13166_inventory_review_snapshots_keep_bounded_owners(path: str) -> None:
