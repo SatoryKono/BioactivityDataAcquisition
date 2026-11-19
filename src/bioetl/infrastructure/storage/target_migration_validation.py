@@ -116,13 +116,13 @@ _WRITER_VALUE_OPTIONS = frozenset(
 
 def _writer_options(args: list[str]) -> list[str]:
     """Keep option values from masquerading as read-only flags or commands."""
-    options, tokens = [], iter(args)
-    for token in tokens:
-        if token == "--":
+    options, remaining = [], iter(args)
+    for argument in remaining:
+        if argument == "--":
             break
-        if token in _WRITER_VALUE_OPTIONS:
-            token = f"{token}={next(tokens, '')}"
-        options.append(token)
+        if argument in _WRITER_VALUE_OPTIONS:
+            argument = f"{argument}={next(remaining, '')}"
+        options.append(argument)
     return options
 
 
