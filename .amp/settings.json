@@ -18,7 +18,8 @@
       "command": "bash",
       "env": {
         "MEMORY_SEED_PATH": "docs/00-project/ai/memory/mcp-memory.json",
-        "NPM_CONFIG_CACHE": ".cache/npm-cache"
+        "NPM_CONFIG_CACHE": ".cache/npm-cache",
+        "BIOETL_AI_MEMORY_MODE": "read-write"
       }
     }
   },

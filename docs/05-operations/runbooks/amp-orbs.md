@@ -56,11 +56,9 @@ table is a defect: fix the UI to match, or update this runbook and
 - Keep Shallow Clone disabled in the Amp project. Amp clones the full
   history by default, as required by `check_no_partial_tree.py`.
 - Installs the pinned official `github-mcp-server` binary (v2.2.0,
-  with fixed SHA-256 for Linux x86_64 and arm64) into `$HOME/tools/bin` — a candidate path of
+  checksum-verified) into `$HOME/tools/bin` — a candidate path of
   `github-mcp-wrapper.sh`; without it the GitHub MCP cannot start in a
   fresh orb. Read-only mode needs no digest approval.
-- Unsupported platforms fail before downloading. A failed checksum leaves
-  an existing binary intact; temporary downloads are removed on failure.
 - No `gh` commands: GitHub is not authenticated while setup runs.
 - No Docker/Redis/monitoring startup (ADR-010, local-only deployment;
   the Docker daemon in an orb stays stopped).
@@ -127,8 +125,10 @@ Project-level secrets hold the wide key set from the `.env` inventory
 - The registered Fetch wrapper requires a Windows owner. Fetch on an
   Amp-hosted Linux orb needs an approved Linux transport before it can
   be counted as executed.
-- The repository memory wrapper exits in `off` and `read-only` modes.
-  Persistent memory requires separate, explicit `read-write` authority.
+- Memory in orbs is `read-write`: `BIOETL_AI_MEMORY_MODE=read-write` is
+  set for the memory server in `.amp/settings.json` (owner decision,
+  2026-11-19). The wrapper scopes persistence per branch/worktree;
+  whether orb writes outlive the orb is a passport check in #13216.
 - GitHub MCP needs the official `github-mcp-server` executable or a
   qualified repository transport. `gh auth status` only checks CLI
   authentication. Verify GitHub MCP separately in the passport.
