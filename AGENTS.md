@@ -280,7 +280,9 @@ does not relax the env guardrail or the full-tree commit gate.
   (memory, github — with the repository wrapper's exclude-tools list
   and lockdown mode). The fetch server is excluded: its repository wrapper
   is bound to the registered Windows host and cannot start in a Linux orb;
-  revisit if a Linux launcher appears. Skills resolve from `.codex/skills/**` via
+  revisit if a Linux launcher appears. Memory in orbs runs with
+  `BIOETL_AI_MEMORY_MODE=read-write` (owner decision, 2026-11-19); other
+  surfaces keep their own memory-mode policy. Skills resolve from `.codex/skills/**` via
   `amp.skills.path`; do not copy skills into an Amp-specific tree.
 - Ship on the Amp project is Custom Ship: run `make test-fast`, push a
   feature branch, open a PR with `gh pr create`, never merge. The default
