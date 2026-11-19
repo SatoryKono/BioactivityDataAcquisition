@@ -12,6 +12,9 @@ from uuid import UUID
 
 import pytest
 
+from bioetl.application.core.batch_transformer_attempt_success import (
+    build_transform_success_outcome,
+)
 from bioetl.application.core.record_normalization_processor import (
     RecordNormalizationProcessor,
 )
@@ -42,7 +45,9 @@ from bioetl.composition.bootstrap.assembly.target_classification_identity import
     target_classification_config_source_refs,
     target_classification_source_refs,
 )
+from bioetl.domain.config import DQConfig, FieldValidation
 from bioetl.domain.context import PipelineContext
+from bioetl.domain.exceptions.validation import ValidationError
 from bioetl.domain.types import RunType
 from bioetl.domain.workflow import WorkflowConfig, WorkflowStepConfig
 from bioetl.infrastructure.config.converters import yaml_config_to_domain
@@ -357,6 +362,59 @@ async def test_rejected_target_rows_release_pending_classification(
 
     assert not session._pending
     assert not session._published
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("disposition", ["quarantine", "skip", "fail"])
+async def test_shadow_evidence_excludes_targets_rejected_by_runtime_dq(
+    shadow_config, tmp_path, disposition
+):
+    transformer = _transformer(shadow_config, tmp_path / "evidence")
+    assert isinstance(transformer, TargetTransformer)
+    context = _context()
+    normalizer = RecordNormalizationProcessor("chembl", "target")
+    dq_config = DQConfig(
+        invalid_record_policy=disposition,
+        field_validations=(
+            FieldValidation(
+                field="pref_name", validation_type="enum", allowed=("accepted",)
+            ),
+        ),
+    )
+    target = {
+        "target_type": "SINGLE PROTEIN",
+        "tax_id": 9606,
+        "organism": "Homo sapiens",
+        "species_group_flag": False,
+    }
+
+    async def attempt(target_id, name, index):
+        return await build_transform_success_outcome(
+            context=context,
+            transform=transformer.transform_pre_silver,
+            raw_record={**target, "target_chembl_id": target_id, "pref_name": name},
+            index=index,
+            normalization_processor=normalizer,
+            gold_filter=lambda _context, _record: False,
+            gold_transform=lambda _context, record: record,
+            dq_config=dq_config,
+            debug_export_service=None,
+        )
+
+    with pytest.raises(ValidationError, match=f"disposition={disposition}"):
+        await attempt("CHEMBL1", "rejected", 0)
+    accepted = await attempt("CHEMBL2", "accepted", 1)
+    assert accepted.silver_record is not None
+    assert accepted.silver_record["target_id"] == "CHEMBL2"
+
+    session = transformer._target_classification_session
+    assert session is not None
+    assert not session._pending
+    transformer.finalize_target_classification(context)
+    [manifest_path] = (tmp_path / "evidence").rglob("manifest.json")
+    evidence = json.loads(manifest_path.read_text(encoding="utf-8"))
+    assert evidence["status"] == "complete"
+    assert evidence["input_row_ids"] == ["chembl.target:CHEMBL2"]
 
 
 @pytest.mark.asyncio

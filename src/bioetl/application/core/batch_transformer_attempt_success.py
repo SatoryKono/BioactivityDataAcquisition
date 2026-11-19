@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
+from contextlib import ExitStack
 from dataclasses import replace
 from inspect import isawaitable
 from typing import TYPE_CHECKING, cast
@@ -188,13 +189,20 @@ async def build_transform_success_outcome(
 ) -> RecordTransformOutcome:
     """Build the outcome for a successfully transformed record."""
     transformed = await resolve_transform_result(transform(context, raw_record, index))
-    staged = transformed if isinstance(transformed, PreSilverRecord) else None
-    if staged is not None:
-        # The complete attempt owns publication; normalization is only one gate.
-        transformed = replace(
-            staged, publish_business_evidence=None, discard_business_evidence=None
-        )
-    try:
+    publish_evidence = None
+    with ExitStack() as cleanup:
+        if isinstance(transformed, PreSilverRecord):
+            publish_evidence = transformed.publish_business_evidence
+            discard_evidence = transformed.discard_business_evidence
+            if discard_evidence is not None:
+                cleanup.callback(discard_evidence, context, index)
+            if publish_evidence is not None or discard_evidence is not None:
+                # Keep staged evidence under the batch outcome's admission boundary.
+                transformed = replace(
+                    transformed,
+                    publish_business_evidence=None,
+                    discard_business_evidence=None,
+                )
         finalized_record = _finalize_transformed_record(
             transformed=transformed,
             normalization_processor=normalization_processor,
@@ -224,16 +232,14 @@ async def build_transform_success_outcome(
                 gold_excluded_by_contract=gold_excluded_by_contract,
                 gold_filter_details=gold_filter_details,
             )
-        if staged is not None and staged.publish_business_evidence is not None:
-            staged.publish_business_evidence(context, index)
-        return RecordTransformOutcome(
+        outcome = RecordTransformOutcome(
             silver_record=finalized_record,
             gold_record=gold_record,
             gold_excluded_by_contract=gold_excluded_by_contract,
         )
-    finally:
-        if staged is not None and staged.discard_business_evidence is not None:
-            staged.discard_business_evidence(context, index)
+        if publish_evidence is not None:
+            publish_evidence(context, index)
+        return outcome
 
 
 async def resolve_transform_result(
