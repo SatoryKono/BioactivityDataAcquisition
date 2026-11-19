@@ -381,10 +381,11 @@ def _run(argv=None):
     )
     environment = ref_environment(os.environ, values, args.auth)
     environment["CODEX_HOME"] = str(codex_home)
-    # Bind the validated route against project overlays or a concurrent TOML edit.
-    overrides.extend(
-        ["--config", "mcp_servers.ref=" + toml_value(config["mcp_servers"]["ref"])]
-    )
+    # Pin the validated route without undoing the explicit Ref-only selection.
+    ref_entry = config["mcp_servers"]["ref"]
+    if args.ref_only:
+        ref_entry = {**ref_entry, "enabled": True}
+    overrides.extend(["--config", "mcp_servers.ref=" + toml_value(ref_entry)])
     if args.check:
         selection = {"ref_only": args.ref_only}
         if args.ref_only:

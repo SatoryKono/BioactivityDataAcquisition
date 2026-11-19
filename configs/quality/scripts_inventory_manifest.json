@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-19T01:10:25.217340+00:00",
+  "generated_at": "2026-11-19T01:20:40.359859+00:00",
   "summary": {
     "total_scripts": 763,
     "status_counts": {
@@ -1195,7 +1195,7 @@
         },
         {
           "path": "tests/unit/scripts/test_mcp_native_session.py",
-          "line": 835,
+          "line": 838,
           "source_group": "tests",
           "text": "from scripts.ai.codex import local_mcp_routes as routes"
         },

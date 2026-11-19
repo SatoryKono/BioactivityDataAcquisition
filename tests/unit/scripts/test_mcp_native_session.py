@@ -642,9 +642,12 @@ def test_ref_only_does_not_load_unrelated_markdownify_binding(
     assert call["argv"][1:3] == ["--cd", str(ref_launch["root"])]
     assert call["ref_key"] == "fixture-ref-key"
     assert "fixture-ref-key" not in " ".join(call["argv"])
-    assert call["argv"][3] == "--config"
-    assert len(call["argv"]) == 5
-    entries = tomllib.loads(call["argv"][4])["mcp_servers"]
+    _, _, _, first_flag, selection, second_flag, pin = call["argv"]
+    assert (first_flag, second_flag) == ("--config", "--config")
+    original_ref = tomllib.loads(original_config.decode())["mcp_servers"]["ref"]
+    assert original_ref["enabled"] is False
+    assert tomllib.loads(pin)["mcp_servers"]["ref"] == {**original_ref, "enabled": True}
+    entries = tomllib.loads(selection)["mcp_servers"]
     assert {name: entry["enabled"] for name, entry in entries.items()} == {
         "memory": False,
         "ast-grep": False,
