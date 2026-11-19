@@ -1898,6 +1898,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "scripts/ai/mcp/mcp_filesystem_wrapper.ps1": (NPM_RUNTIME_TEST,),
     "scripts/ai/mcp/mcp_fetch_wrapper.sh": (MCP_WRAPPER_CONTRACTS_TEST,),
     "scripts/ai/mcp/mcp_fetch_wrapper.ps1": (MCP_WRAPPER_CONTRACTS_TEST,),
+    "scripts/ai/mcp/support/uv_resolver.ps1": (MCP_WRAPPER_CONTRACTS_TEST,),
     "scripts/ai/mcp/support/run_owned_stdio.ps1": (
         NPM_RUNTIME_TEST,
         MCP_WRAPPER_CONTRACTS_TEST,

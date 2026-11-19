@@ -975,6 +975,18 @@ def test_shadow_compare_routes_molecule_eligibility_contract(path: str) -> None:
     assert selection["covers_full_suite"] is False
 
 
+def test_shadow_compare_routes_uv_resolver_to_wrapper_contracts() -> None:
+    repo_root = Path(__file__).resolve().parents[5]
+    selection = build_shadow_compare(
+        ["scripts/ai/mcp/support/uv_resolver.ps1"], repo_root=repo_root
+    )
+    assert (
+        "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py"
+        in selection["selected"]
+    )
+    assert selection["covers_full_suite"] is False
+
+
 def test_shadow_compare_routes_quality_move_governance_inputs() -> None:
     """Quality-move configs and documentation retain explicit governing tests."""
     repo_root = Path(__file__).resolve().parents[5]
