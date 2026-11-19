@@ -189,6 +189,11 @@ _E2E_VCR_CASSETTE_DIR_BY_TEST: dict[str, str] = {
 }
 
 _E2E_VCR_CASSETTE_NAME_OVERRIDES: dict[str, str] = {
+    # #13199: SCD2 rerun replays the same limit-5 batch; reuse the committed
+    # full-cycle cassette instead of recording network traffic.
+    "test_chembl_molecule_gold_scd2_idempotent": (
+        "test_chembl_molecule_full_cycle"
+    ),
     "TestChEMBLPipelineE2E.test_chembl_activity_full_run": (
         "test_chembl_activity_full_run"
     ),
