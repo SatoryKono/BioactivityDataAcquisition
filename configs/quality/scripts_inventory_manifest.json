@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-19T07:17:01.487215+00:00",
+  "generated_at": "2026-11-19T07:59:19.294648+00:00",
   "summary": {
     "total_scripts": 763,
     "status_counts": {
@@ -3621,7 +3621,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 65,
+          "line": 66,
           "source_group": "tests",
           "text": "ADR_ANALYSIS_PS1 = MCP_DIR / \"mcp_adr_analysis_wrapper.ps1\""
         },
@@ -3744,7 +3744,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 68,
+          "line": 69,
           "source_group": "tests",
           "text": "AST_GREP_SH = MCP_DIR / \"mcp_ast_grep_wrapper.sh\""
         },
@@ -3931,7 +3931,7 @@
       "references": [
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 61,
+          "line": 62,
           "source_group": "tests",
           "text": "CODE_INTERPRETER_PS1 = MCP_DIR / \"mcp_code_interpreter_wrapper.ps1\""
         }
@@ -3981,7 +3981,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 67,
+          "line": 68,
           "source_group": "tests",
           "text": "CONTEXT7_PS1 = MCP_DIR / \"mcp_context7_wrapper.ps1\""
         },
@@ -4036,7 +4036,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 66,
+          "line": 67,
           "source_group": "tests",
           "text": "CONTEXT7_SH = MCP_DIR / \"mcp_context7_wrapper.sh\""
         },
@@ -4250,13 +4250,13 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 59,
+          "line": 60,
           "source_group": "tests",
           "text": "FETCH_PS1 = MCP_DIR / \"mcp_fetch_wrapper.ps1\""
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 1229,
+          "line": 1259,
           "source_group": "tests",
           "text": "assert \"mcp_fetch_wrapper.ps1\" in bash_source"
         },
@@ -4305,7 +4305,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 58,
+          "line": 59,
           "source_group": "tests",
           "text": "FETCH_SH = MCP_DIR / \"mcp_fetch_wrapper.sh\""
         },
@@ -4746,7 +4746,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 64,
+          "line": 65,
           "source_group": "tests",
           "text": "MUTMUT_PS1 = MCP_DIR / \"mcp_mutmut_wrapper.ps1\""
         }
@@ -4777,7 +4777,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 63,
+          "line": 64,
           "source_group": "tests",
           "text": "MUTMUT_SH = MCP_DIR / \"mcp_mutmut_wrapper.sh\""
         }
@@ -4827,7 +4827,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 1388,
+          "line": 1418,
           "source_group": "tests",
           "text": "powershell_source = (MCP_DIR / \"mcp_neo4j_cypher_wrapper.ps1\").read_text("
         }
@@ -4870,7 +4870,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 62,
+          "line": 63,
           "source_group": "tests",
           "text": "NEO4J_CYPHER_SH = MCP_DIR / \"mcp_neo4j_cypher_wrapper.sh\""
         },
@@ -5480,7 +5480,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 1230,
+          "line": 1260,
           "source_group": "tests",
           "text": "assert \"exec_windows_ps1_wrapper.sh\" in bash_source"
         },
@@ -5899,7 +5899,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 1226,
+          "line": 1256,
           "source_group": "tests",
           "text": "owned_stdio = (MCP_DIR / \"support\" / \"run_owned_stdio.ps1\").read_text("
         },
@@ -6056,7 +6056,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 57,
+          "line": 58,
           "source_group": "tests",
           "text": "UV_RESOLVER_PS1 = MCP_DIR / \"support\" / \"uv_resolver.ps1\""
         },
@@ -6105,7 +6105,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 56,
+          "line": 57,
           "source_group": "tests",
           "text": "UV_RESOLVER_SH = MCP_DIR / \"support\" / \"uv_resolver.sh\""
         },

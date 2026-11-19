@@ -42,6 +42,7 @@ import time
 from collections.abc import Iterator
 from functools import lru_cache
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -411,7 +412,36 @@ def _collapse_windows_env(env: dict[str, str]) -> dict[str, str]:
             collapsed.pop(previous, None)
         last_name_by_key[key] = name
         collapsed[name] = value
+    profile_name = last_name_by_key.get("userprofile")
+    if os.name != "nt" and windows_powershell and profile_name:
+        # PowerShell initializes HOME before our command-level fixture setup.
+        # Pass the already-Windows profile unchanged through WSL interop.
+        entries = [
+            entry
+            for entry in collapsed.get("WSLENV", "").split(":")
+            if entry and entry.split("/")[0].casefold() != "userprofile"
+        ]
+        collapsed["WSLENV"] = ":".join([*entries, profile_name])
     return collapsed
+
+
+@pytest.mark.parametrize("wslenv", ["", "USERPROFILE/up:OTHER/p"])
+def test_wsl_powershell_transports_fixture_profile_before_startup(
+    monkeypatch: pytest.MonkeyPatch, wslenv: str
+) -> None:
+    module = sys.modules[__name__]
+    monkeypatch.setattr(module, "os", SimpleNamespace(name="posix"))
+    monkeypatch.setattr(module, "POWERSHELL", "/mnt/c/Windows/powershell.exe")
+    env = {"USERPROFILE": r"D:\fixture home", "WSLENV": wslenv}
+
+    result = _collapse_windows_env(env)
+
+    assert result["USERPROFILE"] == r"D:\fixture home"
+    assert "USERPROFILE" in result["WSLENV"].split(":")
+    assert "USERPROFILE/up" not in result["WSLENV"].split(":")
+    if "OTHER/p" in wslenv:
+        assert "OTHER/p" in result["WSLENV"].split(":")
+    assert env["WSLENV"] == wslenv
 
 
 def _powershell_cwd_prefix() -> str:
