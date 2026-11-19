@@ -86,6 +86,14 @@ def _managed_writer_command(argv: Sequence[str]) -> bool:
         args[index : index + 2] == ["workflow", "run"] for index in range(len(args) - 1)
     ):
         return True
+    if "run-all" in args:
+        return "--list-only" not in args and (
+            "--source=chembl" in args
+            or any(
+                args[index : index + 2] == ["--source", "chembl"]
+                for index in range(len(args) - 1)
+            )
+        )
     return "run" in args and (
         "chembl_target" in args or "--pipeline=chembl_target" in args
     )

@@ -56,6 +56,12 @@ ROOT = Path(__file__).resolve().parents[4]
         ["D:/repo/.venv/Scripts/bioetl.exe", "run", "--pipeline=chembl_target"],
         ["bioetl.exe", "workflow", "run", "chembl_baseline"],
         ["bioetl", "run", "chembl_target"],
+        ["bioetl", "run-all", "--source", "chembl"],
+        ["bioetl.exe", "run-all", "--source=chembl"],
+        ["python", "-m", "bioetl", "run-all", "--source", "chembl"],
+        ["python", "-m", "bioetl", "run-all", "--source=chembl"],
+        ["python", "-m", "bioetl.interfaces.cli", "run-all", "--source", "chembl"],
+        ["python", "-m", "bioetl.interfaces.cli", "run-all", "--source=chembl"],
         ["python", "D:/repo/reports/workflow-campaigns/runner.py"],
     ],
 )
@@ -81,6 +87,14 @@ def test_managed_writer_detection_recognizes_actual_argv(argv, monkeypatch):
         ["python", "unrelated.py", "bioetl.interfaces.cli", "run", "chembl_target"],
         ["python", "-m", "bioetl.interfaces.cli", "workflow", "run", "--help"],
         ["bioetl", "workflow", "list"],
+        ["bioetl", "run-all", "--source", "chembl", "--dry-run"],
+        ["bioetl", "run-all", "--source=chembl", "--list-only"],
+        ["bioetl", "run-all", "--source", "chembl", "--help"],
+        ["bioetl", "run-all", "--source=chembl", "-h"],
+        ["bioetl", "run-all", "--source", "pubchem"],
+        ["bioetl", "run-all", "--source=chembl_similar"],
+        ["bioetl", "run-all"],
+        ["python", "unrelated.py", "run-all", "--source", "chembl"],
     ],
 )
 def test_read_only_and_unrelated_commands_do_not_block_migration(argv):
