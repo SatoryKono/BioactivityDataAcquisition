@@ -42,6 +42,7 @@ import time
 from collections.abc import Iterator
 from functools import lru_cache
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -411,7 +412,36 @@ def _collapse_windows_env(env: dict[str, str]) -> dict[str, str]:
             collapsed.pop(previous, None)
         last_name_by_key[key] = name
         collapsed[name] = value
+    profile_name = last_name_by_key.get("userprofile")
+    if os.name != "nt" and windows_powershell and profile_name:
+        # PowerShell initializes HOME before our command-level fixture setup.
+        # Pass the already-Windows profile unchanged through WSL interop.
+        entries = [
+            entry
+            for entry in collapsed.get("WSLENV", "").split(":")
+            if entry and entry.split("/")[0].casefold() != "userprofile"
+        ]
+        collapsed["WSLENV"] = ":".join([*entries, profile_name])
     return collapsed
+
+
+@pytest.mark.parametrize("wslenv", ["", "USERPROFILE/up:OTHER/p"])
+def test_wsl_powershell_transports_fixture_profile_before_startup(
+    monkeypatch: pytest.MonkeyPatch, wslenv: str
+) -> None:
+    module = sys.modules[__name__]
+    monkeypatch.setattr(module, "os", SimpleNamespace(name="posix"))
+    monkeypatch.setattr(module, "POWERSHELL", "/mnt/c/Windows/powershell.exe")
+    env = {"USERPROFILE": r"D:\fixture home", "WSLENV": wslenv}
+
+    result = _collapse_windows_env(env)
+
+    assert result["USERPROFILE"] == r"D:\fixture home"
+    assert "USERPROFILE" in result["WSLENV"].split(":")
+    assert "USERPROFILE/up" not in result["WSLENV"].split(":")
+    if "OTHER/p" in wslenv:
+        assert "OTHER/p" in result["WSLENV"].split(":")
+    assert env["WSLENV"] == wslenv
 
 
 def _powershell_cwd_prefix() -> str:
@@ -932,7 +962,9 @@ printf '%s\n' "$NO_PROXY" "$no_proxy" "${{HTTP_PROXY-unset}}" \
             "function Test-Path { param($LiteralPath, $Path, $ErrorAction) "
             "$LiteralPath -eq 'C:\\fake\\uvx.exe' }\n"
             "function Resolve-Path { param($LiteralPath) "
-            "[pscustomobject]@{Path=$LiteralPath} }",
+            "[pscustomobject]@{"
+            "Path=('Microsoft.PowerShell.Core\\FileSystem::' + $LiteralPath); "
+            "ProviderPath=$LiteralPath} }",
             "C:\\fake\\uvx.exe",
         ),
         (
@@ -941,7 +973,9 @@ printf '%s\n' "$NO_PROXY" "$no_proxy" "${{HTTP_PROXY-unset}}" \
             "function Test-Path { param($LiteralPath, $Path, $ErrorAction) "
             "$LiteralPath -eq 'C:\\tools\\uvx.exe' }\n"
             "function Resolve-Path { param($LiteralPath) "
-            "[pscustomobject]@{Path=$LiteralPath} }",
+            "[pscustomobject]@{"
+            "Path=('Microsoft.PowerShell.Core\\FileSystem::' + $LiteralPath); "
+            "ProviderPath=$LiteralPath} }",
             "C:\\tools\\uvx.exe",
         ),
         (
@@ -949,7 +983,9 @@ printf '%s\n' "$NO_PROXY" "$no_proxy" "${{HTTP_PROXY-unset}}" \
             "function Test-Path { param($LiteralPath, $Path, $ErrorAction) "
             "$LiteralPath -like '*Python313*Scripts*uvx.exe' }\n"
             "function Resolve-Path { param($LiteralPath) "
-            "[pscustomobject]@{Path=$LiteralPath} }",
+            "[pscustomobject]@{"
+            "Path=('Microsoft.PowerShell.Core\\FileSystem::' + $LiteralPath); "
+            "ProviderPath=$LiteralPath} }",
             "Python313\\Scripts\\uvx.exe",
         ),
         (
@@ -957,7 +993,9 @@ printf '%s\n' "$NO_PROXY" "$no_proxy" "${{HTTP_PROXY-unset}}" \
             "function Test-Path { param($LiteralPath, $Path, $ErrorAction) "
             "$LiteralPath -like '*Python312*Scripts*uvx.exe' }\n"
             "function Resolve-Path { param($LiteralPath) "
-            "[pscustomobject]@{Path=$LiteralPath} }",
+            "[pscustomobject]@{"
+            "Path=('Microsoft.PowerShell.Core\\FileSystem::' + $LiteralPath); "
+            "ProviderPath=$LiteralPath} }",
             "Python312\\Scripts\\uvx.exe",
         ),
         (
@@ -965,7 +1003,9 @@ printf '%s\n' "$NO_PROXY" "$no_proxy" "${{HTTP_PROXY-unset}}" \
             "function Test-Path { param($LiteralPath, $Path, $ErrorAction) "
             "$LiteralPath -like '*Python311*Scripts*uvx.exe' }\n"
             "function Resolve-Path { param($LiteralPath) "
-            "[pscustomobject]@{Path=$LiteralPath} }",
+            "[pscustomobject]@{"
+            "Path=('Microsoft.PowerShell.Core\\FileSystem::' + $LiteralPath); "
+            "ProviderPath=$LiteralPath} }",
             "Python311\\Scripts\\uvx.exe",
         ),
         (
@@ -973,7 +1013,9 @@ printf '%s\n' "$NO_PROXY" "$no_proxy" "${{HTTP_PROXY-unset}}" \
             "function Test-Path { param($LiteralPath, $Path, $ErrorAction) "
             "$LiteralPath -like '*.local*bin*uvx.exe' }\n"
             "function Resolve-Path { param($LiteralPath) "
-            "[pscustomobject]@{Path=$LiteralPath} }",
+            "[pscustomobject]@{"
+            "Path=('Microsoft.PowerShell.Core\\FileSystem::' + $LiteralPath); "
+            "ProviderPath=$LiteralPath} }",
             ".local\\bin\\uvx.exe",
         ),
         (
@@ -981,7 +1023,9 @@ printf '%s\n' "$NO_PROXY" "$no_proxy" "${{HTTP_PROXY-unset}}" \
             "function Test-Path { param($LiteralPath, $Path, $ErrorAction) "
             "$LiteralPath -like '*.cargo*bin*uvx.exe' }\n"
             "function Resolve-Path { param($LiteralPath) "
-            "[pscustomobject]@{Path=$LiteralPath} }",
+            "[pscustomobject]@{"
+            "Path=('Microsoft.PowerShell.Core\\FileSystem::' + $LiteralPath); "
+            "ProviderPath=$LiteralPath} }",
             ".cargo\\bin\\uvx.exe",
         ),
     ],
@@ -1004,6 +1048,7 @@ def test_powershell_uv_resolver_candidate_paths(
 
     assert result.returncode == 0, result.stderr
     assert expected.lower() in result.stdout.strip().lower()
+    assert "::" not in result.stdout.strip()
 
 
 def test_uv_resolver_powershell_does_not_split_windows_path_on_colon() -> None:

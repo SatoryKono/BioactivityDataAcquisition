@@ -388,6 +388,13 @@ class AdapterTests(unittest.IsolatedAsyncioTestCase):
 
         backend.call_tool.side_effect = slow
         with (
+            patch.object(
+                asyncio,
+                "to_thread",
+                getattr(
+                    asyncio.to_thread, "_bioetl_original_to_thread", asyncio.to_thread
+                ),
+            ),
             patch.object(S.sys, "stdin", SimpleNamespace(buffer=Input())),
             patch.object(S.sys, "stdout", SimpleNamespace(buffer=Output())),
         ):
