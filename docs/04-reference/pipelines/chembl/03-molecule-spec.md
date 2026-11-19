@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-09-25'
+  Last verified: '2026-11-19'
 
 ______________________________________________________________________
 
@@ -29,6 +29,20 @@ ______________________________________________________________________
 | Silver Format         | `delta`           |
 | Gold Format           | `delta`           |
 | Gold Mode             | `scd2`            |
+
+## Gold eligibility
+
+Molecule Gold requires `molecule_id`, `molecule_type=Small molecule`,
+`structure_type=MOL`, and `inorganic_flag=0`. These filters use fields available
+in the Molecule Silver projection. `potential_duplicate` is absent from that
+projection and is not an eligibility condition; it is not synthesized as zero.
+
+Removing the unavailable condition restores business eligibility for matching
+records and can expand the Gold cohort. Strict Gold validation, DQ dispositions,
+primary keys, hash policy, extraction parameters and source-profile identity stay
+unchanged. The effective-config digest changes with the corrected filter.
+Previously excluded data requires reprocessing from preserved Bronze into a new
+isolated output root; changing configuration alone does not repair stored outputs.
 
 ## Notes
 
