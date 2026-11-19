@@ -4,12 +4,22 @@
 # minutes (Amp platform limit); a timeout publishes no snapshot.
 # Docs: https://ampcode.com/docs/orbs/customizing
 set -euo pipefail
+# The orb image presets core.hooksPath in the global git config, pointing
+# outside any repository. The repo's hook-installation guard rejects an
+# external hooks path ("external core.hooksPath requires host review"),
+# so drop the inherited value; git falls back to the default .git/hooks.
+# .agents/resume repeats this repair in case activation re-injects it.
+git config --global --unset-all core.hooksPath || true
 
 # Python 3.13 from .python-version, locked dependencies.
 uv sync --locked
 
 # Node dependencies for docs/tooling; package-lock.json is canonical.
 npm ci
+# Headless Chromium for the Playwright-based tooling tests (Grafana
+# screenshot runtime). The browser is a dependency of the test suite, so
+# it is installed into the snapshot here, never in .agents/resume.
+npx playwright install chromium
 
 # Keep the version selected for the Amp orb. Both immutable release
 # archives are pinned by their GitHub-published SHA-256, never releases/latest.
