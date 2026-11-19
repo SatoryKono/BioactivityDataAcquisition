@@ -265,6 +265,32 @@ class TestCompositeMoleculePipeline:
             non_null_count = joined.filter(pl.col(molecule_id_col).is_not_null()).height
             assert non_null_count == 2, "Expected 2 records with PubChem CID"
 
+    def test_fractional_seed_phase_survives_enricher_join(
+        self,
+        mock_logger: LoggerPort,
+        seed_molecule_df: pl.DataFrame,
+        enricher_pubchem_df: pl.DataFrame,
+    ) -> None:
+        """A synthetic 0.5 seed phase survives the production column renaming and join."""
+        seed = seed_molecule_df.with_columns(
+            pl.when(pl.col("molecule_id") == "CHEMBL25")
+            .then(0.5)
+            .otherwise(pl.col("max_phase"))
+            .alias("max_phase")
+        )
+        renamer = ColumnRenamer(mock_logger)
+        seed = renamer.rename_dataframe(seed, "chembl_molecule")
+        enricher = renamer.rename_dataframe(enricher_pubchem_df, "pubchem_compound")
+        joined = seed.join(
+            enricher,
+            left_on="chembl.molecule.inchi_key",
+            right_on="pubchem.compound.inchi_key",
+            how="left",
+        )
+        assert joined.height == seed.height == 3
+        fractional = joined.filter(pl.col("chembl.molecule.molecule_id") == "CHEMBL25")
+        assert fractional["chembl.molecule.max_phase"].to_list() == [0.5]
+
     def test_conflict_resolution_field_priorities(
         self,
         composite_molecule_config: CompositeConfig,
