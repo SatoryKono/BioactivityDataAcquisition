@@ -56,6 +56,33 @@ ROOT = Path(__file__).resolve().parents[4]
         ["D:/repo/.venv/Scripts/bioetl.exe", "run", "--pipeline=chembl_target"],
         ["bioetl.exe", "workflow", "run", "chembl_baseline"],
         ["bioetl", "run", "chembl_target"],
+        [
+            "bioetl",
+            "run",
+            "--pipeline",
+            "chembl_target",
+            "--debug-export-dir",
+            "--dry-run",
+        ],
+        ["bioetl", "run", "--pipeline=chembl_target", "--debug-export-dir", "--help"],
+        ["bioetl", "workflow", "run", "baseline", "--debug-export-dir", "-h"],
+        [
+            "bioetl",
+            "run-composite",
+            "--composite",
+            "target",
+            "--cached-bronze-path",
+            "--list-only",
+        ],
+        [
+            "bioetl",
+            "run-composite",
+            "--composite",
+            "target",
+            "--cached-bronze-path",
+            "--dry-run",
+        ],
+        ["bioetl", "workflow", "run", "--", "--help"],
         ["bioetl", "debug", "--pipeline", "chembl_target"],
         ["bioetl", "debug", "--pipeline=chembl_target"],
         ["python", "-m", "bioetl", "debug", "--pipeline", "chembl_target"],
@@ -112,6 +139,15 @@ def test_managed_writer_detection_recognizes_actual_argv(argv, monkeypatch):
         ["bioetl", "run-composite", "--composite", "target", "--dry-run"],
         ["bioetl", "run-composite", "--composite=target", "--help"],
         ["python", "unrelated.py", "debug", "--pipeline=chembl_target"],
+        [
+            "bioetl",
+            "run-composite",
+            "--composite",
+            "target",
+            "--cached-bronze-path",
+            "--list-only",
+            "--dry-run",
+        ],
         ["bioetl", "run-all", "--source", "chembl", "--dry-run"],
         ["bioetl", "run-all", "--source=chembl", "--list-only"],
         ["bioetl", "run-all", "--source", "chembl", "--help"],
@@ -126,6 +162,72 @@ def test_managed_writer_detection_recognizes_actual_argv(argv, monkeypatch):
 )
 def test_read_only_and_unrelated_commands_do_not_block_migration(argv):
     assert validation._managed_writer_command(argv) is False
+
+
+@pytest.mark.parametrize(
+    ("command_path", "arguments", "value_key", "value"),
+    [
+        (
+            ("run",),
+            ["--pipeline", "chembl_target", "--debug-export-dir", "--dry-run"],
+            "debug_export_dir",
+            "--dry-run",
+        ),
+        (
+            ("workflow", "run"),
+            ["baseline", "--debug-export-dir", "-h"],
+            "debug_export_dir",
+            "-h",
+        ),
+        (
+            ("run-composite",),
+            ["--composite", "target", "--cached-bronze-path", "--list-only"],
+            "cached_bronze_path",
+            "--list-only",
+        ),
+    ],
+)
+def test_writer_guard_respects_click_option_values(
+    command_path, arguments, value_key, value
+):
+    """Parse real maintained options without invoking callbacks or a runner."""
+    import click
+    from bioetl.interfaces.cli import cli
+
+    command = cli
+    for name in command_path:
+        command = command.get_command(click.Context(command), name)
+    options, _, _ = command.make_parser(click.Context(command)).parse_args(
+        list(arguments)
+    )
+    assert options[value_key] == value
+    assert not options.get("dry_run")
+    assert validation._managed_writer_command(["bioetl", *command_path, *arguments])
+
+
+def test_writer_guard_value_options_cover_maintained_cli():
+    """A new valued CLI option must not bypass writer admission as a flag."""
+    import click
+    from bioetl.interfaces.cli import cli
+
+    paths = [
+        ("run",),
+        ("debug",),
+        ("run-all",),
+        ("run-composite",),
+        ("workflow", "run"),
+    ]
+    for path in paths:
+        command = cli
+        for name in path:
+            command = command.get_command(click.Context(command), name)
+        value_options = {
+            option
+            for parameter in command.params
+            if isinstance(parameter, click.Option) and not parameter.is_flag
+            for option in parameter.opts
+        }
+        assert value_options <= validation._WRITER_VALUE_OPTIONS
 
 
 def _synthetic_profile(tmp_path: Path) -> LoadedIupharProfile:

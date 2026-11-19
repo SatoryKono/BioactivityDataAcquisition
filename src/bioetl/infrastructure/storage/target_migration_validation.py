@@ -76,16 +76,66 @@ def _bioetl_arguments(argv: Sequence[str]) -> list[str]:
     return []
 
 
+_WRITER_VALUE_OPTIONS = frozenset(
+    [
+        "--pipeline",
+        "--source",
+        "--composite",
+        "--run-type",
+        "--limit",
+        "--start-offset",
+        "--input-csv",
+        "--filter-column",
+        "--filter-field",
+        "--vacuum-retention-days",
+        "--resume-run-id",
+        "--resume-manifest-id",
+        "--debug-export-dir",
+        "--debug-export-format",
+        "--cached-bronze-path",
+        "--cached-bronze-date",
+        "--required-persistence-profile",
+        "--replay-of-run-id",
+        "--replay-of-manifest-id",
+        "--health-port",
+        "--observability-backend-port",
+        "--breakpoints",
+        "--mode",
+        "--seed-limit",
+        "--enrich-only",
+        "--force-enricher",
+        "--only-steps",
+        "--reconciliation-mode",
+        "--log-level",
+        "--execution-context",
+        "--force-steps",
+        "--repair-steps",
+    ]
+)
+
+
+def _writer_options(args: list[str]) -> list[str]:
+    """Keep option values from masquerading as read-only flags or commands."""
+    options, tokens = [], iter(args)
+    for token in tokens:
+        if token == "--":
+            break
+        if token in _WRITER_VALUE_OPTIONS:
+            token = f"{token}={next(tokens, '')}"
+        options.append(token)
+    return options
+
+
 def _managed_batch_writer(command: str, options: list[str]) -> bool:
     """Classify composite writers and last-source ChEMBL batches."""
-    if "--list-only" in options or command == "run-composite":
-        return "--list-only" not in options
+    if command == "run-composite":
+        return True
+    if "--list-only" in options:
+        return False
     for index in range(len(options) - 1, -1, -1):
         option = options[index]
         if option.startswith("--source="):
             return option == "--source=chembl"
-        if option == "--source":
-            return options[index + 1 : index + 2] == ["chembl"]
     return False
 
 
@@ -93,7 +143,7 @@ def _managed_writer_command(argv: Sequence[str]) -> bool:
     """Recognize maintained pipeline and orchestrator writer commands."""
     if any("workflow-campaigns" in arg.replace("\\", "/").split("/") for arg in argv):
         return True
-    args = _bioetl_arguments(argv)
+    args = _writer_options(_bioetl_arguments(argv))
     if any(flag in args for flag in ("--dry-run", "--help", "-h")):
         return False
     if any(
