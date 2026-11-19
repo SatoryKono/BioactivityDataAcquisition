@@ -51,7 +51,7 @@ _OMITTABLE_RUNTIME_COLUMNS = {
 
 
 def assert_no_managed_writers() -> None:
-    """Refuse promotion while known pipeline/workflow/campaign writers live."""
+    """Refuse migration while known pipeline or orchestrated writers live."""
     for process in psutil.process_iter(["pid", "name", "cmdline"]):
         if process.info["pid"] == os.getpid():
             continue
@@ -76,10 +76,10 @@ def _bioetl_arguments(argv: Sequence[str]) -> list[str]:
     return []
 
 
-def _chembl_batch_writer(options: list[str]) -> bool:
-    """Treat the last source option as authoritative, as Click does."""
-    if "--list-only" in options:
-        return False
+def _managed_batch_writer(command: str, options: list[str]) -> bool:
+    """Classify composite writers and last-source ChEMBL batches."""
+    if "--list-only" in options or command == "run-composite":
+        return "--list-only" not in options
     for index in range(len(options) - 1, -1, -1):
         option = options[index]
         if option.startswith("--source="):
@@ -90,7 +90,7 @@ def _chembl_batch_writer(options: list[str]) -> bool:
 
 
 def _managed_writer_command(argv: Sequence[str]) -> bool:
-    """Recognize executable and python-module calls by argument boundary."""
+    """Recognize maintained pipeline and orchestrator writer commands."""
     if any("workflow-campaigns" in arg.replace("\\", "/").split("/") for arg in argv):
         return True
     args = _bioetl_arguments(argv)
@@ -100,9 +100,9 @@ def _managed_writer_command(argv: Sequence[str]) -> bool:
         args[index : index + 2] == ["workflow", "run"] for index in range(len(args) - 1)
     ):
         return True
-    if args[:1] == ["run-all"]:
-        return _chembl_batch_writer(args[1:])
-    return "run" in args and (
+    if args[:1] in (["run-all"], ["run-composite"]):
+        return _managed_batch_writer(args[0], args[1:])
+    return bool({"run", "debug"}.intersection(args)) and (
         "chembl_target" in args or "--pipeline=chembl_target" in args
     )
 
