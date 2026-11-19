@@ -1948,7 +1948,7 @@
       "symbol": "apply_silver_filter",
       "path": "src/bioetl/application/core/pre_silver_record.py",
       "occurrence_count": 1,
-      "first_line": 78,
+      "first_line": 80,
       "role": "Runtime Silver filter application callsite",
       "migration_relevance": "Any new runtime application gate must remain structural-only or be inventoried.",
       "notes": ""
