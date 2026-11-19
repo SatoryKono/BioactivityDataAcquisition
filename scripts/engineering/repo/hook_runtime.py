@@ -181,6 +181,8 @@ def _invoke_guard(entry: Any, args: list[str]) -> Any:
     try:
         return entry(args)
     except SystemExit as error:
+        # Controlled ERROR: an exited guard supplied no validated phase result.
+        # Keep the abort contract pinned by test_owned_guard_execution.py.
         raise RuntimeError("guard exited instead of returning a result") from error
 
 
