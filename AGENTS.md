@@ -277,10 +277,12 @@ does not relax the env guardrail or the full-tree commit gate.
   NOT be created or modified in an orb. This surface does not relax the env
   guardrail above.
 - MCP in orbs is limited to the `amp.mcpServers` set in `.amp/settings.json`
-  (memory, github — with the repository wrapper's exclude-tools list
-  and lockdown mode). The fetch server is excluded: its repository wrapper
-  is bound to the registered Windows host and cannot start in a Linux orb;
-  revisit if a Linux launcher appears. Memory in orbs runs with
+  (memory, fetch, github — with the repository wrapper's exclude-tools list
+  and lockdown mode). Fetch uses the separate Linux public-fetch-v1 launcher
+  with hash-locked dependencies, public DNS and connected-peer checks,
+  bounded redirects, no proxies or credentials, and fixed size/deadline limits.
+  The registered Windows Fetch owner keeps its independent launcher.
+  Memory in orbs runs with
   `BIOETL_AI_MEMORY_MODE=read-write` (owner decision, 2026-11-19); other
   surfaces keep their own memory-mode policy. Skills resolve from `.codex/skills/**` via
   `amp.skills.path`; do not copy skills into an Amp-specific tree.

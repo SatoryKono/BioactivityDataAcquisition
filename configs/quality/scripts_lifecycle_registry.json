@@ -463,6 +463,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-10-15"
     },
+    "scripts/ai/mcp/public_fetch_wrapper.sh": {
+      "decision": "mcp_compatibility_wrapper",
+      "next_step": "Retain as the Linux-only Amp public Fetch launcher from .amp/settings.json; keep the registered Windows owner independent. Recheck fixed public-egress limits and the isolated hash-locked runtime when the Fetch package changes.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-18"
+    },
     "scripts/ai/mcp/safe_file.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the Windows handle-based bounded-read library shared by the Markdownify owner and its filesystem regression controls; no standalone command.",
@@ -478,6 +484,12 @@
     "scripts/ai/mcp/session_client.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the private stdio session selector installed by setup_mcp.py; it inherits cwd and has no administrative root override or independent public CLI.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-18"
+    },
+    "scripts/ai/mcp/setup_public_fetch.sh": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the isolated hash-locked installer invoked by the Amp setup hook and Linux qualification job; do not add its SDK dependencies to the BioETL environment.",
       "owner": "@bioetl-platform",
       "review_by": "2026-12-18"
     },
@@ -516,6 +528,24 @@
       "next_step": "Retain as the internal host route launcher for the Context7 and Brave wrappers.",
       "owner": "@bioetl-platform",
       "review_by": "2027-01-31"
+    },
+    "scripts/ai/mcp/support/public_fetch_runtime.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the package-closure verifier and owning profile reporter for the isolated Linux Fetch launcher; emit originals, accept only individually reviewed platform profiles, and refuse unqualified code before imports.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-18"
+    },
+    "scripts/ai/mcp/support/public_fetch_stdio.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the bounded stdio backend of public_fetch_wrapper.sh; one active operation, four pending requests and fixed input/output/queue/call limits are tested by the isolated qualification.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-18"
+    },
+    "scripts/ai/mcp/support/public_fetch_transport.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the reviewed public-only transport used by public_fetch_stdio.py; preserve literal-address connection, TLS hostname, actual-peer checks, proxy refusal, redirect checks, size and deadline limits.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-18"
     },
     "scripts/ai/mcp/support/run_owned_stdio.ps1": {
       "decision": "shared_helper_module",
@@ -2187,7 +2217,7 @@
     },
     "scripts/ops/observability/grafana/apply_phase4_reflow.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain the tested Phase 4.2\u20134.3 dashboard edit implementation behind python -m scripts.ops apply-grafana-phase4-reflow; keep direct module invocation as a compatibility surface.",
+      "next_step": "Retain the tested Phase 4.2–4.3 dashboard edit implementation behind python -m scripts.ops apply-grafana-phase4-reflow; keep direct module invocation as a compatibility surface.",
       "owner": "@bioetl-platform",
       "review_by": "2027-01-31"
     },

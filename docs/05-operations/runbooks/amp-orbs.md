@@ -38,7 +38,7 @@ project owner's approval for the secret names and the workspace MCP servers.
 | --- | --- | --- |
 | Default orb size | `a1.large` (8 CPU / 16 GB, 60 GB disk) | Project Settings → Orb |
 | Ship Behavior | Custom Ship (canonical text below) | Settings → Overview |
-| MCP servers | memory, github (from `.amp/settings.json`); fetch excluded — its wrapper requires the registered Windows host (see Known limits) | Repo file + owner approval in orb |
+| MCP servers | memory, fetch, github (from `.amp/settings.json`); Fetch uses the separate Linux public-fetch-v1 runtime | Repo file + owner approval in orb |
 | Skills path | `.codex/skills` (`amp.skills.path`) | `.amp/settings.json` |
 | Secrets level | Project (never personal for setup) | Project → Secrets & Env Vars |
 | GitHub integration | Connected, thread subscribed to CI/PR comments | Settings → Integrations & MCP |
@@ -59,6 +59,17 @@ table is a defect: fix the UI to match, or update this runbook and
   checksum-verified) into `$HOME/tools/bin` — a candidate path of
   `github-mcp-wrapper.sh`; without it the GitHub MCP cannot start in a
   fresh orb. Read-only mode needs no digest approval.
+- Installs Fetch with `scripts/ai/mcp/setup_public_fetch.sh` into a separate
+  Python 3.13 environment under `$HOME/.local/share/bioetl/public-fetch-v1/`.
+  The directory is keyed by the requirements lock SHA-256. All packages are
+  version-pinned and wheel hashes are required; BioETL's own environment and
+  dependency lock are unchanged. Resume never installs this environment.
+- Before loading packages, Fetch verifies the complete installed package
+  closure against reviewed platform profiles in
+  `scripts/ai/mcp/support/public-fetch-runtime-profiles.json`. It starts with
+  `-I -S -B`, never processes `.pth` files, and uses a fresh unused bytecode
+  cache prefix. Missing profiles, changed package code/data/native binaries,
+  linked package paths and changed locks fail closed; startup never learns pins.
 - No `gh` commands: GitHub is not authenticated while setup runs.
 - No Docker/Redis/monitoring startup (ADR-010, local-only deployment;
   the Docker daemon in an orb stays stopped).
@@ -122,9 +133,29 @@ Project-level secrets hold the wide key set from the `.env` inventory
   orb requests. Record such rejections here instead of retrying blindly.
 - MCP servers from `.amp/settings.json` require explicit approval in the
   orb (Always Allow is set by the owner once per server).
-- The registered Fetch wrapper requires a Windows owner. Fetch on an
-  Amp-hosted Linux orb needs an approved Linux transport before it can
-  be counted as executed.
+- Fetch on Linux uses `public_fetch_wrapper.sh`, independently of the
+  registered Windows owner. The launcher removes unrelated credentials,
+  proxy and Python import settings. Its public-fetch-v1 policy permits only
+  HTTP/HTTPS on ports 80/443, requires every DNS address to be public, connects
+  to validated numeric addresses and checks the actual peer. Repeated socket
+  records share a limit of 32 unique destinations; all records must be public.
+  Redirects are
+  checked on every hop (maximum eight); proxy use and credentialed URLs are
+  refused. IPv6 site-local destinations are denied, matching the reviewed
+  Windows overlay.
+- Fetch keeps the reviewed limits: response body at most 2 MiB, body reading
+  at most 15 seconds, HTTP request at most 35 seconds, outer call at most
+  38 seconds, queue wait at most four seconds, one active backend operation,
+  four pending requests, input at most 64 KiB and output frame at most 1 MiB.
+  Each SDK operation runs in a private process. Cancellation, deadline and EOF
+  terminate and reap that process before releasing the serial backend quota,
+  including any HTML-extraction threads. Readability.js is disabled; the
+  official package's pure Python extractor and robots policy remain in use.
+- `verify-public-fetch-linux` in Skills Consistency installs the hash-locked
+  environment and runs isolated transport/SDK/stdio probes against controlled
+  fixtures, without live destinations. This qualifies the Linux adapter on
+  the checked SHA; actual orb setup, owner approval and execution remain
+  separate passport entries in #13216. Rebuild the snapshot before trial.
 - Memory in orbs is `read-write`: `BIOETL_AI_MEMORY_MODE=read-write` is
   set for the memory server in `.amp/settings.json` (owner decision,
   2026-11-19). The wrapper scopes persistence per branch/worktree;
@@ -136,6 +167,33 @@ Project-level secrets hold the wide key set from the `.env` inventory
   `.codex/skills` skill that silently loses to a built-in Amp skill is a
   passport defect, not a reason to copy skills into an Amp tree.
 
+### Fetch source and dependency provenance
+
+The Linux adapter ports the reviewed pc-agent public-fetch-v1 transport;
+its original SHA-256 is recorded in the module. It imports the unmodified
+[official Fetch 2026.11.4 package](https://pypi.org/project/mcp-server-fetch/2026.11.4/)
+and adds the same IPv6 site-local rejection as the reviewed Windows overlay.
+The pinned package provides the catalogue, argument schema, robots handling
+and extraction. The catalogue fixture preserves the upstream MIT attribution
+in `tests/fixtures/mcp/FETCH_LICENSE`.
+
+Dependency upgrades require a separate review and repeat qualification.
+Regenerate the isolated lock from its reviewed input, preserving fixed versions:
+
+```bash
+uv pip compile scripts/ai/mcp/support/public-fetch-requirements.in \
+  --python-version 3.13 --universal --generate-hashes --only-binary :all: \
+  --output-file scripts/ai/mcp/support/public-fetch-requirements.txt
+```
+
+The profile reporter emits original per-file hashes without importing the
+packages. Preserve its `--emit-profile` output and the matching GitHub job,
+head SHA, lock hash and installation logs. Accept a platform profile with
+`python -I -S -B scripts/ai/mcp/support/public_fetch_runtime.py --accept-profile <verified-original.json>` only
+after that review, then require fresh isolated probes on the published SHA.
+An unknown orb package closure stays unqualified until its original is
+individually reviewed; a successful install alone is insufficient.
+
 ## Verification
 
 Acceptance evidence lives in issue #13216 as a passport table
@@ -143,6 +201,11 @@ Acceptance evidence lives in issue #13216 as a passport table
 states are UNKNOWN; a failed or skipped check never counts as PASS.
 
 ## Rollback
+
+To roll back Linux Fetch alone, revert its PR through the normal GitHub
+process and rebuild the orb snapshot. Preserve the Windows owner and the
+original qualification artifacts. For full Amp removal, first revert the
+Linux Fetch port if present, then apply the steps below.
 
 1. Repository (one PR): remove the `AGENTS.md` / `.junie/guidelines.md`
    Amp sections, `.amp/settings.json`, `.agents/setup`, `.agents/resume`,
