@@ -101,6 +101,7 @@ _EXPECTED_CHEMBL_CONTRACT_SURFACE: dict[str, dict[str, str]] = {
     "chembl.target": {
         "source_path": "../../src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py",
         "artifact": "../../docs/04-reference/contracts/gold/chembl_target_v3.0.json",
+        "enrich_artifact": "../../docs/04-reference/contracts/gold/chembl_target_v3.1.json",
         "contract_version": "3.0.0",
         "normalization_profile_hash": "a503ff9fc90e001939c9bcd01c8da12ede2d6edad2759e23e33a69cae675534c",
     },
@@ -185,7 +186,10 @@ def test_chembl_contract_registry_covers_all_shipped_gold_surfaces() -> None:
     for contract_ref, expected in _EXPECTED_CHEMBL_CONTRACT_SURFACE.items():
         entry = chembl_entries[contract_ref]
         assert entry.source_path == expected["source_path"]
-        assert entry.published_artifacts == [expected["artifact"]]
+        artifacts = [expected["artifact"]]
+        if "enrich_artifact" in expected:
+            artifacts.append(expected["enrich_artifact"])
+        assert entry.published_artifacts == artifacts
         assert entry.identity.contract_version == expected["contract_version"]
         assert entry.identity.dq_policy_ref == "chembl.dq.v1"
         assert entry.identity.rule_bundle_version == "dq-rules.v1.0"

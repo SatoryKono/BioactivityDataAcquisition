@@ -76,14 +76,20 @@ def test_config_extra_forbid_inventory_counts_match_effective_policy() -> None:
     live = build_payload()
     counts = payload["counts"]
     assert counts == live["counts"]
-    assert counts["basemodel_total"] == 105
+    # The IUPHAR opt-in config adds one strict model to the 105-model RF-002 census.
+    expected_total = 106
+    target_config = next(
+        row for row in live["models"] if row["name"] == "TargetClassificationYamlConfig"
+    )
+    assert target_config["effective_extra"] == "forbid"
+    assert counts["basemodel_total"] == expected_total
     # RF-002: all previous effective-ignore identities migrated to forbid.
     assert counts["local_ignore"] == 0
     assert counts["among_none_inherited_ignore"] == 0
     assert counts["among_none_default_ignore"] == 0
     assert counts["effective_ignore"] == 0
-    assert counts["effective_forbid"] == 105
-    assert counts["local_forbid"] + counts["local_none"] == 105
+    assert counts["effective_forbid"] == expected_total
+    assert counts["local_forbid"] + counts["local_none"] == expected_total
     assert counts["among_none_inherited_forbid"] == counts["local_none"]
     # Provenance: RF-001 baseline SHA + forbid-new ceiling remain pinned.
     assert payload["baseline_sha"] == BASELINE_SHA

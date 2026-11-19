@@ -31,6 +31,7 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -100,6 +101,8 @@ def test_read_delta_records_uses_dataset_scanner_off_windows(
 def test_read_delta_records_uses_active_parquet_files_when_scanner_disabled(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    import pyarrow as pa
+
     monkeypatch.setattr(
         table_ops,
         "_can_use_pyarrow_dataset_scanner",
@@ -108,10 +111,20 @@ def test_read_delta_records_uses_active_parquet_files_when_scanner_disabled(
     rows = [{"entity_id": "row-1"}]
     observed: dict[str, object] = {}
 
+    class _FakeDeltaSchema:
+        def to_pyarrow(self) -> pa.Schema:
+            return pa.schema([("entity_id", pa.string())])
+
     class _FakeTable:
         def file_uris(self) -> list[str]:
             observed["file_uris"] = True
             return ["file:///C:/tmp/part-0.parquet"]
+
+        def metadata(self):
+            return SimpleNamespace(partition_columns=[])
+
+        def schema(self) -> _FakeDeltaSchema:
+            return _FakeDeltaSchema()
 
         def to_pyarrow_dataset(self) -> _FakeDataset:
             raise AssertionError("Windows path must not import dataset scanner")
@@ -123,26 +136,193 @@ def test_read_delta_records_uses_active_parquet_files_when_scanner_disabled(
                 f"native full-table scan must not be used: columns={columns}"
             )
 
+    def _fake_read_schema(path: object) -> pa.Schema:
+        observed["read_schema_path"] = path
+        return pa.schema([("entity_id", pa.string())])
+
     def _fake_read_table(
         path: object,
         columns: list[str] | None = None,
         *,
         use_threads: bool = True,
-    ) -> _FakeArrowTable:
+    ) -> pa.Table:
         observed["path"] = path
         observed["columns"] = columns
         observed["use_threads"] = use_threads
-        return _FakeArrowTable(rows)
+        return pa.table({"entity_id": ["row-1"]})
 
+    monkeypatch.setattr(table_ops.pq, "read_schema", _fake_read_schema)
     monkeypatch.setattr(table_ops.pq, "read_table", _fake_read_table)
 
     assert table_ops.read_delta_records(_FakeTable(), columns=["entity_id"]) == rows
     assert observed == {
         "file_uris": True,
+        "read_schema_path": "C:/tmp/part-0.parquet",
         "path": "C:/tmp/part-0.parquet",
         "columns": ["entity_id"],
         "use_threads": False,
     }
+
+
+@pytest.mark.parametrize(
+    "columns", [None, [], ["target_type"], ["entity_id", "taxonomy_id"]]
+)
+def test_windows_read_restores_typed_partition_values(tmp_path, monkeypatch, columns):
+    import pyarrow as pa
+    from deltalake import DeltaTable, write_deltalake
+
+    path = tmp_path / "partitioned"
+    rows = [
+        {"entity_id": "a", "target_type": "SINGLE PROTEIN", "taxonomy_id": 9606},
+        {"entity_id": "b", "target_type": None, "taxonomy_id": None},
+    ]
+    write_deltalake(
+        str(path),
+        pa.Table.from_pylist(rows),
+        partition_by=["target_type", "taxonomy_id"],
+    )
+    monkeypatch.setattr(table_ops, "_can_use_pyarrow_dataset_scanner", lambda: False)
+    actual = table_ops.read_delta_records(DeltaTable(str(path)), columns=columns)
+    expected = [
+        {k: v for k, v in row.items() if columns is None or k in columns}
+        for row in rows
+    ]
+    assert sorted(actual, key=str) == sorted(expected, key=str)
+
+
+def test_windows_read_fills_schema_evolved_columns_as_typed_nulls(
+    tmp_path, monkeypatch
+):
+    """Older active Parquet files must tolerate Delta schema merge columns."""
+    import pyarrow as pa
+    from deltalake import DeltaTable, write_deltalake
+
+    path = tmp_path / "partitioned-evolved"
+    write_deltalake(
+        str(path),
+        pa.Table.from_pylist(
+            [{"entity_id": "a", "target_type": "SINGLE PROTEIN", "taxonomy_id": 9606}]
+        ),
+        partition_by=["target_type"],
+    )
+    write_deltalake(
+        str(path),
+        pa.Table.from_pylist(
+            [
+                {
+                    "entity_id": "b",
+                    "target_type": "SINGLE PROTEIN",
+                    "taxonomy_id": 9606,
+                    "added": "new",
+                }
+            ]
+        ),
+        mode="append",
+        schema_mode="merge",
+        partition_by=["target_type"],
+    )
+    monkeypatch.setattr(table_ops, "_can_use_pyarrow_dataset_scanner", lambda: False)
+    actual = table_ops.read_delta_records(DeltaTable(str(path)))
+    by_id = {row["entity_id"]: row for row in actual}
+    assert by_id["a"]["added"] is None
+    assert by_id["b"]["added"] == "new"
+    assert by_id["a"]["target_type"] == "SINGLE PROTEIN"
+    assert by_id["b"]["taxonomy_id"] == 9606
+
+    projected = table_ops.read_delta_records(DeltaTable(str(path)), columns=["added"])
+    assert sorted(projected, key=lambda row: row["added"] is not None) == [
+        {"added": None},
+        {"added": "new"},
+    ]
+
+
+@pytest.mark.parametrize("columns", [["target_type"], ["added"]])
+@pytest.mark.parametrize("damage", ["missing", "corrupt"])
+def test_windows_projection_rejects_unreadable_active_parquet(
+    tmp_path, monkeypatch, columns, damage
+):
+    """A metadata failure must not silently turn a nonempty Delta file into zero rows."""
+    import pyarrow as pa
+    from deltalake import DeltaTable, write_deltalake
+
+    path = tmp_path / "unreadable-active-file"
+    write_deltalake(
+        str(path),
+        pa.table({"entity_id": ["a", "b"], "target_type": ["protein", "protein"]}),
+        partition_by=["target_type"],
+    )
+    write_deltalake(
+        str(path),
+        pa.table({"entity_id": ["c"], "target_type": ["protein"], "added": ["new"]}),
+        mode="append",
+        schema_mode="merge",
+        partition_by=["target_type"],
+    )
+    table = DeltaTable(str(path))
+    for uri in table.file_uris():
+        file = Path(table_ops.resolve_parquet_file_uri(uri))
+        if "added" not in table_ops.pq.read_schema(file).names:
+            if damage == "missing":
+                file.unlink()
+            else:
+                file.write_bytes(b"invalid parquet")
+    monkeypatch.setattr(table_ops, "_can_use_pyarrow_dataset_scanner", lambda: False)
+    with pytest.raises((OSError, pa.ArrowInvalid)):
+        table_ops.read_delta_records(table, columns=columns)
+
+
+def test_parquet_row_count_does_not_hide_metadata_read_errors(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def unavailable_metadata(path: str) -> None:
+        raise OSError("unreadable active Parquet footer")
+
+    monkeypatch.setattr(table_ops.pq, "read_metadata", unavailable_metadata)
+
+    with pytest.raises(OSError, match="unreadable active Parquet footer"):
+        table_ops._read_physical_parquet("active.parquet", [], frozenset())
+
+
+def test_schema_alignment_rejects_unknown_projected_columns() -> None:
+    import pyarrow as pa
+
+    with pytest.raises(KeyError, match="missing"):
+        table_ops._align_table_to_schema(
+            pa.table({"entity_id": ["row-1"]}),
+            pa.schema([("entity_id", pa.string())]),
+            ["entity_id", "missing"],
+        )
+
+
+def test_empty_projection_preserves_row_count() -> None:
+    import pyarrow as pa
+
+    empty = table_ops._empty_row_table(3)
+    aligned = table_ops._align_table_to_schema(empty, pa.schema([]), [])
+    assert aligned is empty
+    assert aligned.num_rows == 3
+    assert aligned.column_names == []
+
+
+def test_partition_restoration_keeps_an_existing_typed_column(tmp_path) -> None:
+    import pyarrow as pa
+
+    original = pa.table({"region": ["west"]})
+    info = table_ops._PartitionInfo(
+        tmp_path.resolve(),
+        ["region"],
+        original.schema,
+        {"active.parquet": {"region": "west"}},
+    )
+    result = table_ops._append_partition_columns(
+        original,
+        path=str(tmp_path / "active.parquet"),
+        partition_info=info,
+        columns=None,
+        schema=original.schema,
+    )
+    assert result is original
+    assert result.to_pylist() == [{"region": "west"}]
 
 
 def test_resolve_parquet_file_uri_strips_windows_file_uri_prefix() -> None:

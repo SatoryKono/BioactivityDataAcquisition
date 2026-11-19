@@ -93,7 +93,12 @@ def test_rf003_migration_debt_remains_exact_empty_set() -> None:
     assert debt == live["migration_debt_identities"]
     assert debt == sorted(debt)
     assert payload["counts"]["effective_ignore"] == 0
-    assert payload["counts"]["effective_forbid"] == 105
+    # One additional strict IUPHAR model leaves the permissive-debt ceiling intact.
+    target_config = next(
+        row for row in live["models"] if row["name"] == "TargetClassificationYamlConfig"
+    )
+    assert target_config["effective_extra"] == "forbid"
+    assert payload["counts"]["effective_forbid"] == 106
     assert payload["rf002_debt_cleared_sha"] == RF002_DEBT_CLEARED_SHA
     assert payload["baseline_sha"] == BASELINE_SHA
     assert payload["rf003_issue"] == RF003_ISSUE_ID

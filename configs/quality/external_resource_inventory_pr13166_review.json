@@ -1,0 +1,1741 @@
+{
+  "catalog_ref": "fbfce9a8ea2ee48ae8de9c447e9b7f90e9deac45",
+  "line_updates": {
+    "src/bioetl/infrastructure/storage/delta/table_ops.py": {
+      "98": 152
+    }
+  },
+  "new_resources": [
+    {
+      "call_path": [
+        "bioetl.composition.bootstrap.cli.config -> _entity_document -> path.read_bytes"
+      ],
+      "cleanup_selectors": [],
+      "closer": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
+      "configuration_predicates": [],
+      "creator": [
+        "_entity_document"
+      ],
+      "identity": "iuphar.bioetl.composition.bootstrap.cli.config.file",
+      "lifetime": "owner/operation",
+      "owner": "bioetl.composition.bootstrap.cli.config owns these file acquisitions for opt-in IUPHAR target classification",
+      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
+      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+      "scenarios": {
+        "cancellation": {
+          "applicability": "owning async boundary; these primitives are synchronous",
+          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
+          "observation": "Cancel the owner around the call and observe remaining handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
+          "expected": "Preserve the original failure and release any handle this function already acquired.",
+          "observation": "Inject after allocation and during close; inspect retained handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "normal": {
+          "applicability": "applicable",
+          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
+          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "outer caller attempt; the primitive has no internal retry",
+          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
+          "observation": "Compare opened and closed identities per attempt.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "no intrinsic timeout on the synchronous primitive",
+          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
+          "observation": "Observe the outer deadline and whether the call returned.",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "shutdown_by_site": {},
+      "shutdown_contract": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
+      "site_selectors": [
+        {
+          "call": "path.read_bytes",
+          "expression": "path.read_bytes()",
+          "file": "src/bioetl/composition/bootstrap/cli/config.py",
+          "scope": "_entity_document"
+        }
+      ],
+      "type": "file"
+    },
+    {
+      "call_path": [
+        "bioetl.composition.bootstrap.cli.lineage -> prepare_target_fk_repair -> configuration_path.write_bytes",
+        "bioetl.composition.bootstrap.cli.lineage -> _execute_isolated_recovery -> configuration_path.read_bytes"
+      ],
+      "cleanup_selectors": [],
+      "closer": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
+      "configuration_predicates": [],
+      "creator": [
+        "_execute_isolated_recovery",
+        "prepare_target_fk_repair"
+      ],
+      "identity": "iuphar.bioetl.composition.bootstrap.cli.lineage.file",
+      "lifetime": "owner/operation",
+      "owner": "bioetl.composition.bootstrap.cli.lineage owns these file acquisitions for opt-in IUPHAR target classification",
+      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
+      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+      "scenarios": {
+        "cancellation": {
+          "applicability": "owning async boundary; these primitives are synchronous",
+          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
+          "observation": "Cancel the owner around the call and observe remaining handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
+          "expected": "Preserve the original failure and release any handle this function already acquired.",
+          "observation": "Inject after allocation and during close; inspect retained handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "normal": {
+          "applicability": "applicable",
+          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
+          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "outer caller attempt; the primitive has no internal retry",
+          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
+          "observation": "Compare opened and closed identities per attempt.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "no intrinsic timeout on the synchronous primitive",
+          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
+          "observation": "Observe the outer deadline and whether the call returned.",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "shutdown_by_site": {},
+      "shutdown_contract": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
+      "site_selectors": [
+        {
+          "call": "configuration_path.write_bytes",
+          "expression": "configuration_path.write_bytes(configuration_bytes + b'\\n')",
+          "file": "src/bioetl/composition/bootstrap/cli/lineage.py",
+          "scope": "prepare_target_fk_repair"
+        },
+        {
+          "call": "configuration_path.read_bytes",
+          "expression": "configuration_path.read_bytes()",
+          "file": "src/bioetl/composition/bootstrap/cli/lineage.py",
+          "scope": "_execute_isolated_recovery"
+        }
+      ],
+      "type": "file"
+    },
+    {
+      "call_path": [
+        "bioetl.infrastructure.adapters.iuphar._manifest -> checked_bytes -> root.joinpath(*relative.parts).read_bytes"
+      ],
+      "cleanup_selectors": [],
+      "closer": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
+      "configuration_predicates": [],
+      "creator": [
+        "checked_bytes"
+      ],
+      "identity": "iuphar.bioetl.infrastructure.adapters.iuphar._manifest.file",
+      "lifetime": "owner/operation",
+      "owner": "bioetl.infrastructure.adapters.iuphar._manifest owns these file acquisitions for opt-in IUPHAR target classification",
+      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
+      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+      "scenarios": {
+        "cancellation": {
+          "applicability": "owning async boundary; these primitives are synchronous",
+          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
+          "observation": "Cancel the owner around the call and observe remaining handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
+          "expected": "Preserve the original failure and release any handle this function already acquired.",
+          "observation": "Inject after allocation and during close; inspect retained handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "normal": {
+          "applicability": "applicable",
+          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
+          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "outer caller attempt; the primitive has no internal retry",
+          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
+          "observation": "Compare opened and closed identities per attempt.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "no intrinsic timeout on the synchronous primitive",
+          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
+          "observation": "Observe the outer deadline and whether the call returned.",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "shutdown_by_site": {},
+      "shutdown_contract": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
+      "site_selectors": [
+        {
+          "call": "root.joinpath(*relative.parts).read_bytes",
+          "expression": "root.joinpath(*relative.parts).read_bytes()",
+          "file": "src/bioetl/infrastructure/adapters/iuphar/_manifest.py",
+          "scope": "checked_bytes"
+        }
+      ],
+      "type": "file"
+    },
+    {
+      "call_path": [
+        "bioetl.infrastructure.adapters.iuphar.cohort_projection -> export_canonical_cohort -> request.source_path.read_bytes",
+        "bioetl.infrastructure.adapters.iuphar.cohort_projection -> _publish_rejection -> (output / 'raw-source.bin').write_bytes",
+        "bioetl.infrastructure.adapters.iuphar.cohort_projection -> _publish_rejection -> (output / 'conversion-ledger.json').write_bytes",
+        "bioetl.infrastructure.adapters.iuphar.cohort_projection -> _publish_bundle -> path.open",
+        "bioetl.infrastructure.adapters.iuphar.cohort_projection -> _publish_bundle -> path.read_bytes"
+      ],
+      "cleanup_selectors": [],
+      "closer": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
+      "configuration_predicates": [],
+      "creator": [
+        "_publish_bundle",
+        "_publish_rejection",
+        "export_canonical_cohort"
+      ],
+      "identity": "iuphar.bioetl.infrastructure.adapters.iuphar.cohort_projection.file",
+      "lifetime": "owner/operation",
+      "owner": "bioetl.infrastructure.adapters.iuphar.cohort_projection owns these file acquisitions for opt-in IUPHAR target classification",
+      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
+      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+      "scenarios": {
+        "cancellation": {
+          "applicability": "owning async boundary; these primitives are synchronous",
+          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
+          "observation": "Cancel the owner around the call and observe remaining handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
+          "expected": "Preserve the original failure and release any handle this function already acquired.",
+          "observation": "Inject after allocation and during close; inspect retained handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "normal": {
+          "applicability": "applicable",
+          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
+          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "outer caller attempt; the primitive has no internal retry",
+          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
+          "observation": "Compare opened and closed identities per attempt.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "no intrinsic timeout on the synchronous primitive",
+          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
+          "observation": "Observe the outer deadline and whether the call returned.",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "shutdown_by_site": {},
+      "shutdown_contract": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
+      "site_selectors": [
+        {
+          "call": "request.source_path.read_bytes",
+          "expression": "request.source_path.read_bytes()",
+          "file": "src/bioetl/infrastructure/adapters/iuphar/cohort_projection.py",
+          "scope": "export_canonical_cohort"
+        },
+        {
+          "call": "(output / 'raw-source.bin').write_bytes",
+          "expression": "(output / 'raw-source.bin').write_bytes(raw)",
+          "file": "src/bioetl/infrastructure/adapters/iuphar/cohort_projection.py",
+          "scope": "_publish_rejection"
+        },
+        {
+          "call": "(output / 'conversion-ledger.json').write_bytes",
+          "expression": "(output / 'conversion-ledger.json').write_bytes(canonical_json_bytes({'artifact': 'bioetl_target_cohort_conversion', 'schema_version': 1, 'status': 'REJECTED', 'raw_source': {'sha256': sha256_bytes(raw), 'byte_count': len(raw)}, 'diagnostic': {'code': 'duplicate_target_identity', 'source_record': error.source_record, 'canonical_row_id': error.row_id, 'reason': str(error)}, 'biological_accuracy_accepted': False}))",
+          "file": "src/bioetl/infrastructure/adapters/iuphar/cohort_projection.py",
+          "scope": "_publish_rejection"
+        },
+        {
+          "call": "path.open",
+          "expression": "path.open('xb')",
+          "file": "src/bioetl/infrastructure/adapters/iuphar/cohort_projection.py",
+          "scope": "_publish_bundle"
+        },
+        {
+          "call": "path.read_bytes",
+          "expression": "path.read_bytes()",
+          "file": "src/bioetl/infrastructure/adapters/iuphar/cohort_projection.py",
+          "scope": "_publish_bundle"
+        }
+      ],
+      "type": "file"
+    },
+    {
+      "call_path": [
+        "bioetl.infrastructure.adapters.iuphar.evidence_store -> LocalTargetClassificationEvidenceStore._collect_rows -> run_root.glob"
+      ],
+      "cleanup_selectors": [],
+      "closer": "iterdir, glob, and rglob iterators are exhausted inside the owning function and are not retained.",
+      "configuration_predicates": [],
+      "creator": [
+        "LocalTargetClassificationEvidenceStore._collect_rows"
+      ],
+      "identity": "iuphar.bioetl.infrastructure.adapters.iuphar.evidence_store.directory-enumeration",
+      "lifetime": "owner/operation",
+      "owner": "bioetl.infrastructure.adapters.iuphar.evidence_store owns these directory-enumeration acquisitions for opt-in IUPHAR target classification",
+      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
+      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+      "scenarios": {
+        "cancellation": {
+          "applicability": "owning async boundary; these primitives are synchronous",
+          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
+          "observation": "Cancel the owner around the call and observe remaining handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
+          "expected": "Preserve the original failure and release any handle this function already acquired.",
+          "observation": "Inject after allocation and during close; inspect retained handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "normal": {
+          "applicability": "applicable",
+          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
+          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "outer caller attempt; the primitive has no internal retry",
+          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
+          "observation": "Compare opened and closed identities per attempt.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "no intrinsic timeout on the synchronous primitive",
+          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
+          "observation": "Observe the outer deadline and whether the call returned.",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "shutdown_by_site": {},
+      "shutdown_contract": "iterdir, glob, and rglob iterators are exhausted inside the owning function and are not retained.",
+      "site_selectors": [
+        {
+          "call": "run_root.glob",
+          "expression": "run_root.glob('batches/*/rows/*/row-manifest.json')",
+          "file": "src/bioetl/infrastructure/adapters/iuphar/evidence_store.py",
+          "scope": "LocalTargetClassificationEvidenceStore._collect_rows"
+        }
+      ],
+      "type": "directory-enumeration"
+    },
+    {
+      "call_path": [
+        "bioetl.infrastructure.adapters.iuphar.evidence_store -> _row_manifest -> path.read_bytes",
+        "bioetl.infrastructure.adapters.iuphar.evidence_store -> _verified_artifacts -> path.read_bytes",
+        "bioetl.infrastructure.adapters.iuphar.evidence_store -> _write_same -> path.read_bytes",
+        "bioetl.infrastructure.adapters.iuphar.evidence_store -> LocalTargetClassificationEvidenceStore.publish_result -> manifest_path.read_bytes"
+      ],
+      "cleanup_selectors": [],
+      "closer": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
+      "configuration_predicates": [],
+      "creator": [
+        "LocalTargetClassificationEvidenceStore.publish_result",
+        "_row_manifest",
+        "_verified_artifacts",
+        "_write_same"
+      ],
+      "identity": "iuphar.bioetl.infrastructure.adapters.iuphar.evidence_store.file",
+      "lifetime": "owner/operation",
+      "owner": "bioetl.infrastructure.adapters.iuphar.evidence_store owns these file acquisitions for opt-in IUPHAR target classification",
+      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
+      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+      "scenarios": {
+        "cancellation": {
+          "applicability": "owning async boundary; these primitives are synchronous",
+          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
+          "observation": "Cancel the owner around the call and observe remaining handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
+          "expected": "Preserve the original failure and release any handle this function already acquired.",
+          "observation": "Inject after allocation and during close; inspect retained handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "normal": {
+          "applicability": "applicable",
+          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
+          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "outer caller attempt; the primitive has no internal retry",
+          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
+          "observation": "Compare opened and closed identities per attempt.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "no intrinsic timeout on the synchronous primitive",
+          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
+          "observation": "Observe the outer deadline and whether the call returned.",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "shutdown_by_site": {},
+      "shutdown_contract": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
+      "site_selectors": [
+        {
+          "call": "path.read_bytes",
+          "expression": "path.read_bytes()",
+          "file": "src/bioetl/infrastructure/adapters/iuphar/evidence_store.py",
+          "scope": "_row_manifest"
+        },
+        {
+          "call": "path.read_bytes",
+          "expression": "path.read_bytes()",
+          "file": "src/bioetl/infrastructure/adapters/iuphar/evidence_store.py",
+          "scope": "_verified_artifacts"
+        },
+        {
+          "call": "path.read_bytes",
+          "expression": "path.read_bytes()",
+          "file": "src/bioetl/infrastructure/adapters/iuphar/evidence_store.py",
+          "scope": "_write_same"
+        },
+        {
+          "call": "manifest_path.read_bytes",
+          "expression": "manifest_path.read_bytes()",
+          "file": "src/bioetl/infrastructure/adapters/iuphar/evidence_store.py",
+          "scope": "LocalTargetClassificationEvidenceStore.publish_result"
+        }
+      ],
+      "type": "file"
+    },
+    {
+      "call_path": [
+        "bioetl.infrastructure.adapters.iuphar.snapshot_payload -> build_snapshot_bundle -> destination.open"
+      ],
+      "cleanup_selectors": [],
+      "closer": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
+      "configuration_predicates": [],
+      "creator": [
+        "build_snapshot_bundle"
+      ],
+      "identity": "iuphar.bioetl.infrastructure.adapters.iuphar.snapshot_payload.file",
+      "lifetime": "owner/operation",
+      "owner": "bioetl.infrastructure.adapters.iuphar.snapshot_payload owns these file acquisitions for opt-in IUPHAR target classification",
+      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
+      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+      "scenarios": {
+        "cancellation": {
+          "applicability": "owning async boundary; these primitives are synchronous",
+          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
+          "observation": "Cancel the owner around the call and observe remaining handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
+          "expected": "Preserve the original failure and release any handle this function already acquired.",
+          "observation": "Inject after allocation and during close; inspect retained handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "normal": {
+          "applicability": "applicable",
+          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
+          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "outer caller attempt; the primitive has no internal retry",
+          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
+          "observation": "Compare opened and closed identities per attempt.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "no intrinsic timeout on the synchronous primitive",
+          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
+          "observation": "Observe the outer deadline and whether the call returned.",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "shutdown_by_site": {},
+      "shutdown_contract": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
+      "site_selectors": [
+        {
+          "call": "destination.open",
+          "expression": "destination.open('xb')",
+          "file": "src/bioetl/infrastructure/adapters/iuphar/snapshot_payload.py",
+          "scope": "build_snapshot_bundle"
+        }
+      ],
+      "type": "file"
+    },
+    {
+      "call_path": [
+        "bioetl.infrastructure.storage.target_candidates -> _write_layer -> DeltaTable",
+        "bioetl.infrastructure.storage.target_candidates -> _write_layer -> write_deltalake",
+        "bioetl.infrastructure.storage.target_candidates -> _input_facts -> DeltaTable"
+      ],
+      "cleanup_selectors": [],
+      "closer": "DeltaTable and write_deltalake finish the native table operation before return; no table handle is stored on a process-global owner.",
+      "configuration_predicates": [],
+      "creator": [
+        "_input_facts",
+        "_write_layer"
+      ],
+      "identity": "iuphar.bioetl.infrastructure.storage.target_candidates.delta",
+      "lifetime": "owner/operation",
+      "owner": "bioetl.infrastructure.storage.target_candidates owns these delta acquisitions for opt-in IUPHAR target classification",
+      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
+      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+      "scenarios": {
+        "cancellation": {
+          "applicability": "owning async boundary; these primitives are synchronous",
+          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
+          "observation": "Cancel the owner around the call and observe remaining handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
+          "expected": "Preserve the original failure and release any handle this function already acquired.",
+          "observation": "Inject after allocation and during close; inspect retained handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "normal": {
+          "applicability": "applicable",
+          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
+          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "outer caller attempt; the primitive has no internal retry",
+          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
+          "observation": "Compare opened and closed identities per attempt.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "no intrinsic timeout on the synchronous primitive",
+          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
+          "observation": "Observe the outer deadline and whether the call returned.",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "shutdown_by_site": {},
+      "shutdown_contract": "DeltaTable and write_deltalake finish the native table operation before return; no table handle is stored on a process-global owner.",
+      "site_selectors": [
+        {
+          "call": "DeltaTable",
+          "expression": "DeltaTable(str(original))",
+          "file": "src/bioetl/infrastructure/storage/target_candidates.py",
+          "scope": "_write_layer"
+        },
+        {
+          "call": "write_deltalake",
+          "expression": "write_deltalake(str(destination), output, mode='error', partition_by=table.metadata().partition_columns or None)",
+          "file": "src/bioetl/infrastructure/storage/target_candidates.py",
+          "scope": "_write_layer"
+        },
+        {
+          "call": "DeltaTable",
+          "expression": "DeltaTable(str(paths[name]))",
+          "file": "src/bioetl/infrastructure/storage/target_candidates.py",
+          "scope": "_input_facts"
+        }
+      ],
+      "type": "delta"
+    },
+    {
+      "call_path": [
+        "bioetl.infrastructure.storage.target_candidates -> _safe_output -> path.iterdir",
+        "bioetl.infrastructure.storage.target_candidates -> build_target_candidates -> checked[name].iterdir"
+      ],
+      "cleanup_selectors": [],
+      "closer": "iterdir, glob, and rglob iterators are exhausted inside the owning function and are not retained.",
+      "configuration_predicates": [],
+      "creator": [
+        "_safe_output",
+        "build_target_candidates"
+      ],
+      "identity": "iuphar.bioetl.infrastructure.storage.target_candidates.directory-enumeration",
+      "lifetime": "owner/operation",
+      "owner": "bioetl.infrastructure.storage.target_candidates owns these directory-enumeration acquisitions for opt-in IUPHAR target classification",
+      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
+      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+      "scenarios": {
+        "cancellation": {
+          "applicability": "owning async boundary; these primitives are synchronous",
+          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
+          "observation": "Cancel the owner around the call and observe remaining handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
+          "expected": "Preserve the original failure and release any handle this function already acquired.",
+          "observation": "Inject after allocation and during close; inspect retained handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "normal": {
+          "applicability": "applicable",
+          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
+          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "outer caller attempt; the primitive has no internal retry",
+          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
+          "observation": "Compare opened and closed identities per attempt.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "no intrinsic timeout on the synchronous primitive",
+          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
+          "observation": "Observe the outer deadline and whether the call returned.",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "shutdown_by_site": {},
+      "shutdown_contract": "iterdir, glob, and rglob iterators are exhausted inside the owning function and are not retained.",
+      "site_selectors": [
+        {
+          "call": "path.iterdir",
+          "expression": "path.iterdir()",
+          "file": "src/bioetl/infrastructure/storage/target_candidates.py",
+          "scope": "_safe_output"
+        },
+        {
+          "call": "checked[name].iterdir",
+          "expression": "checked[name].iterdir()",
+          "file": "src/bioetl/infrastructure/storage/target_candidates.py",
+          "scope": "build_target_candidates"
+        }
+      ],
+      "type": "directory-enumeration"
+    },
+    {
+      "call_path": [
+        "bioetl.infrastructure.storage.target_candidates -> freeze_target_inputs -> safe_output.open",
+        "bioetl.infrastructure.storage.target_candidates -> _verified_inputs -> request.input_manifest.read_bytes",
+        "bioetl.infrastructure.storage.target_candidates -> build_target_candidates -> (request.output_dir / 'build-manifest.json').open"
+      ],
+      "cleanup_selectors": [],
+      "closer": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
+      "configuration_predicates": [],
+      "creator": [
+        "_verified_inputs",
+        "build_target_candidates",
+        "freeze_target_inputs"
+      ],
+      "identity": "iuphar.bioetl.infrastructure.storage.target_candidates.file",
+      "lifetime": "owner/operation",
+      "owner": "bioetl.infrastructure.storage.target_candidates owns these file acquisitions for opt-in IUPHAR target classification",
+      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
+      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+      "scenarios": {
+        "cancellation": {
+          "applicability": "owning async boundary; these primitives are synchronous",
+          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
+          "observation": "Cancel the owner around the call and observe remaining handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
+          "expected": "Preserve the original failure and release any handle this function already acquired.",
+          "observation": "Inject after allocation and during close; inspect retained handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "normal": {
+          "applicability": "applicable",
+          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
+          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "outer caller attempt; the primitive has no internal retry",
+          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
+          "observation": "Compare opened and closed identities per attempt.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "no intrinsic timeout on the synchronous primitive",
+          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
+          "observation": "Observe the outer deadline and whether the call returned.",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "shutdown_by_site": {},
+      "shutdown_contract": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
+      "site_selectors": [
+        {
+          "call": "safe_output.open",
+          "expression": "safe_output.open('xb')",
+          "file": "src/bioetl/infrastructure/storage/target_candidates.py",
+          "scope": "freeze_target_inputs"
+        },
+        {
+          "call": "request.input_manifest.read_bytes",
+          "expression": "request.input_manifest.read_bytes()",
+          "file": "src/bioetl/infrastructure/storage/target_candidates.py",
+          "scope": "_verified_inputs"
+        },
+        {
+          "call": "(request.output_dir / 'build-manifest.json').open",
+          "expression": "(request.output_dir / 'build-manifest.json').open('xb')",
+          "file": "src/bioetl/infrastructure/storage/target_candidates.py",
+          "scope": "build_target_candidates"
+        }
+      ],
+      "type": "file"
+    },
+    {
+      "call_path": [
+        "bioetl.infrastructure.storage.target_classification_guard -> _target_table_fields -> DeltaTable"
+      ],
+      "cleanup_selectors": [],
+      "closer": "DeltaTable and write_deltalake finish the native table operation before return; no table handle is stored on a process-global owner.",
+      "configuration_predicates": [],
+      "creator": [
+        "_target_table_fields"
+      ],
+      "identity": "iuphar.bioetl.infrastructure.storage.target_classification_guard.delta",
+      "lifetime": "owner/operation",
+      "owner": "bioetl.infrastructure.storage.target_classification_guard owns these delta acquisitions for opt-in IUPHAR target classification",
+      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
+      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+      "scenarios": {
+        "cancellation": {
+          "applicability": "owning async boundary; these primitives are synchronous",
+          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
+          "observation": "Cancel the owner around the call and observe remaining handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
+          "expected": "Preserve the original failure and release any handle this function already acquired.",
+          "observation": "Inject after allocation and during close; inspect retained handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "normal": {
+          "applicability": "applicable",
+          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
+          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "outer caller attempt; the primitive has no internal retry",
+          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
+          "observation": "Compare opened and closed identities per attempt.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "no intrinsic timeout on the synchronous primitive",
+          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
+          "observation": "Observe the outer deadline and whether the call returned.",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "shutdown_by_site": {},
+      "shutdown_contract": "DeltaTable and write_deltalake finish the native table operation before return; no table handle is stored on a process-global owner.",
+      "site_selectors": [
+        {
+          "call": "DeltaTable",
+          "expression": "DeltaTable(str(path))",
+          "file": "src/bioetl/infrastructure/storage/target_classification_guard.py",
+          "scope": "_target_table_fields"
+        }
+      ],
+      "type": "delta"
+    },
+    {
+      "call_path": [
+        "bioetl.infrastructure.storage.target_classification_guard -> _target_table_fields -> path.iterdir"
+      ],
+      "cleanup_selectors": [],
+      "closer": "iterdir, glob, and rglob iterators are exhausted inside the owning function and are not retained.",
+      "configuration_predicates": [],
+      "creator": [
+        "_target_table_fields"
+      ],
+      "identity": "iuphar.bioetl.infrastructure.storage.target_classification_guard.directory-enumeration",
+      "lifetime": "owner/operation",
+      "owner": "bioetl.infrastructure.storage.target_classification_guard owns these directory-enumeration acquisitions for opt-in IUPHAR target classification",
+      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
+      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+      "scenarios": {
+        "cancellation": {
+          "applicability": "owning async boundary; these primitives are synchronous",
+          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
+          "observation": "Cancel the owner around the call and observe remaining handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
+          "expected": "Preserve the original failure and release any handle this function already acquired.",
+          "observation": "Inject after allocation and during close; inspect retained handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "normal": {
+          "applicability": "applicable",
+          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
+          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "outer caller attempt; the primitive has no internal retry",
+          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
+          "observation": "Compare opened and closed identities per attempt.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "no intrinsic timeout on the synchronous primitive",
+          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
+          "observation": "Observe the outer deadline and whether the call returned.",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "shutdown_by_site": {},
+      "shutdown_contract": "iterdir, glob, and rglob iterators are exhausted inside the owning function and are not retained.",
+      "site_selectors": [
+        {
+          "call": "path.iterdir",
+          "expression": "path.iterdir()",
+          "file": "src/bioetl/infrastructure/storage/target_classification_guard.py",
+          "scope": "_target_table_fields"
+        }
+      ],
+      "type": "directory-enumeration"
+    },
+    {
+      "call_path": [
+        "bioetl.infrastructure.storage.target_classification_migration -> _tree_hashes -> path.rglob"
+      ],
+      "cleanup_selectors": [],
+      "closer": "iterdir, glob, and rglob iterators are exhausted inside the owning function and are not retained.",
+      "configuration_predicates": [],
+      "creator": [
+        "_tree_hashes"
+      ],
+      "identity": "iuphar.bioetl.infrastructure.storage.target_classification_migration.directory-enumeration",
+      "lifetime": "owner/operation",
+      "owner": "bioetl.infrastructure.storage.target_classification_migration owns these directory-enumeration acquisitions for opt-in IUPHAR target classification",
+      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
+      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+      "scenarios": {
+        "cancellation": {
+          "applicability": "owning async boundary; these primitives are synchronous",
+          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
+          "observation": "Cancel the owner around the call and observe remaining handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
+          "expected": "Preserve the original failure and release any handle this function already acquired.",
+          "observation": "Inject after allocation and during close; inspect retained handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "normal": {
+          "applicability": "applicable",
+          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
+          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "outer caller attempt; the primitive has no internal retry",
+          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
+          "observation": "Compare opened and closed identities per attempt.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "no intrinsic timeout on the synchronous primitive",
+          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
+          "observation": "Observe the outer deadline and whether the call returned.",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "shutdown_by_site": {},
+      "shutdown_contract": "iterdir, glob, and rglob iterators are exhausted inside the owning function and are not retained.",
+      "site_selectors": [
+        {
+          "call": "path.rglob",
+          "expression": "path.rglob('*')",
+          "file": "src/bioetl/infrastructure/storage/target_classification_migration.py",
+          "scope": "_tree_hashes"
+        }
+      ],
+      "type": "directory-enumeration"
+    },
+    {
+      "call_path": [
+        "bioetl.infrastructure.storage.target_classification_migration -> _save -> temporary.write_bytes",
+        "bioetl.infrastructure.storage.target_classification_migration -> _lock -> path.open",
+        "bioetl.infrastructure.storage.target_classification_migration -> promote_target_migration -> (checked['backup'] / _JOURNAL_JSON).read_bytes",
+        "bioetl.infrastructure.storage.target_classification_migration -> rollback_target_migration -> (checked['backup'] / _JOURNAL_JSON).read_bytes",
+        "bioetl.infrastructure.storage.target_classification_migration -> _restore_dependencies -> source.read_bytes"
+      ],
+      "cleanup_selectors": [],
+      "closer": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
+      "configuration_predicates": [],
+      "creator": [
+        "_lock",
+        "_restore_dependencies",
+        "_save",
+        "promote_target_migration",
+        "rollback_target_migration"
+      ],
+      "identity": "iuphar.bioetl.infrastructure.storage.target_classification_migration.file",
+      "lifetime": "owner/operation",
+      "owner": "bioetl.infrastructure.storage.target_classification_migration owns these file acquisitions for opt-in IUPHAR target classification",
+      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
+      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+      "scenarios": {
+        "cancellation": {
+          "applicability": "owning async boundary; these primitives are synchronous",
+          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
+          "observation": "Cancel the owner around the call and observe remaining handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
+          "expected": "Preserve the original failure and release any handle this function already acquired.",
+          "observation": "Inject after allocation and during close; inspect retained handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "normal": {
+          "applicability": "applicable",
+          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
+          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "outer caller attempt; the primitive has no internal retry",
+          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
+          "observation": "Compare opened and closed identities per attempt.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "no intrinsic timeout on the synchronous primitive",
+          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
+          "observation": "Observe the outer deadline and whether the call returned.",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "shutdown_by_site": {},
+      "shutdown_contract": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
+      "site_selectors": [
+        {
+          "call": "temporary.write_bytes",
+          "expression": "temporary.write_bytes(canonical_json_bytes(state))",
+          "file": "src/bioetl/infrastructure/storage/target_classification_migration.py",
+          "scope": "_save"
+        },
+        {
+          "call": "path.open",
+          "expression": "path.open('a+b')",
+          "file": "src/bioetl/infrastructure/storage/target_classification_migration.py",
+          "scope": "_lock"
+        },
+        {
+          "call": "(checked['backup'] / _JOURNAL_JSON).read_bytes",
+          "expression": "(checked['backup'] / _JOURNAL_JSON).read_bytes()",
+          "file": "src/bioetl/infrastructure/storage/target_classification_migration.py",
+          "scope": "promote_target_migration"
+        },
+        {
+          "call": "(checked['backup'] / _JOURNAL_JSON).read_bytes",
+          "expression": "(checked['backup'] / _JOURNAL_JSON).read_bytes()",
+          "file": "src/bioetl/infrastructure/storage/target_classification_migration.py",
+          "scope": "rollback_target_migration"
+        },
+        {
+          "call": "source.read_bytes",
+          "expression": "source.read_bytes()",
+          "file": "src/bioetl/infrastructure/storage/target_classification_migration.py",
+          "scope": "_restore_dependencies"
+        }
+      ],
+      "type": "file"
+    },
+    {
+      "call_path": [
+        "bioetl.infrastructure.storage.target_classification_migration -> prepare_target_migration -> shutil.copytree",
+        "bioetl.infrastructure.storage.target_classification_migration -> prepare_target_migration -> shutil.copyfile"
+      ],
+      "cleanup_selectors": [],
+      "closer": "shutil.copyfile and shutil.copytree complete before return and do not retain source or destination streams.",
+      "configuration_predicates": [],
+      "creator": [
+        "prepare_target_migration"
+      ],
+      "identity": "iuphar.bioetl.infrastructure.storage.target_classification_migration.file-copy",
+      "lifetime": "owner/operation",
+      "owner": "bioetl.infrastructure.storage.target_classification_migration owns these file-copy acquisitions for opt-in IUPHAR target classification",
+      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
+      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+      "scenarios": {
+        "cancellation": {
+          "applicability": "owning async boundary; these primitives are synchronous",
+          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
+          "observation": "Cancel the owner around the call and observe remaining handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
+          "expected": "Preserve the original failure and release any handle this function already acquired.",
+          "observation": "Inject after allocation and during close; inspect retained handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "normal": {
+          "applicability": "applicable",
+          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
+          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "outer caller attempt; the primitive has no internal retry",
+          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
+          "observation": "Compare opened and closed identities per attempt.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "no intrinsic timeout on the synchronous primitive",
+          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
+          "observation": "Observe the outer deadline and whether the call returned.",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "shutdown_by_site": {},
+      "shutdown_contract": "shutil.copyfile and shutil.copytree complete before return and do not retain source or destination streams.",
+      "site_selectors": [
+        {
+          "call": "shutil.copytree",
+          "expression": "shutil.copytree(source, target)",
+          "file": "src/bioetl/infrastructure/storage/target_classification_migration.py",
+          "scope": "prepare_target_migration"
+        },
+        {
+          "call": "shutil.copyfile",
+          "expression": "shutil.copyfile(source, target)",
+          "file": "src/bioetl/infrastructure/storage/target_classification_migration.py",
+          "scope": "prepare_target_migration"
+        }
+      ],
+      "type": "file-copy"
+    },
+    {
+      "call_path": [
+        "bioetl.infrastructure.storage.target_classification_migration -> _lock -> msvcrt.locking",
+        "bioetl.infrastructure.storage.target_classification_migration -> _lock -> fcntl.flock"
+      ],
+      "cleanup_selectors": [],
+      "closer": "msvcrt.locking and fcntl.flock are paired with unlock on the same open file before the migration function returns.",
+      "configuration_predicates": [],
+      "creator": [
+        "_lock"
+      ],
+      "identity": "iuphar.bioetl.infrastructure.storage.target_classification_migration.file-lock",
+      "lifetime": "owner/operation",
+      "owner": "bioetl.infrastructure.storage.target_classification_migration owns these file-lock acquisitions for opt-in IUPHAR target classification",
+      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
+      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+      "scenarios": {
+        "cancellation": {
+          "applicability": "owning async boundary; these primitives are synchronous",
+          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
+          "observation": "Cancel the owner around the call and observe remaining handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
+          "expected": "Preserve the original failure and release any handle this function already acquired.",
+          "observation": "Inject after allocation and during close; inspect retained handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "normal": {
+          "applicability": "applicable",
+          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
+          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "outer caller attempt; the primitive has no internal retry",
+          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
+          "observation": "Compare opened and closed identities per attempt.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "no intrinsic timeout on the synchronous primitive",
+          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
+          "observation": "Observe the outer deadline and whether the call returned.",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "shutdown_by_site": {},
+      "shutdown_contract": "msvcrt.locking and fcntl.flock are paired with unlock on the same open file before the migration function returns.",
+      "site_selectors": [
+        {
+          "call": "msvcrt.locking",
+          "expression": "msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)",
+          "file": "src/bioetl/infrastructure/storage/target_classification_migration.py",
+          "scope": "_lock"
+        },
+        {
+          "call": "fcntl.flock",
+          "expression": "fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)",
+          "file": "src/bioetl/infrastructure/storage/target_classification_migration.py",
+          "scope": "_lock"
+        }
+      ],
+      "type": "file-lock"
+    },
+    {
+      "call_path": [
+        "bioetl.infrastructure.storage.target_fk_repair -> freeze_delta -> DeltaTable",
+        "bioetl.infrastructure.storage.target_fk_repair -> _write_candidates -> write_deltalake",
+        "bioetl.infrastructure.storage.target_fk_repair -> FrozenDelta.verify_unchanged -> DeltaTable"
+      ],
+      "cleanup_selectors": [],
+      "closer": "DeltaTable and write_deltalake finish the native table operation before return; no table handle is stored on a process-global owner.",
+      "configuration_predicates": [],
+      "creator": [
+        "FrozenDelta.verify_unchanged",
+        "_write_candidates",
+        "freeze_delta"
+      ],
+      "identity": "iuphar.bioetl.infrastructure.storage.target_fk_repair.delta",
+      "lifetime": "owner/operation",
+      "owner": "bioetl.infrastructure.storage.target_fk_repair owns these delta acquisitions for opt-in IUPHAR target classification",
+      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
+      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+      "scenarios": {
+        "cancellation": {
+          "applicability": "owning async boundary; these primitives are synchronous",
+          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
+          "observation": "Cancel the owner around the call and observe remaining handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
+          "expected": "Preserve the original failure and release any handle this function already acquired.",
+          "observation": "Inject after allocation and during close; inspect retained handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "normal": {
+          "applicability": "applicable",
+          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
+          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "outer caller attempt; the primitive has no internal retry",
+          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
+          "observation": "Compare opened and closed identities per attempt.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "no intrinsic timeout on the synchronous primitive",
+          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
+          "observation": "Observe the outer deadline and whether the call returned.",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "shutdown_by_site": {},
+      "shutdown_contract": "DeltaTable and write_deltalake finish the native table operation before return; no table handle is stored on a process-global owner.",
+      "site_selectors": [
+        {
+          "call": "DeltaTable",
+          "expression": "DeltaTable(root)",
+          "file": "src/bioetl/infrastructure/storage/target_fk_repair.py",
+          "scope": "freeze_delta"
+        },
+        {
+          "call": "write_deltalake",
+          "expression": "write_deltalake(path, table, partition_by=list(previous.partition_columns))",
+          "file": "src/bioetl/infrastructure/storage/target_fk_repair.py",
+          "scope": "_write_candidates"
+        },
+        {
+          "call": "DeltaTable",
+          "expression": "DeltaTable(self.path)",
+          "file": "src/bioetl/infrastructure/storage/target_fk_repair.py",
+          "scope": "FrozenDelta.verify_unchanged"
+        }
+      ],
+      "type": "delta"
+    },
+    {
+      "call_path": [
+        "bioetl.infrastructure.storage.target_fk_repair -> _file_inventory -> root.rglob"
+      ],
+      "cleanup_selectors": [],
+      "closer": "iterdir, glob, and rglob iterators are exhausted inside the owning function and are not retained.",
+      "configuration_predicates": [],
+      "creator": [
+        "_file_inventory"
+      ],
+      "identity": "iuphar.bioetl.infrastructure.storage.target_fk_repair.directory-enumeration",
+      "lifetime": "owner/operation",
+      "owner": "bioetl.infrastructure.storage.target_fk_repair owns these directory-enumeration acquisitions for opt-in IUPHAR target classification",
+      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
+      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+      "scenarios": {
+        "cancellation": {
+          "applicability": "owning async boundary; these primitives are synchronous",
+          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
+          "observation": "Cancel the owner around the call and observe remaining handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
+          "expected": "Preserve the original failure and release any handle this function already acquired.",
+          "observation": "Inject after allocation and during close; inspect retained handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "normal": {
+          "applicability": "applicable",
+          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
+          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "outer caller attempt; the primitive has no internal retry",
+          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
+          "observation": "Compare opened and closed identities per attempt.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "no intrinsic timeout on the synchronous primitive",
+          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
+          "observation": "Observe the outer deadline and whether the call returned.",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "shutdown_by_site": {},
+      "shutdown_contract": "iterdir, glob, and rglob iterators are exhausted inside the owning function and are not retained.",
+      "site_selectors": [
+        {
+          "call": "root.rglob",
+          "expression": "root.rglob('*')",
+          "file": "src/bioetl/infrastructure/storage/target_fk_repair.py",
+          "scope": "_file_inventory"
+        }
+      ],
+      "type": "directory-enumeration"
+    },
+    {
+      "call_path": [
+        "bioetl.infrastructure.storage.target_fk_repair -> publish_repair_candidate -> manifest.write_bytes",
+        "bioetl.infrastructure.storage.target_fk_repair -> _object -> path.read_bytes",
+        "bioetl.infrastructure.storage.target_fk_repair -> _read_acquisition -> (root / _ACQUISITION_JSON).read_bytes",
+        "bioetl.infrastructure.storage.target_fk_repair -> _sha256 -> path.read_bytes"
+      ],
+      "cleanup_selectors": [],
+      "closer": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
+      "configuration_predicates": [],
+      "creator": [
+        "_object",
+        "_read_acquisition",
+        "_sha256",
+        "publish_repair_candidate"
+      ],
+      "identity": "iuphar.bioetl.infrastructure.storage.target_fk_repair.file",
+      "lifetime": "owner/operation",
+      "owner": "bioetl.infrastructure.storage.target_fk_repair owns these file acquisitions for opt-in IUPHAR target classification",
+      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
+      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+      "scenarios": {
+        "cancellation": {
+          "applicability": "owning async boundary; these primitives are synchronous",
+          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
+          "observation": "Cancel the owner around the call and observe remaining handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
+          "expected": "Preserve the original failure and release any handle this function already acquired.",
+          "observation": "Inject after allocation and during close; inspect retained handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "normal": {
+          "applicability": "applicable",
+          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
+          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "outer caller attempt; the primitive has no internal retry",
+          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
+          "observation": "Compare opened and closed identities per attempt.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "no intrinsic timeout on the synchronous primitive",
+          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
+          "observation": "Observe the outer deadline and whether the call returned.",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "shutdown_by_site": {},
+      "shutdown_contract": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
+      "site_selectors": [
+        {
+          "call": "manifest.write_bytes",
+          "expression": "manifest.write_bytes(_json_bytes(document) + b'\\n')",
+          "file": "src/bioetl/infrastructure/storage/target_fk_repair.py",
+          "scope": "publish_repair_candidate"
+        },
+        {
+          "call": "path.read_bytes",
+          "expression": "path.read_bytes()",
+          "file": "src/bioetl/infrastructure/storage/target_fk_repair.py",
+          "scope": "_object"
+        },
+        {
+          "call": "(root / _ACQUISITION_JSON).read_bytes",
+          "expression": "(root / _ACQUISITION_JSON).read_bytes()",
+          "file": "src/bioetl/infrastructure/storage/target_fk_repair.py",
+          "scope": "_read_acquisition"
+        },
+        {
+          "call": "path.read_bytes",
+          "expression": "path.read_bytes()",
+          "file": "src/bioetl/infrastructure/storage/target_fk_repair.py",
+          "scope": "_sha256"
+        }
+      ],
+      "type": "file"
+    },
+    {
+      "call_path": [
+        "bioetl.infrastructure.storage.target_fk_repair -> _freeze_input_copies -> shutil.copyfile",
+        "bioetl.infrastructure.storage.target_fk_repair -> _freeze_input_copies -> shutil.copyfile"
+      ],
+      "cleanup_selectors": [],
+      "closer": "shutil.copyfile and shutil.copytree complete before return and do not retain source or destination streams.",
+      "configuration_predicates": [],
+      "creator": [
+        "_freeze_input_copies"
+      ],
+      "identity": "iuphar.bioetl.infrastructure.storage.target_fk_repair.file-copy",
+      "lifetime": "owner/operation",
+      "owner": "bioetl.infrastructure.storage.target_fk_repair owns these file-copy acquisitions for opt-in IUPHAR target classification",
+      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
+      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+      "scenarios": {
+        "cancellation": {
+          "applicability": "owning async boundary; these primitives are synchronous",
+          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
+          "observation": "Cancel the owner around the call and observe remaining handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
+          "expected": "Preserve the original failure and release any handle this function already acquired.",
+          "observation": "Inject after allocation and during close; inspect retained handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "normal": {
+          "applicability": "applicable",
+          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
+          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "outer caller attempt; the primitive has no internal retry",
+          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
+          "observation": "Compare opened and closed identities per attempt.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "no intrinsic timeout on the synchronous primitive",
+          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
+          "observation": "Observe the outer deadline and whether the call returned.",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "shutdown_by_site": {},
+      "shutdown_contract": "shutil.copyfile and shutil.copytree complete before return and do not retain source or destination streams.",
+      "site_selectors": [
+        {
+          "call": "shutil.copyfile",
+          "expression": "shutil.copyfile(source.directory / name, copy_root / name)",
+          "file": "src/bioetl/infrastructure/storage/target_fk_repair.py",
+          "scope": "_freeze_input_copies"
+        },
+        {
+          "call": "shutil.copyfile",
+          "expression": "shutil.copyfile(original.path / relative, target)",
+          "file": "src/bioetl/infrastructure/storage/target_fk_repair.py",
+          "scope": "_freeze_input_copies"
+        }
+      ],
+      "type": "file-copy"
+    },
+    {
+      "call_path": [
+        "bioetl.infrastructure.storage.target_migration_dependencies -> _copy_verified -> source.read_bytes",
+        "bioetl.infrastructure.storage.target_migration_dependencies -> _DependencyCollector.add -> path.read_bytes",
+        "bioetl.infrastructure.storage.target_migration_dependencies -> _copy_verified -> destination.open",
+        "bioetl.infrastructure.storage.target_migration_dependencies -> _copy_verified -> destination.read_bytes"
+      ],
+      "cleanup_selectors": [],
+      "closer": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
+      "configuration_predicates": [],
+      "creator": [
+        "_DependencyCollector.add",
+        "_copy_verified"
+      ],
+      "identity": "iuphar.bioetl.infrastructure.storage.target_migration_dependencies.file",
+      "lifetime": "owner/operation",
+      "owner": "bioetl.infrastructure.storage.target_migration_dependencies owns these file acquisitions for opt-in IUPHAR target classification",
+      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
+      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+      "scenarios": {
+        "cancellation": {
+          "applicability": "owning async boundary; these primitives are synchronous",
+          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
+          "observation": "Cancel the owner around the call and observe remaining handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
+          "expected": "Preserve the original failure and release any handle this function already acquired.",
+          "observation": "Inject after allocation and during close; inspect retained handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "normal": {
+          "applicability": "applicable",
+          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
+          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "outer caller attempt; the primitive has no internal retry",
+          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
+          "observation": "Compare opened and closed identities per attempt.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "no intrinsic timeout on the synchronous primitive",
+          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
+          "observation": "Observe the outer deadline and whether the call returned.",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "shutdown_by_site": {},
+      "shutdown_contract": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
+      "site_selectors": [
+        {
+          "call": "source.read_bytes",
+          "expression": "source.read_bytes()",
+          "file": "src/bioetl/infrastructure/storage/target_migration_dependencies.py",
+          "scope": "_copy_verified"
+        },
+        {
+          "call": "path.read_bytes",
+          "expression": "path.read_bytes()",
+          "file": "src/bioetl/infrastructure/storage/target_migration_dependencies.py",
+          "scope": "_DependencyCollector.add"
+        },
+        {
+          "call": "destination.open",
+          "expression": "destination.open('xb')",
+          "file": "src/bioetl/infrastructure/storage/target_migration_dependencies.py",
+          "scope": "_copy_verified"
+        },
+        {
+          "call": "destination.read_bytes",
+          "expression": "destination.read_bytes()",
+          "file": "src/bioetl/infrastructure/storage/target_migration_dependencies.py",
+          "scope": "_copy_verified"
+        }
+      ],
+      "type": "file"
+    },
+    {
+      "call_path": [
+        "bioetl.infrastructure.storage.target_migration_row_ops -> read_delta -> DeltaTable"
+      ],
+      "cleanup_selectors": [],
+      "closer": "DeltaTable and write_deltalake finish the native table operation before return; no table handle is stored on a process-global owner.",
+      "configuration_predicates": [],
+      "creator": [
+        "read_delta"
+      ],
+      "identity": "iuphar.bioetl.infrastructure.storage.target_migration_row_ops.delta",
+      "lifetime": "owner/operation",
+      "owner": "bioetl.infrastructure.storage.target_migration_row_ops owns these delta acquisitions for opt-in IUPHAR target classification",
+      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
+      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+      "scenarios": {
+        "cancellation": {
+          "applicability": "owning async boundary; these primitives are synchronous",
+          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
+          "observation": "Cancel the owner around the call and observe remaining handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
+          "expected": "Preserve the original failure and release any handle this function already acquired.",
+          "observation": "Inject after allocation and during close; inspect retained handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "normal": {
+          "applicability": "applicable",
+          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
+          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "outer caller attempt; the primitive has no internal retry",
+          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
+          "observation": "Compare opened and closed identities per attempt.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "no intrinsic timeout on the synchronous primitive",
+          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
+          "observation": "Observe the outer deadline and whether the call returned.",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "shutdown_by_site": {},
+      "shutdown_contract": "DeltaTable and write_deltalake finish the native table operation before return; no table handle is stored on a process-global owner.",
+      "site_selectors": [
+        {
+          "call": "DeltaTable",
+          "expression": "DeltaTable(str(path))",
+          "file": "src/bioetl/infrastructure/storage/target_migration_row_ops.py",
+          "scope": "read_delta"
+        }
+      ],
+      "type": "delta"
+    },
+    {
+      "call_path": [
+        "bioetl.infrastructure.storage.target_migration_validation -> _frozen_v31_hash_fields -> paths['config'].read_text",
+        "bioetl.infrastructure.storage.target_migration_validation -> _load_candidate_profile -> paths['candidate_config'].read_text"
+      ],
+      "cleanup_selectors": [],
+      "closer": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
+      "configuration_predicates": [],
+      "creator": [
+        "_frozen_v31_hash_fields",
+        "_load_candidate_profile"
+      ],
+      "identity": "iuphar.bioetl.infrastructure.storage.target_migration_validation.file",
+      "lifetime": "owner/operation",
+      "owner": "bioetl.infrastructure.storage.target_migration_validation owns these file acquisitions for opt-in IUPHAR target classification",
+      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
+      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+      "scenarios": {
+        "cancellation": {
+          "applicability": "owning async boundary; these primitives are synchronous",
+          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
+          "observation": "Cancel the owner around the call and observe remaining handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
+          "expected": "Preserve the original failure and release any handle this function already acquired.",
+          "observation": "Inject after allocation and during close; inspect retained handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "normal": {
+          "applicability": "applicable",
+          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
+          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "outer caller attempt; the primitive has no internal retry",
+          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
+          "observation": "Compare opened and closed identities per attempt.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "no intrinsic timeout on the synchronous primitive",
+          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
+          "observation": "Observe the outer deadline and whether the call returned.",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "shutdown_by_site": {},
+      "shutdown_contract": "Path read/write and open calls release their stream before the owning function returns; no handle is retained on the caller.",
+      "site_selectors": [
+        {
+          "call": "paths['config'].read_text",
+          "expression": "paths['config'].read_text(encoding='utf-8')",
+          "file": "src/bioetl/infrastructure/storage/target_migration_validation.py",
+          "scope": "_frozen_v31_hash_fields"
+        },
+        {
+          "call": "paths['candidate_config'].read_text",
+          "expression": "paths['candidate_config'].read_text(encoding='utf-8')",
+          "file": "src/bioetl/infrastructure/storage/target_migration_validation.py",
+          "scope": "_load_candidate_profile"
+        }
+      ],
+      "type": "file"
+    }
+  ],
+  "reference_moves": [
+    {
+      "fields": [
+        "creation_sites"
+      ],
+      "from": {
+        "expression": "pq.read_table(resolve_parquet_file_uri(file_uri), columns=columns, use_threads=False)",
+        "file": "src/bioetl/infrastructure/storage/delta/table_ops.py",
+        "line": 53
+      },
+      "identity": "storage.delta-operations.table-file",
+      "to": {
+        "call": "pq.read_table",
+        "expression": "pq.read_table(resolve_parquet_file_uri(file_uri), columns=physical_columns, use_threads=False)",
+        "file": "src/bioetl/infrastructure/storage/delta/table_ops.py",
+        "scope": "_read_active_file"
+      }
+    },
+    {
+      "fields": [
+        "production_binding"
+      ],
+      "from": {
+        "file": "src/bioetl/infrastructure/storage/delta/table_ops.py",
+        "line": 53,
+        "source_segment": "pq.read_table("
+      },
+      "identity": "storage.delta-operations.table-file",
+      "to": {
+        "file": "src/bioetl/infrastructure/storage/delta/table_ops.py",
+        "scope": "_read_active_file",
+        "segment": "result = pq.read_table("
+      }
+    },
+    {
+      "fields": [
+        "cleanup_sources"
+      ],
+      "from": {
+        "file": "src/bioetl/infrastructure/storage/delta/table_ops.py",
+        "line": 53,
+        "source_segment": "pq.read_table("
+      },
+      "identity": "storage.delta-operations.table-file",
+      "to": {
+        "file": "src/bioetl/infrastructure/storage/delta/table_ops.py",
+        "scope": "_read_active_file",
+        "segment": "result = pq.read_table("
+      }
+    }
+  ],
+  "schema_version": 1,
+  "source_ref": "fbfce9a8ea2ee48ae8de9c447e9b7f90e9deac45",
+  "source_reviews": {
+    "src/bioetl/application/core/_record_normalization_hash_support.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/application/core/pre_silver_finalization_flow.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/application/core/pre_silver_record.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/application/core/pre_silver_staging_flow.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/application/core/preflight/service.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/application/core/record_normalization_finalization.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/application/core/runner_execution_flow.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/application/core/wiring/__init__.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/application/core/wiring/registry.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/application/pipelines/chembl/target_classified_transformer.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/application/pipelines/chembl/target_transformer.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/application/services/target_runtime/__init__.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/application/services/target_runtime/classification.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/application/services/target_runtime/scope.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/application/services/workflow/control_plane/execution_service.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/application/services/workflow/control_plane/mutation_plan.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/composition/bootstrap/assembly/storage.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/composition/bootstrap/cli/config.py": "Reviewed opt-in IUPHAR local file, table, lock, copy, and directory acquisitions in this source. Recorded as source-qualified resources with runtime NOT_RUN_12553: 1 file. No network client or process is started.",
+    "src/bioetl/composition/bootstrap/cli/lineage.py": "Reviewed opt-in IUPHAR local file, table, lock, copy, and directory acquisitions in this source. Recorded as source-qualified resources with runtime NOT_RUN_12553: 2 file. No network client or process is started.",
+    "src/bioetl/composition/bootstrap/cli/lock.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/composition/bootstrap/cli/noop.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/composition/bootstrap/runtime/composite_control_plane_bundle.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/composition/bootstrap/runtime/composite_execution_support_bundle.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/composition/bootstrap/runtime/publication_vocab_init.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/composition/factories/dq/_context_resolver_support.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/composition/factories/dq/composite_validation.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/composition/factories/dq/context_resolver.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/composition/factories/pipeline/_creation_wiring.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/composition/factories/pipeline/_factory_method_runtime_support.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/composition/factories/pipeline/_runner_assembly_support.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/composition/factories/pipeline/assembler.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/composition/factories/pipeline/run_context_factory.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/composition/factories/pipeline/runner_assembly.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/composition/factories/pipeline/transformer_builder.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/composition/factories/services/__init__.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/composition/factories/services/pipeline_processing_components_builder.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/composition/factories/services/preflight.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/composition/factories/services/workflow_services.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/composition/factories/storage/_helpers.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/composition/factories/storage/_layer_writers.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/composition/factories/storage/factory.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/composition/runtime_builders/_effective_config_graph_support.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/composition/runtime_builders/_exact_replay_cached_bronze_context.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/composition/runtime_builders/_manifest_publication_context_support.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/composition/runtime_builders/_run_manifest_creation_support_helpers.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/composition/runtime_builders/_runner_input_preparation.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/composition/runtime_builders/effective_config_artifact_builder.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/domain/behavior/identity_service.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/domain/config/__init__.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/domain/config/pipeline.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/domain/config/target_classification.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/domain/contracts/gold/chembl_target_classification.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/domain/entities/chembl_target_classification.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/domain/entities/target_classification_boundary.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/domain/normalization/profiles/chembl_target_classification.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/domain/ports/__init__.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/domain/ports/target_classification.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/domain/schemas/chembl/target.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/infrastructure/adapters/iuphar/__init__.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/infrastructure/adapters/iuphar/_evidence_validation.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/infrastructure/adapters/iuphar/_input_projection.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/infrastructure/adapters/iuphar/_manifest.py": "Reviewed opt-in IUPHAR local file, table, lock, copy, and directory acquisitions in this source. Recorded as source-qualified resources with runtime NOT_RUN_12553: 1 file. No network client or process is started.",
+    "src/bioetl/infrastructure/adapters/iuphar/_official_target_projection.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/infrastructure/adapters/iuphar/_official_targets_csv.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/infrastructure/adapters/iuphar/_snapshot_payloads.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/infrastructure/adapters/iuphar/acceptance_receipt.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/infrastructure/adapters/iuphar/adapter.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/infrastructure/adapters/iuphar/canonical_target_rows.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/infrastructure/adapters/iuphar/cohort_contract.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/infrastructure/adapters/iuphar/cohort_projection.py": "Reviewed opt-in IUPHAR local file, table, lock, copy, and directory acquisitions in this source. Recorded as source-qualified resources with runtime NOT_RUN_12553: 5 file. No network client or process is started.",
+    "src/bioetl/infrastructure/adapters/iuphar/evidence_store.py": "Reviewed opt-in IUPHAR local file, table, lock, copy, and directory acquisitions in this source. Recorded as source-qualified resources with runtime NOT_RUN_12553: 1 directory-enumeration, 4 file. No network client or process is started.",
+    "src/bioetl/infrastructure/adapters/iuphar/snapshot_evidence.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/infrastructure/adapters/iuphar/snapshot_loader.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/infrastructure/adapters/iuphar/snapshot_models.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/infrastructure/adapters/iuphar/snapshot_payload.py": "Reviewed opt-in IUPHAR local file, table, lock, copy, and directory acquisitions in this source. Recorded as source-qualified resources with runtime NOT_RUN_12553: 1 file. No network client or process is started.",
+    "src/bioetl/infrastructure/config/config_ci_contract.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/infrastructure/config/converters.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/infrastructure/config/settings_api.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/infrastructure/config/target_classification_profile.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/infrastructure/control_plane/evidence_location_publish.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/infrastructure/schemas/pipeline_config.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/infrastructure/schemas/pipeline_config_common.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/infrastructure/schemas/silver_chembl_target_classification.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/infrastructure/schemas/target_classification_config.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/infrastructure/storage/delta/table_ops.py": "Reviewed the active parquet read moving from _read_records_from_active_parquet_files into _read_active_file. The same pq.read_table call remains single-threaded (use_threads=False); partition values are restored from Delta add-actions. The read_delta_records fallthrough at the former line 98 is now line 152. No new client, task, or cleanup owner.",
+    "src/bioetl/infrastructure/storage/target_candidates.py": "Reviewed opt-in IUPHAR local file, table, lock, copy, and directory acquisitions in this source. Recorded as source-qualified resources with runtime NOT_RUN_12553: 3 delta, 2 directory-enumeration, 3 file. No network client or process is started.",
+    "src/bioetl/infrastructure/storage/target_classification_guard.py": "Reviewed opt-in IUPHAR local file, table, lock, copy, and directory acquisitions in this source. Recorded as source-qualified resources with runtime NOT_RUN_12553: 1 delta, 1 directory-enumeration. No network client or process is started.",
+    "src/bioetl/infrastructure/storage/target_classification_migration.py": "Reviewed opt-in IUPHAR local file, table, lock, copy, and directory acquisitions in this source. Recorded as source-qualified resources with runtime NOT_RUN_12553: 1 directory-enumeration, 5 file, 2 file-copy, 2 file-lock. No network client or process is started.",
+    "src/bioetl/infrastructure/storage/target_deployment_binding.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/infrastructure/storage/target_fk_repair.py": "Reviewed opt-in IUPHAR local file, table, lock, copy, and directory acquisitions in this source. Recorded as source-qualified resources with runtime NOT_RUN_12553: 3 delta, 1 directory-enumeration, 4 file, 2 file-copy. No network client or process is started.",
+    "src/bioetl/infrastructure/storage/target_migration_classification_checks.py": "Reviewed the opt-in IUPHAR target-classification delta in this source file. Existing acquisition and cleanup owners stay attached to their original calls; no new external client, task, process, or file lifecycle is introduced.",
+    "src/bioetl/infrastructure/storage/target_migration_dependencies.py": "Reviewed opt-in IUPHAR local file, table, lock, copy, and directory acquisitions in this source. Recorded as source-qualified resources with runtime NOT_RUN_12553: 4 file. No network client or process is started.",
+    "src/bioetl/infrastructure/storage/target_migration_row_ops.py": "Reviewed opt-in IUPHAR local file, table, lock, copy, and directory acquisitions in this source. Recorded as source-qualified resources with runtime NOT_RUN_12553: 1 delta. No network client or process is started.",
+    "src/bioetl/infrastructure/storage/target_migration_validation.py": "Reviewed opt-in IUPHAR local file, table, lock, copy, and directory acquisitions in this source. Recorded as source-qualified resources with runtime NOT_RUN_12553: 2 file. No network client or process is started."
+  }
+}

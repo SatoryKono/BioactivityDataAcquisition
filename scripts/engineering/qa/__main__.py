@@ -6,6 +6,8 @@ Usage:
     python -m scripts.engineering.qa --help
 
 Commands:
+    iuphar-snapshot-build Build an immutable reviewed official IUPHAR snapshot
+    iuphar-target-acceptance Execute pinned IUPHAR reference and pipeline acceptance
     check-naming         Naming convention audit
     check-architecture   Infrastructure architecture compatibility check
     check-app-deps       Application dependency compatibility check
@@ -101,6 +103,7 @@ from scripts.engineering.common.cli_dispatch import dispatch_cli, module_command
 
 _HOTSPOT_REPORT_MODULE = "scripts.engineering.qa.generate_hotspot_degradation_report"
 COMMAND_MODULES: dict[str, str] = {
+    "iuphar-snapshot-build": "scripts.engineering.qa.iuphar_snapshot_build",
     "check-naming": "scripts.engineering.qa.naming_audit",
     "check-architecture": "scripts.engineering.qa.check_architecture",
     "check-app-deps": "scripts.engineering.qa.check_application_deps",
@@ -206,6 +209,7 @@ COMMAND_MODULES: dict[str, str] = {
     "analyze-duplicate-functions": "scripts.engineering.qa.analyze_duplicate_functions",
     "calibrate-hotspots": "scripts.engineering.qa.calibrate_hotspot_budgets",
     "proof-or-stop": "memory.proof_cli",
+    "iuphar-target-acceptance": "scripts.engineering.qa.iuphar_target_acceptance",
     "check-dashboard-visual-semantics": "scripts.engineering.qa.check_dashboard_visual_semantics",
     "check-dashboard-performance-budgets": (
         "scripts.engineering.qa.check_dashboard_performance_budgets"

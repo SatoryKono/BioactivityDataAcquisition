@@ -31,7 +31,7 @@ bash scripts/ai/cursor/setup_cursor.sh
 
 1. Регенерирует `.mcp.json`, `.vscode/mcp.json`, `.cursor/mcp.json`, `.codex/settings.json`
 1. Обновляет `~/.codex/config.toml`
-1. Создаёт **relative** symlink skills: `.cursor/skills/<name>` → `../../.codex/skills/<name>` и `../../docs/00-project/ai/grok/skills/<name>`. Если Windows запрещает symlink, скрипт ставит directory junction на тот же source.
+1. Создаёт **relative** symlink skills: `.cursor/skills/<name>` → `../../.codex/skills/<name>` и `../../docs/00-project/ai/grok/skills/<name>`. Если Windows не получает native symlink, в том числе когда Git Bash создаёт LX-symlink, скрипт ставит directory junction на тот же source.
 1. Prunes stale links (e.g. historical dangling `public`)
 
 Daily MCP default is `--profile stable`. For multi-client heavy plane:

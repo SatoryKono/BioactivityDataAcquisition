@@ -37,6 +37,7 @@ if TYPE_CHECKING:
         IdempotencyContract,
         TableConfig,
     )
+    from bioetl.domain.config.target_classification import TargetClassificationConfig
     from bioetl.domain.config.validation import (
         DEFAULT_VALIDATION_CONFIG,
         ConditionalValidation,
@@ -66,6 +67,7 @@ __all__ = [
     "RuntimeConfig",
     "SilverFilterCompatibilityMode",
     "TableConfig",
+    "TargetClassificationConfig",
     "ValidationConfig",
     "convert_write_mode",
     "freeze_sequences",
@@ -79,6 +81,7 @@ _MEMORY_MODULE = "bioetl.domain.config.memory"
 _PIPELINE_MODULE = "bioetl.domain.config.pipeline"
 _RUNTIME_MODULE = "bioetl.domain.config.runtime"
 _TABLE_MODULE = "bioetl.domain.config.table"
+_TARGET_CLASSIFICATION_MODULE = "bioetl.domain.config.target_classification"
 _VALIDATION_MODULE = "bioetl.domain.config.validation"
 
 _EXPORT_MODULES = {
@@ -102,6 +105,7 @@ _EXPORT_MODULES = {
     "RuntimeConfig": _RUNTIME_MODULE,
     "SilverFilterCompatibilityMode": _RUNTIME_MODULE,
     "TableConfig": _TABLE_MODULE,
+    "TargetClassificationConfig": _TARGET_CLASSIFICATION_MODULE,
     "ValidationConfig": _VALIDATION_MODULE,
     "convert_write_mode": _CONVERTERS_MODULE,
     "freeze_sequences": _CONVERTERS_MODULE,

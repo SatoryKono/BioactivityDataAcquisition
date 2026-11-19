@@ -221,6 +221,15 @@ async def run_postrun_phase(host: _PipelineRunnerExecutionHostProtocol) -> None:
         executor=host._executor,  # pyright: ignore[reportArgumentType]
         dq_context=dq_context,
     )
+    if host._config.pipeline_name == "chembl_target":
+        pipeline = getattr(host, "_pipeline", None)
+        finalize = getattr(
+            getattr(pipeline, "transformer", None),
+            "finalize_target_classification",
+            None,
+        )
+        if pipeline is not None and callable(finalize):
+            finalize(pipeline.context)
     emit_postrun_observability(host, result, runner_stage=_POSTRUN_STAGE_NAME)
 
 

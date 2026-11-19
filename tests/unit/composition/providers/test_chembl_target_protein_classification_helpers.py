@@ -33,9 +33,7 @@ import json
 
 import pytest
 
-from bioetl.composition.providers import (
-    _chembl_target_protein_classification_helpers as helpers,
-)
+from bioetl.domain.chembl import target_protein_classification as helpers
 from bioetl.domain.value_objects.protein_class_hierarchy import (
     ProteinClassificationResolutionError,
 )

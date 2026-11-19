@@ -250,6 +250,32 @@ def test_sync_cursor_commands_skips_file_missing_governance_token(
     assert not (deploy / "bare.md").exists()
 
 
+def test_deploy_rewrites_copy_missing_only_the_managed_marker(
+    tmp_path: Path,
+) -> None:
+    canonical = tmp_path / sync_cursor_rules.CURSOR_COMMAND_DOCS_DIR
+    deploy = tmp_path / sync_cursor_rules.CURSOR_COMMANDS_DIR
+    _write_command(canonical, "review.md")
+    source = (canonical / "review.md").read_text(encoding="utf-8")
+    marker = sync_cursor_rules.MANAGED_COMMAND_MARKER
+    lines = source.splitlines()
+    assert lines[-1] == marker
+    assert lines[-2] == ""
+    stripped = "\n".join(lines[:-2]) + "\n"
+    _write_command(deploy, "review.md", body=stripped)
+
+    check_issues = sync_cursor_rules.sync_cursor_commands(
+        root=tmp_path, deploy=False, check_only=True
+    )
+    deploy_issues = sync_cursor_rules.sync_cursor_commands(
+        root=tmp_path, deploy=True, check_only=False
+    )
+
+    assert any("out of sync" in issue for issue in check_issues)
+    assert deploy_issues == []
+    assert (deploy / "review.md").read_text(encoding="utf-8") == source
+
+
 def test_deploy_prunes_stale_managed_commands_and_preserves_local_files(
     tmp_path: Path,
 ) -> None:

@@ -1,7 +1,7 @@
 # BioETL Class Diagrams Bundle
 
-- Generated: 2026-11-17T18:59:00+00:00
-- Diagram count: 149
+- Generated: 2026-10-25T18:11:35+00:00
+- Diagram count: 151
 
 ## Table of Contents
 
@@ -67,6 +67,7 @@
 - [90-pkg-application-services-workflow-control-plane — Package Family: application/services/workflow/control_plane](#90-pkg-application-services-workflow-control-plane)
 - [90-pkg-application-services-workflow — Package Family: application/services/workflow](#90-pkg-application-services-workflow)
 - [90-pkg-composition-bootstrap-assembly — Package Family: composition/bootstrap/assembly](#90-pkg-composition-bootstrap-assembly)
+- [90-pkg-composition-bootstrap-cli — Package Family: composition/bootstrap/cli](#90-pkg-composition-bootstrap-cli)
 - [90-pkg-composition-bootstrap-runtime — Package Family: composition/bootstrap/runtime](#90-pkg-composition-bootstrap-runtime)
 - [90-pkg-composition-contracts — Package Family: composition/contracts](#90-pkg-composition-contracts)
 - [90-pkg-composition-factories-datasource — Package Family: composition/factories/datasource](#90-pkg-composition-factories-datasource)
@@ -117,6 +118,7 @@
 - [90-pkg-infrastructure-adapters-crossref — Package Family: infrastructure/adapters/crossref](#90-pkg-infrastructure-adapters-crossref)
 - [90-pkg-infrastructure-adapters-http-part1 — Package Family: infrastructure/adapters/http (Part 1/2)](#90-pkg-infrastructure-adapters-http-part1)
 - [90-pkg-infrastructure-adapters-http-part2 — Package Family: infrastructure/adapters/http (Part 2/2)](#90-pkg-infrastructure-adapters-http-part2)
+- [90-pkg-infrastructure-adapters-iuphar — Package Family: infrastructure/adapters/iuphar](#90-pkg-infrastructure-adapters-iuphar)
 - [90-pkg-infrastructure-adapters-openalex — Package Family: infrastructure/adapters/openalex](#90-pkg-infrastructure-adapters-openalex)
 - [90-pkg-infrastructure-adapters-pubchem — Package Family: infrastructure/adapters/pubchem](#90-pkg-infrastructure-adapters-pubchem)
 - [90-pkg-infrastructure-adapters-pubmed — Package Family: infrastructure/adapters/pubmed](#90-pkg-infrastructure-adapters-pubmed)
@@ -790,13 +792,13 @@
 ![90-pkg-application-pipelines-chembl-part2](../class-diagrams/svg/90-pkg-application-pipelines-chembl-part2.svg)
 
 ### Описание
-Диаграмма «Package Family: application/pipelines/chembl (Part 2/2)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/application/pipelines/chembl; part 2/2; modules: target_component_transformer, target_protein_classification_transformer, target_transformer, tissue_transformer.. Схема имеет плотность порядка 4 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: target component transformer, target protein classification transformer, target transformer, tissue transformer. Показательные узлы для быстрого чтения: TargetComponentTransformer, TargetProteinClassificationTransformer, TargetTransformer, TissueTransformer. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
+Диаграмма «Package Family: application/pipelines/chembl (Part 2/2)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/application/pipelines/chembl; part 2/2; modules: target_classified_transformer, target_component_transformer, target_protein_classification_transformer, target_transformer, tissue_transformer.. Схема имеет плотность порядка 5 узлов и 1 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: target classified transformer, target component transformer, target protein classification transformer, target transformer, tissue transformer. Показательные узлы для быстрого чтения: TargetClassifiedTransformer, TargetComponentTransformer, TargetProteinClassificationTransformer, TargetTransformer, TissueTransformer. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-10-04`
-- Узлы (metadata): `4`
+- Дата: `2026-11-18`
+- Узлы (metadata): `5`
 
 \newpage
 
@@ -1284,13 +1286,13 @@
 ![90-pkg-application-services-workflow-control-plane](../class-diagrams/svg/90-pkg-application-services-workflow-control-plane.svg)
 
 ### Описание
-Диаграмма «Package Family: application/services/workflow/control_plane» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/application/services/workflow/control_plane; modules: _execution_resume_support, _execution_recording_finish, execution_preparation, execution_service, selected_snapshot_resume.. Схема имеет плотность порядка 6 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: execution resume support, execution recording finish, execution preparation, execution service, selected snapshot resume. Показательные узлы для быстрого чтения: _WorkflowManifestPort, _WorkflowManifestService, WorkflowExecutionRecorder, WorkflowExecutionPreparationResult, WorkflowExecutionService, SelectedSnapshotResumeOptions. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
+Диаграмма «Package Family: application/services/workflow/control_plane» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/application/services/workflow/control_plane; modules: _execution_resume_support, _execution_recording_finish, execution_preparation, execution_service, mutation_plan, selected_snapshot_resume.. Схема имеет плотность порядка 7 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: execution resume support, execution recording finish, execution preparation, execution service, mutation plan, selected snapshot resume. Показательные узлы для быстрого чтения: _WorkflowManifestPort, _WorkflowManifestService, WorkflowExecutionRecorder, WorkflowExecutionPreparationResult, WorkflowExecutionService, WorkflowMutationSpec. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-10-04`
-- Узлы (metadata): `6`
+- Дата: `2026-11-18`
+- Узлы (metadata): `7`
 
 \newpage
 
@@ -1329,6 +1331,25 @@
 - Уровень: `Package Family / Inventory Slice`
 - Дата: `2026-10-04`
 - Узлы (metadata): `5`
+
+\newpage
+
+<div style="page-break-before: always;"></div>
+
+## 90-pkg-composition-bootstrap-cli
+
+**Package Family: composition/bootstrap/cli**
+
+![90-pkg-composition-bootstrap-cli](../class-diagrams/svg/90-pkg-composition-bootstrap-cli.svg)
+
+### Описание
+Диаграмма «Package Family: composition/bootstrap/cli» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/composition/bootstrap/cli; modules: lineage, lock, noop.. Схема имеет плотность порядка 4 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: lineage, lock, noop. Показательные узлы для быстрого чтения: TargetFKRepairRequest, _FrozenAPISource, WorkflowTargetAdmission, _PipelineIntent. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
+
+### Метаданные
+- Тип: `classDiagram`
+- Уровень: `Package Family / Inventory Slice`
+- Дата: `2026-11-18`
+- Узлы (metadata): `4`
 
 \newpage
 
@@ -1607,12 +1628,12 @@
 ![90-pkg-domain-contracts-gold-part1](../class-diagrams/svg/90-pkg-domain-contracts-gold-part1.svg)
 
 ### Описание
-Диаграмма «Package Family: domain/contracts/gold (Part 1/2)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/domain/contracts/gold; part 1/2; modules: _chembl_reference_publication_schemas, _chembl_target_lookup_schemas, _chembl_activity_assay_schemas, composite_bioassay, _chembl_molecule_protein_schemas, _composite_gold_common_schema.. Схема имеет плотность порядка 30 узлов и 29 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: chembl reference publication schemas, chembl target lookup schemas, chembl activity assay schemas, composite bioassay, chembl molecule protein schemas, composite gold common schema. Показательные узлы для быстрого чтения: ChEMBLCellLineGoldSchema, ChEMBLCompoundRecordGoldSchema, ChEMBLPublicationGoldSchema, ChEMBLPublicationSimilarityGoldSchema, ChEMBLPublicationTermGoldSchema, ChEMBLSubcellularFractionGoldSchema. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
+Диаграмма «Package Family: domain/contracts/gold (Part 1/2)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/domain/contracts/gold; part 1/2; modules: _chembl_target_lookup_schemas, _chembl_reference_publication_schemas, _chembl_activity_assay_schemas, composite_bioassay, _chembl_molecule_protein_schemas, _composite_gold_common_schema.. Схема имеет плотность порядка 30 узлов и 29 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: chembl target lookup schemas, chembl reference publication schemas, chembl activity assay schemas, composite bioassay, chembl molecule protein schemas, composite gold common schema. Показательные узлы для быстрого чтения: ChEMBLSubcellularFractionGoldSchema, ChEMBLTargetComponentGoldSchema, ChEMBLTargetGoldSchema, ChEMBLTargetGoldSchemaV31, ChEMBLTargetProteinClassificationGoldSchema, ChEMBLTissueGoldSchema. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-10-04`
+- Дата: `2026-11-18`
 - Узлы (metadata): `30`
 
 \newpage
@@ -1626,13 +1647,13 @@
 ![90-pkg-domain-contracts-gold-part2](../class-diagrams/svg/90-pkg-domain-contracts-gold-part2.svg)
 
 ### Описание
-Диаграмма «Package Family: domain/contracts/gold (Part 2/2)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/domain/contracts/gold; part 2/2; modules: publications_semanticscholar.. Схема имеет плотность порядка 1 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: publications semanticscholar. Показательные узлы для быстрого чтения: SemanticScholarPublicationGoldSchema. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
+Диаграмма «Package Family: domain/contracts/gold (Part 2/2)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/domain/contracts/gold; part 2/2; modules: publications_pubmed, publications_semanticscholar.. Схема имеет плотность порядка 2 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: publications pubmed, publications semanticscholar. Показательные узлы для быстрого чтения: PubMedPublicationGoldSchema, SemanticScholarPublicationGoldSchema. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-10-04`
-- Узлы (metadata): `1`
+- Дата: `2026-11-18`
+- Узлы (metadata): `2`
 
 \newpage
 
@@ -2101,13 +2122,13 @@
 ![90-pkg-domain-schemas-chembl](../class-diagrams/svg/90-pkg-domain-schemas-chembl.svg)
 
 ### Описание
-Диаграмма «Package Family: domain/schemas/chembl» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/domain/schemas/chembl; modules: activity, assay, assay_parameters, cell_line, compound_record, molecule.. Схема имеет плотность порядка 15 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: activity, assay, assay parameters, cell line, compound record, molecule. Показательные узлы для быстрого чтения: ActivitySchema, AssaySchema, AssayParametersSchema, CellLineSchema, CompoundRecordSchema, MoleculeSchema. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
+Диаграмма «Package Family: domain/schemas/chembl» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/domain/schemas/chembl; modules: target, activity, assay, assay_parameters, cell_line, compound_record.. Схема имеет плотность порядка 16 узлов и 1 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: target, activity, assay, assay parameters, cell line, compound record. Показательные узлы для быстрого чтения: TargetSchema, TargetSchemaV31, ActivitySchema, AssaySchema, AssayParametersSchema, CellLineSchema. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-10-04`
-- Узлы (metadata): `15`
+- Дата: `2026-11-18`
+- Узлы (metadata): `16`
 
 \newpage
 
@@ -2284,6 +2305,25 @@
 
 <div style="page-break-before: always;"></div>
 
+## 90-pkg-infrastructure-adapters-iuphar
+
+**Package Family: infrastructure/adapters/iuphar**
+
+![90-pkg-infrastructure-adapters-iuphar](../class-diagrams/svg/90-pkg-infrastructure-adapters-iuphar.svg)
+
+### Описание
+Диаграмма «Package Family: infrastructure/adapters/iuphar» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/adapters/iuphar; modules: cohort_contract, snapshot_models, _official_targets_csv, adapter, evidence_store, snapshot_evidence.. Схема имеет плотность порядка 10 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: cohort contract, snapshot models, official targets csv, adapter, evidence store, snapshot evidence. Показательные узлы для быстрого чтения: CanonicalCohortExport, CohortConversionError, CohortExportRequest, LoadedIupharProfile, LoadedIupharSnapshot, OfficialProjection. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
+
+### Метаданные
+- Тип: `classDiagram`
+- Уровень: `Package Family / Inventory Slice`
+- Дата: `2026-11-18`
+- Узлы (metadata): `10`
+
+\newpage
+
+<div style="page-break-before: always;"></div>
+
 ## 90-pkg-infrastructure-adapters-openalex
 
 **Package Family: infrastructure/adapters/openalex**
@@ -2424,13 +2464,13 @@
 ![90-pkg-infrastructure-config-part2](../class-diagrams/svg/90-pkg-infrastructure-config-part2.svg)
 
 ### Описание
-Диаграмма «Package Family: infrastructure/config (Part 2/2)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/config; part 2/2; modules: protein_class_target_type_loader, publication_controlled_vocabulary_loader, publication_type_classification_loader, semantic_field_registry_loader, source_config_loader.. Схема имеет плотность порядка 5 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: protein class target type loader, publication controlled vocabulary loader, publication type classification loader, semantic field registry loader, source config loader. Показательные узлы для быстрого чтения: ProteinClassTargetTypeMappingLoader, PublicationControlledVocabularyLoader, PublicationTypeClassificationLoader, SemanticFieldRegistryLoader, _CachedSourceConfigLoader. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
+Диаграмма «Package Family: infrastructure/config (Part 2/2)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/config; part 2/2; modules: protein_class_target_type_loader, publication_controlled_vocabulary_loader, publication_type_classification_loader, semantic_field_registry_loader, source_config_loader, target_classification_profile.. Схема имеет плотность порядка 6 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: protein class target type loader, publication controlled vocabulary loader, publication type classification loader, semantic field registry loader, source config loader, target classification profile. Показательные узлы для быстрого чтения: ProteinClassTargetTypeMappingLoader, PublicationControlledVocabularyLoader, PublicationTypeClassificationLoader, SemanticFieldRegistryLoader, _CachedSourceConfigLoader, TargetClassificationSchemaProfile. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-10-04`
-- Узлы (metadata): `5`
+- Дата: `2026-11-18`
+- Узлы (metadata): `6`
 
 \newpage
 
@@ -2538,12 +2578,12 @@
 ![90-pkg-infrastructure-schemas-part2](../class-diagrams/svg/90-pkg-infrastructure-schemas-part2.svg)
 
 ### Описание
-Диаграмма «Package Family: infrastructure/schemas (Part 2/4)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/schemas; part 2/4; modules: composite_config, composite_validation, workflow_config.. Схема имеет плотность порядка 25 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: composite config, composite validation, workflow config. Показательные узлы для быстрого чтения: CompositeConfigFileSchema, CompositeConfigSchema, NormalizedAnchorPolicySchema, NormalizedJoinKeyPolicySchema, PubchemCompoundAnchorSchema, PubchemCompoundJoinBoundarySchema. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
+Диаграмма «Package Family: infrastructure/schemas (Part 2/4)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/schemas; part 2/4; modules: composite_config, composite_validation, pipeline_config_common.. Схема имеет плотность порядка 25 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: composite config, composite validation, pipeline config common. Показательные узлы для быстрого чтения: CompositeConfigFileSchema, CompositeConfigSchema, NormalizedAnchorPolicySchema, NormalizedJoinKeyPolicySchema, PubchemCompoundAnchorSchema, PubchemCompoundJoinBoundarySchema. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-11-17`
+- Дата: `2026-11-18`
 - Узлы (metadata): `25`
 
 \newpage
@@ -2557,13 +2597,13 @@
 ![90-pkg-infrastructure-schemas-part3](../class-diagrams/svg/90-pkg-infrastructure-schemas-part3.svg)
 
 ### Описание
-Диаграмма «Package Family: infrastructure/schemas (Part 3/4)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/schemas; part 3/4; modules: base_schemas_pubchem, pipeline_config_common, dq_report_config, source_config.. Схема имеет плотность порядка 26 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: base schemas pubchem, pipeline config common, dq report config, source config. Показательные узлы для быстрого чтения: BaseFilterColumnSchema, BaseGoldColumnFilterConfig, BaseGoldFiltersConfig, BaseGoldListContainsFilterConfig, BaseGoldListLengthFilterConfig, BaseGoldRangeFilterConfig. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
+Диаграмма «Package Family: infrastructure/schemas (Part 3/4)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/schemas; part 3/4; modules: workflow_config, base_schemas_pubchem, dq_report_config, source_config.. Схема имеет плотность порядка 27 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: workflow config, base schemas pubchem, dq report config, source config. Показательные узлы для быстрого чтения: WorkflowConfigFileSchema, WorkflowConfigSchema, WorkflowDefaultsSchema, WorkflowPipelineStepSchema, WorkflowReconcileForeignKeysConfigSchema, WorkflowReconcileRowsConfigSchema. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-11-17`
-- Узлы (metadata): `26`
+- Дата: `2026-11-18`
+- Узлы (metadata): `27`
 
 \newpage
 
@@ -2576,12 +2616,12 @@
 ![90-pkg-infrastructure-schemas-part4](../class-diagrams/svg/90-pkg-infrastructure-schemas-part4.svg)
 
 ### Описание
-Диаграмма «Package Family: infrastructure/schemas (Part 4/4)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/schemas; part 4/4; modules: _composite_config_merge_schema, composite_config_base, filter_config, dq_config, pipeline_config, pipeline_config_provider.. Схема имеет плотность порядка 25 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: composite config merge schema, composite config base, filter config, dq config, pipeline config, pipeline config provider. Показательные узлы для быстрого чтения: ColumnGroupSchema, MergeOutputSchema, MergeSchema, MergeSortBySchema, TargetProteinClassificationProjectionSchema, AggregationFieldSchema. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
+Диаграмма «Package Family: infrastructure/schemas (Part 4/4)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/schemas; part 4/4; modules: _composite_config_merge_schema, composite_config_base, filter_config, dq_config, pipeline_config_provider, pipeline_contract_policy.. Схема имеет плотность порядка 25 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: composite config merge schema, composite config base, filter config, dq config, pipeline config provider, pipeline contract policy. Показательные узлы для быстрого чтения: ColumnGroupSchema, MergeOutputSchema, MergeSchema, MergeSortBySchema, TargetProteinClassificationProjectionSchema, AggregationFieldSchema. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-11-17`
+- Дата: `2026-11-18`
 - Узлы (metadata): `25`
 
 \newpage
@@ -2633,13 +2673,13 @@
 ![90-pkg-infrastructure-storage-delta](../class-diagrams/svg/90-pkg-infrastructure-storage-delta.svg)
 
 ### Описание
-Диаграмма «Package Family: infrastructure/storage/delta» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/storage/delta; modules: arrow_converter, resilience.. Схема имеет плотность порядка 4 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: arrow converter, resilience. Показательные узлы для быстрого чтения: ArrowDataConverter, ArrowSchemaPreparationContext, AdaptiveRetryPolicy, SilverMergeResiliencePolicy. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
+Диаграмма «Package Family: infrastructure/storage/delta» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/storage/delta; modules: arrow_converter, resilience, table_ops.. Схема имеет плотность порядка 5 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: arrow converter, resilience, table ops. Показательные узлы для быстрого чтения: ArrowDataConverter, ArrowSchemaPreparationContext, AdaptiveRetryPolicy, SilverMergeResiliencePolicy, _PartitionInfo. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-10-04`
-- Узлы (metadata): `4`
+- Дата: `2026-11-18`
+- Узлы (metadata): `5`
 
 \newpage
 

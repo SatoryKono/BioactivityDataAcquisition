@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "6e690657590dd8d6f510051f1168f95ca2afd42b",
+  "source_ref": "7b36eb8384d2825e78c30e40d1a026f9c1718cfb",
+  "source_reviews": {
+    "src/bioetl/application/core/pre_silver_finalization_flow.py": "Leave record enrichment and projection in the existing inner helper and publish only after row policy in the direct target transformer. No changes to resource owners or acquisition expressions.",
+    "src/bioetl/application/core/pre_silver_record.py": "Add an optional in-memory evidence cleanup callback. No resource acquisition.",
+    "src/bioetl/application/core/pre_silver_staging_flow.py": "Wire the optional in-memory evidence cleanup callback from the transformer. No resource acquisition.",
+    "src/bioetl/application/core/record_normalization_finalization.py": "Release the pending in-memory evidence when staged row policy drops or rejects a record. The existing publication remains after the policy. No new acquisition.",
+    "src/bioetl/application/pipelines/chembl/target_transformer.py": "Direct transform publishes via its existing observer after Silver structural and filter decisions and discards pending in-memory evidence on exit. Uses the same evidence sink and no new acquisition.",
+    "src/bioetl/application/services/target_runtime/classification.py": "Discard unpublished entries from the run-scoped in-memory mapping. Existing evidence publication and ownership stay attached to the same call.",
+    "src/bioetl/composition/bootstrap/assembly/target_classification_identity.py": "Forward whether the target replay uses its saved parent configuration into the existing profile resolver. No new acquisition.",
+    "src/bioetl/composition/bootstrap/assembly/target_classification_runtime.py": "Select the replay-supplied configuration instead of the active workflow context binding for exact replay. The existing profile and snapshot byte validation still runs. No acquisition change.",
+    "src/bioetl/composition/factories/pipeline/_creation_wiring.py": "Forward the exact replay flag to config selection in the existing pipeline factory. No new acquisition.",
+    "src/bioetl/composition/factories/services/preflight.py": "Forward exact replay mode to the dependency validator. Existing writer destinations and compatibility checks are unchanged.",
+    "src/bioetl/infrastructure/storage/target_migration_validation.py": "Recognize an additional BioETL CLI Python module invocation in the existing process argument parser. Process enumeration and the two owned local file reads use the same existing expressions."
+  }
+}

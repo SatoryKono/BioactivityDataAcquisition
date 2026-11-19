@@ -21,7 +21,18 @@ def test_memory_error_during_collection(tmp_path: Path) -> None:
 
     # Run pytest directly. Collection MemoryError is a pytest exit 2.
     # This test does not start pytest_abort_diagnostic_adapter.
-    cmd = [sys.executable, "-m", "pytest", str(test_file)]
+    config = tmp_path / "pytest.ini"
+    config.write_text("[pytest]\n", encoding="utf-8")
+    cmd = [
+        sys.executable,
+        "-m",
+        "pytest",
+        "-c",
+        str(config),
+        "-p",
+        "no:cacheprovider",
+        str(test_file),
+    ]
 
     res = subprocess.run(cmd, capture_output=True, text=True, check=False)
 

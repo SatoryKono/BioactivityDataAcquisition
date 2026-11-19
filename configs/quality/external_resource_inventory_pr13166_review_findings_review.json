@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "3ff5f7cddec60b8f15500da8b162900aca123ea7",
+  "source_ref": "828400ea65e2b15616c5adb7f0928b6f7ed99dda",
+  "source_reviews": {
+    "src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py": "Docstring only. V31 columns stay nullable and no acquisition, owner, or qualification changes.",
+    "src/bioetl/domain/ports/__init__.py": "Same TargetClassification port exports, packed so the facade stays within the shrink-only line bound. No new acquisition.",
+    "src/bioetl/infrastructure/adapters/iuphar/_input_projection.py": "Known organism names without a taxonomy id are rejected before classification. No new file or client acquisition.",
+    "src/bioetl/infrastructure/adapters/iuphar/_official_target_projection.py": "The official CSV digest is computed once before the species loop. The same sha256 call remains; no new acquisition.",
+    "src/bioetl/infrastructure/storage/target_fk_repair.py": "The candidate manifest is written to a sibling temp file and replaced into manifest.json. The temp write is a local file acquisition released before return; replace does not retain a handle."
+  },
+  "expression_updates": {
+    "src/bioetl/infrastructure/storage/target_fk_repair.py": {
+      "manifest.write_bytes(_json_bytes(document) + b'\\n')": "temporary.write_bytes(_json_bytes(document) + b'\\n')"
+    }
+  }
+}

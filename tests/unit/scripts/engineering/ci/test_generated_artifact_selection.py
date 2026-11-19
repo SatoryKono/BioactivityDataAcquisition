@@ -374,6 +374,20 @@ def test_daily_validator_failures_survive_and_do_not_suppress_remaining_checks(
     assert [row["exit_code"] for row in json.loads(report.read_text())] == [1, 0]
 
 
+def test_integration_fetches_the_pinned_host_source_before_tests():
+    workflow = yaml.safe_load((ROOT / ".github/workflows/tests.yml").read_text())
+    steps = workflow["jobs"]["test-matrix"]["steps"]
+    fetch = next(s for s in steps if s["name"] == "Fetch immutable integration source")
+    assert fetch["if"] == "matrix.test-group.name == 'integration'"
+    assert "ci_source_revalidations" in fetch["run"]
+    assert 're.fullmatch(r"[0-9a-f]{40}", source)' in fetch["run"]
+    assert 'git cat-file -e "${integration_source}^{tree}"' in fetch["run"]
+    assert 'git fetch --no-tags --depth=1 origin "$integration_source"' in fetch["run"]
+    assert steps.index(fetch) < next(
+        i for i, s in enumerate(steps) if s.get("id") == "run-tests"
+    )
+
+
 def test_source_governance_fetch_is_unconditional_and_precedes_both_modes():
     workflow = yaml.safe_load((ROOT / ".github/workflows/tests.yml").read_text())
     steps = workflow["jobs"]["governance-preflight"]["steps"]

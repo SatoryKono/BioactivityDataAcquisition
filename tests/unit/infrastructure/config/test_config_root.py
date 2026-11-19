@@ -145,6 +145,35 @@ def test_get_default_repo_root_points_to_repository_root() -> None:
     assert (repo_root / "src" / "bioetl").is_dir()
 
 
+def test_installed_runtime_resolves_configs_beside_its_own_venv(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runtime_root = tmp_path / "runtime"
+    runtime_venv = runtime_root / ".venv"
+    source = (
+        runtime_venv
+        / "lib"
+        / "python3.13"
+        / "site-packages"
+        / "bioetl"
+        / "infrastructure"
+        / "config"
+        / "config_root.py"
+    )
+    source.parent.mkdir(parents=True)
+    (runtime_root / "configs").mkdir()
+    (runtime_venv / "pyvenv.cfg").write_text("home = /usr/bin\n", encoding="utf-8")
+    (source.parent / "configs").mkdir()
+    unrelated_cwd = tmp_path / "unrelated"
+    (unrelated_cwd / "configs").mkdir(parents=True)
+    monkeypatch.chdir(unrelated_cwd)
+    monkeypatch.setattr(config_root, "__file__", str(source))
+
+    assert get_default_repo_root() == runtime_root
+    assert resolve_config_subdir("providers") == runtime_root / "configs" / "providers"
+
+
 def _use_synthetic_source_layout(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> Path:
@@ -327,11 +356,11 @@ def test_repo_root_search_skips_unmarked_configs_and_preserves_layout_fallback(
     """Ignore configs-only ancestors and retain the installed-layout fallback."""
     import bioetl.infrastructure.config.config_root as config_root_module
 
-    layout_root = tmp_path / "isolated-layout"
+    layout_root = _use_synthetic_source_layout(tmp_path, monkeypatch)
     source = (
         layout_root / "src" / "bioetl" / "infrastructure" / "config" / "config_root.py"
     )
-    source.parent.mkdir(parents=True)
+    source.parent.mkdir(parents=True, exist_ok=True)
     source.write_text("# isolated source location\n", encoding="utf-8")
     # A closer configs directory is insufficient without either root marker.
     (source.parent / "configs").mkdir()

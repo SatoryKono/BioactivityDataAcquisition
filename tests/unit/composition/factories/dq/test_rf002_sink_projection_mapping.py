@@ -224,7 +224,7 @@ def test_already_projection_dump_preserves_checks() -> None:
 def test_rebase_preserves_unconfigured_dq_paths_and_rebases_configured_layer(tmp_path):
     from types import SimpleNamespace
     from bioetl.composition.bootstrap_contexts import DQOutputPathsContext
-    from bioetl.composition.factories.dq._context_resolver_support import (
+    from bioetl.composition.factories.dq.context_resolver import (
         rebase_dq_output_paths,
     )
 

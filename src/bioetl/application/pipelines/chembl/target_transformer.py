@@ -24,6 +24,9 @@ from bioetl.application.pipelines.chembl.target_helpers import (
     SynonymHelper,
     XrefHelper,
 )
+from bioetl.application.services.target_runtime.classification import (
+    TargetClassificationRunState,
+)
 from bioetl.domain.entities import Target
 from bioetl.domain.types import GoldRecord, JsonDict
 from bioetl.domain.value_objects.taxonomy_id import TaxonomyId
@@ -39,6 +42,31 @@ class TargetTransformer(BaseChemblTransformer):
     entity_class = Target
     primary_id_field = "target_id"
     _PROVIDER_ALIASES: ClassVar[dict[str, str]] = {"target_id": "target_chembl_id"}
+    _target_classification_session: TargetClassificationRunState | None = None
+
+    def configure_target_classification(
+        self, session: TargetClassificationRunState
+    ) -> None:
+        """Bind the run-owned collaborator exactly once from Composition."""
+        if self._target_classification_session is not None:
+            raise RuntimeError("target classification is already configured")
+        self._target_classification_session = session
+        self._business_evidence_observer = session.publish
+        self._business_evidence_discarder = session.discard
+
+    def _enrich_normalized_business_data(
+        self, context: PipelineContext, index: int, business_data: JsonDict
+    ) -> JsonDict:
+        session = self._target_classification_session
+        if session is None:
+            return business_data
+        return session.enrich(context, index, business_data)
+
+    def finalize_target_classification(self, context: PipelineContext) -> None:
+        """Expose completion to the application runner, never during transform."""
+        session = self._target_classification_session
+        if session is not None:
+            session.finalize(context)
 
     @override
     def _prepare_record(

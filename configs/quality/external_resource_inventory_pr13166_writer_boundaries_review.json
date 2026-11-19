@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "f039b59ffed3cbb620126b91bcfb463510b98be7",
+  "source_ref": "4cb05b7d775e73152445af8c1635146328eb2dfb",
+  "source_reviews": {
+    "src/bioetl/infrastructure/storage/target_migration_validation.py": "Reviewed the sole production change: local token/tokens variables in _writer_options are renamed argument/remaining to avoid Bandit B105 interpreting the CLI terminator as a password. Full-file ASTs are identical after that local alpha-renaming; all 171 executable statement locations and 213 arcs, and all 369 physical lines, are unchanged. Full Bandit with existing project configuration passes without exclusions. Maintained writer behavior and external resource expressions, scopes, dispositions and sites are unchanged. The genuine full17 capture remains bound to f039; no measurement identity is relabeled."
+  }
+}

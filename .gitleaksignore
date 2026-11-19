@@ -238,3 +238,13 @@ fe3308006e3265859d849a5e61fbf4a9dd1f7c83:configs/quality/external_resource_inven
 791a9fd50e24731e51ed82d2e7a1a4f444cee694:data/workflow-reconciliation/all-1000-20261115/chembl_core/configs/quality/external_resource_inventory.json:generic-api-key:3913
 791a9fd50e24731e51ed82d2e7a1a4f444cee694:data/workflow-reconciliation/all-1000-20261115/chembl_core/configs/quality/external_resource_inventory.json:generic-api-key:4339
 791a9fd50e24731e51ed82d2e7a1a4f444cee694:data/workflow-reconciliation/all-1000-20261115/chembl_core/configs/quality/external_resource_inventory.json:generic-api-key:4345
+
+# Reviewed immutable false positives from the November 18 PR sweep.
+# Journal findings are a fixed monkeypatch-only test canary. Inventory findings
+# are independently verified settings_api.py Git blob IDs, not credentials.
+# Exact historical fingerprints only; new commits, lines and findings still fail.
+937c1f7fcea5faf0bf9177b2ae5250507c08d52d:configs/quality/external_resource_inventory.json:generic-api-key:3935
+83ca7fb3b838daa4887665f8d289b633c8f9ceaa:configs/quality/external_resource_inventory.json:generic-api-key:3935
+3747c7ce276947d916f168ba89dbb2a4d063dcfc:configs/quality/external_resource_inventory.json:generic-api-key:3935
+767c41667bd1d4770b8cedba42f79a5b19e84da9:tests/architecture/ci/test_event_journal_redaction_barrier.py:generic-api-key:209
+5309ad88b8de1bdeff444840004ef54f4d0df554:tests/architecture/ci/test_event_journal_redaction_barrier.py:generic-api-key:167

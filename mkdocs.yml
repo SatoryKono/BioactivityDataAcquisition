@@ -551,6 +551,7 @@ nav:
           - "VACUUM Procedures": 05-operations/runbooks/vacuum-procedures.md
           - "Observability Checklist": 05-operations/runbooks/observability-checklist.md
           - "Run Manifest Inspection": 05-operations/runbooks/run-manifest-inspection.md
+          - "IUPHAR Target Classification": 05-operations/runbooks/iuphar-target-classification.md
           - "Traceability Signal Ownership": 05-operations/runbooks/traceability-signal-ownership.md
           - "Traceability Tabletop Drills": 05-operations/runbooks/traceability-tabletop-drills.md
           - "Traceability Adoption Checklist": 05-operations/runbooks/traceability-adoption-checklist.md

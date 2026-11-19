@@ -59,6 +59,9 @@ _PUBLIC_EXPORTS = {
     "TargetProteinClassificationTransformer": (
         "bioetl.application.pipelines.chembl.target_protein_classification_transformer"
     ),
+    "TargetClassifiedTransformer": (
+        "bioetl.application.pipelines.chembl.target_classified_transformer"
+    ),
     "TargetTransformer": "bioetl.application.pipelines.chembl.target_transformer",
     "TissueTransformer": "bioetl.application.pipelines.chembl.tissue_transformer",
     "UniProtProteinTransformer": "bioetl.application.pipelines.uniprot.transformer",

@@ -62,8 +62,8 @@
     }
   ],
   "current_live_metrics_provenance": {
-    "source_inventory_sha256": "20f6cc3f6c05a11dcb6a52b29fb7f6640197020fc2f9907a751f7b55db0ce356",
-    "source_tree_sha256": "c86d1b29516048ee6a7cc39d072b6799889ccb0a68b1e9dfe862b5801b6dbb16",
+    "source_inventory_sha256": "ae84027a97d5a6ff55f56a40277bdc824ea96a5710d577cdb5c4549ff1cefde9",
+    "source_tree_sha256": "81a4018f063858b4623c4ecee450b9cdfc74e6d5ae6c1ca2c2141fb000388d74",
     "derived_by": "scripts/engineering/qa/_refresh_issue5376_live_metrics.py",
     "semantics": "Live retained-inventory binding; raw W44 regression ledger is separate."
   }

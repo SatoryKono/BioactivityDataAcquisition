@@ -899,10 +899,12 @@ def test_exact_replay_collect_ledger_bronze_dates_covers_mismatch_and_source_ref
     None
 ):
     manifest = SimpleNamespace(
+        pipeline_name="chembl_activity",
         provider="chembl",
         entity="activity",
         source_refs=(
             SimpleNamespace(
+                pipeline_name="chembl_activity",
                 provider="chembl",
                 entity="activity",
                 input_snapshots=(
@@ -945,10 +947,12 @@ def test_exact_replay_collect_ledger_bronze_dates_covers_mismatch_and_source_ref
             ledger_entries=entity_mismatch_entries,
         )
     mixed_source_ref_manifest = SimpleNamespace(
+        pipeline_name="chembl_activity",
         provider="chembl",
         entity="activity",
         source_refs=(
             SimpleNamespace(
+                pipeline_name="pubchem_activity",
                 provider="pubchem",
                 entity="activity",
                 input_snapshots=(
@@ -968,10 +972,12 @@ def test_exact_replay_prefers_published_ledger_snapshot_over_manifest_fallback()
     None
 ):
     manifest = SimpleNamespace(
+        pipeline_name="chembl_activity",
         provider="chembl",
         entity="activity",
         source_refs=(
             SimpleNamespace(
+                pipeline_name="chembl_activity",
                 provider="chembl",
                 entity="activity",
                 input_snapshots=(
@@ -1000,7 +1006,7 @@ def test_exact_replay_prefers_published_ledger_snapshot_over_manifest_fallback()
 def test_exact_replay_resolution_helpers_cover_parent_lookup_and_date_errors(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    original_resolve_parent_manifest = replay_context._resolve_replay_parent_manifest
+    original_resolve_parent_manifest = replay_context.resolve_replay_parent_manifest
     original_resolve_parent_bronze_date = replay_context._resolve_parent_bronze_date
     settings = SimpleNamespace(
         bronze_path="/tmp/bronze",
@@ -1017,7 +1023,7 @@ def test_exact_replay_resolution_helpers_cover_parent_lookup_and_date_errors(
 
     monkeypatch.setattr(
         replay_context,
-        "_resolve_replay_parent_manifest",
+        "resolve_replay_parent_manifest",
         lambda ctx, settings: manifest,
     )
     monkeypatch.setattr(

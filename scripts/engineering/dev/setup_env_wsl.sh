@@ -55,6 +55,10 @@ fi
 mkdir -p "$(dirname "$VENV_DIR")"
 
 if command -v uv >/dev/null 2>&1; then
+    uv lock --check || {
+        echo "[setup_env_wsl][error] uv.lock is stale or unavailable; update it explicitly before setup." >&2
+        exit 1
+    }
     uv venv "$VENV_DIR" --python 3.13 --allow-existing
     export VIRTUAL_ENV="$VENV_DIR"
     export PATH="$VENV_DIR/bin:$PATH"

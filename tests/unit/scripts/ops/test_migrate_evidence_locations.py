@@ -17,7 +17,6 @@ from bioetl.infrastructure.control_plane.file_run_manifest_store import (
 from bioetl.infrastructure.control_plane.file_workflow_manifest_store import (
     FileWorkflowManifestStore,
 )
-from scripts.engineering.common.repo_paths import REPO_ROOT
 from scripts.ops.runtime.migrate_evidence_locations import (
     MigrationTarget,
     execute_migration,
@@ -449,7 +448,7 @@ def test_read_target_list_rejects_path_escape(tmp_path: Path) -> None:
     outside.write_text('{"targets": []}', encoding="utf-8")
 
     with pytest.raises(ValueError, match="refusing path outside"):
-        read_target_list(outside, root=REPO_ROOT)
+        read_target_list(outside, root=tmp_path / "repo")
 
 
 def test_read_target_list_rejects_missing_targets_key(tmp_path: Path) -> None:
@@ -543,7 +542,12 @@ def test_main_rejects_targets_path_escape(
         ),
         encoding="utf-8",
     )
-    monkeypatch.chdir(REPO_ROOT)
+    trusted = tmp_path / "repo"
+    trusted.mkdir()
+    monkeypatch.setattr(
+        "scripts.ops.runtime.migrate_evidence_locations.REPO_ROOT", trusted
+    )
+    monkeypatch.chdir(trusted)
 
     with caplog.at_level("ERROR"):
         assert main(["--targets", str(outside), "--data-root", "data"]) == 1

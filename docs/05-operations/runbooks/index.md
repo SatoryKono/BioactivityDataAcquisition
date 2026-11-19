@@ -57,6 +57,7 @@ ______________________________________________________________________
 | [Bounded Pipeline Smoke (`--limit 100`)](bounded-pipeline-smoke.md) | Sequential catalog smoke: every entity pipeline then every composite pack | P2 |
 | [Backfill/Rebuild](backfill-rebuild.md)                 | Data backfill and rebuild procedures               | P2       |
 | [Schema Evolution](schema-evolution.md)                 | Handling schema changes                            | P2       |
+| [IUPHAR Target Classification](iuphar-target-classification.md) | Pinned shadow acceptance and paired target V31 promotion/rollback | P2 |
 | [Canonical Semantic Field Unification](canonical-semantic-field-unification.md) | Registry-driven canonical field rename/drift prevention runbook | P2 |
 | [Retention-Sensitive Cleanup](retention-sensitive-cleanup.md) | Bounded cleanup gate for protected data, fixtures, reports, archives, and control-plane artifacts | P1 |
 

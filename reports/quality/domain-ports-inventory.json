@@ -543,6 +543,18 @@
       "runtime_checkable": true
     },
     {
+      "line": 17,
+      "name": "TargetClassificationPort",
+      "path": "src/bioetl/domain/ports/target_classification.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 59,
+      "name": "TargetClassificationEvidencePort",
+      "path": "src/bioetl/domain/ports/target_classification.py",
+      "runtime_checkable": true
+    },
+    {
       "line": 34,
       "name": "ForeignKeyReconciliationPort",
       "path": "src/bioetl/domain/ports/workflow_foreign_key_reconciliation.py",
@@ -558,11 +570,11 @@
   "ports_root": "src/bioetl/domain/ports",
   "schema_version": 1,
   "summary": {
-    "port_module_files": 72,
-    "port_protocol_classes": 91,
+    "port_module_files": 73,
+    "port_protocol_classes": 93,
     "runtime_checkable_coverage_pct": 100.0,
-    "runtime_checkable_decorator_count": 103,
-    "runtime_checkable_port_count": 91,
-    "scanned_python_files": 81
+    "runtime_checkable_decorator_count": 105,
+    "runtime_checkable_port_count": 93,
+    "scanned_python_files": 82
   }
 }

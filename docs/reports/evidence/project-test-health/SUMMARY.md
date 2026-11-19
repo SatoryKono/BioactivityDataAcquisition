@@ -57,6 +57,11 @@ coverage refresh:
 
 ## Freshness note
 
+The PR branch also recorded a source-only census at
+`eed011c2eafb64694b184b99b4746e4a64abd25b`: 3,362 tracked `test_*.py`
+modules under `tests/`, verified with `git ls-tree -r --name-only`.
+This historical census records no test execution or coverage measurement.
+
 Re-verified on 2026-11-17 at source commit
 `f39053c1840173e49ed64eac8a3673f70bcf9eca`: `git ls-tree -r --name-only f39053c1840173e49ed64eac8a3673f70bcf9eca -- tests`
 contains **3333 tracked `test_*.py` modules**. The three canonical configuration

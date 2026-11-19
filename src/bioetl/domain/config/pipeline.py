@@ -13,6 +13,7 @@ from bioetl.domain.composite import ColumnGroupConfig, DataSchemaConfig
 from bioetl.domain.config._converters import freeze_sequences, resolve_loading_strategy
 from bioetl.domain.config.dq import DQConfig
 from bioetl.domain.config.table import TableConfig
+from bioetl.domain.config.target_classification import TargetClassificationConfig
 from bioetl.domain.constants import DEFAULT_BATCH_SIZE, DEFAULT_CHECKPOINT_INTERVAL
 from bioetl.domain.medallion import LoadingStrategy
 from bioetl.domain.types import ScdConfig
@@ -93,6 +94,9 @@ class PipelineConfig:
     data_schema: DataSchemaConfig | None = None
     field_policy: tuple[FieldPolicyConfig, ...] = ()
     source_profile: SourceProfile | None = None
+    target_classification: TargetClassificationConfig = field(
+        default_factory=TargetClassificationConfig
+    )
 
     # Data Quality
     dq: DQConfig = field(default_factory=DQConfig)
@@ -119,12 +123,22 @@ class PipelineConfig:
             ("fields", "column_groups", "field_policy", "transform_steps"),
         )
         self._resolve_loading_strategy()
+        self._validate_target_classification_scope()
         self._validate_config()
 
     def _resolve_loading_strategy(self) -> None:
         """Resolve loading_strategy from string to enum if provided."""
         resolved = resolve_loading_strategy(self.loading_strategy)
         object.__setattr__(self, "loading_strategy", resolved)
+
+    def _validate_target_classification_scope(self) -> None:
+        """Reject enabled classification outside the chembl target pipeline."""
+        if not self.target_classification.enabled:
+            return
+        if self.provider != "chembl" or self.entity_type != "target":
+            raise ValueError(
+                "target classification is supported only for chembl_target"
+            )
 
     def _validate_config(self) -> None:
         """Validate configuration values."""

@@ -2,6 +2,13 @@
 
 from __future__ import annotations
 
+from bioetl.composition.bootstrap.assembly.target_classification_runtime import (
+    resolve_target_runtime_config,
+)
+from bioetl.infrastructure.config.target_classification_profile import (
+    resolve_target_classification_profile,
+)
+
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
@@ -93,10 +100,13 @@ def _resolve_yaml_config(
     deps: _ServiceBundleDeps,
 ) -> PipelineYamlConfig:
     """Resolve the effective pipeline YAML config for one creation request."""
-    return cast(
-        "PipelineYamlConfig",
-        inputs.request.config or deps.load_pipeline_config(inputs.pipeline_name),
-    )
+    resolved = inputs.request.config or deps.load_pipeline_config(inputs.pipeline_name)
+    resolved = cast("PipelineYamlConfig", resolved)
+    if inputs.pipeline_name == "chembl_target":
+        return resolve_target_runtime_config(
+            resolved, exact_replay=inputs.request.runtime.exact_replay
+        )
+    return resolved
 
 
 def _build_pipeline_transformer(
@@ -121,6 +131,7 @@ def _build_pipeline_transformer(
         pandera_silver_schema=inputs.pandera_silver_schema,
         tracer=request.tracer,
         metrics=request.metrics,
+        settings=request.settings,
     )
 
 
@@ -149,6 +160,11 @@ def _create_pipeline_with_services_impl(
         relaxed_dq=request.settings.pipeline.relaxed_dq,
         domain_mapper=cast("DomainConfigMapperPort", deps.yaml_config_to_domain),
     )
+    pandera_silver_schema = inputs.pandera_silver_schema
+    if inputs.pipeline_name == "chembl_target":
+        pandera_silver_schema = resolve_target_classification_profile(
+            yaml_config
+        ).pandera_silver_schema
 
     services = build_pipeline_services_fn(
         pipeline_name=inputs.pipeline_name,
@@ -163,7 +179,7 @@ def _create_pipeline_with_services_impl(
         metadata_coordinator=metadata_coordinator,
         cached_bronze=request.cached_bronze,
         silver_validator=_create_silver_validator(
-            inputs.pandera_silver_schema,
+            pandera_silver_schema,
             cast("DQConfig | None", domain_config.dq),
         ),
     )

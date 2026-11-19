@@ -43,8 +43,8 @@ from bioetl.domain.types import GoldSchemaType
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 if TYPE_CHECKING:
-    from bioetl.application.core.wiring.factory import BasePipeline, PipelineRunner
     from bioetl.infrastructure.config.settings_api import Settings
+    from bioetl.application.core.wiring.factory import BasePipeline, PipelineRunner
     from bioetl.application.core.wiring.transformer import (
         BaseTransformer,
         TransformerDependencyContext,

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import time
+from collections.abc import Callable
 from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.core.preflight._observability import (
@@ -98,6 +99,7 @@ class PreflightService:
         medallion_validator: MedallionConfigValidator,
         *,
         layer_config: PreflightLayerConfig | None = None,
+        dependency_validator: Callable[[], None] | None = None,
     ) -> None:
         self._config = config
         self._context = context
@@ -106,6 +108,7 @@ class PreflightService:
         self._health_aggregator = health_aggregator
         self._medallion_validator = medallion_validator
         self._layer_config = layer_config or PreflightLayerConfig()
+        self._dependency_validator = dependency_validator
 
     async def validate_infrastructure(
         self,
@@ -205,6 +208,8 @@ class PreflightService:
         self, runtime: RuntimeConfig, health_report: HealthReport | None = None
     ) -> PreflightReport:
         """Enforce bound Medallion configuration before preparation or extraction."""
+        if self._dependency_validator is not None:
+            self._dependency_validator()
         report = build_runtime_validation_report(
             self._medallion_validator,
             runtime,

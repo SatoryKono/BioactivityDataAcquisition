@@ -41,7 +41,7 @@ def test_ensure_repo_path_rejects_escape(tmp_path: Path) -> None:
     outside = tmp_path / "outside.txt"
     outside.write_text("x", encoding="utf-8")
     with pytest.raises(ValueError, match="refusing path outside"):
-        ensure_repo_path(outside)
+        ensure_repo_path(outside, root=tmp_path / "repo")
 
 
 def test_ensure_path_within_root_allows_root_itself(tmp_path: Path) -> None:
@@ -57,7 +57,7 @@ def test_resolve_cli_path_joins_relative_under_root() -> None:
 
 def test_resolve_cli_path_rejects_escape(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="refusing path outside"):
-        resolve_cli_path(tmp_path / "escape.txt")
+        resolve_cli_path(tmp_path / "escape.txt", root=tmp_path / "repo")
 
 
 def test_argparse_repo_path_accepts_repo_relative() -> None:
@@ -127,7 +127,7 @@ def test_confined_io_path_rejects_escape(tmp_path: Path) -> None:
     outside = tmp_path / "escape.txt"
     outside.write_text("x", encoding="utf-8")
     with pytest.raises(ValueError, match="refusing path outside"):
-        confined_io_path(outside, root=REPO_ROOT)
+        confined_io_path(outside, root=tmp_path / "repo")
 
 
 def test_confined_io_path_allows_external_absolute_under_custom_root(

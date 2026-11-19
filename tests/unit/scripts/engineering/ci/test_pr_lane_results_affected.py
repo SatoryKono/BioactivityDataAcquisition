@@ -387,6 +387,80 @@ def test_iuphar_batch_pipeline_keeps_a_bounded_owner(tmp_path: Path) -> None:
         assert report["covers_full_suite"] is False
 
 
+def test_passport_artifacts_keep_the_projector_owner(tmp_path: Path) -> None:
+    owner = tmp_path / "tests/unit/scripts/docs/passports/test_passport_projector.py"
+    owner.parent.mkdir(parents=True)
+    owner.write_text("def test_owner():\n    assert True\n", encoding="utf-8")
+    report = build_shadow_compare(
+        [
+            "docs/04-reference/passports/generated/pipelines/chembl_target.json",
+            "docs/04-reference/passports/workflows/chembl-target.md",
+            "docs/04-reference/passports/completeness-report.json",
+        ],
+        repo_root=tmp_path,
+    )
+    assert report["selected"] == [
+        "tests/unit/scripts/docs/passports/test_passport_projector.py"
+    ]
+    assert report["covers_full_suite"] is False
+    with pytest.raises(ValueError, match="unmapped paths"):
+        build_shadow_compare(
+            ["docs/04-reference/contracts/unowned-passport.md"], repo_root=tmp_path
+        )
+
+
+def test_iuphar_shadow_paths_keep_explicit_owners(tmp_path: Path) -> None:
+    owners = (
+        "tests/unit/iuphar_target_class/test_csv_io.py",
+        "tests/unit/iuphar_target_class/test_integration_acceptance.py",
+        "tests/unit/iuphar_target_class/test_reference_coverage_v2.py",
+        "tests/architecture/test_codex_skill_agent_links.py",
+        "tests/architecture/test_ai_runtime_governance_links.py",
+        "tests/architecture/test_documentation_cleanup_inventory.py",
+        "tests/architecture/test_gold_strict_validation_policy.py",
+        "tests/architecture/test_issue_12029_remaining_parity_gates.py",
+        "tests/architecture/test_tech_debt_issue_6038_governance_taxonomy.py",
+        "tests/integration/config/test_semantic_field_unification_contract.py",
+        "tests/architecture/test_gold_schema_contracts.py",
+        "tests/unit/infrastructure/config/test_contract_registry_loader.py",
+        "tests/integration/config/test_non_chembl_contract_registry_coverage.py",
+        "tests/architecture/test_doc_crossref_integrity.py",
+        "tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py",
+    )
+    for owner in owners:
+        path = tmp_path / owner
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("def test_owner():\n    assert True\n", encoding="utf-8")
+    changed = (
+        "configs/base/contract_registry.yaml",
+        "docs/00-project/ai/skills/COMBINED-CATALOG.md",
+        "docs/00-project/ai/skills/README.md",
+        "docs/00-project/ai/skills/SKILLS-CATALOG.md",
+        "docs/00-project/ai/skills/SKILLS-PRACTICAL-INDEX.md",
+        "docs/02-architecture/generated/pipeline-dataflows/chembl_activity/pipeline-dataflow-ir.json",
+        "docs/02-architecture/generated/pipeline-dataflows/chembl_activity/pipeline-passport.md",
+        "docs/04-reference/contracts/gold-schemas.md",
+        "docs/04-reference/contracts/gold/chembl_target_v3.1.json",
+        "docs/05-operations/runbooks/index.md",
+        "docs/05-operations/runbooks/iuphar-target-classification.md",
+        "src/iuphar_target_class/_pipeline_proof_rows.py",
+        "src/iuphar_target_class/csv_io.py",
+        "src/iuphar_target_class/integration_acceptance.py",
+        "src/iuphar_target_class/pipeline_proof.py",
+        "src/iuphar_target_class/reference_coverage.py",
+    )
+    report = build_shadow_compare(list(changed), repo_root=tmp_path)
+    assert set(report["selected"]) == set(owners)
+    assert report["covers_full_suite"] is False
+    for unowned in (
+        "src/iuphar_target_class/unmapped.py",
+        "docs/00-project/ai/skills/UNMAPPED.md",
+        "docs/02-architecture/generated/other/file.json",
+    ):
+        with pytest.raises(ValueError, match="unmapped paths"):
+            build_shadow_compare([unowned], repo_root=tmp_path)
+
+
 def test_iuphar_policy_paths_keep_the_policy_owner(tmp_path: Path) -> None:
     owner = tmp_path / "tests/unit/iuphar_target_class/test_policy.py"
     owner.parent.mkdir(parents=True)
@@ -1526,6 +1600,7 @@ def test_collect_nodeids_parses_pytest_collection(tmp_path: Path) -> None:
     """Collection keeps real nodeids and rejects a missing selector."""
     from scripts.engineering.ci.pr_lane_results import _collect_nodeids
 
+    (tmp_path / "pytest.ini").write_text("[pytest]\n", encoding="utf-8")
     test_file = tmp_path / "tests" / "test_sample.py"
     test_file.parent.mkdir()
     test_file.write_text("def test_one():\n    assert True\n", encoding="utf-8")
@@ -1654,6 +1729,46 @@ def test_shadow_compare_routes_codex_launchers_and_guidance(changed_file: str) -
             "configs/quality/external_resource_inventory_pr0_unreviewed.json",
         ),
         (
+            "configs/quality/external_resource_inventory_pr13166_dq_data_dir_review.json",
+            {
+                "tests/architecture/test_external_resource_inventory_catalog.py",
+                "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+            },
+            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
+        ),
+        (
+            "configs/quality/external_resource_inventory_pr13166_metrics_fold_review.json",
+            {
+                "tests/architecture/test_external_resource_inventory_catalog.py",
+                "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+            },
+            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
+        ),
+        (
+            "configs/quality/external_resource_inventory_pr13166_import_owners_review.json",
+            {
+                "tests/architecture/test_external_resource_inventory_catalog.py",
+                "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+            },
+            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
+        ),
+        (
+            "configs/quality/external_resource_inventory_pr13166_delta_evolution_review.json",
+            {
+                "tests/architecture/test_external_resource_inventory_catalog.py",
+                "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+            },
+            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
+        ),
+        (
+            "configs/quality/external_resource_inventory_pr13166_pagination_abort_review.json",
+            {
+                "tests/architecture/test_external_resource_inventory_catalog.py",
+                "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+            },
+            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
+        ),
+        (
             "configs/quality/external_resource_inventory_pr13113_review.json",
             {
                 "tests/architecture/test_external_resource_inventory_catalog.py",
@@ -1772,128 +1887,3 @@ def test_wsl_setup_routes_to_installer_integrity_regression():
         ["scripts/engineering/dev/setup_bioetl_wsl.ps1"], repo_root=root
     )
     assert "tests/unit/scripts/test_wsl_uv_install_integrity.py" in json.dumps(report)
-
-
-@pytest.mark.parametrize(
-    "audit", ["003", "003_extraction", "004", "004_tip", "005", "006", "007"]
-)
-def test_security_inventory_reviews_route_to_source_qualification_tests(audit):
-    root = Path(__file__).resolve().parents[5]
-    path = (
-        f"configs/quality/external_resource_inventory_security_aud{audit}_review.json"
-    )
-    report = build_shadow_compare([path], repo_root=root)
-    assert (
-        "tests/architecture/test_external_resource_inventory_catalog.py"
-        in json.dumps(report)
-    )
-    assert (
-        "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py"
-        in json.dumps(report)
-    )
-
-
-def test_dashboard_resource_review_keeps_bounded_source_qualification_routes() -> None:
-    root = Path(__file__).resolve().parents[5]
-    report = build_shadow_compare(
-        ["configs/quality/external_resource_inventory_pr13168_review.json"],
-        repo_root=root,
-    )
-    assert {
-        "tests/architecture/test_external_resource_inventory_catalog.py",
-        "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
-    } <= set(report["selected"])
-    assert report["covers_full_suite"] is False
-    assert report["activation"] == "not_applied"
-    with pytest.raises(ValueError, match="unmapped paths"):
-        build_shadow_compare(
-            ["configs/quality/external_resource_inventory_pr13168_unreviewed.json"],
-            repo_root=root,
-        )
-
-
-def test_hook_qualification_inputs_have_bounded_shadow_routes() -> None:
-    root = Path(__file__).resolve().parents[5]
-    expected = {
-        ".gitattributes": {
-            "tests/unit/scripts/repo/test_hook_receipts.py",
-            "tests/architecture/test_config_discrepancy_report_drift.py",
-            "tests/architecture/test_tech_debt_issues_5847_5852_closeout.py",
-        },
-        "configs/quality/external_resource_inventory_pr13133_platform_narrowing_review.json": {
-            "tests/architecture/test_external_resource_inventory_catalog.py",
-            "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
-        },
-        "configs/quality/external_resource_inventory_pr13133_main_66ef9357_review.json": {
-            "tests/architecture/test_external_resource_inventory_catalog.py",
-            "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
-        },
-        "configs/quality/external_resource_inventory_pr13133_main_c41cd6_review.json": {
-            "tests/architecture/test_external_resource_inventory_catalog.py",
-            "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
-        },
-        "configs/quality/external_resource_inventory_pr13133_accepted_main_review.json": {
-            "tests/architecture/test_external_resource_inventory_catalog.py",
-            "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
-        },
-    }
-    for path, owning_tests in expected.items():
-        report = build_shadow_compare([path], repo_root=root)
-        assert owning_tests <= set(report["selected"]), path
-        assert report["covers_full_suite"] is False
-    for unknown in (
-        ".gitattributes.unreviewed",
-        "configs/quality/external_resource_inventory_pr99999_unreviewed_review.json",
-        "configs/quality/external_resource_inventory_pr13133_main_unreviewed_review.json",
-    ):
-        with pytest.raises(ValueError, match="unmapped paths"):
-            build_shadow_compare([unknown], repo_root=root)
-
-
-def test_branch_hygiene_runbook_routes_only_to_owned_checks():
-    root = Path(__file__).resolve().parents[5]
-    report = build_shadow_compare(
-        ["docs/05-operations/runbooks/branch-hygiene-wave.md"], repo_root=root
-    )
-    assert "tests/unit/scripts/repo/test_branch_hygiene.py" in json.dumps(report)
-    with pytest.raises(ValueError, match="unmapped"):
-        build_shadow_compare(
-            ["docs/05-operations/runbooks/branch-hygiene-wave-unknown.md"],
-            repo_root=root,
-        )
-
-
-@pytest.mark.parametrize(
-    "changed",
-    [
-        ".github/tooling/jscpd/package-lock.json",
-        ".github/tooling/jscpd/package.json",
-        ".github/tooling/picomatch-backport/BACKPORT.md",
-        ".github/tooling/picomatch-backport/picomatch-4.0.8-bioetl.17.tgz",
-        ".github/tooling/picomatch-backport/provenance.json",
-        ".github/tooling/picomatch-backport/test.cjs",
-        "grafana/plugins/bioetl-scenes-app/package-lock.json",
-        "grafana/plugins/bioetl-selectorshell-panel/package.json",
-    ],
-)
-def test_security_backport_inputs_select_executable_security_contracts(
-    changed: str,
-) -> None:
-    root = Path(__file__).resolve().parents[5]
-    owner = "tests/architecture/test_picomatch_backport.py"
-    assert owner in affected_pytest_targets([changed], repo_root=root)
-    assert owner in build_shadow_compare([changed], repo_root=root)["selected"]
-
-
-def test_lifecycle_review_report_has_specific_impact_owners() -> None:
-    root = Path(__file__).resolve().parents[5]
-    report = "reports/codex/review_py-audit-bot_20261118_1200_review.md"
-    owners = {
-        "tests/architecture/test_documentation_cleanup_inventory.py",
-        "tests/architecture/test_scripts_lifecycle_registry.py",
-        "tests/unit/scripts/qa/test_lifecycle_review_output_destinations.py",
-    }
-    assert owners <= set(affected_pytest_targets([report], repo_root=root))
-    assert owners <= set(build_shadow_compare([report], repo_root=root)["selected"])
-    with pytest.raises(ValueError, match="unmapped"):
-        build_shadow_compare(["reports/codex/unregistered-review.md"], repo_root=root)

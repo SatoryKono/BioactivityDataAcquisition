@@ -115,6 +115,8 @@ def _run_requested_checks() -> dict[str, str]:
                 "",
                 "-m",
                 "",
+                "-o",
+                f"cache_dir={Path(directory) / 'cache'}",
                 f"--junitxml={receipt}",
             ],
             cwd=root,

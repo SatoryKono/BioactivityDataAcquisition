@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "3ddb5995fbb28255ef97ac648641b537b07f0f83",
+  "source_ref": "dc6f894630a50d20d06c16e452f7adbb6beb34b9",
+  "source_reviews": {
+    "src/bioetl/infrastructure/adapters/iuphar/_input_projection.py": "Move the unchanged pure field/taxonomy projection into iuphar_target_class.bioetl_input so offline acceptance and runtime use the same eligibility policy. This deleted module has no external resource creation, ownership or lifetime behavior.",
+    "src/bioetl/infrastructure/adapters/iuphar/adapter.py": "Retarget the three existing pure input projection imports to their shared owning module. Runtime eligibility, projection, result ordering and resource ownership are unchanged.",
+    "src/bioetl/infrastructure/adapters/iuphar/canonical_target_rows.py": "Retarget the existing pure project_target_fields import to its shared owning module; exporter validation and Arrow resource lifetimes are unchanged.",
+    "src/bioetl/application/core/pre_silver_finalization_flow.py": "Remove a single forwarding identity wrapper; callers pass the identical identity_record mapping directly to the existing prepared-data transformation. Preserve source ID string conversion, transformation ordering and all values.",
+    "src/bioetl/application/pipelines/chembl/base_chembl_transformer.py": "Remove a single forwarding identity wrapper; callers pass the identical identity_record mapping directly to the existing prepared-data transformation. Preserve source ID string conversion, transformation ordering and all values.",
+    "src/bioetl/application/pipelines/uniprot/transformer.py": "Remove a single forwarding identity wrapper; callers pass the identical identity_record mapping directly to the existing prepared-data transformation. Preserve source ID string conversion, transformation ordering and all values.",
+    "src/bioetl/composition/runtime_builders/_manifest_publication_context_support.py": "Reuse existing build_manifest_publication_identity_kwargs instead of duplicating its dictionary. Preserve typed keys, values and identity-resolution behavior; no resource or lifetime changes.",
+    "src/bioetl/infrastructure/control_plane/_evidence_location_publish.py": "Move the unchanged exclusive publication implementation into its public owning module and retarget imports. Preserve hard-link create-if-absent, trusted-base validation, fdopen ownership, flush and cleanup paths. No acquisition, qualification or runtime status changes.",
+    "src/bioetl/infrastructure/control_plane/evidence_location_publish.py": "Move the unchanged exclusive publication implementation into its public owning module and retarget imports. Preserve hard-link create-if-absent, trusted-base validation, fdopen ownership, flush and cleanup paths. No acquisition, qualification or runtime status changes.",
+    "src/bioetl/infrastructure/control_plane/file_evidence_location_store.py": "Move the unchanged exclusive publication implementation into its public owning module and retarget imports. Preserve hard-link create-if-absent, trusted-base validation, fdopen ownership, flush and cleanup paths. No acquisition, qualification or runtime status changes."
+  },
+  "exclusion_moves": [
+    {
+      "from": {
+        "file": "src/bioetl/infrastructure/control_plane/_evidence_location_publish.py",
+        "line": 33,
+        "expression": "safe_path.read_bytes()"
+      },
+      "to": {
+        "file": "src/bioetl/infrastructure/control_plane/evidence_location_publish.py",
+        "scope": "read_existing_bytes",
+        "call": "safe_path.read_bytes",
+        "expression": "safe_path.read_bytes()",
+        "reason": "Synchronous pathlib read_bytes for publish preflight; temporary file stream owned inside helper, not a persistent store connection."
+      }
+    },
+    {
+      "from": {
+        "file": "src/bioetl/infrastructure/control_plane/_evidence_location_publish.py",
+        "line": 77,
+        "expression": "tempfile.mkstemp(suffix='.tmp', prefix='.' + target.stem + '_', dir=target.parent)"
+      },
+      "to": {
+        "file": "src/bioetl/infrastructure/control_plane/evidence_location_publish.py",
+        "scope": "publish_bytes_if_absent",
+        "call": "tempfile.mkstemp",
+        "expression": "tempfile.mkstemp(suffix='.tmp', prefix='.' + target.stem + '_', dir=target.parent)",
+        "reason": "Atomic publish temp fd via mkstemp; descriptor ownership transferred to fdopen/close/unlink in the same helper. Static census only (NOT_RUN_12553)."
+      }
+    },
+    {
+      "from": {
+        "file": "src/bioetl/infrastructure/control_plane/_evidence_location_publish.py",
+        "line": 88,
+        "expression": "os.fdopen(fd, 'wb')"
+      },
+      "to": {
+        "file": "src/bioetl/infrastructure/control_plane/evidence_location_publish.py",
+        "scope": "publish_bytes_if_absent",
+        "call": "os.fdopen",
+        "expression": "os.fdopen(fd, 'wb')",
+        "reason": "fdopen of mkstemp descriptor in evidence-location publish helper; same temp ownership as mkstemp site, not a second resource."
+      }
+    }
+  ]
+}

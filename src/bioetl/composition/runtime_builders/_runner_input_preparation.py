@@ -10,6 +10,10 @@ from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.runtime_builders._exact_replay_cached_bronze_context import (
     bind_cached_bronze_context as _bind_cached_bronze_context,
     resolve_exact_replay_cached_bronze_context as _resolve_exact_replay_cached_bronze_context,
+    resolve_replay_parent_manifest,
+)
+from bioetl.composition.bootstrap.assembly.target_classification_identity import (
+    load_target_aware_pipeline_config,
 )
 from bioetl.composition.runtime_builders._inputs_resolution_support import (
     apply_tracing_override as _apply_tracing_override_impl,
@@ -51,17 +55,6 @@ class PreparedRunnerContext:
 class ResolvedRunnerDerivedInputs:
     runtime_config: RuntimeConfig
     filter_config: InputFilterConfig | None
-
-
-def _resolve_settings_for_runner(
-    *,
-    ctx: PipelineRunContext,
-    get_settings_fn: Callable[[], Settings],
-) -> Settings:
-    return _apply_tracing_override_impl(
-        settings=get_settings_fn(),
-        enabled=getattr(ctx, "tracing_enabled_override", None),
-    )
 
 
 def _resolve_required_persistence_profile(
@@ -111,17 +104,6 @@ def _resolve_effective_context(
     return _bind_cached_bronze_context(ctx, cached_bronze), cached_bronze
 
 
-def _load_runner_yaml_config(
-    *,
-    pipeline_name: str,
-    load_pipeline_config_fn: Callable[[str], PipelineYamlConfig],
-    validate_pk_contract_fn: Callable[[PipelineYamlConfig], None],
-) -> PipelineYamlConfig:
-    yaml_config = load_pipeline_config_fn(pipeline_name)
-    validate_pk_contract_fn(yaml_config)
-    return yaml_config
-
-
 def _build_runner_observability(
     *,
     ctx: PipelineRunContext,
@@ -151,9 +133,9 @@ def prepare_runner_context(
     validate_pk_contract_fn: Callable[[PipelineYamlConfig], None],
 ) -> PreparedRunnerContext:
     """Resolve the shared settings/context/yaml/observability runner inputs."""
-    settings = _resolve_settings_for_runner(
-        ctx=ctx,
-        get_settings_fn=get_settings_fn,
+    settings = _apply_tracing_override_impl(
+        settings=get_settings_fn(),
+        enabled=getattr(ctx, "tracing_enabled_override", None),
     )
     _validate_runner_data_root_policy(
         ctx=ctx,
@@ -168,10 +150,13 @@ def prepare_runner_context(
         settings=settings,
         assemble_cached_bronze_context_fn=assemble_cached_bronze_context_fn,
     )
-    yaml_config = _load_runner_yaml_config(
-        pipeline_name=ctx.pipeline_name,
-        load_pipeline_config_fn=load_pipeline_config_fn,
-        validate_pk_contract_fn=validate_pk_contract_fn,
+    yaml_config = load_target_aware_pipeline_config(
+        ctx.pipeline_name,
+        load_pipeline_config_fn,
+        validate_pk_contract_fn,
+        ctx=effective_ctx,
+        settings=settings,
+        resolve_parent=resolve_replay_parent_manifest,
     )
     observability = _build_runner_observability(
         ctx=effective_ctx,
