@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "catalog_ref": "2ddd2f5165f0fea44160341c577bbda4ffd34be0",
-  "source_ref": "3064c4d15a6c1741c8f13a0bf23dae955a528619",
+  "catalog_ref": "b74592ebaa490780c8eb087a67e7beb05ca30b36",
+  "source_ref": "b74592ebaa490780c8eb087a67e7beb05ca30b36",
   "source_reviews": {
-    "src/bioetl/application/core/batch_transformer_attempt_success.py": "Simplifies ordinary record finalization, deterministic DQ field selection, and the single type cast after optional awaiting. The scoped ExitStack, evidence admission boundary, terminal disposal, and all external resource acquisition expressions are unchanged. Existing resource references require line relocation only."
+    "src/bioetl/application/core/batch_transformer_attempt_success.py": "Simplifies finalization, DQ field ordering, and awaiting of transform outcomes. The staged publication and cleanup order is preserved. No resource acquisition, destination, or authorization changes."
   }
 }
