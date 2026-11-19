@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from datetime import UTC, datetime
 
+import click
 import pyarrow as pa
 import pytest
 import yaml
@@ -37,6 +38,7 @@ from bioetl.infrastructure.storage.target_migration_row_ops import (
 from bioetl.infrastructure.storage.target_classification_guard import (
     assert_target_table_compatibility,
 )
+from bioetl.interfaces.cli.commands.run_composite import run_composite
 from iuphar_target_class.matching import CatalogTarget
 from iuphar_target_class.models import ProviderAnnotation
 from iuphar_target_class.pipeline import IndexedSnapshot
@@ -45,6 +47,27 @@ from iuphar_target_class.stage0.io import canonical_json_bytes, sha256_bytes
 
 pytestmark = pytest.mark.unit
 ROOT = Path(__file__).resolve().parents[4]
+
+
+@pytest.mark.parametrize("directory", ["--list-only", "--help", "--dry-run"])
+def test_composite_cached_path_value_does_not_mark_a_writer_as_preview(
+    directory: str,
+):
+    args = ["run-composite", "--composite=target", "--cached-bronze-path", directory]
+
+    assert validation._managed_writer_command(["bioetl", *args])
+    assert not validation._managed_writer_command(["bioetl", *args, "--dry-run"])
+
+
+def test_composite_guard_consumes_each_value_taking_cli_option():
+    expected = {
+        name
+        for param in run_composite.params
+        if isinstance(param, click.Option) and not param.is_flag
+        for name in param.opts
+    }
+
+    assert expected <= validation._WRITER_VALUE_OPTIONS
 
 
 @pytest.mark.parametrize(
@@ -56,6 +79,41 @@ ROOT = Path(__file__).resolve().parents[4]
         ["D:/repo/.venv/Scripts/bioetl.exe", "run", "--pipeline=chembl_target"],
         ["bioetl.exe", "workflow", "run", "chembl_baseline"],
         ["bioetl", "run", "chembl_target"],
+        [
+            "bioetl",
+            "run",
+            "--pipeline",
+            "chembl_target",
+            "--debug-export-dir",
+            "--dry-run",
+        ],
+        ["bioetl", "run", "--pipeline=chembl_target", "--debug-export-dir", "--help"],
+        ["bioetl", "workflow", "run", "baseline", "--debug-export-dir", "-h"],
+        [
+            "bioetl",
+            "run-composite",
+            "--composite",
+            "target",
+            "--cached-bronze-path",
+            "--list-only",
+        ],
+        [
+            "bioetl",
+            "run-composite",
+            "--composite",
+            "target",
+            "--cached-bronze-path",
+            "--dry-run",
+        ],
+        ["bioetl", "workflow", "run", "--", "--help"],
+        ["bioetl", "debug", "--pipeline", "chembl_target"],
+        ["bioetl", "debug", "--pipeline=chembl_target"],
+        ["python", "-m", "bioetl", "debug", "--pipeline", "chembl_target"],
+        ["python", "-m", "bioetl.interfaces.cli", "debug", "--pipeline=chembl_target"],
+        ["bioetl", "run-composite", "--composite", "target"],
+        ["bioetl", "run-composite", "--composite=target"],
+        ["python", "-m", "bioetl", "run-composite", "--composite", "target"],
+        ["bioetl", "run-composite", "--composite", "operator_profile"],
         ["bioetl", "run-all", "--source", "chembl"],
         ["bioetl", "--", "run-all", "--source=chembl"],
         ["bioetl", "run-all", "--source=pubchem", "--source", "chembl"],
@@ -98,6 +156,21 @@ def test_managed_writer_detection_recognizes_actual_argv(argv, monkeypatch):
         ["python", "unrelated.py", "bioetl.interfaces.cli", "run", "chembl_target"],
         ["python", "-m", "bioetl.interfaces.cli", "workflow", "run", "--help"],
         ["bioetl", "workflow", "list"],
+        ["bioetl", "debug", "--pipeline", "chembl_target", "--help"],
+        ["bioetl", "debug", "--pipeline=chembl_target", "-h"],
+        ["bioetl", "debug", "--pipeline", "pubchem_compound"],
+        ["bioetl", "run-composite", "--composite", "target", "--dry-run"],
+        ["bioetl", "run-composite", "--composite=target", "--help"],
+        ["python", "unrelated.py", "debug", "--pipeline=chembl_target"],
+        [
+            "bioetl",
+            "run-composite",
+            "--composite",
+            "target",
+            "--cached-bronze-path",
+            "--list-only",
+            "--dry-run",
+        ],
         ["bioetl", "run-all", "--source", "chembl", "--dry-run"],
         ["bioetl", "run-all", "--source=chembl", "--list-only"],
         ["bioetl", "run-all", "--source", "chembl", "--help"],
@@ -112,6 +185,72 @@ def test_managed_writer_detection_recognizes_actual_argv(argv, monkeypatch):
 )
 def test_read_only_and_unrelated_commands_do_not_block_migration(argv):
     assert validation._managed_writer_command(argv) is False
+
+
+@pytest.mark.parametrize(
+    ("command_path", "arguments", "value_key", "value"),
+    [
+        (
+            ("run",),
+            ["--pipeline", "chembl_target", "--debug-export-dir", "--dry-run"],
+            "debug_export_dir",
+            "--dry-run",
+        ),
+        (
+            ("workflow", "run"),
+            ["baseline", "--debug-export-dir", "-h"],
+            "debug_export_dir",
+            "-h",
+        ),
+        (
+            ("run-composite",),
+            ["--composite", "target", "--cached-bronze-path", "--list-only"],
+            "cached_bronze_path",
+            "--list-only",
+        ),
+    ],
+)
+def test_writer_guard_respects_click_option_values(
+    command_path, arguments, value_key, value
+):
+    """Parse real maintained options without invoking callbacks or a runner."""
+    import click
+    from bioetl.interfaces.cli import cli
+
+    command = cli
+    for name in command_path:
+        command = command.get_command(click.Context(command), name)
+    options, _, _ = command.make_parser(click.Context(command)).parse_args(
+        list(arguments)
+    )
+    assert options[value_key] == value
+    assert not options.get("dry_run")
+    assert validation._managed_writer_command(["bioetl", *command_path, *arguments])
+
+
+def test_writer_guard_value_options_cover_maintained_cli():
+    """A new valued CLI option must not bypass writer admission as a flag."""
+    import click
+    from bioetl.interfaces.cli import cli
+
+    paths = [
+        ("run",),
+        ("debug",),
+        ("run-all",),
+        ("run-composite",),
+        ("workflow", "run"),
+    ]
+    for path in paths:
+        command = cli
+        for name in path:
+            command = command.get_command(click.Context(command), name)
+        value_options = {
+            option
+            for parameter in command.params
+            if isinstance(parameter, click.Option) and not parameter.is_flag
+            for option in parameter.opts
+        }
+        assert value_options <= validation._WRITER_VALUE_OPTIONS
 
 
 def _synthetic_profile(tmp_path: Path) -> LoadedIupharProfile:

@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "catalog_ref": "cdcf73b4b61ced3cc033d38509df7de9956600d4",
-  "source_ref": "cdcf73b4b61ced3cc033d38509df7de9956600d4",
+  "catalog_ref": "fca31bce39aa541d77a2e1c17e2d992f3abf4da6",
+  "source_ref": "388e2f5346f78b25814edff121c72d73c4a11a0d",
   "source_reviews": {
-    "src/bioetl/infrastructure/storage/target_migration_validation.py": "Writer admission now recognizes the CLI command boundary and the last source option. Other functions are AST-identical. Existing local configuration reads retain their expressions, scopes, dispositions, and resources."
+    "src/bioetl/infrastructure/storage/target_migration_validation.py": "Reviewed command and value boundaries for every maintained CLI writer. Valued options are normalized before recognizing help, dry-run and run-all listing; composite commands never inherit list-only semantics. The option terminator cannot turn workflow operands into flags. Actual Click parsers confirm flag-looking paths are consumed as values without invoking callbacks or runners. Six writer regressions failed before the correction; all 156 admission, dependency, binding and rehearsal tests pass afterward. Existing filesystem configuration reads retain their expressions, scopes, dispositions and resources; no new external resource site is introduced."
   }
 }

@@ -51,7 +51,7 @@ _OMITTABLE_RUNTIME_COLUMNS = {
 
 
 def assert_no_managed_writers() -> None:
-    """Refuse promotion while known pipeline/workflow/campaign writers live."""
+    """Refuse migration while known pipeline or orchestrated writers live."""
     for process in psutil.process_iter(["pid", "name", "cmdline"]):
         if process.info["pid"] == os.getpid():
             continue
@@ -76,33 +76,83 @@ def _bioetl_arguments(argv: Sequence[str]) -> list[str]:
     return []
 
 
-def _chembl_batch_writer(options: list[str]) -> bool:
-    """Treat the last source option as authoritative, as Click does."""
+_WRITER_VALUE_OPTIONS = frozenset(
+    [
+        "--pipeline",
+        "--source",
+        "--composite",
+        "--run-type",
+        "--limit",
+        "--start-offset",
+        "--input-csv",
+        "--filter-column",
+        "--filter-field",
+        "--vacuum-retention-days",
+        "--resume-run-id",
+        "--resume-manifest-id",
+        "--debug-export-dir",
+        "--debug-export-format",
+        "--cached-bronze-path",
+        "--cached-bronze-date",
+        "--required-persistence-profile",
+        "--replay-of-run-id",
+        "--replay-of-manifest-id",
+        "--health-port",
+        "--observability-backend-port",
+        "--breakpoints",
+        "--mode",
+        "--seed-limit",
+        "--enrich-only",
+        "--force-enricher",
+        "--only-steps",
+        "--reconciliation-mode",
+        "--log-level",
+        "--execution-context",
+        "--force-steps",
+        "--repair-steps",
+    ]
+)
+
+
+def _writer_options(args: list[str]) -> list[str]:
+    """Keep option values from masquerading as read-only flags or commands."""
+    options, tokens = [], iter(args)
+    for token in tokens:
+        if token == "--":
+            break
+        if token in _WRITER_VALUE_OPTIONS:
+            token = f"{token}={next(tokens, '')}"
+        options.append(token)
+    return options
+
+
+def _managed_batch_writer(command: str, options: list[str]) -> bool:
+    """Classify composite writers and last-source ChEMBL batches."""
+    if command == "run-composite":
+        return True
     if "--list-only" in options:
         return False
     for index in range(len(options) - 1, -1, -1):
         option = options[index]
         if option.startswith("--source="):
             return option == "--source=chembl"
-        if option == "--source":
-            return options[index + 1 : index + 2] == ["chembl"]
     return False
 
 
 def _managed_writer_command(argv: Sequence[str]) -> bool:
-    """Recognize executable and python-module calls by argument boundary."""
+    """Recognize maintained pipeline and orchestrator writer commands."""
     if any("workflow-campaigns" in arg.replace("\\", "/").split("/") for arg in argv):
         return True
-    args = _bioetl_arguments(argv)
+    args = _writer_options(_bioetl_arguments(argv))
     if any(flag in args for flag in ("--dry-run", "--help", "-h")):
         return False
     if any(
         args[index : index + 2] == ["workflow", "run"] for index in range(len(args) - 1)
     ):
         return True
-    if args[:1] == ["run-all"]:
-        return _chembl_batch_writer(args[1:])
-    return "run" in args and (
+    if args[:1] in (["run-all"], ["run-composite"]):
+        return _managed_batch_writer(args[0], args[1:])
+    return bool({"run", "debug"}.intersection(args)) and (
         "chembl_target" in args or "--pipeline=chembl_target" in args
     )
 
