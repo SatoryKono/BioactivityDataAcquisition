@@ -84,7 +84,7 @@ def validate_ref(config, mode):
 
 def toml_value(value):
     if isinstance(value, str):
-        return json.dumps(value, ensure_ascii=False)
+        return json.dumps(value, ensure_ascii=False).replace("\x7f", r"\u007f")
     if isinstance(value, bool):
         return str(value).lower()
     if isinstance(value, (int, float)):
@@ -95,11 +95,26 @@ def toml_value(value):
         return (
             "{"
             + ",".join(
-                json.dumps(key) + "=" + toml_value(item) for key, item in value.items()
+                toml_value(key) + "=" + toml_value(item) for key, item in value.items()
             )
             + "}"
         )
     raise ValueError("Unsupported native session setting")
+
+
+def ref_only_overrides(config):
+    """Select Ref without loading unrelated workspace bindings or credentials."""
+    servers = config.get("mcp_servers", {})
+    if not isinstance(servers, dict) or "ref" not in servers:
+        raise PermissionError("Ref-only requires a configured Ref entry")
+    enabled = {}
+    for name, entry in servers.items():
+        if not isinstance(name, str) or not name or not isinstance(entry, dict):
+            raise PermissionError("Ref-only requires safe configured server names")
+        enabled[name] = {"enabled": name == "ref"}
+    # Codex splits override paths on dots, including dots inside quoted keys.
+    # Put server names in the TOML value so each key remains literal.
+    return ["--config", "mcp_servers=" + toml_value(enabled)]
 
 
 def _validate_markdownify_client(entry):
@@ -332,7 +347,13 @@ def _run(argv=None):
     parser.add_argument("--sha256", required=True)
     parser.add_argument("--auth", choices=("api-key", "oauth"), default="api-key")
     parser.add_argument("--check", action="store_true")
-    parser.add_argument(
+    modes = parser.add_mutually_exclusive_group()
+    modes.add_argument(
+        "--ref-only",
+        action="store_true",
+        help="Qualify Ref in an ordinary session with other MCP servers disabled",
+    )
+    modes.add_argument(
         "--acceptance",
         action="store_true",
         help="Enable the separate registered acceptance graph",
@@ -348,7 +369,11 @@ def _run(argv=None):
         physical(codex_home / "config.toml").read_text(encoding="utf-8")
     )
     validate_ref(config, args.auth)
-    overrides = session_overrides(config, root, acceptance=args.acceptance)
+    overrides = (
+        ref_only_overrides(config)
+        if args.ref_only
+        else session_overrides(config, root, acceptance=args.acceptance)
+    )
     from dotenv import dotenv_values
 
     values = (
@@ -356,17 +381,22 @@ def _run(argv=None):
     )
     environment = ref_environment(os.environ, values, args.auth)
     environment["CODEX_HOME"] = str(codex_home)
-    # Bind the validated route against project overlays or a concurrent TOML edit.
-    overrides.extend(
-        ["--config", "mcp_servers.ref=" + toml_value(config["mcp_servers"]["ref"])]
-    )
+    # Pin the validated route without undoing the explicit Ref-only selection.
+    ref_entry = config["mcp_servers"]["ref"]
+    if args.ref_only:
+        ref_entry = {**ref_entry, "enabled": True}
+    overrides.extend(["--config", "mcp_servers.ref=" + toml_value(ref_entry)])
     if args.check:
+        selection = {"ref_only": args.ref_only}
+        if args.ref_only:
+            selection["selected_servers"] = ["ref"]
         print(
             json.dumps(
                 {
                     "workspace": str(root),
                     "executable": str(binary),
                     "auth": args.auth,
+                    **selection,
                     "root_credential_present": bool(
                         environment.get("REF_TOOL_API_KEY")
                     ),

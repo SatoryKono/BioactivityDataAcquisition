@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-19T05:25:21.061206+00:00",
+  "generated_at": "2026-11-19T06:19:48.450707+00:00",
   "summary": {
     "total_scripts": 768,
     "status_counts": {
@@ -1159,25 +1159,25 @@
       "references": [
         {
           "path": "scripts/ai/codex/native_session.py",
-          "line": 133,
+          "line": 148,
           "source_group": "scripts",
           "text": "from scripts.ai.codex.local_mcp_routes import common_directory"
         },
         {
           "path": "scripts/ai/codex/native_session.py",
-          "line": 181,
+          "line": 196,
           "source_group": "scripts",
           "text": "from scripts.ai.codex.local_mcp_routes import MCP_POLICY_FIELDS"
         },
         {
           "path": "scripts/ai/codex/native_session.py",
-          "line": 255,
+          "line": 270,
           "source_group": "scripts",
           "text": "from scripts.ai.codex.local_mcp_routes import ("
         },
         {
           "path": "scripts/ai/codex/native_session.py",
-          "line": 286,
+          "line": 301,
           "source_group": "scripts",
           "text": "from scripts.ai.codex.local_mcp_routes import MCP_POLICY_FIELDS"
         },
@@ -1195,7 +1195,7 @@
         },
         {
           "path": "tests/unit/scripts/test_mcp_native_session.py",
-          "line": 591,
+          "line": 838,
           "source_group": "tests",
           "text": "from scripts.ai.codex import local_mcp_routes as routes"
         },
@@ -1620,13 +1620,13 @@
         },
         {
           "path": "tests/unit/scripts/test_mcp_native_session.py",
-          "line": 12,
+          "line": 13,
           "source_group": "tests",
           "text": "from scripts.ai.codex import native_session"
         },
         {
           "path": "tests/unit/scripts/test_mcp_native_session.py",
-          "line": 13,
+          "line": 14,
           "source_group": "tests",
           "text": "from scripts.ai.codex.native_session import ("
         }
@@ -5264,13 +5264,13 @@
         },
         {
           "path": "tests/unit/scripts/test_mcp_native_session.py",
-          "line": 181,
+          "line": 183,
           "source_group": "tests",
           "text": "\"files\": {\"safe_markdownify.py\": hashlib.sha256(source).hexdigest()},"
         },
         {
           "path": "tests/unit/scripts/test_mcp_native_session.py",
-          "line": 188,
+          "line": 190,
           "source_group": "tests",
           "text": "client = version / \"safe_markdownify.py\""
         },
@@ -5307,31 +5307,31 @@
         },
         {
           "path": "tests/unit/scripts/test_mcp_native_session.py",
-          "line": 88,
+          "line": 90,
           "source_group": "tests",
           "text": "\"files\": {\"session_client.py\": hashlib.sha256(source).hexdigest()},"
         },
         {
           "path": "tests/unit/scripts/test_mcp_native_session.py",
-          "line": 96,
+          "line": 98,
           "source_group": "tests",
           "text": "selector = directory / \"session_client.py\""
         },
         {
           "path": "tests/unit/scripts/test_mcp_native_session.py",
-          "line": 357,
-          "source_group": "tests",
-          "text": "entry[\"args\"][3] = \"session_client.py\""
-        },
-        {
-          "path": "tests/unit/scripts/test_mcp_native_session.py",
-          "line": 453,
+          "line": 359,
           "source_group": "tests",
           "text": "entry[\"args\"][3] = \"session_client.py\""
         },
         {
           "path": "tests/unit/scripts/test_mcp_native_session.py",
           "line": 455,
+          "source_group": "tests",
+          "text": "entry[\"args\"][3] = \"session_client.py\""
+        },
+        {
+          "path": "tests/unit/scripts/test_mcp_native_session.py",
+          "line": 457,
           "source_group": "tests",
           "text": "foreign = tmp_path / \"session_client.py\""
         },
@@ -19972,9 +19972,9 @@
         },
         {
           "path": "docs/05-engineering/test-telemetry-baseline.md",
-          "line": 124,
+          "line": 123,
           "source_group": "docs",
-          "text": "| 3 | `12.972` | `tests.unit.scripts.engineering.ci.test_pr_lane_results_runtime_acceptance_routes::test_runtime_evidence_selects_owning_contract[tests/helpers/runtime_acceptance_12553.py]` | `junit-u"
+          "text": "| 2 | `18.755` | `tests.unit.scripts.engineering.ci.test_pr_lane_results_runtime_acceptance_routes::test_runtime_evidence_selects_owning_contract[tests/helpers/runtime_acceptance_12553.py]` | `junit-u"
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
