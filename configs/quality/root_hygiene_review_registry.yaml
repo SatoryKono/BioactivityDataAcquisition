@@ -262,10 +262,15 @@ review_lanes:
         disposition: must_stay_root
         action_if_reintroduced: retain_as_tracked_opencode_phase1_review_triage_surface_exact_root_not_clutter
       - path: .agents
-        current_live_state: absent_from_root_baseline
-        canonical_path: .codex/skills
-        disposition: owner_decision_required
-        action_if_reintroduced: restore_as_curated_shared_agent_skills_adapter_surface_or_use_codex_skills
+        current_live_state: present_curated_root_surface
+        canonical_path: .agents
+        disposition: must_stay_root
+        action_if_reintroduced: retain_only_tracked_amp_lifecycle_hooks_and_keep_skills_in_codex
+      - path: .amp
+        current_live_state: present_curated_root_surface
+        canonical_path: .amp
+        disposition: must_stay_root
+        action_if_reintroduced: retain_project_settings_with_env_references_and_keep_local_state_untracked
       - path: .ai
         current_live_state: present_local_only_root_surface
         canonical_path: null

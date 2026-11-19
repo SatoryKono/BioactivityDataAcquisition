@@ -41,6 +41,8 @@ root_tooling_roots:
       role: canonical_circleci_project_configuration
     - path: .agents
       role: derived_native_agent_skill_discovery_surface
+    - path: .amp
+      role: amp_subordinate_surface_project_config
     - path: .claude
       role: curated_shared_agent_runtime_surface
     - path: .codex

@@ -1396,3 +1396,35 @@ def test_shadow_compare_routes_guardrail_checker_contract(path: str) -> None:
     assert "tests/architecture/test_junie_runtime_ci_contract.py" in report["selected"]
     if path == "scripts/ai/junie/check_junie_mirror.py":
         assert "tests/unit/scripts" not in report["selected"]
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        ".agents/setup",
+        ".agents/resume",
+        ".amp/settings.json",
+        "docs/05-operations/runbooks/amp-orbs.md",
+    ],
+)
+def test_shadow_compare_routes_amp_orb_contract(path: str) -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare([path], repo_root=root)
+    assert (
+        "tests/unit/repo_backed/scripts/ai/mcp/test_amp_orb_setup.py"
+        in report["selected"]
+    )
+
+
+def test_shadow_compare_routes_root_review_registry_to_its_owner() -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        ["configs/quality/root_hygiene_review_registry.yaml"], repo_root=root
+    )
+    assert (
+        "tests/architecture/test_root_hygiene_review_registry.py" in report["selected"]
+    )
+    assert (
+        "tests/unit/scripts/repo/test_check_root_hygiene_review_registry.py"
+        in report["selected"]
+    )

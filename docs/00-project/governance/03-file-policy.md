@@ -113,7 +113,7 @@ Docker helper dispositions are resolved as follows and MUST stay aligned with
   MUST route into approved `reports/**` or archive/report surfaces instead of a
   root-level txt dump.
 - Root-level tracked директории MUST ограничиваться approved runtime/tooling and
-  project surfaces: `.agents`, `.circleci`, `.claude`, `.codex`, `.cursor`, `.devin`, `.gemini`, `.github`,
+  project surfaces: `.agents`, `.amp`, `.circleci`, `.claude`, `.codex`, `.cursor`, `.devin`, `.gemini`, `.github`,
   `.junie`, `.opencode`, `.vibe`, `.vscode`, `.zed`, `artifacts`, `assets`, `configs`, `data`,
   `docs`, `grafana`, `reports`, `scripts`, `src`, and `tests`.
 - `.circleci/config.yml` is the vendor-required entrypoint for the existing
@@ -125,7 +125,7 @@ Docker helper dispositions are resolved as follows and MUST stay aligned with
   `configs/quality/generated_artifact_routing.yaml`; prose docs in this section
   MUST stay aligned with those enforcement surfaces.
 - Служебные локальные деревья (`.worktrees/`, `.rollback/`) MUST NOT попадать в git-index.
-- Shared repo tooling surfaces such as `.agents/`, `.claude/`, `.codex/`, `.gemini/`, `.junie/`,
+- Shared repo tooling surfaces such as `.agents/`, `.amp/`, `.claude/`, `.codex/`, `.gemini/`, `.junie/`,
   `.opencode/`,
   curated `.vibe/`,
   and curated shared editor metadata roots such as `.cursor/`, `.vscode/`, and
