@@ -27,7 +27,7 @@ CONSUMERS = (
 ARCHIVE = BACKPORT / "picomatch-4.0.8-bioetl.17.tgz"
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="module", autouse=True)
 def warm_node() -> None:
     # The first Node exec on a fresh runner pages in its ~150 MB binary; in
     # serial-coverage that alone took 3.5 s and tripped the ReDoS deadline.
@@ -35,7 +35,7 @@ def warm_node() -> None:
 
 
 @pytest.fixture
-def packed_picomatch(tmp_path: Path, warm_node: None) -> Path:
+def packed_picomatch(tmp_path: Path) -> Path:
     with tarfile.open(ARCHIVE) as packed:
         for member in packed.getmembers():
             assert member.isfile() and member.name.startswith("package/")
