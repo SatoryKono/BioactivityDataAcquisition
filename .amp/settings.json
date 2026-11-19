@@ -1,5 +1,11 @@
 {
   "amp.mcpServers": {
+    "fetch": {
+      "args": [
+        "scripts/ai/mcp/public_fetch_wrapper.sh"
+      ],
+      "command": "bash"
+    },
     "github": {
       "args": [
         "scripts/ai/mcp/github-mcp-wrapper.sh"

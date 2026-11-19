@@ -188,6 +188,7 @@ MCP_WRAPPER_CONTRACTS_TEST = (
     "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py"
 )
 AMP_ORB_SETUP_TEST = "tests/unit/repo_backed/scripts/ai/mcp/test_amp_orb_setup.py"
+PUBLIC_FETCH_TEST = "tests/unit/repo_backed/scripts/ai/mcp/test_public_fetch.py"
 CURSOR_SKILL_SYNC_TEST = "tests/architecture/test_cursor_skill_sync_safety.py"
 SYNC_CURSOR_RULES_TEST = "tests/unit/scripts/test_sync_cursor_rules.py"
 ROOT_HYGIENE_REVIEW_REGISTRY_TEST = (
@@ -206,6 +207,9 @@ EXPLICIT_SCRIPT_FALLBACK_PATHS = frozenset(
     {
         "scripts/ai/codex/native_runtime_contract.py",
         "scripts/ai/junie/check_junie_mirror.py",
+        "scripts/ai/mcp/support/public_fetch_stdio.py",
+        "scripts/ai/mcp/support/public_fetch_transport.py",
+        "scripts/ai/mcp/support/public_fetch_runtime.py",
         "scripts/engineering/repo/process_supervisor.py",
     }
 )
@@ -547,11 +551,28 @@ MEMORY_BASELINE_TEST_TARGETS: tuple[str, ...] = (
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     **dict.fromkeys(
-        (".agents/setup", ".agents/resume", ".amp/settings.json"),
-        (AMP_ORB_SETUP_TEST,),
+        (".agents/setup", ".amp/settings.json"),
+        (AMP_ORB_SETUP_TEST, PUBLIC_FETCH_TEST),
+    ),
+    ".agents/resume": (AMP_ORB_SETUP_TEST,),
+    **dict.fromkeys(
+        (
+            "scripts/ai/mcp/public_fetch_wrapper.sh",
+            "scripts/ai/mcp/setup_public_fetch.sh",
+            "scripts/ai/mcp/support/public_fetch_stdio.py",
+            "scripts/ai/mcp/support/public_fetch_transport.py",
+            "scripts/ai/mcp/support/public_fetch_runtime.py",
+            "scripts/ai/mcp/support/public-fetch-runtime-profiles.json",
+            "scripts/ai/mcp/support/public-fetch-requirements.in",
+            "scripts/ai/mcp/support/public-fetch-requirements.txt",
+            "tests/fixtures/mcp/public-fetch-catalogue.json",
+            "tests/fixtures/mcp/FETCH_LICENSE",
+        ),
+        (PUBLIC_FETCH_TEST,),
     ),
     "docs/05-operations/runbooks/amp-orbs.md": (
         AMP_ORB_SETUP_TEST,
+        PUBLIC_FETCH_TEST,
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
     "configs/quality/root_hygiene_review_registry.yaml": (
@@ -1423,6 +1444,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ".github/workflows/dashboard-first-window-noscroll.yml": (
         DASHBOARD_FIRST_WINDOW_NOSCROLL_TEST,
         GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
+    ),
+    ".github/workflows/skills-consistency.yml": (
+        GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
+        PUBLIC_FETCH_TEST,
     ),
     **dict.fromkeys(
         (

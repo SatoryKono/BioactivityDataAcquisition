@@ -1428,3 +1428,27 @@ def test_shadow_compare_routes_root_review_registry_to_its_owner() -> None:
         "tests/unit/scripts/repo/test_check_root_hygiene_review_registry.py"
         in report["selected"]
     )
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "scripts/ai/mcp/public_fetch_wrapper.sh",
+        "scripts/ai/mcp/setup_public_fetch.sh",
+        "scripts/ai/mcp/support/public_fetch_stdio.py",
+        "scripts/ai/mcp/support/public_fetch_transport.py",
+        "scripts/ai/mcp/support/public_fetch_runtime.py",
+        "scripts/ai/mcp/support/public-fetch-runtime-profiles.json",
+        "scripts/ai/mcp/support/public-fetch-requirements.in",
+        "scripts/ai/mcp/support/public-fetch-requirements.txt",
+        "tests/fixtures/mcp/public-fetch-catalogue.json",
+        ".github/workflows/skills-consistency.yml",
+    ],
+)
+def test_shadow_compare_routes_public_fetch_boundary(path: str) -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare([path], repo_root=root)
+    assert (
+        "tests/unit/repo_backed/scripts/ai/mcp/test_public_fetch.py"
+        in report["selected"]
+    )
