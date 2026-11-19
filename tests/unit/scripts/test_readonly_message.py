@@ -275,3 +275,86 @@ def test_stale_bytecode_cannot_override_the_verified_message_source(message_chec
     cache.write_bytes(_code_to_timestamp_pyc(code, int(stat.st_mtime), stat.st_size))
     f.message.write_text("invalid header\n")
     assert reader._invoke(f.root, str(f.message))[0] == 1
+
+
+@pytest.mark.parametrize(
+    "filters",
+    [{}, {"types": ["python"]}, {"types_or": ["python"]}, {"exclude_types": ["text"]}],
+)
+def test_real_classifier_preserves_filtered_message_skip(
+    message_checkout, monkeypatch, filters
+):
+    from pre_commit.commands import run as module
+    from pre_commit.lang_base import no_env
+
+    f = message_checkout
+    config_path = f.root / ".pre-commit-config.yaml"
+    config = yaml.safe_load(config_path.read_text())
+    config["repos"][0]["hooks"][0].update(filters)
+    config_path.write_text(json.dumps(config))
+    hook = SimpleNamespace(
+        id=reader.HOOK_ID,
+        name="header",
+        alias="",
+        src="local",
+        language="python",
+        entry=f.hook["entry"],
+        args=(),
+        prefix=SimpleNamespace(prefix_dir="fixture-cache"),
+        pass_filenames=True,
+        require_serial=False,
+        language_version="default",
+        always_run=False,
+        verbose=False,
+        log_file="",
+        fail_fast=False,
+        files="",
+        exclude="^$",
+        types=filters.get("types", ["file"]),
+        types_or=filters.get("types_or", []),
+        exclude_types=filters.get("exclude_types", []),
+    )
+    args = SimpleNamespace(
+        hook_stage="commit-msg",
+        commit_msg_filename=str(f.message),
+        fail_fast=False,
+        verbose=False,
+        color=False,
+        show_diff_on_failure=False,
+        all_files=False,
+    )
+    scan = Mock(return_value=b"")
+    launch = Mock(side_effect=AssertionError("filtered checker must not execute"))
+    monkeypatch.setattr(module, "_get_diff", scan)
+    monkeypatch.setattr(
+        module, "languages", {"python": SimpleNamespace(in_env=no_env, run_hook=launch)}
+    )
+    runtime_config = {"files": "", "exclude": "^$", "fail_fast": False}
+    # Use the real framework Classifier and commit-msg filename selection.
+    assert bool(
+        tuple(
+            module.Classifier.from_config(
+                (str(f.message),), "", "^$"
+            ).filenames_for_hook(hook)
+        )
+    ) == (not filters)
+    assert reader.qualified(f.root, f.hooks) == (not filters)
+    if filters:
+        assert module._run_hooks(runtime_config, [hook], set(), args) == 0
+        assert scan.called
+    else:
+        assert (
+            reader.dispatch(
+                module,
+                module._run_hooks,
+                runtime_config,
+                [hook],
+                set(),
+                args,
+                root=f.root,
+                hook_dir=f.hooks,
+            )
+            == 0
+        )
+        scan.assert_not_called()
+    launch.assert_not_called()

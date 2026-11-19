@@ -97,6 +97,23 @@ def test_expired_scan_does_not_start_git(monkeypatch):
         scanner._git(["ls-files"], scanner.time.monotonic() - 1)
 
 
+@pytest.mark.parametrize("command", ["ls-files", "diff"])
+def test_zero_exit_with_diagnostics_never_qualifies_as_clean(
+    monkeypatch, capsys, command
+):
+    diagnostic = b"private tracked path: Permission denied"
+    monkeypatch.setattr(
+        scanner.subprocess,
+        "run",
+        lambda argv, **kwargs: subprocess.CompletedProcess(argv, 0, b"", diagnostic),
+    )
+    with pytest.raises(RuntimeError, match="comparison is unavailable") as error:
+        scanner._git([command], scanner.time.monotonic() + 10)
+    assert "private tracked path" not in str(error.value)
+    output = capsys.readouterr()
+    assert output.out == output.err == ""
+
+
 @pytest.mark.parametrize(
     "odd",
     [
@@ -148,12 +165,15 @@ def test_real_git_partitioned_diff_matches_full_diff_without_index_writes(
     if odd:
         names += [":(exclude)*.txt", "line\nname.txt"]
     git("init")
+    git("config", "core.autocrlf", "false")
+    git("config", "commit.gpgSign", "true")
+    git("config", "gpg.program", str(root / "unavailable-signing-program"))
     for name in names:
         path = root / name
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(b"before\n")
     git("add", "--all")
-    git("commit", "-m", "fixture")
+    git("commit", "--no-gpg-sign", "-m", "fixture")
     for key in list(os.environ):
         if key.startswith("GIT_"):
             monkeypatch.delenv(key, raising=False)

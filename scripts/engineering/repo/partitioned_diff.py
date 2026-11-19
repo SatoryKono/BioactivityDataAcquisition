@@ -51,6 +51,8 @@ def _git(args: list[str | bytes], deadline: float) -> bytes:
         check=True,
         timeout=remaining,
     )
+    if result.stderr:
+        raise RuntimeError("source diff emitted diagnostics; comparison is unavailable")
     return result.stdout
 
 

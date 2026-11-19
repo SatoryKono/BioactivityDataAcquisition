@@ -1,5 +1,7 @@
 """Guard code reuse retains CLI checks inside the owned Linux watchdog."""
 
+from __future__ import annotations
+
 from pathlib import Path
 from types import SimpleNamespace
 

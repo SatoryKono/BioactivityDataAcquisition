@@ -1,5 +1,8 @@
 """Owned-hook evidence keeps bounded CI owners and unknown reports fail closed."""
 
+from __future__ import annotations
+
+
 from pathlib import Path
 
 import pytest

@@ -141,6 +141,9 @@ def qualified(root: Path, hook_dir: Path) -> bool:
             and not hook.get("alias", "")
             and not hook.get("files", "")
             and hook.get("exclude", "^$") == "^$"
+            and hook.get("types", ["file"]) == ["file"]
+            and hook.get("types_or", []) == []
+            and hook.get("exclude_types", []) == []
             and _digest(hook["entry"], hook.get("args", ())) == COMMAND_HASH
         )
     except Exception:

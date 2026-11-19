@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-19T16:01:53.452862+00:00",
+  "generated_at": "2026-11-19T16:17:41.435657+00:00",
   "summary": {
     "total_scripts": 776,
     "status_counts": {
@@ -23360,7 +23360,7 @@
         },
         {
           "path": "tests/unit/scripts/test_owned_guard_execution.py",
-          "line": 8,
+          "line": 10,
           "source_group": "tests",
           "text": "from scripts.engineering.repo import hook_runtime as runtime"
         }
