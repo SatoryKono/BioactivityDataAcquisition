@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-19T01:33:46.032412+00:00",
+  "generated_at": "2026-11-19T05:38:16.787793+00:00",
   "summary": {
     "total_scripts": 763,
     "status_counts": {
@@ -4256,7 +4256,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 1214,
+          "line": 1229,
           "source_group": "tests",
           "text": "assert \"mcp_fetch_wrapper.ps1\" in bash_source"
         },
@@ -4827,7 +4827,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 1373,
+          "line": 1388,
           "source_group": "tests",
           "text": "powershell_source = (MCP_DIR / \"mcp_neo4j_cypher_wrapper.ps1\").read_text("
         }
@@ -5480,7 +5480,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 1215,
+          "line": 1230,
           "source_group": "tests",
           "text": "assert \"exec_windows_ps1_wrapper.sh\" in bash_source"
         },
@@ -5899,7 +5899,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 1211,
+          "line": 1226,
           "source_group": "tests",
           "text": "owned_stdio = (MCP_DIR / \"support\" / \"run_owned_stdio.ps1\").read_text("
         },

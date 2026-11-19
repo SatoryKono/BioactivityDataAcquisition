@@ -384,7 +384,8 @@ function Resolve-BioetlUvxBin {
 
     foreach ($candidate in $candidates) {
         if ($candidate -and (Test-Path -LiteralPath $candidate)) {
-            return (Resolve-Path -LiteralPath $candidate).Path
+            # Path may include a PowerShell provider prefix for UNC launchers.
+            return (Resolve-Path -LiteralPath $candidate).ProviderPath
         }
     }
 

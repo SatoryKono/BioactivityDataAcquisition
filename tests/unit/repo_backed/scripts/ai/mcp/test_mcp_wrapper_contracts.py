@@ -932,7 +932,9 @@ printf '%s\n' "$NO_PROXY" "$no_proxy" "${{HTTP_PROXY-unset}}" \
             "function Test-Path { param($LiteralPath, $Path, $ErrorAction) "
             "$LiteralPath -eq 'C:\\fake\\uvx.exe' }\n"
             "function Resolve-Path { param($LiteralPath) "
-            "[pscustomobject]@{Path=$LiteralPath} }",
+            "[pscustomobject]@{"
+            "Path=('Microsoft.PowerShell.Core\\FileSystem::' + $LiteralPath); "
+            "ProviderPath=$LiteralPath} }",
             "C:\\fake\\uvx.exe",
         ),
         (
@@ -941,7 +943,9 @@ printf '%s\n' "$NO_PROXY" "$no_proxy" "${{HTTP_PROXY-unset}}" \
             "function Test-Path { param($LiteralPath, $Path, $ErrorAction) "
             "$LiteralPath -eq 'C:\\tools\\uvx.exe' }\n"
             "function Resolve-Path { param($LiteralPath) "
-            "[pscustomobject]@{Path=$LiteralPath} }",
+            "[pscustomobject]@{"
+            "Path=('Microsoft.PowerShell.Core\\FileSystem::' + $LiteralPath); "
+            "ProviderPath=$LiteralPath} }",
             "C:\\tools\\uvx.exe",
         ),
         (
@@ -949,7 +953,9 @@ printf '%s\n' "$NO_PROXY" "$no_proxy" "${{HTTP_PROXY-unset}}" \
             "function Test-Path { param($LiteralPath, $Path, $ErrorAction) "
             "$LiteralPath -like '*Python313*Scripts*uvx.exe' }\n"
             "function Resolve-Path { param($LiteralPath) "
-            "[pscustomobject]@{Path=$LiteralPath} }",
+            "[pscustomobject]@{"
+            "Path=('Microsoft.PowerShell.Core\\FileSystem::' + $LiteralPath); "
+            "ProviderPath=$LiteralPath} }",
             "Python313\\Scripts\\uvx.exe",
         ),
         (
@@ -957,7 +963,9 @@ printf '%s\n' "$NO_PROXY" "$no_proxy" "${{HTTP_PROXY-unset}}" \
             "function Test-Path { param($LiteralPath, $Path, $ErrorAction) "
             "$LiteralPath -like '*Python312*Scripts*uvx.exe' }\n"
             "function Resolve-Path { param($LiteralPath) "
-            "[pscustomobject]@{Path=$LiteralPath} }",
+            "[pscustomobject]@{"
+            "Path=('Microsoft.PowerShell.Core\\FileSystem::' + $LiteralPath); "
+            "ProviderPath=$LiteralPath} }",
             "Python312\\Scripts\\uvx.exe",
         ),
         (
@@ -965,7 +973,9 @@ printf '%s\n' "$NO_PROXY" "$no_proxy" "${{HTTP_PROXY-unset}}" \
             "function Test-Path { param($LiteralPath, $Path, $ErrorAction) "
             "$LiteralPath -like '*Python311*Scripts*uvx.exe' }\n"
             "function Resolve-Path { param($LiteralPath) "
-            "[pscustomobject]@{Path=$LiteralPath} }",
+            "[pscustomobject]@{"
+            "Path=('Microsoft.PowerShell.Core\\FileSystem::' + $LiteralPath); "
+            "ProviderPath=$LiteralPath} }",
             "Python311\\Scripts\\uvx.exe",
         ),
         (
@@ -973,7 +983,9 @@ printf '%s\n' "$NO_PROXY" "$no_proxy" "${{HTTP_PROXY-unset}}" \
             "function Test-Path { param($LiteralPath, $Path, $ErrorAction) "
             "$LiteralPath -like '*.local*bin*uvx.exe' }\n"
             "function Resolve-Path { param($LiteralPath) "
-            "[pscustomobject]@{Path=$LiteralPath} }",
+            "[pscustomobject]@{"
+            "Path=('Microsoft.PowerShell.Core\\FileSystem::' + $LiteralPath); "
+            "ProviderPath=$LiteralPath} }",
             ".local\\bin\\uvx.exe",
         ),
         (
@@ -981,7 +993,9 @@ printf '%s\n' "$NO_PROXY" "$no_proxy" "${{HTTP_PROXY-unset}}" \
             "function Test-Path { param($LiteralPath, $Path, $ErrorAction) "
             "$LiteralPath -like '*.cargo*bin*uvx.exe' }\n"
             "function Resolve-Path { param($LiteralPath) "
-            "[pscustomobject]@{Path=$LiteralPath} }",
+            "[pscustomobject]@{"
+            "Path=('Microsoft.PowerShell.Core\\FileSystem::' + $LiteralPath); "
+            "ProviderPath=$LiteralPath} }",
             ".cargo\\bin\\uvx.exe",
         ),
     ],
@@ -1004,6 +1018,7 @@ def test_powershell_uv_resolver_candidate_paths(
 
     assert result.returncode == 0, result.stderr
     assert expected.lower() in result.stdout.strip().lower()
+    assert "::" not in result.stdout.strip()
 
 
 def test_uv_resolver_powershell_does_not_split_windows_path_on_colon() -> None:
