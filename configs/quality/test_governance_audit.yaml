@@ -1223,6 +1223,9 @@ repo_backed_unit_test_exceptions:
     - path: tests/unit/repo_backed/scripts/ai/mcp/test_amp_orb_setup.py
       target_lane: repo-backed-unit
       protected_surface: Amp lifecycle hooks and MCP configuration; isolated commands, checksum refusal, and read-only wrapper policy without live credentials
+    - path: tests/unit/repo_backed/scripts/ai/mcp/test_public_fetch.py
+      target_lane: repo-backed-unit
+      protected_surface: Hash-locked Linux public Fetch transport and stdio limits; pinned SDK probes run separately without live destinations
     - path: tests/unit/repo_backed/scripts/ai/mcp/test_host_transport_dispatch.py
       target_lane: repo-backed-unit
       protected_surface: Synthetic host transport and Context7/Brave MCP wrapper routing contracts
