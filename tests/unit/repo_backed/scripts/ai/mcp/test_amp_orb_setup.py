@@ -55,6 +55,7 @@ def _environment(tmp_path: Path, system: str, architecture: str) -> Sandbox:
     scratch.mkdir()
     _command(commands, "uv", 'printf "uv\\n" >> "$AMP_TEST_CALLS"')
     _command(commands, "npm", 'printf "npm\\n" >> "$AMP_TEST_CALLS"')
+    _command(commands, "npx", 'printf "npx\\n" >> "$AMP_TEST_CALLS"')
     _command(commands, "gh", 'printf "gh\\n" >> "$AMP_TEST_CALLS"; exit 1')
     _command(
         commands,
@@ -118,7 +119,7 @@ def test_setup_rejects_corrupt_archive_without_replacing_binary(
     assert result.returncode != 0
     assert "checksum" in result.stderr.lower()
     assert binary.read_bytes() == before
-    assert sandbox.calls.read_text().splitlines() == ["uv", "npm", "curl"]
+    assert sandbox.calls.read_text().splitlines() == ["uv", "npm", "npx", "curl"]
     assert not list(sandbox.scratch.iterdir())
 
 
@@ -140,7 +141,7 @@ def test_setup_refuses_unsupported_platform_before_download(
     )
     assert result.returncode == 64
     assert "unsupported GitHub MCP platform" in result.stderr
-    assert sandbox.calls.read_text().splitlines() == ["uv", "npm"]
+    assert sandbox.calls.read_text().splitlines() == ["uv", "npm", "npx"]
     assert not (sandbox.home / "tools").exists()
 
 
