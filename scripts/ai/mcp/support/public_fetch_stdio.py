@@ -28,6 +28,7 @@ MAX_PENDING = 4
 CALL_SECONDS = 38
 QUEUE_SECONDS = 4
 PROTOCOL = "2025-11-25"
+TOOLS_CALL = "tools/call"
 
 
 def load_backend() -> MCPServer:
@@ -113,7 +114,7 @@ async def invoke(
     async with asyncio.timeout(CALL_SECONDS):
         value = (
             await instance.call_tool("fetch", arguments)
-            if method == "tools/call"
+            if method == TOOLS_CALL
             else await instance.get_prompt("fetch", arguments)
         )
     result = value.model_dump(mode="json", by_alias=True, exclude_none=True)
@@ -127,7 +128,7 @@ async def invoke_serialized(
     params: dict[str, object],
     active: asyncio.Lock,
 ) -> dict[str, object]:
-    if method not in {"tools/call", "prompts/get"}:
+    if method not in {TOOLS_CALL, "prompts/get"}:
         return await invoke(instance, method, params)
     # The Windows owner admits one backend operation at a time. Bound the
     # waiting queue as well, without extending the outer call deadline.
@@ -135,6 +136,8 @@ async def invoke_serialized(
         try:
             await asyncio.wait_for(active.acquire(), QUEUE_SECONDS)
         except TimeoutError:
+            if method == "prompts/get":
+                raise
             return {
                 "content": [{"type": "text", "text": "Fetch busy; request not sent"}],
                 "isError": True,
@@ -145,19 +148,31 @@ async def invoke_serialized(
             active.release()
 
 
-async def serve(instance: MCPServer, tool_error: type[Exception]) -> None:
-    pending: dict[int | str, asyncio.Task[None]] = {}
-    active = asyncio.Lock()
+class StdioSession:
+    def __init__(self, instance: MCPServer, tool_error: type[Exception]) -> None:
+        self.instance = instance
+        self.tool_error = tool_error
+        self.pending: dict[int | str, asyncio.Task[None]] = {}
+        self.active = asyncio.Lock()
 
     async def dispatch(
-        identifier: int | str, method: str, params: dict[str, object]
+        self, identifier: int | str, method: str, params: dict[str, object]
     ) -> None:
         try:
-            result = await invoke_serialized(instance, method, params, active)
+            result = await invoke_serialized(self.instance, method, params, self.active)
             respond(identifier, result=result)
         except asyncio.CancelledError:
             raise
-        except (tool_error, TimeoutError):
+        except (self.tool_error, TimeoutError):
+            if method == "prompts/get":
+                respond(
+                    identifier,
+                    error={
+                        "code": -32000,
+                        "message": "Fetch prompt refused or timed out; request not retried",
+                    },
+                )
+                return
             respond(
                 identifier,
                 result={
@@ -185,71 +200,86 @@ async def serve(instance: MCPServer, tool_error: type[Exception]) -> None:
                 },
             )
         finally:
-            pending.pop(identifier, None)
+            self.pending.pop(identifier, None)
 
-    try:
-        while raw := await asyncio.to_thread(sys.stdin.buffer.readline, MAX_INPUT + 1):
-            if len(raw) > MAX_INPUT:
-                while raw and not raw.endswith(b"\n"):
-                    raw = await asyncio.to_thread(
-                        sys.stdin.buffer.readline, MAX_INPUT + 1
-                    )
-                respond(None, error={"code": -32600, "message": "Request too large"})
-                continue
-            try:
-                message = json.loads(raw)
-            except (ValueError, RecursionError):
-                respond(None, error={"code": -32700, "message": "Invalid JSON"})
-                continue
-            if not isinstance(message, dict) or message.get("jsonrpc") != "2.0":
-                continue
-            method, params = message.get("method"), message.get("params", {})
-            if not isinstance(method, str) or not isinstance(params, dict):
-                continue
-            identifier = message.get("id")
-            if method == "notifications/cancelled" and "id" not in message:
-                target = params.get("requestId")
-                if type(target) in (int, str) and target in pending:
-                    pending[target].cancel()
-            elif type(identifier) not in (int, str) or identifier in pending:
-                continue
-            elif method == "initialize":
-                offered = params.get("protocolVersion")
-                respond(
-                    identifier,
-                    result={
-                        "protocolVersion": offered
-                        if offered in ("2025-03-26", "2025-06-18", PROTOCOL)
-                        else PROTOCOL,
-                        "capabilities": {"tools": {}, "prompts": {}},
-                        "serverInfo": {"name": "mcp-fetch", "version": "2026.11.4"},
-                    },
-                )
-            elif method == "ping":
-                respond(identifier, result={})
-            elif method in {"tools/list", "tools/call", "prompts/list", "prompts/get"}:
-                if len(pending) >= MAX_PENDING:
-                    respond(
-                        identifier,
-                        error={
-                            "code": -32000,
-                            "message": "Too many pending Fetch requests",
-                        },
-                    )
-                else:
-                    pending[identifier] = asyncio.create_task(
-                        dispatch(identifier, method, params)
-                    )
-            else:
-                respond(
-                    identifier,
-                    error={"code": -32601, "message": "Method not supported"},
-                )
-    finally:
-        tasks = list(pending.values())
+    def accept(self, message: dict[str, object]) -> None:
+        method, params = message.get("method"), message.get("params", {})
+        if not isinstance(method, str) or not isinstance(params, dict):
+            return
+        identifier = message.get("id")
+        if method == "notifications/cancelled" and "id" not in message:
+            target = params.get("requestId")
+            if type(target) in (int, str) and target in self.pending:
+                self.pending[target].cancel()
+            return
+        if type(identifier) not in (int, str) or identifier in self.pending:
+            return
+        if method == "initialize":
+            offered = params.get("protocolVersion")
+            respond(
+                identifier,
+                result={
+                    "protocolVersion": offered
+                    if offered in ("2025-03-26", "2025-06-18", PROTOCOL)
+                    else PROTOCOL,
+                    "capabilities": {"tools": {}, "prompts": {}},
+                    "serverInfo": {"name": "mcp-fetch", "version": "2026.11.4"},
+                },
+            )
+        elif method == "ping":
+            respond(identifier, result={})
+        elif method in {"tools/list", TOOLS_CALL, "prompts/list", "prompts/get"}:
+            self.schedule(identifier, method, params)
+        else:
+            respond(
+                identifier, error={"code": -32601, "message": "Method not supported"}
+            )
+
+    def schedule(
+        self, identifier: int | str, method: str, params: dict[str, object]
+    ) -> None:
+        if len(self.pending) >= MAX_PENDING:
+            respond(
+                identifier,
+                error={"code": -32000, "message": "Too many pending Fetch requests"},
+            )
+        else:
+            self.pending[identifier] = asyncio.create_task(
+                self.dispatch(identifier, method, params)
+            )
+
+    async def close(self) -> None:
+        tasks = list(self.pending.values())
         for task in tasks:
             task.cancel()
         await asyncio.gather(*tasks, return_exceptions=True)
+
+
+async def read_message(raw: bytes) -> dict[str, object] | None:
+    if len(raw) > MAX_INPUT:
+        while raw and not raw.endswith(b"\n"):
+            raw = await asyncio.to_thread(sys.stdin.buffer.readline, MAX_INPUT + 1)
+        respond(None, error={"code": -32600, "message": "Request too large"})
+        return None
+    try:
+        message = json.loads(raw)
+    except (ValueError, RecursionError):
+        respond(None, error={"code": -32700, "message": "Invalid JSON"})
+        return None
+    if not isinstance(message, dict) or message.get("jsonrpc") != "2.0":
+        return None
+    return message
+
+
+async def serve(instance: MCPServer, tool_error: type[Exception]) -> None:
+    session = StdioSession(instance, tool_error)
+    try:
+        while raw := await asyncio.to_thread(sys.stdin.buffer.readline, MAX_INPUT + 1):
+            message = await read_message(raw)
+            if message is not None:
+                session.accept(message)
+    finally:
+        await session.close()
 
 
 def minimal_environment(environ: Mapping[str, str]) -> dict[str, str]:

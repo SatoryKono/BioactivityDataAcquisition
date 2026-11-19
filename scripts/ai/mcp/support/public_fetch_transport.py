@@ -36,6 +36,44 @@ class PublicBackend(httpcore.AsyncNetworkBackend):
         self.permitted = permitted
         self.backend = backend if backend is not None else httpcore.AnyIOBackend()
 
+    async def public_addresses(
+        self, host: str
+    ) -> list[ipaddress.IPv4Address | ipaddress.IPv6Address]:
+        try:
+            ipaddress.ip_address(host)
+        except ValueError:
+            addresses = await self.resolve(host)
+        else:
+            addresses = [host]
+        if not addresses or len(addresses) > 32:
+            raise httpcore.ConnectError("Invalid number of destination addresses")
+        if not all(
+            isinstance(item, str) and "%" not in item and self.permitted(item)
+            for item in addresses
+        ):
+            raise httpcore.ConnectError(
+                "Destination has an address outside the public profile"
+            )
+        return list(dict.fromkeys(ipaddress.ip_address(item) for item in addresses))
+
+    async def verify_peer(
+        self,
+        stream: httpcore.AsyncNetworkStream,
+        address: ipaddress.IPv4Address | ipaddress.IPv6Address,
+        port: int,
+    ) -> None:
+        try:
+            peer = stream.get_extra_info("server_addr")
+            if not peer or ipaddress.ip_address(peer[0]) != address or peer[1] != port:
+                raise httpcore.ConnectError(
+                    "Connected peer differs from validated destination"
+                )
+        except (ValueError, TypeError, IndexError, httpcore.ConnectError):
+            await stream.aclose()
+            raise httpcore.ConnectError(
+                "Connected peer could not be verified"
+            ) from None
+
     async def connect_tcp(
         self,
         host: str,
@@ -50,26 +88,9 @@ class PublicBackend(httpcore.AsyncNetworkBackend):
             )
         try:
             with anyio.fail_after(10 if timeout is None else min(10, timeout)):
-                try:
-                    ipaddress.ip_address(host)
-                except ValueError:
-                    addresses = await self.resolve(host)
-                else:
-                    addresses = [host]
-                if not addresses or len(addresses) > 32:
-                    raise httpcore.ConnectError(
-                        "Invalid number of destination addresses"
-                    )
-                if not all(
-                    isinstance(item, str) and "%" not in item and self.permitted(item)
-                    for item in addresses
-                ):
-                    raise httpcore.ConnectError(
-                        "Destination has an address outside the public profile"
-                    )
-                canonical = [ipaddress.ip_address(item) for item in addresses]
+                canonical = await self.public_addresses(host)
                 failure = None
-                for address in dict.fromkeys(canonical):
+                for address in canonical:
                     try:
                         # Pass only the validated literal, never the DNS name.
                         # HTTPCore keeps the original origin for Host and TLS.
@@ -79,21 +100,7 @@ class PublicBackend(httpcore.AsyncNetworkBackend):
                     except (httpcore.ConnectError, httpcore.ConnectTimeout) as error:
                         failure = error
                         continue
-                    try:
-                        peer = stream.get_extra_info("server_addr")
-                        if (
-                            not peer
-                            or ipaddress.ip_address(peer[0]) != address
-                            or peer[1] != port
-                        ):
-                            raise httpcore.ConnectError(
-                                "Connected peer differs from validated destination"
-                            )
-                    except (ValueError, TypeError, IndexError, httpcore.ConnectError):
-                        await stream.aclose()
-                        raise httpcore.ConnectError(
-                            "Connected peer could not be verified"
-                        ) from None
+                    await self.verify_peer(stream, address, port)
                     return stream
                 raise httpcore.ConnectError(
                     "No verified public connection"

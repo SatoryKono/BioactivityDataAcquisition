@@ -284,6 +284,39 @@ class TransportTests(unittest.IsolatedAsyncioTestCase):
 
 
 class AdapterTests(unittest.IsolatedAsyncioTestCase):
+    async def test_busy_prompt_returns_protocol_error_without_calling_sdk(self):
+        backend = SimpleNamespace(get_prompt=AsyncMock())
+        session = S.StdioSession(backend, RuntimeError)
+        await session.active.acquire()
+        output = io.BytesIO()
+        with (
+            patch.object(S, "QUEUE_SECONDS", 0.001),
+            patch.object(S.sys, "stdout", SimpleNamespace(buffer=output)),
+        ):
+            await session.dispatch(1, "prompts/get", {})
+        session.active.release()
+        reply = json.loads(output.getvalue())
+        self.assertNotIn("result", reply)
+        self.assertEqual(reply["error"]["code"], -32000)
+        backend.get_prompt.assert_not_awaited()
+
+    async def test_prompt_timeouts_and_tool_errors_return_protocol_errors(self):
+        for error in (TimeoutError, RuntimeError):
+            with self.subTest(error=error):
+                backend = SimpleNamespace(get_prompt=AsyncMock(side_effect=error))
+                session = S.StdioSession(backend, RuntimeError)
+                output = io.BytesIO()
+                with patch.object(S.sys, "stdout", SimpleNamespace(buffer=output)):
+                    await session.dispatch(
+                        1,
+                        "prompts/get",
+                        {"name": "fetch", "arguments": {"url": "https://example.com/"}},
+                    )
+                reply = json.loads(output.getvalue())
+                self.assertNotIn("result", reply)
+                self.assertEqual(reply["error"]["code"], -32000)
+                self.assertFalse(session.active.locked())
+
     async def test_busy_queue_does_not_enter_sdk(self):
         active = asyncio.Lock()
         await active.acquire()

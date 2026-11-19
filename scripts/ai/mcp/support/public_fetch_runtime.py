@@ -39,17 +39,24 @@ def package_directory() -> Path:
     return site
 
 
-def measure_runtime(*, include_files: bool = False) -> dict[str, object]:
-    if sys.version_info[:2] != (3, 13):
-        raise RuntimeError("Fetch requires Python 3.13")
-    architecture = platform.machine().lower()
-    architecture = {"amd64": "x86_64", "arm64": "aarch64"}.get(
-        architecture, architecture
-    )
-    key = sys.platform + "-" + architecture
-    if key not in {"win32-x86_64", "linux-x86_64", "linux-aarch64"}:
-        raise RuntimeError("Unqualified Fetch platform")
-    site = package_directory()
+def package_file_sha(path: Path) -> str | None:
+    if path.is_symlink() or not stat.S_ISREG(path.lstat().st_mode):
+        raise RuntimeError("Non-regular Fetch package file refused")
+    if path.suffix in {".pyc", ".pyo"}:
+        raise RuntimeError("Sourceless Fetch bytecode refused")
+    if path.parent.name.endswith(".dist-info") and path.name in {
+        "RECORD",
+        "INSTALLER",
+        "REQUESTED",
+        "direct_url.json",
+    }:
+        # These installer receipts are not loaded and contain local paths.
+        return None
+    return _sha(path)
+
+
+def package_files(site: Path) -> dict[str, str]:
+    """Measure only regular package files, rejecting linked or executable caches."""
     files: dict[str, str] = {}
     for current, directories, names in os.walk(site, followlinks=False):
         directory = Path(current)
@@ -60,20 +67,13 @@ def measure_runtime(*, include_files: bool = False) -> dict[str, object]:
         directories[:] = sorted(name for name in directories if name != "__pycache__")
         for name in sorted(names):
             path = directory / name
-            if path.is_symlink() or not stat.S_ISREG(path.lstat().st_mode):
-                raise RuntimeError("Non-regular Fetch package file refused")
-            if path.suffix in {".pyc", ".pyo"}:
-                raise RuntimeError("Sourceless Fetch bytecode refused")
-            if directory.name.endswith(".dist-info") and name in {
-                "RECORD",
-                "INSTALLER",
-                "REQUESTED",
-                "direct_url.json",
-            }:
-                # Installer receipts contain machine-specific paths; they are
-                # not loaded. All package code, native binaries and data remain.
-                continue
-            files[path.relative_to(site).as_posix()] = _sha(path)
+            digest = package_file_sha(path)
+            if digest is not None:
+                files[path.relative_to(site).as_posix()] = digest
+    return files
+
+
+def package_versions(site: Path) -> dict[str, str]:
     packages: dict[str, str] = {}
     for distribution in importlib.metadata.distributions(path=[str(site)]):
         name = distribution.metadata["Name"].lower().replace("_", "-")
@@ -85,6 +85,22 @@ def measure_runtime(*, include_files: bool = False) -> dict[str, object]:
         or packages.get("mcp") != "2.3.0"
     ):
         raise RuntimeError("Pinned Fetch distributions missing")
+    return dict(sorted(packages.items()))
+
+
+def measure_runtime(*, include_files: bool = False) -> dict[str, object]:
+    if sys.version_info[:2] != (3, 13):
+        raise RuntimeError("Fetch requires Python 3.13")
+    architecture = platform.machine().lower()
+    architecture = {"amd64": "x86_64", "arm64": "aarch64"}.get(
+        architecture, architecture
+    )
+    key = sys.platform + "-" + architecture
+    if key not in {"win32-x86_64", "linux-x86_64", "linux-aarch64"}:
+        raise RuntimeError("Unqualified Fetch platform")
+    site = package_directory()
+    files = package_files(site)
+    packages = package_versions(site)
     canonical = json.dumps(files, sort_keys=True, separators=(",", ":")).encode()
     result: dict[str, object] = {
         "platform": key,
