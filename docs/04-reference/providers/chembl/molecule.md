@@ -172,6 +172,9 @@ Backfill очищает целевые таблицы перед записью,
 Из корня репозитория выполнить preview с `--dry-run`, затем в отдельном новом
 root выполнить следующую команду. На Windows использовать
 `.venv-win/Scripts/python.exe` вместо `python`.
+Пример ограничен проверенным снимком из 1000 Molecule от 2026-11-18.
+Для более крупного снимка убрать `--limit 1000` или задать его полное количество;
+date filter также должен соответствовать выбранным batch-файлам.
 
 ```text
 python -m bioetl run --pipeline chembl_molecule --run-type backfill --limit 1000 --use-cached-bronze --cached-bronze-path <absolute-original-molecule-bronze-dir> --cached-bronze-date 2026-11-18 --no-exact-replay --no-ensure-observability-backend
@@ -188,7 +191,11 @@ ID. Сравнить бизнес-поля и hashes с отдельным за�
 | --- | --- |
 | Новая обработка cached Bronze | Команда выше создаёт новые run/manifest/config anchors и результат исправленного кода. |
 | Strict exact replay | `python -m bioetl run --pipeline chembl_molecule --use-cached-bronze --cached-bronze-path <snapshot-bronze-dir> --exact-replay --replay-of-run-id <run-id> --replay-of-manifest-id <manifest-id>` требует snapshot-backed inputs и совместимые anchors исходного исполнения. |
-| Продолжение checkpoint | `python -m bioetl run --pipeline chembl_molecule --resume --resume-run-id <run-id> --resume-manifest-id <manifest-id>` продолжает выбранное незавершённое исполнение по checkpoint. |
+| Последний checkpoint | `python -m bioetl run --pipeline chembl_molecule --resume` продолжает последнее незавершённое исполнение. |
+| Checkpoint выбранного run | `python -m bioetl run --pipeline chembl_molecule --resume-run-id <run-id>` выбирает исполнение по run ID. |
+| Checkpoint выбранного manifest | `python -m bioetl run --pipeline chembl_molecule --resume-manifest-id <manifest-id>` выбирает исполнение по manifest ID. |
+
+Селекторы `--resume`, `--resume-run-id` и `--resume-manifest-id` взаимоисключающие.
 
 После приёмки сохранённого снимка выполнить live-проверку в ещё одном новом
 root через `python -m bioetl workflow run chembl_molecule --limit 1000
