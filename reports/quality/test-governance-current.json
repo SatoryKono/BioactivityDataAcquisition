@@ -1763,7 +1763,7 @@
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "67c756de60ae4ece3f7102ae273f54071e3bb21e073a61bb8939a8282d94454d",
+  "source_tree_sha256": "8fd144918c2470ea0cb9b650850a5748f0132d85eee737d800f4c1e181e701c8",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 67,
