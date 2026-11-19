@@ -130,6 +130,20 @@ def test_issue_5847_root_baseline_is_reduced_without_new_root_directory() -> Non
     assert {path for path in tracked if path.startswith(".circleci/")} == {
         ".circleci/config.yml"
     }
+    assert approved_tooling_roots[".agents"]["role"] == (
+        "derived_native_agent_skill_discovery_surface"
+    )
+    assert approved_tooling_roots[".amp"]["role"] == (
+        "amp_subordinate_surface_project_config"
+    )
+    assert {path for path in tracked if path.startswith(".agents/")} == {
+        ".agents/setup",
+        ".agents/resume",
+    }
+    assert {path for path in tracked if path.startswith(".amp/")} == {
+        ".amp/settings.json"
+    }
+    assert payload["outcomes"]["5847"]["tracked_root_dirs_after"] == 11
     # Catalog-approved runtime/CI roots are governed tooling, not root clutter.
     # `.gemini` stays inside that set and does not raise tracked_root_dirs_after.
     # Its tracked surface is the Code Assist repo file only.
@@ -141,6 +155,8 @@ def test_issue_5847_root_baseline_is_reduced_without_new_root_directory() -> Non
         len(
             root_dirs
             - {
+                ".agents",
+                ".amp",
                 ".claude",
                 ".cursor",
                 ".devin",

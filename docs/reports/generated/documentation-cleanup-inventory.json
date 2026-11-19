@@ -50333,6 +50333,34 @@
       "generator": null,
       "github_issue_number": null,
       "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": null,
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "docs/05-operations/runbooks/amp-orbs.md",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "05-operations",
+      "status": "Active",
+      "surface_family": "active",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": "published",
+      "declared_status": "active",
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "current",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
       "inbound_links": 2,
       "lifecycle": null,
       "outbound_links": 0,
@@ -118637,7 +118665,7 @@
     "by_recommended_action": {
       "archive-after-migration": 434,
       "generate-automatically": 1071,
-      "keep": 2701
+      "keep": 2702
     },
     "by_section": {
       ".github": 6,
@@ -118648,7 +118676,7 @@
       "03-guides": 128,
       "04-reference": 335,
       "05-engineering": 3,
-      "05-operations": 101,
+      "05-operations": 102,
       "99-archive": 1554,
       "AGENTS.md": 1,
       "CHANGELOG.md": 1,
@@ -118666,21 +118694,21 @@
       "security": 2
     },
     "by_status": {
-      "Active": 776,
+      "Active": 777,
       "Archived": 1554,
       "Canonical": 77,
       "Generated": 1071,
       "Working": 728
     },
     "by_surface_family": {
-      "active": 776,
+      "active": 777,
       "archive": 1554,
       "canonical": 77,
       "generated": 1071,
       "working": 728
     },
     "by_tracking_state": {
-      "tracked": 4206
+      "tracked": 4207
     },
     "docs_reports_local_count": 84,
     "duplicate_group_count": 80,
@@ -118693,8 +118721,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 4206,
+    "total_doc_like": 4207,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 4206
+    "total_doc_like_tracked": 4207
   }
 }

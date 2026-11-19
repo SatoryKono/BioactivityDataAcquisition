@@ -545,6 +545,7 @@ nav:
           - "AI Hook Compatibility": 05-operations/runbooks/ai-hook-compatibility.md
           - "Scoped MCP Recovery": 05-operations/runbooks/mcp-scoped-recovery.md
           - "Explicit AI Closeout": 05-operations/runbooks/ai-closeout-wrapper.md
+          - "Amp Orbs": 05-operations/runbooks/amp-orbs.md
           - "Owned Git Hooks": 05-operations/runbooks/owned-git-hooks.md
           - "Scoped Post-change Checks": 05-operations/runbooks/scoped-post-change-checks.md
           - "Full-tree Guard": 05-operations/runbooks/full-tree-guard.md

@@ -265,6 +265,18 @@ does not relax the env guardrail or the full-tree commit gate.
   untouched, no Docker/Redis, tech-debt budgets only down, root hygiene) apply.
   Full contract: `AGENTS.md` § OpenCode GitHub Repo Agent.
 
+## Amp Orb Agent (Phase 1, subordinate surface)
+
+- `.agents/setup`, `.agents/resume`, `.amp/settings.json` — Amp orb surface
+  only; orbs are remote sandboxes, not local checkouts (the `D:\github`
+  placement rule does not apply; the full-tree gate and all root guardrails
+  do). Secrets come from Amp project environment variables; `.env` untouched.
+  Ship is Custom Ship (feature branch + PR, never merge); the default Ship
+  behavior is forbidden.
+- Subordinate to the canonical precedence above; BioETL guardrails (`.env`
+  untouched, no Docker/Redis, tech-debt budgets only down, root hygiene) apply.
+  Full contract: `AGENTS.md` § Amp Orb Agent.
+
 ## Related Files
 
 - `AGENTS.md` (repository-wide equal-peer entry point)
