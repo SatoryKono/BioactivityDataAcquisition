@@ -24,7 +24,7 @@
 | --- | ---: | ---: |
 | `src/bioetl/interfaces/cli/commands/run.py` | 0 | 3 |
 | `src/bioetl/interfaces/cli/commands/run_all.py` | 0 | 5 |
-| `src/bioetl/interfaces/cli/commands/run_composite.py` | 0 | 2 |
+| `src/bioetl/interfaces/cli/commands/run_composite.py` | 0 | 3 |
 | `src/bioetl/interfaces/cli/commands/health.py` | 0 | 3 |
 | `src/bioetl/interfaces/cli/commands/diagnostics.py` | 0 | 4 |
 | `src/bioetl/interfaces/cli/commands/quarantine.py` | 0 | 2 |
@@ -41,7 +41,7 @@
 | --- | --- | --- | --- | --- | --- | ---: | ---: |
 | `src/bioetl/interfaces/cli/commands/run.py` | `bioetl.interfaces.cli.commands` | `stable_public_api_with_reviewed_first_party_usage` | `external-facing` | no | yes | 0 | 3 |
 | `src/bioetl/interfaces/cli/commands/run_all.py` | `bioetl.interfaces.cli.commands` | `stable_public_api_with_reviewed_first_party_usage` | `external-facing` | no | yes | 0 | 5 |
-| `src/bioetl/interfaces/cli/commands/run_composite.py` | `bioetl.interfaces.cli.commands` | `stable_public_api_zero_first_party_src` | `external-facing` | yes | yes | 0 | 2 |
+| `src/bioetl/interfaces/cli/commands/run_composite.py` | `bioetl.interfaces.cli.commands` | `stable_public_api_zero_first_party_src` | `external-facing` | yes | yes | 0 | 3 |
 | `src/bioetl/interfaces/cli/commands/health.py` | `bioetl.interfaces.cli.commands` | `stable_public_api_zero_first_party_src` | `external-facing` | yes | yes | 0 | 3 |
 | `src/bioetl/interfaces/cli/commands/diagnostics.py` | `bioetl.interfaces.cli.commands` | `stable_public_api_with_reviewed_first_party_usage` | `external-facing` | no | yes | 0 | 4 |
 | `src/bioetl/interfaces/cli/commands/quarantine.py` | `bioetl.interfaces.cli.commands` | `stable_public_api_with_reviewed_first_party_usage` | `external-facing` | no | yes | 0 | 2 |
