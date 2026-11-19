@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "catalog_ref": "bb4fc5f6ec96d3411573bba7381d768b2c7a6de0",
-  "source_ref": "cb425d2d5522770cf8a5b0d52c42429a74ac0ff0",
+  "catalog_ref": "fca31bce39aa541d77a2e1c17e2d992f3abf4da6",
+  "source_ref": "388e2f5346f78b25814edff121c72d73c4a11a0d",
   "source_reviews": {
-    "src/bioetl/infrastructure/storage/target_migration_validation.py": "Reviewed all maintained CLI execution routes: run, debug, run-all, workflow run, and run-composite. Debug target execution and configured or custom composite seeds can write chembl_target, so migration admission rejects them. Help, dry-run, other pipelines, and last-source batch semantics remain covered by argv regressions. Existing filesystem configuration reads retain their expressions, scopes, dispositions, and resources; no new external resource site is introduced. Eight new writer cases failed before the fix; the focused suite passed 145 tests after it."
+    "src/bioetl/infrastructure/storage/target_migration_validation.py": "Reviewed command and value boundaries for every maintained CLI writer. Valued options are normalized before recognizing help, dry-run and run-all listing; composite commands never inherit list-only semantics. The option terminator cannot turn workflow operands into flags. Actual Click parsers confirm flag-looking paths are consumed as values without invoking callbacks or runners. Six writer regressions failed before the correction; all 156 admission, dependency, binding and rehearsal tests pass afterward. Existing filesystem configuration reads retain their expressions, scopes, dispositions and resources; no new external resource site is introduced."
   }
 }
