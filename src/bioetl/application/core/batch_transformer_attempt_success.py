@@ -54,13 +54,11 @@ def _finalize_transformed_record(
     index: int,
 ) -> dict[str, object] | None:
     """Finalize transform output through the normalization stage."""
-    if transformed is None:
-        return None
     if isinstance(transformed, PreSilverRecord):
         if normalization_processor is None:
             raise RuntimeError("PreSilverRecord requires RecordNormalizationProcessor")
         return normalization_processor.finalize_pre_silver(transformed, context, index)
-    if normalization_processor is None:
+    if transformed is None or normalization_processor is None:
         return transformed
     return normalization_processor.normalize_record(transformed)
 
@@ -101,11 +99,8 @@ def _outcome_dq_fields(outcome: object, disposition: object) -> list[str]:
     ]
     if tokens:
         return tokens
-    rule_id = str(getattr(outcome, "rule_id", "") or "")
-    parts = rule_id.split(".")
-    if len(parts) >= 3 and parts[0] == "field" and parts[1]:
-        return [parts[1]]
-    return []
+    parts = str(getattr(outcome, "rule_id", "") or "").split(".")
+    return [parts[1]] if len(parts) >= 3 and parts[0] == "field" and parts[1] else []
 
 
 def _primary_dq_affected_field(
@@ -116,9 +111,7 @@ def _primary_dq_affected_field(
     fields: set[str] = set()
     for outcome in outcomes:
         fields.update(_outcome_dq_fields(outcome, disposition))
-    if not fields:
-        return None
-    return sorted(fields)[0]
+    return min(fields, default=None)
 
 
 def _apply_runtime_dq_outcomes(
@@ -227,10 +220,7 @@ async def resolve_transform_result(
 ) -> dict[str, object] | PreSilverRecord | None:
     """Await transform output when needed and normalize the static type."""
     if isawaitable(transformed_result):
-        return cast(
-            dict[str, object] | PreSilverRecord | None,
-            await transformed_result,
-        )
+        transformed_result = await transformed_result
     return cast(dict[str, object] | PreSilverRecord | None, transformed_result)
 
 
