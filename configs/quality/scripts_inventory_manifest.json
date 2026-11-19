@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-19T06:32:31.451212+00:00",
+  "generated_at": "2026-11-19T08:37:54.108118+00:00",
   "summary": {
     "total_scripts": 763,
     "status_counts": {
@@ -22273,7 +22273,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 25,
+      "reference_count": 27,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -22318,10 +22318,10 @@
           "text": "`python scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD`."
         },
         {
-          "path": "docs/05-operations/runbooks/full-tree-guard.md",
-          "line": 38,
-          "source_group": "docs",
-          "text": "python -B scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD"
+          "path": "AGENTS.md",
+          "line": 274,
+          "source_group": "agents",
+          "text": "commit gate (`check_no_partial_tree.py`) and every other root guardrail"
         }
       ]
     },
@@ -23586,7 +23586,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 1268,
+          "line": 1288,
           "source_group": "tests",
           "text": "\"scripts/memory/run_workflow.sh\","
         }

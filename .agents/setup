@@ -6,7 +6,7 @@
 set -euo pipefail
 
 # Python 3.13 from .python-version, locked dependencies.
-uv sync
+uv sync --locked
 
 # Node dependencies for docs/tooling; package-lock.json is canonical.
 npm ci
