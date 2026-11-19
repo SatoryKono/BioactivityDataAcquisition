@@ -18,8 +18,10 @@ uv sync --locked
 npm ci
 # Headless Chromium for the Playwright-based tooling tests (Grafana
 # screenshot runtime). The browser is a dependency of the test suite, so
-# it is installed into the snapshot here, never in .agents/resume.
-npx playwright install chromium
+# it is installed into the snapshot here, never in .agents/resume. The
+# tests launch only headless:true, so the headless shell suffices; the
+# screenshot runtime scripts install their own full Chromium.
+npx playwright install --only-shell chromium
 
 # Keep the version selected for the Amp orb. Both immutable release
 # archives are pinned by their GitHub-published SHA-256, never releases/latest.

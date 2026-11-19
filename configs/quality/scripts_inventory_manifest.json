@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-19T16:36:22.665665+00:00",
+  "generated_at": "2026-11-19T17:12:17.353117+00:00",
   "summary": {
     "total_scripts": 773,
     "status_counts": {
@@ -23394,7 +23394,7 @@
         },
         {
           "path": "scripts/engineering/repo/hook_runtime.py",
-          "line": 304,
+          "line": 306,
           "source_group": "scripts",
           "text": "framework = Path(__file__).with_name(\"offline_precommit.py\")"
         },
