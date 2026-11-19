@@ -1022,6 +1022,9 @@ JSON exports для Gold-схем хранятся в `docs/04-reference/contrac
 - `chembl_target_component_v1.0.json`
 - `chembl_target_protein_classification_v2.2.json`
 - `chembl_target_v3.0.json`
+- `chembl_target_v3.1.json` — nullable IUPHAR fields for admitted `enrich` only;
+  `off` and `shadow` retain 3.0.0. See the
+  [IUPHAR operator procedure](../../05-operations/runbooks/iuphar-target-classification.md).
 - `chembl_tissue_v1.0.json`
 - `composite_activity_v1.0.json`
 - `composite_assay_v1.0.json`

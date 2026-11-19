@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from functools import partial
+from pathlib import Path
+
 from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.preflight import (
     HealthAggregator,
@@ -13,6 +16,21 @@ from bioetl.domain.medallion import WriteModePolicy
 from bioetl.domain.ports import HealthMonitorPort, LoggerPort
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.time import SystemClock
+from bioetl.composition.bootstrap.assembly.target_classification_runtime import (
+    validate_target_runtime_dependency,
+)
+from bioetl.infrastructure.storage.target_classification_guard import (
+    assert_target_table_compatibility,
+)
+
+
+def _resolves_table_path(value: object) -> bool:
+    return callable(getattr(value, "_resolve_table_path", None))
+
+
+def _table_path(writer: object, table_name: str) -> str:
+    resolver_name = "_resolve_table_path"
+    return str(getattr(writer, resolver_name)(table_name))
 
 
 def build_preflight_service(
@@ -42,6 +60,35 @@ def build_preflight_service(
         layer_config=_build_preflight_layer_config(
             pipeline.services.storage, yaml_config
         ),
+        dependency_validator=(
+            partial(_validate_target_dependencies, pipeline, yaml_config)
+            if yaml_config is not None
+            and pipeline.config.pipeline_name == "chembl_target"
+            else None
+        ),
+    )
+
+
+def _validate_target_dependencies(
+    pipeline: BasePipeline, config: PipelineYamlConfig
+) -> None:
+    validate_target_runtime_dependency(
+        config, exact_replay=bool(getattr(pipeline.runtime, "exact_replay", False))
+    )
+    if pipeline.runtime.dry_run:
+        return
+    storage = pipeline.services.storage
+    silver = getattr(storage, "silver", None)
+    gold = getattr(storage, "gold", None)
+    if not _resolves_table_path(silver) or not _resolves_table_path(gold):
+        raise TypeError(
+            "target preflight requires actual Silver and Gold table path resolvers"
+        )
+    assert_target_table_compatibility(
+        silver_path=Path(_table_path(silver, pipeline.config.effective_silver_table)),
+        gold_path=Path(_table_path(gold, pipeline.config.effective_gold_table)),
+        mode=config.target_classification.mode,
+        destructive=pipeline.runtime.run_type.value in {"backfill", "rebuild"},
     )
 
 

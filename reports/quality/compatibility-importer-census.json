@@ -79,11 +79,12 @@
       "usage_classification": "stable_public_api_zero_first_party_src",
       "src_importers": [],
       "test_importers": [
+        "tests/unit/infrastructure/storage/test_target_migration_admission.py",
         "tests/unit/interfaces/cli/commands/test_run_composite.py",
         "tests/unit/scripts/ops/observability/test_green_acceptance.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 2,
+      "test_importer_count": 3,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing"
@@ -487,11 +488,12 @@
       "usage_classification": "stable_public_api_zero_first_party_src",
       "src_importers": [],
       "test_importers": [
+        "tests/unit/infrastructure/storage/test_target_migration_admission.py",
         "tests/unit/interfaces/cli/commands/test_run_composite.py",
         "tests/unit/scripts/ops/observability/test_green_acceptance.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 2,
+      "test_importer_count": 3,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing"

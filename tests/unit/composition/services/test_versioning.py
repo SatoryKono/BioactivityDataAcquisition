@@ -260,6 +260,23 @@ def test_get_dependency_lock_hash_uses_runtime_path_class(
     assert digest.startswith("sha256:")
 
 
+def _use_bounded_runtime_tree(root, cwd, monkeypatch):
+    """Keep ancestor discovery inside the real empty fixture filesystem."""
+
+    class RuntimeDirectory:
+        parents = tuple(p for p in cwd.parents if p == root or root in p.parents)
+
+        def __truediv__(self, name):
+            return cwd / name
+
+    class RuntimePath:
+        @staticmethod
+        def cwd():
+            return RuntimeDirectory()
+
+    monkeypatch.setattr(versioning, "_RUNTIME_PATH_CLS", RuntimePath)
+
+
 @pytest.mark.unit
 def test_get_dependency_lock_hash_returns_none_without_supported_lockfile(
     tmp_path, monkeypatch: pytest.MonkeyPatch
@@ -267,6 +284,7 @@ def test_get_dependency_lock_hash_returns_none_without_supported_lockfile(
     isolated = tmp_path / "work" / "nested"
     isolated.mkdir(parents=True)
     monkeypatch.chdir(isolated)
+    _use_bounded_runtime_tree(tmp_path, isolated, monkeypatch)
     versioning.get_dependency_lock_hash.cache_clear()
 
     assert versioning.get_dependency_lock_hash() is None
@@ -456,6 +474,7 @@ def test_get_code_revision_provenance_falls_back_to_repo_lockfile_outside_runtim
     isolated = tmp_path / "external-cwd"
     isolated.mkdir()
     monkeypatch.chdir(isolated)
+    _use_bounded_runtime_tree(tmp_path, isolated, monkeypatch)
     mock_run.side_effect = [
         SimpleNamespace(returncode=0, stdout=f"{full_hash}\n"),
         SimpleNamespace(returncode=0, stdout="version = 1\n"),

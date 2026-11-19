@@ -4,10 +4,10 @@
     "among_none_default_ignore": 0,
     "among_none_inherited_forbid": 14,
     "among_none_inherited_ignore": 0,
-    "basemodel_total": 105,
-    "effective_forbid": 105,
+    "basemodel_total": 106,
+    "effective_forbid": 106,
     "effective_ignore": 0,
-    "local_forbid": 91,
+    "local_forbid": 92,
     "local_ignore": 0,
     "local_none": 14
   },
@@ -654,16 +654,6 @@
     {
       "declaration_source": "local",
       "effective_extra": "forbid",
-      "identity": "bioetl.infrastructure.schemas.pipeline_config.FieldPolicyConfigSchema",
-      "local_extra": "forbid",
-      "module": "bioetl.infrastructure.schemas.pipeline_config",
-      "name": "FieldPolicyConfigSchema",
-      "reachable_from_runtime_roots": true,
-      "role": "config-boundary"
-    },
-    {
-      "declaration_source": "local",
-      "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.pipeline_config.PipelineYamlConfig",
       "local_extra": "forbid",
       "module": "bioetl.infrastructure.schemas.pipeline_config",
@@ -728,6 +718,16 @@
       "local_extra": "forbid",
       "module": "bioetl.infrastructure.schemas.pipeline_config_common",
       "name": "DQYamlConfig",
+      "reachable_from_runtime_roots": true,
+      "role": "config-boundary"
+    },
+    {
+      "declaration_source": "local",
+      "effective_extra": "forbid",
+      "identity": "bioetl.infrastructure.schemas.pipeline_config_common.FieldPolicyConfigSchema",
+      "local_extra": "forbid",
+      "module": "bioetl.infrastructure.schemas.pipeline_config_common",
+      "name": "FieldPolicyConfigSchema",
       "reachable_from_runtime_roots": true,
       "role": "config-boundary"
     },
@@ -1049,6 +1049,16 @@
       "local_extra": "forbid",
       "module": "bioetl.infrastructure.schemas.source_profile_config",
       "name": "SourceProfileYamlConfig",
+      "reachable_from_runtime_roots": true,
+      "role": "config-boundary"
+    },
+    {
+      "declaration_source": "local",
+      "effective_extra": "forbid",
+      "identity": "bioetl.infrastructure.schemas.target_classification_config.TargetClassificationYamlConfig",
+      "local_extra": "forbid",
+      "module": "bioetl.infrastructure.schemas.target_classification_config",
+      "name": "TargetClassificationYamlConfig",
       "reachable_from_runtime_roots": true,
       "role": "config-boundary"
     },
@@ -1788,7 +1798,7 @@
     {
       "classification": "forbid",
       "effective_extra": "forbid",
-      "identity": "bioetl.infrastructure.schemas.pipeline_config.FieldPolicyConfigSchema",
+      "identity": "bioetl.infrastructure.schemas.pipeline_config_common.FieldPolicyConfigSchema",
       "path": "field_policy",
       "role": "config-boundary",
       "root": "bioetl.infrastructure.schemas.pipeline_config.PipelineYamlConfig"
@@ -1950,6 +1960,14 @@
       "effective_extra": "forbid",
       "identity": "bioetl.infrastructure.schemas.source_profile_config.SourceProfileYamlConfig",
       "path": "source_profile",
+      "role": "config-boundary",
+      "root": "bioetl.infrastructure.schemas.pipeline_config.PipelineYamlConfig"
+    },
+    {
+      "classification": "forbid",
+      "effective_extra": "forbid",
+      "identity": "bioetl.infrastructure.schemas.target_classification_config.TargetClassificationYamlConfig",
+      "path": "target_classification",
       "role": "config-boundary",
       "root": "bioetl.infrastructure.schemas.pipeline_config.PipelineYamlConfig"
     },

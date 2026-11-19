@@ -49,6 +49,7 @@ def _run_installer(
     agent_tools: str,
     with_uv: bool,
     fail_extra: str | None = None,
+    fail_lock: bool = False,
 ) -> subprocess.CompletedProcess[str]:
     fake_bin = tmp_path / "bin"
     fake_bin.mkdir()
@@ -82,6 +83,13 @@ exit 0
 
     if with_uv:
         fail_check = ""
+        if fail_lock:
+            fail_check = """
+if [ "$1 $2" = "lock --check" ]; then
+  echo "uv $*" >> "$BIOETL_TEST_CAPTURE"
+  exit 1
+fi
+"""
         if fail_extra:
             fail_check = f"""
 if echo "$*" | grep -q -- '--extra {fail_extra}'; then
@@ -157,6 +165,8 @@ def test_uv_nominal_sync_keeps_tests_extra(tmp_path: Path) -> None:
     completed = _run_installer(tmp_path, agent_tools="none", with_uv=True)
     assert completed.returncode == 0, completed.stderr
     commands = _logged_commands(tmp_path)
+    assert commands[0] == "uv lock --check"
+    assert commands[1].startswith("uv venv ")
     syncs = [line for line in commands if line.startswith("uv sync")]
     assert len(syncs) == 1
     assert "--frozen" in syncs[0]
@@ -164,6 +174,17 @@ def test_uv_nominal_sync_keeps_tests_extra(tmp_path: Path) -> None:
     assert "--extra tests" in syncs[0]
     assert "--extra dev" in syncs[0]
     assert "--extra tracing" in syncs[0]
+
+
+def test_uv_stale_lock_stops_before_environment_changes(tmp_path: Path) -> None:
+    _skip_windows_installer_isolation()
+    completed = _run_installer(
+        tmp_path, agent_tools="none", with_uv=True, fail_lock=True
+    )
+    assert completed.returncode == 1
+    assert _logged_commands(tmp_path) == ["uv lock --check"]
+    assert "uv.lock is stale or unavailable" in completed.stderr
+    assert "Environment ready" not in completed.stdout
 
 
 def test_uv_agent_tools_all_keeps_tests_and_isolates_failure(tmp_path: Path) -> None:

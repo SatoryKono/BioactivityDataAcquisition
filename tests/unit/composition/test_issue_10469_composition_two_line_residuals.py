@@ -38,7 +38,7 @@ from bioetl.composition.observability_runtime import (
     _ensure_publication_seeds,
     _seed_run_type,
 )
-from bioetl.composition.providers._chembl_target_protein_classification_helpers import (
+from bioetl.domain.chembl.target_protein_classification import (
     coerce_positive_int,
     leaf_ids_from_component_row,
 )

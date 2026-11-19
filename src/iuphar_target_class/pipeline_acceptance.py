@@ -9,13 +9,19 @@ import time
 from collections.abc import Callable, Mapping
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import TypedDict
+from typing import TypedDict, cast
 
 from .models import RawTargetRow, RunProvenance
 from .pipeline import BatchResult, IndexedSnapshot, classify_batch
-from .pipeline_io import read_chembl_target_csv_v1, read_legacy_batch
+from .pipeline_io import (
+    BIOETL_TARGET_KERNEL_CSV_V1,
+    read_bioetl_target_kernel_csv_v1,
+    read_chembl_target_csv_v1,
+    read_legacy_batch,
+)
 from .policy import VOLUME_TEST_SECONDS
 from .stage0.io import atomic_write_bytes, canonical_json_bytes
+from .stage0.v2 import verify_stage0_v2
 
 
 @dataclass(frozen=True, slots=True)
@@ -46,6 +52,10 @@ class AdmittedCohort:
     manifest_sha256: str
     source_digests: tuple[tuple[str, str], ...]
     rows: tuple[RawTargetRow, ...]
+    schema_version: int = 1
+    evidence_digests: tuple[tuple[str, str], ...] = ()
+    cohort_manifest_sha256: str | None = None
+    conversion_ledger_sha256: str | None = None
 
 
 def _sha(data: bytes) -> str:
@@ -87,6 +97,10 @@ def _cohort_source_rows(
     """Convert only already verified bytes using the owner-selected profile."""
     if profile is None:
         return read_legacy_batch(content)
+    if profile.format_version == BIOETL_TARGET_KERNEL_CSV_V1:
+        return read_bioetl_target_kernel_csv_v1(
+            content, source_path=source, target_kind=profile.target_kind
+        )
     if profile.format_version == "chembl_target_csv_v1":
         return read_chembl_target_csv_v1(
             content, source_path=source, target_kind=profile.target_kind
@@ -152,6 +166,8 @@ def load_admitted_cohort(manifest_path: Path, plan: VolumePlan) -> AdmittedCohor
     manifest = json.loads(raw)
     if manifest.get("artifact") != "stage0_manifest" or manifest.get("stage") != "0":
         raise ValueError("not a Stage-0 manifest")
+    if manifest.get("schema_version") == 2:
+        return _load_admitted_cohort_v2(manifest_path, plan)
     copies = manifest.get("copies")
     if not copies or not plan.selected_source_paths:
         raise ValueError("Stage-0 cohort has no admitted source copies")
@@ -169,6 +185,50 @@ def load_admitted_cohort(manifest_path: Path, plan: VolumePlan) -> AdmittedCohor
     return AdmittedCohort(plan.manifest_sha256, tuple(hashes), tuple(rows))
 
 
+def _load_admitted_cohort_v2(manifest_path: Path, plan: VolumePlan) -> AdmittedCohort:
+    """Verify evidence bytes as well as the entire selected cohort material set."""
+    _require_cohort_plan(plan)
+    frozen = verify_stage0_v2(
+        manifest_path, plan.manifest_sha256, plan.selected_source_paths
+    )
+    imports = _cohort_source_profiles(plan)
+    if set(imports) != set(frozen.cohort_payloads):
+        raise ValueError(
+            "Stage-0 V2 requires an explicit profile for every cohort copy"
+        )
+    entries = {
+        item["source_path"]: item
+        for item in cast("list[dict[str, object]]", frozen.document["copies"])
+    }
+    rows: list[RawTargetRow] = []
+    for source in plan.selected_source_paths:
+        profile = imports[source]
+        entry = entries[source]
+        if (profile.format_version, profile.target_kind) != (
+            entry["format_version"],
+            entry["target_kind"],
+        ):
+            raise ValueError(
+                "cohort import profile differs from its frozen Stage-0 declaration"
+            )
+        rows.extend(
+            _cohort_source_rows(frozen.cohort_payloads[source], source, profile)
+        )
+    if len(rows) != plan.expected_rows or len(
+        {row.input_row_id for row in rows}
+    ) != len(rows):
+        raise ValueError("cohort count differs or row identities are not unique")
+    return AdmittedCohort(
+        plan.manifest_sha256,
+        frozen.cohort_digests,
+        tuple(rows),
+        2,
+        frozen.evidence_digests,
+        frozen.cohort_manifest_sha256,
+        frozen.conversion_ledger_sha256,
+    )
+
+
 def run_admitted_volume(
     *,
     manifest_path: Path,
@@ -180,7 +240,12 @@ def run_admitted_volume(
     clock: Callable[[], float] = time.perf_counter,
 ) -> tuple[BatchResult, dict[str, object]]:
     """Write the frozen config before running the full indexed pipeline."""
-    if not snapshot.complete or not all(
+    admitted = (
+        snapshot.admission_complete
+        if snapshot.admission_complete is not None
+        else snapshot.complete
+    )
+    if not admitted or not all(
         (
             provenance.normalization_version,
             provenance.rules_version,
@@ -190,7 +255,7 @@ def run_admitted_volume(
         )
     ):
         raise ValueError(
-            "qualified volume needs complete snapshot and versioned provenance"
+            "qualified volume needs admitted snapshot scope and versioned provenance"
         )
     cohort = load_admitted_cohort(manifest_path, plan)
     config = canonical_json_bytes(

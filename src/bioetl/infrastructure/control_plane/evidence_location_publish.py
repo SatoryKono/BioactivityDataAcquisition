@@ -1,4 +1,4 @@
-"""Exclusive create-if-absent publication for evidence-location records."""
+"""Public owner of exclusive create-if-absent evidence-location publication."""
 
 from __future__ import annotations
 

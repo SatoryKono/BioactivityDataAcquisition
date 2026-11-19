@@ -676,7 +676,9 @@ def test_ports_defined_in_domain_layer(src_dir: Path) -> None:
 
 
 @pytest.mark.slow
-def test_import_linter_contracts(project_root: Path, src_dir: Path) -> None:
+def test_import_linter_contracts(
+    project_root: Path, src_dir: Path, tmp_path: Path
+) -> None:
     """Run import-linter to verify all architectural contracts.
 
     REQ-ARCH-007: All import-linter contracts must pass.
@@ -711,7 +713,7 @@ def test_import_linter_contracts(project_root: Path, src_dir: Path) -> None:
                 "--config",
                 str(importlinter_config),
                 "--cache-dir",
-                "/tmp/bioetl-importlinter-cache",
+                str(tmp_path / "import-linter-cache"),
             ],
             capture_output=True,
             text=True,

@@ -135,6 +135,22 @@ def test_check_mode_reports_stale_snapshot_without_writing(monkeypatch) -> None:
     assert called is False
 
 
+def test_check_mode_validates_opt_in_target_contract(monkeypatch) -> None:
+    """The opt-in V31 output must be recognized and its drift must still fail."""
+    module = _load_module()
+    producer = _load_contracts_module()
+    current = {
+        path.relative_to(module.PROJECT_ROOT).as_posix(): content
+        for path, content in producer._expected_artifacts().items()
+    }
+    target = "docs/04-reference/contracts/gold/chembl_target_v3.1.json"
+    assert target in current
+    monkeypatch.setattr(module, "_snapshot_generated_contracts", lambda: dict(current))
+    assert module._run_gold_contract_generation(check=True) is False
+    current[target] = "{}\n"
+    assert module._run_gold_contract_generation(check=True) is True
+
+
 def test_contract_generator_removes_superseded_generated_contracts(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

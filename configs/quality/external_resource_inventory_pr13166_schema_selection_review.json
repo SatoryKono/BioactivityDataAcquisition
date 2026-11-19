@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "d3aa28cd215302eeec6e24f6002b6beaa6435051",
+  "source_ref": "03103defd0b4bbc9d030031604b31f25e3d83a3b",
+  "source_reviews": {
+    "src/bioetl/composition/services/target_classification_runtime.py": "Remove the second import of the identical runtime-profile resolver. No executable decision, resource lifecycle or qualification changes."
+  }
+}

@@ -2,36 +2,127 @@
 
 from __future__ import annotations
 
-import csv
 import hashlib
-import io
 import re
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import asdict
 from pathlib import Path
 from types import MappingProxyType
 
+from .csv_io import read_csv_records
 from .delivery import _create_new, _path_inside_root, result_names
 from .models import RawTargetRow, RunProvenance
 from .pipeline import BatchResult, IndexedSnapshot, RowResult, classify_batch
 from .stage0.io import canonical_json_bytes
 
+BIOETL_TARGET_KERNEL_CSV_V1 = "bioetl_target_kernel_csv_v1"
+_INVALID_CSV_ROW_WIDTH = "invalid CSV row width"
+_BIOETL_KERNEL_COLUMNS = frozenset(
+    {
+        "input_row_id",
+        "target_kind",
+        "target_chembl_id",
+        "target_id",
+        "uniprot",
+        "organism",
+        "name",
+    }
+)
+_IMPORT_PROVENANCE_COLUMNS = frozenset(
+    {"import_profile", "source_path", "source_sha256", "source_record"}
+)
+
+
+def read_bioetl_target_kernel_csv_v1(
+    content: bytes, *, source_path: str, target_kind: str
+) -> tuple[RawTargetRow, ...]:
+    """Read explicit kernel fields with canonical TaxID text, without guessing.
+
+    This profile keeps ChEMBL and provider identity separate. Species names,
+    padded TaxIDs and unknown sentinels must be converted by a source-owned
+    producer before this boundary; blank taxonomy remains explicitly missing.
+    """
+    if not source_path.strip() or target_kind not in {"protein", "complex"}:
+        raise ValueError(
+            "canonical CSV import requires a source and explicit target kind"
+        )
+    headers, source_rows = read_csv_records(content)
+    _require_bioetl_kernel_header(headers)
+    digest = hashlib.sha256(content).hexdigest()
+    rows = tuple(
+        _bioetl_kernel_row(raw, record, source_path, target_kind, digest)
+        for record, raw in enumerate(source_rows, 1)
+    )
+    if len({row.input_row_id for row in rows}) != len(rows):
+        raise ValueError("duplicate canonical CSV input_row_id")
+    return rows
+
+
+def _require_bioetl_kernel_header(headers: Sequence[str]) -> None:
+    if (
+        len(headers) != len(set(headers))
+        or not _BIOETL_KERNEL_COLUMNS.issubset(headers)
+        or bool(_IMPORT_PROVENANCE_COLUMNS.intersection(headers))
+        or any(not header.strip() for header in headers)
+    ):
+        raise ValueError("invalid bioetl_target_kernel_csv_v1 header")
+
+
+def _bioetl_kernel_identity(raw: dict[str, str], target_kind: str) -> str:
+    """Require a coherent row before constructing its source provenance."""
+    if None in raw or any(value is None for value in raw.values()):
+        raise ValueError(_INVALID_CSV_ROW_WIDTH)
+    identity = raw["input_row_id"]
+    if not identity.strip() or any(mark in identity for mark in ("/", "\n", "\r")):
+        raise ValueError("invalid canonical CSV input_row_id")
+    if raw["target_kind"] != target_kind:
+        raise ValueError("canonical CSV target_kind differs from selected profile")
+    return identity
+
+
+def _require_canonical_taxon(taxon: str) -> None:
+    if taxon and re.fullmatch(r"[1-9]\d*", taxon, flags=re.ASCII) is None:
+        raise ValueError(
+            "canonical CSV organism must be a positive ASCII TaxID or blank"
+        )
+
+
+def _bioetl_kernel_row(
+    raw: dict[str, str],
+    record: int,
+    source_path: str,
+    target_kind: str,
+    digest: str,
+) -> RawTargetRow:
+    identity = _bioetl_kernel_identity(raw, target_kind)
+    _require_canonical_taxon(raw["organism"])
+    fields: dict[str, str | None] = {
+        key: value
+        for key, value in raw.items()
+        if key not in {"input_row_id", "target_kind"}
+    }
+    fields.update(
+        import_profile=BIOETL_TARGET_KERNEL_CSV_V1,
+        source_path=source_path,
+        source_sha256=digest,
+        source_record=str(record),
+    )
+    return RawTargetRow(identity, fields, target_kind)
+
 
 def read_legacy_batch(content: bytes) -> tuple[RawTargetRow, ...]:
     """Decode a CSV, retaining original legacy class only as a source field."""
-    stream = io.StringIO(content.decode("utf-8-sig"), newline="")
-    reader = csv.DictReader(stream, strict=True)
-    headers = reader.fieldnames or []
+    headers, source_rows = read_csv_records(content)
     if len(headers) != len(set(headers)) or not {
         "input_row_id",
         "target_kind",
     }.issubset(headers):
         raise ValueError("invalid CSV header: expected unique columns and row ID/kind")
     rows: list[RawTargetRow] = []
-    for row in reader:
+    for row in source_rows:
         if None in row or any(value is None for value in row.values()):
-            raise ValueError("invalid CSV row width")
-        fields = {
+            raise ValueError(_INVALID_CSV_ROW_WIDTH)
+        fields: dict[str, str | None] = {
             k: v for k, v in row.items() if k not in {"input_row_id", "target_kind"}
         }
         rows.append(RawTargetRow(row["input_row_id"], fields, row["target_kind"]))
@@ -50,9 +141,7 @@ def read_chembl_target_csv_v1(
         raise ValueError(
             "project CSV import requires a source and explicit target kind"
         )
-    reader = csv.DictReader(
-        io.StringIO(content.decode("utf-8-sig"), newline=""), strict=True
-    )
+    headers, source_rows = read_csv_records(content)
     expected = (
         "target_chembl_id",
         "isoform_ids",
@@ -64,13 +153,13 @@ def read_chembl_target_csv_v1(
         "target_names",
         "target_uniprot_id",
     )
-    if tuple(reader.fieldnames or ()) != expected:
+    if headers != expected:
         raise ValueError("invalid chembl_target_csv_v1 header")
     digest = hashlib.sha256(content).hexdigest()
     identity = hashlib.sha256(source_path.encode("utf-8")).hexdigest()
     rows = [
         _chembl_target_row(raw, record, source_path, target_kind, digest, identity)
-        for record, raw in enumerate(reader, 1)
+        for record, raw in enumerate(source_rows, 1)
     ]
     return tuple(rows)
 
@@ -85,7 +174,7 @@ def _chembl_target_row(
 ) -> RawTargetRow:
     """Preserve source columns and record identity after strict width checks."""
     if None in raw or any(value is None for value in raw.values()):
-        raise ValueError("invalid CSV row width")
+        raise ValueError(_INVALID_CSV_ROW_WIDTH)
     names = tuple(
         name.strip() for name in raw["target_names"].split("|") if name.strip()
     )

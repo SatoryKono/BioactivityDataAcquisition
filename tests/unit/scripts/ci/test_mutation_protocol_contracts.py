@@ -336,6 +336,8 @@ def test_real_pytest_plugin_path_fails_closed(sandbox, defect: str, expected_exi
     )
     if defect == "stale_source":
         source.write_bytes(source.read_bytes() + b"\n# stale\n")
+    child_config = root / "mutants" / "pytest.ini"
+    child_config.write_text("[pytest]\n", encoding="utf-8")
     env = dict(os.environ)
     # Retain the current locked instrumenter path and the plugin's repository.
     env["PYTHONPATH"] = os.pathsep.join([str(root / "mutants" / "src"), *sys.path])
@@ -344,6 +346,8 @@ def test_real_pytest_plugin_path_fails_closed(sandbox, defect: str, expected_exi
             sys.executable,
             "-m",
             "pytest",
+            "-c",
+            str(child_config),
             str(test),
             "-q",
             "-p",

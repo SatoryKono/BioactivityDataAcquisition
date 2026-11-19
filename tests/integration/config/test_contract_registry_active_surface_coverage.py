@@ -143,7 +143,13 @@ def test_active_contract_registry_surfaces_resolve_latest_published_gold_artifac
         if not entry.published_artifacts:
             continue
         pipeline_name = contract_ref.replace(".", "_")
-        expected = resolve_path(entry.published_artifacts[0], registry_base).resolve()
+        latest = max(
+            entry.published_artifacts,
+            key=lambda artifact: tuple(
+                int(part) for part in Path(artifact).stem.rsplit("_v", 1)[1].split(".")
+            ),
+        )
+        expected = resolve_path(latest, registry_base).resolve()
         resolved = resolve_latest_gold_contract_path(pipeline_name).resolve()
         if resolved != expected:
             mismatches.append(

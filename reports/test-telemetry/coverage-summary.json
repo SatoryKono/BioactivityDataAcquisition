@@ -1,16 +1,16 @@
 {
-  "source_branch": "codex/pr13209-ci-closeout",
-  "source_commit": "c036d851b98b778ef4f285bff57666533af57070",
-  "source_run_id": "44486065385",
+  "source_branch": "codex/iuphar-target-integration-20261116",
+  "source_commit": "eab94684d0ba77ec7bf230920626a8d7c6d9b4b7",
+  "source_run_id": "44479287100",
   "source_event": "workflow_dispatch",
-  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/44486065385",
-  "source_tree_sha256": "bfa8cf2cfa7d22a037296a5f0a87bfd2a4f443abc3769c185e94127f4dae782b",
-  "refreshed_at_utc": "2026-11-19T08:28:06.116000+00:00",
+  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/44479287100",
+  "source_tree_sha256": "72b5396f91d35b92f89ba0e51f721577b5312b7b3fe0bc7864522e5e5f87d612",
+  "refreshed_at_utc": "2026-11-19T07:37:32.259000+00:00",
   "refresh_status": "captured",
-  "coverage_percent": 99.69,
+  "coverage_percent": 99.51,
   "coverage": {
     "threshold_percent": 85.0,
-    "actual_percent": 99.69,
+    "actual_percent": 99.51,
     "threshold_satisfied": true
   }
 }

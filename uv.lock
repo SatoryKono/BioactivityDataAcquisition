@@ -1,5 +1,5 @@
 version = 1
-revision = 5
+revision = 3
 requires-python = ">=3.12"
 resolution-markers = [
     "python_full_version >= '3.15' and sys_platform == 'win32'",
@@ -405,6 +405,7 @@ dependencies = [
     { name = "pandera" },
     { name = "polars" },
     { name = "prometheus-client" },
+    { name = "psutil" },
     { name = "pubchempy" },
     { name = "pyarrow" },
     { name = "pydantic" },
@@ -575,6 +576,7 @@ requires-dist = [
     { name = "prometheus-client", specifier = ">=0.20" },
     { name = "proofagent-harness", marker = "extra == 'agent-tools'", specifier = "==0.13.0" },
     { name = "proofagent-harness", marker = "extra == 'proofagent'", specifier = "==0.13.0" },
+    { name = "psutil", specifier = ">=5.9" },
     { name = "psutil", marker = "extra == 'dev'", specifier = ">=5.9" },
     { name = "psutil", marker = "extra == 'tests'", specifier = ">=5.9" },
     { name = "pubchempy", specifier = ">=1.0.4" },

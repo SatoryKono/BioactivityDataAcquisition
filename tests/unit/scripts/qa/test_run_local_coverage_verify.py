@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
+from types import SimpleNamespace
 import json
 import subprocess
 
@@ -316,3 +317,38 @@ def test_temporary_git_fixture_cannot_overwrite_callers_index(
     assert foreign_index.read_bytes() == b"caller index must remain untouched"
     assert (repo / ".git" / "index").is_file()
     assert env["WSLENV"] == "PYTHONUTF8"
+
+
+def test_measurement_environment_pins_checkout_imports(monkeypatch) -> None:
+    monkeypatch.setenv("PYTHONPATH", "foreign-checkout")
+    env = _measurement_environment()
+    assert env["PYTHONPATH"] == runner.os.pathsep.join(
+        (str(runner.ROOT / "src"), str(runner.ROOT))
+    )
+
+
+@pytest.mark.parametrize("use_bash", [False, True])
+def test_windows_commands_bind_checkout_imports_for_each_runtime(
+    tmp_path, monkeypatch, use_bash
+) -> None:
+    monkeypatch.setattr(runner, "os", SimpleNamespace(name="nt"))
+    monkeypatch.setattr(runner, "ROOT", PureWindowsPath("D:/github/checkout"))
+    monkeypatch.setattr(runner, "_windows_bash", lambda: "git-bash.exe")
+    env = {
+        "PYTHONPATH": r"D:\github\checkout\src;D:\github\checkout",
+        "OTHER": "retained",
+    }
+    observed = {}
+
+    def run(command, **kwargs):
+        observed.update(kwargs["env"])
+        return SimpleNamespace(returncode=0)
+
+    monkeypatch.setattr(runner.subprocess, "run", run)
+    command = ["git-bash.exe"] if use_bash else ["python.exe"]
+    assert runner._run_logged(command, tmp_path / "child.log", env=env) == 0
+    expected = (
+        "/d/github/checkout/src:/d/github/checkout" if use_bash else env["PYTHONPATH"]
+    )
+    assert observed == {**env, "PYTHONPATH": expected}
+    assert env["PYTHONPATH"] == r"D:\github\checkout\src;D:\github\checkout"

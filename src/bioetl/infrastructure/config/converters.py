@@ -216,6 +216,7 @@ def yaml_config_to_domain(
         data_schema=data_schema,
         field_policy=field_policy,
         source_profile=yaml_config.source_profile.to_domain(),
+        target_classification=yaml_config.target_classification.to_domain(),
         dq=dq_config,
         transform_version=transform_version,
         transform_steps=transform_steps,

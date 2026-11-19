@@ -200,6 +200,76 @@ async def test_build_transform_success_outcome_records_contract_exclusion() -> N
 
 
 @pytest.mark.unit
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "failure", ["normalization", "drop", "gold", "debug", "publish", "success"]
+)
+async def test_staged_evidence_follows_complete_attempt_and_always_releases(failure):
+    events = []
+
+    def fail():
+        raise ValueError("attempt rejected")
+
+    def publish(*_):
+        events.append("publish")
+        if failure == "publish":
+            fail()
+
+    staged = PreSilverRecord(
+        entity_id="1",
+        business_data={"value": 1},
+        build_silver_record=MagicMock(),
+        publish_business_evidence=publish,
+        discard_business_evidence=lambda *_: events.append("discard"),
+    )
+
+    def finalize(payload, *_):
+        assert payload.publish_business_evidence is None
+        assert payload.discard_business_evidence is None
+        events.append("normalize")
+        if failure == "normalization":
+            fail()
+        return None if failure == "drop" else {"entity_id": "1"}
+
+    def gold(*_):
+        events.append("gold")
+        if failure == "gold":
+            fail()
+        return {"entity_id": "1"}
+
+    def debug(**_):
+        events.append("debug")
+        if failure == "debug":
+            fail()
+
+    async def attempt():
+        return await build_transform_success_outcome(
+            context=_attempt_context(),
+            transform=lambda *_: staged,
+            raw_record={"id": "1"},
+            index=2,
+            normalization_processor=MagicMock(finalize_pre_silver=finalize),
+            gold_filter=lambda *_: True,
+            gold_transform=gold,
+            dq_config=None,
+            debug_export_service=MagicMock(record_transform_success=debug),
+        )
+
+    if failure in {"success", "drop"}:
+        outcome = await attempt()
+        assert (outcome.silver_record is None) == (failure == "drop")
+    else:
+        with pytest.raises(ValueError, match="attempt rejected"):
+            await attempt()
+    assert events[-1] == "discard"
+    assert events.count("discard") == 1
+    assert ("publish" in events) == (failure in {"success", "publish"})
+    if failure == "success":
+        assert events == ["normalize", "gold", "debug", "publish", "discard"]
+    assert staged.publish_business_evidence is publish
+
+
+@pytest.mark.unit
 def test_runtime_dq_outcomes_project_warning_flags(monkeypatch) -> None:
     outcome = DQRuleOutcome(
         rule_id="warn-rule",

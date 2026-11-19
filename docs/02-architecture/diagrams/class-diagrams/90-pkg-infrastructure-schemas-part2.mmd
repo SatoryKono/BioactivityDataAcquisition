@@ -1,9 +1,9 @@
 %% Title: Package Family: infrastructure/schemas (Part 2/4)
-%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/schemas; part 2/4; modules: composite_config, composite_validation, workflow_config.
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/schemas; part 2/4; modules: composite_config, composite_validation, pipeline_config_common.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-11-17
+%% @date    2026-11-18
 %% @level   Package Family / Inventory Slice
 %% @nodes   25
 %% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
@@ -32,13 +32,13 @@ classDiagram
         class RetrySchema
     }
 
-    namespace workflow_config {
-        class WorkflowConfigFileSchema
-        class WorkflowConfigSchema
-        class WorkflowDefaultsSchema
-        class WorkflowPipelineStepSchema
-        class WorkflowReconcileForeignKeysConfigSchema
-        class WorkflowReconcileRowsConfigSchema
-        class WorkflowRunOptionsSchema
-        class WorkflowTransformStepSchema
+    namespace pipeline_config_common {
+        class CircuitBreakerYamlConfig
+        class ConditionalValidationConfig
+        class CrossFieldValidationConfig
+        class CsvExportConfig
+        class DQReportYamlConfig
+        class DQYamlConfig
+        class FieldPolicyConfigSchema
+        class FieldValidationConfig
     }

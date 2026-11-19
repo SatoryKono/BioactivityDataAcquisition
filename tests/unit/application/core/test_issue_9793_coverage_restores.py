@@ -216,22 +216,25 @@ def test_forensic_preflight_flags_noop_logger() -> None:
         )
 
 
-def test_build_lock_manager_delegates(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_runner_assembly_injects_lock_runtime_service(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     from bioetl.composition.factories.pipeline import runner_assembly as mod
 
+    result = object()
     monkeypatch.setattr(
         mod,
         "_build_lock_runtime_service",
-        lambda context, checkpoint_manager, context_holder: "lock-runtime",
+        lambda context, checkpoint_manager, context_holder: result,
     )
-    assert (
-        mod._build_lock_manager(
-            MagicMock(),
-            checkpoint_manager=MagicMock(),
-            context_holder=MagicMock(),
+
+    def assemble(context, **builders):
+        return builders["lock_runtime_service_builder"](
+            context, checkpoint_manager=MagicMock(), context_holder=MagicMock()
         )
-        == "lock-runtime"
-    )
+
+    monkeypatch.setattr(mod, "_assemble_runner_parts_impl", assemble)
+    assert mod._assemble_runner_parts(MagicMock()) is result
 
 
 def test_build_postrun_service_for_pipeline_delegates(

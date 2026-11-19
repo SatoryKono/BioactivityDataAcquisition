@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from bioetl.infrastructure.config.target_classification_profile import (
+    resolve_target_classification_profile,
+)
+
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -143,10 +147,18 @@ def load_pipeline_contract_policy(
 
 def load_contract_rollout_policy(config: PipelineYamlConfig) -> ContractRolloutPolicy:
     """Adapt pipeline contract policy into the writer-facing rollout DTO."""
-    return load_pipeline_contract_policy(
+    policy = load_pipeline_contract_policy(
         config.provider,
         config.entity_type,
-    ).to_contract_rollout_policy()
+    )
+    if (config.provider, config.entity_type) == ("chembl", "target"):
+        resolved_policy = resolve_target_classification_profile(
+            config, policy
+        ).contract_policy
+        if resolved_policy is None:
+            raise ValueError("target writer requires an explicit contract policy")
+        policy = resolved_policy
+    return policy.to_contract_rollout_policy()
 
 
 def create_storage_adapter(

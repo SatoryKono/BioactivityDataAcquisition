@@ -16,6 +16,7 @@ import pytest
 
 from pathlib import Path
 
+from scripts.engineering.common.repo_paths import REPO_ROOT
 from scripts.engineering.qa.check_xwalk_missing_backlog import (
     _build_payload,
     collect_xwalk_missing_findings,
@@ -34,6 +35,10 @@ def _write_xwalk(path: Path, body: str) -> Path:
 
 def _write_backlog(path: Path, *, xwalk_path: Path, fields: list[str]) -> Path:
     fields_yaml = "\n".join(f"          - {field}" for field in fields)
+    try:
+        identity = xwalk_path.resolve().relative_to(REPO_ROOT).as_posix()
+    except ValueError:
+        identity = xwalk_path.resolve().as_posix()
     path.write_text(
         f"""version: 1
 scope: test
@@ -47,7 +52,7 @@ classification_values:
   - should_fix
   - deferred
 rules:
-  - path: {xwalk_path.resolve().as_posix()}
+  - path: {identity}
     markers:
       MISSING_CODE:
         classification: must_fix
@@ -84,7 +89,7 @@ plain_missing,MISSING,OK
     ]
     assert {item.provider for item in findings} == {"openalex"}
     assert {item.entity for item in findings} == {"publication"}
-    assert {item.path for item in findings} == {xwalk.resolve().as_posix()}
+    assert {(REPO_ROOT / item.path).resolve() for item in findings} == {xwalk.resolve()}
 
 
 def test_validate_backlog_accepts_matching_rule_fields(tmp_path: Path) -> None:

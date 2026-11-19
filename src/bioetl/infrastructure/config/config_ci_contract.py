@@ -60,6 +60,7 @@ PIPELINE_ALLOWED_KEYS: Final[frozenset[str]] = frozenset(
         "extraction_params",
         "source_profile",
         "page_size_override",
+        "target_classification",
     }
 )
 

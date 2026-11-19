@@ -27,6 +27,7 @@ from bioetl.application.core.base_transformer_helpers_mixin import (
 )
 
 if TYPE_CHECKING:
+    from bioetl.application.core.pre_silver_record import PreSilverEvidenceProtocol
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.filtering import FilterDecision
     from bioetl.domain.types import BronzeRecord, SilverRecord
@@ -34,6 +35,9 @@ if TYPE_CHECKING:
 
 class _BaseTransformerExecutionMixin(_BaseTransformerRecordHelpersMixin):
     """Execution lifecycle helpers composed with record helpers (ARCH-REF-04)."""
+
+    _business_evidence_observer: PreSilverEvidenceProtocol | None = None
+    _business_evidence_discarder: PreSilverEvidenceProtocol | None = None
 
     def _start_transform_span(
         self: TransformerExecutionOwner,
@@ -128,7 +132,10 @@ class _BaseTransformerExecutionMixin(_BaseTransformerRecordHelpersMixin):
             result = await self._transform_impl(context, record, index)
             # Structural policy applies Silver filter once for non-quarantined
             # records; do not call _apply_silver_filter again after this.
-            return self._apply_structural_policy(context, result, index)
+            result = self._apply_structural_policy(context, result, index)
+            if result is not None and self._business_evidence_observer is not None:
+                self._business_evidence_observer(context, index)
+            return result
         except TransformationError as error:
             error_type = self._handle_transformation_error(error, context, span)
             return None
@@ -136,4 +143,6 @@ class _BaseTransformerExecutionMixin(_BaseTransformerRecordHelpersMixin):
             error_type = self._handle_validation_error(error, context, span)
             raise
         finally:
+            if self._business_evidence_discarder is not None:
+                self._business_evidence_discarder(context, index)
             self._record_metrics_and_close_span(start_time, error_type, span)

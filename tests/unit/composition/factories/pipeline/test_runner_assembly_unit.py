@@ -122,7 +122,7 @@ def test_assemble_runner_impl_uses_injected_dq_configs_extractor() -> None:
             return_value=MagicMock(),
         ),
         patch(
-            "bioetl.composition.factories.pipeline.runner_assembly._build_lock_manager",
+            "bioetl.composition.factories.pipeline.runner_assembly._build_lock_runtime_service",
             return_value=MagicMock(),
         ),
         patch(

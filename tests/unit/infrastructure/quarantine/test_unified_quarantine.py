@@ -518,9 +518,15 @@ class TestUnifiedQuarantineWrite:
 
     @pytest.mark.asyncio
     async def test_write_many_holds_the_path_lock_across_select_and_append(
-        self, quarantine, batch_id, mock_write_deltalake
+        self, quarantine, batch_id, mock_write_deltalake, monkeypatch
     ):
         """The second writer waits until the first select-and-append finishes."""
+        # This race requires real workers, including under the WSL inline-I/O shim.
+        monkeypatch.setattr(
+            asyncio,
+            "to_thread",
+            getattr(asyncio.to_thread, "_bioetl_original_to_thread", asyncio.to_thread),
+        )
         first_inside = threading.Event()
         release_first = threading.Event()
         second_entered = threading.Event()

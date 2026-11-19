@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "0b86ca5b1a64b76948f6b6b1c236520dbc697e70",
+  "source_ref": "0b86ca5b1a64b76948f6b6b1c236520dbc697e70",
+  "source_reviews": {
+    "src/bioetl/composition/bootstrap/assembly/storage.py": "Reviewed moving the already qualified replay parent reader import to module scope. The helper invocation, FileRunManifestStore-owned reads, source selectors and mutation-admission checks are unchanged. This removes a forbidden lazy import at the existing zero cap; no new acquisition, process, task or cleanup owner. Static review only; NOT_RUN_12553 runtime acceptance is retained."
+  }
+}

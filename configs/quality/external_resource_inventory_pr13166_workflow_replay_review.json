@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "74a4d74f39d02a6f9dc3da4a54d7a0a6afadc067",
+  "source_ref": "04ac9b5318d5bb6f15e944e265c58d95b71503c0",
+  "source_reviews": {
+    "src/bioetl/application/pipelines/chembl/molecule_transformer.py": "Reviewed main #13210 mapping delta: max_phase remains raw until its existing normalization owner, while first_approval retains integer mapping. No new resource acquisition, ownership, cleanup or external I/O.",
+    "src/bioetl/composition/bootstrap/assembly/storage.py": "Reviewed target preflight using the existing CLI lock helpers and public input_snapshot_resolution parent-reader API. Explicit callbacks, profile validation, persisted replay configuration, admission ordering and resource lifetime unchanged. No new ownership or acquisition.",
+    "src/bioetl/composition/bootstrap/assembly/target_classification_replay.py": "Reviewed removal after verbatim relocation of pure workflow configuration/parent selection helpers into existing bootstrap.cli.lock owner; no acquired resource or cleanup removed. Existing storage parent-reader callback still owns manifest access.",
+    "src/bioetl/composition/bootstrap/cli/lock.py": "Reviewed relocated configuration helpers: validate pinned mappings, hydrate parent configurations, resolve profiles and reject conflicting target dependencies. Parent read is explicitly injected; existing lock/admission lifecycle unchanged. No new client, file handle or task ownership.",
+    "src/bioetl/composition/runtime_builders/run_manifest_support.py": "Reviewed direct as_posix calls replacing the trivial path formatter; all planned artifact paths and semantics unchanged. No parent-reader re-export or new callers remain on this bounded seam. No resource ownership change; static qualification only, NOT_RUN_12553 preserved.",
+    "src/bioetl/composition/runtime_builders/input_snapshot_resolution.py": "Reviewed public re-export of the existing persisted parent-manifest reader from the family-internal exact replay implementation. This acyclic snapshot API already resolves manifest/snapshot inputs. The implementation and manifest-store acquisition/cleanup are unchanged; no shim module, lazy import or caller allowance added."
+  }
+}

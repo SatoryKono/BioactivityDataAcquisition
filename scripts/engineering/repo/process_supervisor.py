@@ -49,11 +49,50 @@ def _children() -> list[int]:
     return [int(value) for value in path.read_text().split()]
 
 
+def _libc_pidfd_open(pid: int, flags: int = 0) -> int:
+    """Open a pidfd via glibc when the interpreter omits os.pidfd_open."""
+    libc = ctypes.CDLL(None, use_errno=True)
+    try:
+        open_fn = libc.pidfd_open
+    except AttributeError as exc:
+        raise OSError("pidfd_open unavailable") from exc
+    open_fn.argtypes = [ctypes.c_int, ctypes.c_uint]
+    open_fn.restype = ctypes.c_int
+    fd = int(open_fn(pid, flags))
+    if fd < 0:
+        err = ctypes.get_errno()
+        raise OSError(err, os.strerror(err))
+    return fd
+
+
+def _libc_pidfd_send_signal(
+    pidfd: int, sig: int, _siginfo: Any = None, flags: int = 0
+) -> None:
+    """Send a signal through a pidfd via glibc when Python bindings are absent."""
+    libc = ctypes.CDLL(None, use_errno=True)
+    try:
+        send_fn = libc.pidfd_send_signal
+    except AttributeError as exc:
+        raise OSError("pidfd_send_signal unavailable") from exc
+    send_fn.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_void_p, ctypes.c_uint]
+    send_fn.restype = ctypes.c_int
+    if int(send_fn(pidfd, sig, None, flags)) != 0:
+        err = ctypes.get_errno()
+        raise OSError(err, os.strerror(err))
+
+
 def _linux_facilities() -> dict[str, Any]:
-    """Probe platform-specific APIs without assuming Windows stubs have them."""
+    """Probe platform-specific APIs without assuming Windows stubs have them.
+
+    Some CPython builds ship HAVE_SYS_PIDFD_H without exporting os.pidfd_open /
+    signal.pidfd_send_signal even when the running kernel and libc provide both
+    symbols. Prefer the interpreter bindings, then fall back to libc.
+    """
+    open_fn = getattr(os, "pidfd_open", None) or _libc_pidfd_open
+    signal_fn = getattr(signal, "pidfd_send_signal", None) or _libc_pidfd_send_signal
     api: dict[str, Any] = {
-        "open": getattr(os, "pidfd_open", None),
-        "signal": getattr(signal, "pidfd_send_signal", None),
+        "open": open_fn,
+        "signal": signal_fn,
         "kill": getattr(signal, "SIGKILL", None),
         "nohang": getattr(os, "WNOHANG", None),
     }

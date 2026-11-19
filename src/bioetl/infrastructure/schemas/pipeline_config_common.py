@@ -31,6 +31,7 @@ __all__ = [
     "CsvExportConfig",
     "DQReportYamlConfig",
     "DQYamlConfig",
+    "FieldPolicyConfigSchema",
     "FieldValidationConfig",
 ]
 
@@ -302,3 +303,66 @@ class CsvExportConfig(BaseModel):
     delimiter: str = ","
     header: bool = True
     encoding: str = "utf-8"
+
+
+class FieldPolicyConfigSchema(BaseModel):
+    """Explicit field-level pipeline policy overrides."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    optional: bool | None = Field(
+        default=None,
+        description=(
+            "Explicit optionality override for this field. "
+            "When omitted, runtime falls back to derived effective_optional_v1."
+        ),
+    )
+    empty_as_missing: bool | None = Field(
+        default=None,
+        description=(
+            "Override structural missing-value semantics for this field. "
+            "When true, empty containers may be treated as missing. "
+            "When false, blank strings are preserved instead of being treated as missing."
+        ),
+    )
+    coercion_policy: Literal["default", "no_string_coercion"] | None = Field(
+        default=None,
+        description=(
+            "Override structural coercion behavior for non-string fields. "
+            "'no_string_coercion' disables string-to-number/string-to-bool coercion."
+        ),
+    )
+    boolean_true_values: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Optional normalized truthy tokens for boolean coercion overrides. "
+            "Applied case-insensitively after trim."
+        ),
+    )
+    boolean_false_values: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Optional normalized falsy tokens for boolean coercion overrides. "
+            "Applied case-insensitively after trim."
+        ),
+    )
+
+    @model_validator(mode="after")
+    def validate_boolean_vocabularies(self) -> FieldPolicyConfigSchema:
+        """Reject overlapping boolean vocabularies after normalization."""
+        true_values = {
+            value.strip().lower() for value in self.boolean_true_values if value.strip()
+        }
+        false_values = {
+            value.strip().lower()
+            for value in self.boolean_false_values
+            if value.strip()
+        }
+        overlap = true_values & false_values
+        if overlap:
+            overlap_values = ", ".join(sorted(overlap))
+            raise ValueError(
+                "field_policy boolean vocabularies must not overlap; "
+                f"got: {overlap_values}"
+            )
+        return self

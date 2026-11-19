@@ -1,0 +1,9 @@
+{
+  "catalog_ref": "349524491a577114105f33b2b8083a8bc685e22a",
+  "schema_version": 1,
+  "source_ref": "349524491a577114105f33b2b8083a8bc685e22a",
+  "source_reviews": {
+    "src/bioetl/infrastructure/adapters/iuphar/_input_projection.py": "Reviewed the Silver null normalization. plain_target_value drops null-valued mapping entries so runtime-absent keys and explicit Silver nulls share one business digest. No new client, file, or task.",
+    "src/bioetl/infrastructure/config/config_root.py": "Reviewed the packaged runtime root. When the module is loaded from an installed .venv that keeps configs but omits contributor files, the root binds to that install. The new probe is Path.is_file on pyvenv.cfg beside the existing AGENTS.md probe. No new client or task."
+  }
+}

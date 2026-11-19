@@ -1,13 +1,24 @@
 %% Title: Package Family: infrastructure/schemas (Part 3/4)
-%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/schemas; part 3/4; modules: base_schemas_pubchem, pipeline_config_common, dq_report_config, source_config.
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/schemas; part 3/4; modules: workflow_config, base_schemas_pubchem, dq_report_config, source_config.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-11-17
+%% @date    2026-11-18
 %% @level   Package Family / Inventory Slice
-%% @nodes   26
+%% @nodes   27
 %% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
 classDiagram
+
+    namespace workflow_config {
+        class WorkflowConfigFileSchema
+        class WorkflowConfigSchema
+        class WorkflowDefaultsSchema
+        class WorkflowPipelineStepSchema
+        class WorkflowReconcileForeignKeysConfigSchema
+        class WorkflowReconcileRowsConfigSchema
+        class WorkflowRunOptionsSchema
+        class WorkflowTransformStepSchema
+    }
 
     namespace base_schemas_pubchem {
         class BaseFilterColumnSchema
@@ -17,16 +28,6 @@ classDiagram
         class BaseGoldListLengthFilterConfig
         class BaseGoldRangeFilterConfig
         class BaseInputFilterConfig
-    }
-
-    namespace pipeline_config_common {
-        class CircuitBreakerYamlConfig
-        class ConditionalValidationConfig
-        class CrossFieldValidationConfig
-        class CsvExportConfig
-        class DQReportYamlConfig
-        class DQYamlConfig
-        class FieldValidationConfig
     }
 
     namespace dq_report_config {

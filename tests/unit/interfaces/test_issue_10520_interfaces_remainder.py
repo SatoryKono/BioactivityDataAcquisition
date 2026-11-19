@@ -606,6 +606,13 @@ def test_debug_breakpoints_and_log_session(monkeypatch: pytest.MonkeyPatch) -> N
 def test_lifecycle_metrics_rehydrate_tick(monkeypatch: pytest.MonkeyPatch) -> None:
     import threading
 
+    # The worker-identity assertion needs real offload under the WSL I/O shim.
+    monkeypatch.setattr(
+        asyncio,
+        "to_thread",
+        getattr(asyncio.to_thread, "_bioetl_original_to_thread", asyncio.to_thread),
+    )
+
     from bioetl.interfaces.cli.commands.domains.health import (
         server_integration_lifecycle as life,
     )

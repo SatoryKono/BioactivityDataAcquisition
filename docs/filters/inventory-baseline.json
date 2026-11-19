@@ -1948,7 +1948,7 @@
       "symbol": "apply_silver_filter",
       "path": "src/bioetl/application/core/pre_silver_record.py",
       "occurrence_count": 1,
-      "first_line": 64,
+      "first_line": 80,
       "role": "Runtime Silver filter application callsite",
       "migration_relevance": "Any new runtime application gate must remain structural-only or be inventoried.",
       "notes": ""
@@ -2102,7 +2102,7 @@
       "symbol": "validate_no_semantic_silver_filter_payload",
       "path": "src/bioetl/infrastructure/schemas/pipeline_config.py",
       "occurrence_count": 2,
-      "first_line": 342,
+      "first_line": 287,
       "role": "Fail-fast Silver semantic key guard",
       "migration_relevance": "Boundary hook that rejects semantic Silver keys before domain conversion.",
       "notes": ""
@@ -2113,7 +2113,7 @@
       "symbol": "source_profile",
       "path": "configs/_schema/pipeline.json",
       "occurrence_count": 1,
-      "first_line": 2103,
+      "first_line": 2190,
       "role": "Versioned source-profile metadata",
       "migration_relevance": "Explicit source-profile metadata anchors extraction_params widening separately from Silver/Gold filter migration.",
       "notes": ""
@@ -2179,7 +2179,7 @@
       "symbol": "source_profile",
       "path": "src/bioetl/infrastructure/schemas/pipeline_config.py",
       "occurrence_count": 2,
-      "first_line": 305,
+      "first_line": 246,
       "role": "Versioned source-profile metadata",
       "migration_relevance": "Explicit source-profile metadata anchors extraction_params widening separately from Silver/Gold filter migration.",
       "notes": ""
@@ -2289,7 +2289,7 @@
       "symbol": "extraction_params",
       "path": "src/bioetl/infrastructure/schemas/pipeline_config.py",
       "occurrence_count": 4,
-      "first_line": 300,
+      "first_line": 241,
       "role": "Source-profile extraction policy",
       "migration_relevance": "extraction_params are provider request policy and must not be treated as Silver filters.",
       "notes": ""
@@ -2432,7 +2432,7 @@
       "symbol": "filters.extraction_params",
       "path": "configs/entities/chembl/target.yaml",
       "occurrence_count": 1,
-      "first_line": 223,
+      "first_line": 225,
       "role": "Entity source-profile policy for chembl.target",
       "migration_relevance": "Provider API request narrowing is source-profile policy, not Silver structural filtering.",
       "notes": "non_empty; parameter_count=3"
@@ -2608,7 +2608,7 @@
       "symbol": "filters.source_profile",
       "path": "configs/entities/chembl/target.yaml",
       "occurrence_count": 1,
-      "first_line": 227,
+      "first_line": 229,
       "role": "Entity source-profile metadata for chembl.target",
       "migration_relevance": "Versioned source-profile metadata must change before source-side extraction widening.",
       "notes": "profile_id=chembl.target.curated; version=1.0.0; status=baseline"

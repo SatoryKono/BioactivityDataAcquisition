@@ -200,6 +200,32 @@ def test_identity_conflict_publishes_the_cross_species_witnesses():
     assert only_mouse.rows[0].result.match_status != "matched"
 
 
+def test_shortlist_reports_cross_species_accession_conflict():
+    snapshot = pipeline.IndexedSnapshot.build(
+        snapshot_id="fixture",
+        mapping_version="fixture-release",
+        complete=True,
+        catalog=(
+            CatalogTarget("1", ("P99999",), None, None, "9606", ("Shared",), ()),
+            CatalogTarget("1", ("P12345",), None, None, "10090", ("Shared",), ()),
+        ),
+        annotations={},
+        family_nodes=(),
+        type_to_class={},
+        family_to_class={},
+    )
+    conflict = _run(
+        RawTargetRow("q", {"uniprot": "P12345", "organism": "9606"}, "protein"),
+        snapshot=snapshot,
+    )
+    assert conflict.rows[0].result.match_status == "identity_conflict"
+    matched = _run(
+        RawTargetRow("ok", {"uniprot": "P99999", "organism": "9606"}, "protein"),
+        snapshot=snapshot,
+    )
+    assert matched.rows[0].result.match_status == "matched"
+
+
 def test_confirmed_annotation_supplies_missing_taxon_without_rewriting_input():
     original = {"target_id": "1"}
     batch = _run(RawTargetRow("exact", original, "protein"))
@@ -555,6 +581,44 @@ def test_volume_refuses_changed_cohort_and_records_config_before_run(tmp_path):
     copy.write_bytes(copy.read_bytes() + b"changed")
     with pytest.raises(ValueError, match="cohort source bytes differ"):
         load_admitted_cohort(manifest, plan)
+
+
+@pytest.mark.parametrize("admission_complete", [True, False, None])
+def test_volume_respects_scoped_admission_without_global_absence_claims(
+    tmp_path, admission_complete
+):
+    manifest, _, plan = _stage0_fixture(tmp_path)
+    scoped = pipeline.IndexedSnapshot.build(
+        snapshot_id="fixture",
+        mapping_version="fixture-release",
+        complete=False,
+        admission_complete=admission_complete,
+        catalog=(),
+        annotations={},
+        family_nodes=(),
+        type_to_class={},
+        family_to_class={},
+    )
+    output = tmp_path / "scoped-volume"
+    kwargs = {
+        "manifest_path": manifest,
+        "plan": plan,
+        "snapshot": scoped,
+        "provenance": _provenance(),
+        "run_id": "scoped-fixture",
+        "output_dir": output,
+    }
+    if not admission_complete:
+        with pytest.raises(ValueError, match="admitted snapshot scope"):
+            run_admitted_volume(**kwargs)
+        assert not output.exists()
+        return
+    batch, report = run_admitted_volume(**kwargs)
+    assert report["status"] == "PASS"
+    assert report["biological_accuracy_accepted"] is False
+    assert batch.rows[0].result.match_status == "source_unavailable"
+    assert batch.rows[0].result.iuphar_class is None
+    assert batch.rows[0].result.matched_target_id is None
 
 
 def test_legacy_target_all_without_provenance_does_not_create_direct():

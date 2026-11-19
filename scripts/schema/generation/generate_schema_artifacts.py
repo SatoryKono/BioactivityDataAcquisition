@@ -14,8 +14,6 @@ from __future__ import annotations
 
 import argparse
 import importlib
-import inspect
-import json
 import subprocess
 import sys
 from dataclasses import dataclass
@@ -266,26 +264,11 @@ def _load_generate_contracts_module() -> ModuleType:
 def _expected_generated_contracts_snapshot() -> dict[str, str]:
     """Build the expected Gold contract snapshot without mutating the workspace."""
     module = _load_generate_contracts_module()
-    schema_classes: list[type[object]] = []
-    for export_name in module.gold_contracts.__all__:
-        export_obj = getattr(module.gold_contracts, export_name)
-        if inspect.isclass(export_obj) and export_name.endswith("GoldSchema"):
-            schema_classes.append(export_obj)
-
-    schema_classes.sort(key=lambda cls: cls.__name__)
-    snapshot: dict[str, str] = {}
-
-    for schema_cls in schema_classes:
-        entity = module._class_to_entity(schema_cls.__name__)
-        contract_version = module._contract_version_for_entity(entity)
-        filename = module._filename_from_version(entity, contract_version)
-        output_path = GENERATED_CONTRACTS_DIR / filename
-        contract = module._build_contract(schema_cls, entity, contract_version)
-        snapshot[output_path.relative_to(PROJECT_ROOT).as_posix()] = (
-            json.dumps(contract, indent=2, ensure_ascii=False) + "\n"
-        )
-
-    return snapshot
+    return {
+        path.relative_to(PROJECT_ROOT).as_posix(): content
+        for path, content in module._expected_artifacts().items()
+        if path.parent == GENERATED_CONTRACTS_DIR
+    }
 
 
 def main(argv: list[str] | None = None) -> int:
