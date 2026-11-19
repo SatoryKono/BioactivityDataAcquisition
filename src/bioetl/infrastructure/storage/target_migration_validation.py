@@ -71,19 +71,22 @@ def _bioetl_arguments(argv: Sequence[str]) -> list[str]:
             "bioetl.exe",
             "bioetl-script.py",
         }:
-            return list(argv[index + 1 :])
+            args = list(argv[index + 1 :])
+            return args[1:] if args[:1] == ["--"] else args
     return []
 
 
-def _chembl_batch_writer(args: Sequence[str]) -> bool:
-    """Recognize a batch command that can write the managed target pipeline."""
-    return "--list-only" not in args and (
-        "--source=chembl" in args
-        or any(
-            args[index : index + 2] == ["--source", "chembl"]
-            for index in range(len(args) - 1)
-        )
-    )
+def _chembl_batch_writer(options: list[str]) -> bool:
+    """Treat the last source option as authoritative, as Click does."""
+    if "--list-only" in options:
+        return False
+    for index in range(len(options) - 1, -1, -1):
+        option = options[index]
+        if option.startswith("--source="):
+            return option == "--source=chembl"
+        if option == "--source":
+            return options[index + 1 : index + 2] == ["chembl"]
+    return False
 
 
 def _managed_writer_command(argv: Sequence[str]) -> bool:
@@ -97,8 +100,8 @@ def _managed_writer_command(argv: Sequence[str]) -> bool:
         args[index : index + 2] == ["workflow", "run"] for index in range(len(args) - 1)
     ):
         return True
-    if "run-all" in args:
-        return _chembl_batch_writer(args)
+    if args[:1] == ["run-all"]:
+        return _chembl_batch_writer(args[1:])
     return "run" in args and (
         "chembl_target" in args or "--pipeline=chembl_target" in args
     )
