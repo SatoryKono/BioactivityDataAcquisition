@@ -29,6 +29,7 @@ CALL_SECONDS = 38
 QUEUE_SECONDS = 4
 PROTOCOL = "2025-11-25"
 TOOLS_CALL = "tools/call"
+PROMPTS_GET = "prompts/get"
 
 
 def load_backend() -> MCPServer:
@@ -128,7 +129,7 @@ async def invoke_serialized(
     params: dict[str, object],
     active: asyncio.Lock,
 ) -> dict[str, object]:
-    if method not in {TOOLS_CALL, "prompts/get"}:
+    if method not in {TOOLS_CALL, PROMPTS_GET}:
         return await invoke(instance, method, params)
     # The Windows owner admits one backend operation at a time. Bound the
     # waiting queue as well, without extending the outer call deadline.
@@ -136,7 +137,7 @@ async def invoke_serialized(
         try:
             await asyncio.wait_for(active.acquire(), QUEUE_SECONDS)
         except TimeoutError:
-            if method == "prompts/get":
+            if method == PROMPTS_GET:
                 raise
             return {
                 "content": [{"type": "text", "text": "Fetch busy; request not sent"}],
@@ -164,7 +165,7 @@ class StdioSession:
         except asyncio.CancelledError:
             raise
         except (self.tool_error, TimeoutError):
-            if method == "prompts/get":
+            if method == PROMPTS_GET:
                 respond(
                     identifier,
                     error={
@@ -228,7 +229,7 @@ class StdioSession:
             )
         elif method == "ping":
             respond(identifier, result={})
-        elif method in {"tools/list", TOOLS_CALL, "prompts/list", "prompts/get"}:
+        elif method in {"tools/list", TOOLS_CALL, "prompts/list", PROMPTS_GET}:
             self.schedule(identifier, method, params)
         else:
             respond(
