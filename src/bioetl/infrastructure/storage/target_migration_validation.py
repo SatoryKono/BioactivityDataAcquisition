@@ -75,6 +75,17 @@ def _bioetl_arguments(argv: Sequence[str]) -> list[str]:
     return []
 
 
+def _chembl_batch_writer(args: Sequence[str]) -> bool:
+    """Recognize a batch command that can write the managed target pipeline."""
+    return "--list-only" not in args and (
+        "--source=chembl" in args
+        or any(
+            args[index : index + 2] == ["--source", "chembl"]
+            for index in range(len(args) - 1)
+        )
+    )
+
+
 def _managed_writer_command(argv: Sequence[str]) -> bool:
     """Recognize executable and python-module calls by argument boundary."""
     if any("workflow-campaigns" in arg.replace("\\", "/").split("/") for arg in argv):
@@ -87,13 +98,7 @@ def _managed_writer_command(argv: Sequence[str]) -> bool:
     ):
         return True
     if "run-all" in args:
-        return "--list-only" not in args and (
-            "--source=chembl" in args
-            or any(
-                args[index : index + 2] == ["--source", "chembl"]
-                for index in range(len(args) - 1)
-            )
-        )
+        return _chembl_batch_writer(args)
     return "run" in args and (
         "chembl_target" in args or "--pipeline=chembl_target" in args
     )
