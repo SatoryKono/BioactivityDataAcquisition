@@ -654,8 +654,9 @@ def test_unlisted_file_in_predecessor_bundle_blocks_rollback_before_commit(
 
 
 @pytest.mark.parametrize("valid", [True, False, None])
+@pytest.mark.parametrize("prepared", [False, True])
 def test_interrupted_old_runtime_can_upgrade_only_with_a_zero_request_start_receipt(
-    transition_owner, bundle, bundle_factory, valid, monkeypatch
+    transition_owner, bundle, bundle_factory, valid, monkeypatch, prepared
 ):
     from scripts.ai.mcp import memory_reconciliation as recovery
 
@@ -681,6 +682,10 @@ def test_interrupted_old_runtime_can_upgrade_only_with_a_zero_request_start_rece
             }
         ],
     }
+    if prepared:
+        coord["history"][-1].update(
+            launch_stage="PREPARED", owner_pid=77, owner_birth=1
+        )
     owner.state.write(directory / "recovery-v2.json", coord)
     owner.state.write(
         directory / "status.json",
@@ -835,7 +840,15 @@ def test_explicit_recovery_completes_the_same_interrupted_transition(
     owner.state.write(index_path, index)
     before_graph = graph.read_bytes()
     if operation == "rollback":
+        legacy = directory / "legacy-runtime.py"
+        legacy.write_bytes(b"# immutable legacy source fixture\n")
+        owner.state.write(
+            directory / versions.ACTIVE_INDEX,
+            {"hashes": {str(legacy): versions.sha(legacy)}},
+        )
         versions.migrate(owner, identity, bundle)
+        graph.write_bytes(b'{"legitimate_change":"after migration"}\n')
+        before_graph = graph.read_bytes()
     original_write = owner.state.write
 
     def fail(path, value):
@@ -1016,7 +1029,22 @@ def test_loading_a_bundle_with_bytecode_enabled_preserves_its_exact_files(
     bundle = tmp_path / hashlib.sha256(raw).hexdigest()
     source.rename(bundle)
     module_path = Path(versions.__file__)
-    program = 'import sys\nfrom pathlib import Path\nnamespace={"__file__":sys.argv[1],"__name__":"isolated_versions"}\nexec(compile(Path(sys.argv[1]).read_text(encoding="utf-8"),sys.argv[1],"exec"),namespace)\nsys.dont_write_bytecode=False\ntry:\n namespace["bundle_owner"](Path(sys.argv[2]))\nexcept RuntimeError:\n assert sys.argv[3]=="True"\nassert sys.dont_write_bytecode is False\nnamespace["verify"](Path(sys.argv[2]))\n'
+    program = """import sys
+from pathlib import Path
+namespace={"__file__":sys.argv[1],"__name__":"isolated_versions"}
+exec(compile(Path(sys.argv[1]).read_text(encoding="utf-8"),sys.argv[1],"exec"),namespace)
+sys.dont_write_bytecode=False
+expected_failure = sys.argv[3] == "True"
+try:
+    namespace["bundle_owner"](Path(sys.argv[2]))
+except RuntimeError as error:
+    assert expected_failure
+    assert str(error) == "injected owner load failure"
+else:
+    assert not expected_failure, "Expected owner load failure did not occur"
+assert sys.dont_write_bytecode is False
+namespace["verify"](Path(sys.argv[2]))
+"""
     result = subprocess.run(
         [
             sys.executable,
@@ -1102,7 +1130,7 @@ def test_partial_transition_still_requires_current_scope_and_graph_claim(
     assert graph.read_bytes() == b'{"fixture":true}\n'
 
 
-@pytest.mark.parametrize("identity_state", ["ALIVE", "UNKNOWN"])
+@pytest.mark.parametrize("identity_state", ["ALIVE", "UNKNOWN", "DEAD"])
 def test_migration_cannot_overtake_a_prepared_owner_before_status_publication(
     transition_owner, bundle, bundle_factory, monkeypatch, identity_state
 ):
@@ -1170,3 +1198,99 @@ def test_migration_cannot_overtake_a_prepared_owner_before_status_publication(
     assert {
         path: path.read_bytes() for path in directory.rglob("*") if path.is_file()
     } == before
+
+
+def test_interrupted_rollback_refuses_changes_since_its_own_graph_snapshot(
+    transition_owner, bundle, monkeypatch
+):
+    owner, directory, graph = transition_owner
+    legacy = directory / "legacy-runtime.py"
+    legacy.write_bytes(b"# immutable legacy source fixture\n")
+    owner.state.write(
+        directory / versions.ACTIVE_INDEX,
+        {"hashes": {str(legacy): versions.sha(legacy)}},
+    )
+    versions.migrate(owner, directory.name, bundle)
+    graph.write_bytes(b'{"legitimate_change":"before rollback"}\n')
+    original = owner.state.write
+
+    def interrupted(path, value):
+        if path.name == versions.PROFILE_DESCRIPTOR:
+            raise OSError("injected rollback interruption")
+        original(path, value)
+
+    with monkeypatch.context() as patch:
+        patch.setattr(owner.state, "write", interrupted)
+        with pytest.raises(OSError, match="rollback interruption"):
+            versions.rollback(owner, directory.name)
+    transaction = owner.state.read(directory / versions.MIGRATION_RECORD)
+    assert transaction["rollback_snapshot"]["graph"] == {
+        "graph_sha256": versions.sha(graph)
+    }
+    graph.write_bytes(b'{"unexpected_change":"during rollback"}\n')
+    before = {
+        path: path.read_bytes()
+        for path in directory.parent.rglob("*")
+        if path.is_file()
+    }
+    with pytest.raises(ValueError, match="Graph changed"):
+        versions.recover_transition(
+            owner, directory.name, transaction["id"], fixture=True
+        )
+    assert {
+        path: path.read_bytes()
+        for path in directory.parent.rglob("*")
+        if path.is_file()
+    } == before
+
+
+@pytest.mark.parametrize("changed_graph", [False, True])
+def test_legacy_interrupted_rollback_requires_its_preserved_graph_snapshot(
+    transition_owner, bundle, monkeypatch, changed_graph
+):
+    owner, directory, graph = transition_owner
+    legacy = directory / "legacy-runtime.py"
+    legacy.write_bytes(b"# immutable legacy source fixture\n")
+    owner.state.write(
+        directory / versions.ACTIVE_INDEX,
+        {"hashes": {str(legacy): versions.sha(legacy)}},
+    )
+    versions.migrate(owner, directory.name, bundle)
+    if changed_graph:
+        graph.write_bytes(b'{"legitimate_change":"after migration"}\n')
+    original = owner.state.write
+
+    def interrupted(path, value):
+        if path.name == versions.PROFILE_DESCRIPTOR:
+            raise OSError("legacy rollback interruption")
+        original(path, value)
+
+    with monkeypatch.context() as patch:
+        patch.setattr(owner.state, "write", interrupted)
+        with pytest.raises(OSError, match="legacy rollback"):
+            versions.rollback(owner, directory.name)
+    transaction = owner.state.read(directory / versions.MIGRATION_RECORD)
+    transaction.pop("rollback_snapshot")  # Earlier runtime journal format.
+    original(directory / versions.MIGRATION_RECORD, transaction)
+    before = {
+        path: path.read_bytes()
+        for path in directory.parent.rglob("*")
+        if path.is_file()
+    }
+    if changed_graph:
+        with pytest.raises(ValueError, match="Graph changed"):
+            versions.recover_transition(
+                owner, directory.name, transaction["id"], fixture=True
+            )
+        assert {
+            path: path.read_bytes()
+            for path in directory.parent.rglob("*")
+            if path.is_file()
+        } == before
+    else:
+        assert (
+            versions.recover_transition(
+                owner, directory.name, transaction["id"], fixture=True
+            )["state"]
+            == "ROLLED_BACK"
+        )

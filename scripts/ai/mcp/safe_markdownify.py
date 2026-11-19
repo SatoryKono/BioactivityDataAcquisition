@@ -484,7 +484,9 @@ def _pending_worker_record_name(path):
 
 def _erase_worker_job(job, snapshot):
     _validate_cleanup_files(job, snapshot)
-    for path in job.iterdir():
+    # Keep the recovery journal until every document/output/temp is gone.
+    paths = sorted(job.iterdir(), key=lambda path: path.name == PENDING_CLEANUP)
+    for path in paths:
         if path.name in {
             snapshot,
             WORKER_OUTPUT,

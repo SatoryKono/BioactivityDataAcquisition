@@ -690,14 +690,31 @@ def test_pre_authorization_proof_rejects_unknown_or_changed_evidence(fixture, ch
     assert {path: path.read_bytes() for path in directory.iterdir()} == before
 
 
-def test_gateway_authorization_receipt_is_published_before_releasing_barrier(fixture):
+def test_gateway_authorization_receipt_is_published_before_releasing_barrier(
+    fixture, monkeypatch
+):
     owner, entry, value, stamp = fixture
     directory = Path(entry["state"])
     recovery.apply(owner, entry, value, recovery.plan(owner, entry, value))
     generation = recovery.launch_generation(owner, entry, value)
     record = {"generation": generation, "owner_pid": os.getpid(), "owner_birth": 42}
     owner.state.write(directory / "status.json", record)
+    original, published = owner.state.write, []
+
+    def checked(path, data):
+        if (
+            path.name == recovery.COORDINATION
+            and data["history"][-1].get("launch_stage") == "AUTHORIZED"
+        ):
+            receipt = owner.state.read(directory / "work.json")
+            assert receipt["generation"] == generation
+            assert receipt["accepted_count"] == 0
+            published.append(generation)
+        original(path, data)
+
+    monkeypatch.setattr(owner.state, "write", checked)
     recovery.authorize_gateway(owner, entry, value, generation, record)
+    assert published == [generation]
     work = owner.state.read(directory / "work.json")
     assert work["generation"] == generation and work["accepted_count"] == 0
     assert work["mutating"] is False and work["graph"] == stamp

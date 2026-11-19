@@ -285,3 +285,26 @@ def test_toml_unicode_comment_and_non_bmp_route_survive_atomic_publication(tmp_p
     parsed = tomllib.loads(path.read_text(encoding="utf-8"))
     assert parsed["mcp_servers"]["memory"]["command"] == servers["memory"]["command"]
     assert parsed["mcp_servers"]["memory"]["args"] == servers["memory"]["args"]
+
+
+@pytest.mark.parametrize("name", ["custom=team", 'custom"=team', "custom'team=1"])
+@pytest.mark.parametrize("root_inline", [False, True])
+def test_quoted_custom_key_with_equals_survives_repeated_sync(
+    private_codex_writer, name, root_inline
+):
+    setup, path, root = private_codex_writer
+    custom = {"command": "custom", "args": ["kept"]}
+    assignment = setup._toml_key(name) + " = " + setup._inline_toml_value(custom)
+    source = (
+        '"mcp\\u005fservers" = { memory = {command="old"}, ' + assignment + "}\n"
+        if root_inline
+        else "mcp_servers." + assignment + "\n"
+    )
+    path.write_text(source, encoding="utf-8")
+    setup._write_codex_config(root, profile="stable")
+    first = path.read_bytes()
+    assert tomllib.loads(first.decode())["mcp_servers"][name] == custom
+    if not root_inline:
+        assert source in first.decode()
+    setup._write_codex_config(root, profile="stable")
+    assert path.read_bytes() == first

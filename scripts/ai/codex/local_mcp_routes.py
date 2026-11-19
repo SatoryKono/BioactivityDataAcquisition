@@ -124,7 +124,8 @@ def apply_local_routes(
         raise ValueError("Native MCP Git binding must be absolute")
     if not _repository_binding_matches(expected, workspace, strict=explicit):
         return servers
-    _physical(expected)
+    # common_directory already validates the physical workspace/Git markers.
+    # Do not probe a path read from the manifest after that identity check.
     result = deepcopy(servers)
     if not isinstance(data["entries"], dict):
         raise ValueError("Invalid native MCP route entries")

@@ -543,9 +543,13 @@ def _upgradeable_interrupted_launch(owner, directory, recovery_state, graph):
         and owner.state.identity(last, "owner") != "DEAD"
     ):
         return False
+    incident = current._interrupted_launch_block(observed, recovery_state)
+    # PREPARED-only proof hashes profile/active records that migration rewrites.
+    # Only a separate successor zero-request receipt survives that transition.
     return (
         current.process_verdict(owner, observed) is None
-        and current._interrupted_launch_block(observed, recovery_state) is not None
+        and incident is not None
+        and incident.startswith("interrupted-")
     )
 
 
@@ -778,20 +782,27 @@ def _complete_transition(owner, directory, identity, transaction, selected, afte
     rollback_direction = phase in {"ROLLING_BACK", "ROLLED_BACK"}
     before = transaction["before"]
     target = before if rollback_direction else after
+    bound = (
+        transaction.get("rollback_snapshot", before) if rollback_direction else before
+    )
+    if not isinstance(bound, dict) or not {"graph", "coordination"}.issubset(bound):
+        raise ValueError("Interrupted transition has no qualified snapshot")
     if rollback_direction and not _predecessor_runtime_matches(before):
         raise ValueError("Rollback predecessor runtime is not qualified")
     index_path = owner.registry.ROOT / PROFILE_INDEX
     index = owner.state.read(index_path)
     current = _transition_records(owner, directory, index, identity)
-    completed = target if phase in {"COMMITTED", "ROLLED_BACK"} else None
-    _check_transition_records(current, before, after, completed_target=completed)
+    completed = phase in {"COMMITTED", "ROLLED_BACK"}
+    _check_transition_records(
+        current, before, after, completed_target=target if completed else None
+    )
     if current["entry"] is None or Path(current["entry"]["state"]) != directory:
         raise ValueError("Pending migration profile scope changed")
-    if dormant(selected, current["entry"], current["descriptor"]) != before["graph"]:
+    if dormant(selected, current["entry"], current["descriptor"]) != bound["graph"]:
         raise ValueError("Graph changed during interrupted migration")
-    if owner.state.read(directory / RECOVERY_RECORD) != before["coordination"]:
+    if owner.state.read(directory / RECOVERY_RECORD) != bound["coordination"]:
         raise ValueError("Coordination changed during interrupted migration")
-    if completed is not None:
+    if completed:
         return {
             "profile": identity,
             "state": phase,
@@ -803,9 +814,9 @@ def _complete_transition(owner, directory, identity, transaction, selected, afte
     index[identity] = target["entry"]
     owner.state.write(index_path, index)
     owner.state.write(directory / RUNTIME_BINDING, target["runtime_binding"])
-    if dormant(selected, target["entry"], target["descriptor"]) != before["graph"]:
+    if dormant(selected, target["entry"], target["descriptor"]) != bound["graph"]:
         raise ValueError("Graph changed while completing interrupted migration")
-    if owner.state.read(directory / RECOVERY_RECORD) != before["coordination"]:
+    if owner.state.read(directory / RECOVERY_RECORD) != bound["coordination"]:
         raise ValueError("Coordination changed while completing interrupted migration")
     transaction["phase"] = "ROLLED_BACK" if rollback_direction else "COMMITTED"
     transaction["completed_by_recovery"] = True
@@ -915,7 +926,7 @@ def rollback(owner, identity):
                     raise ValueError(
                         "Concurrent migration or profile change; rollback refused"
                     )
-                dormant(owner, entry, value)
+                stamp = dormant(owner, entry, value)
                 current = owner.state.read(directory / RECOVERY_RECORD)
                 if current != transaction["before"]["coordination"]:
                     owner.state.write(
@@ -946,6 +957,10 @@ def rollback(owner, identity):
                         "state": "BLOCKED_LEGACY_RUNTIME_DRIFT",
                         "graph_preserved": True,
                     }
+                transaction["rollback_snapshot"] = {
+                    "graph": stamp,
+                    "coordination": current,
+                }
                 transaction["phase"] = "ROLLING_BACK"
                 owner.state.write(path, transaction)
                 owner.state.write(directory / PROFILE_DESCRIPTOR, before["descriptor"])
@@ -956,6 +971,12 @@ def rollback(owner, identity):
                     directory / RUNTIME_BINDING,
                     before.get("runtime_binding", {"schema": 2, "state": "legacy"}),
                 )
+                if dormant(owner, before["entry"], before["descriptor"]) != stamp:
+                    raise ValueError(
+                        "Graph changed during rollback; route remains closed"
+                    )
+                if owner.state.read(directory / RECOVERY_RECORD) != current:
+                    raise ValueError("Coordination changed during rollback")
                 transaction["phase"] = "ROLLED_BACK"
                 owner.state.write(path, transaction)
                 return {
