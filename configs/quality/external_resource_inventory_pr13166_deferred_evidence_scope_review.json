@@ -1,9 +1,8 @@
 {
   "schema_version": 1,
-  "catalog_ref": "a8986cf42a5e064ff984936c727fe479ca87ae28",
-  "source_ref": "a8986cf42a5e064ff984936c727fe479ca87ae28",
+  "catalog_ref": "b74592ebaa490780c8eb087a67e7beb05ca30b36",
+  "source_ref": "b74592ebaa490780c8eb087a67e7beb05ca30b36",
   "source_reviews": {
-    "src/bioetl/application/core/batch_transformer_attempt_success.py": "The batch consumes the existing staged evidence lifecycle. The callback preparation moved into the intermediate record; runtime data quality, successful publication and terminal disposal preserve the previous outcome. Existing resource sites are unchanged.",
-    "src/bioetl/application/core/pre_silver_record.py": "Adds a scoped cleanup registration and a dataclass copy to an existing immutable intermediate record. The incoming cleanup stack owns the same callback; no external resource acquisition is added."
+    "src/bioetl/application/core/batch_transformer_attempt_success.py": "Simplifies finalization, DQ field ordering, and awaiting of transform outcomes. The staged publication and cleanup order is preserved. No resource acquisition, destination, or authorization changes."
   }
 }
