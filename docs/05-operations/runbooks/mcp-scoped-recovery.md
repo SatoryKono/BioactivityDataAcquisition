@@ -59,7 +59,10 @@ When a profile omits a managed server, its policy remains in an inactive comment
 inside the managed TOML block and is restored when that server returns. The
 archive contains policies only; transport and credentials are never archived.
 Generation and shell readiness checks use the same validated policy projection,
-while canonical transport/authentication changes still fail readiness.
+while canonical transport/authentication changes still fail readiness. Readiness
+also rejects managed servers outside the selected profile, even if they appear
+outside the generated block; unmanaged servers remain independent. Root inline
+MCP tables are normalized when necessary to retain custom server values.
 Unchanged output does not replace the file. Back up only changed fields in
 owner-private storage and compare current values before restoring them.
 
@@ -78,6 +81,10 @@ The existing operational CLI exposes `python -B -m scripts.ai.mcp codex-session
 --executable <qualified-app-owned-codex.exe> --sha256 <qualified-digest>`.
 Run from the actual intended checkout. `--check` validates bindings and prepares
 child-only credential delivery without spawning Codex or sending a request.
+The selected physical `CODEX_HOME` supplies the validated user TOML and is passed
+to the child unchanged. A CLI-scoped Ref entry binds the checked route against
+project overlays and concurrent user-TOML edits; only the environment variable
+name, never the credential value, appears in that override.
 The launcher requires a separately qualified native executable and does not
 claim that a currently running ACP/editor client has reloaded its configuration.
 
@@ -95,7 +102,9 @@ full multi-server target session.
 
 The launcher compiles explicit Memory/AST and optional Markdownify bindings into
 supported per-invocation `--config` transport tables. It preserves existing tool
-approval policies. This path leaves the global user TOML unchanged; subsequent
+approval policies, including the separate policy of `memory-acceptance`. The
+selector validates and selects routes from one manifest snapshot. This path
+leaves the global user TOML unchanged; subsequent
 generator synchronization cannot erase these invocation-scoped overrides.
 The Markdownify binding must match the exact physical workspace and Git common
 directory. A default binding for another workspace disables only Markdownify in
@@ -226,6 +235,13 @@ recovery rules. A terminated LAUNCHING generation can produce its own incident
 only when its status and complete zero-request startup receipt match that
 successor and the retained graph stamp. It requires a new plan/grant; the previous
 grant remains consumed. An idle receipt requires an explicit `mutating=false`.
+New runtimes persist `LAUNCHING/PREPARED` with the owner birth before spawning a
+gateway. A dead prepared owner can support a new reviewed plan only when the
+original records and graph still match; absence of a receipt alone is insufficient.
+Before releasing the gateway nonce, the owner durably publishes its generation's
+zero-request startup receipt and `AUTHORIZED` stage. This covers interruption
+between grant consumption and successor publication. Live/unknown prepared owners
+also block migration, even before a new `status.json` exists.
 A pending RESOLVED grant blocks runtime migration until its reviewed launch is
 handled. A LAUNCHING generation also blocks migration unless the dormant-process,
 zero-request startup and matching-graph checks in Rollback/Recovery prove the
@@ -267,13 +283,21 @@ Converters receive a bounded private snapshot, never the original path. Worker
 processes run in owned Jobs with isolated Python and no service credential.
 Each worker registers only the converter for its qualified snapshot extension;
 built-in sniffing and plugins are disabled. ZIP content in an HTML snapshot is
-refused. A worker that misses the cleanup deadline leaves a private cleanup
-record and preserves the original operation error. Preparation, startup and
-subsequent conversions retry cleanup only after the owned Job was closed and
-the original process is known to have exited. Live or unknown identities,
-unrecorded jobs and unowned files block further snapshots without signalling
-other processes. Keep unresolved job directories and escalate to the bound
-profile operator; do not delete retained documents or fabricate identity records.
+refused. A worker records `PREPARED` before writing input, then `SPAWNING` before process
+creation and `RUNNING` after Job attachment and PID/birth publication. The pinned
+worker cannot access input before receiving its private stdin nonce; publication
+of `RUNNING` precedes nonce release. `CLEANUP` preserves deferred process evidence.
+Worker execution has one 70-second budget and cleanup waits at most five seconds,
+leaving time within the client's 100-second IO budget for the bounded tool error.
+The original operation error survives cleanup failure.
+Preparation of an existing profile does not scan a live conversion. On restart
+or the next conversion, only proved completed work is reclaimed. A dead owner
+before nonce authorization proves the snapshot cannot be used; after authorization,
+worker termination and Job closure/owner exit are required. Unknown/live identities
+and unowned files remain refusals without signalling another process. Metadata-only
+interrupted publication and known atomic-record temporary files are handled inside
+the validated private job namespace. Retain unresolved documents for the profile
+operator; do not fabricate identity records.
 
 Responses retain the 2 MiB transport limit and encode ordinary Unicode as UTF-8.
 An oversized JSON envelope returns a bounded tool error rather than closing a
@@ -297,6 +321,9 @@ An administrative restart archives a stopped generation before retiring its
 status. A known different birth for a reused PID proves the former owner is gone;
 that foreign process is left untouched. Unknown birth and a still-live matching
 owner remain refusals. Retirement is resumable after a publication interruption.
+Explicit `start` can also archive a crashed generation without a stop marker when
+its original process is proved gone or its PID has a known different birth. The
+replacement process is left untouched; an unknown live PID remains a refusal.
 
 Installed, version-compatible dependencies define candidate formats in the
 checked converter snapshot. Before publishing a new schema-2 profile, `prepare`
@@ -355,10 +382,28 @@ stamp still matches the launch snapshot. Migration preserves the unresolved
 coordination record; it issues no grant and replays no request. Use the new
 runtime's explicit reconcile-plan/reconcile-apply procedure before launching.
 Missing, idle, changed-generation or nonzero-request receipts remain blocked.
-For `PREPARING` or `ROLLING_BACK`, there is currently no automatic completion or
-cancellation command. Do not retry migrate/rollback or edit records to bypass
-`select_bundle`. Escalate to repository/runtime owner `@SatoryKono` together with
-the operator of the bound Windows account. Preserve, unchanged, that profile's
+For an interrupted `PREPARING` or `ROLLING_BACK`, use the explicit owner command:
+
+```text
+python -B -m scripts.ai.mcp memory-runtime recover-transition --profile <profile-id> --transaction <preserved-transaction-id>
+```
+
+It completes that exact journal's direction, with no new migration or request
+replay. Current account, branch, policy, physical graph claim, dormant processes,
+unchanged graph and coordination must be proved. Under registry, profile and graph
+locks, each record must equal the approved before/after snapshot. Completion changes
+only that profile's descriptor, activation, binding and registry entry, then commits
+the existing journal. Other registry entries and graph bytes are preserved. Repeating
+completed recovery verifies coherent records without writes; an interruption remains
+closed and can be retried with the same ID. Older journals without an after snapshot
+are reconstructed only from the exact verified immutable target and checked against
+their preserved after-entry. Management imports, including lazy runtime imports,
+suppress bytecode and restore the caller's previous mode.
+
+Unknown state, source drift, unqualified predecessor, changed coordination or graph
+remain refusals. Do not edit records or restore the shared registry to bypass them.
+Escalate to repository/runtime owner `@SatoryKono` and the bound account operator.
+Preserve, unchanged, that profile's
 `migration-v2.json`, referenced `migration-history` entries, `runtime-binding.json`,
 `profile.json`, `active.json`, `recovery-v2.json`, `blocked.json`, `status.json`,
 `owner-launch.json`, `work.json`, graph and ownership claims. Retain the matching

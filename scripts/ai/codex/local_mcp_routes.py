@@ -103,16 +103,20 @@ def select_local_routes_manifest(manifest: Path | None = None) -> tuple[Path, bo
 
 
 def apply_local_routes(
-    servers: dict[str, dict[str, Any]], workspace: Path, *, manifest: Path | None = None
+    servers: dict[str, dict[str, Any]],
+    workspace: Path,
+    *,
+    manifest: Path | None = None,
+    snapshot: bytes | None = None,
 ) -> dict[str, dict[str, Any]]:
     """Return reviewed stdio overrides; malformed or foreign bindings fail closed."""
     path, explicit = select_local_routes_manifest(manifest)
-    if not path.exists():
+    if not os.path.lexists(path):
         if explicit:
             raise ValueError("Configured native MCP route manifest is absent")
         return servers
     _physical(path)
-    data = json.loads(path.read_text(encoding="utf-8"))
+    data = json.loads(path.read_bytes() if snapshot is None else snapshot)
     if set(data) != {"schema", "git_common", "entries"} or data["schema"] != 1:
         raise ValueError("Invalid native MCP route manifest")
     expected = Path(data["git_common"])

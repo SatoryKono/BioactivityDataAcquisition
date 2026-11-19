@@ -9,9 +9,18 @@ import sys
 import zipfile
 from pathlib import Path
 
+HTML_EXTENSION = ".html"
+
 sys.dont_write_bytecode = True
 if not (sys.flags.isolated and sys.flags.no_site and len(sys.argv) == 2):
     raise SystemExit("Isolated converter requires exactly one snapshot")
+nonce = os.environ.pop("PC_AGENT_MARKDOWNIFY_LAUNCH_NONCE", "")
+if (
+    len(nonce) != 64
+    or any(char not in "0123456789abcdef" for char in nonce)
+    or sys.stdin.buffer.readline(80) != (nonce + "\n").encode()
+):
+    raise SystemExit("Converter launch barrier was not authorized")
 root = Path(__file__).resolve().parent
 raw = (root / "converter.json").read_bytes()
 if hashlib.sha256(raw).hexdigest() != root.name:
@@ -55,17 +64,17 @@ from markitdown.converters import (
 )
 
 converters = {
-    ".html": HtmlConverter,
+    HTML_EXTENSION: HtmlConverter,
     ".pdf": PdfConverter,
     ".docx": DocxConverter,
     ".pptx": PptxConverter,
     ".xlsx": XlsxConverter,
 }
 extension = source.suffix.lower()
-permitted = {".html", *("." + item for item in manifest.get("formats", []))}
+permitted = {HTML_EXTENSION, *("." + item for item in manifest.get("formats", []))}
 if extension not in permitted or extension not in converters:
     raise SystemExit("Converter snapshot format is not permitted")
-if extension == ".html" and zipfile.is_zipfile(source):
+if extension == HTML_EXTENSION and zipfile.is_zipfile(source):
     raise SystemExit("HTML snapshot contains a ZIP archive")
 converter = MarkItDown(enable_builtins=False, enable_plugins=False)
 converter.register_converter(converters[extension]())

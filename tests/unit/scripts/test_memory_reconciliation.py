@@ -45,7 +45,9 @@ def fixture(tmp_path):
     core = SimpleNamespace(
         LifetimeLock=lock, process_birth=lambda pid: 42 if pid == os.getpid() else None
     )
-    owner = SimpleNamespace(state=state, core=core, HERE=tmp_path / "immutable-v2")
+    owner = SimpleNamespace(
+        state=state, core=core, HERE=tmp_path / "immutable-v2", dead_pid=os.getpid() + 1
+    )
 
     def legacy(*_, **__):
         work = read(tmp_path / "work.json")
@@ -61,7 +63,11 @@ def fixture(tmp_path):
         "profile": value,
         "active": {"pins": "v2"},
         "blocked": {"decision": "BLOCK_UNKNOWN_OUTCOME"},
-        "status": {"generation": "a" * 32, "owner_pid": 123456, "owner_birth": 1},
+        "status": {
+            "generation": "a" * 32,
+            "owner_pid": owner.dead_pid,
+            "owner_birth": 1,
+        },
         "work": {
             "schema": 2,
             "profile": "profile",
@@ -396,7 +402,7 @@ def test_interrupted_successor_has_a_new_incident_and_cannot_reuse_the_old_grant
     generation = recovery.launch_generation(owner, entry, value)
     owner.state.write(
         directory / "status.json",
-        {"generation": generation, "owner_pid": 123456, "owner_birth": 1},
+        {"generation": generation, "owner_pid": owner.dead_pid, "owner_birth": 1},
     )
     owner.state.write(
         directory / "work.json",
@@ -434,7 +440,7 @@ def test_missing_successor_receipt_cannot_invent_an_incident(fixture):
     generation = recovery.launch_generation(owner, entry, value)
     owner.state.write(
         directory / "status.json",
-        {"generation": generation, "owner_pid": 123456, "owner_birth": 1},
+        {"generation": generation, "owner_pid": owner.dead_pid, "owner_birth": 1},
     )
     proposed = recovery.plan(owner, entry, value)
     assert not proposed["eligible"] and proposed["block_id"] is None
@@ -450,7 +456,7 @@ def interrupted_successor(fixture):
     generation = recovery.launch_generation(owner, entry, value)
     owner.state.write(
         directory / "status.json",
-        {"generation": generation, "owner_pid": 123456, "owner_birth": 1},
+        {"generation": generation, "owner_pid": owner.dead_pid, "owner_birth": 1},
     )
     owner.state.write(
         directory / "work.json",
@@ -475,7 +481,7 @@ def test_launching_does_not_reuse_historical_block_for_an_idle_successor(fixture
     generation = recovery.launch_generation(owner, entry, value)
     owner.state.write(
         directory / "status.json",
-        {"generation": generation, "owner_pid": 123456, "owner_birth": 1},
+        {"generation": generation, "owner_pid": owner.dead_pid, "owner_birth": 1},
     )
     work = owner.state.read(directory / "work.json")
     work.update(
@@ -557,7 +563,7 @@ def test_historical_legacy_block_cannot_replace_an_unproven_launch_incident(
     generation = recovery.launch_generation(owner, entry, value)
     owner.state.write(
         directory / "status.json",
-        {"generation": generation, "owner_pid": 123456, "owner_birth": 1},
+        {"generation": generation, "owner_pid": owner.dead_pid, "owner_birth": 1},
     )
     work = {
         "schema": 2,
@@ -625,7 +631,7 @@ def test_resolved_legacy_block_never_produces_another_recovery_grant(fixture):
         directory / "status.json",
         {
             "generation": generation,
-            "owner_pid": 123456,
+            "owner_pid": owner.dead_pid,
             "owner_birth": 1,
         },
     )
@@ -634,3 +640,70 @@ def test_resolved_legacy_block_never_produces_another_recovery_grant(fixture):
     planned = recovery.plan(owner, entry, value)
     assert planned["block_id"] is None and not planned["eligible"]
     assert (directory / recovery.COORDINATION).read_bytes() == before
+
+
+def test_abandoned_pre_authorization_launch_has_a_new_reviewed_recovery_path(fixture):
+    owner, entry, value, _ = fixture
+    directory = Path(entry["state"])
+    first = recovery.plan(owner, entry, value)
+    recovery.apply(owner, entry, value, first)
+    abandoned = recovery.launch_generation(owner, entry, value)
+    coord = recovery.coordination(owner, entry)
+    coord["history"][-1].update(owner_pid=owner.dead_pid, owner_birth=1)
+    owner.state.write(directory / recovery.COORDINATION, coord)
+    second = recovery.plan(owner, entry, value)
+    assert second["eligible"] and second["reason"] == "PROVEN_PREAUTHORIZED_STARTUP"
+    assert (
+        second["old_generation"] == abandoned and second["new_generation"] != abandoned
+    )
+    recovery.apply(owner, entry, value, second)
+    assert recovery.decision(owner, entry, value) == "SAFE_RECONCILED_START"
+    assert recovery.coordination(owner, entry)["history"][0]["phase"] == "LAUNCHING"
+    with pytest.raises(ValueError, match="already applied"):
+        recovery.apply(owner, entry, value, second)
+
+
+@pytest.mark.parametrize(
+    "change",
+    ["unknown_owner", "changed_graph", "authorized_without_receipt", "changed_work"],
+)
+def test_pre_authorization_proof_rejects_unknown_or_changed_evidence(fixture, change):
+    owner, entry, value, stamp = fixture
+    directory = Path(entry["state"])
+    recovery.apply(owner, entry, value, recovery.plan(owner, entry, value))
+    recovery.launch_generation(owner, entry, value)
+    coord = recovery.coordination(owner, entry)
+    coord["history"][-1].update(owner_pid=owner.dead_pid, owner_birth=1)
+    if change == "unknown_owner":
+        coord["history"][-1]["owner_state"] = "UNKNOWN"
+    if change == "authorized_without_receipt":
+        coord["history"][-1]["launch_stage"] = "AUTHORIZED"
+    owner.state.write(directory / recovery.COORDINATION, coord)
+    if change == "changed_graph":
+        stamp["sequence"] += 1
+    if change == "changed_work":
+        work = owner.state.read(directory / "work.json")
+        work["mutating"] = True
+        owner.state.write(directory / "work.json", work)
+    before = {path: path.read_bytes() for path in directory.iterdir()}
+    assert not recovery.plan(owner, entry, value)["eligible"]
+    assert {path: path.read_bytes() for path in directory.iterdir()} == before
+
+
+def test_gateway_authorization_receipt_is_published_before_releasing_barrier(fixture):
+    owner, entry, value, stamp = fixture
+    directory = Path(entry["state"])
+    recovery.apply(owner, entry, value, recovery.plan(owner, entry, value))
+    generation = recovery.launch_generation(owner, entry, value)
+    record = {"generation": generation, "owner_pid": os.getpid(), "owner_birth": 42}
+    owner.state.write(directory / "status.json", record)
+    recovery.authorize_gateway(owner, entry, value, generation, record)
+    work = owner.state.read(directory / "work.json")
+    assert work["generation"] == generation and work["accepted_count"] == 0
+    assert work["mutating"] is False and work["graph"] == stamp
+    assert (
+        recovery.coordination(owner, entry)["history"][-1]["launch_stage"]
+        == "AUTHORIZED"
+    )
+    with pytest.raises(ValueError, match="authorization changed"):
+        recovery.authorize_gateway(owner, entry, value, generation, record)

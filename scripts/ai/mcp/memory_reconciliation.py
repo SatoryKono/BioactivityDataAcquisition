@@ -92,8 +92,48 @@ def process_verdict(owner, observed, *, self_owner=False):
     return None
 
 
+def _preauthorized_launch_matches(observed, coord):
+    last = coord["history"][-1] if coord["history"] else {}
+    expected = last.get("snapshot", {}).get("records", {})
+    if last.get("phase") != "LAUNCHING" or last.get("launch_stage") != "PREPARED":
+        return False
+    if any(
+        digest(observed[name]) != expected.get(name)
+        for name in ("profile", "active", "blocked", "work")
+    ):
+        return False
+    status = observed["status"] or {}
+    if digest(observed["status"]) == expected.get("status"):
+        return True
+    return (
+        status.get("generation") == last.get("new_generation")
+        and all(
+            status.get(key) == last.get(key) for key in ("owner_pid", "owner_birth")
+        )
+        and "backend_pid" not in status
+    )
+
+
+def _preauthorized_launch_verdict(owner, bound, observed, coord):
+    if not _preauthorized_launch_matches(observed, coord):
+        return None
+    last = coord["history"][-1]
+    identity = owner.state.identity(last, "owner")
+    if identity == "ALIVE":
+        return "BLOCK_OWNER_ACTIVE"
+    if identity != "DEAD":
+        return "BLOCK_PROCESS_IDENTITY_UNKNOWN"
+    if bound["graph"] != last["snapshot"]["graph"]:
+        return "BLOCK_GRAPH_RECEIPT_MISMATCH"
+    return "PROVEN_PREAUTHORIZED_STARTUP"
+
+
 def _interrupted_launch_block(observed, coord):
     last = coord["history"][-1] if coord["history"] else {}
+    if _preauthorized_launch_matches(observed, coord):
+        return "prelaunch-" + digest(
+            {"grant": last["id"], "generation": last["new_generation"]}
+        )
     work, status = observed["work"] or {}, observed["status"] or {}
     if (
         last.get("phase") == "LAUNCHING"
@@ -195,15 +235,23 @@ def plan(owner, entry, value):
     reason = process_verdict(owner, observed)
     block = block_identity(observed, coord)
     if reason is None:
+        reason = _preauthorized_launch_verdict(owner, bound, observed, coord)
+    if reason is None:
         reason = _receipt_verdict(bound, work, previous, coord, entry, block)
-    eligible = reason in {"PROVEN_STARTUP_WITHOUT_REQUESTS", "PROVEN_IDLE_RECEIPT"}
+    eligible = reason in {
+        "PROVEN_STARTUP_WITHOUT_REQUESTS",
+        "PROVEN_IDLE_RECEIPT",
+        "PROVEN_PREAUTHORIZED_STARTUP",
+    }
     result = {
         "schema": 2,
         "snapshot": bound,
         "block_id": block,
         "reason": reason,
         "eligible": eligible,
-        "old_generation": previous.get("generation"),
+        "old_generation": coord["history"][-1]["new_generation"]
+        if reason == "PROVEN_PREAUTHORIZED_STARTUP"
+        else previous.get("generation"),
         "new_generation": uuid.uuid4().hex if eligible else None,
     }
     result["plan_id"] = digest(result)
@@ -222,8 +270,14 @@ def identify_interrupted_launch(owner, entry, value):
             if (
                 coord.get("active_block") is not None
                 or not proposed["eligible"]
-                or proposed["reason"] != "PROVEN_STARTUP_WITHOUT_REQUESTS"
-                or not str(proposed["block_id"]).startswith("interrupted-")
+                or proposed["reason"]
+                not in {
+                    "PROVEN_STARTUP_WITHOUT_REQUESTS",
+                    "PROVEN_PREAUTHORIZED_STARTUP",
+                }
+                or not str(proposed["block_id"]).startswith(
+                    ("interrupted-", "prelaunch-")
+                )
             ):
                 raise ValueError(
                     "No proven interrupted startup incident; state preserved"
@@ -334,9 +388,50 @@ def launch_generation(owner, entry, value):
         birth = owner.core.process_birth(os.getpid())
         if birth is None:
             raise ValueError("Recovery owner identity unknown")
-        last.update(phase="LAUNCHING", owner_pid=os.getpid(), owner_birth=birth)
+        last.update(
+            phase="LAUNCHING",
+            launch_stage="PREPARED",
+            owner_pid=os.getpid(),
+            owner_birth=birth,
+        )
         owner.state.write(directory / COORDINATION, coord)
         return last["new_generation"]
+
+
+def authorize_gateway(owner, entry, value, generation, record):
+    """Publish a zero-request receipt before releasing the gateway's nonce barrier."""
+    directory = Path(entry["state"])
+    with _transition_lock(owner, directory):
+        coord = coordination(owner, entry)
+        last = coord["history"][-1] if coord["history"] else None
+        if not last or last["phase"] != "LAUNCHING":
+            return
+        graph = owner.state.graph_stamp(value)
+        if (
+            generation != last["new_generation"]
+            or last.get("launch_stage") != "PREPARED"
+            or record.get("generation") != generation
+            or record.get("owner_pid") != os.getpid()
+            or record.get("owner_birth") != owner.core.process_birth(os.getpid())
+            or graph != last["snapshot"]["graph"]
+            or owner.state.read(directory / "status.json") != record
+        ):
+            raise ValueError("Gateway launch authorization changed")
+        owner.state.write(
+            directory / "work.json",
+            {
+                "schema": 2,
+                "profile": entry["id"],
+                "generation": generation,
+                "phase": "starting",
+                "mutating": False,
+                "accepted_count": 0,
+                "request_id": None,
+                "graph": graph,
+            },
+        )
+        last["launch_stage"] = "AUTHORIZED"
+        owner.state.write(directory / COORDINATION, coord)
 
 
 def _observed_receipt_matches(work, entry, generation, idle, graph):

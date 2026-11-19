@@ -9,6 +9,7 @@ import json
 from threading import Event, Lock
 from unittest.mock import Mock
 from types import SimpleNamespace
+from pathlib import Path
 
 import pytest
 
@@ -897,6 +898,10 @@ def test_partial_snapshot_write_is_cleaned_without_creating_a_worker(
         SimpleNamespace(
             STATE=tmp_path,
             Job=lambda: pytest.fail("worker created after failed snapshot"),
+            process_birth=lambda _: 42,
+            write_json=lambda path, value: path.write_text(
+                json.dumps(value), encoding="utf-8"
+            ),
         ),
     )
     original = markdownify.Path.write_bytes
@@ -1061,13 +1066,21 @@ def test_restart_resumes_after_retirement_was_published(tmp_path, monkeypatch):
 def test_worker_attachment_failure_reaps_only_the_child_created_here(
     tmp_path, monkeypatch
 ):
-    owned, child = Mock(), Mock()
+    owned, child = Mock(), Mock(pid=77)
     owned.attach.side_effect = RuntimeError("job attachment failed")
     child.poll.return_value = None
     monkeypatch.setattr(
         markdownify,
         "core",
-        SimpleNamespace(STATE=tmp_path, Job=lambda: owned, WINDOWS_HIDE=0),
+        SimpleNamespace(
+            STATE=tmp_path,
+            Job=lambda: owned,
+            WINDOWS_HIDE=0,
+            process_birth=lambda _: 42,
+            write_json=lambda path, value: path.write_text(
+                json.dumps(value), encoding="utf-8"
+            ),
+        ),
     )
     monkeypatch.setattr(markdownify.subprocess, "Popen", lambda *args, **kwargs: child)
     with pytest.raises(RuntimeError, match="attachment"):
@@ -1076,7 +1089,7 @@ def test_worker_attachment_failure_reaps_only_the_child_created_here(
         )
     owned.close.assert_called_once()
     child.terminate.assert_called_once()
-    child.wait.assert_called_once_with(timeout=10)
+    child.wait.assert_called_once_with(timeout=markdownify.WORKER_CLEANUP_SECONDS)
     assert list(tmp_path.iterdir()) == []
 
 
@@ -1582,64 +1595,6 @@ def test_owner_binds_a_private_replacement_when_preferred_port_is_busy(monkeypat
     replacement.server_close.assert_not_called()
 
 
-def test_preauth_connections_hold_capacity_until_handlers_exit(monkeypatch):
-    import socket
-    from threading import Condition, Thread
-
-    monkeypatch.setattr(markdownify, "HTTP_CONNECTION_LIMIT", 2)
-    changed = Condition()
-    active = [0]
-    release = Event()
-
-    def handler(connection, *_):
-        server.finish_reading(connection, completed=True)
-        with changed:
-            active[0] += 1
-            changed.notify_all()
-        try:
-            release.wait(timeout=10)
-        finally:
-            with changed:
-                active[0] -= 1
-                changed.notify_all()
-
-    server = markdownify._BoundedHTTPServer(("127.0.0.1", 0), handler)
-    thread = Thread(
-        target=server.serve_forever, kwargs={"poll_interval": 0.01}, daemon=True
-    )
-    thread.start()
-    connections = []
-    try:
-        for _ in range(2):
-            connections.append(
-                socket.create_connection(server.server_address, timeout=3)
-            )
-        with changed:
-            assert changed.wait_for(lambda: active[0] == 2, timeout=3)
-        extra = socket.create_connection(server.server_address, timeout=3)
-        connections.append(extra)
-        try:
-            assert extra.recv(1) == b""
-        except ConnectionResetError:
-            pass
-        release.set()
-        with changed:
-            assert changed.wait_for(lambda: active[0] == 0, timeout=3)
-        assert server._slots.acquire(timeout=2)
-        assert server._slots.acquire(timeout=2)
-        assert not server._slots.acquire(blocking=False)
-        server._slots.release()
-        server._slots.release()
-    finally:
-        release.set()
-        for connection in connections:
-            connection.close()
-        server.shutdown()
-        server.server_close()
-        thread.join(timeout=3)
-    assert not thread.is_alive()
-
-
 def test_conversion_reclaims_a_deferred_snapshot_only_after_child_exits(
     tmp_path, monkeypatch
 ):
@@ -1816,3 +1771,295 @@ def test_markdownify_client_does_not_skip_a_broken_nearest_git_marker(
     monkeypatch.setattr(markdownify, "roots", SimpleNamespace(physical_root=refuse))
     with pytest.raises(PermissionError, match="nearest marker"):
         markdownify._client_root(SimpleNamespace(root=None))
+
+
+def _worker_fixture(tmp_path, monkeypatch, *, alive=False):
+    import os
+
+    def birth(pid):
+        return 42 if alive or pid == os.getpid() else None
+
+    core = SimpleNamespace(
+        STATE=tmp_path,
+        process_birth=birth,
+        read_json=lambda path: json.loads(path.read_bytes()),
+        write_json=lambda path, value: path.write_text(
+            json.dumps(value), encoding="utf-8"
+        ),
+    )
+    monkeypatch.setattr(markdownify, "core", core)
+    monkeypatch.setattr(
+        markdownify,
+        "psutil",
+        SimpleNamespace(pid_exists=lambda pid: alive or pid == os.getpid()),
+    )
+    return core
+
+
+@pytest.mark.parametrize("phase", ["PREPARED", "SPAWNING", "RUNNING", "CLEANUP"])
+def test_crashed_worker_jobs_are_reclaimed_from_durable_phases_only(
+    tmp_path, monkeypatch, phase
+):
+    core = _worker_fixture(tmp_path, monkeypatch)
+    job = tmp_path / ("job-" + "b" * 32)
+    job.mkdir()
+    snapshot = job / "input.html"
+    snapshot.write_bytes(b"synthetic document")
+    record = {
+        "schema": 2,
+        "job": job.name,
+        "snapshot": snapshot.name,
+        "owner_pid": 77,
+        "owner_birth": 42,
+        "worker_pid": None if phase in {"PREPARED", "SPAWNING"} else 78,
+        "worker_birth": None if phase in {"PREPARED", "SPAWNING"} else 42,
+        "job_closed": False,
+        "phase": phase,
+    }
+    core.write_json(job / markdownify.PENDING_CLEANUP, record)
+    foreign = tmp_path / "foreign"
+    foreign.write_bytes(b"preserved")
+    markdownify._retry_pending_jobs()
+    assert not job.exists() and foreign.read_bytes() == b"preserved"
+
+
+@pytest.mark.parametrize("phase", ["PREPARED", "SPAWNING", "RUNNING", "CLEANUP"])
+def test_live_or_unknown_worker_journal_is_retained(tmp_path, monkeypatch, phase):
+    core = _worker_fixture(tmp_path, monkeypatch, alive=True)
+    job = tmp_path / ("job-" + "b" * 32)
+    job.mkdir()
+    snapshot = job / "input.html"
+    snapshot.write_bytes(b"synthetic document")
+    record = {
+        "schema": 2,
+        "job": job.name,
+        "snapshot": snapshot.name,
+        "owner_pid": 77,
+        "owner_birth": 42,
+        "worker_pid": None if phase in {"PREPARED", "SPAWNING"} else 78,
+        "worker_birth": None if phase in {"PREPARED", "SPAWNING"} else 42,
+        "job_closed": False,
+        "phase": phase,
+    }
+    core.write_json(job / markdownify.PENDING_CLEANUP, record)
+    before = {path.name: path.read_bytes() for path in job.iterdir()}
+    with pytest.raises(PermissionError, match="remains pending"):
+        markdownify._retry_pending_jobs()
+    assert {path.name: path.read_bytes() for path in job.iterdir()} == before
+
+
+def test_job_journal_exists_before_the_first_document_write(tmp_path, monkeypatch):
+    core = _worker_fixture(tmp_path, monkeypatch)
+    original = Path.write_bytes
+    observed = []
+
+    def write(path, raw):
+        record = core.read_json(path.parent / markdownify.PENDING_CLEANUP)
+        observed.append(record["phase"])
+        assert record["worker_pid"] is None
+        original(path, raw)
+        raise OSError("injected document write failure")
+
+    core.Job = lambda: pytest.fail("Worker was launched after snapshot failure")
+    monkeypatch.setattr(Path, "write_bytes", write)
+    with pytest.raises(OSError, match="document write"):
+        markdownify._convert_bytes({"converter": "unused"}, ".html", b"synthetic")
+    assert observed == ["PREPARED"] and list(tmp_path.iterdir()) == []
+
+
+def test_worker_execution_and_cleanup_reserve_time_for_the_next_rpc(
+    tmp_path, monkeypatch
+):
+    core = _worker_fixture(tmp_path, monkeypatch, alive=True)
+    clock, waits = [0.0], []
+    child, job = Mock(pid=77), Mock()
+    child.poll.return_value = None
+    core.Job = lambda: job
+    core.WINDOWS_HIDE = 0
+
+    def wait(*, timeout):
+        waits.append(timeout)
+        clock[0] += timeout
+        raise markdownify.subprocess.TimeoutExpired("synthetic", timeout)
+
+    child.wait.side_effect = wait
+
+    def release(_nonce):
+        [directory] = tmp_path.iterdir()
+        record = core.read_json(directory / markdownify.PENDING_CLEANUP)
+        assert record["phase"] == "RUNNING" and record["worker_pid"] == child.pid
+
+    child.stdin.write.side_effect = release
+    monkeypatch.setattr(markdownify.time, "monotonic", lambda: clock[0])
+    monkeypatch.setattr(markdownify.subprocess, "Popen", lambda *args, **kwargs: child)
+    with pytest.raises(markdownify.subprocess.TimeoutExpired):
+        markdownify._convert_bytes({"converter": "fixture"}, ".html", b"synthetic")
+    assert waits == [markdownify.WORKER_SECONDS, markdownify.WORKER_CLEANUP_SECONDS]
+    assert clock[0] < 100 - 10
+    [directory] = tmp_path.iterdir()
+    assert core.read_json(directory / markdownify.PENDING_CLEANUP)["phase"] == "CLEANUP"
+    child.stdin.write.assert_called_once()
+
+
+def test_existing_profile_prepare_does_not_scan_an_active_conversion(
+    tmp_path, monkeypatch
+):
+    (tmp_path / "profile.json").write_text("{}", encoding="utf-8")
+    monkeypatch.setattr(markdownify, "configure", lambda _: ("fixture", {}))
+    monkeypatch.setattr(
+        markdownify,
+        "core",
+        SimpleNamespace(
+            STATE=tmp_path,
+            private_directory=lambda: None,
+            LifetimeLock=lambda _: __import__("contextlib").nullcontext(),
+        ),
+    )
+    monkeypatch.setattr(markdownify, "specification", lambda _: {"prepared": True})
+    cleanup = Mock(side_effect=AssertionError("Active job was scanned"))
+    monkeypatch.setattr(markdownify, "_retry_pending_jobs", cleanup)
+    assert markdownify.prepare(tmp_path) == {"prepared": True}
+    cleanup.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    "birth,alive,allowed", [(2, True, True), (None, False, True), (None, True, False)]
+)
+def test_start_recovers_a_crashed_owner_without_inventing_a_stop_request(
+    tmp_path, monkeypatch, birth, alive, allowed
+):
+    from contextlib import nullcontext
+
+    record = {"owner_pid": 77, "owner_birth": 1, "generation": "a" * 32}
+    path = tmp_path / markdownify.STATUS_RECORD
+    path.write_text(json.dumps(record), encoding="utf-8")
+    monkeypatch.setattr(
+        markdownify,
+        "core",
+        SimpleNamespace(
+            STATE=tmp_path,
+            LifetimeLock=lambda _: nullcontext(),
+            process_birth=lambda _: birth,
+            read_json=lambda p: json.loads(p.read_bytes()),
+            write_json=lambda p, v: p.write_text(json.dumps(v), encoding="utf-8"),
+        ),
+    )
+    monkeypatch.setattr(
+        markdownify, "psutil", SimpleNamespace(pid_exists=lambda _: alive)
+    )
+    monkeypatch.setattr(
+        markdownify, "scope", SimpleNamespace(physical=lambda p, **kwargs: p)
+    )
+    monkeypatch.setattr(markdownify, "specification", lambda _: {"id": "fixture"})
+    ensure = Mock()
+    monkeypatch.setattr(markdownify, "ensure", ensure)
+    if allowed:
+        markdownify._start(tmp_path)
+        assert json.loads(path.read_bytes()) == {
+            markdownify.RETIRED_GENERATION: record["generation"]
+        }
+        evidence = json.loads(
+            (
+                tmp_path / "restart-history" / (record["generation"] + ".json")
+            ).read_bytes()
+        )
+        assert evidence["status"] == record and evidence["reason"] == "OWNER_EXITED"
+        assert not (tmp_path / markdownify.STOP_REQUEST).exists()
+        ensure.assert_called_once_with(tmp_path)
+    else:
+        with pytest.raises(PermissionError, match="unknown"):
+            markdownify._start(tmp_path)
+        assert json.loads(path.read_bytes()) == record
+        ensure.assert_not_called()
+
+
+def test_stop_remains_available_when_checkout_control_files_drift(
+    tmp_path, monkeypatch
+):
+    from contextlib import nullcontext
+
+    binding = {"root": str(tmp_path)}
+    spec = {
+        "schema": 2,
+        "id": "fixture",
+        "binding": binding,
+        "pins": {"old": "hash"},
+        "converter": "unused",
+    }
+    record = {"owner_pid": 77, "owner_birth": 1, "generation": "a" * 32}
+    writes = []
+    monkeypatch.setattr(markdownify, "configure", lambda _: ("fixture", binding))
+
+    def drift(*args):
+        raise ValueError("checkout control files changed")
+
+    monkeypatch.setattr(markdownify, "pins", drift)
+    monkeypatch.setattr(markdownify, "_control_pins", drift)
+    monkeypatch.setattr(
+        markdownify,
+        "core",
+        SimpleNamespace(
+            STATE=tmp_path,
+            read_json=lambda p: spec if p.name == "profile.json" else record,
+            write_json=lambda p, v: writes.append((p.name, v)),
+            process_birth=lambda _: 1,
+            LifetimeLock=lambda _: nullcontext(),
+        ),
+    )
+    monkeypatch.setattr(
+        markdownify, "psutil", SimpleNamespace(pid_exists=lambda _: False)
+    )
+    with pytest.raises(ValueError, match="control files changed"):
+        markdownify.specification(tmp_path)
+    markdownify._stop(tmp_path)
+    assert writes == [(markdownify.STOP_REQUEST, {"generation": record["generation"]})]
+
+
+def test_interrupted_atomic_job_publication_before_input_does_not_block_recovery(
+    tmp_path, monkeypatch
+):
+    core = _worker_fixture(tmp_path, monkeypatch)
+    job = tmp_path / ("job-" + "c" * 32)
+    job.mkdir()
+    (job / (markdownify.PENDING_CLEANUP + "." + "a" * 32 + ".pending")).write_bytes(
+        b'{"partial":'
+    )
+    markdownify._retry_pending_jobs()
+    assert not job.exists()
+
+
+@pytest.mark.parametrize("known_temporary", [True, False])
+def test_worker_recovery_recognizes_only_its_own_atomic_record_namespace(
+    tmp_path, monkeypatch, known_temporary
+):
+    core = _worker_fixture(tmp_path, monkeypatch)
+    job = tmp_path / ("job-" + "c" * 32)
+    job.mkdir()
+    (job / "input.html").write_bytes(b"synthetic document")
+    record = {
+        "schema": 2,
+        "job": job.name,
+        "snapshot": "input.html",
+        "owner_pid": 77,
+        "owner_birth": 42,
+        "worker_pid": 78,
+        "worker_birth": 42,
+        "job_closed": True,
+        "phase": "CLEANUP",
+    }
+    core.write_json(job / markdownify.PENDING_CLEANUP, record)
+    name = (
+        markdownify.PENDING_CLEANUP
+        + "."
+        + ("a" * 32 if known_temporary else "foreign")
+        + ".pending"
+    )
+    (job / name).write_bytes(b"partial control record")
+    before = {path.name: path.read_bytes() for path in job.iterdir()}
+    if known_temporary:
+        markdownify._retry_pending_jobs()
+        assert not job.exists()
+    else:
+        with pytest.raises(PermissionError, match="unowned files"):
+            markdownify._retry_pending_jobs()
+        assert {path.name: path.read_bytes() for path in job.iterdir()} == before

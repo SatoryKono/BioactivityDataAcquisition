@@ -232,3 +232,56 @@ def test_shell_readiness_accepts_retained_policies_but_rejects_transport_drift(
     with pytest.raises(SystemExit, match="differs"):
         exec(compile(python, str(script), "exec"), {"__name__": "__main__"})
     assert path.read_bytes() == drift
+    path.write_bytes(before + b'\n[mcp_servers.custom]\ncommand="custom"\n')
+    exec(compile(python, str(script), "exec"), {"__name__": "__main__"})
+    if profile == "stable":
+        with path.open("a", encoding="utf-8") as stream:
+            stream.write(
+                '\n[mcp_servers.prometheus]\ncommand="unexpected"\ntool_timeout_sec=0.5\n'
+            )
+        extra = path.read_bytes()
+        with pytest.raises(SystemExit, match="profile members"):
+            exec(compile(python, str(script), "exec"), {"__name__": "__main__"})
+        assert path.read_bytes() == extra
+
+
+def test_root_inline_mcp_table_preserves_custom_data_and_replaces_managed(
+    private_codex_writer,
+):
+    setup, path, root = private_codex_writer
+    custom = {
+        "command": "custom-📁",
+        "args": [r"C:\folder\input"],
+        "tools": {"read": {"enabled": False}},
+    }
+    path.write_text(
+        'model = "kept"\nmcp_servers = { memory = { command="old", tool_timeout_sec=0.5 }, custom = '
+        + setup._inline_toml_value(custom)
+        + "}\n",
+        encoding="utf-8",
+    )
+    setup._write_codex_config(root, profile="stable")
+    actual = tomllib.loads(path.read_text(encoding="utf-8"))
+    assert actual["model"] == "kept" and actual["mcp_servers"]["custom"] == custom
+    assert actual["mcp_servers"]["memory"]["command"] == "memory-client"
+    assert actual["mcp_servers"]["memory"]["tool_timeout_sec"] == 0.5
+
+
+def test_toml_unicode_comment_and_non_bmp_route_survive_atomic_publication(tmp_path):
+    from scripts.ai.codex import setup_mcp as setup
+
+    comment = "# kept\u2028inside\u0085comment\r\n"
+    servers = {
+        "memory": {"command": r"C:\📁\python.exe", "args": ["x\u007fy", "📁\\input"]}
+    }
+    preserved = setup._strip_managed_mcp_blocks(
+        comment + 'model="kept"\r\n', {"memory"}
+    )
+    assert comment in preserved
+    path = tmp_path / "candidate.toml"
+    setup._write_user_toml(
+        path, preserved + "\n" + setup._render_codex_mcp_toml(servers), before=None
+    )
+    parsed = tomllib.loads(path.read_text(encoding="utf-8"))
+    assert parsed["mcp_servers"]["memory"]["command"] == servers["memory"]["command"]
+    assert parsed["mcp_servers"]["memory"]["args"] == servers["memory"]["args"]
