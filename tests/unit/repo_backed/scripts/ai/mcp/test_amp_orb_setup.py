@@ -79,6 +79,7 @@ def _environment(tmp_path: Path, system: str, architecture: str) -> Sandbox:
         "HOME": _shell_path(home),
         "TMPDIR": _shell_path(scratch),
         "LC_ALL": "C",
+        "BIOETL_REPO_ENV_LOADED": "1",
         "AMP_TEST_CALLS": _shell_path(tmp_path / "calls"),
         "AMP_TEST_SYSTEM": system,
         "AMP_TEST_ARCH": architecture,
@@ -171,6 +172,16 @@ def test_amp_github_launch_keeps_read_only_policy_and_scrubs_other_secrets(
     env.update(github["env"])
     env["GITHUB_PERSONAL_ACCESS_TOKEN"] = "ghp_" + "x" * 40
     env["OPENAI_API_KEY"] = "unrelated-fixture-credential"
+    # Exercise developer-config isolation without creating any .env file.
+    foreign = tmp_path / "developer-bin"
+    foreign.mkdir()
+    _command(foreign, "foreign-github", "exit 97")
+    settings = tmp_path / "developer-settings.txt"
+    settings.write_text(
+        "BIOETL_GITHUB_MCP_SERVER=" + _shell_path(foreign / "foreign-github") + "\n",
+        encoding="utf-8",
+    )
+    env["BIOETL_ENV_FILE"] = _shell_path(settings)
     commands = sandbox.home / "tools/bin"
     commands.mkdir(parents=True)
     _command(
