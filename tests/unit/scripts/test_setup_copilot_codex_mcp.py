@@ -1304,13 +1304,13 @@ def test_ensure_shell_accepts_full_stable_full_policy_round_trip(tmp_path, monke
                     "--transport-mode",
                     "shared",
                     "--skip-codex-validation",
-                    "--skip-gemini-settings",
                 ]
             )
             == 0
         )
         env["CODEX_MCP_PROFILE"] = profile
         for mode in ("--check", "--ensure", "--refresh"):
+            before = config.read_bytes()
             result = subprocess.run(
                 ["bash", str(script), mode],
                 cwd=script.parents[4],
@@ -1320,6 +1320,16 @@ def test_ensure_shell_accepts_full_stable_full_policy_round_trip(tmp_path, monke
                 timeout=120,
             )
             assert result.returncode == 0, result.stdout + result.stderr
+            if mode == "--check":
+                assert config.read_bytes() == before
+            import tomllib
+
+            entries = tomllib.loads(config.read_text(encoding="utf-8"))["mcp_servers"]
+            assert entries["memory"]["disabled_tools"] == ["delete_entities"]
+            if profile == "stable":
+                assert "prometheus" not in entries
+            else:
+                assert entries["prometheus"]["tool_timeout_sec"] == 0.5
         import tomllib
 
         entries = tomllib.loads(config.read_text(encoding="utf-8"))["mcp_servers"]

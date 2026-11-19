@@ -25,6 +25,7 @@ MARKDOWNIFY_CLIENT = "safe_markdownify.py"
 MARKDOWNIFY_VERSIONS = Path("D:/pc-agent/tools/markdownify-owner-versions")
 SESSION_VERSIONS = Path("D:/pc-agent/tools/codex-session-versions")
 SHA256_PATTERN = "[0-9a-f]{64}"
+ACCEPTANCE_SERVER = "memory-acceptance"
 
 
 def physical(path):
@@ -268,6 +269,7 @@ def session_overrides(
         {name: servers[name] for name in ("memory", "ast-grep")},
         root,
         manifest=manifest,
+        snapshot=raw,
     )
     if manifest.read_bytes() != raw:
         raise PermissionError("Session transport binding changed")
@@ -280,8 +282,23 @@ def session_overrides(
             raise PermissionError(
                 "Acceptance graph requires the reviewed session selector"
             )
-        entry["args"][-1] = "memory-acceptance"
-        selected["memory-acceptance"] = entry
+        entry["args"][-1] = ACCEPTANCE_SERVER
+        from scripts.ai.codex.local_mcp_routes import MCP_POLICY_FIELDS
+
+        previous = servers.get(ACCEPTANCE_SERVER, selected["memory"])
+        if not isinstance(previous, dict):
+            raise PermissionError("Invalid acceptance server policy")
+        transport = {
+            key: value for key, value in entry.items() if key not in MCP_POLICY_FIELDS
+        }
+        selected[ACCEPTANCE_SERVER] = {
+            **transport,
+            **{
+                key: value
+                for key, value in previous.items()
+                if key in MCP_POLICY_FIELDS
+            },
+        }
     source = markdownify or Path.home() / ".config/pc-agent/markdownify-bioetl.json"
     optional = _markdownify_entry(
         source, root, servers, explicit=markdownify is not None
@@ -326,8 +343,9 @@ def _run(argv=None):
     if not session_cwd.is_relative_to(root):
         raise PermissionError("Session cwd is outside its validated workspace")
     binary = qualified_binary(args.executable, args.sha256)
+    codex_home = physical(Path(os.environ.get("CODEX_HOME", Path.home() / ".codex")))
     config = tomllib.loads(
-        (Path.home() / ".codex/config.toml").read_text(encoding="utf-8")
+        physical(codex_home / "config.toml").read_text(encoding="utf-8")
     )
     validate_ref(config, args.auth)
     overrides = session_overrides(config, root, acceptance=args.acceptance)
@@ -337,6 +355,11 @@ def _run(argv=None):
         dotenv_values(physical(canonical / ".env")) if args.auth == "api-key" else {}
     )
     environment = ref_environment(os.environ, values, args.auth)
+    environment["CODEX_HOME"] = str(codex_home)
+    # Bind the validated route against project overlays or a concurrent TOML edit.
+    overrides.extend(
+        ["--config", "mcp_servers.ref=" + toml_value(config["mcp_servers"]["ref"])]
+    )
     if args.check:
         print(
             json.dumps(

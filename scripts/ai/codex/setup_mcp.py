@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+from io import StringIO
 import os
 import re
 import shutil
@@ -893,7 +894,7 @@ def _write_gemini_settings(
 
 
 def _toml_string(value: str) -> str:
-    return json.dumps(value)
+    return json.dumps(value, ensure_ascii=False).replace("\x7f", "\\u007f")
 
 
 def _toml_key(value: str) -> str:
@@ -1030,7 +1031,7 @@ def _render_codex_mcp_toml(
 def _toml_statements(content: str) -> Iterator[tuple[str, dict[str, Any]]]:
     """Let TOML parsing identify complete statements, including multiline strings."""
     pending: list[str] = []
-    for line in content.splitlines(keepends=True):
+    for line in StringIO(content):
         pending.append(line)
         statement = "".join(pending)
         try:
@@ -1119,8 +1120,52 @@ def _render_retained_codex_block(content, canonical_servers, managed_names):
 def _owned_mcp_assignment(
     parsed: dict[str, Any], managed: set[str], parent: bool, at_root: bool
 ) -> bool:
-    values = parsed if parent else parsed.get("mcp_servers", {}) if at_root else {}
+    values = {}
+    if parent:
+        values = parsed
+    elif at_root:
+        values = parsed.get("mcp_servers", {})
     return isinstance(values, dict) and bool(values) and set(values).issubset(managed)
+
+
+def _inline_toml_value(value):
+    from datetime import date, time
+
+    if isinstance(value, str):
+        return _toml_string(value)
+    if isinstance(value, bool):
+        return str(value).lower()
+    if isinstance(value, (int, float)):
+        return json.dumps(value, allow_nan=False)
+    if isinstance(value, (date, time)):
+        return value.isoformat()
+    if isinstance(value, list):
+        return "[" + ", ".join(_inline_toml_value(item) for item in value) + "]"
+    if isinstance(value, dict):
+        return (
+            "{ "
+            + ", ".join(
+                _toml_key(key) + " = " + _inline_toml_value(item)
+                for key, item in value.items()
+            )
+            + " }"
+        )
+    raise ValueError("Unsupported inline MCP value; configuration preserved")
+
+
+def _split_root_mcp_assignment(statement, parsed, managed, at_root):
+    if not at_root or "=" not in statement or set(parsed) != {"mcp_servers"}:
+        return None
+    if tomllib.loads(statement.partition("=")[0] + "= 0") != {"mcp_servers": 0}:
+        return None
+    entries = parsed["mcp_servers"]
+    if not isinstance(entries, dict):
+        raise ValueError("Unsupported MCP server table; configuration preserved")
+    return "".join(
+        "mcp_servers." + _toml_key(name) + " = " + _inline_toml_value(value) + "\n"
+        for name, value in entries.items()
+        if name not in managed
+    )
 
 
 def _strip_managed_mcp_blocks(content: str, managed_server_names: set[str]) -> str:
@@ -1145,6 +1190,12 @@ def _strip_managed_mcp_blocks(content: str, managed_server_names: set[str]) -> s
             skip = isinstance(tables, dict) and bool(
                 managed_server_names.intersection(tables)
             )
+        replacement = _split_root_mcp_assignment(
+            statement, parsed, managed_server_names, at_root
+        )
+        if replacement is not None:
+            kept.append(replacement)
+            continue
         if not skip and not _owned_mcp_assignment(
             parsed, managed_server_names, parent, at_root
         ):

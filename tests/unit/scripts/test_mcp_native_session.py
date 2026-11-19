@@ -583,3 +583,120 @@ def test_matching_markdownify_transport_preserves_existing_policies(
     config["mcp_servers"]["Markdownify-BioETL"]["command"] = "foreign"
     with pytest.raises(PermissionError, match="unrelated"):
         session_overrides(config, root, manifest=manifest, markdownify=source)
+
+
+def test_route_validation_uses_the_original_snapshot_during_aba_swap(
+    session_binding, tmp_path, monkeypatch
+):
+    from scripts.ai.codex import local_mcp_routes as routes
+
+    root, manifest, data, config = session_binding
+    original = manifest.read_bytes()
+    original_apply = routes.apply_local_routes
+
+    def swapped(servers, workspace, *, manifest, snapshot):
+        assert snapshot == original
+        changed = json.loads(original)
+        changed["entries"]["memory"]["command"] = "unqualified-ABA"
+        manifest.write_text(json.dumps(changed), encoding="utf-8")
+        try:
+            return original_apply(
+                servers, workspace, manifest=manifest, snapshot=snapshot
+            )
+        finally:
+            manifest.write_bytes(original)
+
+    monkeypatch.setattr(routes, "apply_local_routes", swapped)
+    entries = {}
+    for value in session_overrides(
+        config, root, manifest=manifest, markdownify=tmp_path / "absent.json"
+    )[1::2]:
+        entries.update(tomllib.loads(value)["mcp_servers"])
+    assert entries["memory"]["command"] == data["entries"]["memory"]["command"]
+
+
+@pytest.mark.parametrize(
+    "policy",
+    [
+        {"disabled_tools": ["delete_entities"]},
+        {"enabled_tools": ["read_graph"]},
+        {"tools": {"read_graph": {"approval_mode": "approve"}}},
+        {"enabled": False},
+    ],
+)
+def test_acceptance_override_retains_its_own_policy(session_binding, tmp_path, policy):
+    root, manifest, data, config = session_binding
+    config["mcp_servers"]["memory-acceptance"] = {"command": "old", **policy}
+    original = json.dumps(config, sort_keys=True)
+    entries = {}
+    for value in session_overrides(
+        config,
+        root,
+        manifest=manifest,
+        markdownify=tmp_path / "absent.json",
+        acceptance=True,
+    )[1::2]:
+        entries.update(tomllib.loads(value)["mcp_servers"])
+    actual = entries["memory-acceptance"]
+    assert actual["args"][-1] == "memory-acceptance"
+    for key, value in policy.items():
+        assert actual[key] == value
+    assert ("tools" in actual) == ("tools" in policy)
+    assert json.dumps(config, sort_keys=True) == original
+
+
+@pytest.mark.parametrize("foreign", [False, True])
+def test_ref_validation_and_child_use_the_same_codex_home(
+    session_binding, tmp_path, monkeypatch, foreign
+):
+    from unittest.mock import Mock
+    from scripts.ai.codex.setup_mcp import _render_codex_mcp_toml
+
+    root, manifest, _, config = session_binding
+    home, alternate = tmp_path / "home", tmp_path / "alternate"
+    (home / ".codex").mkdir(parents=True)
+    alternate.mkdir()
+    monkeypatch.setattr(Path, "home", lambda: home)
+    monkeypatch.setenv("CODEX_HOME", str(alternate))
+    monkeypatch.setenv("BIOETL_CODEX_ROUTES_FILE", str(manifest))
+    monkeypatch.chdir(root)
+    monkeypatch.setattr(native_session, "workspace", lambda: (root, root))
+    servers = {
+        "memory": {"command": "old-memory"},
+        "ast-grep": {"command": "old-ast"},
+        "ref": {"url": native_session.REF_URL},
+    }
+    (home / ".codex/config.toml").write_text(
+        _render_codex_mcp_toml(servers), encoding="utf-8"
+    )
+    if foreign:
+        servers["ref"]["url"] = "https://foreign.invalid/mcp"
+    (alternate / "config.toml").write_text(
+        _render_codex_mcp_toml(servers), encoding="utf-8"
+    )
+    binary = home / "AppData/Local/OpenAI/Codex/bin/qualified/codex.exe"
+    binary.parent.mkdir(parents=True)
+    binary.write_bytes(b"qualified native fixture")
+    call = Mock(return_value=0)
+    monkeypatch.setattr(native_session.subprocess, "call", call)
+    args = [
+        "--executable",
+        str(binary),
+        "--sha256",
+        hashlib.sha256(binary.read_bytes()).hexdigest(),
+        "--auth",
+        "oauth",
+    ]
+    if foreign:
+        with pytest.raises(PermissionError, match="separate"):
+            native_session._run(args)
+        call.assert_not_called()
+    else:
+        assert native_session._run(args) == 0
+        assert call.call_args.kwargs["env"]["CODEX_HOME"] == str(alternate)
+        settings = {}
+        argv = call.call_args.args[0]
+        for index, item in enumerate(argv[:-1]):
+            if item == "--config":
+                settings.update(tomllib.loads(argv[index + 1])["mcp_servers"])
+        assert settings["ref"] == {"url": native_session.REF_URL}

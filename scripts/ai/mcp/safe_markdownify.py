@@ -44,6 +44,11 @@ HTTP_CONNECTION_LIMIT = 64
 HTTP_READ_SECONDS = 5
 STARTUP_SECONDS = 32
 PENDING_CLEANUP = "cleanup.pending.json"
+WORKER_OUTPUT = "output.md"
+WORKER_SECONDS = 70
+WORKER_CLEANUP_SECONDS = 5
+WORKER_NONCE_ENV = "PC_AGENT_MARKDOWNIFY_LAUNCH_NONCE"
+OWNER_IDENTITY_ERROR = "Markdownify owner identity is unknown"
 
 
 def module(name, path):
@@ -151,11 +156,9 @@ def specification(root, *, for_stop=False):
     spec = core.read_json(core.STATE / "profile.json")
     if spec.get("schema") != 2 or spec["id"] != key or spec["binding"] != binding:
         raise PermissionError("Markdownify profile/runtime drift")
-    actual = _control_pins() if for_stop else pins(spec["converter"])
-    expected = (
-        {key: spec["pins"].get(key) for key in actual} if for_stop else spec["pins"]
-    )
-    if actual != expected or (not for_stop and not _qualification_matches(spec)):
+    if not for_stop and (
+        pins(spec["converter"]) != spec["pins"] or not _qualification_matches(spec)
+    ):
         raise PermissionError("Markdownify profile/runtime drift")
     return spec
 
@@ -164,10 +167,10 @@ def prepare(root):
     key, binding = configure(root)
     core.private_directory()
     with core.LifetimeLock(core.STATE / TRANSITION_LOCK):
-        _retry_pending_jobs()
         path = core.STATE / "profile.json"
         if path.exists():
             return specification(root)
+        _retry_pending_jobs()
         if any(core.STATE.iterdir()):
             if any(p.name != TRANSITION_LOCK for p in core.STATE.iterdir()):
                 raise PermissionError("Incomplete Markdownify profile; no overwrite")
@@ -388,11 +391,14 @@ def _launch_owner(root, record, launched):
 def _recorded_owner_identity(record):
     pid, birth = record.get("owner_pid"), record.get("owner_birth")
     if record and not pid and set(record) != {RETIRED_GENERATION}:
-        raise PermissionError("Markdownify owner identity is unknown")
+        raise PermissionError(OWNER_IDENTITY_ERROR)
     if pid is not None and (
-        type(pid) is not int or pid <= 0 or type(birth) not in {int, float}
+        type(pid) is not int
+        or pid <= 0
+        or type(birth) not in {int, float}
+        or not math.isfinite(birth)
     ):
-        raise PermissionError("Markdownify owner identity is unknown")
+        raise PermissionError(OWNER_IDENTITY_ERROR)
     return pid, birth
 
 
@@ -467,10 +473,24 @@ def _check_worker_job(job):
             raise PermissionError("Worker cleanup file has an unowned link")
 
 
+def _pending_worker_record_name(path):
+    prefix, suffix = PENDING_CLEANUP + ".", ".pending"
+    name = path.name
+    if not name.startswith(prefix) or not name.endswith(suffix):
+        return False
+    identity = name[len(prefix) : -len(suffix)]
+    return len(identity) == 32 and all(char in "0123456789abcdef" for char in identity)
+
+
 def _erase_worker_job(job, snapshot):
     _validate_cleanup_files(job, snapshot)
-    for name in (snapshot, "output.md", PENDING_CLEANUP):
-        (job / name).unlink(missing_ok=True)
+    for path in job.iterdir():
+        if path.name in {
+            snapshot,
+            WORKER_OUTPUT,
+            PENDING_CLEANUP,
+        } or _pending_worker_record_name(path):
+            path.unlink()
     job.rmdir()
 
 
@@ -478,26 +498,14 @@ def _validate_cleanup_files(job, snapshot):
     _check_worker_job(job)
     permitted = {"input" + ext for ext in EXTENSIONS.values() if ext != ".md"}
     if snapshot not in permitted or any(
-        path.name not in {snapshot, "output.md", PENDING_CLEANUP}
+        path.name not in {snapshot, WORKER_OUTPUT, PENDING_CLEANUP}
+        and not _pending_worker_record_name(path)
         for path in job.iterdir()
     ):
         raise PermissionError("Worker cleanup contains unowned files")
 
 
-def _pending_worker_finished(record, job):
-    if (
-        not isinstance(record, dict)
-        or record.get("schema") != 1
-        or record.get("job") != job.name
-        or set(record)
-        != {"schema", "job", "snapshot", "worker_pid", "worker_birth", "job_closed"}
-    ):
-        raise PermissionError("Unsupported pending worker cleanup")
-    if record.get("job_closed") is not True:
-        return False
-    pid, birth = record.get("worker_pid"), record.get("worker_birth")
-    if pid is None:
-        return birth is None
+def _identity_finished(pid, birth):
     if (
         type(pid) is not int
         or pid <= 0
@@ -513,24 +521,84 @@ def _pending_worker_finished(record, job):
     return not psutil.pid_exists(pid)
 
 
+def _validate_worker_record(record, job):
+    common = {"schema", "job", "snapshot", "worker_pid", "worker_birth", "job_closed"}
+    if not isinstance(record, dict) or record.get("job") != job.name:
+        raise PermissionError("Unsupported pending worker cleanup")
+    schema = record.get("schema")
+    fields = common if schema == 1 else common | {"owner_pid", "owner_birth", "phase"}
+    if (
+        type(schema) is not int
+        or schema not in {1, 2}
+        or set(record) != fields
+        or type(record["job_closed"]) is not bool
+    ):
+        raise PermissionError("Unsupported pending worker cleanup")
+    return schema
+
+
+def _journal_phase_finished(record):
+    owner_finished = _identity_finished(record["owner_pid"], record["owner_birth"])
+    if record["phase"] in {"PREPARED", "SPAWNING"}:
+        # EOF on the private launch pipe prevents an orphan from reading input.
+        return owner_finished and record["worker_pid"] is record[
+            "worker_birth"
+        ] is None, owner_finished
+    if record["phase"] not in {"RUNNING", "CLEANUP"}:
+        raise PermissionError("Unsupported pending worker phase")
+    if record["phase"] == "RUNNING" and (
+        record["worker_pid"] is None or record["worker_birth"] is None
+    ):
+        raise PermissionError("Running worker identity is incomplete")
+    return None, owner_finished
+
+
+def _pending_worker_finished(record, job):
+    schema = _validate_worker_record(record, job)
+    owner_finished = False
+    if schema == 2:
+        finished, owner_finished = _journal_phase_finished(record)
+        if finished is not None:
+            return finished
+    if record["job_closed"] is not True and not owner_finished:
+        return False
+    pid, birth = record["worker_pid"], record["worker_birth"]
+    if pid is None:
+        return birth is None and record["job_closed"] is True
+    return _identity_finished(pid, birth)
+
+
+def _discard_unpublished_control(job):
+    pending = list(job.iterdir())
+    if not all(_pending_worker_record_name(path) for path in pending):
+        raise PermissionError("Previous worker cleanup has no identity record")
+    for path in pending:
+        path.unlink()
+    job.rmdir()
+
+
+def _retry_worker_job(job):
+    _check_worker_job(job)
+    marker = job / PENDING_CLEANUP
+    if not marker.exists():
+        _discard_unpublished_control(job)
+        return
+    record = core.read_json(marker)
+    if not _pending_worker_finished(record, job):
+        raise PermissionError("Previous worker cleanup remains pending")
+    _validate_cleanup_files(job, record.get("snapshot"))
+    try:
+        _erase_worker_job(job, record.get("snapshot"))
+    except OSError:
+        _validate_cleanup_files(job, record.get("snapshot"))
+        core.write_json(marker, record)
+        raise
+
+
 def _retry_pending_jobs():
     for job in core.STATE.iterdir():
-        if not _worker_job_name(job.name):
-            continue
-        _check_worker_job(job)
-        marker = job / PENDING_CLEANUP
-        if not marker.exists():
-            raise PermissionError("Previous worker cleanup has no identity record")
-        record = core.read_json(marker)
-        if not _pending_worker_finished(record, job):
-            raise PermissionError("Previous worker cleanup remains pending")
-        _validate_cleanup_files(job, record.get("snapshot"))
-        try:
-            _erase_worker_job(job, record.get("snapshot"))
-        except OSError:
-            _validate_cleanup_files(job, record.get("snapshot"))
-            core.write_json(marker, record)
-            raise
+        if _worker_job_name(job.name):
+            _retry_worker_job(job)
 
 
 def _close_worker(owned, child):
@@ -545,48 +613,63 @@ def _close_worker(owned, child):
         if child is not None:
             if child.poll() is None:
                 child.terminate()  # Only the exact child handle created here.
-            child.wait(timeout=10)
+            child.wait(timeout=WORKER_CLEANUP_SECONDS)
     except Exception as error:
         problem = problem or error
+    if child is not None and child.stdin:
+        try:
+            child.stdin.close()
+        except Exception as error:
+            problem = problem or error
     return closed, problem
 
 
-def _pending_worker_record(job, snapshot, child, closed):
-    pid = None if child is None else child.pid
-    birth = None if pid is None else core.process_birth(pid)
+def _new_worker_record(job, snapshot):
+    birth = core.process_birth(os.getpid())
+    if type(birth) not in {int, float} or not math.isfinite(birth):
+        raise PermissionError("Conversion owner identity is unknown")
     return {
-        "schema": 1,
+        "schema": 2,
         "job": job.name,
         "snapshot": snapshot.name,
-        "worker_pid": pid,
-        "worker_birth": birth,
-        "job_closed": closed,
+        "owner_pid": os.getpid(),
+        "owner_birth": birth,
+        "worker_pid": None,
+        "worker_birth": None,
+        "job_closed": False,
+        "phase": "PREPARED",
     }
 
 
-def _finish_worker(job, snapshot, owned, child):
+def _write_worker_record(job, record, phase):
+    record["phase"] = phase
+    core.write_json(job / PENDING_CLEANUP, record)
+
+
+def _finish_worker(job, snapshot, owned, child, record):
     closed, problem = _close_worker(owned, child)
+    if record is not None:
+        record["job_closed"] = closed
     if problem is not None:
-        core.write_json(
-            job / PENDING_CLEANUP, _pending_worker_record(job, snapshot, child, closed)
-        )
+        if record is not None:
+            _write_worker_record(job, record, "CLEANUP")
         raise problem
     try:
         _erase_worker_job(job, snapshot.name)
     except OSError:
-        core.write_json(
-            job / PENDING_CLEANUP, _pending_worker_record(job, snapshot, child, closed)
-        )
+        if record is not None:
+            _write_worker_record(job, record, "CLEANUP")
         raise
 
 
 def _convert_bytes(spec, extension, raw):
     """Execute a pinned worker on an owner-private snapshot, including probes."""
+    deadline = time.monotonic() + WORKER_SECONDS
     _retry_pending_jobs()
     job = core.STATE / ("job-" + uuid.uuid4().hex)
     job.mkdir(mode=0o700)
     snapshot = job / ("input" + extension)
-    output_path = job / "output.md"
+    output_path = job / WORKER_OUTPUT
     env = {
         key: value
         for key, value in os.environ.items()
@@ -604,13 +687,21 @@ def _convert_bytes(spec, extension, raw):
         }
     }
     env["PYTHONUTF8"] = "1"
+    nonce = secrets.token_hex(32)
+    env[WORKER_NONCE_ENV] = nonce
     owned = None
     child = None
+    record = None
     failed = True
     try:
+        record = _new_worker_record(job, snapshot)
+        _write_worker_record(job, record, "PREPARED")
         snapshot.write_bytes(raw)
         owned = core.Job()
         with output_path.open("xb") as output_stream:
+            _write_worker_record(job, record, "SPAWNING")
+            if time.monotonic() >= deadline:
+                raise TimeoutError("Conversion execution deadline")
             child = subprocess.Popen(
                 [
                     str(PYTHON),
@@ -622,13 +713,20 @@ def _convert_bytes(spec, extension, raw):
                 ],
                 cwd=job,
                 env=env,
-                stdin=subprocess.DEVNULL,
+                stdin=subprocess.PIPE,
                 stdout=output_stream,
                 stderr=subprocess.DEVNULL,
                 creationflags=core.WINDOWS_HIDE,
             )
+            record["worker_pid"] = child.pid
+            record["worker_birth"] = core.process_birth(child.pid)
             owned.attach(child)
-            child.wait(timeout=90)
+            if record["worker_birth"] is None:
+                raise PermissionError("Conversion worker identity is unknown")
+            _write_worker_record(job, record, "RUNNING")
+            child.stdin.write((nonce + "\n").encode())
+            child.stdin.flush()
+            child.wait(timeout=max(0, deadline - time.monotonic()))
         with output_path.open("rb") as output_stream:
             output = output_stream.read(1024 * 1024 + 1)
         if child.returncode or len(output) > 1024 * 1024:
@@ -638,7 +736,7 @@ def _convert_bytes(spec, extension, raw):
         return text
     finally:
         try:
-            _finish_worker(job, snapshot, owned, child)
+            _finish_worker(job, snapshot, owned, child, record)
         except Exception:
             if not failed:
                 raise
@@ -1175,6 +1273,34 @@ def _retire_stopped_record(record, marker_value):
     core.write_json(core.STATE / STATUS_RECORD, {RETIRED_GENERATION: generation})
 
 
+def _retire_crashed_record(record):
+    pid, birth = _recorded_owner_identity(record)
+    if pid is None:
+        return
+    actual = core.process_birth(pid)
+    if actual == birth:
+        return
+    if actual is None and psutil.pid_exists(pid):
+        raise PermissionError(OWNER_IDENTITY_ERROR)
+    generation = record.get("generation")
+    if not isinstance(generation, str) or uuid.UUID(generation).hex != generation:
+        raise PermissionError("Invalid crashed generation")
+    if _optional_status_record() != record:
+        raise PermissionError("Markdownify crashed generation changed")
+    history = core.STATE / "restart-history"
+    scope.physical(history, exists=False)
+    history.mkdir(exist_ok=True)
+    archive = history / (generation + ".json")
+    evidence = {"status": record, "reason": "OWNER_EXITED", "observed_birth": actual}
+    if archive.exists():
+        prior = core.read_json(archive)
+        if prior.get("status") != record or prior.get("reason") != "OWNER_EXITED":
+            raise PermissionError("Markdownify crash history changed")
+    else:
+        core.write_json(archive, evidence)
+    core.write_json(core.STATE / STATUS_RECORD, {RETIRED_GENERATION: generation})
+
+
 def _start(root):
     value = specification(root)
     with core.LifetimeLock(core.STATE / TRANSITION_LOCK):
@@ -1183,6 +1309,8 @@ def _start(root):
             record = core.read_json(core.STATE / STATUS_RECORD)
             _retire_stopped_record(record, core.read_json(marker))
             marker.unlink()
+        else:
+            _retire_crashed_record(_optional_status_record())
     ensure(root)
     print(json.dumps({"ready": True, "id": value["id"]}))
 

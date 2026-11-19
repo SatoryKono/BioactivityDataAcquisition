@@ -14,6 +14,8 @@ import json
 import os
 import shutil
 import sys
+import threading
+from contextlib import contextmanager
 import uuid
 from copy import deepcopy
 from pathlib import Path
@@ -34,6 +36,23 @@ ACTIVE_INDEX = "active.json"
 PROFILE_DESCRIPTOR = "profile.json"
 RECOVERY_RECORD = "recovery-v2.json"
 RECONCILIATION_SOURCE = "memory_reconciliation.py"
+REGISTRY_LOCK = "registry.lock"
+PROFILE_LOCK = "transition.lock"
+GRAPH_OWNER_LOCK = ".memory.service-owner.lock"
+
+
+_BYTECODE_LOCK = threading.RLock()
+
+
+@contextmanager
+def _bytecode_guard():
+    with _BYTECODE_LOCK:
+        previous = sys.dont_write_bytecode
+        sys.dont_write_bytecode = True
+        try:
+            yield
+        finally:
+            sys.dont_write_bytecode = previous
 
 
 def canonical(value):
@@ -44,6 +63,7 @@ def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+@_bytecode_guard()
 def load(name, path):
     spec = importlib.util.spec_from_file_location(name, path)
     value = importlib.util.module_from_spec(spec)
@@ -149,6 +169,11 @@ def connect(identity, fixture=False):
         text,
         'state.write(directory / "blocked.json", {"decision": decision})',
         "reconciler.record_block(runtime_owner(), entry, decision)",
+    )
+    text = replace_once(
+        text,
+        'child.stdin.write((nonce + "\\n").encode())',
+        'reconciler.authorize_gateway(runtime_owner(), entry, value, generation, record)\n                child.stdin.write((nonce + "\\n").encode())',
     )
     text = replace_once(
         text,
@@ -345,6 +370,7 @@ def _adapt_service_text(file, text):
     return text
 
 
+@_bytecode_guard()
 def build(owner, entry, value):
     """Copy the reviewed legacy closure and deterministically adapt a new version."""
     hashes = owner.candidate(entry, value)["hashes"]
@@ -426,9 +452,10 @@ def _publish_bundle(staging, target):
     return target
 
 
+@_bytecode_guard()
 def bundle_owner(bundle, fixture_registry=None):
     verify(bundle)
-    # Management imports use the current interpreter; service launch uses the copied one.
+    # The copied owner may import additional pinned dependencies lazily.
     owner = load(
         "versioned_memory_owner", bundle / "tools/shared-mcp/project-memory-owner.py"
     )
@@ -511,6 +538,11 @@ def _upgradeable_interrupted_launch(owner, directory, recovery_state, graph):
     ):
         return False
     observed = current.records(owner, {"state": str(directory)})
+    if (
+        last.get("launch_stage") == "PREPARED"
+        and owner.state.identity(last, "owner") != "DEAD"
+    ):
+        return False
     return (
         current.process_verdict(owner, observed) is None
         and current._interrupted_launch_block(observed, recovery_state) is not None
@@ -561,6 +593,7 @@ def previous_migration(
     return binding, prior
 
 
+@_bytecode_guard()
 def migrate(
     owner, identity, bundle, *, fixture=False, from_version=None, recover_disabled=False
 ):
@@ -571,10 +604,10 @@ def migrate(
     new_owner = bundle_owner(bundle, owner.registry.ROOT if fixture else None)
     entry, value = owner.specification(identity, fixture)
     directory = Path(entry["state"])
-    with owner.core.LifetimeLock(owner.registry.ROOT / "registry.lock"):
-        with owner.core.LifetimeLock(directory / "transition.lock"):
+    with owner.core.LifetimeLock(owner.registry.ROOT / REGISTRY_LOCK):
+        with owner.core.LifetimeLock(directory / PROFILE_LOCK):
             with owner.core.LifetimeLock(
-                Path(value["profile"]["graph"]).with_name(".memory.service-owner.lock")
+                Path(value["profile"]["graph"]).with_name(GRAPH_OWNER_LOCK)
             ):
                 stamp = dormant(owner, entry, value)
                 _check_pending_recovery(owner, directory, stamp)
@@ -616,6 +649,18 @@ def migrate(
                     "after_entry": new_entry,
                     "bundle": str(bundle),
                     "version": bundle.name,
+                }
+                transaction["after"] = {
+                    "entry": new_entry,
+                    "descriptor": updated,
+                    "active": active,
+                    "runtime_binding": {
+                        "schema": 2,
+                        "state": "active",
+                        "bundle": str(bundle),
+                        "version": bundle.name,
+                        "transaction": transaction["id"],
+                    },
                 }
                 path = directory / MIGRATION_RECORD
                 if prior is not None:
@@ -666,6 +711,158 @@ def migrate(
                 }
 
 
+def _approved_migration_after(owner, transaction, fixture):
+    bundle = Path(transaction["bundle"])
+    if bundle.parent != VERSIONS or bundle.name != transaction["version"]:
+        raise ValueError("Pending migration bundle identity changed")
+    selected = bundle_owner(bundle, owner.registry.ROOT if fixture else None)
+    descriptor = deepcopy(transaction["before"]["descriptor"])
+    descriptor["service_pins"] = selected.registry.provider.hashes()
+    entry = transaction["after_entry"]
+    expected_hash = hashlib.sha256(
+        selected.state.scope.canonical(descriptor) + b"\n"
+    ).hexdigest()
+    expected_entry = {
+        **transaction["before"]["entry"],
+        "descriptor_sha256": expected_hash,
+    }
+    if entry != expected_entry:
+        raise ValueError("Pending migration descriptor or profile identity changed")
+    after = {
+        "entry": entry,
+        "descriptor": descriptor,
+        "active": selected.candidate(entry, descriptor),
+        "runtime_binding": {
+            "schema": 2,
+            "state": "active",
+            "bundle": str(bundle),
+            "version": bundle.name,
+            "transaction": transaction["id"],
+        },
+    }
+    if "after" in transaction and transaction["after"] != after:
+        raise ValueError("Pending migration runtime inputs changed")
+    return selected, after
+
+
+def _transition_records(owner, directory, index, identity):
+    return {
+        "entry": index.get(identity),
+        "descriptor": owner.state.read(directory / PROFILE_DESCRIPTOR),
+        "active": owner.state.read(
+            directory / ACTIVE_INDEX, max_bytes=32 * 1024 * 1024
+        ),
+        "runtime_binding": owner.state.read(directory / RUNTIME_BINDING),
+    }
+
+
+def _check_transition_records(current, before, after, *, completed_target=None):
+    for name, value in current.items():
+        if completed_target is not None:
+            if value != completed_target[name]:
+                raise ValueError("Completed migration records changed")
+            continue
+        if value == before.get(name) or value == after[name]:
+            continue
+        if (
+            name == "runtime_binding"
+            and value is None
+            and before.get(name, {}).get("state") == "legacy"
+        ):
+            continue
+        raise ValueError("Pending migration contains an unapproved record")
+
+
+def _complete_transition(owner, directory, identity, transaction, selected, after):
+    phase = transaction["phase"]
+    rollback_direction = phase in {"ROLLING_BACK", "ROLLED_BACK"}
+    before = transaction["before"]
+    target = before if rollback_direction else after
+    if rollback_direction and not _predecessor_runtime_matches(before):
+        raise ValueError("Rollback predecessor runtime is not qualified")
+    index_path = owner.registry.ROOT / PROFILE_INDEX
+    index = owner.state.read(index_path)
+    current = _transition_records(owner, directory, index, identity)
+    completed = target if phase in {"COMMITTED", "ROLLED_BACK"} else None
+    _check_transition_records(current, before, after, completed_target=completed)
+    if current["entry"] is None or Path(current["entry"]["state"]) != directory:
+        raise ValueError("Pending migration profile scope changed")
+    if dormant(selected, current["entry"], current["descriptor"]) != before["graph"]:
+        raise ValueError("Graph changed during interrupted migration")
+    if owner.state.read(directory / RECOVERY_RECORD) != before["coordination"]:
+        raise ValueError("Coordination changed during interrupted migration")
+    if completed is not None:
+        return {
+            "profile": identity,
+            "state": phase,
+            "graph_preserved": True,
+            "already_completed": True,
+        }
+    owner.state.write(directory / PROFILE_DESCRIPTOR, target["descriptor"])
+    owner.state.write(directory / ACTIVE_INDEX, target["active"])
+    index[identity] = target["entry"]
+    owner.state.write(index_path, index)
+    owner.state.write(directory / RUNTIME_BINDING, target["runtime_binding"])
+    if dormant(selected, target["entry"], target["descriptor"]) != before["graph"]:
+        raise ValueError("Graph changed while completing interrupted migration")
+    if owner.state.read(directory / RECOVERY_RECORD) != before["coordination"]:
+        raise ValueError("Coordination changed while completing interrupted migration")
+    transaction["phase"] = "ROLLED_BACK" if rollback_direction else "COMMITTED"
+    transaction["completed_by_recovery"] = True
+    owner.state.write(directory / MIGRATION_RECORD, transaction)
+    return {
+        "profile": identity,
+        "state": transaction["phase"],
+        "graph_preserved": True,
+        "recovered": True,
+    }
+
+
+def _validate_recovery_scope(owner, identity, descriptor):
+    profile = descriptor["profile"]
+    if profile.get("id") != identity:
+        raise ValueError("Recovery profile identity changed")
+    owner.state.scope.revalidate(profile)
+    claims = owner.state.read(owner.registry.ROOT / "graphs.json") or {}
+    if claims.get(owner.registry.claim(descriptor)) != identity:
+        raise ValueError("Recovery graph claim changed")
+
+
+@_bytecode_guard()
+def recover_transition(owner, identity, transaction_id, *, fixture=False):
+    """Complete only the exact, already approved profile-local transition."""
+    if not identity or Path(identity).name != identity or identity in {".", ".."}:
+        raise ValueError("Invalid recovery profile identity")
+    directory = owner.registry.ROOT / identity
+    physical(directory)
+    path = directory / MIGRATION_RECORD
+    expected = owner.state.read(path, max_bytes=32 * 1024 * 1024)
+    if (
+        not expected
+        or expected.get("id") != transaction_id
+        or expected.get("phase")
+        not in {"PREPARING", "ROLLING_BACK", "COMMITTED", "ROLLED_BACK"}
+    ):
+        raise ValueError("Explicit current migration transaction required")
+    selected, after = _approved_migration_after(owner, expected, fixture)
+    if not fixture:
+        _validate_recovery_scope(selected, identity, expected["before"]["descriptor"])
+    graph = Path(expected["before"]["descriptor"]["profile"]["graph"])
+    with owner.core.LifetimeLock(owner.registry.ROOT / REGISTRY_LOCK):
+        with owner.core.LifetimeLock(directory / PROFILE_LOCK):
+            with owner.core.LifetimeLock(graph.with_name(GRAPH_OWNER_LOCK)):
+                transaction = owner.state.read(path, max_bytes=32 * 1024 * 1024)
+                if transaction != expected:
+                    raise ValueError("Pending migration changed during recovery")
+                if not fixture:
+                    _validate_recovery_scope(
+                        selected, identity, expected["before"]["descriptor"]
+                    )
+                return _complete_transition(
+                    owner, directory, identity, transaction, selected, after
+                )
+
+
 def _runtime_hashes_match(hashes):
     try:
         return all(sha(Path(path)) == expected for path, expected in hashes.items())
@@ -683,19 +880,25 @@ def _predecessor_runtime_matches(before):
             verify(bundle)
         except (OSError, ValueError, KeyError):
             return False
-    return _runtime_hashes_match(before["active"]["hashes"])
+    active = before.get("active")
+    return (
+        isinstance(active, dict)
+        and isinstance(active.get("hashes"), dict)
+        and _runtime_hashes_match(active["hashes"])
+    )
 
 
+@_bytecode_guard()
 def rollback(owner, identity):
     entry, value = owner.specification(identity)
     directory = Path(entry["state"])
     expected = owner.state.read(
         directory / MIGRATION_RECORD, max_bytes=32 * 1024 * 1024
     )
-    with owner.core.LifetimeLock(owner.registry.ROOT / "registry.lock"):
-        with owner.core.LifetimeLock(directory / "transition.lock"):
+    with owner.core.LifetimeLock(owner.registry.ROOT / REGISTRY_LOCK):
+        with owner.core.LifetimeLock(directory / PROFILE_LOCK):
             with owner.core.LifetimeLock(
-                Path(value["profile"]["graph"]).with_name(".memory.service-owner.lock")
+                Path(value["profile"]["graph"]).with_name(GRAPH_OWNER_LOCK)
             ):
                 path = directory / MIGRATION_RECORD
                 transaction = owner.state.read(path, max_bytes=32 * 1024 * 1024)
@@ -842,6 +1045,7 @@ def _audit_block_reasons(process_states, work, branch_matches, account_matches):
     return reasons
 
 
+@_bytecode_guard()
 def audit_profile(owner, identity):
     """Inspect historical state without pretending its branch is checked out."""
     if len(identity) != 64 or any(ch not in "0123456789abcdef" for ch in identity):
@@ -906,6 +1110,12 @@ def audit_profile(owner, identity):
 def _profile_action(parser, args, owner, fixture):
     if args.action == "audit-profile":
         return audit_profile(owner, args.profile)
+    if args.action == "recover-transition":
+        if not args.transaction:
+            parser.error("recover-transition requires --transaction")
+        return recover_transition(
+            owner, args.profile, args.transaction, fixture=fixture
+        )
     if args.action == "build":
         entry, value = owner.specification(args.profile, fixture)
         bundle = build(owner, entry, value)
@@ -982,6 +1192,7 @@ def _reconcile_profile(parser, args, selected, fixture):
     }
 
 
+@_bytecode_guard()
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -991,6 +1202,7 @@ def main(argv=None):
             "verify",
             "migrate",
             "rollback",
+            "recover-transition",
             "reconcile-incident",
             "reconcile-plan",
             "reconcile-apply",
@@ -1000,6 +1212,10 @@ def main(argv=None):
     parser.add_argument("--profile")
     parser.add_argument("--bundle", type=Path)
     parser.add_argument("--plan", type=Path)
+    parser.add_argument(
+        "--transaction",
+        help="Exact preserved migration transaction ID for explicit completion",
+    )
     parser.add_argument("--fixture-registry", type=Path)
     parser.add_argument(
         "--from-version",

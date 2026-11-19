@@ -105,6 +105,8 @@ def test_staging_cleanup_refuses_a_foreign_absolute_target(tmp_path):
         (1024 * 1024 + 1, 1, "html"),
         (128, 1, "zip-as-html"),
         (128, 1, "unsupported"),
+        (128, 1, "missing-nonce"),
+        (128, 1, "wrong-nonce"),
     ],
 )
 def test_isolated_worker_writes_exactly_the_checked_utf8_bytes(
@@ -163,7 +165,9 @@ def test_isolated_worker_writes_exactly_the_checked_utf8_bytes(
     )
     job.mkdir(parents=True)
     source = job / ("input.zip" if kind == "unsupported" else "input.html")
-    if kind == "zip-as-html":
+    if kind == "missing-nonce":
+        pass  # A missing snapshot must not be touched before the launch barrier.
+    elif kind == "zip-as-html":
         import zipfile
 
         with zipfile.ZipFile(source, "w") as archive:
@@ -175,10 +179,17 @@ def test_isolated_worker_writes_exactly_the_checked_utf8_bytes(
         for key, value in os.environ.items()
         if key.upper() in {"SYSTEMROOT", "WINDIR", "PATH", "TEMP", "TMP"}
     }
-    env.update(HOME=str(home), USERPROFILE=str(home))
+    env.update(
+        HOME=str(home),
+        USERPROFILE=str(home),
+        PC_AGENT_MARKDOWNIFY_LAUNCH_NONCE="a" * 64,
+    )
+    if kind == "missing-nonce":
+        env.pop("PC_AGENT_MARKDOWNIFY_LAUNCH_NONCE")
     result = subprocess.run(
         [sys.executable, "-I", "-S", "-B", str(converter / runner.name), str(source)],
         env=env,
+        input=(("b" if kind == "wrong-nonce" else "a") * 64 + "\n").encode(),
         capture_output=True,
         timeout=30,
     )
@@ -188,6 +199,8 @@ def test_isolated_worker_writes_exactly_the_checked_utf8_bytes(
         assert b"HTML snapshot contains a ZIP archive" in result.stderr
     if kind == "unsupported":
         assert b"format is not permitted" in result.stderr
+    if kind in {"missing-nonce", "wrong-nonce"}:
+        assert b"launch barrier was not authorized" in result.stderr
 
 
 def test_parallel_publication_reuses_verified_target_and_discards_only_own_copy(

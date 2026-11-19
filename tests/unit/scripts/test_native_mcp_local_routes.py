@@ -456,3 +456,21 @@ def test_selector_main_refuses_missing_dispatcher_before_loading_host(
     with pytest.raises(PermissionError, match="dispatcher manifest"):
         session_client.main()
     load.assert_not_called()
+
+
+def test_dangling_default_manifest_is_rejected_instead_of_portable_fallback(
+    tmp_path, monkeypatch
+):
+    from scripts.ai.codex import local_mcp_routes as routes
+
+    home = tmp_path / "home"
+    marker = home / ".config/pc-agent/codex-routes.json"
+    marker.parent.mkdir(parents=True)
+    try:
+        marker.symlink_to(marker.with_name("missing.json"))
+    except OSError:
+        pytest.skip("Symbolic links are unavailable")
+    monkeypatch.setattr(Path, "home", lambda: home)
+    monkeypatch.delenv("BIOETL_CODEX_ROUTES_FILE", raising=False)
+    with pytest.raises(ValueError, match="reparse point"):
+        routes.apply_local_routes({"memory": {"command": "portable"}}, tmp_path)
