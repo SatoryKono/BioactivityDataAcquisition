@@ -5,12 +5,16 @@ from __future__ import annotations
 
 import argparse
 import json
+from io import StringIO
 import os
 import re
 import shutil
 import subprocess
 import sys
-from collections.abc import Sequence
+import tomllib
+import uuid
+from collections.abc import Iterator, Sequence
+from contextlib import contextmanager
 from copy import deepcopy
 from pathlib import Path
 from typing import Any
@@ -23,10 +27,28 @@ if _REPO_ROOT_STR not in sys.path:
     sys.path.insert(0, _REPO_ROOT_STR)
 
 from scripts.ai.mcp.wrappers import load_wrapper_specs
+from scripts.ai.codex.local_mcp_routes import apply_local_routes
 from scripts.engineering.common.platform import detect_platform
 
 MANAGED_BLOCK_BEGIN = "# === BEGIN MANAGED MCP SERVERS ==="
 MANAGED_BLOCK_END = "# === END MANAGED MCP SERVERS ==="
+CODEX_POLICY_ARCHIVE = "# BioETL inactive MCP policies: "
+CODEX_POLICY_FIELDS = (
+    "enabled",
+    "enabled_tools",
+    "disabled_tools",
+    "tools",
+    "startup_timeout_sec",
+    "tool_timeout_sec",
+)
+CODEX_SERVER_FIELDS = frozenset(CODEX_POLICY_FIELDS) | {
+    "command",
+    "args",
+    "url",
+    "cwd",
+    "env",
+    "env_http_headers",
+}
 MCP_JSON_FILENAME = "mcp.json"
 DOT_MCP_JSON_FILENAME = ".mcp.json"
 SETTINGS_JSON_FILENAME = "settings.json"
@@ -79,7 +101,7 @@ GITHUB_MCP_RETIRED_NPX_PACKAGE = "@modelcontextprotocol/server-github"
 # hosts. Prefer `stable` or `core` for daily work; enable graph/full only when
 # the task needs those tools.
 MCP_PROFILE_STABLE = (
-    # No Docker/gateway/stdio container MCP — host process or remote HTTP only.
+    # No Docker/gateway/stdio container MCP â€” host process or remote HTTP only.
     # github-actions is ops-only (see MCP_PROFILE_OPS); official github already
     # exposes actions_* via GITHUB_MCP_TOOLSETS. Shared transport projects
     # github to http://127.0.0.1:8820/mcp (#10299). Tracked portable manifests
@@ -264,7 +286,7 @@ APPROVED_REMOTE_MCP_BASE_URLS = frozenset(
     }
 )
 
-# Local shared plane only — never treat these as remote SaaS MCP.
+# Local shared plane only â€” never treat these as remote SaaS MCP.
 APPROVED_LOCAL_MCP_BASE_URL_PREFIXES = (
     "http://127.0.0.1:",
     "http://localhost:",
@@ -296,9 +318,9 @@ def _wrapper_command(
     """Build a stdio MCP wrapper invocation.
 
     ``wrapper_platform``:
-      * ``None`` — host OS (``os.name``)
-      * ``\"posix\"`` — always bash + ``.sh`` (tracked portable SSOT)
-      * ``\"nt\"`` — always PowerShell + ``.ps1``
+      * ``None`` â€” host OS (``os.name``)
+      * ``\"posix\"`` â€” always bash + ``.sh`` (tracked portable SSOT)
+      * ``\"nt\"`` â€” always PowerShell + ``.ps1``
     """
     platform = wrapper_platform or detect_platform().wrapper_platform
     if platform not in {"nt", "posix"}:
@@ -366,7 +388,7 @@ def _apply_tracked_json_compat(
     disabled for this runtime``) when an entry carries a field outside its
     bundled Agent Plugins 1.0.0 schema:
 
-    * remote transport must be ``streamable-http`` — the canonical Codex
+    * remote transport must be ``streamable-http`` â€” the canonical Codex
       ``http`` alias is rewritten for the tracked JSON only (local IDE/Codex
       projections keep the Codex alias they already understand);
     * Codex-only ``mode``, ``startup_timeout_sec``, and ``env_http_headers``
@@ -616,7 +638,7 @@ def _codex_runtime_servers(
         fetch_env["UV_TOOL_DIR"] = str(runtime_cache_root / "uv-tools")
     _add_startup_timeouts(servers)
 
-    return servers
+    return apply_local_routes(servers, workspace_root)
 
 
 def _write_json(
@@ -872,7 +894,7 @@ def _write_gemini_settings(
 
 
 def _toml_string(value: str) -> str:
-    return json.dumps(value)
+    return json.dumps(value, ensure_ascii=False).replace("\x7f", "\\u007f")
 
 
 def _toml_key(value: str) -> str:
@@ -921,6 +943,34 @@ def _render_server_env_section(key: str, env: dict[str, Any]) -> list[str]:
     return lines
 
 
+def _render_tool_policy(tools: Any) -> str:
+    if not isinstance(tools, dict):
+        raise ValueError("Invalid existing MCP tool policy")
+    rendered_tools = []
+    for tool, policy in tools.items():
+        if not isinstance(policy, dict) or set(policy) - {
+            "enabled",
+            "approval_mode",
+        }:
+            raise ValueError("Unsupported existing MCP tool policy; preserve config")
+        fields = []
+        for field, value in policy.items():
+            if not isinstance(value, (bool, str)):
+                raise ValueError("Invalid existing MCP tool policy value")
+            literal = (
+                str(value).lower() if isinstance(value, bool) else _toml_string(value)
+            )
+            fields.append(f"{_toml_key(field)} = {literal}")
+        rendered_tools.append(f"{_toml_key(tool)} = {{ " + ", ".join(fields) + " }")
+    return "tools = { " + ", ".join(rendered_tools) + " }"
+
+
+def _toml_timeout(value: Any) -> str:
+    if type(value) not in {int, float}:
+        raise ValueError("MCP timeout must be numeric")
+    return json.dumps(value, allow_nan=False)
+
+
 def _render_one_mcp_server_toml(name: str, server: dict[str, Any]) -> list[str]:
     """Render TOML lines for a single managed MCP server."""
     key = _toml_key(name)
@@ -929,23 +979,46 @@ def _render_one_mcp_server_toml(name: str, server: dict[str, Any]) -> list[str]:
         lines.append(f"enabled = {'true' if bool(server['enabled']) else 'false'}")
     lines.extend(_render_server_transport_lines(server))
     if "startup_timeout_sec" in server:
-        lines.append(f"startup_timeout_sec = {int(server['startup_timeout_sec'])}")
+        lines.append(
+            f"startup_timeout_sec = {_toml_timeout(server['startup_timeout_sec'])}"
+        )
+    if "tool_timeout_sec" in server:
+        lines.append(f"tool_timeout_sec = {_toml_timeout(server['tool_timeout_sec'])}")
+    for field in ("enabled_tools", "disabled_tools"):
+        if field in server:
+            lines.append(f"{field} = {_toml_array(server[field])}")
     env_http_headers = server.get("env_http_headers")
     if env_http_headers:
         lines.append(
             f"env_http_headers = {_toml_inline_string_table(env_http_headers)}"
         )
+    if "tools" in server:
+        lines.append(_render_tool_policy(server["tools"]))
     env = server.get("env")
     if env:
         lines.extend(_render_server_env_section(key, env))
     return lines
 
 
-def _render_codex_mcp_toml(servers: dict[str, dict[str, Any]]) -> str:
+def _render_codex_mcp_toml(
+    servers: dict[str, dict[str, Any]],
+    *,
+    inactive_policies: dict[str, dict[str, Any]] | None = None,
+) -> str:
     lines = [
         MANAGED_BLOCK_BEGIN,
         "# Generated by scripts/ai/codex/setup_mcp.py. Do not edit this block manually.",
     ]
+    if inactive_policies:
+        lines.append(
+            CODEX_POLICY_ARCHIVE
+            + json.dumps(
+                {"schema": 1, "servers": inactive_policies},
+                sort_keys=True,
+                separators=(",", ":"),
+                allow_nan=False,
+            )
+        )
     for name, server in servers.items():
         lines.extend(_render_one_mcp_server_toml(name, server))
 
@@ -955,35 +1028,234 @@ def _render_codex_mcp_toml(servers: dict[str, dict[str, Any]]) -> str:
     return "\n".join(lines)
 
 
+def _toml_statements(content: str) -> Iterator[tuple[str, dict[str, Any]]]:
+    """Let TOML parsing identify complete statements, including multiline strings."""
+    pending: list[str] = []
+    for line in StringIO(content):
+        pending.append(line)
+        statement = "".join(pending)
+        try:
+            parsed = tomllib.loads(statement)
+        except tomllib.TOMLDecodeError:
+            continue
+        yield statement, parsed
+        pending.clear()
+    if pending:
+        raise ValueError("Incomplete TOML statement; configuration preserved")
+
+
+def _archived_codex_policies(content: str, managed_names: set[str]) -> dict[str, Any]:
+    archived: dict[str, Any] = {}
+    inside = False
+    seen = False
+    for statement, _ in _toml_statements(content):
+        stripped = statement.strip()
+        if stripped in {MANAGED_BLOCK_BEGIN, MANAGED_BLOCK_END}:
+            inside = stripped == MANAGED_BLOCK_BEGIN
+            continue
+        if not inside or not stripped.startswith(CODEX_POLICY_ARCHIVE):
+            continue
+        if seen:
+            raise ValueError("Duplicate inactive MCP policy archive")
+        seen = True
+        payload = json.loads(stripped[len(CODEX_POLICY_ARCHIVE) :])
+        if (
+            not isinstance(payload, dict)
+            or payload.get("schema") != 1
+            or not isinstance(payload.get("servers"), dict)
+        ):
+            raise ValueError("Unsupported inactive MCP policy archive")
+        archived = payload["servers"]
+    for name, policy in archived.items():
+        if (
+            name not in managed_names
+            or not isinstance(policy, dict)
+            or set(policy) - set(CODEX_POLICY_FIELDS)
+        ):
+            raise ValueError("Unsupported inactive MCP policy; configuration preserved")
+        _render_one_mcp_server_toml(name, {"command": "policy-validation", **policy})
+    return archived
+
+
+def _retained_codex_policies(
+    content: str, existing: Any, managed: set[str]
+) -> dict[str, Any]:
+    if not isinstance(existing, dict):
+        raise ValueError("Unsupported MCP server table; configuration preserved")
+    policies = _archived_codex_policies(content, managed)
+    for name in managed.intersection(existing):
+        previous = existing[name]
+        if not isinstance(previous, dict) or set(previous) - CODEX_SERVER_FIELDS:
+            raise ValueError(
+                "Unsupported existing MCP settings; config preserved for explicit review"
+            )
+        policies.pop(name, None)  # Active configuration includes intentional deletions.
+        policy = {
+            key: deepcopy(previous[key])
+            for key in CODEX_POLICY_FIELDS
+            if key in previous
+        }
+        if policy:
+            _render_one_mcp_server_toml(
+                name, {"command": "policy-validation", **policy}
+            )
+            policies[name] = policy
+    return policies
+
+
+def _render_retained_codex_block(content, canonical_servers, managed_names):
+    """Share policy preservation between publication and the shell readiness check."""
+    policies = _retained_codex_policies(
+        content, tomllib.loads(content).get("mcp_servers", {}), managed_names
+    )
+    servers = deepcopy(canonical_servers)
+    for name, server in servers.items():
+        server.update(deepcopy(policies.get(name, {})))
+    inactive = {
+        name: policy for name, policy in policies.items() if name not in servers
+    }
+    return _render_codex_mcp_toml(servers, inactive_policies=inactive)
+
+
+def _owned_mcp_assignment(
+    parsed: dict[str, Any], managed: set[str], parent: bool, at_root: bool
+) -> bool:
+    values = {}
+    if parent:
+        values = parsed
+    elif at_root:
+        values = parsed.get("mcp_servers", {})
+    return isinstance(values, dict) and bool(values) and set(values).issubset(managed)
+
+
+def _inline_toml_value(value):
+    from datetime import date, time
+
+    if isinstance(value, str):
+        return _toml_string(value)
+    if isinstance(value, bool):
+        return str(value).lower()
+    if isinstance(value, (int, float)):
+        return json.dumps(value, allow_nan=False)
+    if isinstance(value, (date, time)):
+        return value.isoformat()
+    if isinstance(value, list):
+        return "[" + ", ".join(_inline_toml_value(item) for item in value) + "]"
+    if isinstance(value, dict):
+        return (
+            "{ "
+            + ", ".join(
+                _toml_key(key) + " = " + _inline_toml_value(item)
+                for key, item in value.items()
+            )
+            + " }"
+        )
+    raise ValueError("Unsupported inline MCP value; configuration preserved")
+
+
+def _split_root_mcp_assignment(statement, parsed, managed, at_root):
+    if not at_root or "=" not in statement or set(parsed) != {"mcp_servers"}:
+        return None
+    # Match a single root key followed by its delimiter. Dotted keys may
+    # contain '=' inside quoted components and must remain user-owned text.
+    key = re.match(
+        r"""\s*(?:[A-Za-z0-9_-]+|"(?:[^"\\\r\n]|\\.)*"|'[^'\r\n]*')\s*(?==)""",
+        statement,
+    )
+    if key is None or tomllib.loads(key.group(0) + "= 0") != {"mcp_servers": 0}:
+        return None
+    entries = parsed["mcp_servers"]
+    if not isinstance(entries, dict):
+        raise ValueError("Unsupported MCP server table; configuration preserved")
+    return "".join(
+        "mcp_servers." + _toml_key(name) + " = " + _inline_toml_value(value) + "\n"
+        for name, value in entries.items()
+        if name not in managed
+    )
+
+
 def _strip_managed_mcp_blocks(content: str, managed_server_names: set[str]) -> str:
-    section_re = re.compile(r"^\[mcp_servers\.([A-Za-z0-9_-]+)(?:\.env)?\]\s*$")
+    # Validate the full document first. Each independent statement is parsed to
+    # distinguish a table header from identical text inside a multiline value.
+    tomllib.loads(content)
     kept: list[str] = []
     skip = False
-    skip_marker_block = False
-
-    for line in content.splitlines():
-        stripped = line.strip()
-        if stripped == MANAGED_BLOCK_BEGIN:
-            skip_marker_block = True
+    marker_block = False
+    parent, at_root = False, True
+    for statement, parsed in _toml_statements(content):
+        stripped = statement.strip()
+        if stripped in {MANAGED_BLOCK_BEGIN, MANAGED_BLOCK_END}:
+            marker_block = stripped == MANAGED_BLOCK_BEGIN
             skip = False
             continue
-        if skip_marker_block:
-            if stripped == MANAGED_BLOCK_END:
-                skip_marker_block = False
+        if marker_block:
             continue
-
-        section_match = section_re.match(stripped)
         if stripped.startswith("["):
-            skip = bool(
-                section_match and section_match.group(1) in managed_server_names
+            parent, at_root = parsed == {"mcp_servers": {}}, False
+            tables = parsed.get("mcp_servers", {})
+            skip = isinstance(tables, dict) and bool(
+                managed_server_names.intersection(tables)
             )
+        replacement = _split_root_mcp_assignment(
+            statement, parsed, managed_server_names, at_root
+        )
+        if replacement is not None:
+            kept.append(replacement)
+            continue
+        if not skip and not _owned_mcp_assignment(
+            parsed, managed_server_names, parent, at_root
+        ):
+            kept.append(statement)
+    if marker_block:
+        raise ValueError("Unclosed managed MCP block; configuration preserved")
+    return "".join(kept).rstrip()
 
-        if not skip:
-            kept.append(line)
 
-    while kept and not kept[-1].strip():
-        kept.pop()
-    return "\n".join(kept)
+def _write_user_toml(path: Path, rendered: str, *, before: bytes | None) -> None:
+    """Publish complete valid TOML and refuse a detected concurrent edit."""
+    payload = rendered.encode("utf-8")
+    tomllib.loads(rendered)
+    if payload == before:
+        return
+    pending = path.with_name(path.name + "." + uuid.uuid4().hex + ".pending")
+    try:
+        with pending.open("xb") as stream:
+            stream.write(payload)
+            stream.flush()
+            os.fsync(stream.fileno())
+        current = path.read_bytes() if path.exists() else None
+        if current != before:
+            raise ValueError(
+                "Concurrent Codex config edit; existing settings preserved"
+            )
+        os.replace(pending, path)
+    finally:
+        pending.unlink(missing_ok=True)
+
+
+@contextmanager
+def _lock_codex_config(config_path: Path) -> Iterator[None]:
+    """Serialize cooperating writers without removing the shared lock file."""
+    lock_path = config_path.with_name(config_path.name + ".bioetl.lock")
+    with lock_path.open("a+b") as stream:
+        if sys.platform == "win32":
+            import msvcrt
+
+            stream.seek(0)
+            msvcrt.locking(stream.fileno(), msvcrt.LK_LOCK, 1)
+            try:
+                yield
+            finally:
+                stream.seek(0)
+                msvcrt.locking(stream.fileno(), msvcrt.LK_UNLCK, 1)
+        else:
+            import fcntl
+
+            fcntl.flock(stream.fileno(), fcntl.LOCK_EX)
+            try:
+                yield
+            finally:
+                fcntl.flock(stream.fileno(), fcntl.LOCK_UN)
 
 
 def _write_codex_config(
@@ -991,6 +1263,7 @@ def _write_codex_config(
     *,
     profile: str = "full",
     transport_mode: str = "stdio",
+    stage: bool = False,
 ) -> Path:
     servers = _codex_runtime_servers(
         workspace_root, profile=profile, transport_mode=transport_mode
@@ -1000,21 +1273,32 @@ def _write_codex_config(
     os.chmod(config_dir, 0o700)
     config_path = config_dir / "config.toml"
 
-    existing = config_path.read_text(encoding="utf-8") if config_path.exists() else ""
-    managed_or_retired_names = set(
-        _canonical_servers(workspace_root, profile="full")
-    ) | set(REMOVED_MCP_SERVER_NAMES)
-    preserved = _strip_managed_mcp_blocks(existing, managed_or_retired_names)
-    managed_block = _render_codex_mcp_toml(servers)
+    with _lock_codex_config(config_path):
+        before = config_path.read_bytes() if config_path.exists() else None
+        existing = before.decode("utf-8") if before is not None else ""
+        managed_or_retired_names = set(
+            _canonical_servers(workspace_root, profile="full")
+        ) | set(REMOVED_MCP_SERVER_NAMES)
+        preserved = _strip_managed_mcp_blocks(existing, managed_or_retired_names)
+        managed_block = _render_retained_codex_block(
+            existing, servers, managed_or_retired_names
+        )
 
-    if preserved:
-        rendered = preserved.rstrip() + "\n\n" + managed_block
-    else:
-        rendered = managed_block
+        if preserved:
+            rendered = preserved.rstrip() + "\n\n" + managed_block
+        else:
+            rendered = managed_block
 
-    config_path.write_text(rendered, encoding="utf-8")
-    os.chmod(config_path, 0o600)
-    return config_path
+        destination = (
+            config_path.with_name(
+                config_path.name + "." + uuid.uuid4().hex + ".candidate"
+            )
+            if stage
+            else config_path
+        )
+        _write_user_toml(destination, rendered, before=None if stage else before)
+        os.chmod(destination, 0o600)
+    return destination
 
 
 def _run_codex_validation(workspace_root: Path) -> None:
@@ -1077,6 +1361,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         "--skip-codex-config",
         action="store_true",
         help="Do not update ~/.codex/config.toml with the generated MCP servers.",
+    )
+    parser.add_argument(
+        "--stage-codex-config",
+        action="store_true",
+        help="Prepare a private unique TOML candidate without replacing config.toml; use when external editors may write it.",
     )
     parser.add_argument(
         "--codex-only",
@@ -1152,6 +1441,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         ),
     )
     args = parser.parse_args(raw_argv)
+    if args.stage_codex_config:
+        args.skip_codex_validation = True
     _apply_setup_mcp_flag_shortcuts(args)
     output_root = args.root.absolute()
     workspace_root = args.workspace_root.absolute()
@@ -1172,12 +1463,16 @@ def _run_codex_only_mode(
         )
     if args.skip_codex or args.skip_codex_config:
         parser.error("--codex-only cannot be combined with Codex skip flags")
-    _write_codex_config(
+    written = _write_codex_config(
         workspace_root,
         profile=args.profile,
         transport_mode=args.transport_mode,
+        **({"stage": True} if getattr(args, "stage_codex_config", False) else {}),
     )
-    print("Updated the private Codex user MCP managed block.")
+    if getattr(args, "stage_codex_config", False):
+        print(f"Prepared {written}; review and explicit apply required.")
+    else:
+        print("Updated the private Codex user MCP managed block.")
     if not args.skip_codex_validation:
         _run_codex_validation(workspace_root)
     return 0
@@ -1245,6 +1540,19 @@ def _dispatch_setup_mcp(
     output_root: Path,
     workspace_root: Path,
 ) -> int:
+    if getattr(args, "stage_codex_config", False) and any(
+        getattr(args, field, False)
+        for field in (
+            "skip_codex",
+            "skip_codex_config",
+            "check",
+            "check_local",
+            "qodo_only",
+        )
+    ):
+        parser.error(
+            "--stage-codex-config cannot be combined with modes that skip its candidate"
+        )
     if args.check and args.check_local:
         parser.error("--check and --check-local are mutually exclusive")
     result = _run_codex_only_mode(args, parser, workspace_root)
@@ -1765,6 +2073,7 @@ def _write_optional_side_configs(
             workspace_root,
             profile=args.profile,
             transport_mode=args.transport_mode,
+            **({"stage": True} if getattr(args, "stage_codex_config", False) else {}),
         )
         print(f"Wrote {codex_config_path}")
     if not args.skip_gemini_settings:

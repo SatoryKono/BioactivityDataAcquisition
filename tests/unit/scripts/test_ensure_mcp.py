@@ -140,6 +140,37 @@ def test_ensure_keeps_valid_persisted_config_unchanged(
 @pytest.mark.skipif(
     sys.platform == "win32", reason="bash helper is exercised in the WSL runtime"
 )
+def test_check_accepts_managed_config_with_active_and_dormant_policies(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    for key in (
+        "BIOETL_CODEX_ROUTES_FILE",
+        "CODEX_MCP_PROFILE",
+        "CODEX_MCP_TRANSPORT_MODE",
+    ):
+        monkeypatch.delenv(key, raising=False)
+    workspace, home = tmp_path / "workspace", tmp_path / "home"
+    workspace.mkdir()
+    home.mkdir()
+    _prepare_workspace(workspace, home, monkeypatch)
+    config = _write_codex_config(home, workspace, valid=False)
+    config.write_text(
+        '[mcp_servers.memory]\ncommand = "fixture"\ndisabled_tools = ["fixture-tool"]\n'
+        '[mcp_servers.prometheus]\nurl = "http://localhost/fixture"\ntool_timeout_sec = 0.5\n',
+        encoding="utf-8",
+    )
+    setup_mcp._write_codex_config(workspace, profile="stable", transport_mode="shared")
+    original = config.read_bytes()
+    assert b"BioETL inactive MCP policies" in original
+    assert b"fixture-tool" in original
+    result = _run_helper(workspace, home, "--check")
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert config.read_bytes() == original
+
+
+@pytest.mark.skipif(
+    sys.platform == "win32", reason="bash helper is exercised in the WSL runtime"
+)
 def test_ensure_repairs_stale_persisted_config(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

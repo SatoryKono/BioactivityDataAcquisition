@@ -278,6 +278,7 @@ regexes = [
     '''^(?:\n)?[ \t]*"src/bioetl/infrastructure/config/composite_config_api\.py"[ \t]*:[ \t]*"6d65cc866bd46eb809c1a3e0e70b56fc93e8a9c7",?[ \t]*\r?$''',
     '''^(?:\n)?[ \t]*"src/bioetl/infrastructure/config/pipeline_config_api\.py"[ \t]*:[ \t]*"f65bd2246b2930e0c646b7fd72ee145e35b805da",?[ \t]*\r?$''',
     '''^(?:\n)?[ \t]*"src/bioetl/infrastructure/config/settings_api\.py"[ \t]*:[ \t]*"118542eea9bd4c70db73d0bedba86bec8fb17048",?[ \t]*\r?$''',
+    '''^(?:\n)?[ \t]*"src/bioetl/infrastructure/config/settings_api\.py"[ \t]*:[ \t]*"0ccc69a464adf3d42863fc26dcc505d4b8019e8d",?[ \t]*\r?$''',
     '''^(?:\n)?[ \t]*"src/bioetl/infrastructure/config/workflow_config_api\.py"[ \t]*:[ \t]*"5baa38f4a2e00144ea95f1fd2d51411fd248a92d",?[ \t]*\r?$''',
     '''^(?:\n)?[ \t]*"src/bioetl/interfaces/cli/commands/domains/maintenance/service_access\.py"[ \t]*:[ \t]*"bc3d9d727fb2888a90d260cdbc1b29f0f376e139",?[ \t]*\r?$''',
     '''^(?:\n)?[ \t]*"src/bioetl/interfaces/cli/commands/domains/quarantine/runtime_access\.py"[ \t]*:[ \t]*"4e3f2ee99746c5a323bc7f78401910eda6cdedd9",?[ \t]*\r?$''',
@@ -382,6 +383,15 @@ regexes = [
     '''^(?:\n)?[ \t]*"tests/unit/infrastructure/config/test_composite_config_api\.py": "8bc6c08136abc555e727d5310f54d55a88390b06394e9f2a6a704e5bbaf5803c",?[ \t\r\n]*$''',
     '''^(?:\n)?[ \t]*"tests/unit/infrastructure/config/test_workflow_config_api\.py": "699361215123e7a4b949019cd62c1171c1c380e18f9a8f269a57eb174f37c696",?[ \t\r\n]*$''',
 ]
+
+# PR #13209: both historical findings assign this synthetic redaction canary.
+# Bind this exact source line and path; scan all other content in the file.
+[[rules.allowlists]]
+description = "Reviewed #13209 exact synthetic journal redaction canary"
+condition = "AND"
+paths = ['''^tests/architecture/ci/test_event_journal_redaction_barrier\.py$''']
+regexTarget = "line"
+regexes = ['''^(?:\n)?[ \t]*password[ \t]*=[ \t]*"ephemeral-canary-42"[ \t]*\r?$''']
 
 [[rules]]
 id = "curl-auth-header"

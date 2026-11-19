@@ -1264,3 +1264,77 @@ def test_ensure_mcp_shell_reuses_current_config_and_repairs_drift(
     assert repaired_payload["mcpServers"]["filesystem"]["args"][0] == (
         "scripts/ai/mcp/mcp_filesystem_wrapper.sh"
     )
+
+
+@pytest.mark.skipif(
+    sys.platform == "win32",
+    reason="Bash helper runs on Linux CI; native embedded checker is tested separately",
+)
+def test_ensure_shell_accepts_full_stable_full_policy_round_trip(tmp_path, monkeypatch):
+    monkeypatch.delenv("BIOETL_CODEX_ROUTES_FILE", raising=False)
+    workspace, home = _seed_workspace_mcp(tmp_path, monkeypatch)
+    config = home / ".codex/config.toml"
+    servers = setup_mcp._codex_runtime_servers(
+        workspace, profile="full", transport_mode="shared"
+    )
+    servers["memory"]["disabled_tools"] = ["delete_entities"]
+    servers["prometheus"]["tool_timeout_sec"] = 0.5
+    config.write_text(setup_mcp._render_codex_mcp_toml(servers), encoding="utf-8")
+    script = (
+        Path(__file__).resolve().parents[3] / "scripts/ai/codex/helper/ensure-mcp.sh"
+    )
+    env = dict(
+        os.environ,
+        HOME=str(home),
+        REPO_ROOT=str(workspace),
+        CODEX_VALIDATE_MCP_LIST="0",
+        CODEX_MCP_ENSURE_SHARED_PLANE="0",
+        CODEX_MCP_TRANSPORT_MODE="shared",
+    )
+    for profile in ("full", "stable", "full"):
+        assert (
+            setup_mcp.main(
+                [
+                    "--root",
+                    str(workspace),
+                    "--workspace-root",
+                    str(workspace),
+                    "--profile",
+                    profile,
+                    "--transport-mode",
+                    "shared",
+                    "--skip-codex-validation",
+                ]
+            )
+            == 0
+        )
+        env["CODEX_MCP_PROFILE"] = profile
+        for mode in ("--check", "--ensure", "--refresh"):
+            before = config.read_bytes()
+            result = subprocess.run(
+                ["bash", str(script), mode],
+                cwd=script.parents[4],
+                env=env,
+                capture_output=True,
+                text=True,
+                timeout=120,
+            )
+            assert result.returncode == 0, result.stdout + result.stderr
+            if mode == "--check":
+                assert config.read_bytes() == before
+            import tomllib
+
+            entries = tomllib.loads(config.read_text(encoding="utf-8"))["mcp_servers"]
+            assert entries["memory"]["disabled_tools"] == ["delete_entities"]
+            if profile == "stable":
+                assert "prometheus" not in entries
+            else:
+                assert entries["prometheus"]["tool_timeout_sec"] == 0.5
+        import tomllib
+
+        entries = tomllib.loads(config.read_text(encoding="utf-8"))["mcp_servers"]
+        assert entries["memory"]["disabled_tools"] == ["delete_entities"]
+        if profile == "stable":
+            assert "prometheus" not in entries
+        else:
+            assert entries["prometheus"]["tool_timeout_sec"] == 0.5

@@ -219,3 +219,28 @@ def test_already_projection_dump_preserves_checks() -> None:
     assert payload["dq_report"]["checks"] == ["record_count", "null_rate"]
     validated = SilverSinkConfig.model_validate(payload)
     assert validated.dq_report.checks == ["record_count", "null_rate"]
+
+
+def test_rebase_preserves_unconfigured_dq_paths_and_rebases_configured_layer(tmp_path):
+    from types import SimpleNamespace
+    from bioetl.composition.bootstrap_contexts import DQOutputPathsContext
+    from bioetl.composition.factories.dq._context_resolver_support import (
+        rebase_dq_output_paths,
+    )
+
+    paths = DQOutputPathsContext(
+        bronze_path=None,
+        silver_path="",
+        gold_path="data/output/gold/dq",
+        flat_structure=True,
+    )
+    settings = SimpleNamespace(
+        **{
+            layer + "_path": tmp_path / "output" / layer
+            for layer in ("bronze", "silver", "gold")
+        }
+    )
+    result = rebase_dq_output_paths(paths, settings)
+    assert result.bronze_path is None and result.silver_path == ""
+    assert result.gold_path == str(tmp_path / "output/gold/dq")
+    assert result.flat_structure is True

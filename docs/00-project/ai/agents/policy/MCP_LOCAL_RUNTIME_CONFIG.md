@@ -8,6 +8,12 @@ Document how BioETL treats MCP/runtime config files, including the distinction
 between portable tracked workspace manifests and generated machine-local
 runtime surfaces.
 
+Scoped owner recovery, immutable runtime migration and acceptance are described
+in the [scoped MCP recovery runbook](../../../../05-operations/runbooks/mcp-scoped-recovery.md).
+The user TOML generator owns the managed native block; machine-local editor route
+controllers do not own that TOML. Native transport bindings retain session cwd,
+and do not put host paths or credentials into tracked portable manifests.
+
 ## Scope
 
 This policy applies to:

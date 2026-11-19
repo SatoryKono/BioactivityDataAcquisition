@@ -18,6 +18,7 @@ import json
 import runpy
 import os
 import re
+import subprocess
 import yaml
 from pathlib import Path
 
@@ -181,9 +182,31 @@ def _assert_platform_wrappers(servers: dict[str, object]) -> None:
         )
 
 
-def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None:
+def test_setup_backend_writes_expected_vscode_mcp_config(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Workspace MCP config should match the canonical server layout."""
     root = repo_root()
+    from scripts.ai.codex.local_mcp_routes import common_directory
+
+    git_common = Path(
+        subprocess.check_output(
+            ["git", "rev-parse", "--path-format=absolute", "--git-common-dir"],
+            cwd=root,
+            text=True,
+            timeout=10,
+        ).strip()
+    ).resolve(strict=True)
+    assert common_directory(root, expected=git_common) == git_common
+
+    # This checks the portable projection; user-owned native routes have their
+    # own isolation tests and must not rewrite this contract on a developer host.
+    routes = tmp_path / "portable-test-routes.json"
+    routes.write_text(
+        json.dumps({"schema": 1, "git_common": str(git_common), "entries": {}}),
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("BIOETL_CODEX_ROUTES_FILE", str(routes))
     payload, qodo_payload, codex_settings, gemini_settings, _config_root = (
         _load_workspace_mcp_config(root, tmp_path)
     )
