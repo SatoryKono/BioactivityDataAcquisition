@@ -91,6 +91,35 @@ def test_import_failure_is_error(owned_linux, monkeypatch):
     assert runtime._try_builtin_guard("tree", _command("tree")) == 20
 
 
+@pytest.mark.parametrize("parallel", [False, True])
+def test_user_interrupt_propagates_from_owned_guard(owned_linux, monkeypatch, parallel):
+    commands = [(phase, _command(phase)) for phase in ("tree", "budgets")]
+    finished = []
+
+    def interrupt(args):
+        raise KeyboardInterrupt
+
+    def budgets(args):
+        finished.append("budgets")
+        return 0
+
+    modules = {
+        "check_no_partial_tree": SimpleNamespace(
+            __file__=commands[0][1][3], main=interrupt
+        ),
+        "budget_guard": SimpleNamespace(__file__=commands[1][1][3], main=budgets),
+    }
+    monkeypatch.setattr(
+        runtime.importlib, "import_module", lambda name: modules[name.rsplit(".", 1)[1]]
+    )
+    with pytest.raises(KeyboardInterrupt):
+        if parallel:
+            runtime._try_parallel_guards(commands)
+        else:
+            runtime._try_builtin_guard(*commands[0])
+    assert finished == (["budgets"] if parallel else [])
+
+
 @pytest.mark.parametrize("failure", [False, True])
 def test_owned_entry_scopes_and_resets_context(monkeypatch, tmp_path, failure):
     assert not runtime._OWNED_GUARD_CONTEXT.get()

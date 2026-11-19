@@ -207,6 +207,9 @@ def test_project_pins_match_current_sources_and_fail_on_write_formatter_argument
     root = Path(__file__).resolve().parents[3]
     assert adapter._sources_match(root)
     config = yaml.safe_load((root / ".pre-commit-config.yaml").read_text())
+    for repository in config["repos"]:
+        if repository["repo"] in adapter.REVISIONS:
+            assert adapter.REVISIONS[repository["repo"]] == repository["rev"]
     hook = next(
         h for r in config["repos"] for h in r["hooks"] if h["id"] == "ruff-format"
     )
@@ -215,6 +218,48 @@ def test_project_pins_match_current_sources_and_fail_on_write_formatter_argument
         adapter._digest("ruff format --force-exclude", hook["args"])
         == adapter.COMMANDS["ruff-format"][2]
     )
+
+
+@pytest.mark.parametrize(
+    ("hook_id", "entry"),
+    [
+        ("ruff", "ruff check --force-exclude"),
+        ("ruff-format", "ruff format --force-exclude"),
+    ],
+)
+def test_current_python_hooks_qualify_and_unknown_revision_falls_back(
+    framework, hook_id, entry
+):
+    f = framework
+    root = Path(__file__).resolve().parents[3]
+    configured = yaml.safe_load((root / ".pre-commit-config.yaml").read_text())
+    repository = next(
+        r
+        for r in configured["repos"]
+        if r["repo"] == "https://github.com/astral-sh/ruff-pre-commit"
+    )
+    hook_config = next(h for h in repository["hooks"] if h["id"] == hook_id)
+    hook = SimpleNamespace(**vars(f.hooks[0]))
+    hook.id = hook.name = hook_id
+    hook.src = repository["repo"]
+    hook.entry = entry
+    hook.args = tuple(hook_config["args"])
+    hook.require_serial = True
+    f.hooks = [hook]
+    f.config["repos"] = [repository]
+    assert adapter.qualified(f.module, f.config, f.hooks, f.skips, f.args, root)
+    assert invoke(f) == 0
+    f.execute.assert_called_once()
+    f.scan.assert_called_once()
+    f.legacy.assert_not_called()
+
+    # A future, unqualified pin must retain ordinary per-hook diff checks.
+    repository["rev"] = "unqualified-future-version"
+    f.scan.reset_mock()
+    assert not adapter.qualified(f.module, f.config, f.hooks, f.skips, f.args, root)
+    assert invoke(f) == 0
+    f.scan.assert_not_called()
+    assert f.legacy.call_count >= 2
 
 
 def test_linux_environment_probe_deduplication_is_exact_and_never_cross_event(

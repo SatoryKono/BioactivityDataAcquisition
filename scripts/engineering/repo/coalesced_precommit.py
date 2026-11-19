@@ -122,7 +122,7 @@ SOURCES: dict[str, str] = {
     "scripts/engineering/repo/_root_governance.py": "bb77f623d90875962f974668e2dc9ce8c98e92b7093d83b28611dc027ee3af66",
 }
 REVISIONS = {
-    "https://github.com/astral-sh/ruff-pre-commit": "v0.16.10",
+    "https://github.com/astral-sh/ruff-pre-commit": "v0.17.4",
     "https://github.com/pre-commit/pre-commit-hooks": "v6.0.0",
 }
 

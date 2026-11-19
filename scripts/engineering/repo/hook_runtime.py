@@ -169,7 +169,19 @@ def _guard_entry(phase: str, command: list[str]) -> Any | None:
 def _guard_code(phase: str, code: Any) -> int:
     if type(code) is not int or code not in {0, 1, 2}:
         return 20
-    return 0 if code == 0 else PHASE_CODES[phase] if code == 1 else 22
+    if code == 0:
+        return 0
+    if code == 1:
+        return PHASE_CODES[phase]
+    return 22
+
+
+def _invoke_guard(entry: Any, args: list[str]) -> Any:
+    """A guard CLI exit is a failed invocation, including SystemExit(0)."""
+    try:
+        return entry(args)
+    except SystemExit as error:
+        raise RuntimeError("guard exited instead of returning a result") from error
 
 
 def _try_builtin_guard(phase: str, command: list[str]) -> int | None:
@@ -179,8 +191,8 @@ def _try_builtin_guard(phase: str, command: list[str]) -> int | None:
         if entry is None:
             return None
         with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
-            return _guard_code(phase, entry(command[4:]))
-    except (Exception, SystemExit):
+            return _guard_code(phase, _invoke_guard(entry, command[4:]))
+    except Exception:
         return 20
 
 
@@ -196,18 +208,50 @@ def _try_parallel_guards(commands: list[tuple[str, list[str]]]) -> int | None:
         with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
             with ThreadPoolExecutor(max_workers=2) as pool:
                 pending = [
-                    pool.submit(entry, command[4:])
+                    pool.submit(_invoke_guard, entry, command[4:])
                     for entry, (_, command) in zip(entries, commands, strict=True)
                 ]
                 codes = []
                 for (phase, _), result in zip(commands, pending, strict=True):
                     try:
                         codes.append(_guard_code(phase, result.result()))
-                    except (Exception, SystemExit):
+                    except Exception:
                         codes.append(20)
         return next((code for code in codes if code), 0)
-    except (Exception, SystemExit):
+    except Exception:
         return 20
+
+
+def _execute_single_command(
+    phase: str,
+    command: list[str],
+    repo: Path,
+    hooks: Path,
+    payload: bytes,
+    env: dict[str, str],
+    remaining: float,
+) -> int:
+    builtin = _try_builtin_guard(phase, command)
+    if builtin is not None:
+        return builtin
+    result = run_owned(
+        command,
+        cwd=repo,
+        state_dir=hooks,
+        timeout=remaining,
+        input_bytes=payload,
+        env=env,
+    )
+    if result.status == "PASS":
+        return 0
+    sys.stderr.write(
+        f"BioETL hook {result.status}: {result.reason}; run the scoped check explicitly for details.\n"
+    )
+    if result.status == "ERROR":
+        return 20
+    if phase != "foreign" and result.returncode != 1:
+        return 22
+    return PHASE_CODES[phase]
 
 
 def _execute_commands(
@@ -232,28 +276,11 @@ def _execute_commands(
             continue
         phase, command = commands[position]
         position += 1
-        builtin = _try_builtin_guard(phase, command)
-        if builtin is not None:
-            if builtin:
-                return builtin
-            continue
-        result = run_owned(
-            command,
-            cwd=repo,
-            state_dir=hooks,
-            timeout=remaining,
-            input_bytes=payload,
-            env=env,
+        code = _execute_single_command(
+            phase, command, repo, hooks, payload, env, remaining
         )
-        if result.status != "PASS":
-            sys.stderr.write(
-                f"BioETL hook {result.status}: {result.reason}; run the scoped check explicitly for details.\n"
-            )
-            if result.status == "ERROR":
-                return 20
-            if phase != "foreign" and result.returncode != 1:
-                return 22
-            return PHASE_CODES[phase]
+        if code:
+            return code
     return 0
 
 
