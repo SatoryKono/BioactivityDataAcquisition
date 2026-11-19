@@ -735,13 +735,6 @@
           "values": [
             0
           ]
-        },
-        {
-          "column": "potential_duplicate",
-          "operator": "in",
-          "values": [
-            0
-          ]
         }
       ],
       "exclude_if_present": [],
