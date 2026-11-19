@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from datetime import UTC, datetime
 
+import click
 import pyarrow as pa
 import pytest
 import yaml
@@ -37,6 +38,7 @@ from bioetl.infrastructure.storage.target_migration_row_ops import (
 from bioetl.infrastructure.storage.target_classification_guard import (
     assert_target_table_compatibility,
 )
+from bioetl.interfaces.cli.commands.run_composite import run_composite
 from iuphar_target_class.matching import CatalogTarget
 from iuphar_target_class.models import ProviderAnnotation
 from iuphar_target_class.pipeline import IndexedSnapshot
@@ -45,6 +47,27 @@ from iuphar_target_class.stage0.io import canonical_json_bytes, sha256_bytes
 
 pytestmark = pytest.mark.unit
 ROOT = Path(__file__).resolve().parents[4]
+
+
+@pytest.mark.parametrize("directory", ["--list-only", "--help", "--dry-run"])
+def test_composite_cached_path_value_does_not_mark_a_writer_as_preview(
+    directory: str,
+):
+    args = ["run-composite", "--composite=target", "--cached-bronze-path", directory]
+
+    assert validation._managed_writer_command(["bioetl", *args])
+    assert not validation._managed_writer_command(["bioetl", *args, "--dry-run"])
+
+
+def test_composite_guard_consumes_each_value_taking_cli_option():
+    expected = {
+        name
+        for param in run_composite.params
+        if isinstance(param, click.Option) and not param.is_flag
+        for name in param.opts
+    }
+
+    assert validation._COMPOSITE_VALUE_OPTIONS == expected
 
 
 @pytest.mark.parametrize(

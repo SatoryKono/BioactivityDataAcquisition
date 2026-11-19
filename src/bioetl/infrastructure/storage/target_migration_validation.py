@@ -48,6 +48,21 @@ _OMITTABLE_RUNTIME_COLUMNS = {
     "silver": frozenset({"_run_id", "_run_type", "_ingestion_ts"}),
     "gold": frozenset({"_index", "_dq_error", "_dq_warn"}),
 }
+_PREVIEW_FLAGS = frozenset({"--dry-run", "--help", "-h"})
+_COMPOSITE_VALUE_OPTIONS = frozenset(
+    {
+        "--cached-bronze-date",
+        "--cached-bronze-path",
+        "--composite",
+        "--enrich-only",
+        "--force-enricher",
+        "--health-port",
+        "--limit",
+        "--observability-backend-port",
+        "--required-persistence-profile",
+        "--seed-limit",
+    }
+)
 
 
 def assert_no_managed_writers() -> None:
@@ -76,10 +91,10 @@ def _bioetl_arguments(argv: Sequence[str]) -> list[str]:
     return []
 
 
-def _managed_batch_writer(command: str, options: list[str]) -> bool:
-    """Classify composite writers and last-source ChEMBL batches."""
-    if "--list-only" in options or command == "run-composite":
-        return "--list-only" not in options
+def _chembl_batch_writer(options: list[str]) -> bool:
+    """Treat the last source option as authoritative, as Click does."""
+    if "--list-only" in options:
+        return False
     for index in range(len(options) - 1, -1, -1):
         option = options[index]
         if option.startswith("--source="):
@@ -89,19 +104,32 @@ def _managed_batch_writer(command: str, options: list[str]) -> bool:
     return False
 
 
+def _composite_writer(options: list[str]) -> bool:
+    """Check preview flags after consuming the composite command's values."""
+    tokens = iter(options)
+    for token in tokens:
+        if token in _COMPOSITE_VALUE_OPTIONS:
+            next(tokens, None)
+        elif token in _PREVIEW_FLAGS:
+            return False
+    return True
+
+
 def _managed_writer_command(argv: Sequence[str]) -> bool:
     """Recognize maintained pipeline and orchestrator writer commands."""
     if any("workflow-campaigns" in arg.replace("\\", "/").split("/") for arg in argv):
         return True
     args = _bioetl_arguments(argv)
-    if any(flag in args for flag in ("--dry-run", "--help", "-h")):
+    if args[:1] == ["run-composite"]:
+        return _composite_writer(args[1:])
+    if _PREVIEW_FLAGS.intersection(args):
         return False
     if any(
         args[index : index + 2] == ["workflow", "run"] for index in range(len(args) - 1)
     ):
         return True
-    if args[:1] in (["run-all"], ["run-composite"]):
-        return _managed_batch_writer(args[0], args[1:])
+    if args[:1] == ["run-all"]:
+        return _chembl_batch_writer(args[1:])
     return bool({"run", "debug"}.intersection(args)) and (
         "chembl_target" in args or "--pipeline=chembl_target" in args
     )
