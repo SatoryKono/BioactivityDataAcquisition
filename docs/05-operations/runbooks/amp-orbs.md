@@ -137,7 +137,9 @@ Project-level secrets hold the wide key set from the `.env` inventory
   registered Windows owner. The launcher removes unrelated credentials,
   proxy and Python import settings. Its public-fetch-v1 policy permits only
   HTTP/HTTPS on ports 80/443, requires every DNS address to be public, connects
-  to validated numeric addresses and checks the actual peer. Redirects are
+  to validated numeric addresses and checks the actual peer. Repeated socket
+  records share a limit of 32 unique destinations; all records must be public.
+  Redirects are
   checked on every hop (maximum eight); proxy use and credentialed URLs are
   refused. IPv6 site-local destinations are denied, matching the reviewed
   Windows overlay.
@@ -145,7 +147,9 @@ Project-level secrets hold the wide key set from the `.env` inventory
   at most 15 seconds, HTTP request at most 35 seconds, outer call at most
   38 seconds, queue wait at most four seconds, one active backend operation,
   four pending requests, input at most 64 KiB and output frame at most 1 MiB.
-  Cancellation and EOF cancel pending work. Readability.js is disabled; the
+  Each SDK operation runs in a private process. Cancellation, deadline and EOF
+  terminate and reap that process before releasing the serial backend quota,
+  including any HTML-extraction threads. Readability.js is disabled; the
   official package's pure Python extractor and robots policy remain in use.
 - `verify-public-fetch-linux` in Skills Consistency installs the hash-locked
   environment and runs isolated transport/SDK/stdio probes against controlled

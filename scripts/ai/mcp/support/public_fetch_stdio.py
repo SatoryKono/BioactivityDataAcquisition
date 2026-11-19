@@ -1,6 +1,6 @@
 """Bounded Linux stdio adapter for the isolated public-fetch-v1 runtime.
 
-Use the pinned environment's Python with -I -B. The official Fetch package
+Use the pinned environment's Python with -I -S -B. The official Fetch package
 provides its catalogue, argument validation, robots policy and extraction;
 this adapter preserves the Windows owner's protocol and resource limits.
 """
@@ -293,15 +293,114 @@ def minimal_environment(environ: Mapping[str, str]) -> dict[str, str]:
     return clean
 
 
+async def terminate_worker(process: asyncio.subprocess.Process) -> None:
+    """Keep the serial quota until the entire worker, including threads, exits."""
+    if process.returncode is None:
+        try:
+            process.kill()
+        except ProcessLookupError:
+            pass
+    reaped = asyncio.create_task(process.wait())
+    cancelled = False
+    while not reaped.done():
+        try:
+            await asyncio.shield(reaped)
+        except asyncio.CancelledError:
+            cancelled = True
+    reaped.result()
+    if cancelled:
+        raise asyncio.CancelledError
+
+
+class WorkerResult:
+    def __init__(self, payload: dict[str, object]) -> None:
+        self.payload = payload
+
+    def model_dump(self, **_kwargs: object) -> dict[str, object]:
+        return dict(self.payload)
+
+
+class WorkerBackend:
+    """Run each SDK operation in a killable private process, never a thread."""
+
+    def __init__(self, catalogue: MCPServer) -> None:
+        self.catalogue = catalogue
+
+    async def list_tools(self) -> object:
+        return await self.catalogue.list_tools()
+
+    async def list_prompts(self) -> object:
+        return await self.catalogue.list_prompts()
+
+    async def call_tool(self, name: str, arguments: object) -> WorkerResult:
+        return await self.run(TOOLS_CALL, name, arguments)
+
+    async def get_prompt(self, name: str, arguments: object) -> WorkerResult:
+        return await self.run(PROMPTS_GET, name, arguments)
+
+    async def run(self, method: str, name: str, arguments: object) -> WorkerResult:
+        frame = json.dumps(
+            {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": method,
+                "params": {"name": name, "arguments": arguments},
+            }
+        ).encode()
+        if len(frame) + 1 > MAX_INPUT:
+            raise ValueError("Worker input exceeds the frame limit")
+        process = await asyncio.create_subprocess_exec(
+            sys.executable,
+            "-I",
+            "-S",
+            "-B",
+            str(Path(__file__).resolve()),
+            "--worker",
+            stdin=asyncio.subprocess.PIPE,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.DEVNULL,
+            limit=MAX_FRAME + 1,
+            env=minimal_environment(os.environ),
+        )
+        try:
+            assert process.stdin is not None and process.stdout is not None
+            process.stdin.write(frame + b"\n")
+            await process.stdin.drain()
+            process.stdin.close()
+            raw = await process.stdout.readuntil(b"\n")
+            if len(raw) > MAX_FRAME + 1 or await process.wait() != 0:
+                raise RuntimeError("Fetch worker failed")
+            reply = json.loads(raw)
+            if reply.get("id") != 1 or not isinstance(reply.get("result"), dict):
+                raise RuntimeError("Fetch worker refused the operation")
+            return WorkerResult(reply["result"])
+        finally:
+            await terminate_worker(process)
+
+
+async def run_worker(instance: MCPServer, tool_error: type[Exception]) -> None:
+    """Consume exactly one bounded request on the private worker pipe."""
+    raw = sys.stdin.buffer.readline(MAX_INPUT + 1)
+    message = await read_message(raw)
+    if message is None:
+        return
+    method, params = message.get("method"), message.get("params")
+    if method not in (TOOLS_CALL, PROMPTS_GET) or not isinstance(params, dict):
+        raise ValueError("Invalid worker operation")
+    await StdioSession(instance, tool_error).dispatch(1, method, params)
+
+
 def main() -> None:
     if (
         not sys.flags.isolated
         or not sys.flags.no_site
         or not sys.flags.dont_write_bytecode
         or sys.version_info[:2] != (3, 13)
-        or sys.argv[1:]
+        or sys.argv[1:] not in ([], ["--worker"])
     ):
-        raise RuntimeError("Use isolated pinned Python with -I -S -B and no arguments")
+        raise RuntimeError(
+            "Use isolated pinned Python with -I -S -B and a supported mode"
+        )
     # The orb holds unrelated provider secrets. Fetch receives no credentials,
     # proxy configuration, SDK settings or Python import overrides from it.
     clean = minimal_environment(os.environ)
@@ -316,7 +415,11 @@ def main() -> None:
     bootstrap()
     from mcp.server.mcpserver.exceptions import ToolError
 
-    asyncio.run(serve(load_backend(), ToolError))
+    instance = load_backend()
+    if sys.argv[1:] == ["--worker"]:
+        asyncio.run(run_worker(instance, ToolError))
+    else:
+        asyncio.run(serve(WorkerBackend(instance), ToolError))
 
 
 if __name__ == "__main__":

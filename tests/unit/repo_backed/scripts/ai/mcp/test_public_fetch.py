@@ -114,7 +114,7 @@ class TransportTests(unittest.IsolatedAsyncioTestCase):
             ["8.8.8.8", "127.0.0.1"],
             ["fec0::1"],
             ["fe80::1%lo"],
-            ["8.8.8.8"] * 33,
+            [f"8.8.8.{number}" for number in range(1, 34)],
         ]:
             with self.subTest(addresses=addresses):
                 connector = Connector()
@@ -124,6 +124,21 @@ class TransportTests(unittest.IsolatedAsyncioTestCase):
                 with self.assertRaises(httpcore.ConnectError):
                     await backend.connect_tcp("fixture.invalid", 80)
                 self.assertEqual(connector.calls, [])
+
+    async def test_duplicate_socket_records_share_the_public_destination_limit(self):
+        addresses = [f"8.8.8.{number}" for number in range(1, 17)] * 3
+        connector = Connector(b"")
+        backend = T.PublicBackend(
+            AsyncMock(return_value=addresses), permitted, connector
+        )
+        stream = await backend.connect_tcp("fixture.invalid", 80)
+        await stream.aclose()
+        self.assertEqual(len(connector.calls), 1)
+        backend = T.PublicBackend(
+            AsyncMock(return_value=[*addresses, "127.0.0.1"]), permitted, Connector()
+        )
+        with self.assertRaises(httpcore.ConnectError):
+            await backend.connect_tcp("fixture.invalid", 80)
 
     async def test_private_literal_port_local_bind_and_unix_are_refused(self):
         connector = Connector()
@@ -557,6 +572,78 @@ class RuntimeIdentityTests(unittest.TestCase):
     "Run the pinned isolated Fetch qualification for SDK probes",
 )
 class SDKTests(unittest.IsolatedAsyncioTestCase):
+    async def test_cancel_and_deadline_reap_real_html_extraction_before_releasing_slot(
+        self,
+    ):
+        scratch = ROOT / "reports/local"
+        scratch.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(
+            prefix="fetch-worker-", dir=scratch
+        ) as directory:
+            folder = Path(directory)
+            entered = folder / "entered.txt"
+            worker = folder / "blocked_extractor.py"
+            runtime = ROOT / "scripts/ai/mcp/support/public_fetch_runtime.py"
+            worker.write_text(
+                "import asyncio, importlib.util, pathlib, threading\n"
+                f"spec=importlib.util.spec_from_file_location('runtime', {str(runtime)!r})\n"
+                "runtime=importlib.util.module_from_spec(spec);spec.loader.exec_module(runtime)\n"
+                "runtime.bootstrap()\n"
+                "from mcp_server_fetch import server\n"
+                "def blocked(html):\n"
+                f" pathlib.Path({str(entered)!r}).write_text('actual extractor entered')\n"
+                " threading.Event().wait()\n"
+                "server._readability_content=blocked\n"
+                "asyncio.run(asyncio.to_thread(server.extract_content_from_html, '<html><body>fixture</body></html>', False))\n",
+                encoding="utf-8",
+            )
+            original = asyncio.create_subprocess_exec
+            processes = []
+
+            async def start_fixture(*args, **kwargs):
+                self.assertTrue(all(p.returncode is not None for p in processes))
+                process = await original(*args[:4], str(worker), **kwargs)
+                processes.append(process)
+                return process
+
+            active = asyncio.Lock()
+            backend = S.WorkerBackend(SimpleNamespace())
+            with patch.object(S.asyncio, "create_subprocess_exec", start_fixture):
+                for cancel in (True, False):
+                    with (
+                        self.subTest(cancel=cancel),
+                        patch.object(S, "CALL_SECONDS", 8),
+                    ):
+                        entered.unlink(missing_ok=True)
+                        task = asyncio.create_task(
+                            S.invoke_serialized(
+                                backend,
+                                "tools/call",
+                                {
+                                    "name": "fetch",
+                                    "arguments": {"url": "https://example.com/"},
+                                },
+                                active,
+                            )
+                        )
+                        try:
+                            async with asyncio.timeout(7):
+                                while not entered.exists():
+                                    await asyncio.sleep(0.02)
+                            self.assertTrue(active.locked())
+                            if cancel:
+                                task.cancel()
+                            with self.assertRaises(
+                                asyncio.CancelledError if cancel else TimeoutError
+                            ):
+                                await task
+                        finally:
+                            if not task.done():
+                                task.cancel()
+                                await asyncio.gather(task, return_exceptions=True)
+                        self.assertIsNotNone(processes[-1].returncode)
+                        self.assertFalse(active.locked())
+
     async def test_pinned_versions_and_site_local_policy(self):
         for name, expected in {
             **T.PINS,

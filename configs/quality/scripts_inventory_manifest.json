@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-19T12:07:00.960895+00:00",
+  "generated_at": "2026-11-19T12:23:26.900124+00:00",
   "summary": {
     "total_scripts": 773,
     "status_counts": {
@@ -5945,7 +5945,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
@@ -5961,7 +5961,7 @@
         },
         {
           "path": "docs/05-operations/runbooks/amp-orbs.md",
-          "line": 188,
+          "line": 192,
           "source_group": "docs",
           "text": "`python -I -S -B scripts/ai/mcp/support/public_fetch_runtime.py --accept-profile <verified-original.json>` only"
         },
@@ -5976,6 +5976,12 @@
           "line": 564,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/support/public_fetch_runtime.py\","
+        },
+        {
+          "path": "tests/unit/repo_backed/scripts/ai/mcp/test_public_fetch.py",
+          "line": 586,
+          "source_group": "tests",
+          "text": "runtime = ROOT / \"scripts/ai/mcp/support/public_fetch_runtime.py\""
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
@@ -6022,7 +6028,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_public_fetch.py",
-          "line": 635,
+          "line": 722,
           "source_group": "tests",
           "text": "str(SUPPORT / \"public_fetch_stdio.py\"),"
         },

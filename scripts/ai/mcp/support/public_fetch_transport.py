@@ -45,7 +45,7 @@ class PublicBackend(httpcore.AsyncNetworkBackend):
             addresses = await self.resolve(host)
         else:
             addresses = [host]
-        if not addresses or len(addresses) > 32:
+        if not addresses:
             raise httpcore.ConnectError("Invalid number of destination addresses")
         if not all(
             isinstance(item, str) and "%" not in item and self.permitted(item)
@@ -54,7 +54,12 @@ class PublicBackend(httpcore.AsyncNetworkBackend):
             raise httpcore.ConnectError(
                 "Destination has an address outside the public profile"
             )
-        return list(dict.fromkeys(ipaddress.ip_address(item) for item in addresses))
+        canonical = list(
+            dict.fromkeys(ipaddress.ip_address(item) for item in addresses)
+        )
+        if len(canonical) > 32:
+            raise httpcore.ConnectError("Invalid number of destination addresses")
+        return canonical
 
     async def verify_peer(
         self,
