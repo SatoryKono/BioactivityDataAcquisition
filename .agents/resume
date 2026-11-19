@@ -5,6 +5,10 @@
 # belong in .agents/setup (they publish a new snapshot).
 # Docs: https://ampcode.com/docs/orbs/customizing
 set -uo pipefail
+# Repair: if activation re-injected an external core.hooksPath into the
+# global git config, drop it again — the repo's hook-installation guard
+# rejects hooks paths outside the repository (see .agents/setup).
+git config --global --unset-all core.hooksPath >/dev/null 2>&1 || true
 
 # GitHub CLI becomes authenticated after orb activation via the owner's
 # GitHub connection. Verify and warn; never block the agent on this hook.
