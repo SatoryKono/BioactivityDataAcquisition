@@ -181,7 +181,8 @@ def _try_builtin_guard(phase: str, command: list[str]) -> int | None:
         with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
             return _guard_code(phase, entry(command[4:]))
     except (Exception, SystemExit):
-        return 20
+        # Controlled ERROR: a guard that raises must not map to a phase code.
+        return 20  # NOSONAR - design pinned by test_owned_guard_execution.py
 
 
 def _try_parallel_guards(commands: list[tuple[str, list[str]]]) -> int | None:
@@ -204,10 +205,14 @@ def _try_parallel_guards(commands: list[tuple[str, list[str]]]) -> int | None:
                     try:
                         codes.append(_guard_code(phase, result.result()))
                     except (Exception, SystemExit):
-                        codes.append(20)
+                        # Controlled ERROR: a guard that raises must not map to a phase code.
+                        codes.append(
+                            20
+                        )  # NOSONAR - pinned by test_owned_guard_execution.py
         return next((code for code in codes if code), 0)
     except (Exception, SystemExit):
-        return 20
+        # Controlled ERROR: a guard that raises must not map to a phase code.
+        return 20  # NOSONAR - pinned by test_owned_guard_execution.py
 
 
 def _execute_commands(
