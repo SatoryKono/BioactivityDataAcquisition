@@ -215,7 +215,7 @@ filters.gold_filters.columns.component_type,—,—,—,—,—,—,—,—,—,
 filters.gold_filters.columns.confidence_score,—,—,—,—,—,—,"[8, 9]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 filters.gold_filters.columns.inorganic_flag,—,—,—,—,—,—,—,—,—,—,[0],—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 filters.gold_filters.columns.molecule_type,—,—,—,—,—,—,—,—,—,—,"[""Small molecule""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-filters.gold_filters.columns.potential_duplicate,—,—,—,—,—,[0],—,—,—,—,[0],—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+filters.gold_filters.columns.potential_duplicate,—,—,—,—,—,[0],—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 filters.gold_filters.columns.relationship_type,—,—,—,—,—,—,"[""D""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 filters.gold_filters.columns.reviewed,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,[true]
 filters.gold_filters.columns.src_id,—,—,—,—,—,—,"[""1""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
