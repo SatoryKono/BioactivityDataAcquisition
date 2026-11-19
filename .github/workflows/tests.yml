@@ -1716,11 +1716,17 @@ jobs:
         run: |
           set -euo pipefail
           test -s reports/quality/module-coverage-inventory.candidate.json
+          # Local monotonic adoption records additional XML provenance.
+          # Keep all measured rows, summaries and the source hash in comparison.
+          comparison_filter='del(.coverage_xml_sha256, .snapshot_date) |
+            del(.additive_coverage_xml_path,
+                .additive_coverage_xml_sha256,
+                .additive_measured_module_count)'
           if ! cmp --silent \
-            <(jq -S 'del(.coverage_xml_sha256, .snapshot_date)' reports/quality/module-coverage-inventory.json) \
-            <(jq -S 'del(.coverage_xml_sha256, .snapshot_date)' reports/quality/module-coverage-inventory.candidate.json); then
+            <(jq -S "$comparison_filter" reports/quality/module-coverage-inventory.json) \
+            <(jq -S "$comparison_filter" reports/quality/module-coverage-inventory.candidate.json); then
             echo "Committed module coverage inventory is stale."
-            echo "Download module-coverage-inventory.candidate.json from the successful SHA-bound coverage-verify producer."
+            echo "Refresh the inventory from a qualified complete local 17-shard measurement."
             exit 1
           fi
 
