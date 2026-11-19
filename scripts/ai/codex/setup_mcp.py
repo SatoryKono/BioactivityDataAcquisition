@@ -1156,7 +1156,13 @@ def _inline_toml_value(value):
 def _split_root_mcp_assignment(statement, parsed, managed, at_root):
     if not at_root or "=" not in statement or set(parsed) != {"mcp_servers"}:
         return None
-    if tomllib.loads(statement.partition("=")[0] + "= 0") != {"mcp_servers": 0}:
+    # Match a single root key followed by its delimiter. Dotted keys may
+    # contain '=' inside quoted components and must remain user-owned text.
+    key = re.match(
+        r"""\s*(?:[A-Za-z0-9_-]+|"(?:[^"\\\r\n]|\\.)*"|'[^'\r\n]*')\s*(?==)""",
+        statement,
+    )
+    if key is None or tomllib.loads(key.group(0) + "= 0") != {"mcp_servers": 0}:
         return None
     entries = parsed["mcp_servers"]
     if not isinstance(entries, dict):

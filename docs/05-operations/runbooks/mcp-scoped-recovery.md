@@ -240,8 +240,10 @@ gateway. A dead prepared owner can support a new reviewed plan only when the
 original records and graph still match; absence of a receipt alone is insufficient.
 Before releasing the gateway nonce, the owner durably publishes its generation's
 zero-request startup receipt and `AUTHORIZED` stage. This covers interruption
-between grant consumption and successor publication. Live/unknown prepared owners
-also block migration, even before a new `status.json` exists.
+between grant consumption and successor publication. PREPARED-only proof blocks
+migration even for a dead owner: reconcile in that same immutable runtime first.
+Only a separately qualified successor zero-request receipt can permit the bounded
+upgrade below; migration must not invalidate the hashes needed by PREPARED proof.
 A pending RESOLVED grant blocks runtime migration until its reviewed launch is
 handled. A LAUNCHING generation also blocks migration unless the dormant-process,
 zero-request startup and matching-graph checks in Rollback/Recovery prove the
@@ -296,7 +298,10 @@ before nonce authorization proves the snapshot cannot be used; after authorizati
 worker termination and Job closure/owner exit are required. Unknown/live identities
 and unowned files remain refusals without signalling another process. Metadata-only
 interrupted publication and known atomic-record temporary files are handled inside
-the validated private job namespace. Retain unresolved documents for the profile
+the validated private job namespace. Cleanup deletes its canonical journal last,
+after snapshots, output and atomic-record temporary files. An interruption after
+journal deletion leaves an empty job directory that recovery can safely remove.
+Retain unresolved documents for the profile
 operator; do not fabricate identity records.
 
 Responses retain the 2 MiB transport limit and encode ordinary Unicode as UTF-8.
@@ -397,8 +402,12 @@ the existing journal. Other registry entries and graph bytes are preserved. Repe
 completed recovery verifies coherent records without writes; an interruption remains
 closed and can be retried with the same ID. Older journals without an after snapshot
 are reconstructed only from the exact verified immutable target and checked against
-their preserved after-entry. Management imports, including lazy runtime imports,
-suppress bytecode and restore the caller's previous mode.
+their preserved after-entry. Each new `ROLLING_BACK` journal records its own graph
+and coordination snapshot at rollback start, allowing legitimate graph changes
+since migration while rejecting changes during rollback. A legacy rollback journal
+without that snapshot can use only its unchanged preserved migration snapshot;
+recovery never guesses a later graph state. Management imports, including lazy
+runtime imports, suppress bytecode and restore the caller's previous mode.
 
 Unknown state, source drift, unqualified predecessor, changed coordination or graph
 remain refusals. Do not edit records or restore the shared registry to bypass them.
