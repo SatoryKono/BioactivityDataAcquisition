@@ -172,13 +172,17 @@ Backfill очищает целевые таблицы перед записью,
 Из корня репозитория выполнить preview с `--dry-run`, затем в отдельном новом
 root выполнить следующую команду. На Windows использовать
 `.venv-win/Scripts/python.exe` вместо `python`.
-Пример ограничен проверенным снимком из 1000 Molecule от 2026-11-18.
-Для более крупного снимка убрать `--limit 1000` или задать его полное количество;
-date filter также должен соответствовать выбранным batch-файлам.
+Пример основан на проверенном снимке из 1000 Molecule от 2026-11-18.
+Для другого снимка date filter должен соответствовать выбранным batch-файлам;
+полное восстановление не ограничивает число записей.
 
 ```text
-python -m bioetl run --pipeline chembl_molecule --run-type backfill --limit 1000 --use-cached-bronze --cached-bronze-path <absolute-original-molecule-bronze-dir> --cached-bronze-date 2026-11-18 --no-exact-replay --no-ensure-observability-backend
+python -m bioetl run --pipeline chembl_molecule --run-type backfill --use-cached-bronze --cached-bronze-path <absolute-original-molecule-bronze-dir> --cached-bronze-date 2026-11-18 --no-exact-replay --no-ensure-observability-backend
 ```
+
+Для полного восстановления не задавать `--limit`: иначе cached Bronze будет
+обрезан до указанного числа записей. Ограниченную выборку использовать только
+для отдельного preview, а итоговые количества сверять с полным исходным снимком.
 
 Сверить Silver/Gold Delta по `molecule_id`, значениям фаз, `entity_id`,
 пересчитанным hashes и funnel balances. Проверить current SCD2 rows и повторить
