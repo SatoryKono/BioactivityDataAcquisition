@@ -18,6 +18,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **ChEMBL Molecule Gold eligibility (#13198):** remove the unavailable
+  `potential_duplicate=0` condition. Molecule type, structure and inorganic filters
+  remain required, followed by strict Gold validation. The corrected filter changes
+  the effective-config digest and can admit previously excluded records; restore
+  stored outputs by reprocessing preserved Bronze into isolated destinations.
+
 - **Selected run status:** a missing non-UUID token, including a compact stamp
   such as `20261102T181217`, stays `run_not_found` / `UNKNOWN`. It is no longer
   reported as `QUERY ERROR` / `request_failed`. An explicit UUID and a saved
