@@ -7,7 +7,7 @@ import subprocess
 
 import pytest
 
-from scripts.engineering.repo import partitioned_diff as scanner
+from scripts.engineering.repo.hook_receipts import _SourceDiffScanner as scanner
 
 pytestmark = pytest.mark.unit
 

@@ -9,7 +9,7 @@ from unittest.mock import Mock
 import pytest
 import yaml
 
-from scripts.engineering.repo import coalesced_precommit as adapter
+from scripts.engineering.repo.offline_precommit import _CoalescedPrecommit as adapter
 from scripts.engineering.repo import offline_precommit as offline
 
 pytestmark = pytest.mark.unit
@@ -292,11 +292,17 @@ def test_owned_backend_loaders_do_not_accept_stale_bytecode(
     folder = tmp_path / "scripts" / "engineering" / "repo"
     folder.mkdir(parents=True)
     source = tmp_path / offline.BACKEND_PATHS["partitioned_diff"]
-    source.write_text('def scan(): return b"source"\n')
+    source.write_text(
+        'class _SourceDiffScanner:\n    @staticmethod\n    def scan(): return b"source"\n'
+    )
     info = source.stat()
     cache = Path(importlib.util.cache_from_source(str(source)))
     cache.parent.mkdir(exist_ok=True)
-    stale = compile('def scan(): return b"cached"', str(source), "exec")
+    stale = compile(
+        'class _SourceDiffScanner:\n    @staticmethod\n    def scan(): return b"cached"',
+        str(source),
+        "exec",
+    )
     cache.write_bytes(_code_to_timestamp_pyc(stale, int(info.st_mtime), info.st_size))
     if kind == "backend":
         monkeypatch.setattr(

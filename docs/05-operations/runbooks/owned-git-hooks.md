@@ -203,6 +203,15 @@ interpreters. A changed platform requires rollback/reinstall and fresh evidence.
 
 ## Verification
 
+The coalesced pre-commit, metadata message and partitioned diff handlers are
+private namespaces in the existing `offline_precommit.py`, `hook_installation.py`
+and `hook_receipts.py` owners. Immutable bundles copy those complete owner files;
+backend loading still executes the just-verified source bytes rather than cached
+bytecode. This preserves the active-script cap of 334 without retiring unrelated
+scripts or relaxing the catalog. Git diagnostics make a source comparison
+unavailable even when Git returns zero; unknown commit-message type filters keep
+ordinary framework filtering and skip semantics.
+
 Local mechanism qualification on 2026-11-12 used private synthetic Git fixtures
 and a deployment bundle, without installing callbacks in the project repository.
 Windows: Python 3.13.7, pre-commit 4.7.0, pytest 9.2.0. WSL: Python 3.13.18,

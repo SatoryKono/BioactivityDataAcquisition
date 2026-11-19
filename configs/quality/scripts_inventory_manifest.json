@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-19T16:17:41.435657+00:00",
+  "generated_at": "2026-11-19T16:36:22.665665+00:00",
   "summary": {
-    "total_scripts": 776,
+    "total_scripts": 773,
     "status_counts": {
-      "active": 337,
+      "active": 334,
       "supporting": 437,
       "temporary_diagnostic": 2
     },
@@ -12,11 +12,11 @@
       "agents": 12,
       "build": 18,
       "ci": 81,
-      "docs": 309,
+      "docs": 312,
       "other": 22,
-      "scripts": 671,
+      "scripts": 668,
       "skills": 13,
-      "tests": 593
+      "tests": 590
     }
   },
   "scripts": [
@@ -13305,14 +13305,14 @@
       "reference_count": 4,
       "references": [
         {
-          "path": "scripts/engineering/repo/readonly_message.py",
-          "line": 29,
+          "path": "scripts/engineering/repo/hook_installation.py",
+          "line": 488,
           "source_group": "scripts",
           "text": "\"scripts/engineering/dev/check_commit_message.py\": \"070c7d1197852a7dd653f564dc544b910cd504af8056e5266f777f440413fc2e\","
         },
         {
-          "path": "scripts/engineering/repo/readonly_message.py",
-          "line": 48,
+          "path": "scripts/engineering/repo/hook_installation.py",
+          "line": 510,
           "source_group": "scripts",
           "text": "\"scripts/engineering/dev/check_commit_message.py\","
         },
@@ -22254,8 +22254,8 @@
           "text": "from scripts.engineering.repo._root_governance import ("
         },
         {
-          "path": "scripts/engineering/repo/coalesced_precommit.py",
-          "line": 122,
+          "path": "scripts/engineering/repo/offline_precommit.py",
+          "line": 577,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/_root_governance.py\": \"bb77f623d90875962f974668e2dc9ce8c98e92b7093d83b28611dc027ee3af66\","
         },
@@ -23072,27 +23072,6 @@
       "next_step": "Retain as a fixed owned-process worker behind scripts.engineering.repo closeout, without standalone CLI or native event activation; never launch producers or ingestion."
     },
     {
-      "path": "scripts/engineering/repo/coalesced_precommit.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 2,
-      "references": [
-        {
-          "path": "scripts/engineering/repo/offline_precommit.py",
-          "line": 32,
-          "source_group": "scripts",
-          "text": "\"coalesced_precommit\": \"scripts/engineering/repo/coalesced_precommit.py\","
-        },
-        {
-          "path": "tests/unit/scripts/test_coalesced_precommit.py",
-          "line": 12,
-          "source_group": "tests",
-          "text": "from scripts.engineering.repo import coalesced_precommit as adapter"
-        }
-      ]
-    },
-    {
       "path": "scripts/engineering/repo/create_worktree.py",
       "type": "py",
       "status": "supporting",
@@ -23246,8 +23225,14 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 9,
       "references": [
+        {
+          "path": "docs/05-operations/runbooks/owned-git-hooks.md",
+          "line": 207,
+          "source_group": "docs",
+          "text": "private namespaces in the existing `offline_precommit.py`, `hook_installation.py`"
+        },
         {
           "path": "scripts/engineering/repo/__main__.py",
           "line": 156,
@@ -23261,6 +23246,12 @@
           "text": "from scripts.engineering.repo import hook_installation as installation"
         },
         {
+          "path": "scripts/engineering/repo/offline_precommit.py",
+          "line": 31,
+          "source_group": "scripts",
+          "text": "\"readonly_message\": \"scripts/engineering/repo/hook_installation.py\","
+        },
+        {
           "path": "tests/architecture/test_ops_ai_setup_scripts.py",
           "line": 146,
           "source_group": "tests",
@@ -23271,6 +23262,18 @@
           "line": 15,
           "source_group": "tests",
           "text": "from scripts.engineering.repo import hook_installation as installer"
+        },
+        {
+          "path": "tests/unit/scripts/test_readonly_message.py",
+          "line": 17,
+          "source_group": "tests",
+          "text": "from scripts.engineering.repo.hook_installation import _ReadOnlyMessage as reader"
+        },
+        {
+          "path": "tests/unit/scripts/test_readonly_message.py",
+          "line": 41,
+          "source_group": "tests",
+          "text": "own = bundle / \"scripts/engineering/repo/hook_installation.py\""
         }
       ],
       "owner": "@bioetl-platform",
@@ -23283,8 +23286,14 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 11,
       "references": [
+        {
+          "path": "docs/05-operations/runbooks/owned-git-hooks.md",
+          "line": 208,
+          "source_group": "docs",
+          "text": "and `hook_receipts.py` owners. Immutable bundles copy those complete owner files;"
+        },
         {
           "path": "scripts/engineering/repo/closeout_runtime.py",
           "line": 15,
@@ -23310,21 +23319,21 @@
           "text": "from scripts.engineering.repo import hook_receipts"
         },
         {
+          "path": "scripts/engineering/repo/offline_precommit.py",
+          "line": 30,
+          "source_group": "scripts",
+          "text": "\"partitioned_diff\": \"scripts/engineering/repo/hook_receipts.py\","
+        },
+        {
+          "path": "scripts/engineering/repo/offline_precommit.py",
+          "line": 656,
+          "source_group": "scripts",
+          "text": "/ \"scripts/engineering/repo/hook_receipts.py\""
+        },
+        {
           "path": "scripts/engineering/repo/scoped_checks.py",
           "line": 23,
           "source_group": "scripts",
-          "text": "from scripts.engineering.repo import hook_receipts as receipts"
-        },
-        {
-          "path": "tests/unit/scripts/repo/test_closeout_git_safety.py",
-          "line": 14,
-          "source_group": "tests",
-          "text": "from scripts.engineering.repo import closeout_runtime, closeout_state, hook_receipts"
-        },
-        {
-          "path": "tests/unit/scripts/repo/test_hook_receipts.py",
-          "line": 15,
-          "source_group": "tests",
           "text": "from scripts.engineering.repo import hook_receipts as receipts"
         }
       ],
@@ -23375,13 +23384,25 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 6,
       "references": [
+        {
+          "path": "docs/05-operations/runbooks/owned-git-hooks.md",
+          "line": 207,
+          "source_group": "docs",
+          "text": "private namespaces in the existing `offline_precommit.py`, `hook_installation.py`"
+        },
         {
           "path": "scripts/engineering/repo/hook_runtime.py",
           "line": 304,
           "source_group": "scripts",
           "text": "framework = Path(__file__).with_name(\"offline_precommit.py\")"
+        },
+        {
+          "path": "tests/unit/scripts/test_coalesced_precommit.py",
+          "line": 12,
+          "source_group": "tests",
+          "text": "from scripts.engineering.repo.offline_precommit import _CoalescedPrecommit as adapter"
         },
         {
           "path": "tests/unit/scripts/test_coalesced_precommit.py",
@@ -23455,33 +23476,6 @@
       "lifecycle_decision": "shared_helper_module",
       "review_by": "2027-02-11",
       "next_step": "Retain as the internal guard implementation behind the canonical scripts.engineering.repo router; callers use guard-operation or guard-budgets, not a standalone script."
-    },
-    {
-      "path": "scripts/engineering/repo/partitioned_diff.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 3,
-      "references": [
-        {
-          "path": "scripts/engineering/repo/coalesced_precommit.py",
-          "line": 196,
-          "source_group": "scripts",
-          "text": "/ \"scripts/engineering/repo/partitioned_diff.py\""
-        },
-        {
-          "path": "scripts/engineering/repo/offline_precommit.py",
-          "line": 30,
-          "source_group": "scripts",
-          "text": "\"partitioned_diff\": \"scripts/engineering/repo/partitioned_diff.py\","
-        },
-        {
-          "path": "tests/unit/scripts/test_partitioned_diff.py",
-          "line": 10,
-          "source_group": "tests",
-          "text": "from scripts.engineering.repo import partitioned_diff as scanner"
-        }
-      ]
     },
     {
       "path": "scripts/engineering/repo/preflight_cleanup.sh",
@@ -23613,39 +23607,6 @@
       "lifecycle_decision": "shared_helper_module",
       "review_by": "2027-02-12",
       "next_step": "Retain as an internal owned-hook deployment or bounded-execution helper behind the canonical scripts.engineering.repo hooks router; qualify exact framework and platform contracts before activation."
-    },
-    {
-      "path": "scripts/engineering/repo/readonly_message.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 4,
-      "references": [
-        {
-          "path": "scripts/engineering/repo/offline_precommit.py",
-          "line": 31,
-          "source_group": "scripts",
-          "text": "\"readonly_message\": \"scripts/engineering/repo/readonly_message.py\","
-        },
-        {
-          "path": "tests/unit/scripts/test_readonly_message.py",
-          "line": 17,
-          "source_group": "tests",
-          "text": "from scripts.engineering.repo import readonly_message as reader"
-        },
-        {
-          "path": "tests/unit/scripts/test_readonly_message.py",
-          "line": 41,
-          "source_group": "tests",
-          "text": "own = bundle / \"scripts/engineering/repo/readonly_message.py\""
-        },
-        {
-          "path": "tests/unit/scripts/test_readonly_message.py",
-          "line": 48,
-          "source_group": "tests",
-          "text": "\"scripts/engineering/repo/readonly_message.py\": hashlib.sha256("
-        }
-      ]
     },
     {
       "path": "scripts/engineering/repo/scoped_checks.py",

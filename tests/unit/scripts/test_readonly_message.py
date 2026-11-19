@@ -14,7 +14,7 @@ from unittest.mock import Mock
 import pytest
 import yaml
 
-from scripts.engineering.repo import readonly_message as reader
+from scripts.engineering.repo.hook_installation import _ReadOnlyMessage as reader
 
 pytestmark = pytest.mark.unit
 
@@ -38,14 +38,14 @@ def message_checkout(tmp_path, monkeypatch):
         json.dumps({"repos": [{"repo": "local", "hooks": [hook]}]})
     )
     bundle = root / "metadata/bioetl-hooks/candidate"
-    own = bundle / "scripts/engineering/repo/readonly_message.py"
+    own = bundle / "scripts/engineering/repo/hook_installation.py"
     own.parent.mkdir(parents=True)
     own.write_bytes(source.read_bytes())
     manifest = json.dumps(
         {
             "version": 1,
             "files": {
-                "scripts/engineering/repo/readonly_message.py": hashlib.sha256(
+                "scripts/engineering/repo/hook_installation.py": hashlib.sha256(
                     own.read_bytes()
                 ).hexdigest()
             },
