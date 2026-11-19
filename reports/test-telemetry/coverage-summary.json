@@ -1,11 +1,11 @@
 {
-  "source_branch": "codex/iuphar-target-integration-20261116",
-  "source_commit": "eab94684d0ba77ec7bf230920626a8d7c6d9b4b7",
-  "source_run_id": "44479287100",
+  "source_branch": "main",
+  "source_commit": "43b01a752baa4f304a77e0939f85f10d21d771fc",
+  "source_run_id": "44542033448",
   "source_event": "workflow_dispatch",
-  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/44479287100",
-  "source_tree_sha256": "72b5396f91d35b92f89ba0e51f721577b5312b7b3fe0bc7864522e5e5f87d612",
-  "refreshed_at_utc": "2026-11-19T07:37:32.259000+00:00",
+  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/44542033448",
+  "source_tree_sha256": "55ddc1222054cfac311d2436aee78a385ba09c37858abc7084fbd6d3e825c7fa",
+  "refreshed_at_utc": "2026-11-19T14:31:16.744000+00:00",
   "refresh_status": "captured",
   "coverage_percent": 99.51,
   "coverage": {
