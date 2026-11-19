@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "catalog_ref": "cdcf73b4b61ced3cc033d38509df7de9956600d4",
-  "source_ref": "cdcf73b4b61ced3cc033d38509df7de9956600d4",
+  "catalog_ref": "bb4fc5f6ec96d3411573bba7381d768b2c7a6de0",
+  "source_ref": "cb425d2d5522770cf8a5b0d52c42429a74ac0ff0",
   "source_reviews": {
-    "src/bioetl/infrastructure/storage/target_migration_validation.py": "Writer admission now recognizes the CLI command boundary and the last source option. Other functions are AST-identical. Existing local configuration reads retain their expressions, scopes, dispositions, and resources."
+    "src/bioetl/infrastructure/storage/target_migration_validation.py": "Reviewed all maintained CLI execution routes: run, debug, run-all, workflow run, and run-composite. Debug target execution and configured or custom composite seeds can write chembl_target, so migration admission rejects them. Help, dry-run, other pipelines, and last-source batch semantics remain covered by argv regressions. Existing filesystem configuration reads retain their expressions, scopes, dispositions, and resources; no new external resource site is introduced. Eight new writer cases failed before the fix; the focused suite passed 145 tests after it."
   }
 }
