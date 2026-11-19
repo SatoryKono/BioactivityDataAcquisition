@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "cdcf73b4b61ced3cc033d38509df7de9956600d4",
+  "source_ref": "cdcf73b4b61ced3cc033d38509df7de9956600d4",
+  "source_reviews": {
+    "src/bioetl/infrastructure/storage/target_migration_validation.py": "Reviewed the complete source delta against inventory source f75bff3e2c586c8af4a975c46b4771cb40275325: the managed-writer guard now recognizes the ChEMBL run-all subcommand, retaining dry-run/help/list-only exclusions and using the last repeated source option as Click does. Argument boundaries prevent a directory named run-all from hiding a writing run. A separate batch predicate preserves existing complexity limits. No acquisition, resource owner, Path read expression, lifetime or cleanup changes; references relocate to the same expressions. This static source review does not attest live writers, shutdown, leaks, scientific acceptance or runtime qualification under #12553."
+  }
+}
