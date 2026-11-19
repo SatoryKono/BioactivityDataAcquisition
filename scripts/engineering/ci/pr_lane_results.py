@@ -1894,6 +1894,21 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/architecture/test_scripts_inventory_discovery.py",
         MYPY_TARGET_CONTRACT_TEST,
     ),
+    **dict.fromkeys(
+        (
+            "reports/review/ai-rules-epic-13056-acceptance.md",
+            "reports/review/ai-rules-epic-13056-evidence.json",
+        ),
+        (
+            "tests/unit/scripts/test_coalesced_precommit.py",
+            "tests/unit/scripts/test_parallel_precommit.py",
+            "tests/unit/scripts/test_readonly_message.py",
+            "tests/unit/scripts/test_partitioned_diff.py",
+            "tests/unit/scripts/test_owned_guard_execution.py",
+            "tests/unit/scripts/repo/test_hook_receipts.py",
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
+    ),
     "scripts/engineering/ci/presubmit_gate.py": (
         "tests/unit/repo_backed/scripts/engineering/ci/test_presubmit_gate.py",
         MYPY_TARGET_CONTRACT_TEST,
