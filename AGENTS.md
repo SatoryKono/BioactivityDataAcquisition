@@ -262,6 +262,33 @@ does not relax the env guardrail or the full-tree commit gate.
 - Provenance: `meta-model-cookbook/03_use_cases/11_github_repo_agent`
   (agent prompts verbatim, `AGENTS.md` SECURITY model merged here, not replaced).
 
+## Amp Orb Agent (Phase 1, subordinate surface)
+
+- `.agents/setup`, `.agents/resume` — Amp orb lifecycle hooks
+  (https://ampcode.com/docs/orbs/customizing). `.amp/settings.json` — Amp
+  workspace config (`amp.mcpServers`, `amp.skills.path`). Amp reads the root
+  `AGENTS.md` natively; it has no runtime tree in this repository and MUST NOT
+  gain one without a separate owner decision.
+- Orbs are remote cloud sandboxes, not local checkouts: the `D:\github`
+  worktree-placement rule does not apply to an orb checkout. The full-tree
+  commit gate (`check_no_partial_tree.py`) and every other root guardrail
+  apply in full. The orb environment is detectable via `AMP_ORB=1`.
+- Secrets in orbs come from Amp project environment variables; `.env` MUST
+  NOT be created or modified in an orb. This surface does not relax the env
+  guardrail above.
+- MCP in orbs is limited to the `amp.mcpServers` set in `.amp/settings.json`
+  (memory, fetch, github — with the repository wrapper's exclude-tools list
+  and lockdown mode). Skills resolve from `.codex/skills/**` via
+  `amp.skills.path`; do not copy skills into an Amp-specific tree.
+- Ship on the Amp project is Custom Ship: run `make test-fast`, push a
+  feature branch, open a PR with `gh pr create`, never merge. The default
+  Ship behavior (push to the base branch) is forbidden for this repository.
+- This surface is subordinate to the canonical precedence above; it MUST NOT
+  redefine runtime behavior. BioETL guardrails (`.env` untouched, no
+  Docker/Redis, tech-debt budgets only down, root hygiene) apply to every
+  Amp agent.
+- Tracking: issue #13216; runbook `docs/05-operations/runbooks/amp-orbs.md`.
+
 ## Related Files
 
 - `docs/00-project/NORMATIVE_SOURCES.md`

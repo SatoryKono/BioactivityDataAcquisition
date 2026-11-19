@@ -359,6 +359,9 @@ reports/quality/coderabbit/**/auth.*
 .agent-work/
 .agentbridge/
 .agents/*
+# Amp orb lifecycle hooks (#13216) stay tracked despite the blanket ignore.
+!.agents/setup
+!.agents/resume
 !.agents/skills/
 .agents/skills/*
 !.agents/skills/*/

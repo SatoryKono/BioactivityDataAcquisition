@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Amp orb setup for BioETL (#13216). Runs once per project snapshot; the
+# result is cached as the snapshot used to start new orbs. Budget: 20
+# minutes (Amp platform limit); a timeout publishes no snapshot.
+# Docs: https://ampcode.com/docs/orbs/customizing
+set -euo pipefail
+
+# Python 3.13 from .python-version, locked dependencies.
+uv sync
+
+# Node dependencies for docs/tooling; package-lock.json is canonical.
+npm ci
+
+# No `git fetch --unshallow`: orbs clone the full branch history by default,
+# which check_no_partial_tree.py requires.
+# No `gh` commands: GitHub is not authenticated during setup (see
+# .agents/resume for the post-activation check).
+# No Docker/Redis/monitoring startup: ADR-010 (local-only deployment).

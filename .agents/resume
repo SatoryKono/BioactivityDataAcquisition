@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Amp orb resume hook for BioETL (#13216). Runs after orb activation and
+# after each wake; Amp waits only ~10 seconds for it. Authentication and
+# light repair ONLY — never install dependencies here; dependency changes
+# belong in .agents/setup (they publish a new snapshot).
+# Docs: https://ampcode.com/docs/orbs/customizing
+set -uo pipefail
+
+# GitHub CLI becomes authenticated after orb activation via the owner's
+# GitHub connection. Verify and warn; never block the agent on this hook.
+if ! gh auth status >/dev/null 2>&1; then
+  echo "amp-resume: gh is not authenticated in this orb" >&2
+fi
+
+exit 0
