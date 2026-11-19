@@ -580,3 +580,39 @@ async def test_title_search_propagates_truncation(adapter, mock_http_client):
     with pytest.raises(PaginationTruncatedError) as caught:
         await adapter._search_by_title("cancer", limit=5)
     assert caught.value.reason == "repeated_page"
+
+
+@pytest.mark.asyncio
+async def test_zero_search_limit_performs_no_http_request(adapter, mock_http_client):
+    assert await adapter._get_pmids("cancer", 0) == []
+    mock_http_client.get.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_title_search_propagates_the_page_cap_instead_of_empty_success(
+    adapter, mock_http_client, monkeypatch
+):
+    from bioetl.infrastructure.adapters.pubmed import _search
+
+    monkeypatch.setattr(_search, "MAX_ESEARCH_PAGES", 1)
+    mock_http_client.get = AsyncMock(
+        return_value=_esearch_page(count=5, ids=["1", "2"])
+    )
+    with pytest.raises(PaginationTruncatedError) as caught:
+        await adapter._search_by_title("cancer", limit=5)
+    assert caught.value.reason == "max_pages"
+    assert caught.value.page_count == 1
+    mock_http_client.get.assert_awaited_once()
+
+
+def test_short_esearch_result_never_becomes_a_complete_collection(adapter):
+    from bioetl.infrastructure.adapters.pubmed._search_models import (
+        reject_short_esearch_result,
+    )
+
+    with pytest.raises(PaginationTruncatedError) as caught:
+        reject_short_esearch_result(
+            adapter, ["1", "2"], max_count=5, reported_count=5, page_count=2, retstart=2
+        )
+    assert caught.value.reason == "short_idlist"
+    assert caught.value.page_count == 2

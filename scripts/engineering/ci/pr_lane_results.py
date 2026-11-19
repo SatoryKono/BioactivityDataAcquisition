@@ -608,6 +608,15 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         HOOK_RECEIPTS_TEST,
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
+    "docs/05-operations/runbooks/mcp-scoped-recovery.md": (
+        "tests/unit/scripts/test_converter_snapshot.py",
+        "tests/unit/scripts/test_mcp_native_session.py",
+        "tests/unit/scripts/test_native_mcp_local_routes.py",
+        "tests/unit/scripts/test_memory_versions.py",
+        "tests/unit/scripts/test_memory_reconciliation.py",
+        "tests/unit/scripts/test_safe_markdownify_client.py",
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
     "docs/05-operations/runbooks/ai-closeout-wrapper.md": (
         "tests/unit/scripts/repo/test_closeout_runtime.py",
         "tests/unit/scripts/repo/test_closeout_git_safety.py",
