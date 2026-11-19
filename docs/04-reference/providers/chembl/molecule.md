@@ -174,8 +174,12 @@ root выполнить следующую команду. На Windows испо
 `.venv-win/Scripts/python.exe` вместо `python`.
 
 ```text
-python -m bioetl run --pipeline chembl_molecule --run-type backfill --limit 1000 --use-cached-bronze --cached-bronze-path <absolute-original-molecule-bronze-dir> --cached-bronze-date 2026-11-18 --no-exact-replay --no-ensure-observability-backend
+python -m bioetl run --pipeline chembl_molecule --run-type backfill --use-cached-bronze --cached-bronze-path <absolute-original-molecule-bronze-dir> --cached-bronze-date 2026-11-18 --no-exact-replay --no-ensure-observability-backend
 ```
+
+Для полного восстановления не задавать `--limit`: иначе cached Bronze будет
+обрезан до указанного числа записей. Ограниченную выборку использовать только
+для отдельного preview, а итоговые количества сверять с полным исходным снимком.
 
 Сверить Silver/Gold Delta по `molecule_id`, значениям фаз, `entity_id`,
 пересчитанным hashes и funnel balances. Проверить current SCD2 rows и повторить
