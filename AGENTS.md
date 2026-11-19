@@ -277,8 +277,10 @@ does not relax the env guardrail or the full-tree commit gate.
   NOT be created or modified in an orb. This surface does not relax the env
   guardrail above.
 - MCP in orbs is limited to the `amp.mcpServers` set in `.amp/settings.json`
-  (memory, fetch, github — with the repository wrapper's exclude-tools list
-  and lockdown mode). Skills resolve from `.codex/skills/**` via
+  (memory, github — with the repository wrapper's exclude-tools list
+  and lockdown mode). The fetch server is excluded: its repository wrapper
+  is bound to the registered Windows host and cannot start in a Linux orb;
+  revisit if a Linux launcher appears. Skills resolve from `.codex/skills/**` via
   `amp.skills.path`; do not copy skills into an Amp-specific tree.
 - Ship on the Amp project is Custom Ship: run `make test-fast`, push a
   feature branch, open a PR with `gh pr create`, never merge. The default

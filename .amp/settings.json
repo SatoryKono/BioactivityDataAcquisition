@@ -1,1 +1,26 @@
-{"amp.mcpServers":{"fetch":{"args":["scripts/ai/mcp/mcp_fetch_wrapper.sh"],"command":"bash","env":{"NPM_CONFIG_CACHE":".cache/npm-cache","UV_CACHE_DIR":".cache/uv-cache","UV_TOOL_DIR":".cache/uv-tools"}},"github":{"args":["scripts/ai/mcp/github-mcp-wrapper.sh"],"command":"bash","env":{"GITHUB_EXCLUDE_TOOLS":"create_or_update_file,push_files,delete_file,fork_repository,create_repository,merge_pull_request,actions_run_trigger","GITHUB_LOCKDOWN_MODE":"true","GITHUB_TOOLSETS":"context,issues,pull_requests,repos,users,actions,code_security,dependabot,notifications"}},"memory":{"args":["scripts/ai/mcp/mcp_memory_wrapper.sh"],"command":"bash","env":{"MEMORY_SEED_PATH":"docs/00-project/ai/memory/mcp-memory.json","NPM_CONFIG_CACHE":".cache/npm-cache"}}},"amp.skills.path":".codex/skills"}
+{
+  "amp.mcpServers": {
+    "github": {
+      "args": [
+        "scripts/ai/mcp/github-mcp-wrapper.sh"
+      ],
+      "command": "bash",
+      "env": {
+        "GITHUB_EXCLUDE_TOOLS": "create_or_update_file,push_files,delete_file,fork_repository,create_repository,merge_pull_request,actions_run_trigger",
+        "GITHUB_LOCKDOWN_MODE": "true",
+        "GITHUB_TOOLSETS": "context,issues,pull_requests,repos,users,actions,code_security,dependabot,notifications"
+      }
+    },
+    "memory": {
+      "args": [
+        "scripts/ai/mcp/mcp_memory_wrapper.sh"
+      ],
+      "command": "bash",
+      "env": {
+        "MEMORY_SEED_PATH": "docs/00-project/ai/memory/mcp-memory.json",
+        "NPM_CONFIG_CACHE": ".cache/npm-cache"
+      }
+    }
+  },
+  "amp.skills.path": ".codex/skills"
+}
