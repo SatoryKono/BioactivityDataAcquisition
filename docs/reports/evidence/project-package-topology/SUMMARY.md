@@ -443,8 +443,8 @@ it is not a new coverage measurement or a complete topology re-audit.
 - Source modules: `2653`
 - `coverage_inventory_module_count=2653`
 - Accepted coverage inventory: `2653` modules
-- Accepted inventory: `2536` fully covered
-- Accepted inventory: `116` partially covered
+- Accepted inventory: `2537` fully covered
+- Accepted inventory: `115` partially covered
 - Test inventory: `assertless_total_candidates=67`
 
 Derived by scripts/engineering/qa/report_topology_source_binding.py from
