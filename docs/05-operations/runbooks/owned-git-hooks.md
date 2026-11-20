@@ -39,6 +39,10 @@ First merge the shared guards, full-tree checker and installer into the protecte
 main branch. Fetch that branch in an approved full checkout. Bootstrap dependencies
 explicitly with the chosen project interpreter: `python -m pre_commit install-hooks`.
 That command may download dependencies; it belongs outside commit/push.
+For Linux/WSL, prepend the chosen interpreter's `bin` directory to `PATH` during
+bootstrap as well as qualification. Environment health checks resolve Python
+names through `PATH`; bootstrap success under a different `PATH` does not prove
+that the installed environments are healthy for the callback interpreter.
 
 Run `python -m scripts.engineering.repo hooks install --python <absolute-project-python>`.
 The existing `setup_plugins.sh --hooks-only` entrypoint explicitly bootstraps
@@ -164,6 +168,9 @@ The total scan deadline remains ten seconds. No sparse/assume-unchanged setting,
 cross-event cache or omitted source prefix is introduced. Full-tree history
 inspection overlaps only immutable ancestor/tree queries in four worker slots;
 it checks every candidate commit and refreshes shallow boundaries afterwards.
+The secret-baseline check recursively scans every file under `src/` with the
+same detectors, filters and baseline. This includes ignored/untracked source
+files and avoids normalizing tracked paths elsewhere in the repository.
 Only inside the already supervised Linux worker, the two exact tree/budget
 guard CLIs may execute in that interpreter with their original argument lists.
 The independent tree/budget pair can overlap in two bounded worker slots;
