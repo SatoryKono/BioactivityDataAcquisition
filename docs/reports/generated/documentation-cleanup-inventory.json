@@ -50505,7 +50505,7 @@
       "lifecycle": null,
       "outbound_links": 3,
       "owner": "BioETL Team",
-      "path": "docs/05-operations/runbooks/chembl-molecule-phase-recovery.md",
+      "path": "docs/05-operations/runbooks/chembl_molecule-phase-recovery.md",
       "recommended_action": "keep",
       "root_doc_kind": null,
       "section": "05-operations",
