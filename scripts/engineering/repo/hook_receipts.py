@@ -526,6 +526,7 @@ class _SourceDiffScanner:
         """Retain a ten-second total scan limit, including both index observations."""
         deadline = time.monotonic() + 10
         before = cls._git(["ls-files", "--stage", "-z"], deadline)
+        flags_before = cls._git(["ls-files", "-v", "-z"], deadline)
         batches = cls.partition(cls._paths(before))
 
         def inspect(paths: list[bytes]) -> bytes:
@@ -543,6 +544,9 @@ class _SourceDiffScanner:
 
         with ThreadPoolExecutor(max_workers=8) as pool:
             patches = list(pool.map(inspect, batches))
-        if cls._git(["ls-files", "--stage", "-z"], deadline) != before:
+        if (
+            cls._git(["ls-files", "--stage", "-z"], deadline) != before
+            or cls._git(["ls-files", "-v", "-z"], deadline) != flags_before
+        ):
             raise ValueError("index changed during source diff")
         return b"".join(patches)

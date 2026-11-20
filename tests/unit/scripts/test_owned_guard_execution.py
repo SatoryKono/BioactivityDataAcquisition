@@ -10,6 +10,9 @@ import pytest
 from scripts.engineering.repo import hook_runtime as runtime
 
 
+pytestmark = pytest.mark.unit
+
+
 def _command(phase):
     name = {"tree": "check_no_partial_tree", "budgets": "budget_guard"}[phase]
     path = Path(runtime.__file__).with_name(name + ".py")
@@ -215,3 +218,33 @@ def test_parallel_group_exception_still_awaits_other_check(owned_linux, monkeypa
     )
     assert runtime._try_parallel_guards(commands) == 20
     assert finished == ["budgets"]
+
+
+@pytest.mark.parametrize(
+    "failed_phase,tree_code,expected",
+    [("budgets", 1, 11), ("budgets", 0, 20), ("tree", 0, 20)],
+)
+def test_parallel_import_error_preserves_phase_order_and_runs_partner(
+    owned_linux, monkeypatch, failed_phase, tree_code, expected
+):
+    commands = [(phase, _command(phase)) for phase in ("tree", "budgets")]
+    finished = []
+    modules = {}
+    for phase, command in commands:
+
+        def main(args, phase=phase):
+            finished.append(phase)
+            return tree_code if phase == "tree" else 0
+
+        modules[Path(command[3]).stem] = SimpleNamespace(__file__=command[3], main=main)
+
+    failed_name = Path(_command(failed_phase)[3]).stem
+
+    def load(name):
+        if name.rsplit(".", 1)[1] == failed_name:
+            raise ImportError("private loader diagnostics")
+        return modules[name.rsplit(".", 1)[1]]
+
+    monkeypatch.setattr(runtime.importlib, "import_module", load)
+    assert runtime._try_parallel_guards(commands) == expected
+    assert finished == (["tree"] if failed_phase == "budgets" else ["budgets"])

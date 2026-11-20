@@ -74,6 +74,25 @@ def test_index_change_during_scan_is_refused(monkeypatch):
         scanner.scan()
 
 
+@pytest.mark.parametrize("changed_flag", [b"h", b"S"])
+def test_index_flag_change_during_scan_is_refused(monkeypatch, changed_flag):
+    observations = 0
+
+    def capture(args, deadline):
+        nonlocal observations
+        if args[0] != "ls-files":
+            return b""
+        if "--stage" in args:
+            return b"100644 " + b"a" * 40 + b" 0\tfile\0"
+        observations += 1
+        flag = b"H" if observations == 1 else changed_flag
+        return flag + b" file\0"
+
+    monkeypatch.setattr(scanner, "_git", capture)
+    with pytest.raises(ValueError, match="index changed"):
+        scanner.scan()
+
+
 def test_literal_arguments_and_git_failure_are_preserved(monkeypatch):
     def execute(argv, **options):
         assert argv[:2] == ["git", "--literal-pathspecs"]
@@ -133,9 +152,14 @@ def test_real_git_partitioned_diff_matches_full_diff_without_index_writes(
     root.mkdir()
     disabled = tmp_path / "disabled"
     disabled.mkdir()
+    global_config = tmp_path / "fixture.gitconfig"
+    global_config.write_text("", encoding="utf-8")
+    excludes = tmp_path / "fixture.excludes"
+    excludes.write_text("", encoding="utf-8")
     env = {
         key: value for key, value in os.environ.items() if not key.startswith("GIT_")
     }
+    env.update(GIT_CONFIG_GLOBAL=str(global_config), GIT_CONFIG_NOSYSTEM="1")
 
     def git(*args):
         return subprocess.check_output(
@@ -165,6 +189,7 @@ def test_real_git_partitioned_diff_matches_full_diff_without_index_writes(
     if odd:
         names += [":(exclude)*.txt", "line\nname.txt"]
     git("init")
+    git("config", "core.excludesFile", str(excludes))
     git("config", "core.autocrlf", "false")
     git("config", "commit.gpgSign", "true")
     git("config", "gpg.program", str(root / "unavailable-signing-program"))
@@ -177,6 +202,8 @@ def test_real_git_partitioned_diff_matches_full_diff_without_index_writes(
     for key in list(os.environ):
         if key.startswith("GIT_"):
             monkeypatch.delenv(key, raising=False)
+    monkeypatch.setenv("GIT_CONFIG_GLOBAL", str(global_config))
+    monkeypatch.setenv("GIT_CONFIG_NOSYSTEM", "1")
     monkeypatch.chdir(root)
     index = git("ls-files", "--stage", "-z")
     assert scanner.scan() == b""

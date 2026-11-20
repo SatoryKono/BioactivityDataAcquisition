@@ -150,6 +150,12 @@ def _foreign_command(
     return None
 
 
+def _unavailable_guard(args: list[str]) -> None:
+    """Report a loading failure when its phase result is collected."""
+    del args
+    raise RuntimeError("guard code is unavailable")
+
+
 def _guard_entry(phase: str, command: list[str]) -> Any | None:
     """Resolve exact guard code only in the already supervised Linux worker."""
     if sys.platform != "linux" or not _OWNED_GUARD_CONTEXT.get():
@@ -160,10 +166,15 @@ def _guard_entry(phase: str, command: list[str]) -> Any | None:
     expected = Path(__file__).with_name(name + ".py")
     if command[:4] != [sys.executable, "-I", "-B", str(expected)]:
         return None
-    module = importlib.import_module("scripts.engineering.repo." + name)
-    return (
-        module.main if Path(module.__file__).resolve() == expected.resolve() else None
-    )
+    try:
+        module = importlib.import_module("scripts.engineering.repo." + name)
+        return (
+            module.main
+            if Path(module.__file__).resolve() == expected.resolve()
+            else None
+        )
+    except Exception:
+        return _unavailable_guard
 
 
 def _guard_code(phase: str, code: Any) -> int:
@@ -180,10 +191,12 @@ def _invoke_guard(entry: Any, args: list[str]) -> Any:
     """A guard CLI exit is a failed invocation, including SystemExit(0)."""
     try:
         return entry(args)
-    except SystemExit as error:
-        # Controlled ERROR: an exited guard supplied no validated phase result.
-        # Keep the abort contract pinned by test_owned_guard_execution.py.
-        raise RuntimeError("guard exited instead of returning a result") from error
+    except BaseException as error:
+        if isinstance(error, SystemExit):
+            # Guard entrypoints return a validated code. An exit, including
+            # exit(0), supplies no result to the phase collector.
+            raise RuntimeError("guard exited instead of returning a result") from error
+        raise
 
 
 def _try_builtin_guard(phase: str, command: list[str]) -> int | None:

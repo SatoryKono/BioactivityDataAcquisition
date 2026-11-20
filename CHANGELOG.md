@@ -18,6 +18,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **ChEMBL Molecule phase recovery (#13197, #13200):** decimal provider strings
+  such as `"4.0"` and `"0.5"` retain their canonical numeric phase before hashing.
+  Previously damaged Silver and derived outputs require processing preserved
+  Bronze into new isolated roots. Corrected phase values change content hashes;
+  the Gold eligibility fix changes the effective-config digest and Gold cohort.
+  The provider reference documents cached recovery, exact replay and checkpoint
+  resume with separate offline and live acceptance.
+
 - **ChEMBL Molecule Gold eligibility (#13198):** remove the unavailable
   `potential_duplicate=0` condition. Molecule type, structure and inorganic filters
   remain required, followed by strict Gold validation. The corrected filter changes
