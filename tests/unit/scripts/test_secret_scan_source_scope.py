@@ -9,6 +9,7 @@ import random
 import string
 import subprocess
 import sys
+from types import SimpleNamespace
 
 import pytest
 
@@ -17,11 +18,10 @@ from tests.architecture import test_antipatterns as owner
 pytestmark = pytest.mark.unit
 
 
-@pytest.mark.parametrize("tracked", [False, True])
-def test_source_secret_is_rejected_without_mutating_committed_baseline(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, tracked: bool
-) -> None:
-    """An ignored source secret is as actionable as a tracked source secret."""
+def _source_case(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, *, tracked: bool
+) -> tuple[Path, Path, str]:
+    """Prepare a real scanner with isolated Git metadata and synthetic input."""
     root = tmp_path / "source-scan"
     (root / "src").mkdir(parents=True)
     # A synthetic high-entropy assignment, never an account credential.
@@ -54,21 +54,42 @@ def test_source_secret_is_rejected_without_mutating_committed_baseline(
     scratch.mkdir()
     monkeypatch.setattr(owner, "REPO_ROOT", root)
 
-    def run(command: list[str], *, timeout: int, cwd: Path):
+    def run(command: list[str], **options: object):
         assert command[:3] == [sys.executable, "-m", "detect_secrets"]
-        return subprocess.run(
-            command,
-            timeout=timeout,
-            cwd=cwd,
-            env=environment,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            check=False,
-        )
+        return subprocess.run(command, env=environment, **options)
+
+    monkeypatch.setattr(owner, "subprocess", SimpleNamespace(run=run))
+    return source, scratch, value
+
+
+@pytest.mark.parametrize("tracked", [False, True])
+def test_source_secret_is_rejected_without_mutating_committed_baseline(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, tracked: bool
+) -> None:
+    """An ignored source secret is as actionable as a tracked source secret."""
+    source, scratch, value = _source_case(tmp_path, monkeypatch, tracked=tracked)
+    baseline = source.parent.parent / ".secrets.baseline"
+    original = baseline.read_bytes()
 
     with pytest.raises(AssertionError, match="New secret findings") as error:
-        owner.test_no_hardcoded_secrets(run, scratch)
+        owner.test_no_hardcoded_secrets(scratch)
     assert "src/module with spaces.py" in str(error.value)
     assert value not in str(error.value)
-    assert (root / ".secrets.baseline").read_text(encoding="utf-8") == original
+    assert baseline.read_bytes() == original
+
+
+def test_same_temporary_baseline_path_requires_a_fresh_scan(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A previous success cannot hide a new ignored-source secret."""
+    source, scratch, value = _source_case(tmp_path, monkeypatch, tracked=False)
+    baseline = source.parent.parent / ".secrets.baseline"
+    original = baseline.read_bytes()
+    source.write_text("safe = 1\n", encoding="utf-8")
+    owner.test_no_hardcoded_secrets(scratch)
+    source.write_text(f"password = {value!r}\n", encoding="utf-8")
+
+    with pytest.raises(AssertionError, match="New secret findings") as error:
+        owner.test_no_hardcoded_secrets(scratch)
+    assert value not in str(error.value)
+    assert baseline.read_bytes() == original
