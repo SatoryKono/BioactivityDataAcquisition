@@ -550,11 +550,17 @@ MEMORY_BASELINE_TEST_TARGETS: tuple[str, ...] = (
 
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
-    **dict.fromkeys(
-        (".agents/setup", ".amp/settings.json"),
-        (AMP_ORB_SETUP_TEST, PUBLIC_FETCH_TEST),
+    ".agents/setup": (AMP_ORB_SETUP_TEST, PUBLIC_FETCH_TEST),
+    ".amp/settings.json": (
+        AMP_ORB_SETUP_TEST,
+        PUBLIC_FETCH_TEST,
+        "tests/unit/repo_backed/scripts/ai/mcp/test_memory_persistence_mode.py",
     ),
     ".agents/resume": (AMP_ORB_SETUP_TEST,),
+    "scripts/ai/mcp/amp_memory_wrapper.sh": (
+        "tests/unit/repo_backed/scripts/ai/mcp/test_memory_persistence_mode.py",
+        "tests/unit/memory/test_mcp_scope.py",
+    ),
     **dict.fromkeys(
         (
             "scripts/ai/mcp/public_fetch_wrapper.sh",
