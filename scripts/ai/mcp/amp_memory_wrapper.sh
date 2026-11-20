@@ -2,10 +2,10 @@
 # Discard foreign orb environment overrides before starting shared memory MCP.
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd -P)"
 if [[ -n "${MEMORY_FILE_PATH:-}" ]]; then
-  resolved_target="$(realpath -m -- "${MEMORY_FILE_PATH}")"
+  resolved_target="$(python3 -c 'import os, sys; print(os.path.realpath(os.path.expanduser(sys.argv[1])))' "${MEMORY_FILE_PATH}")"
   case "${resolved_target}" in
     "${REPO_ROOT}/.cache/mcp-memory"|"${REPO_ROOT}/.cache/mcp-memory"/*) ;;
     *)
