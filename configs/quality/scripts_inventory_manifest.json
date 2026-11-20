@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-20T06:58:37.414585+00:00",
+  "generated_at": "2026-11-20T07:49:26.831866+00:00",
   "summary": {
     "total_scripts": 773,
     "status_counts": {
@@ -1948,7 +1948,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5847_5852_closeout.py",
-          "line": 264,
+          "line": 251,
           "source_group": "tests",
           "text": "\"setup-codex-wsl.ps1\": \"scripts/ai/codex/setup.ps1\","
         }
@@ -22956,7 +22956,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5847_5852_closeout.py",
-          "line": 228,
+          "line": 217,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"repo\" / \"cleanup_root_local_clutter.py\""
         }
