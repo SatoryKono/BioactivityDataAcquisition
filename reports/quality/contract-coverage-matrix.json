@@ -449,6 +449,7 @@
         "tests/contract/test_gold_entity_coverage_complete.py",
         "tests/contract/test_gold_pk_consistency.py",
         "tests/contract/test_gold_schema_strict_violations.py",
+        "tests/e2e/test_chembl_molecule_cached_e2e.py",
         "tests/e2e/test_chembl_molecule_e2e.py",
         "tests/integration/chembl/test_molecule_extraction_params.py",
         "tests/integration/composite/test_molecule_pipeline.py",
@@ -1557,6 +1558,7 @@
         "tests/contract/test_gold_entity_coverage_complete.py",
         "tests/contract/test_gold_pk_consistency.py",
         "tests/contract/test_gold_schema_strict_violations.py",
+        "tests/e2e/test_chembl_molecule_cached_e2e.py",
         "tests/e2e/test_chembl_molecule_e2e.py",
         "tests/integration/chembl/test_molecule_extraction_params.py",
         "tests/integration/composite/test_molecule_pipeline.py",
@@ -2755,5 +2757,5 @@
     "gold_enabled": "Effective runtime state of pipeline.sink.gold.enabled after hierarchical config resolution; omitted enabled defaults to true. Never infer this from contract/Pandera availability or from unrelated flags such as filters.input_filter.enabled.",
     "missing_gold_enabled_count": "Runtime-enabled Gold rows whose contract parity_status is not covered."
   },
-  "snapshot_date": "2026-11-19"
+  "snapshot_date": "2026-11-20"
 }

@@ -1,11 +1,11 @@
 {
-  "source_branch": "main",
-  "source_commit": "c123f2f936aca59fb0ee9a052e52cfd432e4c41b",
-  "source_run_id": "44553914098",
+  "source_branch": "codex/fix-nightly-measurement-closeout-a35-20261119",
+  "source_commit": "60c652567037d051824ebe5a8298f76110f1571e",
+  "source_run_id": "44745894500",
   "source_event": "workflow_dispatch",
-  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/44553914098",
-  "source_tree_sha256": "fa186719cd654d35d7cc47ba7345faa6d4152ae28df12710a555d9df7dfab784",
-  "refreshed_at_utc": "2026-11-19T15:35:18.257000+00:00",
+  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/44745894500",
+  "source_tree_sha256": "b3904391015c435d41da41fe0569bd18a6e60ed291104ced8473eb18a46d197e",
+  "refreshed_at_utc": "2026-11-20T13:48:14.308000+00:00",
   "refresh_status": "captured",
   "coverage_percent": 99.51,
   "coverage": {
