@@ -42,7 +42,7 @@ def test_partition_covers_every_index_path_once_in_bounded_workers():
     [
         b"invalid",
         b"040000 " + b"a" * 40 + b" 0\tdir/\0",
-        b"160000 " + b"a" * 40 + b" 0\tsubmodule\0",
+        b"160001 " + b"a" * 40 + b" 0\tinvalid-mode\0",
         b"100644 " + b"a" * 40 + b" 1\tunmerged\0",
         b"100644 " + b"a" * 40 + b" 0\t../escape\0",
         b"100644 " + b"a" * 40 + b" 0\t/absolute\0",
@@ -133,6 +133,7 @@ def test_zero_exit_with_diagnostics_never_qualifies_as_clean(
     assert output.out == output.err == ""
 
 
+@pytest.mark.parametrize("gitlink", [False, True])
 @pytest.mark.parametrize(
     "odd",
     [
@@ -146,7 +147,7 @@ def test_zero_exit_with_diagnostics_never_qualifies_as_clean(
     ],
 )
 def test_real_git_partitioned_diff_matches_full_diff_without_index_writes(
-    tmp_path, monkeypatch, odd
+    tmp_path, monkeypatch, odd, gitlink
 ):
     root = tmp_path / "one-file-git-fixture"
     root.mkdir()
@@ -198,6 +199,16 @@ def test_real_git_partitioned_diff_matches_full_diff_without_index_writes(
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(b"before\n")
     git("add", "--all")
+    if gitlink:
+        submodule = root / "submodule"
+        submodule.mkdir()
+        git("-C", "submodule", "init")
+        git("-C", "submodule", "config", "core.autocrlf", "false")
+        (submodule / "nested.txt").write_bytes(b"nested before\n")
+        git("-C", "submodule", "add", "--all")
+        git("-C", "submodule", "commit", "--no-gpg-sign", "-m", "nested fixture")
+        commit = git("-C", "submodule", "rev-parse", "HEAD").decode().strip()
+        git("update-index", "--add", "--cacheinfo", "160000," + commit + ",submodule")
     git("commit", "--no-gpg-sign", "-m", "fixture")
     for key in list(os.environ):
         if key.startswith("GIT_"):
@@ -207,10 +218,25 @@ def test_real_git_partitioned_diff_matches_full_diff_without_index_writes(
     monkeypatch.chdir(root)
     index = git("ls-files", "--stage", "-z")
     assert scanner.scan() == b""
+    if gitlink:
+        from scripts.engineering.repo import offline_precommit as offline
+
+        with monkeypatch.context() as context:
+            context.setattr(offline.sys, "platform", "linux")
+            with offline._read_only_staged_files(str(tmp_path)):
+                pass
     for name in names:
         (root / name).write_bytes(b"after\n")
     (root / names[0]).unlink()
+    if gitlink:
+        (submodule / "nested.txt").write_bytes(b"nested after\n")
     actual = scanner.scan()
     expected = git("diff", "--no-ext-diff", "--no-textconv", "--ignore-submodules=none")
     assert set(actual.split(b"diff --git ")) == set(expected.split(b"diff --git "))
     assert git("ls-files", "--stage", "-z") == index
+    if gitlink:
+        with monkeypatch.context() as context:
+            context.setattr(offline.sys, "platform", "linux")
+            with pytest.raises(offline.BootstrapRequired, match="unstaged_changes"):
+                with offline._read_only_staged_files(str(tmp_path)):
+                    pytest.fail("dirty gitlink entered the staged-files context")

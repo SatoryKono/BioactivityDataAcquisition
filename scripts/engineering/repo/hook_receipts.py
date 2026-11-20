@@ -507,7 +507,7 @@ class _SourceDiffScanner:
             if (
                 not separator
                 or len(fields) != 3
-                or fields[0] not in {b"100644", b"100755", b"120000"}
+                or fields[0] not in {b"100644", b"100755", b"120000", b"160000"}
                 or fields[2] != b"0"
                 or not path
                 or path.startswith(b"/")
@@ -527,7 +527,12 @@ class _SourceDiffScanner:
         deadline = time.monotonic() + 10
         before = cls._git(["ls-files", "--stage", "-z"], deadline)
         flags_before = cls._git(["ls-files", "-v", "-z"], deadline)
-        batches = cls.partition(cls._paths(before))
+        paths = cls._paths(before)
+        if any(record.startswith(b"160000 ") for record in before.split(b"\0")):
+            # An empty pathspec retains Git's complete submodule comparison.
+            batches = [[]]
+        else:
+            batches = cls.partition(paths)
 
         def inspect(paths: list[bytes]) -> bytes:
             return cls._git(

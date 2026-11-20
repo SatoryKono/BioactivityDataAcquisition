@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-20T05:15:59.157907+00:00",
+  "generated_at": "2026-11-20T05:44:24.278790+00:00",
   "summary": {
     "total_scripts": 773,
     "status_counts": {
@@ -23229,7 +23229,7 @@
       "references": [
         {
           "path": "docs/05-operations/runbooks/owned-git-hooks.md",
-          "line": 207,
+          "line": 209,
           "source_group": "docs",
           "text": "private namespaces in the existing `offline_precommit.py`, `hook_installation.py`"
         },
@@ -23290,7 +23290,7 @@
       "references": [
         {
           "path": "docs/05-operations/runbooks/owned-git-hooks.md",
-          "line": 208,
+          "line": 210,
           "source_group": "docs",
           "text": "and `hook_receipts.py` owners. Immutable bundles copy those complete owner files;"
         },
@@ -23384,11 +23384,11 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
         {
           "path": "docs/05-operations/runbooks/owned-git-hooks.md",
-          "line": 207,
+          "line": 209,
           "source_group": "docs",
           "text": "private namespaces in the existing `offline_precommit.py`, `hook_installation.py`"
         },
@@ -23421,6 +23421,12 @@
           "line": 14,
           "source_group": "tests",
           "text": "from scripts.engineering.repo import offline_precommit as adapter"
+        },
+        {
+          "path": "tests/unit/scripts/test_partitioned_diff.py",
+          "line": 222,
+          "source_group": "tests",
+          "text": "from scripts.engineering.repo import offline_precommit as offline"
         }
       ],
       "owner": "@bioetl-platform",
