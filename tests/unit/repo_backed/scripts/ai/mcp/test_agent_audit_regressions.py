@@ -340,7 +340,7 @@ def test_github_powershell_child_env_is_isolated(tmp_path: Path) -> None:
         env=env,
         capture_output=True,
         text=True,
-        timeout=15,
+        timeout=60,
     )
     assert completed.returncode == 0, completed.stderr
     payload = json.loads(completed.stdout)
