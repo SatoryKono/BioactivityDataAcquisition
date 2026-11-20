@@ -60,7 +60,7 @@ ______________________________________________________________________
 | [IUPHAR Target Classification](iuphar-target-classification.md) | Pinned shadow acceptance and paired target V31 promotion/rollback | P2 |
 | [Canonical Semantic Field Unification](canonical-semantic-field-unification.md) | Registry-driven canonical field rename/drift prevention runbook | P2 |
 | [Retention-Sensitive Cleanup](retention-sensitive-cleanup.md) | Bounded cleanup gate for protected data, fixtures, reports, archives, and control-plane artifacts | P1 |
-| [ChEMBL Molecule Phase Recovery](chembl-molecule-phase-recovery.md) | Restore processed chembl_molecule snapshots from preserved Bronze after max_phase / Gold-filter fixes | P1 |
+| [ChEMBL Molecule Phase Recovery](chembl_molecule-phase-recovery.md) | Restore processed chembl_molecule snapshots from preserved Bronze after max_phase / Gold-filter fixes | P1 |
 
 ### Infrastructure
 
