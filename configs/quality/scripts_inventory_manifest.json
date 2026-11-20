@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-20T06:58:37.414585+00:00",
+  "generated_at": "2026-11-20T07:42:43.425396+00:00",
   "summary": {
     "total_scripts": 773,
     "status_counts": {
@@ -23229,7 +23229,7 @@
       "references": [
         {
           "path": "docs/05-operations/runbooks/owned-git-hooks.md",
-          "line": 216,
+          "line": 218,
           "source_group": "docs",
           "text": "private namespaces in the existing `offline_precommit.py`, `hook_installation.py`"
         },
@@ -23290,7 +23290,7 @@
       "references": [
         {
           "path": "docs/05-operations/runbooks/owned-git-hooks.md",
-          "line": 217,
+          "line": 219,
           "source_group": "docs",
           "text": "and `hook_receipts.py` owners. Immutable bundles copy those complete owner files;"
         },
@@ -23388,7 +23388,7 @@
       "references": [
         {
           "path": "docs/05-operations/runbooks/owned-git-hooks.md",
-          "line": 216,
+          "line": 218,
           "source_group": "docs",
           "text": "private namespaces in the existing `offline_precommit.py`, `hook_installation.py`"
         },
