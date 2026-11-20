@@ -1,11 +1,11 @@
 {
-  "source_branch": "codex/fix-nightly-measurement-closeout-a35-20261119",
-  "source_commit": "60c652567037d051824ebe5a8298f76110f1571e",
-  "source_run_id": "44745894500",
+  "source_branch": "fix/amp-memory-path",
+  "source_commit": "3d33cc6515c9446bd1388afca3564f50e8b3b816",
+  "source_run_id": "44760615105",
   "source_event": "workflow_dispatch",
-  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/44745894500",
-  "source_tree_sha256": "b3904391015c435d41da41fe0569bd18a6e60ed291104ced8473eb18a46d197e",
-  "refreshed_at_utc": "2026-11-20T13:48:14.308000+00:00",
+  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/44760615105",
+  "source_tree_sha256": "229c2b20eedcec16e1c7c6d6afb03ca7a068abac1d54e2ae121e13f61381ad74",
+  "refreshed_at_utc": "2026-11-20T15:26:30.967000+00:00",
   "refresh_status": "captured",
   "coverage_percent": 99.51,
   "coverage": {
