@@ -1,11 +1,11 @@
 {
-  "source_branch": "codex/fix-nightly-measurement-closeout-a35-20261119",
-  "source_commit": "60c652567037d051824ebe5a8298f76110f1571e",
-  "source_run_id": "44745894500",
+  "source_branch": "fix/chembl-runbook-naming",
+  "source_commit": "b89c04721d88f6fb7dfea8c583e2956bdde02061",
+  "source_run_id": "44782237936",
   "source_event": "workflow_dispatch",
-  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/44745894500",
-  "source_tree_sha256": "b3904391015c435d41da41fe0569bd18a6e60ed291104ced8473eb18a46d197e",
-  "refreshed_at_utc": "2026-11-20T13:48:14.308000+00:00",
+  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/44782237936",
+  "source_tree_sha256": "8e0fa67e7561c85d7ce9dff8aaae8c25a8cb3161e79a7ed3854a98e8ed4d0c32",
+  "refreshed_at_utc": "2026-11-20T17:32:17.591000+00:00",
   "refresh_status": "captured",
   "coverage_percent": 99.51,
   "coverage": {
