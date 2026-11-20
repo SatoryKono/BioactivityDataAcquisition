@@ -23,6 +23,7 @@ repos:
         stages: [pre-commit]
       # Run the formatter
       - id: ruff-format
+        args: [--exit-non-zero-on-format]
         files: ^(src|tests|scripts)/.*\.py$
         stages: [pre-commit]
 

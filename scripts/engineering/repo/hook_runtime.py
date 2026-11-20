@@ -2,6 +2,11 @@
 
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
+from contextlib import redirect_stderr, redirect_stdout
+from contextvars import ContextVar
+import importlib
+import io
 import os
 from pathlib import Path
 import re
@@ -17,6 +22,9 @@ from scripts.engineering.repo.operation_guards import is_env_target
 from scripts.engineering.repo.process_deadline import ProcessResult, run_owned
 
 TRUSTED_BASE = "origin/main"
+_OWNED_GUARD_CONTEXT: ContextVar[bool] = ContextVar(
+    "bioetl_owned_guard_context", default=False
+)
 DEADLINES = {"pre-commit": 30, "pre-push": 180, "commit-msg": 10}
 PHASE_CODES = {"tree": 11, "budgets": 12, "foreign": 13, "framework": 14}
 CONTROLLED_REASONS = {
@@ -142,6 +150,125 @@ def _foreign_command(
     return None
 
 
+def _unavailable_guard(args: list[str]) -> None:
+    """Report a loading failure when its phase result is collected."""
+    del args
+    raise RuntimeError("guard code is unavailable")
+
+
+def _guard_entry(phase: str, command: list[str]) -> Any | None:
+    """Resolve exact guard code only in the already supervised Linux worker."""
+    if sys.platform != "linux" or not _OWNED_GUARD_CONTEXT.get():
+        return None
+    name = {"tree": "check_no_partial_tree", "budgets": "budget_guard"}.get(phase)
+    if name is None:
+        return None
+    expected = Path(__file__).with_name(name + ".py")
+    if command[:4] != [sys.executable, "-I", "-B", str(expected)]:
+        return None
+    try:
+        module = importlib.import_module("scripts.engineering.repo." + name)
+        return (
+            module.main
+            if Path(module.__file__).resolve() == expected.resolve()
+            else None
+        )
+    except Exception:
+        return _unavailable_guard
+
+
+def _guard_code(phase: str, code: Any) -> int:
+    if type(code) is not int or code not in {0, 1, 2}:
+        return 20
+    if code == 0:
+        return 0
+    if code == 1:
+        return PHASE_CODES[phase]
+    return 22
+
+
+def _invoke_guard(entry: Any, args: list[str]) -> Any:
+    """A guard CLI exit is a failed invocation, including SystemExit(0)."""
+    try:
+        return entry(args)
+    except BaseException as error:
+        if isinstance(error, SystemExit):
+            # Guard entrypoints return a validated code. An exit, including
+            # exit(0), supplies no result to the phase collector.
+            raise RuntimeError("guard exited instead of returning a result") from error
+        raise
+
+
+def _try_builtin_guard(phase: str, command: list[str]) -> int | None:
+    """Reuse code, never results; unknown/non-owned calls keep subprocess guards."""
+    try:
+        entry = _guard_entry(phase, command)
+        if entry is None:
+            return None
+        with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+            return _guard_code(phase, _invoke_guard(entry, command[4:]))
+    except Exception:
+        return 20
+
+
+def _try_parallel_guards(commands: list[tuple[str, list[str]]]) -> int | None:
+    """Await both fresh read-only checks before any callback; preserve error order."""
+    if [phase for phase, _ in commands] != ["tree", "budgets"]:
+        return None
+    try:
+        entries = [_guard_entry(phase, command) for phase, command in commands]
+        if any(entry is None for entry in entries):
+            return None
+        # Redirect once around the complete group, never per worker thread.
+        with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+            with ThreadPoolExecutor(max_workers=2) as pool:
+                pending = [
+                    pool.submit(_invoke_guard, entry, command[4:])
+                    for entry, (_, command) in zip(entries, commands, strict=True)
+                ]
+                codes = []
+                for (phase, _), result in zip(commands, pending, strict=True):
+                    try:
+                        codes.append(_guard_code(phase, result.result()))
+                    except Exception:
+                        codes.append(20)
+        return next((code for code in codes if code), 0)
+    except Exception:
+        return 20
+
+
+def _execute_single_command(
+    phase: str,
+    command: list[str],
+    repo: Path,
+    hooks: Path,
+    payload: bytes,
+    env: dict[str, str],
+    remaining: float,
+) -> int:
+    builtin = _try_builtin_guard(phase, command)
+    if builtin is not None:
+        return builtin
+    result = run_owned(
+        command,
+        cwd=repo,
+        state_dir=hooks,
+        timeout=remaining,
+        input_bytes=payload,
+        env=env,
+    )
+    if result.status == "PASS":
+        return 0
+    sys.stderr.write(
+        f"BioETL hook {result.status}: {result.reason}; run the scoped check explicitly for details.\n"
+    )
+    if result.status == "ERROR":
+        return 20
+    if phase != "foreign" and result.returncode != 1:
+        return 22
+    return PHASE_CODES[phase]
+
+
 def _execute_commands(
     commands: list[tuple[str, list[str]]],
     repo: Path,
@@ -151,27 +278,24 @@ def _execute_commands(
     env: dict[str, str],
     start: float,
 ) -> int:
-    for phase, command in commands:
+    position = 0
+    while position < len(commands):
         remaining = DEADLINES[kind] - (time.monotonic() - start)
         if remaining <= 0:
             return 2
-        result = run_owned(
-            command,
-            cwd=repo,
-            state_dir=hooks,
-            timeout=remaining,
-            input_bytes=payload,
-            env=env,
+        parallel = _try_parallel_guards(commands[position : position + 2])
+        if parallel is not None:
+            if parallel:
+                return parallel
+            position += 2
+            continue
+        phase, command = commands[position]
+        position += 1
+        code = _execute_single_command(
+            phase, command, repo, hooks, payload, env, remaining
         )
-        if result.status != "PASS":
-            sys.stderr.write(
-                f"BioETL hook {result.status}: {result.reason}; run the scoped check explicitly for details.\n"
-            )
-            if result.status == "ERROR":
-                return 20
-            if phase != "foreign" and result.returncode != 1:
-                return 22
-            return PHASE_CODES[phase]
+        if code:
+            return code
     return 0
 
 
@@ -283,7 +407,11 @@ def main() -> int:
         payload = (
             sys.stdin.buffer.read(8 * 1024 * 1024 + 1) if kind == "pre-push" else b""
         )
-        return run(kind, Path(args[2]), args[3:], payload)
+        token = _OWNED_GUARD_CONTEXT.set(True)
+        try:
+            return run(kind, Path(args[2]), args[3:], payload)
+        finally:
+            _OWNED_GUARD_CONTEXT.reset(token)
     if len(args) < 2 or args[0] not in DEADLINES:
         return 2
     # The outer watchdog covers protocol reads, Git discovery and every callback.

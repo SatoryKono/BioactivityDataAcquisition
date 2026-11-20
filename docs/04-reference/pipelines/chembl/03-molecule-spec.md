@@ -73,3 +73,12 @@ isolated output root; changing configuration alone does not repair stored output
 | Canonical source traceability | Pass   | Page delegates current contract to the linked canonical source and active config surface |
 | Contract linkage              | Pass   | [chembl_molecule_v1.0.json](../../contracts/gold/chembl_molecule_v1.0.json)              |
 | Published-page role           | Pass   | Canonical compact summary is explicitly bounded by current canonical sources             |
+
+## Phase preservation and recovery
+
+`max_phase` accepts nullable ChEMBL numeric codes `{-1, 0, 0.5, 1, 2, 3, 4}`.
+Provider decimal strings pass through application mapping before normalization.
+Existing affected outputs require processing preserved Bronze into isolated
+roots with new run/manifest/config anchors. See the
+[recovery procedure](../../providers/chembl/molecule.md#фазы-и-восстановление-сохранённых-данных)
+for cached processing, SCD2 checks and separate live acceptance.

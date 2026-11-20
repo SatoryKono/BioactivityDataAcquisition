@@ -15,6 +15,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+from concurrent.futures import ThreadPoolExecutor
 import json
 import os
 import re
@@ -485,14 +486,20 @@ def find_collapsing_commits(
     offenders: list[str] = []
     # Only immutable commit trees are reused, and only within this inspection.
     # Mutable refs, index state and shallow boundaries are always read afresh.
-    trees: dict[str, dict[str, str]] = {}
-    for revision, parents in commits:
-        if not parents:
-            raise EvidenceError("unrelated root cannot qualify for shared history")
-        historical_base = _historical_base(cwd, base_sha, revision)
-        for sha in (historical_base, revision):
-            if sha not in trees:
-                trees[sha] = _top_entries(cwd, sha)
+    if any(not parents for _, parents in commits):
+        raise EvidenceError("unrelated root cannot qualify for shared history")
+
+    def ancestor(revision: str) -> str:
+        return _historical_base(cwd, base_sha, revision)
+
+    def entries(sha: str) -> dict[str, str]:
+        return _top_entries(cwd, sha)
+
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        ancestors = list(pool.map(ancestor, revisions))
+        identities = list(dict.fromkeys([*ancestors, *revisions]))
+        trees = dict(zip(identities, pool.map(entries, identities), strict=True))
+    for revision, historical_base in zip(revisions, ancestors, strict=True):
         base_entries, tip_entries = trees[historical_base], trees[revision]
         if is_collapsed_tree(
             frozenset(base_entries), frozenset(tip_entries)

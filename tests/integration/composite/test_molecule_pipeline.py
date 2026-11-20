@@ -91,7 +91,7 @@ def seed_molecule_df() -> pl.DataFrame:
                 "CC(C)CC1=CC=C(C=C1)C(C)C(=O)O",  # Ibuprofen
                 "CC1=C(C=C(C=C1)NC(=O)C2=CC=C(C=C2)CN3CCN(CC3)C)NC4=NC=CC(=N4)C5=CN=CC=C5",  # Imatinib
             ],
-            "max_phase": [4.0, 4.0, 4.0],
+            "max_phase": [4.0, 0.5, 4.0],
             "molecular_weight": [180.16, 206.28, 493.60],
             "logp": [1.19, 3.50, 3.50],
             "therapeutic_flag": [True, True, True],
@@ -220,6 +220,7 @@ class TestCompositeMoleculePipeline:
         # All seed records should be preserved
         assert len(seed_renamed) == 3
         assert "chembl.molecule.molecule_id" in seed_renamed.columns
+        assert seed_renamed["chembl.molecule.max_phase"].to_list() == [4.0, 0.5, 4.0]
 
     def test_enricher_join_by_inchi_key(
         self,
@@ -254,12 +255,41 @@ class TestCompositeMoleculePipeline:
         # 2 records should have PubChem data (aspirin, ibuprofen)
         # 1 record (imatinib) should have nulls for PubChem fields
         assert len(joined) == 3
+        assert joined.filter(pl.col("chembl.molecule.molecule_id") == "CHEMBL192")[
+            "chembl.molecule.max_phase"
+        ].to_list() == [0.5]
 
         # Check that PubChem CID is populated for matched records
         molecule_id_col = "pubchem.compound.molecule_id"
         if molecule_id_col in joined.columns:
             non_null_count = joined.filter(pl.col(molecule_id_col).is_not_null()).height
             assert non_null_count == 2, "Expected 2 records with PubChem CID"
+
+    def test_fractional_seed_phase_survives_enricher_join(
+        self,
+        mock_logger: LoggerPort,
+        seed_molecule_df: pl.DataFrame,
+        enricher_pubchem_df: pl.DataFrame,
+    ) -> None:
+        """A synthetic 0.5 seed phase survives the production column renaming and join."""
+        seed = seed_molecule_df.with_columns(
+            pl.when(pl.col("molecule_id") == "CHEMBL25")
+            .then(0.5)
+            .otherwise(pl.col("max_phase"))
+            .alias("max_phase")
+        )
+        renamer = ColumnRenamer(mock_logger)
+        seed = renamer.rename_dataframe(seed, "chembl_molecule")
+        enricher = renamer.rename_dataframe(enricher_pubchem_df, "pubchem_compound")
+        joined = seed.join(
+            enricher,
+            left_on="chembl.molecule.inchi_key",
+            right_on="pubchem.compound.inchi_key",
+            how="left",
+        )
+        assert joined.height == seed.height == 3
+        fractional = joined.filter(pl.col("chembl.molecule.molecule_id") == "CHEMBL25")
+        assert fractional["chembl.molecule.max_phase"].to_list() == [0.5]
 
     def test_conflict_resolution_field_priorities(
         self,

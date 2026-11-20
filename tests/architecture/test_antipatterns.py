@@ -104,7 +104,7 @@ def test_no_sentinel_values(source_content_cache: dict) -> None:
 @pytest.mark.slow
 @pytest.mark.timeout(600)  # Increased timeout to 10 minutes
 def test_no_hardcoded_secrets(cached_subprocess_run, tmp_path: Path) -> None:
-    """Verify no hardcoded secrets using detect-secrets scanner with cached results."""
+    """Verify all source files against the unchanged secret baseline."""
     baseline_path = REPO_ROOT / ".secrets.baseline"
     if not baseline_path.exists():
         raise AssertionError("Missing .secrets.baseline for detect-secrets scan")
@@ -120,6 +120,9 @@ def test_no_hardcoded_secrets(cached_subprocess_run, tmp_path: Path) -> None:
             "-m",
             "detect_secrets",
             "scan",
+            # Recurse only under src instead of normalizing every tracked path
+            # in the repository. This also covers ignored/untracked source files.
+            "--all-files",
             "--baseline",
             str(scan_baseline),
             "src/",
