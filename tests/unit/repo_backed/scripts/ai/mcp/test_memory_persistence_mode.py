@@ -153,6 +153,49 @@ def test_mcp_memory_default_store_is_scoped_and_untracked() -> None:
     assert "export MEMORY_FILE_PATH\nexec" in wrapper
 
 
+@_WINDOWS_BASH_SKIP
+@pytest.mark.parametrize("inside", [True, False])
+def test_amp_memory_wrapper_confines_inherited_override(
+    tmp_path: Path, inside: bool
+) -> None:
+    root = Path(__file__).resolve().parents[6]
+    config = json.loads((root / ".amp/settings.json").read_text())
+    wrapper = root / config["amp.mcpServers"]["memory"]["args"][0]
+    assert wrapper.name == "amp_memory_wrapper.sh"
+    assert wrapper.is_file()
+    target = (
+        root / ".cache/mcp-memory" / f"amp-test-{tmp_path.name}.json"
+        if inside
+        else tmp_path / "outside.json"
+    )
+    request = {"jsonrpc": "2.0", "id": 1, "method": "initialize"}
+    completed = subprocess.run(
+        ["bash", str(wrapper)],
+        cwd=root,
+        input=json.dumps(request) + "\n",
+        env={
+            **os.environ,
+            "BIOETL_AI_MEMORY_MODE": "read-write",
+            "MEMORY_FILE_PATH": str(target),
+        },
+        capture_output=True,
+        check=False,
+        text=True,
+        timeout=15,
+    )
+    try:
+        assert completed.returncode == 0, completed.stderr
+        assert (
+            json.loads(completed.stdout)["result"]["serverInfo"]["name"]
+            == "bioetl-memory"
+        )
+        assert ("ignoring inherited MEMORY_FILE_PATH" in completed.stderr) is not inside
+        assert target.exists() is inside
+    finally:
+        if inside:
+            target.unlink(missing_ok=True)
+
+
 def test_mcp_memory_wrapper_is_git_executable() -> None:
     """Safe-mode contracts require the wrapper to be executable (mode 100755).
 
