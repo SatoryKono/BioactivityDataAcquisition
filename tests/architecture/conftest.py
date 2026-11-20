@@ -494,7 +494,9 @@ def _build_ast_cache(
         text_cache,
     )
     cache_paths = list(cached_text)
-    cached_payload = _load_disk_cached_payload(cache_name, cache_paths)
+    cached_payload = (
+        _load_disk_cached_payload(cache_name, cache_paths) if use_disk_cache else None
+    )
     if cached_payload is not None:
         return cast(dict[Path, ast.Module], cached_payload)
 
