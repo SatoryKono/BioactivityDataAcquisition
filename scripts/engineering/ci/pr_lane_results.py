@@ -2163,7 +2163,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     **dict.fromkeys(
         (
             "docs/04-reference/providers/chembl/molecule.md",
-            "docs/05-operations/runbooks/chembl_molecule-phase-recovery.md",
+            "docs/05-operations/runbooks/molecule-phase-recovery.md",
         ),
         (
             DOCUMENTATION_SYNC_TEST,
