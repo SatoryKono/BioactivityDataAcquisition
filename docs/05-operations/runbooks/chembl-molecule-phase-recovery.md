@@ -82,10 +82,13 @@ anchors со ссылкой на исходный batch. Явный persistence 
 - Проверить перечень downstream outputs, включая `composite_molecule`.
   Восстановленные и ещё открытые области перечислить явно; результат одного
   снимка не означает восстановление всей базы.
-- Отдельно запустить `python -m bioetl workflow run chembl_molecule --limit 1000`
-  с ещё одним новым data/report/archive root. Оценивать фактический новый
-  cohort; не предполагать равенство исторической API-выборке. Сохранить
-  HTTP/retry ошибки, exit status, отчёты и monitoring evidence.
+- Отдельно запустить
+  `python -m bioetl workflow run chembl_molecule --limit 1000 --required-persistence-profile degraded_observable`
+  с ещё одним новым data/report/archive root. Профиль обязателен: штатный
+  `replay_ready` отклоняет live-запуск без immutable snapshot-backed Bronze.
+  Оценивать фактический новый cohort; не предполагать равенство исторической
+  API-выборке. Сохранить HTTP/retry ошибки, exit status, отчёты и monitoring
+  evidence.
 
 ## Rollback/Recovery
 
