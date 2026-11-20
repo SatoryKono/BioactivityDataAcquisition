@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-20T15:33:12.253422+00:00",
+  "generated_at": "2026-11-20T16:07:34.215313+00:00",
   "summary": {
     "total_scripts": 774,
     "status_counts": {
-      "active": 335,
-      "supporting": 437,
+      "active": 334,
+      "supporting": 438,
       "temporary_diagnostic": 2
     },
     "reference_group_coverage": {
@@ -3278,7 +3278,7 @@
     {
       "path": "scripts/ai/mcp/amp_memory_wrapper.sh",
       "type": "sh",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 3,
       "references": [
@@ -3300,7 +3300,11 @@
           "source_group": "tests",
           "text": "[\"scripts/ai/mcp/amp_memory_wrapper.sh\"], repo_root=root"
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-12-20",
+      "next_step": "Retain as the Amp-specific MCP environment compatibility adapter before the shared memory wrapper; it is not a standalone operator entrypoint."
     },
     {
       "path": "scripts/ai/mcp/check.sh",
