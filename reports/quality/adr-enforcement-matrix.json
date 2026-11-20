@@ -337,7 +337,6 @@
         "docs/05-operations/runbooks/index.md",
         "docs/05-operations/runbooks/iuphar-target-classification.md",
         "docs/05-operations/runbooks/merge-campaign.md",
-        "docs/05-operations/runbooks/molecule-phase-recovery.md",
         "docs/05-operations/runbooks/monitoring-surface-reduction-2026-07-23.md",
         "docs/05-operations/runbooks/neo4j-backend-recovery-quick-start.md",
         "docs/05-operations/runbooks/observability-checklist.md",
