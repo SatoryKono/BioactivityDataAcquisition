@@ -50839,7 +50839,7 @@
       "github_issue_url": null,
       "inbound_links": 7,
       "lifecycle": null,
-      "outbound_links": 50,
+      "outbound_links": 51,
       "owner": "BioETL Team",
       "path": "docs/05-operations/runbooks/index.md",
       "recommended_action": "keep",
