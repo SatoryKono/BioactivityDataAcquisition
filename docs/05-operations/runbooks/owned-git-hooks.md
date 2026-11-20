@@ -112,7 +112,68 @@ set semantics, with additions refused. Concurrent later index changes still need
 The offline framework adapter is qualified only for pre-commit 4.7.0 and the tested
 private API signatures. Unknown versions fail before configured framework callbacks. Missing repository
 cache or unhealthy/missing environments fail instead of cloning or installing.
-Existing checks remain required. The qualified adapter replaces pre-commit
+Existing checks remain required. The four qualified local read-only pre-push
+commands (secret baseline, mypy, Bandit and architecture smoke) may overlap in the
+owned process tree. Eligibility requires their exact tokenized-command fingerprints,
+local unsupported/system language with the qualified no-environment adapter, and
+no fail-fast or skip request. Changed commands, filename-passing hooks, explicit serial requests
+or an earlier unqualified check retain ordinary serial dispatch. Other configured
+checks run normally after the parallel group has completed; Python environments
+are never entered while the qualified processes are still running. The original
+framework still reports every result and captures Git diff after each check, with
+the initial diff captured before launching the group. No check, cache health probe,
+containment requirement or event deadline is removed. Command changes require
+fresh qualification before updating the fingerprint pins. Commit formatters and
+commit-msg retain serial dispatch.
+
+For the sole known Conventional Commit checker, a source-pinned read-only message
+adapter executes the original parser in the already selected project interpreter.
+The seven package/helper source files, configured command, owned bundle, cache
+health and interpreter identity must match. Original worktree packages are loaded
+explicitly and namespaces/search paths are restored afterwards. Foreign/legacy
+callbacks, different checker sources or additional message hooks retain ordinary
+framework execution. The qualified metadata-only checker does not hide or inspect
+unstaged source files: it cannot write them, so framework mutation-detection diffs
+and a second project-Python startup are unnecessary in this scope. Fresh runtime
+index/HEAD/base/env bookends and changed-index protected checks remain mandatory.
+Independent read-only bookend probes overlap in four bounded worker slots; every
+probe is awaited and each bookend samples fresh state without cross-event reuse.
+Missing or skipped message input cannot qualify execution. This is not a native
+AI permission boundary, cache waiver or authorization to mutate an env file.
+
+On Linux, the qualified pre-commit path can coalesce repeated whole-tree diffs
+only when every active command matches the known read-only or fail-on-write
+contract. Remote revisions/commands and the root-audit source chain are pinned;
+unknown active hooks, source drift, SKIP or fail-fast retain ordinary execution.
+The read-only staged context supplies the initial clean observation. Every actual
+check still runs, and a fresh checked Git diff after the last successful check
+must be empty. The first nonzero result resumes ordinary per-hook diff checks
+for the rest of the event. Ruff format explicitly exits nonzero after formatting,
+preserving the framework's existing refusal when a formatter changes input.
+An unavailable final diff is an error. Distinct Linux environments are probed
+once per invocation by the framework's complete install key, without reuse
+between events. Windows retains ordinary pre-commit diff/probe dispatch. This
+is bounded command qualification, not proof of an OS permission boundary.
+
+Linux source comparisons use eight bounded native Git diff workers over disjoint
+literal pathspec groups covering the complete index. Index entries must match
+before and after scanning; missing, ambiguous or changed index evidence refuses.
+Indexes containing gitlinks (`160000`) use a single full native Git diff, with
+both index/flag bookends and the same scan deadline.
+The total scan deadline remains ten seconds. No sparse/assume-unchanged setting,
+cross-event cache or omitted source prefix is introduced. Full-tree history
+inspection overlaps only immutable ancestor/tree queries in four worker slots;
+it checks every candidate commit and refreshes shallow boundaries afterwards.
+Only inside the already supervised Linux worker, the two exact tree/budget
+guard CLIs may execute in that interpreter with their original argument lists.
+The independent tree/budget pair can overlap in two bounded worker slots;
+both results are awaited before callbacks, retaining the original failure order.
+Every invocation performs fresh checks; no result is reused. The module must
+resolve to the verified deployment bundle, and the outer watchdog still contains
+all Python work and Git descendants. Unknown commands, foreign modules, Windows
+and calls outside the owned worker retain subprocess execution. Invalid return
+values or unavailable guard execution refuse the operation.
+The qualified adapter replaces pre-commit
 stash/checkout with a read-only unstaged-diff check: if the framework would need
 to hide tracked unstaged changes, it refuses before configured callbacks. Stage
 or preserve those changes explicitly outside the hook and retry. It never creates
@@ -143,6 +204,15 @@ one common hook deployment must not be claimed portable across incompatible
 interpreters. A changed platform requires rollback/reinstall and fresh evidence.
 
 ## Verification
+
+The coalesced pre-commit, metadata message and partitioned diff handlers are
+private namespaces in the existing `offline_precommit.py`, `hook_installation.py`
+and `hook_receipts.py` owners. Immutable bundles copy those complete owner files;
+backend loading still executes the just-verified source bytes rather than cached
+bytecode. This preserves the active-script cap of 334 without retiring unrelated
+scripts or relaxing the catalog. Git diagnostics make a source comparison
+unavailable even when Git returns zero; unknown commit-message type filters keep
+ordinary framework filtering and skip semantics.
 
 Local mechanism qualification on 2026-11-12 used private synthetic Git fixtures
 and a deployment bundle, without installing callbacks in the project repository.
