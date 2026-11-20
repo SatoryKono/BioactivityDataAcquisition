@@ -2153,11 +2153,17 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "docs/02-architecture/finances-github-billing.md": (DOCUMENTATION_SYNC_TEST,),
     "docs/05-engineering/test-telemetry-baseline.md": TELEMETRY_BASELINE_TESTS,
-    "docs/04-reference/providers/chembl/molecule.md": (
-        DOCUMENTATION_SYNC_TEST,
-        DOCUMENTATION_CLEANUP_INVENTORY_TEST,
-        "tests/e2e/test_chembl_molecule_e2e.py",
-        "tests/e2e/test_chembl_molecule_cached_e2e.py",
+    **dict.fromkeys(
+        (
+            "docs/04-reference/providers/chembl/molecule.md",
+            "docs/05-operations/runbooks/molecule-phase-recovery.md",
+        ),
+        (
+            DOCUMENTATION_SYNC_TEST,
+            DOCUMENTATION_CLEANUP_INVENTORY_TEST,
+            "tests/e2e/test_chembl_molecule_e2e.py",
+            "tests/e2e/test_chembl_molecule_cached_e2e.py",
+        ),
     ),
     ".gitignore": (
         "tests/architecture/test_gitignore_secret_and_agents_policy.py",
