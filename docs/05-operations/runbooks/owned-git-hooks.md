@@ -171,6 +171,8 @@ it checks every candidate commit and refreshes shallow boundaries afterwards.
 The secret-baseline check recursively scans every file under `src/` with the
 same detectors, filters and baseline. This includes ignored/untracked source
 files and avoids normalizing tracked paths elsewhere in the repository.
+The baseline comparison always runs a fresh scanner against a private baseline
+copy; cached stdout cannot replay the required output-file update.
 Only inside the already supervised Linux worker, the two exact tree/budget
 guard CLIs may execute in that interpreter with their original argument lists.
 The independent tree/budget pair can overlap in two bounded worker slots;
