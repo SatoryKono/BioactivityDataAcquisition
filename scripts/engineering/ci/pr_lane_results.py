@@ -73,6 +73,7 @@ AI_RUNTIME_GOVERNANCE_LINKS_TEST = (
 )
 DOCKER_RUNTIME_CONTRACT_TEST = "tests/architecture/test_docker_runtime_contracts.py"
 MEMORY_RAG_INDEXING_TEST = "tests/unit/memory/test_rag_indexing.py"
+MEMORY_MCP_SCOPE_TEST = "tests/unit/memory/test_mcp_scope.py"
 TECH_DEBT_5847_5852_CLOSEOUT_TEST = (
     "tests/architecture/test_tech_debt_issues_5847_5852_closeout.py"
 )
@@ -516,7 +517,7 @@ MEMORY_BASELINE_TEST_TARGETS: tuple[str, ...] = (
     "tests/unit/memory/test_issue_10526_workflow_module_script_targets_slice.py",
     "tests/unit/memory/test_issue_10526_workflow_output_expression_slice.py",
     "tests/unit/memory/test_lifecycle.py",
-    "tests/unit/memory/test_mcp_scope.py",
+    MEMORY_MCP_SCOPE_TEST,
     "tests/unit/memory/test_mcp_server.py",
     "tests/unit/memory/test_memory_acl.py",
     "tests/unit/memory/test_migrations.py",
@@ -559,7 +560,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ".agents/resume": (AMP_ORB_SETUP_TEST,),
     "scripts/ai/mcp/amp_memory_wrapper.sh": (
         "tests/unit/repo_backed/scripts/ai/mcp/test_memory_persistence_mode.py",
-        "tests/unit/memory/test_mcp_scope.py",
+        MEMORY_MCP_SCOPE_TEST,
     ),
     **dict.fromkeys(
         (
@@ -1184,7 +1185,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/integration/memory/test_mcp_server_isolation.py",
     ),
     "src/memory/mcp_scope.py": (
-        "tests/unit/memory/test_mcp_scope.py",
+        MEMORY_MCP_SCOPE_TEST,
         "tests/integration/memory/test_mcp_server_isolation.py",
     ),
     "src/memory/storage.py": ("tests/unit/memory/test_atomic_storage.py",),
