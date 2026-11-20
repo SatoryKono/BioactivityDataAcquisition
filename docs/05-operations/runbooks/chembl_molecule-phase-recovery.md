@@ -120,8 +120,8 @@ proof и повторить в новом root. Для отката потреб
 ## Выполненное восстановление (2026-11-19/20, #13196 / #13201)
 
 Восстановление выполнено на checkout `735969e92ad082541cf4af6b431113bc3e7db119`
-(main после #13214 и #13225) в отдельных roots
-`data/chembl-molecule-recovery-20261119/{offline,live}`. Исходный Bronze
+(main после #13214 и #13225) в отдельных offline/live roots для
+`chembl_molecule`. Исходный Bronze
 (`data/workflows-limit1000-20261118T042057Z/.../bronze/chembl/molecule`,
 batch `64dfb0f8-ee12-557b-a3cf-ec181f7ccbbe`) до и после обработки неизменён:
 1000 записей, 1000 уникальных `molecule_chembl_id`, max_phase заполнен 1000/1000,
