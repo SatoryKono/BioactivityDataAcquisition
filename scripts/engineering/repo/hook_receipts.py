@@ -7,6 +7,7 @@ hashes detect stale evidence, not a malicious user able to forge local files.
 from __future__ import annotations
 
 from collections.abc import Mapping
+from concurrent.futures import ThreadPoolExecutor
 import hashlib
 import importlib.metadata
 import json
@@ -165,28 +166,38 @@ def protected_state(root: Path, base: str = "origin/main") -> dict[str, str]:
     )
 
     base = validate_revision_token(base)
-    _reject_gitlink_revisions(root, "HEAD", base)
-    indexes = [
-        _index_material(root, view, reject_hidden=False) for view in _index_views(root)
-    ]
-    if check_checkout_state(root):
-        raise ValueError("checkout state is not qualified")
-    return {
-        "head_sha": _git(root, "rev-parse", "--verify", "HEAD^{commit}")
-        .strip()
-        .decode("ascii"),
-        "base_sha": _git(root, "rev-parse", "--verify", base + "^{commit}")
-        .strip()
-        .decode("ascii"),
-        "history_sha256": digest(sorted(_shallow_boundaries(root))),
-        "index_sha256": digest(
-            [
-                {key: hashlib.sha256(value).hexdigest() for key, value in item.items()}
-                for item in indexes
-            ]
-        ),
-        "dotenv_sha256": digest(_dotenv_material(root)),
-    }
+    # These read-only probes share no mutable process environment or cache.
+    # Await every result before callbacks; each bookend samples again afresh.
+    views = _index_views(root)
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        gitlinks = pool.submit(_reject_gitlink_revisions, root, "HEAD", base)
+        indexes = [
+            pool.submit(_index_material, root, view, reject_hidden=False)
+            for view in views
+        ]
+        checkout = pool.submit(check_checkout_state, root)
+        head = pool.submit(_git, root, "rev-parse", "--verify", "HEAD^{commit}")
+        base_sha = pool.submit(_git, root, "rev-parse", "--verify", base + "^{commit}")
+        history = pool.submit(_shallow_boundaries, root)
+        dotenv = pool.submit(_dotenv_material, root)
+        gitlinks.result()
+        if checkout.result():
+            raise ValueError("checkout state is not qualified")
+        return {
+            "head_sha": head.result().strip().decode("ascii"),
+            "base_sha": base_sha.result().strip().decode("ascii"),
+            "history_sha256": digest(sorted(history.result())),
+            "index_sha256": digest(
+                [
+                    {
+                        key: hashlib.sha256(value).hexdigest()
+                        for key, value in future.result().items()
+                    }
+                    for future in indexes
+                ]
+            ),
+            "dotenv_sha256": digest(dotenv.result()),
+        }
 
 
 def _path_state(
@@ -432,3 +443,115 @@ def validate_receipt(
         subprocess.SubprocessError,
     ):
         return {"status": "ERROR", "reason": "receipt_unavailable_or_invalid"}
+
+
+class _SourceDiffScanner:
+    """Scan every indexed path with bounded parallel native Git diff processes."""
+
+    __file__ = __file__
+    subprocess = subprocess
+    time = time
+
+    @classmethod
+    def partition(cls, paths: tuple[bytes, ...], workers: int = 8) -> list[list[bytes]]:
+        """Cover every path exactly once without traversing the working filesystem."""
+        leaves: list[tuple[bytes, int]] = []
+
+        def split(values: list[bytes], depth: int) -> None:
+            groups: dict[bytes, list[bytes]] = {}
+            for path in values:
+                parts = path.split(b"/")
+                key = b"/".join(parts[:depth])
+                if len(parts) > depth:
+                    key += b"/"
+                groups.setdefault(key, []).append(path)
+            for prefix, children in groups.items():
+                if len(children) > 64 and prefix.endswith(b"/"):
+                    split(children, depth + 1)
+                else:
+                    leaves.append((prefix, len(children)))
+
+        split(list(paths), 1)
+        batches: list[list[bytes]] = [[] for _ in range(workers)]
+        counts = [0] * workers
+        for prefix, count in sorted(leaves, key=lambda item: (-item[1], item[0])):
+            slot = min(range(workers), key=counts.__getitem__)
+            batches[slot].append(prefix)
+            counts[slot] += count
+        return [sorted(batch) for batch in batches if batch]
+
+    @classmethod
+    def _git(cls, args: list[str | bytes], deadline: float) -> bytes:
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            raise TimeoutError("source diff deadline exhausted")
+        result = subprocess.run(
+            ["git", "--literal-pathspecs", "-c", "core.fsmonitor=false", *args],
+            env=dict(os.environ, GIT_OPTIONAL_LOCKS="0"),
+            capture_output=True,
+            check=True,
+            timeout=remaining,
+        )
+        if result.stderr:
+            raise RuntimeError(
+                "source diff emitted diagnostics; comparison is unavailable"
+            )
+        return result.stdout
+
+    @classmethod
+    def _paths(cls, index: bytes) -> tuple[bytes, ...]:
+        paths = []
+        for record in filter(None, index.split(b"\0")):
+            metadata, separator, path = record.partition(b"\t")
+            fields = metadata.split()
+            if (
+                not separator
+                or len(fields) != 3
+                or fields[0] not in {b"100644", b"100755", b"120000", b"160000"}
+                or fields[2] != b"0"
+                or not path
+                or path.startswith(b"/")
+                or b".." in path.split(b"/")
+            ):
+                raise ValueError("source diff index is not qualified")
+            paths.append(path)
+        if len(set(paths)) != len(paths):
+            raise ValueError("source diff index paths are ambiguous")
+        return tuple(sorted(paths))
+
+    @classmethod
+    def scan(
+        cls,
+    ) -> bytes:
+        """Retain a ten-second total scan limit, including both index observations."""
+        deadline = time.monotonic() + 10
+        before = cls._git(["ls-files", "--stage", "-z"], deadline)
+        flags_before = cls._git(["ls-files", "-v", "-z"], deadline)
+        paths = cls._paths(before)
+        if any(record.startswith(b"160000 ") for record in before.split(b"\0")):
+            # An empty pathspec retains Git's complete submodule comparison.
+            batches = [[]]
+        else:
+            batches = cls.partition(paths)
+
+        def inspect(paths: list[bytes]) -> bytes:
+            return cls._git(
+                [
+                    "diff",
+                    "--no-ext-diff",
+                    "--no-textconv",
+                    "--ignore-submodules=none",
+                    "--",
+                    *paths,
+                ],
+                deadline,
+            )
+
+        with ThreadPoolExecutor(max_workers=8) as pool:
+            patches = list(pool.map(inspect, batches))
+        if (
+            cls._git(["ls-files", "--stage", "-z"], deadline) != before
+            or cls._git(["ls-files", "-v", "-z"], deadline) != flags_before
+        ):
+            raise ValueError("index changed during source diff")
+        return b"".join(patches)

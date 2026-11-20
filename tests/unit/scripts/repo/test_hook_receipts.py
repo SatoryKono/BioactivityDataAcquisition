@@ -444,3 +444,79 @@ def test_invalid_json_shapes_are_errors(private_repo, payload):
         receipts.validate_receipt(root, path, state, ["fixture-check"])["status"]
         == "ERROR"
     )
+
+
+@pytest.mark.parametrize(
+    "failed",
+    [None, "gitlinks", "index", "checkout", "head", "base", "history", "dotenv"],
+)
+def test_parallel_bookend_awaits_every_probe_and_preserves_failures(
+    tmp_path, monkeypatch, failed
+):
+    """Even an early failure drains all independent probes before returning."""
+    import threading
+    from collections import Counter
+    from scripts.engineering.repo import check_no_partial_tree as tree
+
+    barrier = threading.Barrier(3)
+    finished = Counter()
+    lock = threading.Lock()
+
+    def sample(name, value):
+        if name in {"gitlinks", "index", "checkout"}:
+            barrier.wait(timeout=5)
+        with lock:
+            finished[name] += 1
+        if name == failed:
+            raise ValueError("unqualified " + name)
+        return value
+
+    monkeypatch.setattr(tree, "_index_views", lambda root: [None])
+    monkeypatch.setattr(
+        receipts, "_reject_gitlink_revisions", lambda *a: sample("gitlinks", None)
+    )
+    monkeypatch.setattr(
+        receipts,
+        "_index_material",
+        lambda *a, **k: sample("index", {"index": b"one", "flags": b"H fixture"}),
+    )
+    monkeypatch.setattr(tree, "check_checkout_state", lambda *a: sample("checkout", []))
+    monkeypatch.setattr(
+        receipts,
+        "_git",
+        lambda root, *args: sample(
+            "head" if args[-1] == "HEAD^{commit}" else "base", b"abc\n"
+        ),
+    )
+    monkeypatch.setattr(
+        tree, "_shallow_boundaries", lambda *a: sample("history", frozenset())
+    )
+    monkeypatch.setattr(receipts, "_dotenv_material", lambda *a: sample("dotenv", {}))
+    if failed:
+        with pytest.raises(ValueError, match="unqualified " + failed):
+            receipts.protected_state(tmp_path)
+    else:
+        import hashlib
+
+        expected = {
+            "head_sha": "abc",
+            "base_sha": "abc",
+            "history_sha256": receipts.digest([]),
+            "dotenv_sha256": receipts.digest({}),
+            "index_sha256": receipts.digest(
+                [
+                    {
+                        "index": hashlib.sha256(b"one").hexdigest(),
+                        "flags": hashlib.sha256(b"H fixture").hexdigest(),
+                    }
+                ]
+            ),
+        }
+        assert receipts.protected_state(tmp_path) == expected
+        assert receipts.protected_state(tmp_path) == expected
+    assert finished == Counter(
+        dict.fromkeys(
+            ("gitlinks", "index", "checkout", "head", "base", "history", "dotenv"),
+            1 if failed else 2,
+        )
+    )
