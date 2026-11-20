@@ -41037,7 +41037,7 @@
       "generator": null,
       "github_issue_number": null,
       "github_issue_url": null,
-      "inbound_links": 4,
+      "inbound_links": 5,
       "lifecycle": null,
       "outbound_links": 0,
       "owner": "BioETL Team",
@@ -48177,7 +48177,7 @@
       "generator": null,
       "github_issue_number": null,
       "github_issue_url": null,
-      "inbound_links": 4,
+      "inbound_links": 5,
       "lifecycle": null,
       "outbound_links": 4,
       "owner": "BioETL Team",
@@ -48849,7 +48849,7 @@
       "generator": null,
       "github_issue_number": null,
       "github_issue_url": null,
-      "inbound_links": 1,
+      "inbound_links": 2,
       "lifecycle": null,
       "outbound_links": 0,
       "owner": "BioETL Team",
@@ -50489,6 +50489,34 @@
       "canonical_successor": null,
       "catalog_lifecycle": null,
       "commit_policy": null,
+      "declared_class": "published",
+      "declared_status": "active",
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "current",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 1,
+      "lifecycle": null,
+      "outbound_links": 3,
+      "owner": "BioETL Team",
+      "path": "docs/05-operations/runbooks/chembl-molecule-phase-recovery.md",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "05-operations",
+      "status": "Active",
+      "surface_family": "active",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
       "declared_class": "internal-published",
       "declared_status": "active",
       "diagram_kind": null,
@@ -50839,7 +50867,7 @@
       "github_issue_url": null,
       "inbound_links": 7,
       "lifecycle": null,
-      "outbound_links": 50,
+      "outbound_links": 51,
       "owner": "BioETL Team",
       "path": "docs/05-operations/runbooks/index.md",
       "recommended_action": "keep",
@@ -118665,7 +118693,7 @@
     "by_recommended_action": {
       "archive-after-migration": 434,
       "generate-automatically": 1071,
-      "keep": 2702
+      "keep": 2703
     },
     "by_section": {
       ".github": 6,
@@ -118676,7 +118704,7 @@
       "03-guides": 128,
       "04-reference": 335,
       "05-engineering": 3,
-      "05-operations": 102,
+      "05-operations": 103,
       "99-archive": 1554,
       "AGENTS.md": 1,
       "CHANGELOG.md": 1,
@@ -118694,21 +118722,21 @@
       "security": 2
     },
     "by_status": {
-      "Active": 777,
+      "Active": 778,
       "Archived": 1554,
       "Canonical": 77,
       "Generated": 1071,
       "Working": 728
     },
     "by_surface_family": {
-      "active": 777,
+      "active": 778,
       "archive": 1554,
       "canonical": 77,
       "generated": 1071,
       "working": 728
     },
     "by_tracking_state": {
-      "tracked": 4207
+      "tracked": 4208
     },
     "docs_reports_local_count": 84,
     "duplicate_group_count": 80,
@@ -118721,8 +118749,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 4207,
+    "total_doc_like": 4208,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 4207
+    "total_doc_like_tracked": 4208
   }
 }
