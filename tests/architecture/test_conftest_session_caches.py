@@ -12,7 +12,9 @@ from __future__ import annotations
 
 import pytest
 
+import ast
 import importlib.util
+import pickle
 from pathlib import Path
 
 
@@ -87,6 +89,35 @@ def test_build_ast_cache_skips_syntax_errors(tmp_path: Path) -> None:
 
     assert list(cache) == [valid]
     assert cache[valid].body
+
+
+@pytest.mark.parametrize("named", [False, True])
+def test_build_ast_cache_ignores_persisted_tree_when_disk_reuse_is_disabled(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, named: bool
+) -> None:
+    """A previous success cannot hide a forbidden import in current text."""
+    source = tmp_path / "source.py"
+    source.write_text("import redis\n", encoding="utf-8")
+    cache_dir = tmp_path / "cache"
+    cache_dir.mkdir()
+    monkeypatch.setattr(architecture_conftest, "_ARCHITECTURE_CACHE_DIR", cache_dir)
+    name = "source-ast" if named else "ad-hoc-ast"
+    signature = architecture_conftest._cache_signature([source])
+    persisted = architecture_conftest._cache_file_path(name, signature)
+    with persisted.open("wb") as stream:
+        pickle.dump({source: ast.parse("pass\n")}, stream)
+    original = persisted.read_bytes()
+    current = {source: source.read_text(encoding="utf-8")}
+
+    result = (
+        architecture_conftest._build_ast_cache(name, current)
+        if named
+        else architecture_conftest._build_ast_cache(current)
+    )
+
+    assert isinstance(result[source].body[0], ast.Import)
+    assert result[source].body[0].names[0].name == "redis"
+    assert persisted.read_bytes() == original
 
 
 def test_build_yaml_cache_skips_invalid_documents(tmp_path: Path) -> None:

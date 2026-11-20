@@ -17,6 +17,7 @@ REQ-ARCH-001: Application, domain и interfaces слои используют Lo
 from __future__ import annotations
 
 import ast
+from collections.abc import Mapping
 from pathlib import Path
 
 import pytest
@@ -34,7 +35,10 @@ EXEMPTED_FILES: set[str] = set()
 
 
 def _check_structlog_imports(
-    directory: Path, exempted: set[str] | None = None
+    directory: Path,
+    exempted: set[str] | None = None,
+    *,
+    trees: Mapping[Path, ast.Module] | None = None,
 ) -> list[str]:
     """Check for direct structlog imports in a directory.
 
@@ -58,7 +62,7 @@ def _check_structlog_imports(
         if _normalize_rel_path(rel_path) in exempted:
             continue
 
-        tree = _read_ast_or_none(py_file)
+        tree = _read_ast_or_none(py_file, trees)
         if tree is None:
             continue
 
@@ -71,7 +75,14 @@ def _normalize_rel_path(rel_path: Path) -> str:
     return str(rel_path).replace("\\", "/")
 
 
-def _read_ast_or_none(py_file: Path) -> ast.Module | None:
+def _read_ast_or_none(
+    py_file: Path, trees: Mapping[Path, ast.Module] | None = None
+) -> ast.Module | None:
+    # Layer constants are relative, whereas the shared fixture keys are absolute.
+    # Do not resolve each path through the mounted filesystem again.
+    key = py_file.absolute()
+    if trees is not None and key in trees:
+        return trees[key]
     try:
         return ast.parse(py_file.read_text(encoding="utf-8"))
     except (SyntaxError, UnicodeDecodeError):
@@ -102,13 +113,17 @@ def _is_structlog_import_from(node: ast.ImportFrom) -> bool:
 class TestNoStructlogInApplicationLayer:
     """Test that application layer does not import structlog directly."""
 
-    def test_no_structlog_in_application_layer(self) -> None:
+    def test_no_structlog_in_application_layer(
+        self, source_ast_cache: dict[Path, ast.Module]
+    ) -> None:
         """Application layer MUST NOT import structlog directly.
 
         REQ-ARCH-001: Use LoggerPort abstraction instead.
         See ADR-006 for rationale.
         """
-        violations = _check_structlog_imports(APPLICATION_DIR, EXEMPTED_FILES)
+        violations = _check_structlog_imports(
+            APPLICATION_DIR, EXEMPTED_FILES, trees=source_ast_cache
+        )
 
         assert not violations, (
             "Direct structlog imports found in application layer:\n"
@@ -120,13 +135,17 @@ class TestNoStructlogInApplicationLayer:
 class TestNoStructlogInInterfacesLayer:
     """Test that interfaces layer does not import structlog directly."""
 
-    def test_no_structlog_in_interfaces_layer(self) -> None:
+    def test_no_structlog_in_interfaces_layer(
+        self, source_ast_cache: dict[Path, ast.Module]
+    ) -> None:
         """Interfaces layer MUST NOT import structlog directly.
 
         REQ-ARCH-001: Use LoggerPort abstraction instead.
         See ADR-006 for rationale.
         """
-        violations = _check_structlog_imports(INTERFACES_DIR, EXEMPTED_FILES)
+        violations = _check_structlog_imports(
+            INTERFACES_DIR, EXEMPTED_FILES, trees=source_ast_cache
+        )
 
         assert not violations, (
             "Direct structlog imports found in interfaces layer:\n"
@@ -138,9 +157,13 @@ class TestNoStructlogInInterfacesLayer:
 class TestNoStructlogInDomainLayer:
     """Test that domain layer does not import structlog directly."""
 
-    def test_no_structlog_in_domain_layer(self) -> None:
+    def test_no_structlog_in_domain_layer(
+        self, source_ast_cache: dict[Path, ast.Module]
+    ) -> None:
         """Domain layer MUST NOT import structlog directly."""
-        violations = _check_structlog_imports(DOMAIN_DIR, EXEMPTED_FILES)
+        violations = _check_structlog_imports(
+            DOMAIN_DIR, EXEMPTED_FILES, trees=source_ast_cache
+        )
 
         assert not violations, (
             "Direct structlog imports found in domain layer:\n"
@@ -157,14 +180,18 @@ class TestNoStructlogInDomainLayer:
         ("interfaces", INTERFACES_DIR),
     ],
 )
-def test_no_structlog_parametrized(layer_name: str, layer_dir: Path) -> None:
+def test_no_structlog_parametrized(
+    layer_name: str, layer_dir: Path, source_ast_cache: dict[Path, ast.Module]
+) -> None:
     """Parametrized test for structlog imports in multiple layers.
 
     Args:
         layer_name: Name of the layer being tested.
         layer_dir: Directory path of the layer.
     """
-    violations = _check_structlog_imports(layer_dir, EXEMPTED_FILES)
+    violations = _check_structlog_imports(
+        layer_dir, EXEMPTED_FILES, trees=source_ast_cache
+    )
 
     assert not violations, (
         f"Direct structlog imports found in {layer_name} layer:\n"
@@ -173,7 +200,9 @@ def test_no_structlog_parametrized(layer_name: str, layer_dir: Path) -> None:
     )
 
 
-def _check_structlog_boundlogger_usage(directory: Path) -> list[str]:
+def _check_structlog_boundlogger_usage(
+    directory: Path, content: Mapping[Path, str] | None = None
+) -> list[str]:
     """Check for structlog.BoundLogger type annotations in source code.
 
     Scans Python files for usage of 'structlog.BoundLogger' as type annotation.
@@ -191,14 +220,22 @@ def _check_structlog_boundlogger_usage(directory: Path) -> list[str]:
     violations: list[str] = []
     for py_file in directory.rglob("*.py"):
         rel_path = py_file.relative_to(Path("src"))
-        violations.extend(_iter_boundlogger_line_violations(py_file, rel_path))
+        violations.extend(_iter_boundlogger_line_violations(py_file, rel_path, content))
 
     return violations
 
 
-def _iter_boundlogger_line_violations(py_file: Path, rel_path: Path) -> list[str]:
+def _iter_boundlogger_line_violations(
+    py_file: Path, rel_path: Path, content: Mapping[Path, str] | None = None
+) -> list[str]:
     try:
-        lines = py_file.read_text(encoding="utf-8").splitlines()
+        key = py_file.absolute()
+        source = (
+            content[key]
+            if content is not None and key in content
+            else py_file.read_text(encoding="utf-8")
+        )
+        lines = source.splitlines()
     except (UnicodeDecodeError, OSError):
         return []
     return [
@@ -208,7 +245,9 @@ def _iter_boundlogger_line_violations(py_file: Path, rel_path: Path) -> list[str
     ]
 
 
-def test_no_structlog_boundlogger_in_application() -> None:
+def test_no_structlog_boundlogger_in_application(
+    source_content_cache: dict[Path, str],
+) -> None:
     """Application layer MUST use LoggerPort, not structlog.BoundLogger.
 
     REQ-ARCH-001: The application layer should be decoupled from
@@ -218,7 +257,9 @@ def test_no_structlog_boundlogger_in_application() -> None:
     annotation anywhere in the application layer, including in
     TYPE_CHECKING blocks.
     """
-    violations = _check_structlog_boundlogger_usage(APPLICATION_DIR)
+    violations = _check_structlog_boundlogger_usage(
+        APPLICATION_DIR, source_content_cache
+    )
 
     assert not violations, (
         "structlog.BoundLogger usage found in application layer:\n"
@@ -226,3 +267,60 @@ def test_no_structlog_boundlogger_in_application() -> None:
         + "\n\nApplication layer MUST use LoggerPort, not structlog.BoundLogger."
         + "\nImport LoggerPort from bioetl.domain.ports instead."
     )
+
+
+def test_structlog_snapshot_retains_relative_path_violations(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    source = Path("src/package/source.py")
+    source.parent.mkdir(parents=True)
+    text = "from structlog.contextvars import bind_contextvars\n"
+    source.write_text(text, encoding="utf-8")
+    trees = {source.absolute(): ast.parse(text)}
+
+    observed = _check_structlog_imports(Path("src"), trees=trees)
+
+    assert observed == _check_structlog_imports(Path("src"))
+    assert observed == [
+        f"{Path('package/source.py')}:1: from structlog.contextvars import ..."
+    ]
+
+
+def test_structlog_snapshot_miss_scans_new_file(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    source = Path("src/new.py")
+    source.parent.mkdir()
+    source.write_text("import structlog\n", encoding="utf-8")
+
+    assert _check_structlog_imports(Path("src"), trees={}) == [
+        "new.py:1: import structlog"
+    ]
+
+
+def test_structlog_snapshot_miss_preserves_invalid_syntax_policy(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "invalid.py"
+    source.write_text("def invalid(:\n", encoding="utf-8")
+
+    assert _read_ast_or_none(source, {}) is None
+
+
+def test_boundlogger_snapshot_retains_relative_path_violations(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    source = Path("src/logger.py")
+    source.parent.mkdir()
+    text = "logger: structlog.BoundLogger\n"
+    source.write_text(text, encoding="utf-8")
+
+    observed = _check_structlog_boundlogger_usage(
+        Path("src"), {source.absolute(): text}
+    )
+
+    assert observed == _check_structlog_boundlogger_usage(Path("src"))
+    assert observed == ["logger.py:1: logger: structlog.BoundLogger"]
