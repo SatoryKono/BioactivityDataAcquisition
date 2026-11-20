@@ -1,6 +1,12 @@
 {
   "description": "Lifecycle and supporting-taxonomy decisions for non-active scripts.",
   "entries": {
+    "scripts/ai/mcp/amp_memory_wrapper.sh": {
+      "decision": "mcp_compatibility_wrapper",
+      "next_step": "Retain as the Amp-specific MCP environment compatibility adapter before the shared memory wrapper; it is not a standalone operator entrypoint.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-20"
+    },
     "scripts/ai/codex/helper/check-env.ps1": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the Windows-side environment-check helper invoked by Codex launcher and setup flows; keep it supporting unless it becomes a standalone documented entrypoint.",
