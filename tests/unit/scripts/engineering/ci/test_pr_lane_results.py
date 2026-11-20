@@ -1416,6 +1416,18 @@ def test_shadow_compare_routes_amp_orb_contract(path: str) -> None:
     )
 
 
+def test_shadow_compare_routes_amp_memory_wrapper() -> None:
+    root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        ["scripts/ai/mcp/amp_memory_wrapper.sh"], repo_root=root
+    )
+    assert (
+        "tests/unit/repo_backed/scripts/ai/mcp/test_memory_persistence_mode.py"
+        in report["selected"]
+    )
+    assert "tests/unit/memory/test_mcp_scope.py" in report["selected"]
+
+
 def test_shadow_compare_routes_root_review_registry_to_its_owner() -> None:
     root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare(

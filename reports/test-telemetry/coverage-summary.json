@@ -1,11 +1,11 @@
 {
-  "source_branch": "fix/chembl-runbook-naming",
-  "source_commit": "b89c04721d88f6fb7dfea8c583e2956bdde02061",
-  "source_run_id": "44782237936",
+  "source_branch": "fix/amp-memory-path",
+  "source_commit": "3d33cc6515c9446bd1388afca3564f50e8b3b816",
+  "source_run_id": "44760615105",
   "source_event": "workflow_dispatch",
-  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/44782237936",
-  "source_tree_sha256": "8e0fa67e7561c85d7ce9dff8aaae8c25a8cb3161e79a7ed3854a98e8ed4d0c32",
-  "refreshed_at_utc": "2026-11-20T17:32:17.591000+00:00",
+  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/44760615105",
+  "source_tree_sha256": "229c2b20eedcec16e1c7c6d6afb03ca7a068abac1d54e2ae121e13f61381ad74",
+  "refreshed_at_utc": "2026-11-20T15:26:30.967000+00:00",
   "refresh_status": "captured",
   "coverage_percent": 99.51,
   "coverage": {

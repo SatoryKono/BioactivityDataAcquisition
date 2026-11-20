@@ -19,7 +19,7 @@
     },
     "memory": {
       "args": [
-        "scripts/ai/mcp/mcp_memory_wrapper.sh"
+        "scripts/ai/mcp/amp_memory_wrapper.sh"
       ],
       "command": "bash",
       "env": {
