@@ -13,7 +13,7 @@ pytestmark = pytest.mark.unit
     "path",
     [
         "docs/04-reference/providers/chembl/molecule.md",
-        "docs/05-operations/runbooks/molecule-phase-recovery.md",
+        "docs/05-operations/runbooks/chembl_molecule-phase-recovery.md",
     ],
 )
 def test_chembl_molecule_reference_selects_owned_contracts(path: str) -> None:
