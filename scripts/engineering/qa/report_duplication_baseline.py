@@ -49,6 +49,7 @@ class DuplicateCluster:
     path: str
     line: int
     modules: tuple[DuplicateModuleRef, ...]
+    contains_bare_package_initializer: bool = False
 
 
 @dataclass(frozen=True)
@@ -129,13 +130,12 @@ def _is_package_entry_report_noise(cluster: DuplicateCluster) -> bool:
 
 
 def _cluster_actionability_category(cluster: DuplicateCluster) -> str:
-    """Classify duplicate-code findings by likely remediation path."""
+    """Classify by compared modules, not the aggregate R0801 report path."""
     module_names = [module.module for module in cluster.modules]
     if _is_self_module_cluster(cluster):
         return "self_module_scanner_noise"
     if _is_package_entry_report_noise(cluster):
         return "package_entry_report_noise"
-    normalized_path = cluster.path.replace("\\", "/")
     if any(
         token in module
         for module in module_names
@@ -148,8 +148,8 @@ def _cluster_actionability_category(cluster: DuplicateCluster) -> str:
         return "pipeline_transformer_contract_pattern"
     if any(".composition." in module for module in module_names):
         return "composition_runtime_wiring_pattern"
-    if normalized_path.endswith("/__init__.py") or any(
-        module.endswith(".__init__") for module in module_names
+    if cluster.contains_bare_package_initializer or any(
+        module.endswith(_PACKAGE_ENTRY_MODULE_SUFFIX) for module in module_names
     ):
         return "export_facade_or_package_barrel"
     return "behavior_bearing_candidate"
@@ -285,7 +285,26 @@ def _build_first_wave_selection(
     }
 
 
-def _parse_pylint_duplicate_output(stdout: str) -> list[DuplicateCluster]:
+def _is_bare_package_initializer(
+    module: str, *, source_root: Path, scan_root: Path
+) -> bool:
+    """Confirm a compared bare package name without importing project code."""
+    parts = module.split(".")
+    if not all(part.isidentifier() for part in parts):
+        return False
+    package = source_root.joinpath(*parts)
+    initializer = package / "__init__.py"
+    return (
+        initializer.is_relative_to(scan_root)
+        and initializer.is_file()
+        and initializer.resolve().is_relative_to(scan_root)
+        and not package.with_suffix(".py").is_file()
+    )
+
+
+def _parse_pylint_duplicate_output(
+    stdout: str, *, source_root: Path | None = None, scan_root: Path | None = None
+) -> list[DuplicateCluster]:
     """Parse pylint duplicate-code text output into structured clusters."""
     clusters: list[DuplicateCluster] = []
     current_path: str | None = None
@@ -304,6 +323,16 @@ def _parse_pylint_duplicate_output(stdout: str) -> list[DuplicateCluster]:
                 path=current_path,
                 line=current_line,
                 modules=tuple(current_modules),
+                contains_bare_package_initializer=(
+                    source_root is not None
+                    and scan_root is not None
+                    and any(
+                        _is_bare_package_initializer(
+                            module.module, source_root=source_root, scan_root=scan_root
+                        )
+                        for module in current_modules
+                    )
+                ),
             )
         )
         current_path = None
@@ -527,7 +556,7 @@ def _scan_target(
         "--enable=duplicate-code",
         target,
     ]
-    from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+    from scripts.engineering.common.repo_paths import REPO_ROOT, ensure_safe_cli_argv
 
     result = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv
         ensure_safe_cli_argv([str(token) for token in cmd]),
@@ -544,7 +573,15 @@ def _scan_target(
         details = stderr or stdout or f"unexpected return code {result.returncode}"
         raise RuntimeError(f"duplication scan failed for {target}: {details}")
 
-    raw_clusters = _parse_pylint_duplicate_output(result.stdout)
+    # A package scanned as the target root may have a bare module name, whereas
+    # the same initializer in a wider scan can be named package.__init__.
+    source_root = (REPO_ROOT / "src").resolve()
+    scan_root = Path(target).resolve()
+    raw_clusters = _parse_pylint_duplicate_output(
+        result.stdout,
+        source_root=source_root if scan_root.is_relative_to(source_root) else None,
+        scan_root=scan_root,
+    )
     clusters = _filter_clusters_by_module_patterns(
         raw_clusters,
         exclude_module_patterns=exclude_module_patterns,
