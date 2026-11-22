@@ -60,11 +60,11 @@ agentdebugx = [
 ]
 proofagent = [
     # Optional, subprocess-only advisory evidence producer. Keep exact for reproducibility.
-    "proofagent-harness==0.13.0",
+    "proofagent-harness==0.14.0",
 ]
 agent-tools = [
     "agentdebugx==0.5.2",
-    "proofagent-harness==0.13.0",
+    "proofagent-harness==0.14.0",
 ]
 tracing = [
     "opentelemetry-api>=1.20",
