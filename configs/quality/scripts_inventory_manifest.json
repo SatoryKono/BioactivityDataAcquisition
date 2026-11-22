@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-22T20:16:29.601703+00:00",
+  "generated_at": "2026-11-22T20:41:56.757936+00:00",
   "summary": {
     "total_scripts": 774,
     "status_counts": {
@@ -4293,7 +4293,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
-          "line": 1044,
+          "line": 1058,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.ps1\","
         }
@@ -4342,7 +4342,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
-          "line": 1045,
+          "line": 1059,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.sh\","
         }
@@ -5585,7 +5585,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
-          "line": 1046,
+          "line": 1060,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/support/exec_windows_ps1_wrapper.sh\","
         }
@@ -6145,7 +6145,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
-          "line": 1047,
+          "line": 1061,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/support/run_owned_stdio.ps1\","
         }
@@ -14222,7 +14222,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
-          "line": 1887,
+          "line": 1901,
           "source_group": "tests",
           "text": "[\"scripts/engineering/dev/setup_bioetl_wsl.ps1\"], repo_root=root"
         },
@@ -20244,7 +20244,7 @@
           "path": "docs/05-engineering/test-telemetry-baseline.md",
           "line": 123,
           "source_group": "docs",
-          "text": "| 2 | `17.948` | `tests.unit.scripts.engineering.ci.test_pr_lane_results_runtime_acceptance_routes::test_runtime_evidence_selects_owning_contract[tests/helpers/runtime_acceptance_12553.py]` | `junit-u"
+          "text": "| 2 | `15.327` | `tests.unit.scripts.engineering.ci.test_pr_lane_results_runtime_acceptance_routes::test_runtime_evidence_selects_owning_contract[tests/helpers/runtime_acceptance_12553.py]` | `junit-u"
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
@@ -23629,7 +23629,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results_affected.py",
-          "line": 1869,
+          "line": 1883,
           "source_group": "tests",
           "text": "\"scripts/engineering/repo/process_supervisor.py\","
         },
@@ -26722,7 +26722,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 2429,
+          "line": 2435,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },
