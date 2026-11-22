@@ -1433,6 +1433,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             ".github/workflows/contract-governance-fast-check.yml",
             ".github/workflows/contract-tests.yml",
             ".github/workflows/dashboard-render-host.yml",
+            ".github/workflows/dependency-review.yml",
             ".github/workflows/diagram-nightly.yml",
             ".github/workflows/docs-kpi-weekly.yml",
             ".github/workflows/e2e-matrix-health.yml",
