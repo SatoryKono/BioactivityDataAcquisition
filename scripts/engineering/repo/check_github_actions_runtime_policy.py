@@ -100,6 +100,7 @@ ALLOWED_USES: dict[str, set[str]] = {
     },
     "actions/dependency-review-action": {
         "a1d282b36b6f3519aa1f3fc636f609c47dddb294",  # v5.0.0
+        "bbc44d14a204704ccc493733616cd1e93a0321ec",  # v5.0.1
     },
     "astral-sh/setup-uv": {
         "37802adc94f370d6bfd71619e3f0bf239e1f3b78",  # v7 (canonical; composite setup-python-uv)
@@ -107,6 +108,7 @@ ALLOWED_USES: dict[str, set[str]] = {
         "bec219d24cd3e171d82865faccec33120bb574f4",  # v10.1.0
         "18d369b23da25a81e9458561248e1aafff6a70fa",  # v10.3.1
         "68559e99cc807c1eb7e9238fd43a15bba460eec2",  # v10.3.3
+        "1db35dd8eee11c5894872e0b383ae6c406cf738d",  # v10.4.0
     },
     "SonarSource/sonarqube-scan-action": {
         "fd88b7d7ccbaefd23d8f36f73b59db7a3d246602",
