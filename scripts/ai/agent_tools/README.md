@@ -21,7 +21,7 @@ bash scripts/engineering/dev/setup_env_wsl.sh --agent-tools all
 ```
 
 The lock-backed extras pin `agentdebugx==0.5.2` and
-`proofagent-harness==0.13.0`. When `all` is selected, each optional tool is
+`proofagent-harness==0.14.0`. When `all` is selected, each optional tool is
 attempted separately so one installation failure does not prevent the other.
 
 ## Use
