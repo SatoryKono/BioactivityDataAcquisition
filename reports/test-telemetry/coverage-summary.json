@@ -1,11 +1,11 @@
 {
-  "source_branch": "fix/pwsh-test-timeout",
-  "source_commit": "1228f4ef3b6565ed52a181b2527248320cdef521",
-  "source_run_id": "44799533853",
+  "source_branch": "fix/mutation-iuphar-copy",
+  "source_commit": "f2f14b25296569286769cc5ad758b4260e6ec5bf",
+  "source_run_id": "45029086860",
   "source_event": "workflow_dispatch",
-  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/44799533853",
-  "source_tree_sha256": "ff11bb483ffece85f37a77bda99f0800e49a2fb3a991cc79001afb510b9d0d81",
-  "refreshed_at_utc": "2026-11-20T19:22:40.767000+00:00",
+  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/45029086860",
+  "source_tree_sha256": "3787c20ae331157d99b483f6a3f1a33f33b456865c5193dd179aaa3dec3a4782",
+  "refreshed_at_utc": "2026-11-22T13:57:34.345000+00:00",
   "refresh_status": "captured",
   "coverage_percent": 99.51,
   "coverage": {
