@@ -1,11 +1,11 @@
 {
-  "source_branch": "dependabot/pip/pip-minor-patch-5e24b04546",
-  "source_commit": "73fe9126037a0954a84cdf2beca54299cddd1af4",
-  "source_run_id": "45052153971",
+  "source_branch": "dependabot/github_actions/github-actions-fb79fd3e87",
+  "source_commit": "79c19313c8041047c67ac04f7d617be33674b789",
+  "source_run_id": "45068010506",
   "source_event": "workflow_dispatch",
-  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/45052153971",
-  "source_tree_sha256": "a228eea31c41d4fd0f5b6b7c9f7fedf7cc30bfc2a09788f5c91bcf7e159b9d3b",
-  "refreshed_at_utc": "2026-11-22T18:11:10.583000+00:00",
+  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/45068010506",
+  "source_tree_sha256": "03b73501d47888e828f77122651e85b1b0693a26df2240b1569ae17fcd62a542",
+  "refreshed_at_utc": "2026-11-22T20:58:19.203000+00:00",
   "refresh_status": "captured",
   "coverage_percent": 99.51,
   "coverage": {
