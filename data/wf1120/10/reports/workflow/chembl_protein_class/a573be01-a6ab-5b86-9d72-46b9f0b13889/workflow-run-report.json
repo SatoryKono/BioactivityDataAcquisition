@@ -1,0 +1,90 @@
+{
+  "execution": [
+    {
+      "gold_excluded_by_contract": 0,
+      "kind": "pipeline",
+      "pipeline_manifest_id": "99d5e6b7-5c27-591e-948b-5cbc54b88e4c",
+      "pipeline_name": "chembl_protein_class",
+      "pipeline_report_ref": "D:\\github\\BioactivityDataAcquisition\\data\\wf1120\\10\\reports\\pipeline\\chembl_protein_class\\0151d488-d942-51ba-8f06-d9dfe652382f\\pipeline-run-report.json",
+      "pipeline_run_id": "0151d488-d942-51ba-8f06-d9dfe652382f",
+      "records_bronze": 905,
+      "records_extracted": 905,
+      "records_gold": 904,
+      "records_silver": 904,
+      "status": "success",
+      "step_id": "run_chembl_protein_class",
+      "top_reasons": [
+        {
+          "count": 1,
+          "outcome": "filtered_out",
+          "reason_code": "FILTERED_OUT_SILVER:protein_class_id",
+          "reason_family": "system"
+        }
+      ]
+    }
+  ],
+  "identity": {
+    "completed_at": "2026-11-20T09:04:17.116598+00:00",
+    "duration_seconds": 46.92855209999834,
+    "execution_fingerprint": "e9341eb4afdc7dfe07f28d654ab22f9956fb3833f3fb93fa917a1952d1d57c51",
+    "manifest_id": "bc40611d-c69a-5280-b320-52a277c31ee4",
+    "resumed": false,
+    "started_at": "2026-11-20T09:03:30.188050+00:00",
+    "status": "success",
+    "workflow_name": "chembl_protein_class",
+    "workflow_run_id": "a573be01-a6ab-5b86-9d72-46b9f0b13889",
+    "workflow_version": "1.0.0"
+  },
+  "index": {
+    "chembl_protein_class": {
+      "records_extracted": 905,
+      "step_ids": [
+        "run_chembl_protein_class"
+      ]
+    }
+  },
+  "observations": {
+    "Evidence Location": {
+      "facts": {
+        "detail": null,
+        "kind": "workflow",
+        "owner": "chembl_protein_class",
+        "relative_data_root": ".",
+        "root_alias": "dashboard_data",
+        "run_id": "a573be01-a6ab-5b86-9d72-46b9f0b13889",
+        "workflow_run_id": null
+      },
+      "reason": "ok",
+      "verdict": "OK"
+    }
+  },
+  "plan": {
+    "steps": [
+      {
+        "depends_on": [],
+        "kind": "pipeline",
+        "pipeline_name": "chembl_protein_class",
+        "step_id": "run_chembl_protein_class",
+        "transform_name": null
+      }
+    ]
+  },
+  "reasons_rollup": [
+    {
+      "count": 1,
+      "outcome": "filtered_out",
+      "reason_code": "FILTERED_OUT_SILVER:protein_class_id",
+      "reason_family": "system"
+    }
+  ],
+  "schema_version": "workflow_run_report_v1",
+  "totals": {
+    "records_extracted_sum": 905,
+    "records_gold_sum": 904,
+    "records_silver_sum": 904,
+    "steps_failed": 0,
+    "steps_planned": 1,
+    "steps_skipped": 0,
+    "steps_succeeded": 1
+  }
+}

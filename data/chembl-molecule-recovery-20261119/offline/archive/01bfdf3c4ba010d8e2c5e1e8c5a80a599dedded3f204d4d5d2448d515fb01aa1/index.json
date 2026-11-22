@@ -1,0 +1,68 @@
+{
+  "schema": "bioetl_local_archive_v1",
+  "manifest_id": "e685a593-9b79-5fb9-aeb5-d99f59841a29",
+  "run_id": "774f4a22-b2b2-5358-a6ae-9e202157ec4e",
+  "manifest_sha256": "21312d13a4963af68954ed6ff7537f4201a733bd53bc0ced1ffe7b2a071a5131",
+  "files": [
+    {
+      "path": "output/checkpoints/.history/by_manifest/e685a593-9b79-5fb9-aeb5-d99f59841a29.json",
+      "sha256": "a4d5bea7986635e7d97382f261506281a2fc24da6f07d5959c481157bcd10e3e"
+    },
+    {
+      "path": "output/checkpoints/.history/by_pipeline/chembl_molecule/774f4a22-b2b2-5358-a6ae-9e202157ec4e/1795118048004584600.json",
+      "sha256": "503ae5429105bdd5563ddc68ac88ea681af9b096aa609c446df63dfd926d138f"
+    },
+    {
+      "path": "output/checkpoints/.history/by_pipeline/chembl_molecule/774f4a22-b2b2-5358-a6ae-9e202157ec4e/1795118048126428400.json",
+      "sha256": "1c7640673e8d1cbb05dd966039ce73c6d68a1c749224caf593b41d906a84d810"
+    },
+    {
+      "path": "output/control/effective_config/effective-config-c4734e9af0ddf625.json",
+      "sha256": "8a5dac8339d70376ef623c46d000caf6d79328a6560c87d4197fe886bb7a4657"
+    },
+    {
+      "path": "output/control/lineage/_by_manifest_id/0b8baf4aa828332d6ea2c79b0de51b5541e6e5385d3db6a9afb7f6c8b8c6e4e8.jsonl",
+      "sha256": "a56f91887b3b1846b5cfd64bbf46a617e4c02f1b35e6332b6fb1abcb1bd7aadc"
+    },
+    {
+      "path": "output/control/lineage/fragments/0716e0c2084203b72050cb4e19ba688dc020c7c84df70bd98890f4c669a39dfa.json",
+      "sha256": "cb3d156c59b2c8e765ff38f509ba8aaf581dd626099209b89893ebef1830f5dd"
+    },
+    {
+      "path": "output/control/lineage/fragments/d1c970eccf0c6248e5d945ec7f90fa6fcc2102263a979c92831b500584c0dae8.json",
+      "sha256": "985bd2cc02fc72dcd57ce267f76a22dbdb36dab236ea32f521398710390ad196"
+    },
+    {
+      "path": "output/control/lineage/fragments/ffb09b54b821708965be87ca97a4192e822a4199a4111af73abcb5df8132bed9.json",
+      "sha256": "cc8907c64ddcac278f89f729e46aacad4856d137106e61222fd1e24ab14802ab"
+    },
+    {
+      "path": "output/control/run_ledger/e685a593-9b79-5fb9-aeb5-d99f59841a29.jsonl",
+      "sha256": "177ebc3bf32de1716de41962fdcfae4ba0980ded1950a8e171cac3d2e0b35198"
+    },
+    {
+      "path": "output/control/run_manifest/e685a593-9b79-5fb9-aeb5-d99f59841a29.contract-evidence.json",
+      "sha256": "05d76147a91e7cd31492f7a84ee005451f9398cfca73b95bab43efbfe9b72853"
+    },
+    {
+      "path": "output/control/run_manifest/e685a593-9b79-5fb9-aeb5-d99f59841a29.json",
+      "sha256": "b6e980bd534439867b65242b590bd1d7a5769d112e24a19ca4d1a85284a883dc"
+    },
+    {
+      "path": "run-reports/pipeline/chembl_molecule/774f4a22-b2b2-5358-a6ae-9e202157ec4e/pipeline-run-report.json",
+      "sha256": "ab78c0ccda76b854f74100fb59fb85546d99a0336cfc225383d438b9a0882328"
+    },
+    {
+      "path": "run-reports/pipeline/chembl_molecule/774f4a22-b2b2-5358-a6ae-9e202157ec4e/pipeline-run-report.md",
+      "sha256": "8b0f80e290383d97fe6336d036e083c900aa81cbd3da615b46921a20e814ee0f"
+    },
+    {
+      "path": "run-reports/pipeline/chembl_molecule/774f4a22-b2b2-5358-a6ae-9e202157ec4e/status-revisions/20972328d1f05f9ed4c5553e9cd721a932680c71c4e65061bb905e6a280e7037.json",
+      "sha256": "b0bf586f8c19a2c3d3d7bdc1602624aed7160fa0de262871e866cf73f87bff8d"
+    },
+    {
+      "path": "run-reports/pipeline/chembl_molecule/774f4a22-b2b2-5358-a6ae-9e202157ec4e/status-revisions/9960ed7e0c61e24212333304ea9b631cbd98f16f3dd7bde9b80395e3066d11af.json",
+      "sha256": "a934eb88036d4ca90751f26217c6d3fd2035f041ce7335ad8cc7d6cc11e842e0"
+    }
+  ]
+}

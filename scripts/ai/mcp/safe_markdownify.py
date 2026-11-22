@@ -982,7 +982,6 @@ class _MarkdownifyHandler(BaseHTTPRequestHandler):
     def _dispatch_request(self, request_value):
         identifier = request_value.get("id")
         method = request_value.get("method")
-        session = self.headers.get("Mcp-Session-Id")
         if method == "initialize":
             session = None if self._draining.is_set() else self._sessions.issue()
             if session is None:
@@ -996,7 +995,11 @@ class _MarkdownifyHandler(BaseHTTPRequestHandler):
                     "version": "1.0.0",
                 },
             }
-        elif not self._sessions.touch(session):
+            self.reply(
+                200, {"jsonrpc": "2.0", "id": identifier, "result": result}, session
+            )
+            return
+        if not self._sessions.touch(self.headers.get("Mcp-Session-Id")):
             self.reply(404)
             return
         elif identifier is None:
@@ -1016,7 +1019,7 @@ class _MarkdownifyHandler(BaseHTTPRequestHandler):
             self._call_tool(
                 request_value,
                 respond=lambda result: self.reply(
-                    200, {"jsonrpc": "2.0", "id": identifier, "result": result}, session
+                    200, {"jsonrpc": "2.0", "id": identifier, "result": result}
                 ),
             )
             return
@@ -1030,7 +1033,7 @@ class _MarkdownifyHandler(BaseHTTPRequestHandler):
                 },
             )
             return
-        self.reply(200, {"jsonrpc": "2.0", "id": identifier, "result": result}, session)
+        self.reply(200, {"jsonrpc": "2.0", "id": identifier, "result": result})
 
     def _call_tool(self, request_value, *, respond=None):
         if not self._gate.acquire(blocking=False):

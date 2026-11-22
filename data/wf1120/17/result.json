@@ -1,0 +1,45 @@
+{
+  "workflow": "chembl_target_protein_classification",
+  "limit": 1000,
+  "exit_code": 82,
+  "status": "failed",
+  "workflow_run_id": "e7d65d91-dbbf-5b05-a5b4-f972fd1fd589",
+  "steps": [
+    {
+      "step_id": "run_chembl_protein_class",
+      "kind": "pipeline",
+      "status": "failed",
+      "pipeline_name": "chembl_protein_class",
+      "pipeline_run_id": "6e797f4a-3b88-5cb1-a60e-a3a8387173bb",
+      "error_type": "ExternalServiceError",
+      "error_message": "[Errno 11001] getaddrinfo failed"
+    },
+    {
+      "step_id": "run_chembl_target",
+      "kind": "pipeline",
+      "status": "success",
+      "pipeline_name": "chembl_target",
+      "pipeline_run_id": "6352bbe3-489a-56fe-bee5-5bf0f4cf0a1e",
+      "error_type": null,
+      "error_message": null
+    },
+    {
+      "step_id": "run_chembl_target_component",
+      "kind": "pipeline",
+      "status": "failed",
+      "pipeline_name": "chembl_target_component",
+      "pipeline_run_id": "68e41977-af66-59d1-9829-54301c1791be",
+      "error_type": "ServiceUnavailableError",
+      "error_message": "Circuit breaker open for chembl. Retry after 2998.8757579999947s"
+    },
+    {
+      "step_id": "run_chembl_target_protein_classification",
+      "kind": "pipeline",
+      "status": "skipped",
+      "pipeline_name": "chembl_target_protein_classification",
+      "pipeline_run_id": null,
+      "error_type": "UpstreamStepFailed",
+      "error_message": "Skipped because upstream step 'run_chembl_target_component' failed before this step could execute."
+    }
+  ]
+}

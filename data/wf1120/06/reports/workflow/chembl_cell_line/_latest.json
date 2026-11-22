@@ -1,0 +1,9 @@
+{
+  "completed_at": "2026-11-20T08:55:07.771423+00:00",
+  "json_path": "D:/github/BioactivityDataAcquisition/data/wf1120/06/reports/workflow/chembl_cell_line/fafcf9ec-507d-5284-93e0-536f677f9f85/workflow-run-report.json",
+  "kind": "workflow_run_report",
+  "markdown_path": "D:/github/BioactivityDataAcquisition/data/wf1120/06/reports/workflow/chembl_cell_line/fafcf9ec-507d-5284-93e0-536f677f9f85/workflow-run-report.md",
+  "status": "failed",
+  "workflow_name": "chembl_cell_line",
+  "workflow_run_id": "fafcf9ec-507d-5284-93e0-536f677f9f85"
+}

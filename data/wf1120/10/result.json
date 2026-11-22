@@ -1,0 +1,18 @@
+{
+  "workflow": "chembl_protein_class",
+  "limit": 1000,
+  "exit_code": 0,
+  "status": "success",
+  "workflow_run_id": "a573be01-a6ab-5b86-9d72-46b9f0b13889",
+  "steps": [
+    {
+      "step_id": "run_chembl_protein_class",
+      "kind": "pipeline",
+      "status": "success",
+      "pipeline_name": "chembl_protein_class",
+      "pipeline_run_id": "0151d488-d942-51ba-8f06-d9dfe652382f",
+      "error_type": null,
+      "error_message": null
+    }
+  ]
+}

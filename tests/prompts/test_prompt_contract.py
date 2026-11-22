@@ -38,6 +38,7 @@ def test_registered_scenario_identities() -> None:
         "architecture-cycle",
         "dashboard-audit",
         "sequential-run",
+        "audit-full-run",
         "test-loop",
         "comprehensive-audit",
     }

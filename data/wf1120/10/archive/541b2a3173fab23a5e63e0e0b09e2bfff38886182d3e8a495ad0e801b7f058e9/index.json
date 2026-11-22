@@ -1,0 +1,68 @@
+{
+  "schema": "bioetl_local_archive_v1",
+  "manifest_id": "99d5e6b7-5c27-591e-948b-5cbc54b88e4c",
+  "run_id": "0151d488-d942-51ba-8f06-d9dfe652382f",
+  "manifest_sha256": "1252e65e5899fbb35469f6873c58fe6d2f2e20dade52e8a4a289cac9b0122a6a",
+  "files": [
+    {
+      "path": "output/bronze/chembl/protein_class/2026-11-20/batch_2026-11-20_0d2b432f-0844-5c89-9765-4e22a8e92baf.jsonl.zst",
+      "sha256": "7db2555d5b2a6fe0e111ee123d092423b11d0a922cf4e1527b1027b8029ef776"
+    },
+    {
+      "path": "output/bronze/chembl/protein_class/2026-11-20/batch_2026-11-20_4ccea0ec-9a01-5ed4-bfb8-62b0a1203e50.jsonl.zst",
+      "sha256": "8ae5a705a3cb05c3454045463c953aca5362badf8cadfccdf50d38bf38368f76"
+    },
+    {
+      "path": "output/checkpoints/.history/by_manifest/99d5e6b7-5c27-591e-948b-5cbc54b88e4c.json",
+      "sha256": "6e7e590f05d9cb540f6f56c69ef4a8354c82ad985fc14dda20cda7187d81f758"
+    },
+    {
+      "path": "output/checkpoints/.history/by_pipeline/chembl_protein_class/0151d488-d942-51ba-8f06-d9dfe652382f/1795165444172639700.json",
+      "sha256": "0b4289a5be7e995566b7e84ca5645aecbab8d2db7dbb9f58e85cb7d91ee2a8d7"
+    },
+    {
+      "path": "output/checkpoints/.history/by_pipeline/chembl_protein_class/0151d488-d942-51ba-8f06-d9dfe652382f/1795165455515101200.json",
+      "sha256": "c64b90556c367837f6f49c256157a5a57f1dd5535fe0501614994b93b1e71fe4"
+    },
+    {
+      "path": "output/control/effective_config/effective-config-c95baa1bad720b31.json",
+      "sha256": "bd0aaad9ffb2ee393dab447e5f51bdf230dd710872bc633ab19cbe8c0dcb6855"
+    },
+    {
+      "path": "output/control/lineage/_by_manifest_id/facec218dcb7de854b3d14e737a0c39172e142b684bade96b86a6f24dd9dd4ec.jsonl",
+      "sha256": "d1f394092e26753730095de14bbc4915b0e7fdf2094d8469aa8f8640d66011fe"
+    },
+    {
+      "path": "output/control/lineage/fragments/7173341af51b8ac8add97e1861f38afe582f91a8d1dd778891f5f084dad10f47.json",
+      "sha256": "c9a950ac55903800b88ec4b12ca0fc6931ff74a3ee0cf085ce47b143f507f41e"
+    },
+    {
+      "path": "output/control/lineage/fragments/d70a4f1c1dad4829450228ba31cbe53ff712232437494f7439cddaedefbf8333.json",
+      "sha256": "6931a8ed3561adddc38490ec06084f749b247fea05f20bce3dd9822f84fe3517"
+    },
+    {
+      "path": "output/control/run_ledger/99d5e6b7-5c27-591e-948b-5cbc54b88e4c.jsonl",
+      "sha256": "06a798dfa429d660eaec28a09267dfd63242b07d4d6d66ff02f4d700436ce459"
+    },
+    {
+      "path": "output/control/run_manifest/99d5e6b7-5c27-591e-948b-5cbc54b88e4c.contract-evidence.json",
+      "sha256": "6ee5db6363c5d2a8d870ef614e68795767f0d653d8e49b8f7e38309f31f3949c"
+    },
+    {
+      "path": "output/control/run_manifest/99d5e6b7-5c27-591e-948b-5cbc54b88e4c.json",
+      "sha256": "00c7b4bacbb648a43d1c7b496cce48a0e9ded7435fae24ba47ccbe06d3e26364"
+    },
+    {
+      "path": "run-reports/pipeline/chembl_protein_class/0151d488-d942-51ba-8f06-d9dfe652382f/pipeline-run-report.json",
+      "sha256": "ef08bf41fb20bcb684d1f6d38a97a9998df87432f951981b2765a6bde53cc3a8"
+    },
+    {
+      "path": "run-reports/pipeline/chembl_protein_class/0151d488-d942-51ba-8f06-d9dfe652382f/pipeline-run-report.md",
+      "sha256": "df65d3075f2a68b3ceb071970daf8bc1ec43d2f607dea177a1f72643f808ab55"
+    },
+    {
+      "path": "run-reports/pipeline/chembl_protein_class/0151d488-d942-51ba-8f06-d9dfe652382f/status-revisions/40f9549cdd62da61d919f58a62c0a4d75ff4ea7dc405375a9234b0cde2f67b14.json",
+      "sha256": "6db061635258a7682b46bc636475e4b360d7eda3875da785c55b043b73e62ec3"
+    }
+  ]
+}

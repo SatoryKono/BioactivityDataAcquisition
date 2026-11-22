@@ -1,0 +1,18 @@
+{
+  "workflow": "chembl_publication_similarity",
+  "limit": 1000,
+  "exit_code": 0,
+  "status": "success",
+  "workflow_run_id": "bc4ead33-d7b1-5ab1-a7ad-c9d26c891b1d",
+  "steps": [
+    {
+      "step_id": "run_chembl_publication_similarity",
+      "kind": "pipeline",
+      "status": "success",
+      "pipeline_name": "chembl_publication_similarity",
+      "pipeline_run_id": "df8f3565-f476-51ae-86ed-a7f5d32a2aea",
+      "error_type": null,
+      "error_message": null
+    }
+  ]
+}

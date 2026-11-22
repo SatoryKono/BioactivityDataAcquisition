@@ -1,0 +1,195 @@
+{
+  "execution": [
+    {
+      "error_message": "Circuit breaker open for chembl. Retry after 2998.7404711000127s",
+      "error_type": "ServiceUnavailableError",
+      "gold_excluded_by_contract": 0,
+      "kind": "pipeline",
+      "pipeline_manifest_id": "4bd4e6bf-1cc6-530f-ad9d-cc5b70b25e6b",
+      "pipeline_name": "chembl_assay",
+      "pipeline_report_ref": "D:\\github\\BioactivityDataAcquisition\\data\\wf1120\\05\\reports\\pipeline\\chembl_assay\\7bd7fe14-8d2c-54b5-abdf-e662953a9f26\\pipeline-run-report.json",
+      "pipeline_run_id": "7bd7fe14-8d2c-54b5-abdf-e662953a9f26",
+      "records_bronze": 0,
+      "records_extracted": 0,
+      "records_gold": 0,
+      "records_silver": 0,
+      "status": "failed",
+      "step_id": "run_chembl_assay"
+    },
+    {
+      "error_message": "Skipped because upstream step 'run_chembl_assay' failed before this step could execute.",
+      "error_type": "UpstreamStepFailed",
+      "kind": "pipeline",
+      "pipeline_name": "chembl_target",
+      "records_extracted": 0,
+      "status": "skipped",
+      "step_id": "run_chembl_target"
+    },
+    {
+      "error_message": "Skipped because upstream step 'run_chembl_assay' failed before this step could execute.",
+      "error_type": "UpstreamStepFailed",
+      "kind": "transform",
+      "records_extracted": 0,
+      "status": "skipped",
+      "step_id": "reconcile_assay_target_orphans"
+    },
+    {
+      "error_message": "Skipped because upstream step 'run_chembl_target' failed before this step could execute.",
+      "error_type": "UpstreamStepFailed",
+      "kind": "pipeline",
+      "pipeline_name": "chembl_publication",
+      "records_extracted": 0,
+      "status": "skipped",
+      "step_id": "run_chembl_publication"
+    },
+    {
+      "error_message": "Skipped because upstream step 'reconcile_assay_target_orphans' failed before this step could execute.",
+      "error_type": "UpstreamStepFailed",
+      "kind": "transform",
+      "records_extracted": 0,
+      "status": "skipped",
+      "step_id": "reconcile_assay_publication_orphans"
+    },
+    {
+      "error_message": "Skipped because upstream step 'reconcile_assay_publication_orphans' failed before this step could execute.",
+      "error_type": "UpstreamStepFailed",
+      "kind": "transform",
+      "records_extracted": 0,
+      "status": "skipped",
+      "step_id": "reconcile_target_assay_orphans"
+    },
+    {
+      "error_message": "Skipped because upstream step 'reconcile_target_assay_orphans' failed before this step could execute.",
+      "error_type": "UpstreamStepFailed",
+      "kind": "transform",
+      "records_extracted": 0,
+      "status": "skipped",
+      "step_id": "reconcile_publication_assay_orphans"
+    }
+  ],
+  "identity": {
+    "completed_at": "2026-11-20T08:54:20.645989+00:00",
+    "duration_seconds": 99.12098990000959,
+    "execution_fingerprint": "a3394a88323fb8bbd9241ade1e9f61aa715f3b33e9655d6d66a3e6be66a11031",
+    "manifest_id": "b89c2e62-dce1-580d-baf3-1d561efb28a4",
+    "resumed": false,
+    "started_at": "2026-11-20T08:52:41.525004+00:00",
+    "status": "failed",
+    "workflow_name": "chembl_baseline",
+    "workflow_run_id": "2b028c59-db6a-5ff3-afc4-6d17c60706b6",
+    "workflow_version": "1.2.0"
+  },
+  "index": {
+    "chembl_assay": {
+      "records_extracted": 0,
+      "step_ids": [
+        "run_chembl_assay"
+      ]
+    },
+    "chembl_publication": {
+      "records_extracted": 0,
+      "step_ids": [
+        "run_chembl_publication"
+      ]
+    },
+    "chembl_target": {
+      "records_extracted": 0,
+      "step_ids": [
+        "run_chembl_target"
+      ]
+    }
+  },
+  "observations": {
+    "Evidence Location": {
+      "facts": {
+        "detail": null,
+        "kind": "workflow",
+        "owner": "chembl_baseline",
+        "relative_data_root": ".",
+        "root_alias": "dashboard_data",
+        "run_id": "2b028c59-db6a-5ff3-afc4-6d17c60706b6",
+        "workflow_run_id": null
+      },
+      "reason": "ok",
+      "verdict": "OK"
+    }
+  },
+  "plan": {
+    "steps": [
+      {
+        "depends_on": [],
+        "kind": "pipeline",
+        "pipeline_name": "chembl_assay",
+        "step_id": "run_chembl_assay",
+        "transform_name": null
+      },
+      {
+        "depends_on": [
+          "run_chembl_assay"
+        ],
+        "kind": "pipeline",
+        "pipeline_name": "chembl_target",
+        "step_id": "run_chembl_target",
+        "transform_name": null
+      },
+      {
+        "depends_on": [
+          "run_chembl_assay",
+          "run_chembl_target"
+        ],
+        "kind": "transform",
+        "pipeline_name": null,
+        "step_id": "reconcile_assay_target_orphans",
+        "transform_name": "reconcile_foreign_keys"
+      },
+      {
+        "depends_on": [
+          "run_chembl_target",
+          "run_chembl_assay"
+        ],
+        "kind": "pipeline",
+        "pipeline_name": "chembl_publication",
+        "step_id": "run_chembl_publication",
+        "transform_name": null
+      },
+      {
+        "depends_on": [
+          "reconcile_assay_target_orphans",
+          "run_chembl_publication"
+        ],
+        "kind": "transform",
+        "pipeline_name": null,
+        "step_id": "reconcile_assay_publication_orphans",
+        "transform_name": "reconcile_foreign_keys"
+      },
+      {
+        "depends_on": [
+          "reconcile_assay_publication_orphans"
+        ],
+        "kind": "transform",
+        "pipeline_name": null,
+        "step_id": "reconcile_target_assay_orphans",
+        "transform_name": "reconcile_foreign_keys"
+      },
+      {
+        "depends_on": [
+          "reconcile_target_assay_orphans"
+        ],
+        "kind": "transform",
+        "pipeline_name": null,
+        "step_id": "reconcile_publication_assay_orphans",
+        "transform_name": "reconcile_foreign_keys"
+      }
+    ]
+  },
+  "schema_version": "workflow_run_report_v1",
+  "totals": {
+    "records_extracted_sum": 0,
+    "records_gold_sum": 0,
+    "records_silver_sum": 0,
+    "steps_failed": 1,
+    "steps_planned": 7,
+    "steps_skipped": 6,
+    "steps_succeeded": 0
+  }
+}

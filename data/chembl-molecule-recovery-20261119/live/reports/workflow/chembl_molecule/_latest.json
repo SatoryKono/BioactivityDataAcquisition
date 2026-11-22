@@ -1,0 +1,9 @@
+{
+  "completed_at": "2026-11-20T04:37:40.023079+00:00",
+  "json_path": "D:/github/BioactivityDataAcquisition/data/chembl-molecule-recovery-20261119/live/reports/workflow/chembl_molecule/0b68c9b0-17a2-5f2b-ad4c-f5056820fdce/workflow-run-report.json",
+  "kind": "workflow_run_report",
+  "markdown_path": "D:/github/BioactivityDataAcquisition/data/chembl-molecule-recovery-20261119/live/reports/workflow/chembl_molecule/0b68c9b0-17a2-5f2b-ad4c-f5056820fdce/workflow-run-report.md",
+  "status": "success",
+  "workflow_name": "chembl_molecule",
+  "workflow_run_id": "0b68c9b0-17a2-5f2b-ad4c-f5056820fdce"
+}

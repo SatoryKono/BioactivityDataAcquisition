@@ -1,0 +1,22 @@
+{
+  "workflow": "uniprot_idmapping",
+  "limit": 1000,
+  "exit_code": 0,
+  "status": "success",
+  "workflow_run_id": "ea04b65b-18f9-5289-bfe2-0b3433e93770",
+  "started_at": "2026-11-20T13:53:46.0032198+03:00",
+  "completed_at": "2026-11-20T13:54:54.5730996+03:00",
+  "steps": [
+    {
+      "step_id": "run_uniprot_idmapping",
+      "kind": "pipeline",
+      "status": "success",
+      "pipeline_name": "uniprot_idmapping",
+      "pipeline_run_id": "a1033ef3-68d6-5f55-962a-ea967f0c202c",
+      "error_type": null,
+      "error_message": null
+    }
+  ],
+  "metrics_enabled": true,
+  "report_root": "D:\\github\\BioactivityDataAcquisition/reports/run-reports"
+}

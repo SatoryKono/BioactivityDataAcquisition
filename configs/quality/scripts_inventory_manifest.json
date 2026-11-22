@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-19T17:05:26.723898+00:00",
+  "generated_at": "2026-11-20T10:18:11.689076+00:00",
   "summary": {
     "total_scripts": 773,
     "status_counts": {
@@ -2955,7 +2955,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 128,
+          "line": 129,
           "source_group": "docs",
           "text": "- Grok project-domain audit workflow: scripts/ai/generate_project_domain_audit_workflow.py -- generates .grok/workflows/project-domain-audit.rhai"
         },
@@ -6476,25 +6476,25 @@
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 96,
+          "line": 97,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts render prompt.audit.comprehensive --param SCOPE=repo"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 118,
+          "line": 119,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts compile --domain docs --profile audit-readonly"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 119,
+          "line": 120,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts render prompt.audit.cycle --param SCOPE=src/bioetl --param DOMAIN=docs"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 120,
+          "line": 121,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts check"
         },
@@ -6519,7 +6519,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 113,
+          "line": 114,
           "source_group": "docs",
           "text": "in `scripts/ai/prompts/check.py` (per-card override `max_rendered_lines`)."
         },
@@ -11996,7 +11996,7 @@
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 906,
+          "line": 899,
           "source_group": "ci",
           "text": "uv run --with packaging==26.3 --no-sync --frozen --no-build python -m scripts.engineering.ci.pr_lane_results build \\"
         },
@@ -23180,7 +23180,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_github_actions_runtime_policy.py",
-          "line": 206,
+          "line": 207,
           "source_group": "scripts",
           "text": "vs this list is reviewed by `github_settings_review.py`, not here."
         },

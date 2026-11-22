@@ -1,0 +1,18 @@
+{
+  "workflow": "chembl_compound_record",
+  "limit": 1000,
+  "exit_code": 0,
+  "status": "success",
+  "workflow_run_id": "46a3891a-ece5-5a84-9247-2b944c3a829d",
+  "steps": [
+    {
+      "step_id": "run_chembl_compound_record",
+      "kind": "pipeline",
+      "status": "success",
+      "pipeline_name": "chembl_compound_record",
+      "pipeline_run_id": "ef04189c-3aca-563b-a7b9-203cf66f8e0b",
+      "error_type": null,
+      "error_message": null
+    }
+  ]
+}

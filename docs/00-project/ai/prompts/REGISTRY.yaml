@@ -5,7 +5,7 @@
 version: 2.1.0
 root: docs/00-project/ai/prompts
 schema: _schema/prompt.schema.json
-note: 'Epic #10081: 18 scenarios. Operator paste only — not runtime SSOT.'
+note: 'Epic #10081: 19 scenarios. Operator paste only — not runtime SSOT.'
 scenarios:
 - id: session-bootstrap
   scenario: Daily session lock for Grok/Codex
@@ -234,6 +234,27 @@ scenarios:
   - run-ledger
   schema: _schema/prompt.schema.json
   deps:
+  - prompt.fragment.issue-state-machine-v3
+  - prompt.fragment.gh-powershell
+- id: audit-full-run
+  scenario: Full sequential all-stage audit run
+  role: py-audit-bot
+  prompt: prompt.audit.full-run
+  inputs:
+  - DOMAINS
+  - N
+  - MODE
+  - DEPTH
+  - LANGUAGE
+  - RECONCILE
+  outputs:
+  - evidence-ledger.json
+  - final-sweep.md
+  - run-ledger
+  schema: _schema/prompt.schema.json
+  deps:
+  - prompt.fragment.cyclic-kernel-v3
+  - prompt.fragment.evidence-contract-v3
   - prompt.fragment.issue-state-machine-v3
   - prompt.fragment.gh-powershell
 - id: test-loop
@@ -632,6 +653,19 @@ entries:
   - operator
   summary: Sequential library/audit run — 10 cycle cards, REQ-* binding, issue/fix/close
     gates
+- id: prompt.audit.full-run
+  path: library/audit/full-run.md
+  status: active
+  class: operator-paste
+  tags:
+  - audit
+  - sequential
+  - full-run
+  - cycle
+  - github
+  - operator
+  summary: Full sequential audit run — bootstrap, shared inventory, 14 ordered domains
+    with issue/fix/close gates, reconcile, final sweep, closeout
 - id: prompt.audit.tech-debt
   path: library/audit/tech-debt.md
   status: active

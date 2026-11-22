@@ -1,0 +1,9 @@
+{
+  "completed_at": "2026-11-20T08:52:25.005123+00:00",
+  "json_path": "D:/github/BioactivityDataAcquisition/data/wf1120/04/reports/workflow/chembl_assay_parameters/bee6e25d-6a00-50ec-a4aa-32f2933cb4dc/workflow-run-report.json",
+  "kind": "workflow_run_report",
+  "markdown_path": "D:/github/BioactivityDataAcquisition/data/wf1120/04/reports/workflow/chembl_assay_parameters/bee6e25d-6a00-50ec-a4aa-32f2933cb4dc/workflow-run-report.md",
+  "status": "success",
+  "workflow_name": "chembl_assay_parameters",
+  "workflow_run_id": "bee6e25d-6a00-50ec-a4aa-32f2933cb4dc"
+}

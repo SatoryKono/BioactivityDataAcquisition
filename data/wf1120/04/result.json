@@ -1,0 +1,18 @@
+{
+  "workflow": "chembl_assay_parameters",
+  "limit": 1000,
+  "exit_code": 0,
+  "status": "success",
+  "workflow_run_id": "bee6e25d-6a00-50ec-a4aa-32f2933cb4dc",
+  "steps": [
+    {
+      "step_id": "run_chembl_assay_parameters",
+      "kind": "pipeline",
+      "status": "success",
+      "pipeline_name": "chembl_assay_parameters",
+      "pipeline_run_id": "49e3e40f-ad71-5c3c-b25c-15e8204f74ad",
+      "error_type": null,
+      "error_message": null
+    }
+  ]
+}

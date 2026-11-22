@@ -1,0 +1,137 @@
+[
+  {
+    "Workflow": "chembl_assay",
+    "Directory": "02",
+    "Limit": 1000
+  },
+  {
+    "Workflow": "chembl_activity",
+    "Directory": "03",
+    "Limit": 1000
+  },
+  {
+    "Workflow": "chembl_assay_parameters",
+    "Directory": "04",
+    "Limit": 1000
+  },
+  {
+    "Workflow": "chembl_baseline",
+    "Directory": "05",
+    "Limit": 1000
+  },
+  {
+    "Workflow": "chembl_cell_line",
+    "Directory": "06",
+    "Limit": 1000
+  },
+  {
+    "Workflow": "chembl_compound_record",
+    "Directory": "07",
+    "Limit": 1000
+  },
+  {
+    "Workflow": "chembl_core",
+    "Directory": "08",
+    "Limit": 1000
+  },
+  {
+    "Workflow": "chembl_molecule",
+    "Directory": "09",
+    "Limit": 1000
+  },
+  {
+    "Workflow": "chembl_protein_class",
+    "Directory": "10",
+    "Limit": 1000
+  },
+  {
+    "Workflow": "chembl_publication_similarity",
+    "Directory": "11",
+    "Limit": 1000
+  },
+  {
+    "Workflow": "chembl_publication_term",
+    "Directory": "12",
+    "Limit": 1000
+  },
+  {
+    "Workflow": "chembl_publication",
+    "Directory": "13",
+    "Limit": 1000
+  },
+  {
+    "Workflow": "chembl_reference_pack",
+    "Directory": "14",
+    "Limit": 1000
+  },
+  {
+    "Workflow": "chembl_subcellular_fraction",
+    "Directory": "15",
+    "Limit": 1000
+  },
+  {
+    "Workflow": "chembl_target_component",
+    "Directory": "16",
+    "Limit": 1000
+  },
+  {
+    "Workflow": "chembl_target_protein_classification",
+    "Directory": "17",
+    "Limit": 1000
+  },
+  {
+    "Workflow": "chembl_target",
+    "Directory": "18",
+    "Limit": 1000
+  },
+  {
+    "Workflow": "chembl_tissue",
+    "Directory": "19",
+    "Limit": 1000
+  },
+  {
+    "Workflow": "crossref_publication",
+    "Directory": "20",
+    "Limit": 1000
+  },
+  {
+    "Workflow": "openalex_publication",
+    "Directory": "21",
+    "Limit": 1000
+  },
+  {
+    "Workflow": "pubchem_compound",
+    "Directory": "22",
+    "Limit": 1000
+  },
+  {
+    "Workflow": "publication_provider_pack",
+    "Directory": "23",
+    "Limit": 1000
+  },
+  {
+    "Workflow": "pubmed_publication",
+    "Directory": "24",
+    "Limit": 1000
+  },
+  {
+    "Workflow": "semanticscholar_publication",
+    "Directory": "25",
+    "Limit": 1000
+  },
+  {
+    "Workflow": "uniprot_idmapping",
+    "Directory": "26",
+    "Limit": 1000
+  },
+  {
+    "Workflow": "uniprot_protein",
+    "Directory": "27",
+    "Limit": 1000
+  },
+  {
+    "Workflow": "uniprot_support_pack",
+    "Directory": "28",
+    "Limit": 1000
+  }
+]

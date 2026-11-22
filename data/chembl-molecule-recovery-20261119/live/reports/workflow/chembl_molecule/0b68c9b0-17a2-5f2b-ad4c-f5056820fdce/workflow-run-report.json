@@ -1,0 +1,74 @@
+{
+  "execution": [
+    {
+      "gold_excluded_by_contract": 0,
+      "kind": "pipeline",
+      "pipeline_manifest_id": "223829d1-c380-5b78-a0cd-a4b1f3f2274c",
+      "pipeline_name": "chembl_molecule",
+      "pipeline_report_ref": "D:\\github\\BioactivityDataAcquisition\\data\\chembl-molecule-recovery-20261119\\live\\reports\\pipeline\\chembl_molecule\\3f634546-3144-5462-9b0b-62c2ce411ccc\\pipeline-run-report.json",
+      "pipeline_run_id": "3f634546-3144-5462-9b0b-62c2ce411ccc",
+      "records_bronze": 1000,
+      "records_extracted": 1000,
+      "records_gold": 1000,
+      "records_silver": 1000,
+      "status": "success",
+      "step_id": "run_chembl_molecule"
+    }
+  ],
+  "identity": {
+    "completed_at": "2026-11-20T04:37:40.023079+00:00",
+    "duration_seconds": 42.60838079999667,
+    "execution_fingerprint": "5f38e124d02f304dc0e3f493788be09620d46a3471202cd4046f9b12632ad820",
+    "manifest_id": "3030d998-c080-5455-ada3-e4750ab02e5b",
+    "resumed": false,
+    "started_at": "2026-11-20T04:36:57.414699+00:00",
+    "status": "success",
+    "workflow_name": "chembl_molecule",
+    "workflow_run_id": "0b68c9b0-17a2-5f2b-ad4c-f5056820fdce",
+    "workflow_version": "1.0.0"
+  },
+  "index": {
+    "chembl_molecule": {
+      "records_extracted": 1000,
+      "step_ids": [
+        "run_chembl_molecule"
+      ]
+    }
+  },
+  "observations": {
+    "Evidence Location": {
+      "facts": {
+        "detail": null,
+        "kind": "workflow",
+        "owner": "chembl_molecule",
+        "relative_data_root": ".",
+        "root_alias": "dashboard_data",
+        "run_id": "0b68c9b0-17a2-5f2b-ad4c-f5056820fdce",
+        "workflow_run_id": null
+      },
+      "reason": "ok",
+      "verdict": "OK"
+    }
+  },
+  "plan": {
+    "steps": [
+      {
+        "depends_on": [],
+        "kind": "pipeline",
+        "pipeline_name": "chembl_molecule",
+        "step_id": "run_chembl_molecule",
+        "transform_name": null
+      }
+    ]
+  },
+  "schema_version": "workflow_run_report_v1",
+  "totals": {
+    "records_extracted_sum": 1000,
+    "records_gold_sum": 1000,
+    "records_silver_sum": 1000,
+    "steps_failed": 0,
+    "steps_planned": 1,
+    "steps_skipped": 0,
+    "steps_succeeded": 1
+  }
+}

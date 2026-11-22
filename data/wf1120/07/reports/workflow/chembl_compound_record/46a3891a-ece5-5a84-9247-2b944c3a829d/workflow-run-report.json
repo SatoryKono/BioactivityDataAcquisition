@@ -1,0 +1,74 @@
+{
+  "execution": [
+    {
+      "gold_excluded_by_contract": 0,
+      "kind": "pipeline",
+      "pipeline_manifest_id": "a109014c-d9e3-5ffc-8e1d-9b020328e317",
+      "pipeline_name": "chembl_compound_record",
+      "pipeline_report_ref": "D:\\github\\BioactivityDataAcquisition\\data\\wf1120\\07\\reports\\pipeline\\chembl_compound_record\\ef04189c-3aca-563b-a7b9-203cf66f8e0b\\pipeline-run-report.json",
+      "pipeline_run_id": "ef04189c-3aca-563b-a7b9-203cf66f8e0b",
+      "records_bronze": 1000,
+      "records_extracted": 1000,
+      "records_gold": 1000,
+      "records_silver": 1000,
+      "status": "success",
+      "step_id": "run_chembl_compound_record"
+    }
+  ],
+  "identity": {
+    "completed_at": "2026-11-20T08:57:40.541873+00:00",
+    "duration_seconds": 142.6897450999968,
+    "execution_fingerprint": "652e29525a78ef1798016cd45b2fa3c0c0e9af948e99745b31c7ecf650eaa004",
+    "manifest_id": "9092f728-6666-54c3-9836-d44e0c9b26f9",
+    "resumed": false,
+    "started_at": "2026-11-20T08:55:17.852133+00:00",
+    "status": "success",
+    "workflow_name": "chembl_compound_record",
+    "workflow_run_id": "46a3891a-ece5-5a84-9247-2b944c3a829d",
+    "workflow_version": "1.0.0"
+  },
+  "index": {
+    "chembl_compound_record": {
+      "records_extracted": 1000,
+      "step_ids": [
+        "run_chembl_compound_record"
+      ]
+    }
+  },
+  "observations": {
+    "Evidence Location": {
+      "facts": {
+        "detail": null,
+        "kind": "workflow",
+        "owner": "chembl_compound_record",
+        "relative_data_root": ".",
+        "root_alias": "dashboard_data",
+        "run_id": "46a3891a-ece5-5a84-9247-2b944c3a829d",
+        "workflow_run_id": null
+      },
+      "reason": "ok",
+      "verdict": "OK"
+    }
+  },
+  "plan": {
+    "steps": [
+      {
+        "depends_on": [],
+        "kind": "pipeline",
+        "pipeline_name": "chembl_compound_record",
+        "step_id": "run_chembl_compound_record",
+        "transform_name": null
+      }
+    ]
+  },
+  "schema_version": "workflow_run_report_v1",
+  "totals": {
+    "records_extracted_sum": 1000,
+    "records_gold_sum": 1000,
+    "records_silver_sum": 1000,
+    "steps_failed": 0,
+    "steps_planned": 1,
+    "steps_skipped": 0,
+    "steps_succeeded": 1
+  }
+}

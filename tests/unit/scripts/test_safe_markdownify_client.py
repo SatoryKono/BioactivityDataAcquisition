@@ -85,9 +85,11 @@ def test_protocol_initialization_and_tool_visibility_remain_session_bound(handle
     assert handler._sessions.touch(session)
     handler.headers["Mcp-Session-Id"] = session
     handler._dispatch_request({"id": 2, "method": "tools/list"})
-    assert [
-        tool["name"] for tool in handler.reply.call_args.args[1]["result"]["tools"]
-    ] == ["get-markdown-file"]
+    status, response = handler.reply.call_args.args
+    assert status == 200
+    assert [tool["name"] for tool in response["result"]["tools"]] == [
+        "get-markdown-file"
+    ]
     handler.do_DELETE()
     assert not handler._sessions.touch(session)
     handler._dispatch_request({"id": 3, "method": "ping"})
@@ -817,7 +819,7 @@ def test_active_tool_reply_remains_inside_the_shutdown_gate(handler, monkeypatch
     handler.headers["Mcp-Session-Id"] = session
     replies = []
 
-    def reply(status, value, session):
+    def reply(status, value):
         assert not handler._gate.acquire(blocking=False), (
             "shutdown could pass before reply"
         )
@@ -1697,13 +1699,10 @@ def test_worker_timeout_returns_a_tool_error_and_accepts_the_next_rpc(
     convert.assert_called_once_with(
         handler._spec, "get-markdown-file", {"filepath": "private-file.md"}
     )
-    status, response, returned_session = handler.reply.call_args.args
+    status, response = handler.reply.call_args.args
     assert status == 200 and response["result"]["isError"] is True
-    assert returned_session == session
     assert "private-" not in json.dumps(response)
     handler._dispatch_request({"id": 11, "method": "ping"})
-    handler.reply.assert_called_with(
-        200, {"jsonrpc": "2.0", "id": 11, "result": {}}, session
-    )
+    handler.reply.assert_called_with(200, {"jsonrpc": "2.0", "id": 11, "result": {}})
     assert handler._sessions.touch(session)
     convert.assert_called_once()

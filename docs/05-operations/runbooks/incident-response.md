@@ -202,8 +202,11 @@ Symptoms and log messages are not alert identifiers.
 
 - **Alert**: `BioETLCircuitBreakerStuckOpen`.
 - **Diagnosis**: Inspect adapter state and transition logs. The rule uses a
-  rolling maximum; firing does not prove every instant in the window was open
-  or that retry exhaustion caused the state.
+  rolling maximum for directly scraped samples. For Pushgateway snapshots it
+  checks the latest state only when the matching group's `push_time_seconds`
+  is positive, no later than evaluation time, and less than 15 minutes old.
+  Repeated scrapes do not renew that publication time. Firing does not prove
+  every instant in the window was open or that retry exhaustion caused the state.
 - **Action**: Diagnose the provider/network fault and verify recovery before
   resuming traffic. Do not disable the breaker or force repeated requests against
   a failing provider merely to clear the alert.

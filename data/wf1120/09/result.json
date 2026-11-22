@@ -1,0 +1,18 @@
+{
+  "workflow": "chembl_molecule",
+  "limit": 1000,
+  "exit_code": 0,
+  "status": "success",
+  "workflow_run_id": "ba4e3fc2-3c82-5c65-98b7-26290c0a8ffb",
+  "steps": [
+    {
+      "step_id": "run_chembl_molecule",
+      "kind": "pipeline",
+      "status": "success",
+      "pipeline_name": "chembl_molecule",
+      "pipeline_run_id": "613bcae8-34f4-5ae3-a560-27eefcfd9d65",
+      "error_type": null,
+      "error_message": null
+    }
+  ]
+}

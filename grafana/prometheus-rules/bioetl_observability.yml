@@ -1655,7 +1655,40 @@ groups:
           runbook: "docs/05-operations/runbooks/observability-checklist.md"
 
       - alert: BioETLIngestionThroughputDegraded
-        expr: (max by (pipeline, run_type) (max_over_time(bioetl_stage_backlog_records{stage="ingestion"}[15m])) > 0) and on (pipeline, run_type) (max by (pipeline, run_type) (max_over_time(bioetl_stage_lag_seconds{stage="ingestion"}[15m])) >= 300)
+        expr: |
+          (max by (pipeline, run_type) (
+            (
+              max_over_time(bioetl_stage_backlog_records{stage="ingestion"}[15m])
+              and on (job, instance) up{job="bioetl",instance!=""}
+            )
+            or
+            (
+              bioetl_stage_backlog_records{stage="ingestion"}
+              and on (job, instance, pipeline, run_type)
+                (
+                  (push_time_seconds{job="bioetl",instance=""} > time() - 900)
+                  and (push_time_seconds{job="bioetl",instance=""} <= time())
+                  and (push_time_seconds{job="bioetl",instance=""} > 0)
+                )
+            )
+          ) > 0)
+          and on (pipeline, run_type)
+          (max by (pipeline, run_type) (
+            (
+              max_over_time(bioetl_stage_lag_seconds{stage="ingestion"}[15m])
+              and on (job, instance) up{job="bioetl",instance!=""}
+            )
+            or
+            (
+              bioetl_stage_lag_seconds{stage="ingestion"}
+              and on (job, instance, pipeline, run_type)
+                (
+                  (push_time_seconds{job="bioetl",instance=""} > time() - 900)
+                  and (push_time_seconds{job="bioetl",instance=""} <= time())
+                  and (push_time_seconds{job="bioetl",instance=""} > 0)
+                )
+            )
+          ) >= 300)
         for: 1m
         labels:
           severity: warning
@@ -1665,7 +1698,23 @@ groups:
           runbook: "docs/05-operations/runbooks/observability-checklist.md"
 
       - alert: BioETLStageBacklogActive
-        expr: max by (pipeline, run_type, stage) (max_over_time(bioetl_stage_backlog_records[15m])) > 0
+        expr: |
+          max by (pipeline, run_type, stage) (
+            (
+              max_over_time(bioetl_stage_backlog_records[15m])
+              and on (job, instance) up{job="bioetl",instance!=""}
+            )
+            or
+            (
+              bioetl_stage_backlog_records
+              and on (job, instance, pipeline, run_type)
+                (
+                  (push_time_seconds{job="bioetl",instance=""} > time() - 900)
+                  and (push_time_seconds{job="bioetl",instance=""} <= time())
+                  and (push_time_seconds{job="bioetl",instance=""} > 0)
+                )
+            )
+          ) > 0
         for: 5m
         labels:
           severity: warning
@@ -1675,7 +1724,23 @@ groups:
           runbook: "docs/05-operations/runbooks/observability-checklist.md"
 
       - alert: BioETLStageLagHigh
-        expr: max by (pipeline, run_type, stage) (max_over_time(bioetl_stage_lag_seconds[15m])) >= 300
+        expr: |
+          max by (pipeline, run_type, stage) (
+            (
+              max_over_time(bioetl_stage_lag_seconds[15m])
+              and on (job, instance) up{job="bioetl",instance!=""}
+            )
+            or
+            (
+              bioetl_stage_lag_seconds
+              and on (job, instance, pipeline, run_type)
+                (
+                  (push_time_seconds{job="bioetl",instance=""} > time() - 900)
+                  and (push_time_seconds{job="bioetl",instance=""} <= time())
+                  and (push_time_seconds{job="bioetl",instance=""} > 0)
+                )
+            )
+          ) >= 300
         for: 5m
         labels:
           severity: warning
@@ -2004,13 +2069,29 @@ groups:
           runbook: "docs/05-operations/runbooks/incident-response.md"
 
       - alert: BioETLCircuitBreakerStuckOpen
-        expr: max by (adapter) (max_over_time(bioetl_circuit_breaker_state[15m])) >= 2
+        expr: |
+          max by (adapter) (
+            (
+              max_over_time(bioetl_circuit_breaker_state[15m])
+              and on (job, instance) up{job="bioetl",instance!=""}
+            )
+            or
+            (
+              bioetl_circuit_breaker_state
+              and on (job, instance, pipeline, run_type)
+                (
+                  (push_time_seconds{job="bioetl",instance=""} > time() - 900)
+                  and (push_time_seconds{job="bioetl",instance=""} <= time())
+                  and (push_time_seconds{job="bioetl",instance=""} > 0)
+                )
+            )
+          ) >= 2
         for: 10m
         labels:
           severity: warning
         annotations:
           summary: "Circuit breaker remained open"
-          description: "bioetl_circuit_breaker_state stayed open for adapter={{ $labels.adapter }} within the last 15m."
+          description: "Recent bioetl_circuit_breaker_state observations reported open for adapter={{ $labels.adapter }} within the last 15m."
           runbook: "docs/05-operations/runbooks/incident-response.md"
 
       - alert: BioETLProviderAdapterLatencyHigh

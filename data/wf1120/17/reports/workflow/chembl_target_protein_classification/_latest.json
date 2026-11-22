@@ -1,0 +1,9 @@
+{
+  "completed_at": "2026-11-20T09:26:05.217322+00:00",
+  "json_path": "D:/github/BioactivityDataAcquisition/data/wf1120/17/reports/workflow/chembl_target_protein_classification/e7d65d91-dbbf-5b05-a5b4-f972fd1fd589/workflow-run-report.json",
+  "kind": "workflow_run_report",
+  "markdown_path": "D:/github/BioactivityDataAcquisition/data/wf1120/17/reports/workflow/chembl_target_protein_classification/e7d65d91-dbbf-5b05-a5b4-f972fd1fd589/workflow-run-report.md",
+  "status": "failed",
+  "workflow_name": "chembl_target_protein_classification",
+  "workflow_run_id": "e7d65d91-dbbf-5b05-a5b4-f972fd1fd589"
+}

@@ -1,0 +1,11 @@
+{
+  "completed_at": "2026-11-20T09:18:20.020513+00:00",
+  "json_path": "D:/github/BioactivityDataAcquisition/data/wf1120/14/reports/pipeline/chembl_protein_class/ae39d4da-0118-51f7-b96a-da23eaf4931a/pipeline-run-report.json",
+  "json_sha256": "5596c0d5a979894d3b6205e01d227857fb95c6d4e61d60fb7eb80afba9215ccf",
+  "kind": "pipeline_run_report",
+  "markdown_path": "D:/github/BioactivityDataAcquisition/data/wf1120/14/reports/pipeline/chembl_protein_class/ae39d4da-0118-51f7-b96a-da23eaf4931a/pipeline-run-report.md",
+  "markdown_sha256": "dfcab775b9ab0299a1713dec9b7ef74363e5e0e5aa727262cf72f936fff15d4d",
+  "pipeline_name": "chembl_protein_class",
+  "run_id": "ae39d4da-0118-51f7-b96a-da23eaf4931a",
+  "status": "failed"
+}

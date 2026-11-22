@@ -34,7 +34,7 @@ scenario-table content parity (`check_readme_scenarios`), not version equality.
 ```text
 docs/00-project/ai/prompts/
   README.md
-  REGISTRY.yaml          # 18 scenarios + entries
+  REGISTRY.yaml          # 19 scenarios + entries
   domains.yaml           # 28 ADR-060 overlays (consolidated)
   CATALOG.md             # optional, from python -m scripts.ai.prompts catalog
   _schema/*.json         # 6 schemas
@@ -45,7 +45,7 @@ docs/00-project/ai/prompts/
 
 Historical copies: `docs/99-archive/prompts-2026-09/`.
 
-## 18 scenarios
+## 19 scenarios
 
 See `REGISTRY.yaml` `scenarios:`. Primary cards (this table must mirror
 `scenarios:` id + prompt id both ways — enforced by `check`):
@@ -70,6 +70,7 @@ See `REGISTRY.yaml` `scenarios:`. Primary cards (this table must mirror
 | architecture-cycle | `prompt.architecture.cycle` | [library/audit/architecture.md](library/audit/architecture.md) |
 | dashboard-audit | `prompt.observability.dashboard-audit-cycle` | [library/audit/dashboard.md](library/audit/dashboard.md) |
 | sequential-run | `prompt.audit.sequential-run` | [library/audit/sequential-run.md](library/audit/sequential-run.md) |
+| audit-full-run | `prompt.audit.full-run` | [library/audit/full-run.md](library/audit/full-run.md) |
 
 Deprecated: `prompt.audit.grok-cycle`, `prompt.audit.cyclic-pack` → `prompt.audit.cycle`.
 

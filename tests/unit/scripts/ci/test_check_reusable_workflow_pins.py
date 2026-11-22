@@ -261,7 +261,7 @@ def test_local_action_yaml_suffix_passes_and_escape_fails(tmp_path: Path) -> Non
 
 DOCKER_LANE_PIN = (
     "SatoryKono/BioactivityDataAcquisition/.github/workflows/docker.yml"
-    "@84548f8bfed680b9415fc6855d6be059ffd9d1ab"
+    "@390e7fd01eea914f934ffb7dc9aeaab5d1d54a80"
 )
 DOCS_LANE_PIN = (
     "SatoryKono/BioactivityDataAcquisition/.github/workflows/docs.yml"
@@ -485,9 +485,15 @@ def test_actual_pinned_docker_workflow_preserves_sarif_comparison() -> None:
     )
     assert result.returncode == 0, "Pinned workflow blob requires full Git history"
     pinned_workflow = yaml.safe_load(result.stdout)
-    caller_permissions = caller["jobs"]["docker-lane"]["permissions"]
+    lane = caller["jobs"]["docker-lane"]
+    triggers = pinned_workflow.get("on", pinned_workflow.get(True))
+    inputs = triggers["workflow_call"]["inputs"]
+    assert "caller-sha" not in inputs
+    assert inputs["cache-write"]["default"] is False
+    assert lane.get("with", {}).get("cache-write", False) is False
+    caller_permissions = lane["permissions"]
     permission_levels = {"none": 0, "read": 1, "write": 2}
-    # GitHub validates every nested job, including skipped publish jobs.
+    # GitHub validates every nested job, including skipped jobs.
     for job in pinned_workflow["jobs"].values():
         for scope, requested in job.get("permissions", {}).items():
             assert (

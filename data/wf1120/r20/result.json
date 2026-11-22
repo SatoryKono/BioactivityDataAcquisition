@@ -1,0 +1,22 @@
+{
+  "workflow": "crossref_publication",
+  "limit": 1000,
+  "exit_code": 0,
+  "status": "success",
+  "workflow_run_id": "7774e50b-bbd2-5816-ae12-ab9dd05892ea",
+  "started_at": "2026-11-20T13:31:21.7061138+03:00",
+  "completed_at": "2026-11-20T13:31:52.2834910+03:00",
+  "steps": [
+    {
+      "step_id": "run_crossref_publication",
+      "kind": "pipeline",
+      "status": "success",
+      "pipeline_name": "crossref_publication",
+      "pipeline_run_id": "1c0b68e0-5663-5dcd-a8db-32a481c4f2d1",
+      "error_type": null,
+      "error_message": null
+    }
+  ],
+  "metrics_enabled": true,
+  "report_root": "D:\\github\\BioactivityDataAcquisition/reports/run-reports"
+}

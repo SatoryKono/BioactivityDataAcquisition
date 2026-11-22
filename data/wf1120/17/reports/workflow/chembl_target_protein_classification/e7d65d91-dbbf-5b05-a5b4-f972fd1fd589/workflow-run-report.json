@@ -1,0 +1,190 @@
+{
+  "execution": [
+    {
+      "error_message": "[Errno 11001] getaddrinfo failed",
+      "error_type": "ExternalServiceError",
+      "gold_excluded_by_contract": 0,
+      "kind": "pipeline",
+      "pipeline_manifest_id": "48042bb7-aa87-5ac3-8258-8b78d3d33dcc",
+      "pipeline_name": "chembl_protein_class",
+      "pipeline_report_ref": "D:\\github\\BioactivityDataAcquisition\\data\\wf1120\\17\\reports\\pipeline\\chembl_protein_class\\6e797f4a-3b88-5cb1-a60e-a3a8387173bb\\pipeline-run-report.json",
+      "pipeline_run_id": "6e797f4a-3b88-5cb1-a60e-a3a8387173bb",
+      "records_bronze": 500,
+      "records_extracted": 500,
+      "records_gold": 499,
+      "records_silver": 499,
+      "status": "failed",
+      "step_id": "run_chembl_protein_class",
+      "top_reasons": [
+        {
+          "count": 1,
+          "outcome": "filtered_out",
+          "reason_code": "FILTERED_OUT_SILVER:protein_class_id",
+          "reason_family": "system"
+        }
+      ]
+    },
+    {
+      "gold_excluded_by_contract": 78,
+      "kind": "pipeline",
+      "pipeline_manifest_id": "189e4e8a-263b-58f9-9108-31eac28f43f0",
+      "pipeline_name": "chembl_target",
+      "pipeline_report_ref": "D:\\github\\BioactivityDataAcquisition\\data\\wf1120\\17\\reports\\pipeline\\chembl_target\\6352bbe3-489a-56fe-bee5-5bf0f4cf0a1e\\pipeline-run-report.json",
+      "pipeline_run_id": "6352bbe3-489a-56fe-bee5-5bf0f4cf0a1e",
+      "records_bronze": 1000,
+      "records_extracted": 1000,
+      "records_gold": 922,
+      "records_silver": 1000,
+      "status": "success",
+      "step_id": "run_chembl_target",
+      "top_reasons": [
+        {
+          "count": 78,
+          "outcome": "excluded_by_contract",
+          "reason_code": "column_filter_mismatch:organism_class",
+          "reason_family": "system"
+        }
+      ]
+    },
+    {
+      "error_message": "Circuit breaker open for chembl. Retry after 2998.8757579999947s",
+      "error_type": "ServiceUnavailableError",
+      "gold_excluded_by_contract": 0,
+      "kind": "pipeline",
+      "pipeline_manifest_id": "7d8e0ad7-1966-5ade-96ff-8b4199962b8b",
+      "pipeline_name": "chembl_target_component",
+      "pipeline_report_ref": "D:\\github\\BioactivityDataAcquisition\\data\\wf1120\\17\\reports\\pipeline\\chembl_target_component\\68e41977-af66-59d1-9829-54301c1791be\\pipeline-run-report.json",
+      "pipeline_run_id": "68e41977-af66-59d1-9829-54301c1791be",
+      "records_bronze": 0,
+      "records_extracted": 0,
+      "records_gold": 0,
+      "records_silver": 0,
+      "status": "failed",
+      "step_id": "run_chembl_target_component"
+    },
+    {
+      "error_message": "Skipped because upstream step 'run_chembl_target_component' failed before this step could execute.",
+      "error_type": "UpstreamStepFailed",
+      "kind": "pipeline",
+      "pipeline_name": "chembl_target_protein_classification",
+      "records_extracted": 0,
+      "status": "skipped",
+      "step_id": "run_chembl_target_protein_classification"
+    }
+  ],
+  "identity": {
+    "completed_at": "2026-11-20T09:26:05.217322+00:00",
+    "duration_seconds": 207.9628575000097,
+    "execution_fingerprint": "7fab9506364985f072a37361e3b498d7e5d22a5749991e6ac7c68f1a2ae3e9f6",
+    "manifest_id": "0e2aba88-732f-5cf8-8eb1-ec01fefbf17f",
+    "resumed": false,
+    "started_at": "2026-11-20T09:22:37.254466+00:00",
+    "status": "failed",
+    "workflow_name": "chembl_target_protein_classification",
+    "workflow_run_id": "e7d65d91-dbbf-5b05-a5b4-f972fd1fd589",
+    "workflow_version": "1.0.0"
+  },
+  "index": {
+    "chembl_protein_class": {
+      "records_extracted": 500,
+      "step_ids": [
+        "run_chembl_protein_class"
+      ]
+    },
+    "chembl_target": {
+      "records_extracted": 1000,
+      "step_ids": [
+        "run_chembl_target"
+      ]
+    },
+    "chembl_target_component": {
+      "records_extracted": 0,
+      "step_ids": [
+        "run_chembl_target_component"
+      ]
+    },
+    "chembl_target_protein_classification": {
+      "records_extracted": 0,
+      "step_ids": [
+        "run_chembl_target_protein_classification"
+      ]
+    }
+  },
+  "observations": {
+    "Evidence Location": {
+      "facts": {
+        "detail": null,
+        "kind": "workflow",
+        "owner": "chembl_target_protein_classification",
+        "relative_data_root": ".",
+        "root_alias": "dashboard_data",
+        "run_id": "e7d65d91-dbbf-5b05-a5b4-f972fd1fd589",
+        "workflow_run_id": null
+      },
+      "reason": "ok",
+      "verdict": "OK"
+    }
+  },
+  "plan": {
+    "steps": [
+      {
+        "depends_on": [],
+        "kind": "pipeline",
+        "pipeline_name": "chembl_protein_class",
+        "step_id": "run_chembl_protein_class",
+        "transform_name": null
+      },
+      {
+        "depends_on": [],
+        "kind": "pipeline",
+        "pipeline_name": "chembl_target",
+        "step_id": "run_chembl_target",
+        "transform_name": null
+      },
+      {
+        "depends_on": [
+          "run_chembl_target"
+        ],
+        "kind": "pipeline",
+        "pipeline_name": "chembl_target_component",
+        "step_id": "run_chembl_target_component",
+        "transform_name": null
+      },
+      {
+        "depends_on": [
+          "run_chembl_target",
+          "run_chembl_target_component",
+          "run_chembl_protein_class"
+        ],
+        "kind": "pipeline",
+        "pipeline_name": "chembl_target_protein_classification",
+        "step_id": "run_chembl_target_protein_classification",
+        "transform_name": null
+      }
+    ]
+  },
+  "reasons_rollup": [
+    {
+      "count": 78,
+      "outcome": "excluded_by_contract",
+      "reason_code": "column_filter_mismatch:organism_class",
+      "reason_family": "system"
+    },
+    {
+      "count": 1,
+      "outcome": "filtered_out",
+      "reason_code": "FILTERED_OUT_SILVER:protein_class_id",
+      "reason_family": "system"
+    }
+  ],
+  "schema_version": "workflow_run_report_v1",
+  "totals": {
+    "records_extracted_sum": 1500,
+    "records_gold_sum": 1421,
+    "records_silver_sum": 1499,
+    "steps_failed": 2,
+    "steps_planned": 4,
+    "steps_skipped": 1,
+    "steps_succeeded": 1
+  }
+}

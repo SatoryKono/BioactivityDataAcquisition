@@ -317,12 +317,11 @@ def _partition_env_needles() -> tuple[tuple[str, ...], tuple[str, ...]]:
     blocked: set[str] = set()
     keyed: set[str] = set()
     for key, value in os.environ.items():
-        if len(value) < 8:
-            continue
         if _is_sealed_field(key):
-            blocked.add(value)
+            if value:
+                blocked.add(value)
             continue
-        if _SECRET_KEY.search(key) is None:
+        if len(value) < 8 or _SECRET_KEY.search(key) is None:
             continue
         keyed.add(value)
     blocked_values = tuple(sorted(blocked, key=len, reverse=True))

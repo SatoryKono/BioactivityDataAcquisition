@@ -1,0 +1,76 @@
+{
+  "schema": "bioetl_local_archive_v1",
+  "manifest_id": "189e4e8a-263b-58f9-9108-31eac28f43f0",
+  "run_id": "6352bbe3-489a-56fe-bee5-5bf0f4cf0a1e",
+  "manifest_sha256": "9b32ebc5e584323ac6fef235a81d065a0d99099ba45f374b34f9dc377e74a323",
+  "files": [
+    {
+      "path": "output/bronze/chembl/target/2026-11-20/batch_2026-11-20_71b92067-5c98-50d9-b4e3-24ca11418b93.jsonl.zst",
+      "sha256": "6c7742eb101a6c79759a13bd6d7b0748604f5f5b9038d321314f179332aab6f2"
+    },
+    {
+      "path": "output/checkpoints/.history/by_manifest/189e4e8a-263b-58f9-9108-31eac28f43f0.json",
+      "sha256": "16549aec9d960102e9f2acfba0f4db98607bdf022ec1f3941fd8386acd5d4d90"
+    },
+    {
+      "path": "output/checkpoints/.history/by_pipeline/chembl_target/6352bbe3-489a-56fe-bee5-5bf0f4cf0a1e/1795166707039931600.json",
+      "sha256": "9f2f307e80c10537b69e9ca77f3c3f2db671da378f5556fe6c60b46e3135e36f"
+    },
+    {
+      "path": "output/checkpoints/.history/by_pipeline/chembl_target/6352bbe3-489a-56fe-bee5-5bf0f4cf0a1e/1795166707048282500.json",
+      "sha256": "6037428f38221361dcc47f8c329f93bb789deea298560550e5bf98853bb8daa7"
+    },
+    {
+      "path": "output/control/effective_config/effective-config-f8cd4dc4d456b037.json",
+      "sha256": "955bb60852c79c6b5f8e0e398eacc86591067d4e13d1d07150ea097060907622"
+    },
+    {
+      "path": "output/control/lineage/_by_manifest_id/c0a82ace475a509d0e1348414ef1df6c4ab0c7be1b27d97309146b3d6fef4399.jsonl",
+      "sha256": "0020951f581c7aefae3de471092cb04dea8bde7b9ce19668a8d2264d94d7b034"
+    },
+    {
+      "path": "output/control/lineage/fragments/4793924d508468f2e654ce28e28bca3cef144b71666cc9fb61d06b6a5270dadc.json",
+      "sha256": "f1bb578fc0558d59c8394f46fa242e5fc0bc602538b175d47f277e00b8635b5b"
+    },
+    {
+      "path": "output/control/lineage/fragments/efe54cacdba99277122f574121ea4636ceede8b32b7e4a7ed3992ac1c593bdbb.json",
+      "sha256": "d073db41e27546fb0a26378465ed4b71171212efd41e94b2b73c7e90b42bc558"
+    },
+    {
+      "path": "output/control/run_ledger/189e4e8a-263b-58f9-9108-31eac28f43f0.jsonl",
+      "sha256": "6a8ea245fc5cf677a6204d80d2a4b9c5da126b58d9cb020c7e30ebc2516f0915"
+    },
+    {
+      "path": "output/control/run_manifest/189e4e8a-263b-58f9-9108-31eac28f43f0.contract-evidence.json",
+      "sha256": "798f143e558cf70568f3a673d9b3b84eb9f1890d907b1e5f189813c2ab7cc655"
+    },
+    {
+      "path": "output/control/run_manifest/189e4e8a-263b-58f9-9108-31eac28f43f0.json",
+      "sha256": "976d5811bcde45070b0d5b53424f9057d17c3254eb9729aeb8c5392f3c33315b"
+    },
+    {
+      "path": "run-reports/pipeline/chembl_target/6352bbe3-489a-56fe-bee5-5bf0f4cf0a1e/pipeline-run-report.json",
+      "sha256": "ff89765f11ee7dff02c17a448819fa72a6106d285fa1055a0373a2c52d18e7d8"
+    },
+    {
+      "path": "run-reports/pipeline/chembl_target/6352bbe3-489a-56fe-bee5-5bf0f4cf0a1e/pipeline-run-report.md",
+      "sha256": "73f187602679a72b55853c95103443acd208da122ae33fab2f1f655ea6c44b05"
+    },
+    {
+      "path": "run-reports/pipeline/chembl_target/6352bbe3-489a-56fe-bee5-5bf0f4cf0a1e/status-revisions/05052b7e02b5423462491cbd81fcafab9dba05555aa25efa525d33deb062b1b8.json",
+      "sha256": "b36c06e3f2b56bb6cbd060f71e4ed6962341e1ce8deb34532bb21b4c7d7f2587"
+    },
+    {
+      "path": "run-reports/pipeline/chembl_target/6352bbe3-489a-56fe-bee5-5bf0f4cf0a1e/status-revisions/75b5cc011b1cf43a5cb4bdf5efeb74522dab925b33498ed2e722fcafeed4d896.json",
+      "sha256": "aabf17f3347657d3ec6c778c2b524d97523016910c6170a00d4c82b022b63507"
+    },
+    {
+      "path": "run-reports/pipeline/chembl_target/6352bbe3-489a-56fe-bee5-5bf0f4cf0a1e/status-revisions/9829f2188f5ab2f988d7736b37553433378ee544eb92d466e077b23e69438b7d.json",
+      "sha256": "b9d25fce2eca1d597f39f3b817c29862569a5ffc43d12a9436e27c7d5510fd7e"
+    },
+    {
+      "path": "run-reports/pipeline/chembl_target/6352bbe3-489a-56fe-bee5-5bf0f4cf0a1e/status-revisions/b23fe65d74d9053c9545f84ee9871fa2bbeac03ed0f500f1e8c1bc86c2b45b4d.json",
+      "sha256": "5726eb040559ba2689f2599e92e1f5ce6f9b1c69eee09a0df495630dc33bce8a"
+    }
+  ]
+}

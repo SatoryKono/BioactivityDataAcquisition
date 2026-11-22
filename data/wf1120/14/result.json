@@ -1,0 +1,99 @@
+{
+  "workflow": "chembl_reference_pack",
+  "limit": 1000,
+  "exit_code": 82,
+  "status": "failed",
+  "workflow_run_id": "6fb38224-594e-5802-aa72-7137e03a1eac",
+  "steps": [
+    {
+      "step_id": "run_chembl_cell_line",
+      "kind": "pipeline",
+      "status": "failed",
+      "pipeline_name": "chembl_cell_line",
+      "pipeline_run_id": "9ff8b8a2-0314-57a3-9427-082ef7874667",
+      "error_type": "ExternalServiceError",
+      "error_message": "[Errno 11001] getaddrinfo failed"
+    },
+    {
+      "step_id": "run_chembl_protein_class",
+      "kind": "pipeline",
+      "status": "failed",
+      "pipeline_name": "chembl_protein_class",
+      "pipeline_run_id": "ae39d4da-0118-51f7-b96a-da23eaf4931a",
+      "error_type": "ExternalServiceError",
+      "error_message": "[Errno 11001] getaddrinfo failed"
+    },
+    {
+      "step_id": "run_chembl_publication",
+      "kind": "pipeline",
+      "status": "failed",
+      "pipeline_name": "chembl_publication",
+      "pipeline_run_id": "5441ea0d-01d5-5f77-aa3c-9ac321f98abe",
+      "error_type": "ExternalServiceError",
+      "error_message": "[Errno 11001] getaddrinfo failed"
+    },
+    {
+      "step_id": "run_chembl_subcellular_fraction",
+      "kind": "pipeline",
+      "status": "failed",
+      "pipeline_name": "chembl_subcellular_fraction",
+      "pipeline_run_id": "2dc51f34-ba3e-5513-8506-e85d78e95de8",
+      "error_type": "ExternalServiceError",
+      "error_message": "[Errno 11001] getaddrinfo failed"
+    },
+    {
+      "step_id": "run_chembl_target",
+      "kind": "pipeline",
+      "status": "failed",
+      "pipeline_name": "chembl_target",
+      "pipeline_run_id": "80bbca48-6d27-54e0-9969-359575d4fc16",
+      "error_type": "ExternalServiceError",
+      "error_message": "[Errno 11001] getaddrinfo failed"
+    },
+    {
+      "step_id": "run_chembl_tissue",
+      "kind": "pipeline",
+      "status": "failed",
+      "pipeline_name": "chembl_tissue",
+      "pipeline_run_id": "b5159905-b580-5538-a482-f1d391df499f",
+      "error_type": "ServiceUnavailableError",
+      "error_message": "Circuit breaker open for chembl. Retry after 2998.757514099998s"
+    },
+    {
+      "step_id": "run_chembl_publication_similarity",
+      "kind": "pipeline",
+      "status": "skipped",
+      "pipeline_name": "chembl_publication_similarity",
+      "pipeline_run_id": null,
+      "error_type": "UpstreamStepFailed",
+      "error_message": "Skipped because upstream step 'run_chembl_publication' failed before this step could execute."
+    },
+    {
+      "step_id": "run_chembl_publication_term",
+      "kind": "pipeline",
+      "status": "skipped",
+      "pipeline_name": "chembl_publication_term",
+      "pipeline_run_id": null,
+      "error_type": "UpstreamStepFailed",
+      "error_message": "Skipped because upstream step 'run_chembl_publication' failed before this step could execute."
+    },
+    {
+      "step_id": "run_chembl_target_component",
+      "kind": "pipeline",
+      "status": "skipped",
+      "pipeline_name": "chembl_target_component",
+      "pipeline_run_id": null,
+      "error_type": "UpstreamStepFailed",
+      "error_message": "Skipped because upstream step 'run_chembl_target' failed before this step could execute."
+    },
+    {
+      "step_id": "run_chembl_target_protein_classification",
+      "kind": "pipeline",
+      "status": "skipped",
+      "pipeline_name": "chembl_target_protein_classification",
+      "pipeline_run_id": null,
+      "error_type": "UpstreamStepFailed",
+      "error_message": "Skipped because upstream step 'run_chembl_target' failed before this step could execute."
+    }
+  ]
+}

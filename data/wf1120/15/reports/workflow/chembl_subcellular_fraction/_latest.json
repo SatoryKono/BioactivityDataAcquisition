@@ -1,0 +1,9 @@
+{
+  "completed_at": "2026-11-20T09:21:50.470809+00:00",
+  "json_path": "D:/github/BioactivityDataAcquisition/data/wf1120/15/reports/workflow/chembl_subcellular_fraction/ce2dfbf6-cd35-5482-acd6-b42b25177d24/workflow-run-report.json",
+  "kind": "workflow_run_report",
+  "markdown_path": "D:/github/BioactivityDataAcquisition/data/wf1120/15/reports/workflow/chembl_subcellular_fraction/ce2dfbf6-cd35-5482-acd6-b42b25177d24/workflow-run-report.md",
+  "status": "failed",
+  "workflow_name": "chembl_subcellular_fraction",
+  "workflow_run_id": "ce2dfbf6-cd35-5482-acd6-b42b25177d24"
+}

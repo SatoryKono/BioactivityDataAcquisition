@@ -1,0 +1,76 @@
+{
+  "execution": [
+    {
+      "error_message": "[Errno 11001] getaddrinfo failed",
+      "error_type": "ExternalServiceError",
+      "gold_excluded_by_contract": 0,
+      "kind": "pipeline",
+      "pipeline_manifest_id": "a602b977-1f89-5e3a-9f8c-62a1cf9319a0",
+      "pipeline_name": "chembl_publication_term",
+      "pipeline_report_ref": "D:\\github\\BioactivityDataAcquisition\\data\\wf1120\\12\\reports\\pipeline\\chembl_publication_term\\0cad7668-0e53-5f62-bb23-05d0187c1333\\pipeline-run-report.json",
+      "pipeline_run_id": "0cad7668-0e53-5f62-bb23-05d0187c1333",
+      "records_bronze": 0,
+      "records_extracted": 0,
+      "records_gold": 0,
+      "records_silver": 0,
+      "status": "failed",
+      "step_id": "run_chembl_publication_term"
+    }
+  ],
+  "identity": {
+    "completed_at": "2026-11-20T09:16:21.036470+00:00",
+    "duration_seconds": 591.0149369999999,
+    "execution_fingerprint": "de9223ce68e4e65c827e661864075fa61bf44d7ecd02f94cde788890a708f346",
+    "manifest_id": "deda6692-b963-5150-88f8-b3866794b40f",
+    "resumed": false,
+    "started_at": "2026-11-20T09:06:30.021535+00:00",
+    "status": "failed",
+    "workflow_name": "chembl_publication_term",
+    "workflow_run_id": "fe1e41a9-a709-5069-8b8e-c7a9d404156e",
+    "workflow_version": "1.0.0"
+  },
+  "index": {
+    "chembl_publication_term": {
+      "records_extracted": 0,
+      "step_ids": [
+        "run_chembl_publication_term"
+      ]
+    }
+  },
+  "observations": {
+    "Evidence Location": {
+      "facts": {
+        "detail": null,
+        "kind": "workflow",
+        "owner": "chembl_publication_term",
+        "relative_data_root": ".",
+        "root_alias": "dashboard_data",
+        "run_id": "fe1e41a9-a709-5069-8b8e-c7a9d404156e",
+        "workflow_run_id": null
+      },
+      "reason": "ok",
+      "verdict": "OK"
+    }
+  },
+  "plan": {
+    "steps": [
+      {
+        "depends_on": [],
+        "kind": "pipeline",
+        "pipeline_name": "chembl_publication_term",
+        "step_id": "run_chembl_publication_term",
+        "transform_name": null
+      }
+    ]
+  },
+  "schema_version": "workflow_run_report_v1",
+  "totals": {
+    "records_extracted_sum": 0,
+    "records_gold_sum": 0,
+    "records_silver_sum": 0,
+    "steps_failed": 1,
+    "steps_planned": 1,
+    "steps_skipped": 0,
+    "steps_succeeded": 0
+  }
+}

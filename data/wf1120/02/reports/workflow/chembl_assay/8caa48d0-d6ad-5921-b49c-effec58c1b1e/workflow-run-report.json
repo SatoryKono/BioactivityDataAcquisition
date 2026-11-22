@@ -1,0 +1,102 @@
+{
+  "execution": [
+    {
+      "gold_excluded_by_contract": 17,
+      "kind": "pipeline",
+      "pipeline_manifest_id": "85cefdf7-65b5-55b9-8565-c0b3d4d0f9a1",
+      "pipeline_name": "chembl_assay",
+      "pipeline_report_ref": "D:\\github\\BioactivityDataAcquisition\\data\\wf1120\\02\\reports\\pipeline\\chembl_assay\\e4789b03-5ded-5aa7-8770-3b7c7355bb11\\pipeline-run-report.json",
+      "pipeline_run_id": "e4789b03-5ded-5aa7-8770-3b7c7355bb11",
+      "records_bronze": 1000,
+      "records_extracted": 1000,
+      "records_gold": 983,
+      "records_silver": 1000,
+      "status": "success",
+      "step_id": "run_chembl_assay",
+      "top_reasons": [
+        {
+          "count": 15,
+          "outcome": "excluded_by_contract",
+          "reason_code": "column_filter_mismatch:bao_format",
+          "reason_family": "system"
+        },
+        {
+          "count": 2,
+          "outcome": "excluded_by_contract",
+          "reason_code": "column_filter_mismatch:assay_test_type",
+          "reason_family": "system"
+        }
+      ]
+    }
+  ],
+  "identity": {
+    "completed_at": "2026-11-20T08:47:10.151278+00:00",
+    "duration_seconds": 68.5408626999997,
+    "execution_fingerprint": "924f2ece9cd3656c8ae6909eed933c54931a158d2158009bb9f347bca84abd1c",
+    "manifest_id": "65732b4a-1c58-5b90-a67e-41606d778e4c",
+    "resumed": false,
+    "started_at": "2026-11-20T08:46:01.610419+00:00",
+    "status": "success",
+    "workflow_name": "chembl_assay",
+    "workflow_run_id": "8caa48d0-d6ad-5921-b49c-effec58c1b1e",
+    "workflow_version": "1.0.0"
+  },
+  "index": {
+    "chembl_assay": {
+      "records_extracted": 1000,
+      "step_ids": [
+        "run_chembl_assay"
+      ]
+    }
+  },
+  "observations": {
+    "Evidence Location": {
+      "facts": {
+        "detail": null,
+        "kind": "workflow",
+        "owner": "chembl_assay",
+        "relative_data_root": ".",
+        "root_alias": "dashboard_data",
+        "run_id": "8caa48d0-d6ad-5921-b49c-effec58c1b1e",
+        "workflow_run_id": null
+      },
+      "reason": "ok",
+      "verdict": "OK"
+    }
+  },
+  "plan": {
+    "steps": [
+      {
+        "depends_on": [],
+        "kind": "pipeline",
+        "pipeline_name": "chembl_assay",
+        "step_id": "run_chembl_assay",
+        "transform_name": null
+      }
+    ]
+  },
+  "reasons_rollup": [
+    {
+      "count": 15,
+      "outcome": "excluded_by_contract",
+      "reason_code": "column_filter_mismatch:bao_format",
+      "reason_family": "system"
+    },
+    {
+      "count": 2,
+      "outcome": "excluded_by_contract",
+      "reason_code": "column_filter_mismatch:assay_test_type",
+      "reason_family": "system"
+    }
+  ],
+  "schema_version": "workflow_run_report_v1",
+  "totals": {
+    "records_extracted_sum": 1000,
+    "records_gold_sum": 983,
+    "records_silver_sum": 1000,
+    "steps_failed": 0,
+    "steps_planned": 1,
+    "steps_skipped": 0,
+    "steps_succeeded": 1
+  }
+}

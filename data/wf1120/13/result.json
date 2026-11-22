@@ -1,0 +1,18 @@
+{
+  "workflow": "chembl_publication",
+  "limit": 1000,
+  "exit_code": 82,
+  "status": "failed",
+  "workflow_run_id": "56091b3e-4e91-51b4-8519-6209efec0ab8",
+  "steps": [
+    {
+      "step_id": "run_chembl_publication",
+      "kind": "pipeline",
+      "status": "failed",
+      "pipeline_name": "chembl_publication",
+      "pipeline_run_id": "63977221-3f9f-56d2-9b50-c5c7a1378304",
+      "error_type": "ExternalServiceError",
+      "error_message": "[Errno 11001] getaddrinfo failed"
+    }
+  ]
+}

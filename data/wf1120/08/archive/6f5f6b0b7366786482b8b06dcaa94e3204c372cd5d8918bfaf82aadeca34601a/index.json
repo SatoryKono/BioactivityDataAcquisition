@@ -1,0 +1,64 @@
+{
+  "schema": "bioetl_local_archive_v1",
+  "manifest_id": "d97e02d9-ca29-5681-88e8-73a2cd1fa835",
+  "run_id": "c34159c1-376a-5144-b1b3-f2728384b714",
+  "manifest_sha256": "033a2f4a7e27949248880b7f1987d2097806cd8952514f0bf411a8cadba70173",
+  "files": [
+    {
+      "path": "output/bronze/chembl/activity/2026-11-20/batch_2026-11-20_e356c767-2e14-5f66-8b63-e24b8591110b.jsonl.zst",
+      "sha256": "ee89b4b6e09daad5cd088b258efe8f023c1ad5a6017414dbe5c76ea5857f7f0b"
+    },
+    {
+      "path": "output/checkpoints/.history/by_manifest/d97e02d9-ca29-5681-88e8-73a2cd1fa835.json",
+      "sha256": "b31da9f6805cc7500cad6b584d4088d7138d0bb572b22584ee6ac828cc8826e2"
+    },
+    {
+      "path": "output/checkpoints/.history/by_pipeline/chembl_activity/c34159c1-376a-5144-b1b3-f2728384b714/1795165149325215800.json",
+      "sha256": "3604e0f4f0e8bbf3880714fae8fb61693d9f082332c2e882fc104814562ec648"
+    },
+    {
+      "path": "output/checkpoints/.history/by_pipeline/chembl_activity/c34159c1-376a-5144-b1b3-f2728384b714/1795165149329881300.json",
+      "sha256": "ebbae857f0534ccf9d923d4c29b2ba69040697d7f0977ac73f10080c3b0a6fa4"
+    },
+    {
+      "path": "output/control/effective_config/effective-config-93dfe559e6c34936.json",
+      "sha256": "dd33948307f810d3f5bbdcd8ef0f08dfda90f532998cc89e36c3645606829322"
+    },
+    {
+      "path": "output/control/lineage/_by_manifest_id/f776af50d8c0a281c3e687bd3311082f9d14c8aee51a3c98fd20629f6dbd4d67.jsonl",
+      "sha256": "0e4e359d3187121bfaf5d4bc25c084fa36546443716d0ad109176d0e9b1b073f"
+    },
+    {
+      "path": "output/control/lineage/fragments/586fbfa9fb8c1a9786f58695e752aa0ac65f92b659c8b1dab40219177ac11590.json",
+      "sha256": "e1ae8618cab22ea6f7788506bfc21b09acc13e3f5283c4402aa4a198dae0714f"
+    },
+    {
+      "path": "output/control/lineage/fragments/b2e61c13b8e56be4023582345924beed718e5409c4dd205b2155930aa59e9478.json",
+      "sha256": "32fd564cf6fc9c6548bc92b54ce2ed98059930e2dc2cd1138c0f79d6cebd98e1"
+    },
+    {
+      "path": "output/control/run_ledger/d97e02d9-ca29-5681-88e8-73a2cd1fa835.jsonl",
+      "sha256": "b11d344d2a5ff5ee8d46356c36ba8b0f0435080bbf021774b4e76ec234ffdd1a"
+    },
+    {
+      "path": "output/control/run_manifest/d97e02d9-ca29-5681-88e8-73a2cd1fa835.contract-evidence.json",
+      "sha256": "c8e2c9c2bd5bd7c456de55ed3319d0e6b158626dc82314e3f2a88398d31ffbb3"
+    },
+    {
+      "path": "output/control/run_manifest/d97e02d9-ca29-5681-88e8-73a2cd1fa835.json",
+      "sha256": "6b6975be2dd236f2252b90478495b9e5302490601bafcd2b7e020cbf098750c8"
+    },
+    {
+      "path": "run-reports/pipeline/chembl_activity/c34159c1-376a-5144-b1b3-f2728384b714/pipeline-run-report.json",
+      "sha256": "16edf3efc3a17b837f14e0a013e381b1d43c8cd812f8ec99b64d0e4273856996"
+    },
+    {
+      "path": "run-reports/pipeline/chembl_activity/c34159c1-376a-5144-b1b3-f2728384b714/pipeline-run-report.md",
+      "sha256": "69a0ddcd4ee45fe11e161738e0de784680592c7807af7f988e09b7cba63d8161"
+    },
+    {
+      "path": "run-reports/pipeline/chembl_activity/c34159c1-376a-5144-b1b3-f2728384b714/status-revisions/cabf0c04a84cf60d9f0fcd93055cedaf505ded5ee974e7a995482b001c6f2135.json",
+      "sha256": "8eaf225927925b6f2f407718df98052cc9db1ff6fce3b731af0d512394e35a4d"
+    }
+  ]
+}

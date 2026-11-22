@@ -1,0 +1,11 @@
+{
+  "completed_at": "2026-11-20T09:03:17.755140+00:00",
+  "json_path": "D:/github/BioactivityDataAcquisition/data/wf1120/09/reports/pipeline/chembl_molecule/613bcae8-34f4-5ae3-a560-27eefcfd9d65/pipeline-run-report.json",
+  "json_sha256": "72b9ca32327bafe75d57758f3cd1ffbcc71b167b6cc1818c34f763d975935642",
+  "kind": "pipeline_run_report",
+  "markdown_path": "D:/github/BioactivityDataAcquisition/data/wf1120/09/reports/pipeline/chembl_molecule/613bcae8-34f4-5ae3-a560-27eefcfd9d65/pipeline-run-report.md",
+  "markdown_sha256": "b60a783c0fe21b1e51134a993122f75cff78f06cdd7c796227f396631f6cb76f",
+  "pipeline_name": "chembl_molecule",
+  "run_id": "613bcae8-34f4-5ae3-a560-27eefcfd9d65",
+  "status": "success"
+}

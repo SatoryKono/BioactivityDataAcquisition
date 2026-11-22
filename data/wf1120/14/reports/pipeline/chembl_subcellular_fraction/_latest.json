@@ -1,0 +1,11 @@
+{
+  "completed_at": "2026-11-20T09:19:24.209365+00:00",
+  "json_path": "D:/github/BioactivityDataAcquisition/data/wf1120/14/reports/pipeline/chembl_subcellular_fraction/2dc51f34-ba3e-5513-8506-e85d78e95de8/pipeline-run-report.json",
+  "json_sha256": "2ff7100e9c0b3b46714a32b96172addb3b443d39c2fca9fa78a7ebcafa9cb10d",
+  "kind": "pipeline_run_report",
+  "markdown_path": "D:/github/BioactivityDataAcquisition/data/wf1120/14/reports/pipeline/chembl_subcellular_fraction/2dc51f34-ba3e-5513-8506-e85d78e95de8/pipeline-run-report.md",
+  "markdown_sha256": "7c50ab1a0afc0f1b620ca4ad054828c9f5b69db12a2037d64ce4409907c7f3a3",
+  "pipeline_name": "chembl_subcellular_fraction",
+  "run_id": "2dc51f34-ba3e-5513-8506-e85d78e95de8",
+  "status": "failed"
+}

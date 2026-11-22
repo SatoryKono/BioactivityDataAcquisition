@@ -1,0 +1,9 @@
+{
+  "completed_at": "2026-11-20T09:06:21.102966+00:00",
+  "json_path": "D:/github/BioactivityDataAcquisition/data/wf1120/11/reports/workflow/chembl_publication_similarity/bc4ead33-d7b1-5ab1-a7ad-c9d26c891b1d/workflow-run-report.json",
+  "kind": "workflow_run_report",
+  "markdown_path": "D:/github/BioactivityDataAcquisition/data/wf1120/11/reports/workflow/chembl_publication_similarity/bc4ead33-d7b1-5ab1-a7ad-c9d26c891b1d/workflow-run-report.md",
+  "status": "success",
+  "workflow_name": "chembl_publication_similarity",
+  "workflow_run_id": "bc4ead33-d7b1-5ab1-a7ad-c9d26c891b1d"
+}

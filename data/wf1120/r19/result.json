@@ -1,0 +1,22 @@
+{
+  "workflow": "chembl_tissue",
+  "limit": 1000,
+  "exit_code": 0,
+  "status": "success",
+  "workflow_run_id": "7afb3137-673c-5815-84dc-63152327c69d",
+  "started_at": "2026-11-20T13:29:25.9556915+03:00",
+  "completed_at": "2026-11-20T13:31:21.6630539+03:00",
+  "steps": [
+    {
+      "step_id": "run_chembl_tissue",
+      "kind": "pipeline",
+      "status": "success",
+      "pipeline_name": "chembl_tissue",
+      "pipeline_run_id": "c139cde0-56de-5e2c-afcc-e635ef64b18e",
+      "error_type": null,
+      "error_message": null
+    }
+  ],
+  "metrics_enabled": true,
+  "report_root": "D:\\github\\BioactivityDataAcquisition/reports/run-reports"
+}

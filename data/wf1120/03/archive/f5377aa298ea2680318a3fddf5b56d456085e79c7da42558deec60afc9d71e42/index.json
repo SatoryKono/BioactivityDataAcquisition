@@ -1,0 +1,76 @@
+{
+  "schema": "bioetl_local_archive_v1",
+  "manifest_id": "891d17d2-11d9-5b58-90f1-54cdee07e1b1",
+  "run_id": "f9ee04d2-965c-5c07-9c39-5a23ad0e6b82",
+  "manifest_sha256": "a961e9eaff95733b3a4c3e5243eb8e1cecabb09af3d4268fc6084514c74fef08",
+  "files": [
+    {
+      "path": "output/bronze/chembl/activity/2026-11-20/batch_2026-11-20_8a57741c-9eff-5372-9015-f628cd1f4296.jsonl.zst",
+      "sha256": "cec031ccc0fb8d49fb6c172521b2862a1ba80d40f38edc68a2141b6980f5da3c"
+    },
+    {
+      "path": "output/checkpoints/.history/by_manifest/891d17d2-11d9-5b58-90f1-54cdee07e1b1.json",
+      "sha256": "cac17c348222c958844354fc0a6968f2a02eace9e8f9307ea91373403d9020f0"
+    },
+    {
+      "path": "output/checkpoints/.history/by_pipeline/chembl_activity/f9ee04d2-965c-5c07-9c39-5a23ad0e6b82/1795164519931245000.json",
+      "sha256": "29e8df2b0ec03ca705f9593715d08b2607e6d0711ba64da96db368644f9ae748"
+    },
+    {
+      "path": "output/checkpoints/.history/by_pipeline/chembl_activity/f9ee04d2-965c-5c07-9c39-5a23ad0e6b82/1795164519938692400.json",
+      "sha256": "d86dbcc2800eb000a96d90f69c86cfac9de53c8fc10adf11a075bf9be454c9d1"
+    },
+    {
+      "path": "output/control/effective_config/effective-config-93dfe559e6c34936.json",
+      "sha256": "48901208ee9897df137e6d9db0393322ed2c3deb73005ebd337057ddf8a73daa"
+    },
+    {
+      "path": "output/control/lineage/_by_manifest_id/d61e3a0fa33ac1147d052db789530239b4cf8494c96138169009742259e9ba86.jsonl",
+      "sha256": "5253839512b8675a1a216c5f1931b38cbe476cb6f3206a11b8e421b9d388ab4f"
+    },
+    {
+      "path": "output/control/lineage/fragments/12921ab3345ba81d29a4e935b6da9455725073db765c6883aafd015769d4c9d8.json",
+      "sha256": "e2b35f8117236a4620142f878c086d6432978d3bfdf176ee3bac009c980b3c82"
+    },
+    {
+      "path": "output/control/lineage/fragments/3454395aaa35d69d52172ca8d516ccc72e83c4e2e35afff43b445dda0e89e1a2.json",
+      "sha256": "3428157a9c52d2e0e4f3dc9b1324d4a2dd8c151f7cb880ebf1e9fbda6662d9de"
+    },
+    {
+      "path": "output/control/run_ledger/891d17d2-11d9-5b58-90f1-54cdee07e1b1.jsonl",
+      "sha256": "6d71fcfb9c6fcfc5d4bf4c044c4712bb7ed78dcd40c297ebf62abebc66f1fa99"
+    },
+    {
+      "path": "output/control/run_manifest/891d17d2-11d9-5b58-90f1-54cdee07e1b1.contract-evidence.json",
+      "sha256": "132c5fa6af5ac061fd534f05ee48dc88053cf78df639d945204dbad23474bb09"
+    },
+    {
+      "path": "output/control/run_manifest/891d17d2-11d9-5b58-90f1-54cdee07e1b1.json",
+      "sha256": "8270431b8957cba7c4c96e58b81a8e4d665c446749f36bd3a7075addca640f71"
+    },
+    {
+      "path": "run-reports/pipeline/chembl_activity/f9ee04d2-965c-5c07-9c39-5a23ad0e6b82/pipeline-run-report.json",
+      "sha256": "ca26609c0ef4d1caf47697805d18ba8c2c57909581c29cd800498b5413a9cc60"
+    },
+    {
+      "path": "run-reports/pipeline/chembl_activity/f9ee04d2-965c-5c07-9c39-5a23ad0e6b82/pipeline-run-report.md",
+      "sha256": "3082b5e2b5e2c1dd70bc983f15b1f56d2dd1d97c51948a220eb94bc5eb3fa4ed"
+    },
+    {
+      "path": "run-reports/pipeline/chembl_activity/f9ee04d2-965c-5c07-9c39-5a23ad0e6b82/status-revisions/6642eb111244d18c972b02353c7a990b50173ad5e3ead8dba5a89e88e8443b01.json",
+      "sha256": "dc67bf4133687cd1909712fd7f960fa7be60665aa76efdd297cfc2a5cfd36b82"
+    },
+    {
+      "path": "run-reports/pipeline/chembl_activity/f9ee04d2-965c-5c07-9c39-5a23ad0e6b82/status-revisions/6d08215aadfe33ebd4b3764cdd7e98a54f69af4700bf01766170652209d78f9a.json",
+      "sha256": "a2085b11747379d6cc5e0af3415dbcc5f9a4088c22b0db70ea4645d0bb855e77"
+    },
+    {
+      "path": "run-reports/pipeline/chembl_activity/f9ee04d2-965c-5c07-9c39-5a23ad0e6b82/status-revisions/71a11a149a75082054e67229ad702e8a486ab4fd6c2848628a2eb0dc8c1e4867.json",
+      "sha256": "d08cd4c9c1f0b1f7ee44232b025c944c97e023f981f9b754407bc6cfedebfc90"
+    },
+    {
+      "path": "run-reports/pipeline/chembl_activity/f9ee04d2-965c-5c07-9c39-5a23ad0e6b82/status-revisions/a77b7d99fc3ed44088fd2e3c20500ecacc4e8da14d5f28c6d38e170a2a73505c.json",
+      "sha256": "07ed5fd668e8e5e4c94a5bd7472f07d4e9751b17b8c9e66ef77e1ae042c8a28c"
+    }
+  ]
+}

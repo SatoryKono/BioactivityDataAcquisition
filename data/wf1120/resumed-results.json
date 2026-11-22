@@ -1,0 +1,258 @@
+[
+  {
+    "workflow": "chembl_tissue",
+    "limit": 1000,
+    "exit_code": 0,
+    "status": "success",
+    "workflow_run_id": "7afb3137-673c-5815-84dc-63152327c69d",
+    "started_at": "2026-11-20T13:29:25.9556915+03:00",
+    "completed_at": "2026-11-20T13:31:21.6630539+03:00",
+    "steps": [
+      {
+        "step_id": "run_chembl_tissue",
+        "kind": "pipeline",
+        "status": "success",
+        "pipeline_name": "chembl_tissue",
+        "pipeline_run_id": "c139cde0-56de-5e2c-afcc-e635ef64b18e",
+        "error_type": null,
+        "error_message": null
+      }
+    ],
+    "metrics_enabled": true,
+    "report_root": "D:\\github\\BioactivityDataAcquisition/reports/run-reports"
+  },
+  {
+    "workflow": "crossref_publication",
+    "limit": 1000,
+    "exit_code": 0,
+    "status": "success",
+    "workflow_run_id": "7774e50b-bbd2-5816-ae12-ab9dd05892ea",
+    "started_at": "2026-11-20T13:31:21.7061138+03:00",
+    "completed_at": "2026-11-20T13:31:52.2834910+03:00",
+    "steps": [
+      {
+        "step_id": "run_crossref_publication",
+        "kind": "pipeline",
+        "status": "success",
+        "pipeline_name": "crossref_publication",
+        "pipeline_run_id": "1c0b68e0-5663-5dcd-a8db-32a481c4f2d1",
+        "error_type": null,
+        "error_message": null
+      }
+    ],
+    "metrics_enabled": true,
+    "report_root": "D:\\github\\BioactivityDataAcquisition/reports/run-reports"
+  },
+  {
+    "workflow": "openalex_publication",
+    "limit": 1000,
+    "exit_code": 0,
+    "status": "success",
+    "workflow_run_id": "81047acf-38a3-5239-a679-06768ddadd1c",
+    "started_at": "2026-11-20T13:31:52.3774337+03:00",
+    "completed_at": "2026-11-20T13:32:20.0728397+03:00",
+    "steps": [
+      {
+        "step_id": "run_openalex_publication",
+        "kind": "pipeline",
+        "status": "success",
+        "pipeline_name": "openalex_publication",
+        "pipeline_run_id": "ea8fe927-8a11-5e80-9eb5-93c5dc204ab2",
+        "error_type": null,
+        "error_message": null
+      }
+    ],
+    "metrics_enabled": true,
+    "report_root": "D:\\github\\BioactivityDataAcquisition/reports/run-reports"
+  },
+  {
+    "workflow": "pubchem_compound",
+    "limit": 1000,
+    "exit_code": 0,
+    "status": "success",
+    "workflow_run_id": "2fffacd3-4f35-562d-bf29-e8f467963cfb",
+    "started_at": "2026-11-20T13:32:20.1384123+03:00",
+    "completed_at": "2026-11-20T13:32:46.4226417+03:00",
+    "steps": [
+      {
+        "step_id": "run_pubchem_compound",
+        "kind": "pipeline",
+        "status": "success",
+        "pipeline_name": "pubchem_compound",
+        "pipeline_run_id": "c3898453-e5d5-5162-8a8e-4cc76dc5f4e6",
+        "error_type": null,
+        "error_message": null
+      }
+    ],
+    "metrics_enabled": true,
+    "report_root": "D:\\github\\BioactivityDataAcquisition/reports/run-reports"
+  },
+  {
+    "workflow": "publication_provider_pack",
+    "limit": 1000,
+    "exit_code": 0,
+    "status": "success",
+    "workflow_run_id": "c4f3c41f-6ee3-5077-93ee-9f498b6614f3",
+    "started_at": "2026-11-20T13:32:46.4873044+03:00",
+    "completed_at": "2026-11-20T13:46:00.7988246+03:00",
+    "steps": [
+      {
+        "step_id": "run_crossref_publication",
+        "kind": "pipeline",
+        "status": "success",
+        "pipeline_name": "crossref_publication",
+        "pipeline_run_id": "4a707f76-9024-5e2a-9f9c-d2e622ec2e20",
+        "error_type": null,
+        "error_message": null
+      },
+      {
+        "step_id": "run_openalex_publication",
+        "kind": "pipeline",
+        "status": "success",
+        "pipeline_name": "openalex_publication",
+        "pipeline_run_id": "8edeb867-63cc-507c-9d46-b467fdeba220",
+        "error_type": null,
+        "error_message": null
+      },
+      {
+        "step_id": "run_pubmed_publication",
+        "kind": "pipeline",
+        "status": "success",
+        "pipeline_name": "pubmed_publication",
+        "pipeline_run_id": "e51dcdfb-6135-53d8-b0af-1c6935924745",
+        "error_type": null,
+        "error_message": null
+      },
+      {
+        "step_id": "run_semanticscholar_publication",
+        "kind": "pipeline",
+        "status": "success",
+        "pipeline_name": "semanticscholar_publication",
+        "pipeline_run_id": "7e64bd38-a63f-567f-b641-4eebf5cd14f3",
+        "error_type": null,
+        "error_message": null
+      }
+    ],
+    "metrics_enabled": true,
+    "report_root": "D:\\github\\BioactivityDataAcquisition/reports/run-reports"
+  },
+  {
+    "workflow": "pubmed_publication",
+    "limit": 1000,
+    "exit_code": 0,
+    "status": "success",
+    "workflow_run_id": "1fb3285c-0b95-51cb-9dca-f8a0f9ba1c10",
+    "started_at": "2026-11-20T13:46:00.8328897+03:00",
+    "completed_at": "2026-11-20T13:46:50.1350443+03:00",
+    "steps": [
+      {
+        "step_id": "run_pubmed_publication",
+        "kind": "pipeline",
+        "status": "success",
+        "pipeline_name": "pubmed_publication",
+        "pipeline_run_id": "3180618c-82f3-58b0-9ec6-b28c16a92cd5",
+        "error_type": null,
+        "error_message": null
+      }
+    ],
+    "metrics_enabled": true,
+    "report_root": "D:\\github\\BioactivityDataAcquisition/reports/run-reports"
+  },
+  {
+    "workflow": "semanticscholar_publication",
+    "limit": 1000,
+    "exit_code": 82,
+    "status": "failed",
+    "workflow_run_id": "ce098139-0171-58f1-b351-aea47914bb4d",
+    "started_at": "2026-11-20T13:46:50.1766835+03:00",
+    "completed_at": "2026-11-20T13:53:45.9761744+03:00",
+    "steps": [
+      {
+        "step_id": "run_semanticscholar_publication",
+        "kind": "pipeline",
+        "status": "failed",
+        "pipeline_name": "semanticscholar_publication",
+        "pipeline_run_id": "17ac583d-c845-576b-8618-2cb73ca76466",
+        "error_type": "RetryExhaustedError",
+        "error_message": "Exhausted 2 retry attempts for https://api.semanticscholar.org/graph/v1/paper/batch?fields=paperId,externalIds,title,abstract,year,publicationDate,venue,authors,authors.externalIds,authors.hIndex,authors.authorId,citationCount,referenceCount,isOpenAccess,openAccessPdf,tldr,fieldsOfStudy,publicationTypes,journal: Client error '429 ' for url 'https://api.semanticscholar.org/graph/v1/paper/batch?fields=paperId,externalIds,title,abstract,year,publicationDate,venue,authors,authors.externalIds,authors.hIndex,authors.authorId,citationCount,referenceCount,isOpenAccess,openAccessPdf,tldr,fieldsOfStudy,publicationTypes,journal'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429"
+      }
+    ],
+    "metrics_enabled": true,
+    "report_root": "D:\\github\\BioactivityDataAcquisition/reports/run-reports"
+  },
+  {
+    "workflow": "uniprot_idmapping",
+    "limit": 1000,
+    "exit_code": 0,
+    "status": "success",
+    "workflow_run_id": "ea04b65b-18f9-5289-bfe2-0b3433e93770",
+    "started_at": "2026-11-20T13:53:46.0032198+03:00",
+    "completed_at": "2026-11-20T13:54:54.5730996+03:00",
+    "steps": [
+      {
+        "step_id": "run_uniprot_idmapping",
+        "kind": "pipeline",
+        "status": "success",
+        "pipeline_name": "uniprot_idmapping",
+        "pipeline_run_id": "a1033ef3-68d6-5f55-962a-ea967f0c202c",
+        "error_type": null,
+        "error_message": null
+      }
+    ],
+    "metrics_enabled": true,
+    "report_root": "D:\\github\\BioactivityDataAcquisition/reports/run-reports"
+  },
+  {
+    "workflow": "uniprot_protein",
+    "limit": 1000,
+    "exit_code": 0,
+    "status": "success",
+    "workflow_run_id": "fc087bde-6d1c-5c41-b53f-990c3c14bbfc",
+    "started_at": "2026-11-20T13:54:54.6468028+03:00",
+    "completed_at": "2026-11-20T13:56:35.8009107+03:00",
+    "steps": [
+      {
+        "step_id": "run_uniprot_protein",
+        "kind": "pipeline",
+        "status": "success",
+        "pipeline_name": "uniprot_protein",
+        "pipeline_run_id": "0993936a-b7e0-5613-96ad-6d1640b9a591",
+        "error_type": null,
+        "error_message": null
+      }
+    ],
+    "metrics_enabled": true,
+    "report_root": "D:\\github\\BioactivityDataAcquisition/reports/run-reports"
+  },
+  {
+    "workflow": "uniprot_support_pack",
+    "limit": 1000,
+    "exit_code": 0,
+    "status": "success",
+    "workflow_run_id": "07b23362-5df5-54e5-87ae-6f30972a41e6",
+    "started_at": "2026-11-20T13:56:35.8693236+03:00",
+    "completed_at": "2026-11-20T13:58:35.1767696+03:00",
+    "steps": [
+      {
+        "step_id": "run_uniprot_idmapping",
+        "kind": "pipeline",
+        "status": "success",
+        "pipeline_name": "uniprot_idmapping",
+        "pipeline_run_id": "c728930d-6541-5c76-9d08-6eca16f5a6c7",
+        "error_type": null,
+        "error_message": null
+      },
+      {
+        "step_id": "run_uniprot_protein",
+        "kind": "pipeline",
+        "status": "success",
+        "pipeline_name": "uniprot_protein",
+        "pipeline_run_id": "d324ddab-1f41-549a-9787-5cc98b9f4b0c",
+        "error_type": null,
+        "error_message": null
+      }
+    ],
+    "metrics_enabled": true,
+    "report_root": "D:\\github\\BioactivityDataAcquisition/reports/run-reports"
+  }
+]

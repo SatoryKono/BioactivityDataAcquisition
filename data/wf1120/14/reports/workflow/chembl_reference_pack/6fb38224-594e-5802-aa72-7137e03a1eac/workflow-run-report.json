@@ -1,0 +1,319 @@
+{
+  "execution": [
+    {
+      "error_message": "[Errno 11001] getaddrinfo failed",
+      "error_type": "ExternalServiceError",
+      "gold_excluded_by_contract": 0,
+      "kind": "pipeline",
+      "pipeline_manifest_id": "18b143c4-df87-5d97-9ae4-42103b2d22fc",
+      "pipeline_name": "chembl_cell_line",
+      "pipeline_report_ref": "D:\\github\\BioactivityDataAcquisition\\data\\wf1120\\14\\reports\\pipeline\\chembl_cell_line\\9ff8b8a2-0314-57a3-9427-082ef7874667\\pipeline-run-report.json",
+      "pipeline_run_id": "9ff8b8a2-0314-57a3-9427-082ef7874667",
+      "records_bronze": 0,
+      "records_extracted": 0,
+      "records_gold": 0,
+      "records_silver": 0,
+      "status": "failed",
+      "step_id": "run_chembl_cell_line"
+    },
+    {
+      "error_message": "[Errno 11001] getaddrinfo failed",
+      "error_type": "ExternalServiceError",
+      "gold_excluded_by_contract": 0,
+      "kind": "pipeline",
+      "pipeline_manifest_id": "e42940b8-2d00-51e3-9831-581e3c1b8113",
+      "pipeline_name": "chembl_protein_class",
+      "pipeline_report_ref": "D:\\github\\BioactivityDataAcquisition\\data\\wf1120\\14\\reports\\pipeline\\chembl_protein_class\\ae39d4da-0118-51f7-b96a-da23eaf4931a\\pipeline-run-report.json",
+      "pipeline_run_id": "ae39d4da-0118-51f7-b96a-da23eaf4931a",
+      "records_bronze": 0,
+      "records_extracted": 0,
+      "records_gold": 0,
+      "records_silver": 0,
+      "status": "failed",
+      "step_id": "run_chembl_protein_class"
+    },
+    {
+      "error_message": "[Errno 11001] getaddrinfo failed",
+      "error_type": "ExternalServiceError",
+      "gold_excluded_by_contract": 0,
+      "kind": "pipeline",
+      "pipeline_manifest_id": "be0d4537-caf9-54b5-8076-4d6060b6cdab",
+      "pipeline_name": "chembl_publication",
+      "pipeline_report_ref": "D:\\github\\BioactivityDataAcquisition\\data\\wf1120\\14\\reports\\pipeline\\chembl_publication\\5441ea0d-01d5-5f77-aa3c-9ac321f98abe\\pipeline-run-report.json",
+      "pipeline_run_id": "5441ea0d-01d5-5f77-aa3c-9ac321f98abe",
+      "records_bronze": 0,
+      "records_extracted": 0,
+      "records_gold": 0,
+      "records_silver": 0,
+      "status": "failed",
+      "step_id": "run_chembl_publication"
+    },
+    {
+      "error_message": "[Errno 11001] getaddrinfo failed",
+      "error_type": "ExternalServiceError",
+      "gold_excluded_by_contract": 0,
+      "kind": "pipeline",
+      "pipeline_manifest_id": "e54731a3-be7b-555b-9780-e71c7b63ffa3",
+      "pipeline_name": "chembl_subcellular_fraction",
+      "pipeline_report_ref": "D:\\github\\BioactivityDataAcquisition\\data\\wf1120\\14\\reports\\pipeline\\chembl_subcellular_fraction\\2dc51f34-ba3e-5513-8506-e85d78e95de8\\pipeline-run-report.json",
+      "pipeline_run_id": "2dc51f34-ba3e-5513-8506-e85d78e95de8",
+      "records_bronze": 0,
+      "records_extracted": 0,
+      "records_gold": 0,
+      "records_silver": 0,
+      "status": "failed",
+      "step_id": "run_chembl_subcellular_fraction"
+    },
+    {
+      "error_message": "[Errno 11001] getaddrinfo failed",
+      "error_type": "ExternalServiceError",
+      "gold_excluded_by_contract": 0,
+      "kind": "pipeline",
+      "pipeline_manifest_id": "09e50cd8-fcd6-5b6a-a455-d3d4270bbe95",
+      "pipeline_name": "chembl_target",
+      "pipeline_report_ref": "D:\\github\\BioactivityDataAcquisition\\data\\wf1120\\14\\reports\\pipeline\\chembl_target\\80bbca48-6d27-54e0-9969-359575d4fc16\\pipeline-run-report.json",
+      "pipeline_run_id": "80bbca48-6d27-54e0-9969-359575d4fc16",
+      "records_bronze": 0,
+      "records_extracted": 0,
+      "records_gold": 0,
+      "records_silver": 0,
+      "status": "failed",
+      "step_id": "run_chembl_target"
+    },
+    {
+      "error_message": "Circuit breaker open for chembl. Retry after 2998.757514099998s",
+      "error_type": "ServiceUnavailableError",
+      "gold_excluded_by_contract": 0,
+      "kind": "pipeline",
+      "pipeline_manifest_id": "d8bafbd8-1d24-5208-98f0-3563a25f15b2",
+      "pipeline_name": "chembl_tissue",
+      "pipeline_report_ref": "D:\\github\\BioactivityDataAcquisition\\data\\wf1120\\14\\reports\\pipeline\\chembl_tissue\\b5159905-b580-5538-a482-f1d391df499f\\pipeline-run-report.json",
+      "pipeline_run_id": "b5159905-b580-5538-a482-f1d391df499f",
+      "records_bronze": 0,
+      "records_extracted": 0,
+      "records_gold": 0,
+      "records_silver": 0,
+      "status": "failed",
+      "step_id": "run_chembl_tissue"
+    },
+    {
+      "error_message": "Skipped because upstream step 'run_chembl_publication' failed before this step could execute.",
+      "error_type": "UpstreamStepFailed",
+      "kind": "pipeline",
+      "pipeline_name": "chembl_publication_similarity",
+      "records_extracted": 0,
+      "status": "skipped",
+      "step_id": "run_chembl_publication_similarity"
+    },
+    {
+      "error_message": "Skipped because upstream step 'run_chembl_publication' failed before this step could execute.",
+      "error_type": "UpstreamStepFailed",
+      "kind": "pipeline",
+      "pipeline_name": "chembl_publication_term",
+      "records_extracted": 0,
+      "status": "skipped",
+      "step_id": "run_chembl_publication_term"
+    },
+    {
+      "error_message": "Skipped because upstream step 'run_chembl_target' failed before this step could execute.",
+      "error_type": "UpstreamStepFailed",
+      "kind": "pipeline",
+      "pipeline_name": "chembl_target_component",
+      "records_extracted": 0,
+      "status": "skipped",
+      "step_id": "run_chembl_target_component"
+    },
+    {
+      "error_message": "Skipped because upstream step 'run_chembl_target' failed before this step could execute.",
+      "error_type": "UpstreamStepFailed",
+      "kind": "pipeline",
+      "pipeline_name": "chembl_target_protein_classification",
+      "records_extracted": 0,
+      "status": "skipped",
+      "step_id": "run_chembl_target_protein_classification"
+    }
+  ],
+  "identity": {
+    "completed_at": "2026-11-20T09:20:52.418860+00:00",
+    "duration_seconds": 219.48221250000643,
+    "execution_fingerprint": "58bbe937c8f00bafb967c140030a58f6a00f5516fc048b8d0cff81b980d1d3d3",
+    "manifest_id": "392fdead-5436-5589-ba61-71fba3f931c1",
+    "resumed": false,
+    "started_at": "2026-11-20T09:17:12.936652+00:00",
+    "status": "failed",
+    "workflow_name": "chembl_reference_pack",
+    "workflow_run_id": "6fb38224-594e-5802-aa72-7137e03a1eac",
+    "workflow_version": "1.0.0"
+  },
+  "index": {
+    "chembl_cell_line": {
+      "records_extracted": 0,
+      "step_ids": [
+        "run_chembl_cell_line"
+      ]
+    },
+    "chembl_protein_class": {
+      "records_extracted": 0,
+      "step_ids": [
+        "run_chembl_protein_class"
+      ]
+    },
+    "chembl_publication": {
+      "records_extracted": 0,
+      "step_ids": [
+        "run_chembl_publication"
+      ]
+    },
+    "chembl_publication_similarity": {
+      "records_extracted": 0,
+      "step_ids": [
+        "run_chembl_publication_similarity"
+      ]
+    },
+    "chembl_publication_term": {
+      "records_extracted": 0,
+      "step_ids": [
+        "run_chembl_publication_term"
+      ]
+    },
+    "chembl_subcellular_fraction": {
+      "records_extracted": 0,
+      "step_ids": [
+        "run_chembl_subcellular_fraction"
+      ]
+    },
+    "chembl_target": {
+      "records_extracted": 0,
+      "step_ids": [
+        "run_chembl_target"
+      ]
+    },
+    "chembl_target_component": {
+      "records_extracted": 0,
+      "step_ids": [
+        "run_chembl_target_component"
+      ]
+    },
+    "chembl_target_protein_classification": {
+      "records_extracted": 0,
+      "step_ids": [
+        "run_chembl_target_protein_classification"
+      ]
+    },
+    "chembl_tissue": {
+      "records_extracted": 0,
+      "step_ids": [
+        "run_chembl_tissue"
+      ]
+    }
+  },
+  "observations": {
+    "Evidence Location": {
+      "facts": {
+        "detail": null,
+        "kind": "workflow",
+        "owner": "chembl_reference_pack",
+        "relative_data_root": ".",
+        "root_alias": "dashboard_data",
+        "run_id": "6fb38224-594e-5802-aa72-7137e03a1eac",
+        "workflow_run_id": null
+      },
+      "reason": "ok",
+      "verdict": "OK"
+    }
+  },
+  "plan": {
+    "steps": [
+      {
+        "depends_on": [],
+        "kind": "pipeline",
+        "pipeline_name": "chembl_cell_line",
+        "step_id": "run_chembl_cell_line",
+        "transform_name": null
+      },
+      {
+        "depends_on": [],
+        "kind": "pipeline",
+        "pipeline_name": "chembl_protein_class",
+        "step_id": "run_chembl_protein_class",
+        "transform_name": null
+      },
+      {
+        "depends_on": [],
+        "kind": "pipeline",
+        "pipeline_name": "chembl_publication",
+        "step_id": "run_chembl_publication",
+        "transform_name": null
+      },
+      {
+        "depends_on": [],
+        "kind": "pipeline",
+        "pipeline_name": "chembl_subcellular_fraction",
+        "step_id": "run_chembl_subcellular_fraction",
+        "transform_name": null
+      },
+      {
+        "depends_on": [],
+        "kind": "pipeline",
+        "pipeline_name": "chembl_target",
+        "step_id": "run_chembl_target",
+        "transform_name": null
+      },
+      {
+        "depends_on": [],
+        "kind": "pipeline",
+        "pipeline_name": "chembl_tissue",
+        "step_id": "run_chembl_tissue",
+        "transform_name": null
+      },
+      {
+        "depends_on": [
+          "run_chembl_publication"
+        ],
+        "kind": "pipeline",
+        "pipeline_name": "chembl_publication_similarity",
+        "step_id": "run_chembl_publication_similarity",
+        "transform_name": null
+      },
+      {
+        "depends_on": [
+          "run_chembl_publication"
+        ],
+        "kind": "pipeline",
+        "pipeline_name": "chembl_publication_term",
+        "step_id": "run_chembl_publication_term",
+        "transform_name": null
+      },
+      {
+        "depends_on": [
+          "run_chembl_target"
+        ],
+        "kind": "pipeline",
+        "pipeline_name": "chembl_target_component",
+        "step_id": "run_chembl_target_component",
+        "transform_name": null
+      },
+      {
+        "depends_on": [
+          "run_chembl_target",
+          "run_chembl_target_component",
+          "run_chembl_protein_class"
+        ],
+        "kind": "pipeline",
+        "pipeline_name": "chembl_target_protein_classification",
+        "step_id": "run_chembl_target_protein_classification",
+        "transform_name": null
+      }
+    ]
+  },
+  "schema_version": "workflow_run_report_v1",
+  "totals": {
+    "records_extracted_sum": 0,
+    "records_gold_sum": 0,
+    "records_silver_sum": 0,
+    "steps_failed": 6,
+    "steps_planned": 10,
+    "steps_skipped": 4,
+    "steps_succeeded": 0
+  }
+}

@@ -848,18 +848,11 @@ jobs:
     name: Docker lane
     needs: classify-changes
     if: needs['classify-changes'].outputs['docker'] == 'required'
-    # GitHub validates nested job permissions at startup. docker-build asks for
-    # security-events, and docker-push asks for packages, id-token,
-    # attestations, and actions:read, even when the publish job is skipped on
-    # pull requests.
+    # This pin validates and uploads SARIF; GHCR publication is separate.
     permissions:
       contents: read
-      actions: read
       security-events: write
-      packages: write
-      id-token: write
-      attestations: write
-    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/docker.yml@84548f8bfed680b9415fc6855d6be059ffd9d1ab
+    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/docker.yml@390e7fd01eea914f934ffb7dc9aeaab5d1d54a80
 
   pr-gate-complete:
     name: pr-gate-complete

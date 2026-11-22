@@ -111,6 +111,18 @@ pipeline publication or restore a verified gateway backup. Do not seed zero
 counters in a fresh process to claim historical success or replay a pipeline
 solely to change dashboard colours. Keep missing evidence visible until recovered.
 
+### Queue and stage alerts from retained snapshots
+
+`BioETLIngestionThroughputDegraded`, `BioETLStageBacklogActive` and
+`BioETLStageLagHigh` use a rolling 15-minute maximum for directly scraped
+metrics. For Pushgateway snapshots, they use the latest value only when the
+matching `job`, `instance`, `pipeline` and `run_type` group's `push_time_seconds`
+is positive, no later than evaluation time and less than 15 minutes old.
+Repeated scrapes do not renew publication time. Check that timestamp before
+interpreting a retained backlog or lag as a current incident. An old snapshot
+does not establish recovery or a healthy pipeline; inspect the saved run report
+and obtain a genuine publication when current state is needed.
+
 ### Validation Scope
 
 This checklist validates that operators can:

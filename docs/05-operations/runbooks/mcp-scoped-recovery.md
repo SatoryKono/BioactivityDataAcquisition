@@ -75,6 +75,28 @@ Review it against the latest original and apply it explicitly after coordinating
 writers. Ordinary synchronized publication retains its detected-conflict guard.
 Fractional startup/tool timeouts are preserved without integer truncation.
 
+### Verify Windows editor projections after synchronization
+
+On a Windows host with the approved route controller, verify two separate
+outputs. Generate the selected profile and transport mode into a disposable
+`--root`, using the actual checkout as `--workspace-root` and passing
+`--skip-codex-config --skip-codex-validation --skip-gemini-settings`.
+Run `setup_mcp --check-local` against that same output root, workspace root,
+profile, and transport mode to verify the generator baseline.
+
+For the live editor JSON, run the installed `project-route-owner.py plan`
+with the approved Windows Python. A successful plan with no changes for the
+target checkout confirms the controller would not rewrite its owned routes;
+it does not validate the rest of each JSON file. For full parity, apply the
+controller's verified renderer to the clean generator output in memory, then
+compare the complete result to each live JSON file. Account for separately
+approved local settings explicitly; do not blanket-ignore transport drift.
+Keep plan details and raw configurations local. Do not overwrite approved
+host routes merely to make the baseline check green on the live tree.
+
+Neither comparison proves tool execution. Restart the intended client and
+repeat the scoped MCP calls in the actual checkout and worktree.
+
 ### Session boundaries
 
 The existing operational CLI exposes `python -B -m scripts.ai.mcp codex-session

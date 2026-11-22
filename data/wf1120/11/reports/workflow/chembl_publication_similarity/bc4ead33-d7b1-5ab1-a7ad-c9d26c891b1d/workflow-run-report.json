@@ -1,0 +1,74 @@
+{
+  "execution": [
+    {
+      "gold_excluded_by_contract": 0,
+      "kind": "pipeline",
+      "pipeline_manifest_id": "329e0aeb-5416-5c47-9506-b9fe04dabc2c",
+      "pipeline_name": "chembl_publication_similarity",
+      "pipeline_report_ref": "D:\\github\\BioactivityDataAcquisition\\data\\wf1120\\11\\reports\\pipeline\\chembl_publication_similarity\\df8f3565-f476-51ae-86ed-a7f5d32a2aea\\pipeline-run-report.json",
+      "pipeline_run_id": "df8f3565-f476-51ae-86ed-a7f5d32a2aea",
+      "records_bronze": 1000,
+      "records_extracted": 1000,
+      "records_gold": 1000,
+      "records_silver": 1000,
+      "status": "success",
+      "step_id": "run_chembl_publication_similarity"
+    }
+  ],
+  "identity": {
+    "completed_at": "2026-11-20T09:06:21.102966+00:00",
+    "duration_seconds": 111.30949790000159,
+    "execution_fingerprint": "038e84924b5fdc4cce79839b1dcc11c2afa334e903c148188c1122fef8603099",
+    "manifest_id": "d91a4bfa-2523-59e6-a8bb-5223c0b422e4",
+    "resumed": false,
+    "started_at": "2026-11-20T09:04:29.793473+00:00",
+    "status": "success",
+    "workflow_name": "chembl_publication_similarity",
+    "workflow_run_id": "bc4ead33-d7b1-5ab1-a7ad-c9d26c891b1d",
+    "workflow_version": "1.0.0"
+  },
+  "index": {
+    "chembl_publication_similarity": {
+      "records_extracted": 1000,
+      "step_ids": [
+        "run_chembl_publication_similarity"
+      ]
+    }
+  },
+  "observations": {
+    "Evidence Location": {
+      "facts": {
+        "detail": null,
+        "kind": "workflow",
+        "owner": "chembl_publication_similarity",
+        "relative_data_root": ".",
+        "root_alias": "dashboard_data",
+        "run_id": "bc4ead33-d7b1-5ab1-a7ad-c9d26c891b1d",
+        "workflow_run_id": null
+      },
+      "reason": "ok",
+      "verdict": "OK"
+    }
+  },
+  "plan": {
+    "steps": [
+      {
+        "depends_on": [],
+        "kind": "pipeline",
+        "pipeline_name": "chembl_publication_similarity",
+        "step_id": "run_chembl_publication_similarity",
+        "transform_name": null
+      }
+    ]
+  },
+  "schema_version": "workflow_run_report_v1",
+  "totals": {
+    "records_extracted_sum": 1000,
+    "records_gold_sum": 1000,
+    "records_silver_sum": 1000,
+    "steps_failed": 0,
+    "steps_planned": 1,
+    "steps_skipped": 0,
+    "steps_succeeded": 1
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "execution": [
+    {
+      "gold_excluded_by_contract": 0,
+      "kind": "pipeline",
+      "pipeline_manifest_id": "309f8758-6104-5b15-90ea-8b3ec9b38b06",
+      "pipeline_name": "chembl_molecule",
+      "pipeline_report_ref": "D:\\github\\BioactivityDataAcquisition\\data\\wf1120\\09\\reports\\pipeline\\chembl_molecule\\613bcae8-34f4-5ae3-a560-27eefcfd9d65\\pipeline-run-report.json",
+      "pipeline_run_id": "613bcae8-34f4-5ae3-a560-27eefcfd9d65",
+      "records_bronze": 1000,
+      "records_extracted": 1000,
+      "records_gold": 1000,
+      "records_silver": 1000,
+      "status": "success",
+      "step_id": "run_chembl_molecule"
+    }
+  ],
+  "identity": {
+    "completed_at": "2026-11-20T09:03:19.060053+00:00",
+    "duration_seconds": 56.71496990000014,
+    "execution_fingerprint": "e21fa1a9481efa90172eb691bd127141cc372ae63f6da9624db0b68bd211dad6",
+    "manifest_id": "1da80926-d0d5-5af1-9fc5-6e2a7ca99ae7",
+    "resumed": false,
+    "started_at": "2026-11-20T09:02:22.345089+00:00",
+    "status": "success",
+    "workflow_name": "chembl_molecule",
+    "workflow_run_id": "ba4e3fc2-3c82-5c65-98b7-26290c0a8ffb",
+    "workflow_version": "1.0.0"
+  },
+  "index": {
+    "chembl_molecule": {
+      "records_extracted": 1000,
+      "step_ids": [
+        "run_chembl_molecule"
+      ]
+    }
+  },
+  "observations": {
+    "Evidence Location": {
+      "facts": {
+        "detail": null,
+        "kind": "workflow",
+        "owner": "chembl_molecule",
+        "relative_data_root": ".",
+        "root_alias": "dashboard_data",
+        "run_id": "ba4e3fc2-3c82-5c65-98b7-26290c0a8ffb",
+        "workflow_run_id": null
+      },
+      "reason": "ok",
+      "verdict": "OK"
+    }
+  },
+  "plan": {
+    "steps": [
+      {
+        "depends_on": [],
+        "kind": "pipeline",
+        "pipeline_name": "chembl_molecule",
+        "step_id": "run_chembl_molecule",
+        "transform_name": null
+      }
+    ]
+  },
+  "schema_version": "workflow_run_report_v1",
+  "totals": {
+    "records_extracted_sum": 1000,
+    "records_gold_sum": 1000,
+    "records_silver_sum": 1000,
+    "steps_failed": 0,
+    "steps_planned": 1,
+    "steps_skipped": 0,
+    "steps_succeeded": 1
+  }
+}

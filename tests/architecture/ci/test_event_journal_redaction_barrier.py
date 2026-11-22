@@ -435,23 +435,28 @@ def test_password_discovered_after_collection_keeps_terminal_matching(
 
 
 @pytest.mark.parametrize("template", ["authorization={}", "ghp_{}"])
+@pytest.mark.parametrize("password", ["aB7xQ", "sharedpassword"])
 def test_unknown_credential_containing_password_is_sealed_in_full(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, template: str
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, template: str, password: str
 ) -> None:
     from scripts.engineering.ci import pytest_event_journal as journal
 
-    password = "sharedpassword"
     monkeypatch.setenv("REVIEW_PASSWORD", password)
     seen = _spy_correlation(monkeypatch, journal)
     path = tmp_path / "receipt.jsonl"
     plugin = journal.EventJournalPlugin(None, path, _identity())
     plugin.record(
-        "outcome", {"notes": template.format(password + "IndependentSensitive123")}
+        "outcome",
+        {
+            "notes": template.format(password + "IndependentSensitive123"),
+            "authorization": password + "IndependentSensitive123",
+        },
     )
     plugin.finalize()
     text = path.read_text(encoding="utf-8")
     assert password not in text
     assert "IndependentSensitive123" not in text
+    assert json.loads(text.splitlines()[0])["authorization"] == "[redacted]"
     assert not any(password in item for item in seen)
 
 
