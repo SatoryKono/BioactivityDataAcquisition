@@ -557,6 +557,13 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         PUBLIC_FETCH_TEST,
         "tests/unit/repo_backed/scripts/ai/mcp/test_memory_persistence_mode.py",
     ),
+    **dict.fromkeys(
+        (
+            "scripts/ai/agent_tools/README.md",
+            "tests/fixtures/agent-tools/proofagent-harness-0.14.0.sha256",
+        ),
+        ("tests/unit/repo_backed/scripts/ai/agent_tools/test_install_contracts.py",),
+    ),
     ".agents/resume": (AMP_ORB_SETUP_TEST,),
     "scripts/ai/mcp/amp_memory_wrapper.sh": (
         "tests/unit/repo_backed/scripts/ai/mcp/test_memory_persistence_mode.py",
