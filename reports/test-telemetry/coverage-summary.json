@@ -1,11 +1,11 @@
 {
-  "source_branch": "main",
-  "source_commit": "c123f2f936aca59fb0ee9a052e52cfd432e4c41b",
-  "source_run_id": "44553914098",
+  "source_branch": "fix/pwsh-test-timeout",
+  "source_commit": "1228f4ef3b6565ed52a181b2527248320cdef521",
+  "source_run_id": "44799533853",
   "source_event": "workflow_dispatch",
-  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/44553914098",
-  "source_tree_sha256": "fa186719cd654d35d7cc47ba7345faa6d4152ae28df12710a555d9df7dfab784",
-  "refreshed_at_utc": "2026-11-19T15:35:18.257000+00:00",
+  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/44799533853",
+  "source_tree_sha256": "ff11bb483ffece85f37a77bda99f0800e49a2fb3a991cc79001afb510b9d0d81",
+  "refreshed_at_utc": "2026-11-20T19:22:40.767000+00:00",
   "refresh_status": "captured",
   "coverage_percent": 99.51,
   "coverage": {

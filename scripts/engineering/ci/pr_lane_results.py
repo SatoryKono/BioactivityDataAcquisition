@@ -73,6 +73,7 @@ AI_RUNTIME_GOVERNANCE_LINKS_TEST = (
 )
 DOCKER_RUNTIME_CONTRACT_TEST = "tests/architecture/test_docker_runtime_contracts.py"
 MEMORY_RAG_INDEXING_TEST = "tests/unit/memory/test_rag_indexing.py"
+MEMORY_MCP_SCOPE_TEST = "tests/unit/memory/test_mcp_scope.py"
 TECH_DEBT_5847_5852_CLOSEOUT_TEST = (
     "tests/architecture/test_tech_debt_issues_5847_5852_closeout.py"
 )
@@ -516,7 +517,7 @@ MEMORY_BASELINE_TEST_TARGETS: tuple[str, ...] = (
     "tests/unit/memory/test_issue_10526_workflow_module_script_targets_slice.py",
     "tests/unit/memory/test_issue_10526_workflow_output_expression_slice.py",
     "tests/unit/memory/test_lifecycle.py",
-    "tests/unit/memory/test_mcp_scope.py",
+    MEMORY_MCP_SCOPE_TEST,
     "tests/unit/memory/test_mcp_server.py",
     "tests/unit/memory/test_memory_acl.py",
     "tests/unit/memory/test_migrations.py",
@@ -550,11 +551,17 @@ MEMORY_BASELINE_TEST_TARGETS: tuple[str, ...] = (
 
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
-    **dict.fromkeys(
-        (".agents/setup", ".amp/settings.json"),
-        (AMP_ORB_SETUP_TEST, PUBLIC_FETCH_TEST),
+    ".agents/setup": (AMP_ORB_SETUP_TEST, PUBLIC_FETCH_TEST),
+    ".amp/settings.json": (
+        AMP_ORB_SETUP_TEST,
+        PUBLIC_FETCH_TEST,
+        "tests/unit/repo_backed/scripts/ai/mcp/test_memory_persistence_mode.py",
     ),
     ".agents/resume": (AMP_ORB_SETUP_TEST,),
+    "scripts/ai/mcp/amp_memory_wrapper.sh": (
+        "tests/unit/repo_backed/scripts/ai/mcp/test_memory_persistence_mode.py",
+        MEMORY_MCP_SCOPE_TEST,
+    ),
     **dict.fromkeys(
         (
             "scripts/ai/mcp/public_fetch_wrapper.sh",
@@ -1015,6 +1022,23 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     **dict.fromkeys(
         (
+            "reports/review/ai-rules-epic-13056-acceptance.md",
+            "reports/review/ai-rules-epic-13056-evidence.json",
+        ),
+        (
+            HOOK_INSTALLATION_TEST,
+            "tests/unit/scripts/test_coalesced_precommit.py",
+            "tests/unit/scripts/test_parallel_precommit.py",
+            "tests/unit/scripts/test_partitioned_diff.py",
+            "tests/unit/scripts/test_readonly_message.py",
+            "tests/unit/scripts/test_owned_guard_execution.py",
+            "tests/unit/scripts/repo/test_hook_receipts.py",
+            "tests/unit/scripts/repo/test_check_no_partial_tree.py",
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
+    ),
+    **dict.fromkeys(
+        (
             "reports/review/grafana-full-tables-20261110/audit.json",
             "reports/review/grafana-full-tables-20261110/chembl_protein_class-overview.png",
             "reports/review/grafana-full-tables-20261110/uniprot_protein-overview.png",
@@ -1161,7 +1185,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/integration/memory/test_mcp_server_isolation.py",
     ),
     "src/memory/mcp_scope.py": (
-        "tests/unit/memory/test_mcp_scope.py",
+        MEMORY_MCP_SCOPE_TEST,
         "tests/integration/memory/test_mcp_server_isolation.py",
     ),
     "src/memory/storage.py": ("tests/unit/memory/test_atomic_storage.py",),
@@ -2136,11 +2160,17 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "docs/02-architecture/finances-github-billing.md": (DOCUMENTATION_SYNC_TEST,),
     "docs/05-engineering/test-telemetry-baseline.md": TELEMETRY_BASELINE_TESTS,
-    "docs/04-reference/providers/chembl/molecule.md": (
-        DOCUMENTATION_SYNC_TEST,
-        DOCUMENTATION_CLEANUP_INVENTORY_TEST,
-        "tests/e2e/test_chembl_molecule_e2e.py",
-        "tests/e2e/test_chembl_molecule_cached_e2e.py",
+    **dict.fromkeys(
+        (
+            "docs/04-reference/providers/chembl/molecule.md",
+            "docs/05-operations/runbooks/molecule-phase-recovery.md",
+        ),
+        (
+            DOCUMENTATION_SYNC_TEST,
+            DOCUMENTATION_CLEANUP_INVENTORY_TEST,
+            "tests/e2e/test_chembl_molecule_e2e.py",
+            "tests/e2e/test_chembl_molecule_cached_e2e.py",
+        ),
     ),
     ".gitignore": (
         "tests/architecture/test_gitignore_secret_and_agents_policy.py",

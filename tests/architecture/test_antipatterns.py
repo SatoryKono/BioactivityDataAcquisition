@@ -13,6 +13,7 @@ from __future__ import annotations
 import ast
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -103,8 +104,8 @@ def test_no_sentinel_values(source_content_cache: dict) -> None:
 
 @pytest.mark.slow
 @pytest.mark.timeout(600)  # Increased timeout to 10 minutes
-def test_no_hardcoded_secrets(cached_subprocess_run, tmp_path: Path) -> None:
-    """Verify no hardcoded secrets using detect-secrets scanner with cached results."""
+def test_no_hardcoded_secrets(tmp_path: Path) -> None:
+    """Verify all source files against the unchanged secret baseline."""
     baseline_path = REPO_ROOT / ".secrets.baseline"
     if not baseline_path.exists():
         raise AssertionError("Missing .secrets.baseline for detect-secrets scan")
@@ -114,18 +115,28 @@ def test_no_hardcoded_secrets(cached_subprocess_run, tmp_path: Path) -> None:
     scan_baseline.write_text(original, encoding="utf-8")
     # scan --baseline updates its input; never mutate the committed baseline.
     # Reuse the active test environment, including worktrees sharing a venv.
-    result = cached_subprocess_run(
+    # Cached stdout cannot replay the baseline file mutation. Always run a fresh
+    # scanner, including when pytest reuses the same temporary baseline path.
+    result = subprocess.run(
         [
             sys.executable,
             "-m",
             "detect_secrets",
             "scan",
+            # Recurse only under src instead of normalizing every tracked path
+            # in the repository. This also covers ignored/untracked source files.
+            "--all-files",
             "--baseline",
             str(scan_baseline),
             "src/",
         ],
         timeout=600,
         cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        check=False,
     )
 
     if result.returncode != 0:

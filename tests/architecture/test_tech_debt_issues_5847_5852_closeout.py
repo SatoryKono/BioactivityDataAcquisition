@@ -112,9 +112,7 @@ def test_issue_5847_root_baseline_is_reduced_without_new_root_directory() -> Non
         for line in ROOT_ALLOWLIST.read_text(encoding="utf-8").splitlines()
         if line.strip() and not line.strip().startswith("#")
     }
-    structure_catalog = yaml.safe_load(
-        REPO_STRUCTURE_CATALOG.read_text(encoding="utf-8")
-    )
+    structure_catalog = _load_yaml(REPO_STRUCTURE_CATALOG)
     approved_tooling_roots = {
         row["path"]: row
         for row in structure_catalog["root_tooling_roots"]["approved_roots"]
@@ -125,24 +123,29 @@ def test_issue_5847_root_baseline_is_reduced_without_new_root_directory() -> Non
         structure_catalog["root_tooling_roots"]["approved_roots"]
     )
     assert ".devin" in approved_tooling_roots
-    circleci = approved_tooling_roots[".circleci"]
-    assert circleci["role"] == "canonical_circleci_project_configuration"
-    assert {path for path in tracked if path.startswith(".circleci/")} == {
-        ".circleci/config.yml"
+    governed_roots = {
+        ".claude",
+        ".cursor",
+        ".devin",
+        ".zed",
+        ".opencode",
+        ".gemini",
+        ".vscode",
     }
-    assert approved_tooling_roots[".agents"]["role"] == (
-        "derived_native_agent_skill_discovery_surface"
-    )
-    assert approved_tooling_roots[".amp"]["role"] == (
-        "amp_subordinate_surface_project_config"
-    )
-    assert {path for path in tracked if path.startswith(".agents/")} == {
-        ".agents/setup",
-        ".agents/resume",
-    }
-    assert {path for path in tracked if path.startswith(".amp/")} == {
-        ".amp/settings.json"
-    }
+    for prefix, role, filenames in (
+        (".circleci", "canonical_circleci_project_configuration", {"config.yml"}),
+        (
+            ".agents",
+            "derived_native_agent_skill_discovery_surface",
+            {"setup", "resume"},
+        ),
+        (".amp", "amp_subordinate_surface_project_config", {"settings.json"}),
+    ):
+        assert approved_tooling_roots[prefix]["role"] == role
+        assert {path for path in tracked if path.startswith(prefix + "/")} == {
+            f"{prefix}/{name}" for name in filenames
+        }
+        governed_roots.add(prefix)
     assert payload["outcomes"]["5847"]["tracked_root_dirs_after"] == 11
     # Catalog-approved runtime/CI roots are governed tooling, not root clutter.
     # `.gemini` stays inside that set and does not raise tracked_root_dirs_after.
@@ -152,21 +155,7 @@ def test_issue_5847_root_baseline_is_reduced_without_new_root_directory() -> Non
     # `.cursor` is the curated editor hooks/rules surface (catalog approved_roots);
     # tracking `.cursor/hooks/**` must not inflate the closeout baseline.
     assert (
-        len(
-            root_dirs
-            - {
-                ".agents",
-                ".amp",
-                ".claude",
-                ".cursor",
-                ".devin",
-                ".zed",
-                ".opencode",
-                ".circleci",
-                ".gemini",
-                ".vscode",
-            }
-        )
+        len(root_dirs - governed_roots)
         == payload["outcomes"]["5847"]["tracked_root_dirs_after"]
     )
     assert {path for path in tracked if path.startswith(".gemini/")} == {
@@ -233,9 +222,7 @@ def test_issue_5848_root_local_clutter_cleanup_command_is_bounded() -> None:
     assert "SECURITY_ROOT_PATHS" in script_text
     assert "load_root_governance_policy" in script_text
     assert "--include-venv" in script_text
-    structure_catalog = _load_yaml(
-        ROOT / "configs" / "quality" / "repo_structure_catalog.yaml"
-    )
+    structure_catalog = _load_yaml(REPO_STRUCTURE_CATALOG)
     catalog_blocked_paths = {
         row["path"]
         for row in structure_catalog["blocked_cleanup_zones"]

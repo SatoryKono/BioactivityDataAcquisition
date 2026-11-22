@@ -31,6 +31,7 @@ from __future__ import annotations
 import pytest
 
 import ast
+from collections.abc import Mapping
 import os
 import re
 from pathlib import Path
@@ -57,11 +58,19 @@ def _python_files(path: Path, *, skip_private: bool = False) -> list[Path]:
     return files
 
 
-def _read_file(py_file: Path) -> str:
+def _read_file(py_file: Path, content: Mapping[Path, str] | None = None) -> str:
+    if content is not None and py_file in content:
+        return content[py_file]
     return py_file.read_text(encoding="utf-8")
 
 
-def _parse_file(py_file: Path) -> ast.AST:
+def _parse_file(
+    py_file: Path, trees: Mapping[Path, ast.Module] | None = None
+) -> ast.AST:
+    if trees is not None and py_file in trees:
+        return trees[py_file]
+    # The shared fixture omits unreadable or invalid files. A miss must retain
+    # the original fresh read/parse and its error, never silently skip a file.
     return ast.parse(_read_file(py_file))
 
 
@@ -81,11 +90,12 @@ def _module_import_violations(
     *,
     exact_modules: set[str] | None = None,
     startswith_modules: tuple[str, ...] = (),
+    trees: Mapping[Path, ast.Module] | None = None,
 ) -> list[str]:
     """Check for violations of module imports."""
     exact_modules = exact_modules or set()
     violations: list[str] = []
-    tree = _parse_file(py_file)
+    tree = _parse_file(py_file, trees)
 
     for node in ast.walk(tree):
         if isinstance(node, ast.ImportFrom):
@@ -136,10 +146,11 @@ def _composition_module_violations(
     src_dir: Path,
     *,
     allowed_modules: set[str],
+    trees: Mapping[Path, ast.Module] | None = None,
 ) -> list[str]:
     """Check for violations of composition module imports."""
     violations: list[str] = []
-    tree = _parse_file(py_file)
+    tree = _parse_file(py_file, trees)
 
     for node in ast.walk(tree):
         if isinstance(node, ast.ImportFrom):
@@ -198,7 +209,9 @@ def _is_forbidden_port_import_target(module_name: str) -> bool:
     return module_name != "bioetl.domain.ports.noop"
 
 
-def _iter_metrics_server_call_violations(src_dir: Path) -> list[str]:
+def _iter_metrics_server_call_violations(
+    src_dir: Path, content: Mapping[Path, str] | None = None
+) -> list[str]:
     """Collect forbidden start_metrics_server invocations outside composition."""
     forbidden_layers = ("interfaces", "application", "domain")
     allowed_patterns = (
@@ -220,16 +233,22 @@ def _iter_metrics_server_call_violations(src_dir: Path) -> list[str]:
                     py_file,
                     src_dir,
                     allowed_patterns=allowed_patterns,
+                    content=content,
                 )
             )
     return violations
 
 
-def _port_import_violations(layer_path: Path, src_dir: Path) -> list[str]:
+def _port_import_violations(
+    layer_path: Path,
+    src_dir: Path,
+    *,
+    trees: Mapping[Path, ast.Module] | None = None,
+) -> list[str]:
     """Collect imports of forbidden deep port modules for a single layer."""
     violations: list[str] = []
     for py_file in _python_files(layer_path):
-        tree = _parse_file(py_file)
+        tree = _parse_file(py_file, trees)
         relative_path = _relative(src_dir, py_file)
         if relative_path.parts[:3] == ("bioetl", "domain", "ports"):
             continue
@@ -283,11 +302,12 @@ def _iter_file_metrics_server_call_violations(
     src_dir: Path,
     *,
     allowed_patterns: tuple[str, ...],
+    content: Mapping[Path, str] | None = None,
 ) -> list[str]:
     relative_path = _relative(src_dir, py_file)
     return [
         f"{relative_path}:{line_number} - {line.strip()}"
-        for line_number, line in enumerate(_read_file(py_file).splitlines(), 1)
+        for line_number, line in enumerate(_read_file(py_file, content).splitlines(), 1)
         if _is_forbidden_metrics_server_call_line(line, allowed_patterns)
     ]
 
@@ -304,7 +324,9 @@ def _is_forbidden_metrics_server_call_line(
 class TestLocalOnlyPolicy:
     """Tests enforcing the Local-Only Architecture (ADR-010)."""
 
-    def test_no_cloud_or_distributed_libs(self, src_dir: Path) -> None:
+    def test_no_cloud_or_distributed_libs(
+        self, src_dir: Path, source_content_cache: dict[Path, str]
+    ) -> None:
         """Verify no usage of cloud SDKs or distributed systems clients.
 
         REQ-ARCH-001: The system must run entirely locally without external
@@ -340,7 +362,7 @@ class TestLocalOnlyPolicy:
         violations = []
 
         for py_file in _python_files(source_path):
-            content = _read_file(py_file)
+            content = _read_file(py_file, content=source_content_cache)
 
             for lib in forbidden_libs:
                 # Check for various import forms:
@@ -370,7 +392,9 @@ class TestLocalOnlyPolicy:
 class TestOrchestrationIsolation:
     """Tests ensuring orchestration frameworks are properly isolated."""
 
-    def test_application_layer_no_orchestration_imports(self, src_dir: Path) -> None:
+    def test_application_layer_no_orchestration_imports(
+        self, src_dir: Path, source_content_cache: dict[Path, str]
+    ) -> None:
         """Application layer must not import external orchestration frameworks.
 
         REQ-ARCH-001: External workflow frameworks (Celery, Airflow, etc.)
@@ -384,7 +408,7 @@ class TestOrchestrationIsolation:
         violations = []
 
         for py_file in _python_files(application_path):
-            content = _read_file(py_file)
+            content = _read_file(py_file, content=source_content_cache)
             for lib in disallowed:
                 if f"from {lib}" in content or f"import {lib}" in content:
                     violations.append(f"{_relative(src_dir, py_file)}: imports {lib}")
@@ -399,13 +423,17 @@ class TestOrchestrationIsolation:
 class TestObservabilityInitialization:
     """Tests ensuring observability is initialized in correct layer."""
 
-    def test_metrics_server_only_in_composition(self, src_dir: Path) -> None:
+    def test_metrics_server_only_in_composition(
+        self, src_dir: Path, source_content_cache: dict[Path, str]
+    ) -> None:
         """Verify start_metrics_server is only called from composition layer.
 
         REQ-ARCH-001: Observability initialization should only happen
         in the composition root to ensure single point of responsibility.
         """
-        violations = _iter_metrics_server_call_violations(src_dir)
+        violations = _iter_metrics_server_call_violations(
+            src_dir, content=source_content_cache
+        )
 
         assert not violations, (
             "start_metrics_server() should only be called from composition layer.\n"
@@ -417,7 +445,9 @@ class TestObservabilityInitialization:
 class TestPortImportFacade:
     """Tests ensuring ports are imported from the facade module."""
 
-    def test_ports_imported_only_from_facade(self, src_dir: Path) -> None:
+    def test_ports_imported_only_from_facade(
+        self, src_dir: Path, source_ast_cache: dict[Path, ast.Module]
+    ) -> None:
         """All layers MUST import contracts from sanctioned facades only.
 
         REQ-ARCH-001: Port protocols are accessible via ``bioetl.domain.ports``.
@@ -435,7 +465,9 @@ class TestPortImportFacade:
             layer_path = src_dir / "bioetl" / layer
             if not layer_path.exists():
                 continue
-            violations.extend(_port_import_violations(layer_path, src_dir))
+            violations.extend(
+                _port_import_violations(layer_path, src_dir, trees=source_ast_cache)
+            )
 
         assert not violations, (
             "Ports must be imported only from sanctioned facades.\n"
@@ -546,7 +578,9 @@ class TestInterfacesFilesystemAccess:
 class TestInterfacesBootstrapIsolation:
     """Tests ensuring interfaces layer doesn't import bootstrap directly."""
 
-    def test_cli_no_bootstrap_import(self, src_dir: Path) -> None:
+    def test_cli_no_bootstrap_import(
+        self, src_dir: Path, source_content_cache: dict[Path, str]
+    ) -> None:
         """Interfaces layer MUST NOT import from bootstrap.py directly.
 
         REQ-ARCH-C1: Interfaces must use sanctioned composition public APIs,
@@ -568,7 +602,7 @@ class TestInterfacesBootstrapIsolation:
 
         violations = []
         for py_file in _python_files(interfaces_path):
-            content = _read_file(py_file)
+            content = _read_file(py_file, content=source_content_cache)
             for pattern in forbidden_patterns:
                 if re.search(pattern, content):
                     violations.append(
@@ -587,7 +621,7 @@ class TestInterfacesBootstrapIsolation:
         )
 
     def test_interfaces_no_legacy_execution_or_maintenance_api_imports(
-        self, src_dir: Path
+        self, src_dir: Path, source_ast_cache: dict[Path, ast.Module]
     ) -> None:
         """Interfaces use canonical entrypoints, not legacy execution/maintenance APIs."""
         violations: list[str] = []
@@ -600,6 +634,7 @@ class TestInterfacesBootstrapIsolation:
                         "bioetl.composition.execution_api",
                         "bioetl.composition.maintenance_api",
                     },
+                    trees=source_ast_cache,
                 )
             )
 
@@ -609,7 +644,9 @@ class TestInterfacesBootstrapIsolation:
             "Violations:\n" + "\n".join(f"  - {item}" for item in violations)
         )
 
-    def test_interfaces_no_direct_composition_root_imports(self, src_dir: Path) -> None:
+    def test_interfaces_no_direct_composition_root_imports(
+        self, src_dir: Path, source_ast_cache: dict[Path, ast.Module]
+    ) -> None:
         """Interfaces must use specialized composition APIs instead of package root imports."""
         violations: list[str] = []
         for py_file in _python_files(_interfaces_path(src_dir)):
@@ -618,6 +655,7 @@ class TestInterfacesBootstrapIsolation:
                     py_file,
                     src_dir,
                     exact_modules={"bioetl.composition"},
+                    trees=source_ast_cache,
                 )
             )
 
@@ -634,7 +672,9 @@ class TestInterfacesBootstrapIsolation:
             "Violations:\n" + "\n".join(f"  - {item}" for item in violations)
         )
 
-    def test_interfaces_no_direct_services_api_imports(self, src_dir: Path) -> None:
+    def test_interfaces_no_direct_services_api_imports(
+        self, src_dir: Path, source_ast_cache: dict[Path, ast.Module]
+    ) -> None:
         """Interfaces must consume narrow service APIs instead of services_api."""
         violations: list[str] = []
         for py_file in _python_files(_interfaces_path(src_dir)):
@@ -643,6 +683,7 @@ class TestInterfacesBootstrapIsolation:
                     py_file,
                     src_dir,
                     exact_modules={"bioetl.composition.services_api"},
+                    trees=source_ast_cache,
                 )
             )
 
@@ -659,7 +700,9 @@ class TestInterfacesBootstrapIsolation:
             "Violations:\n" + "\n".join(f"  - {item}" for item in violations)
         )
 
-    def test_interfaces_no_direct_resources_api_imports(self, src_dir: Path) -> None:
+    def test_interfaces_no_direct_resources_api_imports(
+        self, src_dir: Path, source_ast_cache: dict[Path, ast.Module]
+    ) -> None:
         """Interfaces must consume owner-focused APIs instead of resources_api."""
         violations: list[str] = []
         for py_file in _python_files(_interfaces_path(src_dir)):
@@ -668,6 +711,7 @@ class TestInterfacesBootstrapIsolation:
                     py_file,
                     src_dir,
                     exact_modules={"bioetl.composition.resources_runtime"},
+                    trees=source_ast_cache,
                 )
             )
 
@@ -681,7 +725,7 @@ class TestInterfacesBootstrapIsolation:
         )
 
     def test_interfaces_no_direct_control_plane_api_imports(
-        self, src_dir: Path
+        self, src_dir: Path, source_ast_cache: dict[Path, ast.Module]
     ) -> None:
         """Interfaces must use the first-party control-plane access seam."""
         violations: list[str] = []
@@ -691,6 +735,7 @@ class TestInterfacesBootstrapIsolation:
                     py_file,
                     src_dir,
                     exact_modules={"bioetl.composition.control_plane_runtime"},
+                    trees=source_ast_cache,
                 )
             )
 
@@ -703,7 +748,7 @@ class TestInterfacesBootstrapIsolation:
         )
 
     def test_interfaces_no_direct_registry_internal_imports(
-        self, src_dir: Path
+        self, src_dir: Path, source_ast_cache: dict[Path, ast.Module]
     ) -> None:
         """Interfaces must consume registry_api instead of registry internals."""
         forbidden_modules = {
@@ -716,6 +761,7 @@ class TestInterfacesBootstrapIsolation:
                     py_file,
                     src_dir,
                     exact_modules=forbidden_modules,
+                    trees=source_ast_cache,
                 )
             )
 
@@ -726,7 +772,7 @@ class TestInterfacesBootstrapIsolation:
         )
 
     def test_interfaces_no_direct_composition_factories_imports(
-        self, src_dir: Path
+        self, src_dir: Path, source_ast_cache: dict[Path, ast.Module]
     ) -> None:
         """Interfaces must not import composition factories directly."""
         violations: list[str] = []
@@ -736,6 +782,7 @@ class TestInterfacesBootstrapIsolation:
                     py_file,
                     src_dir,
                     startswith_modules=("bioetl.composition.factories",),
+                    trees=source_ast_cache,
                 )
             )
 
@@ -746,7 +793,7 @@ class TestInterfacesBootstrapIsolation:
         )
 
     def test_interfaces_composition_imports_stay_within_sanctioned_modules(
-        self, src_dir: Path
+        self, src_dir: Path, source_ast_cache: dict[Path, ast.Module]
     ) -> None:
         """Interfaces may import only the approved composition public API modules."""
         allowed_modules = {
@@ -772,6 +819,7 @@ class TestInterfacesBootstrapIsolation:
                     py_file,
                     src_dir,
                     allowed_modules=allowed_modules,
+                    trees=source_ast_cache,
                 )
             )
 
@@ -816,14 +864,16 @@ class TestLegacyNormalizersGuardrail:
             "All normalisation belongs in infrastructure.config.source_normalizers."
         )
 
-    def test_no_legacy_normalizers_imports(self, src_dir: Path) -> None:
+    def test_no_legacy_normalizers_imports(
+        self, src_dir: Path, source_content_cache: dict[Path, str]
+    ) -> None:
         """No production code may reference legacy_normalizers."""
         violations: list[str] = []
         source_path = src_dir / "bioetl"
 
         for py_file in _python_files(source_path):
             try:
-                content = _read_file(py_file)
+                content = _read_file(py_file, content=source_content_cache)
             except (OSError, UnicodeDecodeError):
                 continue
             for pattern in self.FORBIDDEN_PATTERNS:
@@ -836,3 +886,61 @@ class TestLegacyNormalizersGuardrail:
             "Use bioetl.infrastructure.config.source_normalizers instead.\n\n"
             "Violations:\n" + "\n".join(f"  - {v}" for v in violations)
         )
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        "import bioetl.composition.factories\n",
+        "def nested():\n    from bioetl.composition.factories import Factory\n",
+    ],
+)
+def test_snapshot_import_scan_retains_forbidden_imports(
+    tmp_path: Path, source: str
+) -> None:
+    path = tmp_path / "source.py"
+    path.write_text(source, encoding="utf-8")
+    expected = _module_import_violations(
+        path, tmp_path, startswith_modules=("bioetl.composition.factories",)
+    )
+
+    observed = _module_import_violations(
+        path,
+        tmp_path,
+        startswith_modules=("bioetl.composition.factories",),
+        trees={path: ast.parse(source)},
+    )
+
+    assert expected
+    assert observed == expected
+
+
+def test_snapshot_miss_still_scans_new_source_file(tmp_path: Path) -> None:
+    original = tmp_path / "safe.py"
+    original.write_text("pass\n", encoding="utf-8")
+    trees = {original: ast.parse("pass\n")}
+    new_source = tmp_path / "new.py"
+    new_source.write_text("import bioetl.domain.ports.storage\n", encoding="utf-8")
+
+    assert _port_import_violations(tmp_path, tmp_path, trees=trees) == [
+        "new.py:1 imports bioetl.domain.ports.storage"
+    ]
+
+
+def test_snapshot_miss_preserves_syntax_error(tmp_path: Path) -> None:
+    path = tmp_path / "invalid.py"
+    path.write_text("def invalid(:\n", encoding="utf-8")
+
+    with pytest.raises(SyntaxError):
+        _module_import_violations(path, tmp_path, trees={})
+
+
+def test_default_import_scan_observes_later_source_change(tmp_path: Path) -> None:
+    path = tmp_path / "changed.py"
+    path.write_text("pass\n", encoding="utf-8")
+    assert _module_import_violations(path, tmp_path, exact_modules={"redis"}) == []
+    path.write_text("import redis\n", encoding="utf-8")
+
+    assert _module_import_violations(path, tmp_path, exact_modules={"redis"}) == [
+        "changed.py:1"
+    ]

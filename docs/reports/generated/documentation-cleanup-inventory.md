@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 4207 |
-| Tracked doc-like files | 4207 |
+| Doc-like files | 4209 |
+| Tracked doc-like files | 4209 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 80 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 4207 |
+| tracked | 4209 |
 
 ## Lifecycle Counts
 
@@ -52,20 +52,20 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 777 |
+| Active | 778 |
 | Archived | 1554 |
 | Canonical | 77 |
-| Generated | 1071 |
+| Generated | 1072 |
 | Working | 728 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 777 |
+| active | 778 |
 | archive | 1554 |
 | canonical | 77 |
-| generated | 1071 |
+| generated | 1072 |
 | working | 728 |
 
 ## Recommended Actions
@@ -73,8 +73,8 @@
 | Action | Count |
 | --- | --- |
 | archive-after-migration | 434 |
-| generate-automatically | 1071 |
-| keep | 2702 |
+| generate-automatically | 1072 |
+| keep | 2703 |
 
 ## Cleanup Candidates
 
@@ -228,6 +228,7 @@
 | `docs/00-project/ai/prompts/library/audit/dashboard.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/library/audit/debug.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/library/audit/diagrams.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/full-run.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/library/audit/generic-nine.pack.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/library/audit/github-actions.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/library/audit/grafana-data.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
@@ -244,7 +245,6 @@
 | `docs/00-project/ai/prompts/library/audit/tech-debt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/library/closeout/grok-closeout.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/library/config/validate.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/library/doc/audit.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 
 ## GitHub Issue Evidence Examples
 
