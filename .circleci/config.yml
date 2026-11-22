@@ -1333,7 +1333,6 @@ jobs:
           # Subset mutation still needs the full package + tooling imports.
           config["also_copy"] = [
               "src/bioetl",
-              "src/iuphar_target_class",
               "scripts",
               "configs",
           ]
