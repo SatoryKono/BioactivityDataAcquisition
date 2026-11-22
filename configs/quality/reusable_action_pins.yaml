@@ -10,7 +10,7 @@ pins:
   - path: "zizmorcore/zizmor-action"
     sha: "45d7276c9ca790aabd705e31ca99c6185c3e76dd"
   - path: "actions/dependency-review-action"
-    sha: "a1d282b36b6f3519aa1f3fc636f609c47dddb294"
+    sha: "bbc44d14a204704ccc493733616cd1e93a0321ec"
   - path: "gitleaks/gitleaks-action"
     sha: "e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e"
   - path: "google/osv-scanner-action/osv-scanner-action"

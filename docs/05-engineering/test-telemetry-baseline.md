@@ -27,14 +27,14 @@ trend evidence only.
 
 ## Baseline Snapshot
 
-- Source branch: `dependabot/pip/pip-minor-patch-5e24b04546`
-- Source commit: `73fe9126037a0954a84cdf2beca54299cddd1af4`
-- Source run id: `45052153971`
+- Source branch: `dependabot/github_actions/github-actions-fb79fd3e87`
+- Source commit: `79c19313c8041047c67ac04f7d617be33674b789`
+- Source run id: `45068010506`
 - Source event: `workflow_dispatch`
-- Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/45052153971`
-- Source tree sha256: `a228eea31c41d4fd0f5b6b7c9f7fedf7cc30bfc2a09788f5c91bcf7e159b9d3b`
+- Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/45068010506`
+- Source tree sha256: `03b73501d47888e828f77122651e85b1b0693a26df2240b1569ae17fcd62a542`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-11-22T18:11:10.583000+00:00`
+- Refreshed at (UTC): `2026-11-22T20:58:19.203000+00:00`
 
 ## Branch-accurate provenance (#5729)
 
@@ -107,7 +107,7 @@ trend evidence only.
 
 ## Duration Telemetry
 
-- Total executed test cases: `69961`
+- Total executed test cases: `69968`
 - Executed means observed non-skipped JUnit testcase records, not
   collection count or distinct logical tests. Error records can describe
   setup or collection failures rather than a test body run.
@@ -119,31 +119,31 @@ trend evidence only.
 
 | Rank | Duration (s) | Test | Source |
 |---:|---:|---|---|
-| 1 | `24.194` | `tests.unit.repo_backed.scripts.ai.mcp.test_host_transport_dispatch::test_host_transport_behavior` | `junit-repo-backed-unit.tooling.xml` |
-| 2 | `15.327` | `tests.unit.scripts.engineering.ci.test_pr_lane_results_runtime_acceptance_routes::test_runtime_evidence_selects_owning_contract[tests/helpers/runtime_acceptance_12553.py]` | `junit-unit-scripts-tooling.other.xml` |
-| 3 | `14.864` | `tests.unit.scripts.engineering.ci.test_pytest_receipts::test_xdist_waits_for_slow_worker_receipt_finalization` | `junit-unit-scripts-tooling.other.xml` |
-| 4 | `10.962` | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery::test_last_resort_requires_switch_and_should_process_confirmation` | `junit-repo-backed-unit.ops.xml` |
-| 5 | `10.59` | `tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline::test_chembl_activity_happy_path` | `junit.integration.xml` |
-| 6 | `10.558` | `tests.integration.pipelines.test_chembl_target_component.TestChemblTargetComponentPipeline::test_chembl_target_component_happy_path` | `junit.integration.xml` |
-| 7 | `10.392` | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline::test_chembl_cell_line_source_fields` | `junit.integration.xml` |
-| 8 | `10.313` | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline::test_chembl_cell_line_happy_path` | `junit.integration.xml` |
-| 9 | `10.274` | `tests.integration.pipelines.test_chembl_compound_record.TestChemblCompoundRecordPipeline::test_chembl_compound_record_happy_path` | `junit.integration.xml` |
-| 10 | `10.077` | `tests.unit.scripts.engineering.ci.test_generated_artifact_selection::test_real_pytest_partition_and_daily_missing_node_fail_closed` | `junit-unit-scripts-tooling.other.xml` |
+| 1 | `20.508` | `tests.unit.repo_backed.scripts.ai.mcp.test_host_transport_dispatch::test_host_transport_behavior` | `junit-repo-backed-unit.tooling.xml` |
+| 2 | `18.798` | `tests.unit.scripts.engineering.ci.test_pr_lane_results_runtime_acceptance_routes::test_runtime_evidence_selects_owning_contract[tests/helpers/runtime_acceptance_12553.py]` | `junit-unit-scripts-tooling.other.xml` |
+| 3 | `15.41` | `tests.unit.scripts.engineering.ci.test_pytest_receipts::test_xdist_waits_for_slow_worker_receipt_finalization` | `junit-unit-scripts-tooling.other.xml` |
+| 4 | `12.943` | `tests.unit.scripts.engineering.ci.test_generated_artifact_selection::test_real_pytest_partition_and_daily_missing_node_fail_closed` | `junit-unit-scripts-tooling.other.xml` |
+| 5 | `12.877` | `tests.performance.test_measure_merger_input::test_measurement_harness_smoke` | `junit-serial-coverage.xml` |
+| 6 | `10.946` | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery::test_last_resort_requires_switch_and_should_process_confirmation` | `junit-repo-backed-unit.ops.xml` |
+| 7 | `10.813` | `tests.unit.scripts.qa.test_check_quality_exemptions::test_check_quality_exemptions_passes_current_zero_budget_registry` | `junit-unit-scripts-tooling.other.xml` |
+| 8 | `10.5` | `tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline::test_chembl_activity_happy_path` | `junit.integration.xml` |
+| 9 | `10.486` | `tests.integration.pipelines.test_chembl_target_component.TestChemblTargetComponentPipeline::test_chembl_target_component_happy_path` | `junit.integration.xml` |
+| 10 | `10.344` | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline::test_chembl_cell_line_source_fields` | `junit.integration.xml` |
 
 ### Top Slow Zones
 
 | Rank | Zone | Tests | Total Duration (s) | Max Duration (s) |
 |---:|---|---:|---:|---:|
-| 1 | `tests.unit.repo_backed.scripts.ai.mcp.test_host_transport_dispatch` | 1 | 24.194 | 24.194 |
-| 2 | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline` | 2 | 20.705 | 10.392 |
-| 3 | `tests.unit.iuphar_target_class.test_acceptance` | 3 | 19.016 | 6.539 |
-| 4 | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery` | 2 | 17.424 | 10.962 |
-| 5 | `tests.unit.iuphar_target_class.test_normalization` | 2 | 15.771 | 8.408 |
-| 6 | `tests.unit.scripts.engineering.ci.test_pr_lane_results_runtime_acceptance_routes` | 1 | 15.327 | 15.327 |
-| 7 | `tests.unit.scripts.engineering.ci.test_pytest_receipts` | 1 | 14.864 | 14.864 |
-| 8 | `tests.unit.infrastructure.test_issue_10469_stream_a_infra_thirteen.TestExemptionsDebtReductionAndFormatter` | 2 | 12.997 | 6.886 |
-| 9 | `tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline` | 1 | 10.59 | 10.59 |
-| 10 | `tests.integration.pipelines.test_chembl_target_component.TestChemblTargetComponentPipeline` | 1 | 10.558 | 10.558 |
+| 1 | `tests.unit.iuphar_target_class.test_acceptance` | 3 | 21.987 | 7.592 |
+| 2 | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline` | 2 | 20.66 | 10.344 |
+| 3 | `tests.unit.repo_backed.scripts.ai.mcp.test_host_transport_dispatch` | 1 | 20.508 | 20.508 |
+| 4 | `tests.unit.scripts.engineering.ci.test_pr_lane_results_runtime_acceptance_routes` | 1 | 18.798 | 18.798 |
+| 5 | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery` | 2 | 17.367 | 10.946 |
+| 6 | `tests.unit.iuphar_target_class.test_normalization` | 2 | 17.035 | 9.359 |
+| 7 | `tests.unit.scripts.engineering.ci.test_pytest_receipts` | 1 | 15.41 | 15.41 |
+| 8 | `tests.unit.composition.bootstrap.runtime.test_composite_contract_evidence` | 2 | 13.93 | 7.437 |
+| 9 | `tests.unit.scripts.engineering.ci.test_generated_artifact_selection` | 1 | 12.943 | 12.943 |
+| 10 | `tests.performance.test_measure_merger_input` | 1 | 12.877 | 12.877 |
 
 ## Refresh Procedure
 
