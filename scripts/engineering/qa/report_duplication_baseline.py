@@ -49,6 +49,7 @@ class DuplicateCluster:
     path: str
     line: int
     modules: tuple[DuplicateModuleRef, ...]
+    package_entry_modules: frozenset[str] = frozenset()
 
 
 @dataclass(frozen=True)
@@ -135,7 +136,6 @@ def _cluster_actionability_category(cluster: DuplicateCluster) -> str:
         return "self_module_scanner_noise"
     if _is_package_entry_report_noise(cluster):
         return "package_entry_report_noise"
-    normalized_path = cluster.path.replace("\\", "/")
     if any(
         token in module
         for module in module_names
@@ -148,8 +148,10 @@ def _cluster_actionability_category(cluster: DuplicateCluster) -> str:
         return "pipeline_transformer_contract_pattern"
     if any(".composition." in module for module in module_names):
         return "composition_runtime_wiring_pattern"
-    if normalized_path.endswith("/__init__.py") or any(
-        module.endswith(".__init__") for module in module_names
+    if any(
+        module in cluster.package_entry_modules
+        or module.endswith(_PACKAGE_ENTRY_MODULE_SUFFIX)
+        for module in module_names
     ):
         return "export_facade_or_package_barrel"
     return "behavior_bearing_candidate"
@@ -285,7 +287,9 @@ def _build_first_wave_selection(
     }
 
 
-def _parse_pylint_duplicate_output(stdout: str) -> list[DuplicateCluster]:
+def _parse_pylint_duplicate_output(
+    stdout: str, *, package_entry_modules: frozenset[str] = frozenset()
+) -> list[DuplicateCluster]:
     """Parse pylint duplicate-code text output into structured clusters."""
     clusters: list[DuplicateCluster] = []
     current_path: str | None = None
@@ -304,6 +308,7 @@ def _parse_pylint_duplicate_output(stdout: str) -> list[DuplicateCluster]:
                 path=current_path,
                 line=current_line,
                 modules=tuple(current_modules),
+                package_entry_modules=package_entry_modules,
             )
         )
         current_path = None
@@ -511,6 +516,32 @@ def _comparison_rows(
     return rows
 
 
+def _scan_package_entry_modules(target: str) -> frozenset[str]:
+    """Index Pylint's compared input identities, independent of R0801 headers.
+
+    A directory scanned as a package root appears under its bare module name,
+    whereas the same __init__.py under a broader target carries .__init__.
+    Recognize the former only when Pylint resolves it to a package-entry file.
+    If an identity has multiple candidate files, keep the finding.
+    """
+    from pylint.lint.expand_modules import expand_modules
+
+    inputs, errors = expand_modules([target], (), [], [], [])
+    if errors:
+        return frozenset()
+
+    paths_by_module: dict[str, set[Path]] = {}
+    for item in inputs.values():
+        if not item["isignored"] and item["name"]:
+            paths_by_module.setdefault(item["name"], set()).add(Path(item["path"]))
+    return frozenset(
+        module
+        for module, paths in paths_by_module.items()
+        if len(paths) == 1
+        and any(path.name == "__init__.py" and path.is_file() for path in paths)
+    )
+
+
 def _scan_target(
     target: str,
     *,
@@ -544,7 +575,12 @@ def _scan_target(
         details = stderr or stdout or f"unexpected return code {result.returncode}"
         raise RuntimeError(f"duplication scan failed for {target}: {details}")
 
-    raw_clusters = _parse_pylint_duplicate_output(result.stdout)
+    raw_clusters = _parse_pylint_duplicate_output(
+        result.stdout,
+        package_entry_modules=(
+            _scan_package_entry_modules(target) if result.returncode == 8 else frozenset()
+        ),
+    )
     clusters = _filter_clusters_by_module_patterns(
         raw_clusters,
         exclude_module_patterns=exclude_module_patterns,

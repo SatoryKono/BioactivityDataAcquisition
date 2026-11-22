@@ -84,6 +84,56 @@ def test_package_entry_noise_keeps_real_package_export_comparisons() -> None:
     assert not report._is_package_entry_report_noise(cluster)
 
 
+@pytest.mark.parametrize("scan_parent", [False, True])
+@pytest.mark.parametrize("facade", [False, True])
+def test_scanned_facade_filter_uses_input_identity(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, scan_parent: bool, facade: bool
+) -> None:
+    """Use actual Pylint input expansion; vary R0801's unrelated header."""
+    from subprocess import CompletedProcess
+
+    root = tmp_path / "sample_bioetl"
+    package = root / "sample_lineage"
+    package.mkdir(parents=True)
+    for path in (
+        root / "__init__.py",
+        package / "__init__.py",
+        package / "retry.py",
+        package / "circuit_breaker.py",
+    ):
+        path.touch()
+    monkeypatch.chdir(tmp_path)
+    prefix = "sample_bioetl.sample_lineage"
+    if facade:
+        left_module = prefix + (".__init__" if scan_parent else "")
+    else:
+        left_module = prefix + ".circuit_breaker"
+    headers = ("unrelated/__init__.py", "unrelated/concrete.py")
+    findings = "\n".join(
+        f"{header}:5:0: R0801: Similar lines in 2 files\n"
+        f"=={left_module}:[10:25]\n"
+        f"=={prefix}.retry:[30:45]"
+        for header in headers
+    )
+    monkeypatch.setattr(
+        report.subprocess,
+        "run",
+        lambda *_args, **_kwargs: CompletedProcess([], 8, stdout=findings, stderr=""),
+    )
+
+    result = report._scan_target(
+        str(root if scan_parent else package),
+        timeout_seconds=10,
+        exclude_actionability_categories=frozenset({"export_facade_or_package_barrel"}),
+    )
+
+    assert result.raw_duplicate_count == 2
+    assert result.duplicate_count == (0 if facade else 2)
+    assert [cluster.path for cluster in result.clusters] == (
+        [] if facade else list(headers)
+    )
+
+
 def test_report_duplication_baseline_main_accepts_dispatcher_argv(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
