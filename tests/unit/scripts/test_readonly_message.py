@@ -271,7 +271,7 @@ def test_stale_bytecode_cannot_override_the_verified_message_source(message_chec
     code = compile("def main(argv): return 0", str(source), "exec")
     stat = source.stat()
     cache = Path(importlib.util.cache_from_source(str(source)))
-    cache.parent.mkdir(exist_ok=True)
+    cache.parent.mkdir(parents=True, exist_ok=True)
     cache.write_bytes(_code_to_timestamp_pyc(code, int(stat.st_mtime), stat.st_size))
     f.message.write_text("invalid header\n")
     assert reader._invoke(f.root, str(f.message))[0] == 1

@@ -297,7 +297,7 @@ def test_owned_backend_loaders_do_not_accept_stale_bytecode(
     )
     info = source.stat()
     cache = Path(importlib.util.cache_from_source(str(source)))
-    cache.parent.mkdir(exist_ok=True)
+    cache.parent.mkdir(parents=True, exist_ok=True)
     stale = compile(
         'class _SourceDiffScanner:\n    @staticmethod\n    def scan(): return b"cached"',
         str(source),
