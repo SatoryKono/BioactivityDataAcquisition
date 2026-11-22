@@ -133,6 +133,42 @@ def test_facade_category_filter_depends_on_compared_modules(
     ) == (clusters if retained else [])
 
 
+@pytest.mark.parametrize(
+    ("suffix", "package_scanned", "excluded"),
+    [("", True, True), (".__init__", True, True), ("", False, False)],
+)
+def test_facade_filter_resolves_a_compared_package_initializer_in_scan_scope(
+    tmp_path: Path, suffix: str, package_scanned: bool, excluded: bool
+) -> None:
+    source_root = tmp_path / "src"
+    services = source_root / "bioetl" / "application" / "services"
+    lineage = services / "lineage"
+    lineage.mkdir(parents=True)
+    (lineage / "__init__.py").touch()
+    other = services / "other"
+    other.mkdir()
+    compared_package = "bioetl.application.services.lineage"
+    stdout = "\n".join(
+        (
+            f"{lineage / '_metadata_coordinator_helpers.py'}:1:0: "
+            "R0801: Similar lines in 2 files",
+            f"=={compared_package}.lineage_inspection_service:[23:29]",
+            f"=={compared_package}{suffix}:[14:20]",
+        )
+    )
+
+    clusters = report._parse_pylint_duplicate_output(
+        stdout, source_root=source_root, scan_root=lineage if package_scanned else other
+    )
+
+    assert len(clusters) == 1
+    assert clusters[0].modules[1].module == f"{compared_package}{suffix}"
+    assert report._filter_clusters_by_actionability_categories(
+        clusters,
+        exclude_actionability_categories=frozenset({"export_facade_or_package_barrel"}),
+    ) == ([] if excluded else clusters)
+
+
 def test_report_duplication_baseline_main_accepts_dispatcher_argv(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
