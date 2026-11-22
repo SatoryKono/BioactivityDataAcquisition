@@ -84,6 +84,58 @@ def test_package_entry_noise_keeps_real_package_export_comparisons() -> None:
     assert not report._is_package_entry_report_noise(cluster)
 
 
+@pytest.mark.parametrize(
+    "header",
+    [
+        r"src\bioetl\application\services\lineage\__init__.py",
+        "src/bioetl/application/services/lineage/runtime.py",
+    ],
+)
+@pytest.mark.parametrize(
+    ("compared", "retained"),
+    [
+        ("bioetl.application.services.lineage.runtime", True),
+        ("bioetl.application.services.lineage", False),
+        ("bioetl.application.services.other.__init__", False),
+        ("bioetl.application.services.ambiguous.__init__", True),
+    ],
+)
+def test_facade_filter_uses_pylint_file_provenance(
+    header: str, compared: str, retained: bool
+) -> None:
+    stdout = (
+        f"{header}:9:0: R0801: Similar lines in 2 files\n"
+        f"=={compared}:[10:20]\n"
+        "==bioetl.application.services.worker:[30:40]\n"
+        'BIOETL_PYLINT_PACKAGE_ENTRIES ["bioetl.application.services.lineage",'
+        ' "bioetl.application.services.other.__init__"]\n'
+    )
+    clusters = report._parse_pylint_duplicate_output(stdout)
+
+    assert len(clusters) == 1
+    assert clusters[0].modules[0].module == compared
+    assert report._filter_clusters_by_actionability_categories(
+        clusters,
+        exclude_actionability_categories=frozenset({"export_facade_or_package_barrel"}),
+    ) == (clusters if retained else [])
+
+
+def test_pylint_reporter_excludes_ambiguous_module_identities() -> None:
+    pytest.importorskip("pylint")
+    from scripts.engineering.qa.pylint_duplicate_provenance import (
+        _confirmed_package_entries,
+    )
+
+    assert _confirmed_package_entries(
+        {
+            "pkg": {"repo/pkg/__init__.py"},
+            "pkg.__init__": {"repo/pkg/__init__.py"},
+            "alias": {"repo/pkg/__init__.py", "repo/alias.py"},
+            "ordinary": {"repo/pkg/ordinary.py"},
+        }
+    ) == ["pkg", "pkg.__init__"]
+
+
 def test_report_duplication_baseline_main_accepts_dispatcher_argv(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

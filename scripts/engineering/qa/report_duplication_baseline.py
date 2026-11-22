@@ -31,6 +31,7 @@ _HEADER_RE = re.compile(
 _MODULE_RE = re.compile(r"^==(?P<module>[^:]+):\[(?P<start>\d+):(?P<end>\d+)\]$")
 _MD_TABLE_SEPARATOR_2COL = "| --- | ---: |"
 _PACKAGE_ENTRY_MODULE_SUFFIX = ".__init__"
+_PYLINT_PACKAGE_ENTRIES_PREFIX = "BIOETL_PYLINT_PACKAGE_ENTRIES "
 
 
 @dataclass(frozen=True)
@@ -49,6 +50,7 @@ class DuplicateCluster:
     path: str
     line: int
     modules: tuple[DuplicateModuleRef, ...]
+    package_entries: frozenset[str] | None = None
 
 
 @dataclass(frozen=True)
@@ -135,7 +137,6 @@ def _cluster_actionability_category(cluster: DuplicateCluster) -> str:
         return "self_module_scanner_noise"
     if _is_package_entry_report_noise(cluster):
         return "package_entry_report_noise"
-    normalized_path = cluster.path.replace("\\", "/")
     if any(
         token in module
         for module in module_names
@@ -148,9 +149,13 @@ def _cluster_actionability_category(cluster: DuplicateCluster) -> str:
         return "pipeline_transformer_contract_pattern"
     if any(".composition." in module for module in module_names):
         return "composition_runtime_wiring_pattern"
-    if normalized_path.endswith("/__init__.py") or any(
-        module.endswith(".__init__") for module in module_names
-    ):
+    if cluster.package_entries is None:
+        package_entry = any(
+            module.endswith(_PACKAGE_ENTRY_MODULE_SUFFIX) for module in module_names
+        )
+    else:
+        package_entry = not cluster.package_entries.isdisjoint(module_names)
+    if package_entry:
         return "export_facade_or_package_barrel"
     return "behavior_bearing_candidate"
 
@@ -287,6 +292,18 @@ def _build_first_wave_selection(
 
 def _parse_pylint_duplicate_output(stdout: str) -> list[DuplicateCluster]:
     """Parse pylint duplicate-code text output into structured clusters."""
+    # The reporter records physical identity for precisely the names that
+    # Pylint's similarity checker emits. Header paths are display-only.
+    provenance: frozenset[str] | None = None
+    for line in reversed(stdout.splitlines()):
+        if line.startswith(_PYLINT_PACKAGE_ENTRIES_PREFIX):
+            names = json.loads(line.removeprefix(_PYLINT_PACKAGE_ENTRIES_PREFIX))
+            if not isinstance(names, list) or not all(
+                isinstance(name, str) for name in names
+            ):
+                raise ValueError("invalid Pylint package entry provenance")
+            provenance = frozenset(names)
+            break
     clusters: list[DuplicateCluster] = []
     current_path: str | None = None
     current_line: int | None = None
@@ -304,6 +321,7 @@ def _parse_pylint_duplicate_output(stdout: str) -> list[DuplicateCluster]:
                 path=current_path,
                 line=current_line,
                 modules=tuple(current_modules),
+                package_entries=provenance,
             )
         )
         current_path = None
@@ -522,9 +540,10 @@ def _scan_target(
     cmd = [
         sys.executable,
         "-m",
-        "pylint",
+        "scripts.engineering.qa.pylint_duplicate_provenance",
         "--disable=all",
         "--enable=duplicate-code",
+        "--persistent=no",
         target,
     ]
     from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
@@ -545,6 +564,8 @@ def _scan_target(
         raise RuntimeError(f"duplication scan failed for {target}: {details}")
 
     raw_clusters = _parse_pylint_duplicate_output(result.stdout)
+    if any(cluster.package_entries is None for cluster in raw_clusters):
+        raise RuntimeError(f"duplication scan lacks file provenance for {target}")
     clusters = _filter_clusters_by_module_patterns(
         raw_clusters,
         exclude_module_patterns=exclude_module_patterns,
