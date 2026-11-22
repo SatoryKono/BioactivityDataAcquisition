@@ -557,13 +557,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         PUBLIC_FETCH_TEST,
         "tests/unit/repo_backed/scripts/ai/mcp/test_memory_persistence_mode.py",
     ),
-    **dict.fromkeys(
-        (
-            "scripts/ai/agent_tools/README.md",
-            "tests/fixtures/agent-tools/proofagent-harness-0.14.0.sha256",
-        ),
-        ("tests/unit/repo_backed/scripts/ai/agent_tools/test_install_contracts.py",),
-    ),
     ".agents/resume": (AMP_ORB_SETUP_TEST,),
     "scripts/ai/mcp/amp_memory_wrapper.sh": (
         "tests/unit/repo_backed/scripts/ai/mcp/test_memory_persistence_mode.py",
@@ -2197,6 +2190,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "reports/quality/flaky-test-burndown-review.json": FLAKY_BURNDOWN_REVIEW_TESTS,
     "reports/quality/test-governance-current.json": TEST_GOVERNANCE_ARTIFACT_TESTS,
+    "scripts/ai/agent_tools/README.md": (
+        "tests/unit/repo_backed/scripts/ai/agent_tools/test_install_contracts.py",
+    ),
     "reports/engineering/finances/billing_manifest.json": (
         "tests/unit/scripts/test_github_billing.py",
     ),
@@ -2262,6 +2258,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
 # file mapping would need hundreds of entries. Each prefix still maps to real
 # governing tests; fail-closed semantics are unchanged for unmapped paths.
 AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
+    "tests/fixtures/agent-tools/": (
+        "tests/unit/repo_backed/scripts/ai/agent_tools/test_install_contracts.py",
+    ),
     "configs/ide/zed/": (
         "tests/integration/ide/test_zed_portability.py",
         ZED_WORKSPACE_CONFIG_TEST,
