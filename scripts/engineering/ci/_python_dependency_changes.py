@@ -31,6 +31,7 @@ FULL_SUITE_CONFIGURATION_PREFIXES = (
 NARROW_CONFIGURATION_PREFIXES = (
     "tool.setuptools.packages.find.exclude",
     "tool.ruff.lint.select",
+    "tool.mutmut.also_copy",
 )
 # Stub-only wheels have no runtime import owner. Keep reviewed ownership explicit.
 STUB_RUNTIME_DISTRIBUTIONS = {
