@@ -1,11 +1,11 @@
 {
-  "source_branch": "fix/mutation-iuphar-copy",
-  "source_commit": "f2f14b25296569286769cc5ad758b4260e6ec5bf",
-  "source_run_id": "45029086860",
+  "source_branch": "dependabot/pip/pip-minor-patch-5e24b04546",
+  "source_commit": "73fe9126037a0954a84cdf2beca54299cddd1af4",
+  "source_run_id": "45052153971",
   "source_event": "workflow_dispatch",
-  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/45029086860",
-  "source_tree_sha256": "3787c20ae331157d99b483f6a3f1a33f33b456865c5193dd179aaa3dec3a4782",
-  "refreshed_at_utc": "2026-11-22T13:57:34.345000+00:00",
+  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/45052153971",
+  "source_tree_sha256": "a228eea31c41d4fd0f5b6b7c9f7fedf7cc30bfc2a09788f5c91bcf7e159b9d3b",
+  "refreshed_at_utc": "2026-11-22T18:11:10.583000+00:00",
   "refresh_status": "captured",
   "coverage_percent": 99.51,
   "coverage": {
