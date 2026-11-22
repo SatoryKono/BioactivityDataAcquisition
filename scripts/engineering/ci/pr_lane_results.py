@@ -2190,6 +2190,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "reports/quality/flaky-test-burndown-review.json": FLAKY_BURNDOWN_REVIEW_TESTS,
     "reports/quality/test-governance-current.json": TEST_GOVERNANCE_ARTIFACT_TESTS,
+    "scripts/ai/agent_tools/README.md": (
+        "tests/unit/repo_backed/scripts/ai/agent_tools/test_install_contracts.py",
+    ),
     "reports/engineering/finances/billing_manifest.json": (
         "tests/unit/scripts/test_github_billing.py",
     ),
@@ -2255,6 +2258,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
 # file mapping would need hundreds of entries. Each prefix still maps to real
 # governing tests; fail-closed semantics are unchanged for unmapped paths.
 AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
+    "tests/fixtures/agent-tools/": (
+        "tests/unit/repo_backed/scripts/ai/agent_tools/test_install_contracts.py",
+    ),
     "configs/ide/zed/": (
         "tests/integration/ide/test_zed_portability.py",
         ZED_WORKSPACE_CONFIG_TEST,
