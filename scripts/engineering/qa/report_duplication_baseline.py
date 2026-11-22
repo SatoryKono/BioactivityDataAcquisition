@@ -129,13 +129,12 @@ def _is_package_entry_report_noise(cluster: DuplicateCluster) -> bool:
 
 
 def _cluster_actionability_category(cluster: DuplicateCluster) -> str:
-    """Classify duplicate-code findings by likely remediation path."""
+    """Classify by compared modules, not the aggregate R0801 report path."""
     module_names = [module.module for module in cluster.modules]
     if _is_self_module_cluster(cluster):
         return "self_module_scanner_noise"
     if _is_package_entry_report_noise(cluster):
         return "package_entry_report_noise"
-    normalized_path = cluster.path.replace("\\", "/")
     if any(
         token in module
         for module in module_names
@@ -148,9 +147,7 @@ def _cluster_actionability_category(cluster: DuplicateCluster) -> str:
         return "pipeline_transformer_contract_pattern"
     if any(".composition." in module for module in module_names):
         return "composition_runtime_wiring_pattern"
-    if normalized_path.endswith("/__init__.py") or any(
-        module.endswith(".__init__") for module in module_names
-    ):
+    if any(module.endswith(_PACKAGE_ENTRY_MODULE_SUFFIX) for module in module_names):
         return "export_facade_or_package_barrel"
     return "behavior_bearing_candidate"
 

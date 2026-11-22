@@ -84,6 +84,55 @@ def test_package_entry_noise_keeps_real_package_export_comparisons() -> None:
     assert not report._is_package_entry_report_noise(cluster)
 
 
+@pytest.mark.parametrize(
+    "path",
+    [
+        r"src\bioetl\infrastructure\adapters\uniprot\__init__.py",
+        "src/bioetl/infrastructure/adapters/decorators/circuit_breaker.py",
+    ],
+)
+@pytest.mark.parametrize(
+    ("left_module", "expected_category", "retained"),
+    [
+        (
+            "bioetl.infrastructure.adapters.decorators.circuit_breaker",
+            "behavior_bearing_candidate",
+            True,
+        ),
+        (
+            "bioetl.infrastructure.adapters.decorators.__init__",
+            "export_facade_or_package_barrel",
+            False,
+        ),
+    ],
+)
+def test_facade_category_filter_depends_on_compared_modules(
+    path: str,
+    left_module: str,
+    expected_category: str,
+    retained: bool,
+) -> None:
+    cluster = DuplicateCluster(
+        path=path,
+        line=1,
+        modules=(
+            DuplicateModuleRef(module=left_module, start_line=78, end_line=111),
+            DuplicateModuleRef(
+                module="bioetl.infrastructure.adapters.decorators.retry",
+                start_line=81,
+                end_line=118,
+            ),
+        ),
+    )
+
+    assert report._cluster_actionability_category(cluster) == expected_category
+    clusters = [cluster]
+    assert report._filter_clusters_by_actionability_categories(
+        clusters,
+        exclude_actionability_categories=frozenset({"export_facade_or_package_barrel"}),
+    ) == (clusters if retained else [])
+
+
 def test_report_duplication_baseline_main_accepts_dispatcher_argv(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
