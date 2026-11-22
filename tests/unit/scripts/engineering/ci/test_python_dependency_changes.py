@@ -625,6 +625,19 @@ def test_configuration_only_change_is_not_a_dependency_success(
         dependencies.changed_dependencies(tmp_path, "base", "head")
 
 
+def test_mutmut_also_copy_uses_narrow_classified_route(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def revision(_root: Path, sha: str, _name: str) -> dict:
+        paths = ["src/bioetl"]
+        if sha == "head":
+            paths.append("src/iuphar_target_class")
+        return {"tool": {"mutmut": {"also_copy": paths}}}
+
+    monkeypatch.setattr(dependencies, "_read_revision", revision)
+    assert not dependencies.pytest_configuration_changed(tmp_path, "base", "head")
+
+
 def test_setuptools_package_exclusion_uses_narrow_classified_route(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
