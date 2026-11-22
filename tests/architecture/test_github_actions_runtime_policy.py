@@ -548,7 +548,6 @@ def test_dependency_review_workflow_is_pr_scoped_and_sha_pinned() -> None:
     workflow = _load_yaml(workflow_path)
     triggers = cast(dict[str, Any], workflow.get("on", workflow.get(True)))
     coordinator = _load_yaml(ROOT / ".github/workflows/pr-required.yml")
-    review_sha = next(iter(policy.ALLOWED_USES["actions/dependency-review-action"]))
     review_step = next(
         step
         for step in coordinator["jobs"]["fast-governance"]["steps"]
@@ -557,7 +556,8 @@ def test_dependency_review_workflow_is_pr_scoped_and_sha_pinned() -> None:
 
     assert workflow["permissions"] == {"contents": "read"}
     assert set(triggers) == {"workflow_dispatch"}
-    assert review_step["uses"] == f"actions/dependency-review-action@{review_sha}"
+    review_sha = review_step["uses"].removeprefix("actions/dependency-review-action@")
+    assert review_sha in policy.ALLOWED_USES["actions/dependency-review-action"]
     assert review_step["with"]["fail-on-severity"] == "high"
     assert review_step["if"] == "github.event_name == 'pull_request'"
 

@@ -22,8 +22,8 @@ def test_optional_vendor_extras_are_exact_and_absent_from_core_dependencies() ->
     extras = project["optional-dependencies"]
     expected = {
         "agentdebugx": ["agentdebugx==0.5.2"],
-        "proofagent": ["proofagent-harness==0.13.0"],
-        "agent-tools": ["agentdebugx==0.5.2", "proofagent-harness==0.13.0"],
+        "proofagent": ["proofagent-harness==0.14.0"],
+        "agent-tools": ["agentdebugx==0.5.2", "proofagent-harness==0.14.0"],
     }
     assert {name: extras[name] for name in expected} == expected
     for name in ("agentdebugx", "proofagent"):
@@ -41,11 +41,14 @@ def test_lock_contains_approved_wheel_hashes() -> None:
         "sha256:4fdb90ae19167deb49cbaacce3fbc925220041408aee31c48e59c03bbf7ec82b"
         in lock
     )
-    assert "proofagent_harness-0.13.0-py3-none-any.whl" in lock
-    assert (
-        "sha256:a4013765f2e31b68514f66ac5c7e21709c2036d891ce88b08d7a3e01f8c13527"
-        in lock
+    assert "proofagent_harness-0.14.0-py3-none-any.whl" in lock
+    digest = (
+        (ROOT / "tests/fixtures/agent-tools/proofagent-harness-0.14.0.sha256")
+        .read_text(encoding="utf-8")
+        .strip()
     )
+    assert len(digest) == 64 and all(char in "0123456789abcdef" for char in digest)
+    assert f"sha256:{digest}" in lock
 
 
 def test_platform_installers_default_to_none_and_isolate_optional_failures() -> None:

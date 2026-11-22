@@ -25,6 +25,20 @@ HEAD = "a" * 40
 @pytest.mark.parametrize(
     "changed",
     [
+        "scripts/ai/agent_tools/README.md",
+        "tests/fixtures/agent-tools/proofagent-harness-0.14.0.sha256",
+    ],
+)
+def test_agent_tools_inputs_select_install_contract(changed: str) -> None:
+    repo_root = Path(__file__).resolve().parents[5]
+    owner = "tests/unit/repo_backed/scripts/ai/agent_tools/test_install_contracts.py"
+    assert owner in affected_pytest_targets([changed], repo_root=repo_root)
+    assert owner in build_shadow_compare([changed], repo_root=repo_root)["selected"]
+
+
+@pytest.mark.parametrize(
+    "changed",
+    [
         "configs/ide/zed/settings.json",
         "configs/ide/zed/tasks.json",
         "configs/ide/zed/agent-settings.json",
