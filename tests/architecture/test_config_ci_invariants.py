@@ -60,6 +60,9 @@ from bioetl.infrastructure.config.contract_policy_loader import (
 from bioetl.infrastructure.config.pipeline_config_api import (
     load_pipeline_config_from_root,
 )
+from bioetl.infrastructure.schemas.pipeline_contract_policy import (
+    PipelineContractPolicy,
+)
 from scripts.schema.validation import (
     audit_effective_optionality as optionality_audit_script,
 )
@@ -1035,6 +1038,9 @@ class TestNoUnknownKeys:
     def test_check_inv_005_script_passes(self) -> None:
         errors = invariant_script.check_inv_005(verbose=False)
         assert errors == []
+
+    def test_contract_allowed_keys_match_policy_fields(self) -> None:
+        assert CONTRACT_ALLOWED_KEYS == set(PipelineContractPolicy.model_fields)
 
     @pytest.mark.parametrize("key", ["scd_type", "gold_business_rules", "unknown_key"])
     def test_contract_policy_rejects_unsupported_keys(
