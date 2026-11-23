@@ -6,12 +6,11 @@ import hashlib
 from collections.abc import Callable
 from typing import cast
 
-import pandera.pandas as pa
-from pandera.typing import Series
-
 from bioetl.domain.contracts.gold._chembl_target_lookup_schemas import (
     ChEMBLTargetGoldSchema,
     ChEMBLTargetGoldSchemaV31,
+    Series,
+    pa,
     target_v31_schema_hash,
 )
 from bioetl.domain.entities.chembl_structures_foundation import Target
