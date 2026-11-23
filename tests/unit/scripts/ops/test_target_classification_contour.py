@@ -515,6 +515,24 @@ def test_contour_report_cli_rejects_invalid_evidence(tmp_path: Path) -> None:
     assert caught.value.code == 2
 
 
+def test_claimed_profile_must_match_each_current_row(tmp_path: Path) -> None:
+    evidence, observations = _ready_case(tmp_path)
+    other = "f" * 64
+    enrich = dict(evidence["isolated_enrich"])
+    enrich["profile_sha256"] = other
+    evidence["isolated_enrich"] = enrich
+    migration = dict(evidence["migration"])
+    migration["effective_profile_sha256"] = other
+    evidence["migration"] = migration
+    report = evaluate_main_contour(evidence, observations)
+
+    assert _phase(report, "isolated_enrich") == "FAIL"
+    assert (
+        "enrich_profile_row_mismatch" in report["phases"]["isolated_enrich"]["reasons"]
+    )
+    assert report["promotion_decision"] == "BLOCKED"
+
+
 def test_closed_gold_version_does_not_close_a_current_assay_fk() -> None:
     current_assay = [{"target_id": "CHEMBL1", "_is_current": True}]
     closed_gold = [{"target_id": "CHEMBL1", "_is_current": False}]

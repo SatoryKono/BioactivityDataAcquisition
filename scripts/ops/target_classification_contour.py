@@ -89,6 +89,9 @@ class ContourObservations:
     silver_sha256: str | None = None
     gold_sha256: str | None = None
     live_projection_match: bool | None = None
+    table_profile_values: tuple[str | None, ...] | None = None
+    silver_profile_values: tuple[str | None, ...] | None = None
+    gold_profile_values: tuple[str | None, ...] | None = None
 
 
 def _confine(path: Path) -> Path:
@@ -177,6 +180,14 @@ def table_identity_sha256(path: Path, rows: list[dict[str, object]]) -> str:
     if safe.is_file():  # NOSONAR - confined_io_path
         return file_sha256(safe)
     return logical_projection_sha256(rows)
+
+
+def _profile_values(rows: list[dict[str, object]]) -> tuple[str | None, ...]:
+    """Current ``target_class_profile_sha256`` values, including blanks."""
+    return tuple(
+        _norm_cell(row.get("target_class_profile_sha256"))
+        for row in _current_rows(rows)
+    )
 
 
 def unresolved_assay_targets(
@@ -362,6 +373,7 @@ def apply_measurements(
     table_rows = load_table(table) if table is not None else None
     repeat_rows = load_table(repeat_table) if repeat_table is not None else None
     if table_rows is not None:
+        updates["table_profile_values"] = _profile_values(table_rows)
         updates["repeat_classification_sha256"] = classification_sha256(
             _current_rows(table_rows)
         )
@@ -384,8 +396,10 @@ def apply_measurements(
     gold_rows = load_table(gold) if gold is not None else None
     if silver_rows is not None and silver is not None:
         updates["silver_sha256"] = table_identity_sha256(silver, silver_rows)
+        updates["silver_profile_values"] = _profile_values(silver_rows)
     if gold_rows is not None and gold is not None:
         updates["gold_sha256"] = table_identity_sha256(gold, gold_rows)
+        updates["gold_profile_values"] = _profile_values(gold_rows)
     if silver_rows is not None and gold_rows is not None:
         updates["live_projection_match"] = _current_projections_match(
             silver_rows, gold_rows
@@ -480,6 +494,28 @@ def _evaluate_enrich(
     ):
         if not _pinned(enrich[key]):
             reasons.append(code)
+    for observed, missing_code, mismatch_code in (
+        (
+            observations.table_profile_values,
+            "enrich_profile_rows_not_measured",
+            "enrich_profile_row_mismatch",
+        ),
+        (
+            observations.silver_profile_values,
+            "silver_profile_rows_not_measured",
+            "silver_profile_row_mismatch",
+        ),
+        (
+            observations.gold_profile_values,
+            "gold_profile_rows_not_measured",
+            "gold_profile_row_mismatch",
+        ),
+    ):
+        reasons.extend(
+            _profile_row_reasons(
+                observed, enrich["profile_sha256"], missing_code, mismatch_code
+            )
+        )
     reasons.extend(
         _measured_identity(
             observations.silver_sha256,
@@ -834,6 +870,22 @@ def _hash_pair(observed: str | None, attested: object, label: str) -> list[str]:
         return [f"{label}_not_read"]
     if attested is not None and attested != observed:
         return [f"{label}_hash_conflict"]
+    return []
+
+
+def _profile_row_reasons(
+    observed: tuple[str | None, ...] | None,
+    attested: object,
+    missing_code: str,
+    mismatch_code: str,
+) -> list[str]:
+    """Every current row must carry the claimed profile digest."""
+    if not _pinned(attested):
+        return []
+    if observed is None:
+        return [missing_code]
+    if not observed or any(value != attested for value in observed):
+        return [mismatch_code]
     return []
 
 

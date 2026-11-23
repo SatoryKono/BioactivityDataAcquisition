@@ -495,7 +495,9 @@ command recomputes hashes, status distributions, XLSX round-trip, historical
 columns, current assay FK closure, and the canonical config digest. A file is
 identified by its byte SHA-256. A Delta directory is identified by the SHA-256
 of its current business-field projection, and a pinned hash is not accepted
-when that identity was not measured. Current rows are those with missing or
+when that identity was not measured. Every current enrich, Silver, and Gold
+row must carry the claimed `target_class_profile_sha256`; a digest that is
+only well formed does not confirm the classifier that wrote the rows. Current rows are those with missing or
 true `_is_current`; closed versions do not close an assay FK. Live readback
 compares each current Gold target with the current Silver row of the same id,
 not with the `--limit 1000` smoke table. The command does not promote, edit
