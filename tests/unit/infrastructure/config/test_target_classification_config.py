@@ -35,7 +35,6 @@ from bioetl.domain.normalization.profiles.chembl_target_classification import (
     target_v31_normalization_profile,
     target_v32_normalization_profile,
 )
-from bioetl.composition.bootstrap.assembly.storage import stable_target_config_dump
 from bioetl.domain.normalization.target_classification_values import (
     project_classification_detail,
 )
@@ -423,9 +422,9 @@ def test_absent_selector_matches_a_manifest_written_before_the_field() -> None:
     stored_classification = stored["target_classification"]
     assert isinstance(stored_classification, dict)
     stored_classification.pop("table_contract", None)
-    dumped = stable_target_config_dump(current)
+    dumped = current.model_dump(mode="json")
     assert dumped["target_classification"] == stored_classification
-    selected = stable_target_config_dump(_config("enrich", "3.2.0"))
+    selected = _config("enrich", "3.2.0").model_dump(mode="json")
     assert selected["target_classification"]["table_contract"] == "3.2.0"
 
 

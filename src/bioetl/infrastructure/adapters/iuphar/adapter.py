@@ -10,9 +10,6 @@ from bioetl.domain.entities.target_classification_boundary import (
     TargetClassificationInput,
     TargetClassificationResult,
 )
-from bioetl.domain.normalization.target_classification_values import (
-    project_classification_detail,
-)
 from iuphar_target_class.bioetl_input import (
     plain_target_value as _plain,
 )
@@ -23,10 +20,11 @@ from iuphar_target_class.bioetl_input import (
     target_input_eligibility as _eligibility,
 )
 from iuphar_target_class.models import RawTargetRow, RunProvenance
-from iuphar_target_class.pipeline import BatchResult, RowResult, classify_batch
+from iuphar_target_class.pipeline import BatchResult, classify_batch
 from iuphar_target_class.pipeline_io import render_batch
 from iuphar_target_class.stage0.io import canonical_json_bytes
 
+from .detail_projection import detail_projection
 from .snapshot_loader import LoadedIupharProfile
 
 _FIELD_MAP = {
@@ -41,50 +39,6 @@ _FIELD_MAP = {
 }
 
 
-def _detail_projection(row: object | None, *, computed: bool) -> dict[str, str | None]:
-    if not computed or row is None:
-        return project_classification_detail(
-            computed=False,
-            iuphar_type_raw=None,
-            annotation_status=None,
-            family_ids=(),
-            subclasses=(),
-            paths=(),
-            local_status=None,
-            local_subclasses=(),
-            local_rule_ids=(),
-            effective_subclasses=(),
-            conflict_codes=(),
-            evidence_ids=((), ()),
-        )
-    typed = row if isinstance(row, RowResult) else None
-    if typed is None:
-        raise TypeError("classification detail requires a row result")
-    result = typed.result
-    annotation = typed.annotation
-    direct = typed.direct
-    subclass = result.iuphar_subclass
-    return project_classification_detail(
-        computed=result.input_validation_status != "invalid_input",
-        iuphar_type_raw=result.iuphar_type_raw,
-        annotation_status=result.iuphar_annotation_status,
-        match_status=result.match_status,
-        family_ids=annotation.family_ids if annotation is not None else (),
-        subclasses=(subclass,) if subclass else (),
-        paths=(
-            tuple((item.family_id, item.root_to_leaf) for item in direct.paths)
-            if direct is not None
-            else ()
-        ),
-        local_status=result.local_status,
-        local_subclasses=result.local_subclasses,
-        local_rule_ids=result.local_rule_ids,
-        effective_subclasses=result.effective_subclasses,
-        conflict_codes=result.conflict_codes,
-        evidence_ids=(result.match_evidence_ids, result.local_evidence_ids),
-    )
-
-
 def _unclassified(
     row: TargetClassificationInput,
     profile_hash: str,
@@ -95,7 +49,7 @@ def _unclassified(
     projection = dict.fromkeys(_FIELD_MAP)
     projection["target_class_profile_sha256"] = profile_hash
     if include_detail:
-        projection.update(_detail_projection(None, computed=False))
+        projection.update(detail_projection(None, computed=False))
     payloads: dict[str, object] = {
         "classification.json": [
             {
@@ -133,7 +87,7 @@ def _row_result(
     }
     projection["target_class_profile_sha256"] = profile_hash
     if include_detail:
-        projection.update(_detail_projection(output, computed=True))
+        projection.update(detail_projection(output, computed=True))
     return TargetClassificationResult(
         output.result.input_row_id,
         projection,

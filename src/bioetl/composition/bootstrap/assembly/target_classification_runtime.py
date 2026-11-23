@@ -8,9 +8,6 @@ from bioetl.application.core.wiring.registry import (
     TargetClassifiedTransformer,
     TargetTransformer,
 )
-from bioetl.application.pipelines.chembl.target_classified_transformer import (
-    TargetClassifiedTransformerV32,
-)
 from bioetl.application.core.wiring.transformer import BaseTransformer
 from bioetl.application.services.target_runtime.scope import (
     get_target_classification_dependency,
@@ -97,10 +94,13 @@ def select_target_transformer(
         else None,
     )
     selected = transformer_class
-    if target_profile.contract_version == "3.2.0":
-        selected = TargetClassifiedTransformerV32
-    elif target_profile.config.mode == "enrich":
-        selected = TargetClassifiedTransformer
+    if (
+        target_profile.contract_version == "3.2.0"
+        or target_profile.config.mode == "enrich"
+    ):
+        selected = TargetClassifiedTransformer.for_physical_contract(
+            target_profile.contract_version
+        )
     return (
         selected,
         target_profile.resolved_yaml_config,

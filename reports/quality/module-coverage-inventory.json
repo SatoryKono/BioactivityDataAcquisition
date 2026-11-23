@@ -19136,6 +19136,16 @@
       "source_lines": 130
     },
     {
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 13,
+      "executable_lines": 13,
+      "missing_lines": 0,
+      "module": "bioetl.infrastructure.adapters.iuphar.detail_projection",
+      "path": "src/bioetl/infrastructure/adapters/iuphar/detail_projection.py",
+      "source_lines": 52
+    },
+    {
       "coverage_percent": 87.27,
       "coverage_status": "partially_covered",
       "covered_lines": 96,
@@ -45678,6 +45688,16 @@
       "source_lines": 130
     },
     {
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 13,
+      "executable_lines": 13,
+      "missing_lines": 0,
+      "module": "bioetl.infrastructure.adapters.iuphar.detail_projection",
+      "path": "src/bioetl/infrastructure/adapters/iuphar/detail_projection.py",
+      "source_lines": 52
+    },
+    {
       "coverage_percent": 87.27,
       "coverage_status": "partially_covered",
       "covered_lines": 96,
@@ -53090,7 +53110,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-11-20",
-  "source_tree_sha256": "6046b7d2949f33951ba0ab02c3d157e7b93db71cb5e74cc2653055f5cbafc1e1",
+  "source_tree_sha256": "df7a176a47f0752fbf8b941ae229c66c86bda2deb61199bf3233600fc5c0ef6a",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -53245,10 +53265,10 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 2654,
+    "source_module_count": 2655,
     "status_counts": {
       "coverage_xml_missing": 0,
-      "fully_covered": 2537,
+      "fully_covered": 2538,
       "no_executable_lines": 1,
       "partially_covered": 116,
       "uncovered": 0,

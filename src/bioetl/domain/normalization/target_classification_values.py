@@ -1,13 +1,3 @@
-"""Canonical 3.2.0 persistence for IUPHAR classification detail.
-
-Logical values are scalars, sets, and one struct. ADR-035 stores every value
-as a nullable string: sets and structs are canonical JSON. ``None`` means the
-value was not computed. ``[]`` and an evidence object with empty id lists mean
-the value was computed and is empty. Set members are trimmed, de-duplicated and
-ordered lexicographically. A path keeps root-to-leaf order; paths themselves are
-ordered by family id and that chain. These strings participate in content_hash.
-"""
-
 from __future__ import annotations
 
 import json
@@ -43,63 +33,6 @@ _EVIDENCE_KEYS = frozenset({"local_evidence_ids", "match_evidence_ids"})
 _EvidenceIds = tuple[Iterable[object], Iterable[object]]
 
 
-_SET_LOGICAL_CONTRACT = {
-    "x-bioetl-logical-type": "set<string>",
-    "x-bioetl-serialization": "canonical-json-string",
-    "x-bioetl-order": "lexicographic",
-    "x-bioetl-null": "not-computed",
-    "x-bioetl-empty": "[]",
-    "x-bioetl-content-hash": "include",
-}
-
-DETAIL_LOGICAL_CONTRACT: dict[str, dict[str, str]] = {
-    "iuphar_type_raw": {
-        "x-bioetl-logical-type": "string",
-        "x-bioetl-null": "not-computed",
-        "x-bioetl-content-hash": "include",
-    },
-    "iuphar_source_completeness": {
-        "x-bioetl-logical-type": "enum",
-        "x-bioetl-enum": "family_only|source_unavailable|typed|unannotated",
-        "x-bioetl-null": "not-computed",
-        "x-bioetl-content-hash": "include",
-    },
-    "iuphar_family_ids": dict(_SET_LOGICAL_CONTRACT),
-    "iuphar_subclasses": dict(_SET_LOGICAL_CONTRACT),
-    "iuphar_family_paths": {
-        "x-bioetl-logical-type": (
-            "set<struct<family_id:string,root_to_leaf:list<string>>>"
-        ),
-        "x-bioetl-serialization": "canonical-json-string",
-        "x-bioetl-order": "family_id,root_to_leaf",
-        "x-bioetl-path-order": "root-to-leaf",
-        "x-bioetl-null": "not-computed",
-        "x-bioetl-empty": "[]",
-        "x-bioetl-content-hash": "include",
-    },
-    "local_status": {
-        "x-bioetl-logical-type": "enum",
-        "x-bioetl-enum": "candidate_only|conflicting|not_supported|supported",
-        "x-bioetl-null": "not-computed",
-        "x-bioetl-content-hash": "include",
-    },
-    "local_subclasses": dict(_SET_LOGICAL_CONTRACT),
-    "local_rule_ids": dict(_SET_LOGICAL_CONTRACT),
-    "effective_subclasses": dict(_SET_LOGICAL_CONTRACT),
-    "conflict_codes": dict(_SET_LOGICAL_CONTRACT),
-    "classification_evidence_refs": {
-        "x-bioetl-logical-type": (
-            "struct<local_evidence_ids:set<string>,match_evidence_ids:set<string>>"
-        ),
-        "x-bioetl-serialization": "canonical-json-string",
-        "x-bioetl-order": "lexicographic-members",
-        "x-bioetl-null": "not-computed",
-        "x-bioetl-empty": ('{"local_evidence_ids":[],"match_evidence_ids":[]}'),
-        "x-bioetl-content-hash": "include",
-    },
-}
-
-
 def _missing(value: object) -> bool:
     if value is None:
         return True
@@ -120,14 +53,10 @@ def _string_set(values: Iterable[object]) -> tuple[str, ...]:
 
 
 def canonical_string_set(values: Iterable[object]) -> str:
-    """Return one sorted unique JSON array."""
     return serialize_json_canonical(list(_string_set(values)))
 
 
-def canonical_family_paths(
-    paths: Iterable[tuple[object, Sequence[object]]],
-) -> str:
-    """Return paths ordered by family id and root-to-leaf chain."""
+def canonical_family_paths(paths: Iterable[tuple[object, Sequence[object]]]) -> str:
     records: list[dict[str, object]] = []
     seen: set[tuple[str, tuple[str, ...]]] = set()
     for family_id, nodes in paths:
@@ -152,13 +81,25 @@ def canonical_family_paths(
 def canonical_evidence_refs(
     match_ids: Iterable[object], local_ids: Iterable[object]
 ) -> str:
-    """Return one evidence struct with both id sets in canonical order."""
     return serialize_json_canonical(
         {
             "local_evidence_ids": list(_string_set(local_ids)),
             "match_evidence_ids": list(_string_set(match_ids)),
         }
     )
+
+
+def _source_is_unavailable(
+    annotation_status: str | None, match_status: str | None
+) -> bool:
+    return (
+        annotation_status == "source_unavailable"
+        or match_status == "source_unavailable"
+    )
+
+
+def _source_is_typed(type_raw: str | None) -> bool:
+    return type_raw is not None and bool(type_raw.strip())
 
 
 def source_completeness(
@@ -168,13 +109,9 @@ def source_completeness(
     family_ids: Iterable[object],
     match_status: str | None = None,
 ) -> str:
-    """Classify how much of the IUPHAR source was available for one row."""
-    if (
-        annotation_status == "source_unavailable"
-        or match_status == "source_unavailable"
-    ):
+    if _source_is_unavailable(annotation_status, match_status):
         return "source_unavailable"
-    if type_raw is not None and type_raw.strip():
+    if _source_is_typed(type_raw):
         return "typed"
     if any(True for _item in family_ids):
         return "family_only"
@@ -197,7 +134,6 @@ def project_classification_detail(
     conflict_codes: Iterable[object],
     evidence_ids: _EvidenceIds,
 ) -> dict[str, str | None]:
-    """Project one row onto the persisted 3.2.0 detail columns."""
     from bioetl.domain.config.target_classification import (
         TARGET_CLASSIFICATION_DETAIL_FIELDS,
     )
@@ -229,14 +165,7 @@ def project_classification_detail(
     }
 
 
-def canonical_persisted_text(field_name: str, value: object) -> str | None:
-    """Return the canonical persisted text, or None when the value is absent."""
-    if _missing(value):
-        return None
-    if not isinstance(value, str):
-        raise TypeError(f"{field_name} must be a canonical string or null")
-    if field_name in _SCALAR_FIELDS:
-        return _canonical_scalar(field_name, value)
+def _canonical_json_field(field_name: str, value: str) -> str:
     parsed = _parse_json(value)
     if field_name in _SET_FIELDS:
         if not isinstance(parsed, list):
@@ -247,6 +176,16 @@ def canonical_persisted_text(field_name: str, value: object) -> str | None:
     if field_name == _EVIDENCE_FIELD:
         return canonical_evidence_refs(*_evidence_members(parsed))
     raise ValueError(f"unknown classification detail field: {field_name}")
+
+
+def canonical_persisted_text(field_name: str, value: object) -> str | None:
+    if _missing(value):
+        return None
+    if not isinstance(value, str):
+        raise TypeError(f"{field_name} must be a canonical string or null")
+    if field_name in _SCALAR_FIELDS:
+        return _canonical_scalar(field_name, value)
+    return _canonical_json_field(field_name, value)
 
 
 def detail_is_canonical(field_name: str, value: object) -> bool:
@@ -278,20 +217,19 @@ def _parse_json(value: str) -> object:
         raise ValueError("classification value must be JSON") from exc
 
 
+def _path_record(item: object) -> tuple[object, tuple[object, ...]]:
+    if not isinstance(item, Mapping) or set(item) != _PATH_KEYS:
+        raise ValueError("classification path keys must be family_id and root_to_leaf")
+    chain = item["root_to_leaf"]
+    if not isinstance(chain, list):
+        raise ValueError("classification path root_to_leaf must be an array")
+    return item["family_id"], tuple(chain)
+
+
 def _path_pairs(parsed: object) -> tuple[tuple[object, tuple[object, ...]], ...]:
     if not isinstance(parsed, list):
         raise ValueError("classification paths must be a JSON array")
-    pairs: list[tuple[object, tuple[object, ...]]] = []
-    for item in parsed:
-        if not isinstance(item, Mapping) or set(item) != _PATH_KEYS:
-            raise ValueError(
-                "classification path keys must be family_id and root_to_leaf"
-            )
-        chain = item["root_to_leaf"]
-        if not isinstance(chain, list):
-            raise ValueError("classification path root_to_leaf must be an array")
-        pairs.append((item["family_id"], tuple(chain)))
-    return tuple(pairs)
+    return tuple(_path_record(item) for item in parsed)
 
 
 def _evidence_members(parsed: object) -> tuple[list[object], list[object]]:
@@ -305,7 +243,6 @@ def _evidence_members(parsed: object) -> tuple[list[object], list[object]]:
 
 
 __all__ = [
-    "DETAIL_LOGICAL_CONTRACT",
     "IUPHAR_SOURCE_COMPLETENESS",
     "LOCAL_STATUS_VALUES",
     "canonical_evidence_refs",

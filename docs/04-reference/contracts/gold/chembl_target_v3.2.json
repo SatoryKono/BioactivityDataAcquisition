@@ -333,7 +333,7 @@
         "null"
       ],
       "nullable": true,
-      "description": "IUPHAR source completeness: typed, family_only, source_unavailable or unannotated.",
+      "description": "typed, family_only, source_unavailable or unannotated.",
       "x-bioetl-logical-type": "enum",
       "x-bioetl-enum": "family_only|source_unavailable|typed|unannotated",
       "x-bioetl-null": "not-computed",
@@ -373,7 +373,7 @@
         "null"
       ],
       "nullable": true,
-      "description": "Canonical JSON set of structs {family_id, root_to_leaf}.",
+      "description": "Canonical JSON set of {family_id, root_to_leaf}.",
       "x-bioetl-logical-type": "set<struct<family_id:string,root_to_leaf:list<string>>>",
       "x-bioetl-serialization": "canonical-json-string",
       "x-bioetl-order": "family_id,root_to_leaf",
@@ -388,7 +388,7 @@
         "null"
       ],
       "nullable": true,
-      "description": "Local-rule status. Null means the local layer was not computed.",
+      "description": "Local-rule status. Null means not computed.",
       "x-bioetl-logical-type": "enum",
       "x-bioetl-enum": "candidate_only|conflicting|not_supported|supported",
       "x-bioetl-null": "not-computed",
@@ -456,7 +456,7 @@
         "null"
       ],
       "nullable": true,
-      "description": "Canonical JSON struct of match_evidence_ids and local_evidence_ids.",
+      "description": "Canonical JSON struct of evidence id sets.",
       "x-bioetl-logical-type": "struct<local_evidence_ids:set<string>,match_evidence_ids:set<string>>",
       "x-bioetl-serialization": "canonical-json-string",
       "x-bioetl-order": "lexicographic-members",

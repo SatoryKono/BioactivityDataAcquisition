@@ -38,8 +38,17 @@ class TargetClassifiedTransformer(TargetTransformer):
             self._get_record_normalizer().compute_content_hash(business_data)
         )
 
+    @classmethod
+    def for_physical_contract(
+        cls, contract_version: str
+    ) -> type[TargetClassifiedTransformer]:
+        """Return the enrich transformer for one physical contract."""
+        if contract_version == "3.2.0":
+            return TargetClassifiedDetailTransformer
+        return cls
 
-class TargetClassifiedTransformerV32(TargetClassifiedTransformer):
+
+class TargetClassifiedDetailTransformer(TargetClassifiedTransformer):
     """Select the 3.2.0 entity and canonical detail normalization."""
 
     entity_class = TargetV32
@@ -55,4 +64,4 @@ class TargetClassifiedTransformerV32(TargetClassifiedTransformer):
         )
 
 
-__all__ = ["TargetClassifiedTransformer", "TargetClassifiedTransformerV32"]
+__all__ = ["TargetClassifiedDetailTransformer", "TargetClassifiedTransformer"]

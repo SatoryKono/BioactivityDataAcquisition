@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import Self
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_serializer, model_validator
 
 from bioetl.domain.config.target_classification import (
     TargetClassificationConfig,
@@ -73,6 +74,20 @@ class TargetClassificationYamlConfig(BaseModel):
         default=None, pattern=r"^[0-9a-f]{64}$"
     )
     table_contract: TargetTableContract | None = None
+
+    @model_serializer(mode="wrap")
+    def _omit_absent_table_contract(
+        self, handler: Callable[[TargetClassificationYamlConfig], object]
+    ) -> object:
+        """Omit a null selector so manifests written before the field still match."""
+        payload = handler(self)
+        if (
+            isinstance(payload, dict)
+            and "table_contract" in payload
+            and payload["table_contract"] is None
+        ):
+            payload.pop("table_contract")
+        return payload
 
     @model_validator(mode="after")
     def validate_profile(self) -> Self:

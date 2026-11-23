@@ -17,19 +17,15 @@ from bioetl.domain.contracts.gold._strict_gold_contract_schema import (
 )
 from bioetl.domain.schemas.chembl.target import (
     build_target_classification_detail_model,
-)
-from bioetl.domain.schemas.chembl.target import (
-    register_canonical_classification_detail as _register_detail,
+    register_canonical_classification_detail,
 )
 from bioetl.domain.transformations import canonical_json_dumps
 from bioetl.domain.types import JsonDict
 
-_register_detail()
+register_canonical_classification_detail()
 
 
 class ChEMBLTargetGoldSchema(StrictGoldContractSchema):
-    """Schema for ChEMBL Target in Gold layer."""
-
     entity_id: Series[str] = pa.Field(nullable=False)
     content_hash: Series[str] = pa.Field(
         nullable=False,
@@ -287,21 +283,13 @@ ChEMBLTargetGoldSchemaV32 = build_target_classification_detail_model(
 
 
 def target_v31_schema_hash() -> str:
-    """Bind manifested identity to the actual canonical V31 schema model."""
-    render_schema = cast(
-        "Callable[[], JsonDict]", ChEMBLTargetGoldSchemaV31.to_json_schema
-    )
-    canonical = canonical_json_dumps(render_schema())
-    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+    rendered = cast("Callable[[], JsonDict]", ChEMBLTargetGoldSchemaV31.to_json_schema)
+    return hashlib.sha256(canonical_json_dumps(rendered()).encode("utf-8")).hexdigest()
 
 
 def target_v32_schema_hash() -> str:
-    """Bind manifested identity to the actual canonical V32 schema model."""
-    render_schema = cast(
-        "Callable[[], JsonDict]", ChEMBLTargetGoldSchemaV32.to_json_schema
-    )
-    canonical = canonical_json_dumps(render_schema())
-    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+    rendered = cast("Callable[[], JsonDict]", ChEMBLTargetGoldSchemaV32.to_json_schema)
+    return hashlib.sha256(canonical_json_dumps(rendered()).encode("utf-8")).hexdigest()
 
 
 __all__ = [

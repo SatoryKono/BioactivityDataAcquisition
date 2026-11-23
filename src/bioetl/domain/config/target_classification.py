@@ -17,6 +17,21 @@ def _validate_target_classification_mode(mode: str) -> None:
         raise ValueError("target classification mode must be off, shadow or enrich")
 
 
+def _default_physical_table_contract(mode: str) -> str:
+    return "3.1.0" if mode == "enrich" else "3.0.0"
+
+
+def _reject_incompatible_table_contract(mode: str, table_contract: str) -> None:
+    if mode != "enrich" and table_contract != "3.0.0":
+        raise ValueError(
+            "off/shadow target profiles require physical table contract 3.0.0"
+        )
+    if mode == "enrich" and table_contract == "3.0.0":
+        raise ValueError(
+            "enrich target profile cannot use physical table contract 3.0.0"
+        )
+
+
 def resolve_physical_table_contract(mode: str, table_contract: str | None) -> str:
     """Select the physical table contract without reading a snapshot.
 
@@ -26,17 +41,10 @@ def resolve_physical_table_contract(mode: str, table_contract: str | None) -> st
     """
     _validate_target_classification_mode(mode)
     if table_contract is None:
-        return "3.1.0" if mode == "enrich" else "3.0.0"
+        return _default_physical_table_contract(mode)
     if table_contract not in _TARGET_TABLE_CONTRACTS:
         raise ValueError("target table contract must be 3.0.0, 3.1.0 or 3.2.0")
-    if mode in {"off", "shadow"} and table_contract != "3.0.0":
-        raise ValueError(
-            "off/shadow target profiles require physical table contract 3.0.0"
-        )
-    if mode == "enrich" and table_contract == "3.0.0":
-        raise ValueError(
-            "enrich target profile cannot use physical table contract 3.0.0"
-        )
+    _reject_incompatible_table_contract(mode, table_contract)
     return table_contract
 
 

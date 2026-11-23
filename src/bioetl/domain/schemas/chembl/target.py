@@ -6,11 +6,10 @@ Aligned with RULES.md v5.24 and ChEMBL 34 schema.
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import Any, cast
+from typing import cast
 
 import pandas as pd
 import pandera.pandas as pa
-from pandera.api.checks import Check
 from pandera.typing import Series
 
 from bioetl.domain.normalization.target_classification_values import (
@@ -230,7 +229,7 @@ class TargetSchemaV31(TargetSchema):
 
 def register_canonical_classification_detail() -> None:
     """Register the 3.2.0 column check on the schema boundary, once."""
-    if hasattr(Check, "canonical_classification_detail"):
+    if hasattr(pa.Check, "canonical_classification_detail"):
         return
 
     register = cast(
@@ -248,7 +247,7 @@ def register_canonical_classification_detail() -> None:
 register_canonical_classification_detail()
 
 
-def _detail_field(name: str, description: str) -> Any:
+def _detail_field(name: str, description: str) -> object:
     return pa.Field(
         nullable=True,
         description=description,
@@ -260,26 +259,17 @@ _DETAIL_FIELD_SPECS: tuple[tuple[str, str], ...] = (
     ("iuphar_type_raw", "Raw IUPHAR source type. Null means not computed."),
     (
         "iuphar_source_completeness",
-        "IUPHAR source completeness: typed, family_only, source_unavailable or unannotated.",
+        "typed, family_only, source_unavailable or unannotated.",
     ),
     ("iuphar_family_ids", "Canonical JSON set of IUPHAR family ids."),
     ("iuphar_subclasses", "Canonical JSON set of IUPHAR subclasses."),
-    (
-        "iuphar_family_paths",
-        "Canonical JSON set of structs {family_id, root_to_leaf}.",
-    ),
-    (
-        "local_status",
-        "Local-rule status. Null means the local layer was not computed.",
-    ),
+    ("iuphar_family_paths", "Canonical JSON set of {family_id, root_to_leaf}."),
+    ("local_status", "Local-rule status. Null means not computed."),
     ("local_subclasses", "Canonical JSON set of local subclasses."),
     ("local_rule_ids", "Canonical JSON set of local rule ids."),
     ("effective_subclasses", "Canonical JSON set of effective subclasses."),
     ("conflict_codes", "Canonical JSON set of conflict codes."),
-    (
-        "classification_evidence_refs",
-        "Canonical JSON struct of match_evidence_ids and local_evidence_ids.",
-    ),
+    ("classification_evidence_refs", "Canonical JSON struct of evidence id sets."),
 )
 
 
@@ -300,7 +290,7 @@ def build_target_classification_detail_model(
         annotations[field_name] = Series[str]
         namespace[field_name] = _detail_field(field_name, description)
     model = type(name, (base,), namespace)
-    if not isinstance(model, type) or not issubclass(model, pa.DataFrameModel):
+    if not issubclass(model, pa.DataFrameModel):
         raise TypeError("detail schema must be a Pandera model")
     return model
 
