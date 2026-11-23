@@ -1,6 +1,6 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
@@ -9,7 +9,7 @@ Reviewers:
 - BioETL Team
   Priority: P2
   Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-  Last verified: '2026-11-16'
+  Last verified: '2026-11-23'
 
 ______________________________________________________________________
 
@@ -61,13 +61,121 @@ The registry's current identity remains 3.0.0. Publishing the
 [V31 contract](../../04-reference/contracts/gold/chembl_target_v3.1.json) does
 not promote production or enable generic dual writing.
 
+## Delivery boundaries
+
+These boundaries match the wired code. A green local test, a shadow
+configuration, and an enrich configuration are different outcomes. An enrich
+configuration plus an isolated run does not migrate the canonical V30 tables.
+Promotion is only the migration procedure below.
+
+### Base `chembl_target` and a composite target
+
+Classification runs inside the `chembl_target` transformer, on the business
+projection that transformer builds from the ChEMBL target record: `target_id`,
+`target_type`, `taxonomy_id`, `organism`, `pref_name`, component accessions,
+UniProt cross-references, EC numbers, and protein/gene synonyms. `shadow`
+returns that business row unchanged. `enrich` merges the nine projection
+fields into it. `"off"` does not bind a classifier.
+
+The step does not run again after composite dependency joins. A composite
+target record can hold fields this projection never sees. The kernel reads
+`gene_symbol` and `gene_id` only when they are already on the business row.
+The `chembl_target` extractor does not set them, and it does not supply
+`keywords`, `predicted_l1`, or `predicted_l2`.
+
+The kernel UniProt channel is the ordered union of `component_accessions` and
+`target_xref_uniprot_ids`. Those two sources are not separate match channels.
+
+`chembl_target_protein_classification` is a different pipeline. It is not this
+IUPHAR classifier. Workflows that write the same Silver/Gold target tables
+still share the one `chembl_target` configuration.
+
+### Stage signs and statuses
+
+Eligibility stops before classification. The reasons are
+`unsupported_target_type` (any type other than `SINGLE PROTEIN`),
+`invalid_taxonomy_id`, `unsupported_taxon`,
+`missing_taxonomy_for_known_organism`, and `taxonomy_name_conflict`. Those
+rows are `not_applicable` and do not receive a direct class.
+
+Match status is `matched`, `ambiguous`, `not_found`, `source_unavailable`,
+`insufficient_input`, `identity_conflict`, or `contract_error`.
+
+Annotation status is `available`, `partial`, `unmapped_type`, `conflicting`,
+or `not_available`. A `partial` annotation can still carry a coarse direct
+class. Local inference does not fill `iuphar_class`.
+
+The wired local policy publishes EC, L1/L2, and free-text rules. Class support
+from EC is attached only for rules whose family is `ec_class` and whose input
+condition is `ec_category=<n>`. The standard EC rules use family `ec`, so they
+do not supply `local_class`. Keyword support requires family `annotation` and
+an exact `keyword_id=` condition; the standard policy has no such rule. Free
+text, including the substrings kinase, channel, and zinc finger, stays a
+manual-review candidate. L1/L2 values on a kernel row are passed with unknown
+provenance, so they stay candidates and do not assign `local_class`.
+
+Local status from the wired assembler is `supported`, `not_supported`, or
+`conflicting`. The decision table also accepts `candidate_only`.
+
+Decision status is `resolved` or `requires_review`. `contract_error` is a
+conflict code, not a third decision status.
+
+Batch status is `empty`, `rejected`, or `processed`.
+
+An acceptance receipt status is `PASS`, `FAIL`, or `BLOCKED_INPUT`. A check
+that did not run stays `NOT_RUN`. `PASS` qualifies only the supplied scope.
+`biological_accuracy_accepted` stays false. A V2 receipt records
+`scientific_status: bounded_reference_cases_only`.
+
+Stage-5 comparison with M is measured only when the stage-0 reference contains
+M rows. An empty M set returns `measured: false` and does not invent counts.
+That comparison is not biological acceptance. Policy gold cases remain
+unconfirmed.
+
+### Snapshot, export, and API key
+
+New snapshots use `gtopdb_target_species_payload_v2` and
+`annotation_capability: family_only`. The builder does not invent a direct
+target type. `admission_complete: true` with `complete: false` is a bounded
+snapshot: targets outside the reviewed scope stay `source_unavailable`, not
+negative matches.
+
+Hierarchy paths and subclass fields stay on the kernel result and in evidence
+`classification.json`. The nine V31 business columns do not carry them.
+Standard table export, including XLSX, writes the persisted table columns. It
+does not reconstruct kernel paths that were not stored on the row. An enrich
+table is required before those nine columns exist to export.
+
+Shadow, enrich, acceptance, and migration read a pinned local snapshot.
+Cohort export reads a frozen normalized ChEMBL target Silver file and does
+not require that snapshot. None of these steps call the Guide to Pharmacology
+API or require `GTP-API-Key`. The optional HTTP adapter omits that header when no key is
+configured. The stage-1 policy records `api_key_required` as a documentary
+note; it does not block stages 0–3. Do not add a key to the repository or to
+an `.env` file for this procedure.
+
+### Separated verification files
+
+`iuphar-target-acceptance` writes `acceptance.json` and three siblings. Each
+file is created only when that name is absent. A later run uses a new output
+directory. None of the three copies another file's status:
+
+| File | Contents |
+| --- | --- |
+| `classification-verification.json` | Stage-0 admission, reference cases, evidence integrity, and semantic determinism, with the run, profile, and snapshot bindings |
+| `m-parity-report.json` | Stage-5 comparison with M. This command supplies no M rows, so `measured` stays false |
+| `proof-verification.json` | Pipeline-integration status and proof/report digests. `ci.status` stays `NOT_RUN` unless a separate CI receipt names the head SHA. A local exit code is not that receipt |
+
+Exit 0 still means the acceptance receipt status is `PASS`. It does not mean
+CI ran, and it does not mean biological accuracy was accepted.
+
 ## Preconditions
 
 - Work from the repository root using the native Windows interpreter
   `.\.venv-win\Scripts\python.exe`, or the prepared local interpreter on other
   platforms. The commands below use PowerShell.
 - Preserve existing data, configuration, reports, and evidence. Leave `.env`
-  files unchanged throughout this procedure.
+  files unchanged throughout this procedure. No API key is required.
 - Keep the existing target eligibility filters. This integration does not
   expand the pipeline to protein complexes or change baseline cohort selection.
 - For preparation, promotion, or rollback, stop and quiesce all writers listed above and
@@ -133,7 +241,13 @@ columns. The builder retains the public ID and derives separately checked
 species variants; it does not choose the first record or collapse taxa.
 This export provides `annotation_capability: family_only`. The builder does
 not manufacture a direct target type, and an available family can yield a
-coarse direct class with annotation status `partial`.
+coarse direct class with annotation status `partial`. RF-005 keeps that
+capability: subclasses and all intact `root_to_leaf` hierarchy paths are
+persisted from the approved dictionary and merged multi-parent family graph
+without claiming full direct-type coverage. See
+[`data/iuphar_target_class/rf005/coverage_matrix.json`](../../../data/iuphar_target_class/rf005/coverage_matrix.json)
+and the path policy notes in
+[16-iuphar-target-classification-semantics.md](../../04-reference/pipelines/chembl/16-iuphar-target-classification-semantics.md).
 
 Supply a pinned `bioetl_iuphar_acquisition` receipt containing the release,
 timezone-bearing retrieval time, source format, and every raw artifact's
@@ -210,6 +324,7 @@ finalization and completes the run manifest after data writes finish.
 Check evidence IDs against their referenced records and frozen payload hashes.
 Keep run/batch clocks and evidence paths outside business content hashing.
 V31 hashes include the nine columns above; V30 hash scope remains unchanged.
+Subclass lists and hierarchy paths are not part of those nine columns.
 
 ### Freeze a canonical cohort and its evidence
 
@@ -487,14 +602,185 @@ moving both candidates and the configuration into place. It journals each
 move, retains originals, and restores already moved pairs on an activation
 error. Keep the maintenance window open through verification.
 
+### Record main-contour acceptance
+
+Shadow, the isolated `--limit 1000` enrich, composite enrich, migration, and
+live readback are separate statuses. A passing smoke does not prove the full
+cohort. `biological_accuracy_accepted` stays false for a bounded RF-008
+reference; a matched count must not be recorded as biological qualification.
+The canonical entity document stays `mode: "off"` until `promotion_decision`
+is `READY` and `promote` then runs in a window with no writers. `LIVE_ACCEPTED`
+requires that promotion plus a readback of the next ordinary run. If a gate
+fails after promotion, the command exits 1 with `rollback_required: true`;
+restore with the rollback command above. Do not switch the mode to `"off"`
+instead of restoring the tables.
+
+Write the evidence JSON outside the committed tree. Point the command at the
+actual discrepancy report, independent expectations, shadow business table,
+shadow classification artifact, enrich table, repeat table, XLSX, isolated
+Silver/Gold, main-contour Silver/Gold, and assay inputs. `--shadow-table` is
+the unchanged V30 business cohort. `--shadow-classification` supplies the
+status distributions; the business table does not. `--table`,
+`--isolated-silver`, and `--isolated-gold` are the `--limit 1000` enrich
+cohort. `--silver` and `--gold` are only the later main-contour readback. The
+command recomputes hashes, status distributions, XLSX round-trip, historical
+columns, current assay FK closure, and the canonical config digest. A file is
+identified by its byte SHA-256. A Delta directory is identified by the SHA-256
+of its current business-field projection, and a pinned hash is not accepted
+when that identity was not measured. Every current enrich, Silver, and Gold
+row must carry the claimed `target_class_profile_sha256`; a digest that is
+only well formed does not confirm the classifier that wrote the rows. Current
+rows of `--silver` and `--gold` are checked against
+`migration.effective_profile_sha256`. Those live observations stay separate
+from the isolated `--limit 1000` profile values. Current
+rows are those with a missing or true `_is_current`. A CSV cell `False`,
+`false`, or `0` is closed before that check. Closed versions do not close an
+assay FK. Live readback compares each current Gold target with the current
+Silver row of the same id. Two current rows of one id fail that readback.
+Both rows must contain every classification field; a missing field is not a
+null match. The comparison does not use the `--limit 1000` smoke table, and
+the smoke hashes are not taken from the main-contour tables. A standard XLSX that carries
+`_bioetl_export_manifest` is restored before the historical-column check, so
+text split across cells is joined. The command does not promote, edit
+configuration, or replace an existing report path.
+
+```powershell
+.\.venv-win\Scripts\python.exe -m scripts.ops target-classification-migration contour-report `
+  --evidence 'PATH_TO_CONTOUR_EVIDENCE_JSON' `
+  --discrepancy-report 'PATH_TO_DISCREPANCY_REPORT' `
+  --expectations 'PATH_TO_INDEPENDENT_EXPECTATIONS' `
+  --shadow-table 'PATH_TO_SHADOW_BUSINESS_TABLE' `
+  --shadow-classification 'PATH_TO_SHADOW_CLASSIFICATION_TABLE' `
+  --table 'PATH_TO_ENRICH_TABLE' `
+  --repeat-table 'PATH_TO_REPEAT_ENRICH_TABLE' `
+  --xlsx 'PATH_TO_STANDARD_XLSX' `
+  --isolated-silver 'PATH_TO_ISOLATED_SILVER' `
+  --isolated-gold 'PATH_TO_ISOLATED_GOLD' `
+  --silver 'PATH_TO_MAIN_SILVER' `
+  --gold 'PATH_TO_MAIN_GOLD' `
+  --assay 'PATH_TO_ASSAY_TABLE' `
+  --output 'NEW_CONTOUR_REPORT_JSON' `
+  --require-ready
+```
+
+On Linux or WSL, use the prepared interpreter from the repository root. The
+evidence document uses `schema_version`
+`bioetl_iuphar_main_contour_evidence_v1`. Every key below is required; a
+not-run phase still uses these objects. `local` and `ci` stay `NOT_RUN` until
+their own evidence hash or 40-character commit SHA is supplied. Composite
+acceptance stays `BLOCKED` while the composite Gold contract omits the nine
+classification fields, even when both column groups already list them. Keep
+the report with the occurrence; do not commit it.
+
+```json
+{
+  "schema_version": "bioetl_iuphar_main_contour_evidence_v1",
+  "shadow": {
+    "executed": false,
+    "run_id": null,
+    "separate_directory": false,
+    "contract_version": null,
+    "business_rows_unchanged": false,
+    "profile_sha256": null,
+    "config_sha256": null,
+    "cohort_sha256": null,
+    "discrepancy_report_sha256": null,
+    "independent_expectations_sha256": null,
+    "row_count": 0,
+    "status_counts": {
+      "iuphar_match_status": {},
+      "local_class": {},
+      "effective_class": {},
+      "decision_status": {}
+    },
+    "source_completeness": "not_recorded"
+  },
+  "isolated_enrich": {
+    "executed": false,
+    "separate_directory": false,
+    "limit": null,
+    "full_table_proof": false,
+    "silver_contract": null,
+    "gold_contract": null,
+    "profile_sha256": null,
+    "config_sha256": null,
+    "evidence_manifest_sha256": null,
+    "persisted_silver_sha256": null,
+    "persisted_gold_sha256": null,
+    "repeat": {
+      "same_inputs": false,
+      "same_versions": false,
+      "classification_sha256": null,
+      "repeat_classification_sha256": null
+    },
+    "xlsx": {
+      "table_sha256": null,
+      "xlsx_sha256": null,
+      "historical_columns": []
+    }
+  },
+  "composite_enrich": {
+    "executed": false,
+    "separate_directory": false,
+    "agreed_cohort_sha256": null,
+    "same_cohort_as_shadow": false,
+    "classification_columns_present": false
+  },
+  "migration": {
+    "rehearsal_rollback": "NOT_RUN",
+    "fk_unresolved": null,
+    "writers_quiesced": false,
+    "promoted": false,
+    "source_identity_matches": false,
+    "effective_config_sha256": null,
+    "effective_profile_sha256": null,
+    "physical_contract": null,
+    "backup_retained": false,
+    "full_cohort": false
+  },
+  "live": {
+    "readback": false,
+    "next_run_executed": false,
+    "next_run_id": null,
+    "tables_match_promoted": false,
+    "classification_reproduced": false,
+    "observed_profile_sha256": null,
+    "observed_config_sha256": null
+  },
+  "biological": {
+    "biological_accuracy_accepted": false,
+    "matched_count": null,
+    "matched_count_used_as_qualification": false,
+    "scientific_status": null,
+    "rf008_receipt_status": "NOT_RUN",
+    "rf008_receipt_sha256": null,
+    "independent_reference_sha256": null,
+    "reviewer_reference": null
+  },
+  "local": {"status": "NOT_RUN", "evidence_sha256": null},
+  "ci": {"status": "NOT_RUN", "commit_sha": null}
+}
+```
+
 ## Verification
 
 - Confirm the selected configuration, contract version, actual schema hash,
   normalization identity, and profile digest in the effective configuration
   and [run manifest](run-manifest-inspection.md).
+- Read `classification-verification.json`, `m-parity-report.json`, and
+  `proof-verification.json` separately. A `PASS` in one file does not change
+  the status stored in the others. `ci.status: NOT_RUN` means CI was not
+  recorded for that head. Do not relabel it as `PASS`.
+- Keep `biological_accuracy_accepted: false` until a reviewed biological
+  receipt says otherwise. Engineering checks, M comparison, and pipeline proof
+  do not grant that receipt.
 - For shadow, verify unchanged V30 rows/hash scope plus complete separate
   evidence. For enrich, verify V31 on both tables, coherent profile values,
   completed evidence, full cohort preservation, and baseline FK closure.
+- Read `contour-report` phases and axes separately: `local`, `ci`,
+  `migration`, and `biological`. `promotion_decision` is not a biological
+  accuracy claim, and `matched_count` does not change
+  `biological_accuracy_accepted`.
 - Inspect all executed receipt checks, category dispositions, bounded scope,
   source digests, output hashes,
   and matching successful integration report. Retain unresolved disagreements

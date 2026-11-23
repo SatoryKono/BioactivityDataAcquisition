@@ -139,7 +139,7 @@ def test_direct_ec_rule_is_rejected() -> None:
         input_conditions="EC 1",
         output="Oxidoreductases",
         justification_source="план v1 r8 шаг D",
-        version="plan-v1-r8",
+        version="plan-v1-r9",
         limits="local",
         marks_direct_layer=True,
     )

@@ -18,7 +18,7 @@
     "why": "New materials are not qualified, so the last profile stays off."
   },
   "rules": {
-    "rules_sha256": "218673ad860a74022c9564488383f2529063242e762d3d1176f6ae4c7c3955fb",
+    "rules_sha256": "cf65fa2cbc17c6808a4d11efe1905eca917bdaaa218520e8c3a403d806f17db9",
     "rules_version": "local-rules-2026.11.23",
     "working_classes": [
       "Receptor",

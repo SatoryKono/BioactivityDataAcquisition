@@ -75,6 +75,13 @@ enrich. Matched counts are not biological accuracy.
 - `leaf_to_root` is migration/comparison text only and does not choose a class.
 - Multi-parent paths are retained; graph defects do not invent a class from a
   cut path. `Table.Distinct`-style collapse is not an identity decision.
+- **RF-005 (#13313):** repeated family IDs with the same payload **union**
+  parent sets (order-independent). Conflicting payloads stay a graph defect.
+  `iuphar_subclass` comes only from the approved type/family dictionary and
+  does **not** elevate `annotation_capability` above `family_only`.
+  `local:` / `synthetic:` / `legacy:` IDs stay outside the official numeric
+  family graph. Coverage matrix:
+  [`data/iuphar_target_class/rf005/coverage_matrix.json`](../../../../data/iuphar_target_class/rf005/coverage_matrix.json).
 - Missing markers currently: `#n/a`, `N/A`, `n/a`, `""`, plus null and
   whitespace-only. `missing_markers_version` remains unset (`не утверждено`).
 - **Other Protein Target** is allowed only from an approved direct/family
@@ -86,7 +93,7 @@ enrich. Matched counts are not biological accuracy.
 
 | Surface | Current baseline | Change rule |
 | --- | --- | --- |
-| `rules_version` | `local-rules-2026.11.23` | New rules → new version; `plan-v1-r8` stays on historical runs |
+| `rules_version` | `local-rules-2026.11.23` | New rules → new version; `plan-v1-r9` is the dictionary plan pin; `plan-v1-r8` stays on historical runs |
 | `normalization_version` | unset | Approving missing markers publishes a new version |
 | `classification_schema_version` (profile) | `3.1.0` when shadow/enrich enabled | Adapter field; not the same as table contract |
 | table / business contract | off/shadow → V30 / `3.0.0`; enrich → V31 / `3.1.0` | Nine additive columns only after enrich admission |

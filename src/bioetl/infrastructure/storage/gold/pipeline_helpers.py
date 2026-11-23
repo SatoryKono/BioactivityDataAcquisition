@@ -164,6 +164,16 @@ async def prepare_gold_write(
         schema,
         contract_version=contract_version,
     )
+    if validated_mode == GoldWriteMode.SCD2 and scd_config is not None:
+        import pandas as pd
+
+        for record in records:
+            for key in scd_config.business_keys:
+                value = record.get(key)
+                if value is None or (pd.api.types.is_scalar(value) and pd.isna(value)):
+                    raise ValueError(
+                        f"SCD2 business key '{key}' must not be null or missing"
+                    )
     return PreparedGoldWriteContext(
         table_name=table_name,
         table_path=host._resolve_table_path(table_name),

@@ -5,21 +5,21 @@
         "as_of": "2026-11-09",
         "item": "api_key_required",
         "note": "не проверенный контракт сервиса",
-        "source": "план v1 r8 §5",
+        "source": "план v1 r9 §5",
         "status": "подтверждено документально"
       },
       {
         "as_of": "2026-11-09",
         "item": "header_GTP-API-Key",
         "note": "не проверенный контракт сервиса",
-        "source": "план v1 r8 §5",
+        "source": "план v1 r9 §5",
         "status": "подтверждено документально"
       },
       {
         "as_of": "2026-11-09",
         "item": "rate_about_60_per_minute",
         "note": "ориентир документации, не измеренный лимит",
-        "source": "план v1 r8 §5",
+        "source": "план v1 r9 §5",
         "status": "подтверждено документально"
       }
     ],
@@ -40,57 +40,57 @@
     {
       "family": "dictionary",
       "input_conditions": "утверждённое отображение type или family ID выбранного выпуска даёт Receptor",
-      "justification_source": "план v1 r8 §2.1",
+      "justification_source": "план v1 r9 §2.1",
       "limits": "проектная группировка, не схема API; без утверждённого отображения класс не присваивается",
       "marks_direct_layer": false,
       "output": "Receptor",
       "priority": 100,
       "rule_id": "class:Receptor",
-      "version": "plan-v1-r8"
+      "version": "plan-v1-r9"
     },
     {
       "family": "dictionary",
       "input_conditions": "утверждённое отображение type или family ID выбранного выпуска даёт Ion Channel",
-      "justification_source": "план v1 r8 §2.1",
+      "justification_source": "план v1 r9 §2.1",
       "limits": "проектная группировка, не схема API; без утверждённого отображения класс не присваивается",
       "marks_direct_layer": false,
       "output": "Ion Channel",
       "priority": 100,
       "rule_id": "class:Ion Channel",
-      "version": "plan-v1-r8"
+      "version": "plan-v1-r9"
     },
     {
       "family": "dictionary",
       "input_conditions": "утверждённое отображение type или family ID выбранного выпуска даёт Enzyme",
-      "justification_source": "план v1 r8 §2.1",
+      "justification_source": "план v1 r9 §2.1",
       "limits": "проектная группировка, не схема API; без утверждённого отображения класс не присваивается",
       "marks_direct_layer": false,
       "output": "Enzyme",
       "priority": 100,
       "rule_id": "class:Enzyme",
-      "version": "plan-v1-r8"
+      "version": "plan-v1-r9"
     },
     {
       "family": "dictionary",
       "input_conditions": "утверждённое отображение type или family ID выбранного выпуска даёт Transporter",
-      "justification_source": "план v1 r8 §2.1",
+      "justification_source": "план v1 r9 §2.1",
       "limits": "проектная группировка, не схема API; без утверждённого отображения класс не присваивается",
       "marks_direct_layer": false,
       "output": "Transporter",
       "priority": 100,
       "rule_id": "class:Transporter",
-      "version": "plan-v1-r8"
+      "version": "plan-v1-r9"
     },
     {
       "family": "dictionary",
       "input_conditions": "утверждённое отображение type или family ID выбранного выпуска даёт Other Protein Target",
-      "justification_source": "план v1 r8 §2.1",
+      "justification_source": "план v1 r9 §2.1",
       "limits": "проектная группировка, не схема API; без утверждённого отображения класс не присваивается",
       "marks_direct_layer": false,
       "output": "Other Protein Target",
       "priority": 100,
       "rule_id": "class:Other Protein Target",
-      "version": "plan-v1-r8"
+      "version": "plan-v1-r9"
     }
   ],
   "direct_mappings": {
@@ -1312,8 +1312,8 @@
     "volume_test_time_status": "утверждено"
   },
   "plan": {
-    "issued_on": "2026-11-10",
-    "revision": "8",
+    "issued_on": "2026-11-23",
+    "revision": "9",
     "version": "1"
   },
   "result_key": [
@@ -1459,7 +1459,10 @@
       "legacy_text_field": "leaf_to_root",
       "legacy_text_usage": "migration/comparison only; never used to choose a class",
       "multiple_parents_allowed": true,
+      "parent_merge_policy": "RF-005: repeated family IDs with the same payload union parent sets; conflicting payloads remain a graph defect; path order is canonical sort by (family_id, root_to_leaf), independent of source-row order",
       "structure": "tuple of family ids from root ancestor to leaf family",
+      "subclass_policy": "iuphar_subclass comes only from the approved type/family dictionary; it does not elevate annotation_capability above family_only",
+      "synthetic_id_policy": "local:/synthetic:/legacy: chains stay outside the official numeric family graph and never become parents of official family IDs",
       "table_distinct_policy": "Power Query Table.Distinct / unordered collapse is not an identity decision; ambiguous multi-parent or multi-candidate rows stay ambiguous"
     },
     "profile_change_rules": {
@@ -1531,11 +1534,24 @@
   "stage_status": "recorded_without_biological_acceptance",
   "subclass_comparison": {
     "class_subclass_pairs": [],
-    "direct_vocabulary": [],
+    "comparison_pairs_status": "не утверждено",
+    "direct_vocabulary": [
+      "Catalytic receptors",
+      "Enzymes",
+      "G protein-coupled receptors",
+      "Ligand-gated ion channels",
+      "Nuclear hormone receptors",
+      "Other ion channels",
+      "Other protein targets",
+      "Transporters",
+      "Voltage-gated ion channels"
+    ],
     "local_vocabulary": [],
     "rule": "совпадение; класс–подкласс; иначе несовместимость; подкласс вне словаря своего слоя — дефект контракта; подкласс без отображения в другой слой — несовместим",
     "same_pairs": [],
-    "status": "не утверждено"
+    "status": "не утверждено",
+    "vocabulary_issue": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/13313",
+    "vocabulary_status": "утверждено"
   },
   "unknown_type_status": "unmapped_type",
   "working_classes": [
