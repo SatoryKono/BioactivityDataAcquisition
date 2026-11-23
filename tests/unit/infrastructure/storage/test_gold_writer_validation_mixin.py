@@ -31,6 +31,7 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock
 
+import pandera.pandas as pa
 import pytest
 
 from bioetl.domain.medallion import GoldWriteMode
@@ -122,6 +123,37 @@ class TestGoldWriterValidationMixin:
         schema = MagicMock()
         schema.strict = True
         host._validate_schema_strict(schema)
+
+    @pytest.mark.parametrize("strict", [False, "filter"])
+    def test_validate_schema_rejects_non_strict_pandera_modes(self, strict) -> None:
+        """Reject Pandera modes that do not fail on unexpected columns."""
+        schema = pa.DataFrameSchema({"value": pa.Column(int)}, strict=strict)
+        with pytest.raises(GoldContractValidationError, match="strict=True"):
+            _Host()._validate_schema_strict(schema)
+
+    @pytest.mark.parametrize("strict", [False, "filter", 1])
+    def test_validate_schema_rejects_non_true_mode_even_with_strict_config(
+        self, strict
+    ) -> None:
+        """An effective non-True setting must not be overridden by Config."""
+
+        class Schema:
+            class Config:
+                strict = True
+
+        schema = Schema()
+        schema.strict = strict
+        with pytest.raises(GoldContractValidationError, match="strict=True"):
+            _Host()._validate_schema_strict(schema)
+
+    def test_validate_schema_accepts_strict_config(self) -> None:
+        """Model-style schemas retain their Config.strict fallback."""
+
+        class Schema:
+            class Config:
+                strict = True
+
+        _Host()._validate_schema_strict(Schema)
 
     def test_validate_schema_strict_fails(self) -> None:
         """Schema without strict=True should raise ValueError."""
