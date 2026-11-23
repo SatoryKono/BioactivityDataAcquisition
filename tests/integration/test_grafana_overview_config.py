@@ -96,14 +96,19 @@ def test_overview_uses_frozen_v3_selector_set() -> None:
         "selected_pipeline",
     ]
 
+    # Audit R5-06: workflow unified on Ops HTTP filter-options (same as pipeline/run_type).
     workflow = variables["workflow"]
     assert workflow.get("datasource") == {
-        "type": "prometheus",
-        "uid": "prometheus",
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bioetl-ops-http",
     }
     assert workflow.get("includeAll") is True
     assert workflow.get("current", {}).get("text") == "All"
     assert workflow.get("current", {}).get("value") == "$__all"
+    workflow_query = workflow.get("query", {})
+    assert isinstance(workflow_query, dict)
+    workflow_inf = workflow_query.get("infinityQuery", {})
+    assert "dimension=workflow" in str(workflow_inf.get("url", ""))
 
     # Phase 1.5: run_type options come from Ops HTTP filter-options (same as pipeline).
     run_type = variables["run_type"]
