@@ -111,12 +111,14 @@ def assign_mapped_subclass(
     family_to_subclass: Mapping[str, str],
 ) -> str | None:
     """Return a subclass only from the approved type/family dictionaries."""
-    family_values = tuple(
+    # Set comprehension avoids tuple→set (python:S7508); sorted() keeps
+    # deterministic conflict detection order.
+    family_values = {
         family_to_subclass[family_id]
-        for family_id in sorted(family_ids)
+        for family_id in family_ids
         if family_id in family_to_subclass
-    )
-    distinct = tuple(sorted(set(family_values)))
+    }
+    distinct = tuple(sorted(family_values))
     if len(distinct) > 1:
         return None
     if type_name and type_name in type_to_subclass:
