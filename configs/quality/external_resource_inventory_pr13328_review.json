@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "72e42509ca522c4679f51a8e135e96848cc352d6",
+  "source_ref": "73b70f9d37113fa85fc4226e4d06b81603fe8dea",
+  "source_reviews": {
+    "src/bioetl/application/services/run_reports/workflow_observations.py": "Reviewed resume handling: skip rewriting previously completed child reports; existing storage operations and ownership are unchanged.",
+    "src/bioetl/application/services/workflow/workflow_runner_reports.py": "Reviewed archive handling: skipped restored children are not archived again; existing report store access and ownership are unchanged.",
+    "src/bioetl/application/services/workflow/workflow_runner_transitions.py": "Reviewed resume transition: retain the restored RunResult and identity; no external resource acquisition or ownership changes."
+  },
+  "expression_updates": {},
+  "segment_updates": {},
+  "reference_moves": [],
+  "exclusion_moves": [],
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": []
+}
