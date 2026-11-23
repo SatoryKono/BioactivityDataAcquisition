@@ -12,6 +12,7 @@ from iuphar_target_class.hierarchy import (
     validate_family_graph,
 )
 from iuphar_target_class.policy import GRAPH_MAX_DEPTH, GRAPH_MAX_VISITED_NODES
+from iuphar_target_class.rf008_qualification import evaluate_categories
 
 pytestmark = pytest.mark.unit
 
@@ -349,3 +350,32 @@ def test_conflicting_family_evidence_is_not_hidden_by_a_known_type() -> None:
     assert conflict.iuphar_class is None
     assert conflict.iuphar_subclass is None
     assert conflict.family_evidence == (("1", "Receptor"), ("2", "Ion Channel"))
+
+
+def test_rf008_direct_class_and_graph_defects_follow_the_dictionary() -> None:
+    report = evaluate_categories(
+        ("direct_type", "partial_source", "multi_parent", "cycle", "missing_node")
+    )
+    assert report["unexplained_error_count"] == 0
+    cases = report["cases"]
+    assert isinstance(cases, list)
+    by_id = {str(item["case_id"]): item for item in cases if isinstance(item, dict)}
+    assert by_id["direct-type-gpcr"]["disposition"] == "verified"
+    assert by_id["direct-type-gpcr"]["observed"]["iuphar_class"] == "Receptor"
+    assert by_id["graph-partial-family"]["observed"]["annotation_status"] == "partial"
+    assert by_id["graph-cycle"]["observed"]["iuphar_class"] is None
+    assert by_id["graph-missing-node"]["observed"]["paths_empty"] is True
+    assert by_id["graph-multi-parent"]["disposition"] == "verified"
+    evidence = by_id["graph-multi-parent"]["evidence"]
+    observed = by_id["graph-multi-parent"]["observed"]
+    assert isinstance(evidence, dict)
+    assert isinstance(observed, dict)
+    parents = evidence["parents"]
+    branches = observed["root_to_leaf_paths"]
+    assert isinstance(parents, list)
+    assert isinstance(branches, list)
+    leaf = str(evidence["family_id"])
+    assert observed["branch_count"] == len(parents) == len(branches)
+    assert len(branches) > 1
+    assert all(isinstance(path, list) and path[-1] == leaf for path in branches)
+    assert {path[-2] for path in branches} == {str(parent) for parent in parents}
