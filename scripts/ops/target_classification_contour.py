@@ -74,6 +74,24 @@ class ContourEvidenceError(ValueError):
 
 
 @dataclass(frozen=True, slots=True)
+class ContourMeasurementPaths:
+    """Operator files. Isolated smoke paths stay separate from live readback."""
+
+    discrepancy_report: Path | None = None
+    expectations: Path | None = None
+    shadow_table: Path | None = None
+    shadow_classification: Path | None = None
+    table: Path | None = None
+    repeat_table: Path | None = None
+    xlsx: Path | None = None
+    isolated_silver: Path | None = None
+    isolated_gold: Path | None = None
+    silver: Path | None = None
+    gold: Path | None = None
+    assay: Path | None = None
+
+
+@dataclass(frozen=True, slots=True)
 class ContourObservations:
     """Facts read from configs, contracts, and operator-supplied files."""
 
@@ -476,30 +494,19 @@ def _record_fk(
 def apply_measurements(
     observations: ContourObservations,
     evidence: dict[str, object],
-    *,
-    discrepancy_report: Path | None = None,
-    expectations: Path | None = None,
-    shadow_table: Path | None = None,
-    shadow_classification: Path | None = None,
-    table: Path | None = None,
-    repeat_table: Path | None = None,
-    xlsx: Path | None = None,
-    isolated_silver: Path | None = None,
-    isolated_gold: Path | None = None,
-    silver: Path | None = None,
-    gold: Path | None = None,
-    assay: Path | None = None,
+    paths: ContourMeasurementPaths | None = None,
 ) -> ContourObservations:
     """Fill observations from confined files and current Delta rows."""
+    selected = paths or ContourMeasurementPaths()
     updates: dict[str, object] = {}
-    _record_hash(updates, "discrepancy_report_sha256", discrepancy_report)
-    _record_hash(updates, "expectations_sha256", expectations)
-    _record_shadow(updates, shadow_table, shadow_classification)
-    table_rows = _record_enrich_table(updates, table, repeat_table)
-    _record_xlsx(updates, evidence, table_rows, xlsx)
-    _record_isolated(updates, isolated_silver, isolated_gold)
-    gold_rows = _record_live(updates, silver, gold)
-    _record_fk(updates, assay, gold_rows)
+    _record_hash(updates, "discrepancy_report_sha256", selected.discrepancy_report)
+    _record_hash(updates, "expectations_sha256", selected.expectations)
+    _record_shadow(updates, selected.shadow_table, selected.shadow_classification)
+    table_rows = _record_enrich_table(updates, selected.table, selected.repeat_table)
+    _record_xlsx(updates, evidence, table_rows, selected.xlsx)
+    _record_isolated(updates, selected.isolated_silver, selected.isolated_gold)
+    gold_rows = _record_live(updates, selected.silver, selected.gold)
+    _record_fk(updates, selected.assay, gold_rows)
     return cast(ContourObservations, replace(observations, **updates))
 
 
@@ -836,6 +843,16 @@ def _evaluate_migration(
     return _phase("FAIL" if reasons else "PASS", _unique(reasons))
 
 
+def _live_projection_reasons(observations: ContourObservations) -> list[str]:
+    if observations.duplicate_current_target_ids is True:
+        return ["duplicate_current_target_id"]
+    if observations.live_projection_match is None:
+        return ["classification_readback_missing"]
+    if observations.live_projection_match is not True:
+        return ["classification_not_reproduced"]
+    return []
+
+
 def _evaluate_live(
     document: dict[str, object],
     observations: ContourObservations,
@@ -861,12 +878,7 @@ def _evaluate_live(
         live["observed_config_sha256"] != observations.canonical_config_sha256
     ):
         reasons.append("live_config_mismatch")
-    if observations.duplicate_current_target_ids is True:
-        reasons.append("duplicate_current_target_id")
-    elif observations.live_projection_match is None:
-        reasons.append("classification_readback_missing")
-    elif observations.live_projection_match is not True:
-        reasons.append("classification_not_reproduced")
+    reasons.extend(_live_projection_reasons(observations))
     if live["classification_reproduced"] is not True:
         reasons.append("classification_reproduced_not_attested")
     return _phase("FAIL" if reasons else "PASS", _unique(reasons))
@@ -1805,6 +1817,7 @@ __all__ = [
     "PHYSICAL_CONTRACT",
     "REPORT_SCHEMA",
     "ContourEvidenceError",
+    "ContourMeasurementPaths",
     "ContourObservations",
     "apply_measurements",
     "classification_sha256",

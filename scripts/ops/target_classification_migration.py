@@ -23,6 +23,7 @@ from scripts.engineering.common.repo_paths import confined_io_path
 from scripts.ops.target_classification_contour import (
     REPO_ROOT,
     ContourEvidenceError,
+    ContourMeasurementPaths,
     apply_measurements,
     evaluate_main_contour,
     inspect_repository,
@@ -153,18 +154,20 @@ def _contour_report(parser: argparse.ArgumentParser, args: argparse.Namespace) -
         observations = apply_measurements(
             inspect_repository(args.repo_root or REPO_ROOT),
             evidence,
-            discrepancy_report=args.discrepancy_report,
-            expectations=args.expectations,
-            shadow_table=args.shadow_table,
-            shadow_classification=args.shadow_classification,
-            table=args.table,
-            repeat_table=args.repeat_table,
-            xlsx=args.xlsx,
-            isolated_silver=args.isolated_silver,
-            isolated_gold=args.isolated_gold,
-            silver=args.silver,
-            gold=args.gold,
-            assay=args.assay,
+            ContourMeasurementPaths(
+                discrepancy_report=args.discrepancy_report,
+                expectations=args.expectations,
+                shadow_table=args.shadow_table,
+                shadow_classification=args.shadow_classification,
+                table=args.table,
+                repeat_table=args.repeat_table,
+                xlsx=args.xlsx,
+                isolated_silver=args.isolated_silver,
+                isolated_gold=args.isolated_gold,
+                silver=args.silver,
+                gold=args.gold,
+                assay=args.assay,
+            ),
         )
         report = evaluate_main_contour(evidence, observations)
         write_contour_report(

@@ -13,6 +13,7 @@ from bioetl.domain.config.target_classification import TARGET_CLASSIFICATION_FIE
 from scripts.ops.target_classification_contour import (
     PHYSICAL_CONTRACT,
     ContourEvidenceError,
+    ContourMeasurementPaths,
     ContourObservations,
     apply_measurements,
     classification_sha256,
@@ -304,18 +305,20 @@ def _ready_case(tmp_path: Path) -> tuple[dict[str, object], ContourObservations]
             composite_contract_properties=frozenset(TARGET_CLASSIFICATION_FIELDS),
         ),
         parsed,
-        discrepancy_report=discrepancy,
-        expectations=expectations,
-        shadow_table=shadow_business,
-        shadow_classification=shadow_classification,
-        table=table,
-        repeat_table=repeat,
-        xlsx=workbook,
-        isolated_silver=silver,
-        isolated_gold=gold,
-        silver=silver,
-        gold=gold,
-        assay=assay,
+        ContourMeasurementPaths(
+            discrepancy_report=discrepancy,
+            expectations=expectations,
+            shadow_table=shadow_business,
+            shadow_classification=shadow_classification,
+            table=table,
+            repeat_table=repeat,
+            xlsx=workbook,
+            isolated_silver=silver,
+            isolated_gold=gold,
+            silver=silver,
+            gold=gold,
+            assay=assay,
+        ),
     )
     return parsed, observations
 
@@ -432,8 +435,7 @@ def test_unresolved_fk_and_xlsx_mismatch_fail_their_own_phases(tmp_path: Path) -
     mismatched = apply_measurements(
         observations,
         evidence,
-        table=tmp_path / "enrich.csv",
-        xlsx=broken,
+        ContourMeasurementPaths(table=tmp_path / "enrich.csv", xlsx=broken),
     )
     xlsx_report = evaluate_main_contour(evidence, mismatched)
     assert _phase(xlsx_report, "isolated_enrich") == "FAIL"
@@ -447,8 +449,10 @@ def test_repeat_mismatch_fails_enrich_only(tmp_path: Path) -> None:
     measured = apply_measurements(
         observations,
         evidence,
-        table=tmp_path / "enrich.csv",
-        repeat_table=changed,
+        ContourMeasurementPaths(
+            table=tmp_path / "enrich.csv",
+            repeat_table=changed,
+        ),
     )
     report = evaluate_main_contour(evidence, measured)
 
@@ -590,10 +594,12 @@ def test_shadow_counts_come_from_classification_not_the_business_table(
     measured = apply_measurements(
         observations,
         evidence,
-        shadow_table=business,
-        shadow_classification=tmp_path / "shadow-classification.csv",
-        table=shorter,
-        repeat_table=shorter,
+        ContourMeasurementPaths(
+            shadow_table=business,
+            shadow_classification=tmp_path / "shadow-classification.csv",
+            table=shorter,
+            repeat_table=shorter,
+        ),
     )
     report = evaluate_main_contour(evidence, measured)
 
@@ -608,7 +614,7 @@ def test_shadow_counts_come_from_classification_not_the_business_table(
     business_only = apply_measurements(
         replace(observations, shadow_classification_rows=None),
         evidence,
-        shadow_table=business,
+        ContourMeasurementPaths(shadow_table=business),
     )
     business_report = evaluate_main_contour(evidence, business_only)
     reasons = business_report["phases"]["shadow"]["reasons"]
@@ -627,7 +633,11 @@ def test_directory_identity_is_measured_for_silver(
         "scripts.ops.target_classification_contour.load_table",
         lambda _path: list(_ROWS),
     )
-    measured = apply_measurements(observations, evidence, isolated_silver=directory)
+    measured = apply_measurements(
+        observations,
+        evidence,
+        ContourMeasurementPaths(isolated_silver=directory),
+    )
     assert measured.silver_sha256 == logical_projection_sha256(list(_ROWS))
     report = evaluate_main_contour(evidence, measured)
     assert "silver_hash_conflict" in report["phases"]["isolated_enrich"]["reasons"]
@@ -760,9 +770,7 @@ def test_csv_closed_flags_stay_out_of_current_checks(tmp_path: Path) -> None:
     measured = apply_measurements(
         observations,
         evidence,
-        table=table,
-        repeat_table=repeat,
-        xlsx=workbook,
+        ContourMeasurementPaths(table=table, repeat_table=repeat, xlsx=workbook),
     )
     report = evaluate_main_contour(evidence, measured)
 
@@ -803,8 +811,7 @@ def test_live_readback_rejects_missing_classification_fields(
             canonical_config_sha256=_CONFIG,
         ),
         evidence,
-        silver=silver,
-        gold=gold,
+        ContourMeasurementPaths(silver=silver, gold=gold),
     )
     report = evaluate_main_contour(evidence, measured)
     phases = report["phases"]
@@ -850,8 +857,7 @@ def test_main_contour_readback_does_not_replace_isolated_hashes(
             canonical_config_sha256=_CONFIG,
         ),
         evidence,
-        silver=silver,
-        gold=gold,
+        ContourMeasurementPaths(silver=silver, gold=gold),
     )
     report = evaluate_main_contour(evidence, measured)
 
@@ -890,8 +896,7 @@ def test_duplicate_current_target_id_blocks_live_acceptance(
             canonical_config_sha256=_CONFIG,
         ),
         evidence,
-        silver=silver,
-        gold=tmp_path / "gold.csv",
+        ContourMeasurementPaths(silver=silver, gold=tmp_path / "gold.csv"),
     )
     report = evaluate_main_contour(evidence, measured)
     phases = report["phases"]
