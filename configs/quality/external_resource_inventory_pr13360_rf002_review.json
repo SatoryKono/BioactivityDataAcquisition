@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "catalog_ref": "7c4ada7f0faa1c99f579e80022c5ff89cf837f27",
-  "source_ref": "7c7d3fbd1a411eeaaa1547db2cea9a231a1d87e4",
+  "catalog_ref": "76e0b462119b4e19b388cc46a6d5a004043a8357",
+  "source_ref": "8f303f488460ddf11483113203eb0c3dee93a2f8",
   "source_reviews": {
     "src/bioetl/application/services/target_runtime/classification.py": "RF-002 (#13310/#13360): record matching_policy_version in Target Classification observation facts. No new filesystem/network/process acquisition.",
     "src/bioetl/composition/bootstrap/assembly/storage.py": "RF-002 (#13310/#13360): wire matching_policy_version into evidence store and run state. No new acquisition sites.",
