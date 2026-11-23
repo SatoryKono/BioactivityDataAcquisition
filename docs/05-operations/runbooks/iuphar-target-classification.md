@@ -1,6 +1,6 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
@@ -9,7 +9,7 @@ Reviewers:
 - BioETL Team
   Priority: P2
   Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-  Last verified: '2026-11-16'
+  Last verified: '2026-11-23'
 
 ______________________________________________________________________
 
@@ -75,13 +75,121 @@ The registry's current identity remains 3.0.0. Publishing the
 [V31 contract](../../04-reference/contracts/gold/chembl_target_v3.1.json) does
 not promote production or enable generic dual writing.
 
+## Delivery boundaries
+
+These boundaries match the wired code. A green local test, a shadow
+configuration, and an enrich configuration are different outcomes. An enrich
+configuration plus an isolated run does not migrate the canonical V30 tables.
+Promotion is only the migration procedure below.
+
+### Base `chembl_target` and a composite target
+
+Classification runs inside the `chembl_target` transformer, on the business
+projection that transformer builds from the ChEMBL target record: `target_id`,
+`target_type`, `taxonomy_id`, `organism`, `pref_name`, component accessions,
+UniProt cross-references, EC numbers, and protein/gene synonyms. `shadow`
+returns that business row unchanged. `enrich` merges the nine projection
+fields into it. `"off"` does not bind a classifier.
+
+The step does not run again after composite dependency joins. A composite
+target record can hold fields this projection never sees. The kernel reads
+`gene_symbol` and `gene_id` only when they are already on the business row.
+The `chembl_target` extractor does not set them, and it does not supply
+`keywords`, `predicted_l1`, or `predicted_l2`.
+
+The kernel UniProt channel is the ordered union of `component_accessions` and
+`target_xref_uniprot_ids`. Those two sources are not separate match channels.
+
+`chembl_target_protein_classification` is a different pipeline. It is not this
+IUPHAR classifier. Workflows that write the same Silver/Gold target tables
+still share the one `chembl_target` configuration.
+
+### Stage signs and statuses
+
+Eligibility stops before classification. The reasons are
+`unsupported_target_type` (any type other than `SINGLE PROTEIN`),
+`invalid_taxonomy_id`, `unsupported_taxon`,
+`missing_taxonomy_for_known_organism`, and `taxonomy_name_conflict`. Those
+rows are `not_applicable` and do not receive a direct class.
+
+Match status is `matched`, `ambiguous`, `not_found`, `source_unavailable`,
+`insufficient_input`, `identity_conflict`, or `contract_error`.
+
+Annotation status is `available`, `partial`, `unmapped_type`, `conflicting`,
+or `not_available`. A `partial` annotation can still carry a coarse direct
+class. Local inference does not fill `iuphar_class`.
+
+The wired local policy publishes EC, L1/L2, and free-text rules. Class support
+from EC is attached only for rules whose family is `ec_class` and whose input
+condition is `ec_category=<n>`. The standard EC rules use family `ec`, so they
+do not supply `local_class`. Keyword support requires family `annotation` and
+an exact `keyword_id=` condition; the standard policy has no such rule. Free
+text, including the substrings kinase, channel, and zinc finger, stays a
+manual-review candidate. L1/L2 values on a kernel row are passed with unknown
+provenance, so they stay candidates and do not assign `local_class`.
+
+Local status from the wired assembler is `supported`, `not_supported`, or
+`conflicting`. The decision table also accepts `candidate_only`.
+
+Decision status is `resolved` or `requires_review`. `contract_error` is a
+conflict code, not a third decision status.
+
+Batch status is `empty`, `rejected`, or `processed`.
+
+An acceptance receipt status is `PASS`, `FAIL`, or `BLOCKED_INPUT`. A check
+that did not run stays `NOT_RUN`. `PASS` qualifies only the supplied scope.
+`biological_accuracy_accepted` stays false. A V2 receipt records
+`scientific_status: bounded_reference_cases_only`.
+
+Stage-5 comparison with M is measured only when the stage-0 reference contains
+M rows. An empty M set returns `measured: false` and does not invent counts.
+That comparison is not biological acceptance. Policy gold cases remain
+unconfirmed.
+
+### Snapshot, export, and API key
+
+New snapshots use `gtopdb_target_species_payload_v2` and
+`annotation_capability: family_only`. The builder does not invent a direct
+target type. `admission_complete: true` with `complete: false` is a bounded
+snapshot: targets outside the reviewed scope stay `source_unavailable`, not
+negative matches.
+
+Hierarchy paths and subclass fields stay on the kernel result and in evidence
+`classification.json`. The nine V31 business columns do not carry them.
+Standard table export, including XLSX, writes the persisted table columns. It
+does not reconstruct kernel paths that were not stored on the row. An enrich
+table is required before those nine columns exist to export.
+
+Shadow, enrich, acceptance, and migration read a pinned local snapshot.
+Cohort export reads a frozen normalized ChEMBL target Silver file and does
+not require that snapshot. None of these steps call the Guide to Pharmacology
+API or require `GTP-API-Key`. The optional HTTP adapter omits that header when no key is
+configured. The stage-1 policy records `api_key_required` as a documentary
+note; it does not block stages 0–3. Do not add a key to the repository or to
+an `.env` file for this procedure.
+
+### Separated verification files
+
+`iuphar-target-acceptance` writes `acceptance.json` and three siblings. Each
+file is created only when that name is absent. A later run uses a new output
+directory. None of the three copies another file's status:
+
+| File | Contents |
+| --- | --- |
+| `classification-verification.json` | Stage-0 admission, reference cases, evidence integrity, and semantic determinism, with the run, profile, and snapshot bindings |
+| `m-parity-report.json` | Stage-5 comparison with M. This command supplies no M rows, so `measured` stays false |
+| `proof-verification.json` | Pipeline-integration status and proof/report digests. `ci.status` stays `NOT_RUN` unless a separate CI receipt names the head SHA. A local exit code is not that receipt |
+
+Exit 0 still means the acceptance receipt status is `PASS`. It does not mean
+CI ran, and it does not mean biological accuracy was accepted.
+
 ## Preconditions
 
 - Work from the repository root using the native Windows interpreter
   `.\.venv-win\Scripts\python.exe`, or the prepared local interpreter on other
   platforms. The commands below use PowerShell.
 - Preserve existing data, configuration, reports, and evidence. Leave `.env`
-  files unchanged throughout this procedure.
+  files unchanged throughout this procedure. No API key is required.
 - Keep the existing target eligibility filters. This integration does not
   expand the pipeline to protein complexes or change baseline cohort selection.
 - For preparation, promotion, or rollback, stop and quiesce all writers listed above and
@@ -230,6 +338,7 @@ finalization and completes the run manifest after data writes finish.
 Check evidence IDs against their referenced records and frozen payload hashes.
 Keep run/batch clocks and evidence paths outside business content hashing.
 V31 hashes include the nine columns above; V30 hash scope remains unchanged.
+Subclass lists and hierarchy paths are not part of those nine columns.
 
 ### Freeze a canonical cohort and its evidence
 
@@ -512,6 +621,13 @@ error. Keep the maintenance window open through verification.
 - Confirm the selected configuration, contract version, actual schema hash,
   normalization identity, and profile digest in the effective configuration
   and [run manifest](run-manifest-inspection.md).
+- Read `classification-verification.json`, `m-parity-report.json`, and
+  `proof-verification.json` separately. A `PASS` in one file does not change
+  the status stored in the others. `ci.status: NOT_RUN` means CI was not
+  recorded for that head. Do not relabel it as `PASS`.
+- Keep `biological_accuracy_accepted: false` until a reviewed biological
+  receipt says otherwise. Engineering checks, M comparison, and pipeline proof
+  do not grant that receipt.
 - For shadow, verify unchanged V30 rows/hash scope plus complete separate
   evidence. For enrich, verify V31 on both tables, coherent profile values,
   completed evidence, full cohort preservation, and baseline FK closure.

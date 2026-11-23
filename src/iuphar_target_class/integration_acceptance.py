@@ -420,11 +420,19 @@ def _verify_batch_outputs(
     checks: dict[str, str],
 ) -> Mapping[str, bytes]:
     """Verify reviewed outcomes, evidence and frozen permutation determinism."""
-    _check_cases(batch, spec, request.expected_labels.parent)
-    if spec["schema_version"] == 2:
-        validate_executed_reference_coverage(batch, spec)
+    try:
+        _check_cases(batch, spec, request.expected_labels.parent)
+        if spec["schema_version"] == 2:
+            validate_executed_reference_coverage(batch, spec)
+    except AssertionError:
+        checks["reference_cases"] = "FAIL"
+        raise
     checks["reference_cases"] = "PASS"
-    _check_evidence(batch)
+    try:
+        _check_evidence(batch)
+    except AssertionError:
+        checks["evidence_integrity"] = "FAIL"
+        raise
     checks["evidence_integrity"] = "PASS"
     rendered = render_batch(batch)
     repeated = classify_batch(
@@ -434,6 +442,7 @@ def _verify_batch_outputs(
         run_id=request.run_id,
     )
     if rendered != render_batch(repeated):
+        checks["semantic_determinism"] = "FAIL"
         raise AssertionError("frozen-provenance permutation determinism failed")
     checks["semantic_determinism"] = "PASS"
     return rendered
