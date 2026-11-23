@@ -42,6 +42,19 @@ AVAILABILITY_STATES: tuple[str, ...] = (
     "not_found",
 )
 OTHER_LABELS = frozenset({CANONICAL_OTHER, LEGACY_OTHER})
+_MISSING_CLASS_MARKERS = frozenset(marker.casefold() for marker in BASE_MISSING_MARKERS)
+
+
+def _class_or_none(value: str | None) -> str | None:
+    """Return a real class, or None for a missing-marker or blank value."""
+    if value is None:
+        return None
+    stripped = value.strip()
+    if stripped.casefold() in _MISSING_CLASS_MARKERS:
+        return None
+    return stripped
+
+
 _DICTIONARY_PREFIX = "iuphar_"
 _LOCAL_PREFIX = "local_"
 _EFFECTIVE_PREFIX = "effective_"
@@ -126,6 +139,10 @@ class BoundaryObservation:
             "absent",
         }:
             raise ValueError("local_status is outside the local vocabulary")
+        object.__setattr__(
+            self, "dictionary_class", _class_or_none(self.dictionary_class)
+        )
+        object.__setattr__(self, "local_class", _class_or_none(self.local_class))
         if self.local_status == "supported" and not self.local_class:
             raise ValueError("supported local requires local_class")
 
@@ -721,12 +738,19 @@ def _confirmed_not_found(observation: BoundaryObservation) -> BoundaryDecision |
 def _other_label(observation: BoundaryObservation) -> str | None:
     if observation.assigned_label in OTHER_LABELS:
         return observation.assigned_label
+    if observation.dictionary_class in OTHER_LABELS:
+        return observation.dictionary_class
     return None
 
 
 def _other_decision(observation: BoundaryObservation) -> BoundaryDecision | None:
     label = _other_label(observation)
     if label is None:
+        return None
+    resolving = observation.approved_other_mapping and not (
+        label == LEGACY_OTHER and not observation.legacy_field
+    )
+    if observation.uncertainty is not None and resolving:
         return None
     if not observation.approved_other_mapping or (
         label == LEGACY_OTHER and not observation.legacy_field
@@ -832,6 +856,8 @@ def _dictionary_or_null(
     codes: tuple[str, ...],
 ) -> BoundaryDecision:
     dictionary_class = observation.dictionary_class
+    if dictionary_class in OTHER_LABELS:
+        dictionary_class = None
     return _decision(
         observation,
         rule_id=rule_id,

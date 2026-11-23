@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 from pathlib import Path
 
@@ -11,6 +12,7 @@ import yaml
 
 from bioetl.domain.config.target_classification import TARGET_CLASSIFICATION_FIELDS
 from iuphar_target_class.baseline_manifest import (
+    BASELINE_REVISION,
     INCOMPLETE_HISTORY,
     MANIFEST_RELATIVE_PATH,
     build_baseline_manifest,
@@ -217,13 +219,32 @@ def test_partial_and_conflict_keep_a_dictionary_fact_apart_from_local() -> None:
     assert conflict.effective_class == "Ion Channel"
 
 
+def _baseline_file(relative: str) -> str | None:
+    commit = subprocess.run(
+        ["git", "cat-file", "-e", f"{BASELINE_REVISION}^{{commit}}"],
+        cwd=ROOT,
+        capture_output=True,
+        check=False,
+    )
+    if commit.returncode != 0:
+        return None
+    blob = subprocess.run(
+        ["git", "cat-file", "blob", f"{BASELINE_REVISION}:{relative}"],
+        cwd=ROOT,
+        capture_output=True,
+        check=False,
+    )
+    assert blob.returncode == 0, relative
+    return blob.stdout.decode("utf-8")
+
+
 def test_committed_configs_match_the_baseline_claim() -> None:
-    entity = yaml.safe_load(
-        (ROOT / "configs/entities/chembl/target.yaml").read_text(encoding="utf-8")
-    )
-    composite = yaml.safe_load(
-        (ROOT / "configs/composites/target.yaml").read_text(encoding="utf-8")
-    )
+    entity_text = _baseline_file("configs/entities/chembl/target.yaml")
+    composite_text = _baseline_file("configs/composites/target.yaml")
+    if entity_text is None or composite_text is None:
+        pytest.skip(INCOMPLETE_HISTORY)
+    entity = yaml.safe_load(entity_text)
+    composite = yaml.safe_load(composite_text)
     classification = entity["pipeline"]["target_classification"]
     assert classification["mode"] == COMMITTED_ENTITY_MODE
     assert entity["contracts"]["active_version"] == COMMITTED_ENTITY_CONTRACT
@@ -357,6 +378,11 @@ def _git(repo: Path, *args: str) -> str:
         check=True,
         capture_output=True,
         text=True,
+        env={
+            **os.environ,
+            "GIT_CONFIG_NOSYSTEM": "1",
+            "GIT_CONFIG_GLOBAL": os.devnull,
+        },
     )
     return completed.stdout.strip()
 
@@ -366,6 +392,7 @@ def _init_repo(repo: Path) -> None:
     _git(repo, "init")
     _git(repo, "config", "user.email", "rf001@example.com")
     _git(repo, "config", "user.name", "RF-001")
+    _git(repo, "config", "commit.gpgsign", "false")
 
 
 def test_missing_revision_is_one_incomplete_history_problem(tmp_path: Path) -> None:
@@ -442,6 +469,112 @@ def test_later_file_bytes_do_not_fail_historical_verification(tmp_path: Path) ->
         ],
     )
     assert problems == ()
+
+
+def test_tree_path_is_unreadable_rather_than_absent(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    _init_repo(repo)
+    folder = repo / "nested"
+    folder.mkdir()
+    (folder / "kept.py").write_text("kept\n", encoding="utf-8")
+    _git(repo, "add", "nested/kept.py")
+    _git(repo, "commit", "-m", "baseline")
+    revision = _git(repo, "rev-parse", "HEAD")
+    problems = historical_blob_problems(
+        repo,
+        revision,
+        [
+            {
+                "availability": "present",
+                "baseline_sha256": None,
+                "material_id": "classifier_source",
+                "path": "nested",
+            }
+        ],
+    )
+    assert problems == ("classifier_source baseline blob is unreadable",)
+
+
+def test_blank_classes_do_not_become_dictionary_or_local_facts() -> None:
+    with pytest.raises(ValueError, match="supported local"):
+        BoundaryObservation(
+            case_id="blank-local",
+            local_class="  ",
+            local_status="supported",
+        )
+    empty = decide(BoundaryObservation(case_id="empty-dictionary", dictionary_class=""))
+    assert empty.rule_id == "unknown"
+    assert empty.iuphar_class is None
+    unmarked = decide(
+        BoundaryObservation(
+            case_id="dictionary-other",
+            dictionary_class=CANONICAL_OTHER,
+        )
+    )
+    assert unmarked.rule_id == "false_other"
+    assert unmarked.effective_class is None
+    ambiguous = decide(
+        BoundaryObservation(
+            case_id="legacy-ambiguous",
+            assigned_label=LEGACY_OTHER,
+            approved_other_mapping=True,
+            legacy_field=True,
+            uncertainty="ambiguous",
+        )
+    )
+    assert ambiguous.rule_id == "ambiguous_match"
+    assert ambiguous.effective_class is None
+    enzyme = decide(
+        BoundaryObservation(
+            case_id="enzyme",
+            source_state="not_found",
+            local_class="Enzyme",
+            local_status="supported",
+        )
+    )
+    assert enzyme.effective_class == "Enzyme"
+    assert enzyme.iuphar_class is None
+
+
+def test_manifest_rejects_non_hex_hashes_and_non_string_roles() -> None:
+    document = json.loads((ROOT / MANIFEST_RELATIVE_PATH).read_text(encoding="utf-8"))
+    by_id = {row["material_id"]: row for row in document["materials"]}
+    by_id["manifest_source"]["worktree_sha256"] = "z" * 64
+    letters = verify_baseline_manifest(ROOT, document)
+    assert "manifest_source hash shape mismatch" in letters
+    by_id["manifest_source"]["worktree_sha256"] = "1" * 64
+    digits = verify_baseline_manifest(ROOT, document)
+    assert "manifest_source hash shape mismatch" not in digits
+    by_id["control_target"]["role"] = ["control_input"]
+    roles = verify_baseline_manifest(ROOT, document)
+    assert "control_target role is not a string" in roles
+
+
+def test_release_header_matches_the_pinned_source() -> None:
+    document = json.loads((ROOT / MANIFEST_RELATIVE_PATH).read_text(encoding="utf-8"))
+    document["iuphar_release"]["archive_sha256"] = "ab" * 32
+    problems = verify_baseline_manifest(ROOT, document)
+    if INCOMPLETE_HISTORY in problems:
+        pytest.skip(INCOMPLETE_HISTORY)
+    assert "IUPHAR archive_sha256 does not match the baseline revision" in problems
+
+
+def test_embedded_semantics_must_carry_the_decision_contract() -> None:
+    document = json.loads((ROOT / MANIFEST_RELATIVE_PATH).read_text(encoding="utf-8"))
+    embedded = {
+        "artifact": "iuphar_rf001_baseline_semantics",
+        "baseline_id": document["semantics"]["baseline_id"],
+        "configuration": document["semantics"]["configuration"],
+        "snapshot_annotation_capability": document["semantics"][
+            "snapshot_annotation_capability"
+        ],
+    }
+    document["semantics"] = embedded
+    document["semantics_sha256"] = sha256_bytes(canonical_json_bytes(embedded))
+    problems = verify_baseline_manifest(ROOT, document)
+    assert "semantics decision table is missing" in problems
+    assert "semantics field dictionary is missing" in problems
+    assert "semantics hash mismatch" not in problems
 
 
 def test_rebuild_refuses_when_the_revision_object_is_missing(

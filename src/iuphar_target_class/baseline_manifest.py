@@ -35,6 +35,7 @@ BASELINE_REVISION = (
 )
 INCOMPLETE_HISTORY = "baseline revision is not in this checkout"
 _SHA256_WIDTH = 64
+_SHA256_TEXT = re.compile(rf"[0-9a-f]{{{_SHA256_WIDTH}}}")
 _REVISION_PATTERN = r"[0-9a-f]{40}"
 
 _M_NOTE = (
@@ -280,6 +281,9 @@ def verify_baseline_manifest(
     revision = document.get("baseline_revision")
     if isinstance(revision, str):
         problems.extend(historical_blob_problems(root, revision, present))
+        problems.extend(
+            historical_release_problems(root, revision, document.get("iuphar_release"))
+        )
     else:
         problems.append(INCOMPLETE_HISTORY)
     return tuple(problems)
@@ -362,7 +366,12 @@ def historical_blob_problems(
         if not isinstance(path, str):
             problems.append(f"{material_id} path is missing")
             continue
-        if row.get("baseline_sha256") != _blob_sha256(root, revision, path):
+        try:
+            actual = _blob_sha256(root, revision, path)
+        except BaselineBlobError:
+            problems.append(f"{material_id} baseline blob is unreadable")
+            continue
+        if row.get("baseline_sha256") != actual:
             problems.append(f"{material_id} baseline hash mismatch")
     return tuple(problems)
 
@@ -379,7 +388,12 @@ def _commit_available(root: Path, revision: str) -> bool:
     return probe.returncode == 0
 
 
-def _blob_sha256(root: Path, revision: str, path: str) -> str | None:
+class BaselineBlobError(RuntimeError):
+    """The revision contains the path, but that object is not a readable blob."""
+
+
+def _read_blob(root: Path, revision: str, path: str) -> bytes | None:
+    """Return blob bytes, or None when the path is absent from the revision."""
     probe = subprocess.run(
         ["git", "cat-file", "-e", f"{revision}:{path}"],
         cwd=root,
@@ -395,8 +409,15 @@ def _blob_sha256(root: Path, revision: str, path: str) -> str | None:
         check=False,
     )
     if blob.returncode != 0:
+        raise BaselineBlobError(f"{revision}:{path}")
+    return blob.stdout
+
+
+def _blob_sha256(root: Path, revision: str, path: str) -> str | None:
+    payload = _read_blob(root, revision, path)
+    if payload is None:
         return None
-    return sha256_bytes(blob.stdout)
+    return sha256_bytes(payload)
 
 
 _HEADER_CHECKS: tuple[tuple[str, object, str], ...] = (
@@ -431,6 +452,18 @@ def _check_embedded_semantics(
     digest = sha256_bytes(canonical_json_bytes(embedded))
     if document.get("semantics_sha256") != digest:
         problems.append("semantics hash mismatch")
+    if embedded.get("artifact") != "iuphar_rf001_baseline_semantics":
+        problems.append("semantics artifact mismatch")
+    if embedded.get("baseline_id") != BASELINE_ID:
+        problems.append("semantics baseline id mismatch")
+    if not isinstance(embedded.get("decision_table"), list) or not embedded.get(
+        "decision_table"
+    ):
+        problems.append("semantics decision table is missing")
+    if not isinstance(embedded.get("field_dictionary"), list) or not embedded.get(
+        "field_dictionary"
+    ):
+        problems.append("semantics field dictionary is missing")
     if document.get("configuration") != embedded.get("configuration"):
         problems.append("configuration claim mismatch")
 
@@ -450,12 +483,44 @@ def _check_release(release: object, embedded: object, problems: list[str]) -> No
         problems.append("snapshot capability mismatch")
 
 
+_RELEASE_SOURCE = "src/iuphar_target_class/gtopdb_2026_3_1.py"
+_RELEASE_PIN = re.compile(
+    r'^(RELEASE|ARCHIVE_SHA256|SQL_SHA256|TARGETS_CSV_SHA256) = "([^"]*)"',
+    re.MULTILINE,
+)
+_RELEASE_FIELDS = (
+    ("release", "RELEASE"),
+    ("archive_sha256", "ARCHIVE_SHA256"),
+    ("sql_sha256", "SQL_SHA256"),
+    ("targets_csv_sha256", "TARGETS_CSV_SHA256"),
+)
+
+
 def _check_release_pins(release: dict[str, object], problems: list[str]) -> None:
     for key in ("archive_sha256", "sql_sha256", "targets_csv_sha256"):
-        value = release.get(key)
-        if isinstance(value, str) and len(value) == _SHA256_WIDTH:
+        if _sha256_text(release.get(key)):
             continue
         problems.append(f"IUPHAR {key} shape mismatch")
+
+
+def historical_release_problems(
+    root: Path, revision: str, release: object
+) -> tuple[str, ...]:
+    """Compare the recorded release header with the pinned revision's source."""
+    if not isinstance(release, dict) or not _commit_available(root, revision):
+        return ()
+    try:
+        payload = _read_blob(root, revision, _RELEASE_SOURCE)
+    except BaselineBlobError:
+        return ("IUPHAR release source is unreadable",)
+    if payload is None:
+        return ("IUPHAR release source is absent from the baseline revision",)
+    pins = dict(_RELEASE_PIN.findall(payload.decode("utf-8")))
+    problems: list[str] = []
+    for field, name in _RELEASE_FIELDS:
+        if release.get(field) != pins.get(name):
+            problems.append(f"IUPHAR {field} does not match the baseline revision")
+    return tuple(problems)
 
 
 def _check_material_set(materials: list[object], problems: list[str]) -> None:
@@ -463,7 +528,15 @@ def _check_material_set(materials: list[object], problems: list[str]) -> None:
     found = [row.get("material_id") for row in materials if isinstance(row, dict)]
     if found != expected:
         problems.append("material id set mismatch")
-    roles = {row.get("role") for row in materials if isinstance(row, dict)}
+    roles: set[str] = set()
+    for row in materials:
+        if not isinstance(row, dict):
+            continue
+        role = row.get("role")
+        if not isinstance(role, str):
+            problems.append(f"{row.get('material_id')} role is not a string")
+            continue
+        roles.add(role)
     required = {spec.role for spec in MATERIAL_SPECS}
     if roles != required:
         problems.append("material role set mismatch")
@@ -551,10 +624,14 @@ def _delta_matches(delta: object, baseline: object, worktree: object) -> bool:
     return False
 
 
+def _sha256_text(value: object) -> bool:
+    return isinstance(value, str) and _SHA256_TEXT.fullmatch(value) is not None
+
+
 def _sha256_or_none(value: object) -> bool:
     if value is None:
         return True
-    return isinstance(value, str) and len(value) == _SHA256_WIDTH and value.islower()
+    return _sha256_text(value)
 
 
 __all__ = [
@@ -565,6 +642,7 @@ __all__ = [
     "MaterialSpec",
     "build_baseline_manifest",
     "historical_blob_problems",
+    "historical_release_problems",
     "verify_baseline_manifest",
     "write_baseline_manifest",
 ]
