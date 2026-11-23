@@ -1,0 +1,1034 @@
+{
+  "artifact": "bioetl_iuphar_rf008_independent_expectations",
+  "biological_accuracy_accepted": false,
+  "built_from_classifier_output": false,
+  "cases": [
+    {
+      "case_id": "cmp-explained-direct-class",
+      "category": "comparison_evidence",
+      "claim": "engineering_rule",
+      "evidence": {
+        "source": "a direct-class change is kept only with a sign and an explanation"
+      },
+      "executor": "comparison",
+      "expected": {
+        "change_count": 1,
+        "residual_count": 0
+      },
+      "fixture": {
+        "m_rows": [
+          {
+            "input_row_id": "1",
+            "legacy_iuphar_class": "Receptor"
+          }
+        ],
+        "python_rows": [
+          {
+            "change_sign": "dictionary_change",
+            "explanation": "dictionary record, not a classifier label",
+            "input_row_id": "1",
+            "iuphar_class": "Enzyme"
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "cmp-unexplained-direct-class",
+      "category": "comparison_evidence",
+      "claim": "engineering_rule",
+      "evidence": {
+        "source": "a direct-class change without evidence stays residual"
+      },
+      "executor": "comparison",
+      "expected": {
+        "change_count": 0,
+        "residual_count": 1
+      },
+      "fixture": {
+        "m_rows": [
+          {
+            "input_row_id": "1",
+            "legacy_iuphar_class": "Receptor"
+          }
+        ],
+        "python_rows": [
+          {
+            "input_row_id": "1",
+            "iuphar_class": "Enzyme"
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "direct-type-catalytic_receptor",
+      "category": "direct_type",
+      "claim": "dictionary_class",
+      "evidence": {
+        "record": [
+          "catalytic_receptor",
+          "Receptor"
+        ],
+        "source": "gtopdb_2026_3_1.TYPE_CLASS_PAIRS"
+      },
+      "executor": "approved_hierarchy",
+      "expected": {
+        "annotation_status": "available",
+        "iuphar_class": "Receptor",
+        "root_to_leaf_paths": [
+          [
+            "688",
+            "862",
+            "301",
+            "305"
+          ]
+        ]
+      },
+      "fixture": {
+        "family_ids": [
+          "305"
+        ],
+        "release": "2026.3.1",
+        "type_name": "catalytic_receptor"
+      }
+    },
+    {
+      "case_id": "direct-type-enzyme",
+      "category": "direct_type",
+      "claim": "dictionary_class",
+      "evidence": {
+        "record": [
+          "enzyme",
+          "Enzyme"
+        ],
+        "source": "gtopdb_2026_3_1.TYPE_CLASS_PAIRS"
+      },
+      "executor": "approved_hierarchy",
+      "expected": {
+        "annotation_status": "available",
+        "iuphar_class": "Enzyme",
+        "root_to_leaf_paths": [
+          [
+            "690",
+            "104"
+          ]
+        ]
+      },
+      "fixture": {
+        "family_ids": [
+          "104"
+        ],
+        "release": "2026.3.1",
+        "type_name": "enzyme"
+      }
+    },
+    {
+      "case_id": "direct-type-gpcr",
+      "category": "direct_type",
+      "claim": "dictionary_class",
+      "evidence": {
+        "record": [
+          "gpcr",
+          "Receptor"
+        ],
+        "source": "gtopdb_2026_3_1.TYPE_CLASS_PAIRS"
+      },
+      "executor": "approved_hierarchy",
+      "expected": {
+        "annotation_status": "available",
+        "iuphar_class": "Receptor",
+        "root_to_leaf_paths": [
+          [
+            "688",
+            "694",
+            "1"
+          ]
+        ]
+      },
+      "fixture": {
+        "family_ids": [
+          "1"
+        ],
+        "release": "2026.3.1",
+        "type_name": "gpcr"
+      }
+    },
+    {
+      "case_id": "direct-type-lgic",
+      "category": "direct_type",
+      "claim": "dictionary_class",
+      "evidence": {
+        "record": [
+          "lgic",
+          "Ion Channel"
+        ],
+        "source": "gtopdb_2026_3_1.TYPE_CLASS_PAIRS"
+      },
+      "executor": "approved_hierarchy",
+      "expected": {
+        "annotation_status": "available",
+        "iuphar_class": "Ion Channel",
+        "root_to_leaf_paths": [
+          [
+            "689",
+            "697",
+            "68"
+          ]
+        ]
+      },
+      "fixture": {
+        "family_ids": [
+          "68"
+        ],
+        "release": "2026.3.1",
+        "type_name": "lgic"
+      }
+    },
+    {
+      "case_id": "direct-type-nhr",
+      "category": "direct_type",
+      "claim": "dictionary_class",
+      "evidence": {
+        "record": [
+          "nhr",
+          "Receptor"
+        ],
+        "source": "gtopdb_2026_3_1.TYPE_CLASS_PAIRS"
+      },
+      "executor": "approved_hierarchy",
+      "expected": {
+        "annotation_status": "available",
+        "iuphar_class": "Receptor",
+        "root_to_leaf_paths": [
+          [
+            "688",
+            "695",
+            "84"
+          ]
+        ]
+      },
+      "fixture": {
+        "family_ids": [
+          "84"
+        ],
+        "release": "2026.3.1",
+        "type_name": "nhr"
+      }
+    },
+    {
+      "case_id": "direct-type-other_ic",
+      "category": "direct_type",
+      "claim": "dictionary_class",
+      "evidence": {
+        "record": [
+          "other_ic",
+          "Ion Channel"
+        ],
+        "source": "gtopdb_2026_3_1.TYPE_CLASS_PAIRS"
+      },
+      "executor": "approved_hierarchy",
+      "expected": {
+        "annotation_status": "available",
+        "iuphar_class": "Ion Channel",
+        "root_to_leaf_paths": [
+          [
+            "689",
+            "861",
+            "119"
+          ]
+        ]
+      },
+      "fixture": {
+        "family_ids": [
+          "119"
+        ],
+        "release": "2026.3.1",
+        "type_name": "other_ic"
+      }
+    },
+    {
+      "case_id": "direct-type-other_protein",
+      "category": "direct_type",
+      "claim": "dictionary_class",
+      "evidence": {
+        "record": [
+          "other_protein",
+          "Other Protein Target"
+        ],
+        "source": "gtopdb_2026_3_1.TYPE_CLASS_PAIRS"
+      },
+      "executor": "approved_hierarchy",
+      "expected": {
+        "annotation_status": "available",
+        "iuphar_class": "Other Protein Target",
+        "root_to_leaf_paths": [
+          [
+            "864",
+            "106"
+          ]
+        ]
+      },
+      "fixture": {
+        "family_ids": [
+          "106"
+        ],
+        "release": "2026.3.1",
+        "type_name": "other_protein"
+      }
+    },
+    {
+      "case_id": "direct-type-transporter",
+      "category": "direct_type",
+      "claim": "dictionary_class",
+      "evidence": {
+        "record": [
+          "transporter",
+          "Transporter"
+        ],
+        "source": "gtopdb_2026_3_1.TYPE_CLASS_PAIRS"
+      },
+      "executor": "approved_hierarchy",
+      "expected": {
+        "annotation_status": "available",
+        "iuphar_class": "Transporter",
+        "root_to_leaf_paths": [
+          [
+            "691",
+            "136",
+            "151"
+          ]
+        ]
+      },
+      "fixture": {
+        "family_ids": [
+          "151"
+        ],
+        "release": "2026.3.1",
+        "type_name": "transporter"
+      }
+    },
+    {
+      "case_id": "direct-type-vgic",
+      "category": "direct_type",
+      "claim": "dictionary_class",
+      "evidence": {
+        "record": [
+          "vgic",
+          "Ion Channel"
+        ],
+        "source": "gtopdb_2026_3_1.TYPE_CLASS_PAIRS"
+      },
+      "executor": "approved_hierarchy",
+      "expected": {
+        "annotation_status": "available",
+        "iuphar_class": "Ion Channel",
+        "root_to_leaf_paths": [
+          [
+            "689",
+            "696",
+            "133",
+            "69"
+          ]
+        ]
+      },
+      "fixture": {
+        "family_ids": [
+          "69"
+        ],
+        "release": "2026.3.1",
+        "type_name": "vgic"
+      }
+    },
+    {
+      "case_id": "graph-cycle",
+      "category": "cycle",
+      "claim": "engineering_rule",
+      "evidence": {
+        "source": "graph policy: a cycle does not yield a class from a cut path"
+      },
+      "executor": "synthetic_hierarchy",
+      "expected": {
+        "annotation_status": "not_available",
+        "iuphar_class": null,
+        "paths_empty": true
+      },
+      "fixture": {
+        "family_ids": [
+          "a"
+        ],
+        "nodes": [
+          {
+            "family_id": "a",
+            "parent_ids": [
+              "b"
+            ],
+            "payload": "a"
+          },
+          {
+            "family_id": "b",
+            "parent_ids": [
+              "a"
+            ],
+            "payload": "b"
+          }
+        ],
+        "type_name": null
+      }
+    },
+    {
+      "case_id": "graph-grouping-unmapped",
+      "category": "direct_type",
+      "claim": "dictionary_class",
+      "evidence": {
+        "family_id": 16,
+        "source": "FAMILY_ROWS grouping is excluded from the class map"
+      },
+      "executor": "approved_hierarchy",
+      "expected": {
+        "annotation_status": "unmapped_type",
+        "iuphar_class": null,
+        "root_to_leaf_paths": [
+          [
+            "688",
+            "694",
+            "16"
+          ]
+        ]
+      },
+      "fixture": {
+        "family_ids": [
+          "16"
+        ],
+        "release": "2026.3.1",
+        "type_name": "grouping"
+      }
+    },
+    {
+      "case_id": "graph-missing-node",
+      "category": "missing_node",
+      "claim": "engineering_rule",
+      "evidence": {
+        "source": "graph policy: a missing parent does not invent a family class"
+      },
+      "executor": "synthetic_hierarchy",
+      "expected": {
+        "annotation_status": "not_available",
+        "iuphar_class": null,
+        "paths_empty": true
+      },
+      "fixture": {
+        "family_ids": [
+          "leaf"
+        ],
+        "nodes": [
+          {
+            "family_id": "leaf",
+            "parent_ids": [
+              "gone"
+            ],
+            "payload": "leaf"
+          }
+        ],
+        "type_name": null
+      }
+    },
+    {
+      "case_id": "graph-multi-parent",
+      "category": "multi_parent",
+      "claim": "dictionary_class",
+      "evidence": {
+        "family_id": 254,
+        "parents": [
+          239,
+          865
+        ],
+        "source": "FAMILY_ROWS immediate parents",
+        "type_class": "Enzyme"
+      },
+      "executor": "approved_hierarchy",
+      "expected": {
+        "annotation_status": "available",
+        "branch_count": 2,
+        "iuphar_class": "Enzyme",
+        "root_to_leaf_paths": [
+          [
+            "690",
+            "239",
+            "254"
+          ],
+          [
+            "690",
+            "865",
+            "254"
+          ]
+        ]
+      },
+      "fixture": {
+        "family_ids": [
+          "254"
+        ],
+        "release": "2026.3.1",
+        "type_name": "enzyme"
+      }
+    },
+    {
+      "case_id": "graph-partial-family",
+      "category": "partial_source",
+      "claim": "dictionary_class",
+      "evidence": {
+        "family_id": 1,
+        "source": "FAMILY_ROWS gpcr without a direct type; family_only snapshot",
+        "type_class": "Receptor"
+      },
+      "executor": "approved_hierarchy",
+      "expected": {
+        "annotation_status": "partial",
+        "iuphar_class": "Receptor",
+        "root_to_leaf_paths": [
+          [
+            "688",
+            "694",
+            "1"
+          ]
+        ]
+      },
+      "fixture": {
+        "family_ids": [
+          "1"
+        ],
+        "release": "2026.3.1",
+        "type_name": null
+      }
+    },
+    {
+      "case_id": "local-ec-1",
+      "category": "ec_category",
+      "claim": "dictionary_class",
+      "evidence": {
+        "number": 1,
+        "source": "IUBMB EC class via policy.EC_CATEGORIES"
+      },
+      "executor": "local_ec",
+      "expected": {
+        "direct_layer_rule_ids": [],
+        "ec_categories": [
+          "Oxidoreductases"
+        ],
+        "local_class": null,
+        "not_an_iuphar_class": true,
+        "rule_family": "ec",
+        "rule_marks_direct_layer": false,
+        "rule_output": "Oxidoreductases"
+      },
+      "fixture": {
+        "ec": "1.-.-.-"
+      }
+    },
+    {
+      "case_id": "local-ec-2",
+      "category": "ec_category",
+      "claim": "dictionary_class",
+      "evidence": {
+        "number": 2,
+        "source": "IUBMB EC class via policy.EC_CATEGORIES"
+      },
+      "executor": "local_ec",
+      "expected": {
+        "direct_layer_rule_ids": [],
+        "ec_categories": [
+          "Transferases"
+        ],
+        "local_class": null,
+        "not_an_iuphar_class": true,
+        "rule_family": "ec",
+        "rule_marks_direct_layer": false,
+        "rule_output": "Transferases"
+      },
+      "fixture": {
+        "ec": "2.-.-.-"
+      }
+    },
+    {
+      "case_id": "local-ec-3",
+      "category": "ec_category",
+      "claim": "dictionary_class",
+      "evidence": {
+        "number": 3,
+        "source": "IUBMB EC class via policy.EC_CATEGORIES"
+      },
+      "executor": "local_ec",
+      "expected": {
+        "direct_layer_rule_ids": [],
+        "ec_categories": [
+          "Hydrolases"
+        ],
+        "local_class": null,
+        "not_an_iuphar_class": true,
+        "rule_family": "ec",
+        "rule_marks_direct_layer": false,
+        "rule_output": "Hydrolases"
+      },
+      "fixture": {
+        "ec": "3.-.-.-"
+      }
+    },
+    {
+      "case_id": "local-ec-4",
+      "category": "ec_category",
+      "claim": "dictionary_class",
+      "evidence": {
+        "number": 4,
+        "source": "IUBMB EC class via policy.EC_CATEGORIES"
+      },
+      "executor": "local_ec",
+      "expected": {
+        "direct_layer_rule_ids": [],
+        "ec_categories": [
+          "Lyases"
+        ],
+        "local_class": null,
+        "not_an_iuphar_class": true,
+        "rule_family": "ec",
+        "rule_marks_direct_layer": false,
+        "rule_output": "Lyases"
+      },
+      "fixture": {
+        "ec": "4.-.-.-"
+      }
+    },
+    {
+      "case_id": "local-ec-5",
+      "category": "ec_category",
+      "claim": "dictionary_class",
+      "evidence": {
+        "number": 5,
+        "source": "IUBMB EC class via policy.EC_CATEGORIES"
+      },
+      "executor": "local_ec",
+      "expected": {
+        "direct_layer_rule_ids": [],
+        "ec_categories": [
+          "Isomerases"
+        ],
+        "local_class": null,
+        "not_an_iuphar_class": true,
+        "rule_family": "ec",
+        "rule_marks_direct_layer": false,
+        "rule_output": "Isomerases"
+      },
+      "fixture": {
+        "ec": "5.-.-.-"
+      }
+    },
+    {
+      "case_id": "local-ec-6",
+      "category": "ec_category",
+      "claim": "dictionary_class",
+      "evidence": {
+        "number": 6,
+        "source": "IUBMB EC class via policy.EC_CATEGORIES"
+      },
+      "executor": "local_ec",
+      "expected": {
+        "direct_layer_rule_ids": [],
+        "ec_categories": [
+          "Ligases"
+        ],
+        "local_class": null,
+        "not_an_iuphar_class": true,
+        "rule_family": "ec",
+        "rule_marks_direct_layer": false,
+        "rule_output": "Ligases"
+      },
+      "fixture": {
+        "ec": "6.-.-.-"
+      }
+    },
+    {
+      "case_id": "local-ec-7",
+      "category": "ec_category",
+      "claim": "dictionary_class",
+      "evidence": {
+        "number": 7,
+        "source": "IUBMB EC class via policy.EC_CATEGORIES"
+      },
+      "executor": "local_ec",
+      "expected": {
+        "direct_layer_rule_ids": [],
+        "ec_categories": [
+          "Translocases"
+        ],
+        "local_class": null,
+        "not_an_iuphar_class": true,
+        "rule_family": "ec",
+        "rule_marks_direct_layer": false,
+        "rule_output": "Translocases"
+      },
+      "fixture": {
+        "ec": "7.-.-.-"
+      }
+    },
+    {
+      "case_id": "local-ec-multiple",
+      "category": "multiple_ec",
+      "claim": "dictionary_class",
+      "evidence": {
+        "source": "IUBMB classes 1 and 3; multiple categories are not one IUPHAR class"
+      },
+      "executor": "local_ec",
+      "expected": {
+        "direct_layer_rule_ids": [],
+        "ec_categories": [
+          "Oxidoreductases",
+          "Hydrolases"
+        ],
+        "local_class": null,
+        "multiple_ec_categories": true,
+        "not_an_iuphar_class": true,
+        "rule_marks_direct_layer": [
+          false,
+          false
+        ],
+        "rule_outputs": [
+          "Oxidoreductases",
+          "Hydrolases"
+        ]
+      },
+      "fixture": {
+        "ec": "1.-.-.-|3.-.-.-"
+      }
+    },
+    {
+      "case_id": "local-missing-markers",
+      "category": "missing_marker",
+      "claim": "engineering_rule",
+      "evidence": {
+        "markers": [
+          "#n/a",
+          "N/A",
+          "n/a",
+          "",
+          "   "
+        ],
+        "source": "policy BASE_MISSING_MARKERS; version remains unapproved"
+      },
+      "executor": "missing_marker",
+      "expected": {
+        "normalized": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "version": null,
+        "version_status": "не утверждено"
+      },
+      "fixture": {
+        "markers": [
+          "#n/a",
+          "N/A",
+          "n/a",
+          "",
+          "   "
+        ]
+      }
+    },
+    {
+      "case_id": "local-tf-broad",
+      "category": "broad_tf_tag",
+      "claim": "engineering_rule",
+      "evidence": {
+        "source": "WORKING_CLASSES has no transcription-factor class, and an unregistered keyword is not an exact local rule"
+      },
+      "executor": "local_text",
+      "expected": {
+        "free_text_marks_direct_layer": [
+          false
+        ],
+        "free_text_rule_ids": [
+          "free-text"
+        ],
+        "local_class": null,
+        "local_rule_ids": [],
+        "local_status": "not_supported"
+      },
+      "fixture": {
+        "free_text": "transcription factor kinase channel zinc finger",
+        "keyword_ids": [
+          "KW-BROAD-TF"
+        ]
+      }
+    },
+    {
+      "case_id": "match-auxiliary-projection",
+      "category": "auxiliary_anchor",
+      "claim": "engineering_rule",
+      "evidence": {
+        "source": "component_accessions is the primary accession; target_xref_uniprot_ids is auxiliary. RF-002."
+      },
+      "executor": "projection",
+      "expected": {
+        "auxiliary_uniprot": [
+          "Q99999"
+        ],
+        "primary_uniprot": [
+          "P35372"
+        ],
+        "uniprot": "P35372"
+      },
+      "fixture": {
+        "component_accessions": [
+          "P35372"
+        ],
+        "target_xref_uniprot_ids": [
+          "Q99999"
+        ],
+        "taxon": "9606"
+      },
+      "previous_policy": {
+        "uniprot": "P35372|Q99999"
+      }
+    },
+    {
+      "case_id": "match-auxiliary-unknown-xref",
+      "category": "auxiliary_anchor",
+      "claim": "engineering_rule",
+      "evidence": {
+        "source": "RF-002: an unknown auxiliary UniProt xref must not be a required object id. Issue #13310."
+      },
+      "executor": "match",
+      "expected": {
+        "match_status": "matched",
+        "matched_target_id": "primary"
+      },
+      "fixture": {
+        "catalog": [
+          {
+            "species": "human",
+            "target_id": "primary",
+            "uniprot": "P35372"
+          }
+        ],
+        "organism": "human",
+        "snapshot_complete": true,
+        "uniprot_ids": [
+          "P35372",
+          "Q99999"
+        ]
+      },
+      "previous_policy": {
+        "match_status": "ambiguous",
+        "matched_target_id": null
+      }
+    },
+    {
+      "case_id": "match-complete-absence",
+      "category": "partial_source",
+      "claim": "engineering_rule",
+      "evidence": {
+        "source": "a complete snapshot with no hit is not_found, not a class"
+      },
+      "executor": "match",
+      "expected": {
+        "match_status": "not_found",
+        "matched_target_id": null
+      },
+      "fixture": {
+        "catalog": [],
+        "snapshot_complete": true,
+        "target_id": "missing"
+      }
+    },
+    {
+      "case_id": "match-complex",
+      "category": "complex",
+      "claim": "engineering_rule",
+      "evidence": {
+        "source": "PROTEIN COMPLEX is outside single-protein eligibility; a subunit accession does not prove the complex"
+      },
+      "executor": "eligibility",
+      "expected": {
+        "reason": "unsupported_target_type",
+        "taxon": null
+      },
+      "fixture": {
+        "component_accessions": [
+          "P35372"
+        ],
+        "target_type": "PROTEIN COMPLEX",
+        "taxonomy_id": "9606"
+      }
+    },
+    {
+      "case_id": "match-conflict-two-primaries",
+      "category": "identity_conflict",
+      "claim": "engineering_rule",
+      "evidence": {
+        "source": "two reliable ids that hit different catalog targets conflict"
+      },
+      "executor": "match",
+      "expected": {
+        "match_status": "identity_conflict",
+        "matched_target_id": null
+      },
+      "fixture": {
+        "catalog": [
+          {
+            "species": "human",
+            "target_id": "1",
+            "uniprot": "P11111"
+          },
+          {
+            "species": "human",
+            "target_id": "2",
+            "uniprot": "P22222"
+          }
+        ],
+        "organism": "human",
+        "snapshot_complete": true,
+        "target_id": "1",
+        "uniprot_ids": [
+          "P22222"
+        ]
+      }
+    },
+    {
+      "case_id": "match-incomplete-snapshot",
+      "category": "partial_source",
+      "claim": "engineering_rule",
+      "evidence": {
+        "source": "an incomplete snapshot stays source_unavailable; absence is not confirmed"
+      },
+      "executor": "match",
+      "expected": {
+        "match_status": "source_unavailable",
+        "matched_target_id": null
+      },
+      "fixture": {
+        "catalog": [],
+        "snapshot_complete": false,
+        "target_id": "missing"
+      }
+    },
+    {
+      "case_id": "match-name-only",
+      "category": "name_only",
+      "claim": "engineering_rule",
+      "evidence": {
+        "source": "an exact name does not confirm identity"
+      },
+      "executor": "match",
+      "expected": {
+        "match_status": "ambiguous",
+        "matched_target_id": null
+      },
+      "fixture": {
+        "catalog": [
+          {
+            "name": "Mu opioid receptor",
+            "species": "human",
+            "target_id": "1"
+          }
+        ],
+        "name": "Mu opioid receptor",
+        "snapshot_complete": true
+      }
+    },
+    {
+      "case_id": "match-primary-uniprot",
+      "category": "primary_anchor",
+      "claim": "engineering_rule",
+      "evidence": {
+        "source": "one primary accession and the requested species agree"
+      },
+      "executor": "match",
+      "expected": {
+        "match_status": "matched",
+        "matched_target_id": "primary"
+      },
+      "fixture": {
+        "catalog": [
+          {
+            "species": "human",
+            "target_id": "primary",
+            "uniprot": "P35372"
+          }
+        ],
+        "organism": "human",
+        "snapshot_complete": true,
+        "uniprot_ids": [
+          "P35372"
+        ]
+      }
+    },
+    {
+      "case_id": "match-species-gene",
+      "category": "species",
+      "claim": "engineering_rule",
+      "evidence": {
+        "source": "the same gene symbol in two species needs the requested taxon"
+      },
+      "executor": "match",
+      "expected": {
+        "match_status": "matched",
+        "matched_target_id": "human-id"
+      },
+      "fixture": {
+        "catalog": [
+          {
+            "gene": "GENE1",
+            "species": "human",
+            "target_id": "human-id"
+          },
+          {
+            "gene": "GENE1",
+            "species": "mouse",
+            "target_id": "mouse-id"
+          }
+        ],
+        "gene_symbol": "GENE1",
+        "organism": "human",
+        "snapshot_complete": true
+      }
+    },
+    {
+      "case_id": "taxon-drosophila",
+      "category": "species",
+      "claim": "engineering_rule",
+      "evidence": {
+        "source": "7227 is outside SPECIES_TAXON_IDS and is unsupported"
+      },
+      "executor": "eligibility",
+      "expected": {
+        "reason": "unsupported_taxon",
+        "taxon": "7227"
+      },
+      "fixture": {
+        "organism": "Drosophila melanogaster",
+        "target_type": "SINGLE PROTEIN",
+        "taxonomy_id": "7227"
+      }
+    },
+    {
+      "case_id": "taxon-human",
+      "category": "species",
+      "claim": "engineering_rule",
+      "evidence": {
+        "source": "SPECIES_TAXON_IDS includes 9606 Homo sapiens"
+      },
+      "executor": "eligibility",
+      "expected": {
+        "reason": null,
+        "taxon": "9606"
+      },
+      "fixture": {
+        "organism": "Homo sapiens",
+        "target_type": "SINGLE PROTEIN",
+        "taxonomy_id": "9606"
+      }
+    }
+  ],
+  "issue": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/13316",
+  "qualification_version": "rf008-2026-11-23",
+  "source_release": "2026.3.1"
+}
