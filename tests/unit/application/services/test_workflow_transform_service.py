@@ -342,3 +342,63 @@ async def test_transform_step_passes_artifact_context_and_skip_avoids_sink() -> 
         "created_at": created_at,
     }
     assert skipped.status == "skipped"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "shape", ["two", "three", "keyword", "unsupported", "body_error"]
+)
+async def test_transform_executor_signature_contract(shape: str) -> None:
+    calls: list[object] = []
+
+    def two(spec: object, upstream: object) -> object:
+        calls.append((spec, upstream))
+        return "ok"
+
+    def three(spec: object, upstream: object, context: object) -> object:
+        calls.append((spec, upstream, context))
+        return "ok"
+
+    def keyword(
+        spec: object, upstream: object, *, runtime_context: object = None
+    ) -> object:
+        calls.append((spec, upstream, runtime_context))
+        return "ok"
+
+    def unsupported(spec: object, upstream: object, *, required: object) -> object:
+        calls.append((spec, upstream, required))
+        return "unexpected"
+
+    def body_error(spec: object, upstream: object) -> object:
+        calls.append((spec, upstream))
+        raise TypeError("executor body failure")
+
+    registry = WorkflowTransformRegistry()
+    registry.register("custom", locals()[shape])
+    service = WorkflowTransformService(registry=registry, metrics=_RecordingMetrics())
+    result = await service.run_step(
+        workflow_name="example",
+        step=TransformStepConfig(step_id="step", transform_name="custom"),
+        upstream_outputs={"input": 42},
+        dry_run=True,
+    )
+
+    if shape == "unsupported":
+        assert result.status == "failed"
+        assert result.error_type == "TypeError"
+        assert (
+            "Unsupported workflow transform executor signature" in result.error_message
+        )
+        assert calls == []
+    elif shape == "body_error":
+        assert result.status == "failed"
+        assert result.error_message == "executor body failure"
+        assert len(calls) == 1
+    else:
+        assert result.status == "success"
+        assert result.output == "ok"
+        assert len(calls) == 1
+        assert calls[0][1] == {"input": 42}
+        if shape in ("three", "keyword"):
+            assert calls[0][2].dry_run is True
+            assert calls[0][2].workflow_name == "example"

@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Awaitable, Callable, Mapping
 from dataclasses import dataclass
 from datetime import datetime
-from inspect import isawaitable, signature
+from inspect import Parameter, isawaitable, signature
 from time import perf_counter
 from typing import TYPE_CHECKING
 
@@ -197,6 +197,30 @@ def _invoke_transform_executor(
     upstream_outputs: Mapping[str, object],
     runtime_context: WorkflowTransformRuntimeContext,
 ) -> object | Awaitable[object]:
-    if len(signature(executor).parameters) >= 3:
-        return executor(spec, upstream_outputs, runtime_context)
-    return executor(spec, upstream_outputs)
+    executor_signature = signature(executor)
+    context_parameter = executor_signature.parameters.get("runtime_context")
+    candidates = []
+    if (
+        context_parameter is not None
+        and context_parameter.kind == Parameter.KEYWORD_ONLY
+    ):
+        candidates.append(
+            ((spec, upstream_outputs), {"runtime_context": runtime_context})
+        )
+    candidates.extend(
+        [
+            ((spec, upstream_outputs, runtime_context), {}),
+            ((spec, upstream_outputs), {}),
+        ]
+    )
+    for args, kwargs in candidates:
+        try:
+            executor_signature.bind(*args, **kwargs)
+        except TypeError:
+            continue
+        return executor(*args, **kwargs)
+    raise TypeError(
+        "Unsupported workflow transform executor signature: expected (spec, "
+        "upstream_outputs), (spec, upstream_outputs, runtime_context), or "
+        "(spec, upstream_outputs, *, runtime_context=...)"
+    )
