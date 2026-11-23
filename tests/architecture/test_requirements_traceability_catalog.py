@@ -19,6 +19,8 @@ from __future__ import annotations
 
 import csv
 import re
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -201,3 +203,37 @@ def test_executable_surface_paths_exist() -> None:
         "crosswalk executable_surface cites paths missing from checkout:\n"
         + "\n".join(f"  {item}" for item in missing)
     )
+
+
+def test_named_pytest_selectors_resolve() -> None:
+    """Named pytest nodes in the crosswalk must actually collect."""
+    with _CSV.open(encoding="utf-8", newline="") as handle:
+        rows = list(csv.DictReader(handle))
+    selectors = [
+        (row["requirement_id"], match.group())
+        for row in rows
+        for match in re.finditer(
+            r"tests/[A-Za-z0-9_./-]+\.py(?:::[A-Za-z0-9_\[\].-]+)+",
+            row.get("executable_surface") or "",
+        )
+    ]
+    failures = []
+    for req_id, selector in selectors:
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "pytest",
+                selector,
+                "--collect-only",
+                "--no-cov",
+                "-q",
+            ],
+            cwd=_ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if result.returncode:
+            failures.append(f"{req_id}: {selector}\n{result.stdout}{result.stderr}")
+    assert not failures, "unresolvable pytest selectors:\n" + "\n".join(failures)
