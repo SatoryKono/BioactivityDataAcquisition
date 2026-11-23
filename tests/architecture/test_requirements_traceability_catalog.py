@@ -206,6 +206,26 @@ def test_executable_surface_paths_exist() -> None:
     )
 
 
+def _collect_selector(selector: str) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "pytest",
+            selector,
+            "--collect-only",
+            "--artifact-selection=all",
+            "--no-cov",
+            "-q",
+        ],
+        cwd=_ROOT,
+        env={**os.environ, "PYTEST_ADDOPTS": ""},
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+
 def test_named_pytest_selectors_resolve() -> None:
     """Named pytest nodes in the crosswalk must actually collect."""
     with _CSV.open(encoding="utf-8", newline="") as handle:
@@ -225,22 +245,16 @@ def test_named_pytest_selectors_resolve() -> None:
     ]
     failures = []
     for req_id, selector in selectors:
-        result = subprocess.run(
-            [
-                sys.executable,
-                "-m",
-                "pytest",
-                selector,
-                "--collect-only",
-                "--no-cov",
-                "-q",
-            ],
-            cwd=_ROOT,
-            env={**os.environ, "PYTEST_ADDOPTS": ""},
-            capture_output=True,
-            text=True,
-            check=False,
-        )
+        result = _collect_selector(selector)
         if result.returncode:
             failures.append(f"{req_id}: {selector}\n{result.stdout}{result.stderr}")
     assert not failures, "unresolvable pytest selectors:\n" + "\n".join(failures)
+
+
+def test_selector_collection_rejects_missing_nodes() -> None:
+    """An existing file must not make a nonexistent test selector valid."""
+    result = _collect_selector(
+        "tests/architecture/test_domain_purity.py::test_nonexistent_selector"
+    )
+    assert result.returncode != 0
+    assert "not found" in result.stderr
