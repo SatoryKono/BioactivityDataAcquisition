@@ -40,6 +40,7 @@ _PATH_FIELD = "iuphar_family_paths"
 _EVIDENCE_FIELD = "classification_evidence_refs"
 _PATH_KEYS = frozenset({"family_id", "root_to_leaf"})
 _EVIDENCE_KEYS = frozenset({"local_evidence_ids", "match_evidence_ids"})
+_EvidenceIds = tuple[Iterable[object], Iterable[object]]
 
 
 _SET_LOGICAL_CONTRACT = {
@@ -194,7 +195,7 @@ def project_classification_detail(
     local_rule_ids: Iterable[object],
     effective_subclasses: Iterable[object],
     conflict_codes: Iterable[object],
-    evidence_ids: tuple[Iterable[object], Iterable[object]],
+    evidence_ids: _EvidenceIds,
 ) -> dict[str, str | None]:
     """Project one row onto the persisted 3.2.0 detail columns."""
     from bioetl.domain.config.target_classification import (
