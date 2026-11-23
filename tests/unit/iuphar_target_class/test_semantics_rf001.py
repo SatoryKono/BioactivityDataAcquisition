@@ -33,6 +33,7 @@ from iuphar_target_class.semantics import (
     UNCERTAINTY_TOKENS,
     semantics_document,
 )
+from iuphar_target_class.resolution import ResolutionInput, select_effective_class
 from iuphar_target_class.stage0.io import canonical_json_bytes
 
 pytestmark = pytest.mark.unit
@@ -173,6 +174,23 @@ def test_baseline_manifest_hashes_and_receipt() -> None:
         assert meta["pin_policy"] in {"not_hash_locked", "versioned_separately"}
     assert DOC.is_file()
     assert "source_unavailable" in DOC.read_text(encoding="utf-8")
+
+
+def test_matched_available_path_uses_iuphar_normalized_source() -> None:
+    """RF-001 dictionary must name the live resolution token, not a short alias."""
+    outcome = select_effective_class(
+        ResolutionInput(
+            match_status="matched",
+            iuphar_annotation_status="available",
+            local_status="not_supported",
+            iuphar_class="Receptor",
+        )
+    )
+    assert outcome.effective_class == "Receptor"
+    assert outcome.effective_source == "iuphar_normalized"
+    assert outcome.decision_status == "resolved"
+    assert "iuphar_normalized" in FIELD_LAYERS["effective_source"]["meaning"]
+    assert "iuphar_normalized" in DOC.read_text(encoding="utf-8")
 
 
 def test_profile_schema_version_is_not_conflated_with_table_contract() -> None:
