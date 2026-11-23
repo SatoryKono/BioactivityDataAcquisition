@@ -606,3 +606,44 @@ def test_approved_release_keeps_both_paths_and_pinned_hashes() -> None:
     assert mapped.subclass_origin == "subclass_dictionary"
     assert mapped.annotation_capability == "family_only"
     assert mapped.absence_status == "source_unavailable"
+
+
+def _numbered_chain(
+    length: int, *, root_id_first: bool
+) -> tuple[tuple[FamilyNode, ...], str]:
+    labels = [f"{index:02d}" for index in range(length)]
+    ordered = labels if root_id_first else list(reversed(labels))
+    nodes = tuple(
+        FamilyNode(
+            family_id,
+            () if index == 0 else (ordered[index - 1],),
+            family_id,
+        )
+        for index, family_id in enumerate(ordered)
+    )
+    return nodes, ordered[0]
+
+
+@pytest.mark.parametrize("root_id_first", [True, False])
+def test_unrequested_deep_branch_blocks_admission_in_either_id_order(
+    root_id_first: bool,
+) -> None:
+    nodes, root = _numbered_chain(10, root_id_first=root_id_first)
+    blocked = admit_family_graph(
+        nodes,
+        (root,),
+        max_depth=8,
+        max_visited_nodes=10_000,
+    )
+    assert blocked.admitted is False
+    assert blocked.diagnostics[0].message == "превышение лимита"
+    assert blocked.annotation_capability == "family_only"
+    allowed_nodes, allowed_root = _numbered_chain(9, root_id_first=root_id_first)
+    allowed = admit_family_graph(
+        allowed_nodes,
+        (allowed_root,),
+        max_depth=8,
+        max_visited_nodes=10_000,
+    )
+    assert allowed.admitted is True
+    assert allowed.diagnostics == ()

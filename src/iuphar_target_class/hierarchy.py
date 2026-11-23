@@ -216,7 +216,13 @@ def validate_family_graph(
     max_visited_nodes: int,
     multiple_parents_allowed: bool = True,
 ) -> Diagnostic | None:
-    """Return the first graph defect, or ``None`` when the walk is intact."""
+    """Return the first defect in the supplied nodes, or ``None``.
+
+    Every node is checked, not only ``family_ids``. The requested ids select
+    the walk that also enforces the visit budget. A cycle, a missing parent,
+    or a root distance above ``max_depth`` anywhere in the supplied nodes
+    still blocks the graph. The result does not depend on identifier order.
+    """
     prepared = _prepare_graph(nodes)
     if isinstance(prepared, Diagnostic):
         return prepared
@@ -557,78 +563,64 @@ def _structural_defect(
     max_depth: int,
     multiple_parents_allowed: bool,
 ) -> Diagnostic | None:
-    state: dict[str, int] = {}
+    """Reject cycles and root distance above ``max_depth`` in any order."""
+    for family_id in sorted(nodes):
+        node = nodes[family_id]
+        if not multiple_parents_allowed and len(node.parent_ids) > 1:
+            return _defect(_MULTI_PARENT)
+        for parent_id in node.parent_ids:
+            if parent_id == family_id:
+                return _defect(_SELF_LOOP)
+            if parent_id not in nodes:
+                return _defect(_MISSING_PARENT)
+    distances: dict[str, int] = {}
     for start in sorted(nodes):
-        if state.get(start) == 2:
-            continue
-        frames: list[list[int | str]] = [[start, 0, 0]]
-        while frames:
-            defect = _structural_step(
-                nodes,
-                frames,
-                state,
-                max_depth=max_depth,
-                multiple_parents_allowed=multiple_parents_allowed,
-            )
-            if defect is not None:
-                return defect
+        defect = _bind_root_distance(nodes, start, distances, max_depth=max_depth)
+        if defect is not None:
+            return defect
     return None
 
 
-def _structural_step(
+def _bind_root_distance(
     nodes: dict[str, FamilyNode],
-    frames: list[list[int | str]],
-    state: dict[str, int],
+    start: str,
+    distances: dict[str, int],
     *,
     max_depth: int,
-    multiple_parents_allowed: bool,
 ) -> Diagnostic | None:
-    frame = frames[-1]
-    node_id = str(frame[0])
-    depth = int(frame[1])
-    cursor = int(frame[2])
-    node = nodes[node_id]
-    if cursor == 0:
-        entered = _enter_structural(
-            node,
-            depth=depth,
-            max_depth=max_depth,
-            multiple_parents_allowed=multiple_parents_allowed,
-            nodes=nodes,
-        )
-        if entered is not None:
-            return entered
-        state[node_id] = 1
-    if cursor < len(node.parent_ids):
-        parent_id = node.parent_ids[cursor]
-        frame[2] = cursor + 1
-        if state.get(parent_id) == 1:
-            return _defect(_CYCLE)
-        if state.get(parent_id, 0) == 0:
-            frames.append([parent_id, depth + 1, 0])
+    """Store each node's longest parent-chain length, including finished parents."""
+    if start in distances:
         return None
-    state[node_id] = 2
-    frames.pop()
-    return None
-
-
-def _enter_structural(
-    node: FamilyNode,
-    *,
-    depth: int,
-    max_depth: int,
-    multiple_parents_allowed: bool,
-    nodes: dict[str, FamilyNode],
-) -> Diagnostic | None:
-    if depth > max_depth:
-        return _defect(_LIMIT)
-    if not multiple_parents_allowed and len(node.parent_ids) > 1:
-        return _defect(_MULTI_PARENT)
-    for parent_id in node.parent_ids:
-        if parent_id == node.family_id:
-            return _defect(_SELF_LOOP)
-        if parent_id not in nodes:
-            return _defect(_MISSING_PARENT)
+    frames: list[list[int | str]] = [[start, 0]]
+    stacked: set[str] = set()
+    best: dict[str, int] = {}
+    while frames:
+        frame = frames[-1]
+        node_id = str(frame[0])
+        cursor = int(frame[1])
+        if node_id in distances:
+            frames.pop()
+            continue
+        parents = nodes[node_id].parent_ids
+        if cursor == 0 and node_id not in stacked:
+            stacked.add(node_id)
+            best[node_id] = 0
+        if cursor < len(parents):
+            parent_id = parents[cursor]
+            if parent_id not in distances:
+                if parent_id in stacked:
+                    return _defect(_CYCLE)
+                frames.append([parent_id, 0])
+                continue
+            best[node_id] = max(best[node_id], distances[parent_id] + 1)
+            frame[1] = cursor + 1
+            continue
+        distance = best[node_id]
+        if distance > max_depth:
+            return _defect(_LIMIT)
+        distances[node_id] = distance
+        stacked.remove(node_id)
+        frames.pop()
     return None
 
 
