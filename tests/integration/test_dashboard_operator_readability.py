@@ -865,3 +865,29 @@ def test_run_explorer_pipeline_passport_uses_a_fixed_allowed_origin() -> None:
         '"pipeline_passport_path": $substringAfter(pipeline_passport_url, '
         in panel["targets"][0]["root_selector"]
     )
+
+
+def test_incident_suspect_rank_uses_stable_tie_breakers() -> None:
+    """Apply one Grafana sort key at a time before assigning a row rank."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
+    panels = {panel["id"]: panel for panel in get_dashboard_panels(dashboard)}
+    expected = [
+        {"desc": False, "field": "domain"},
+        {"desc": False, "field": "signal"},
+        {"desc": False, "field": "object"},
+        {"desc": True, "field": "Value"},
+    ]
+    for panel_id in (2010, 22010):
+        transforms = panels[panel_id]["transformations"]
+        rank_index = next(
+            index
+            for index, transform in enumerate(transforms)
+            if transform["options"].get("alias") == "row_index"
+        )
+        assert transforms[rank_index]["options"]["mode"] == "index"
+        keys = [
+            transform["options"]["sort"]
+            for transform in transforms[:rank_index]
+            if transform["id"] == "sortBy"
+        ]
+        assert keys == [[key] for key in expected]

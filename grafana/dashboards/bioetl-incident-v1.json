@@ -665,20 +665,44 @@
             "fields": {},
             "sort": [
               {
-                "desc": true,
-                "field": "Value"
-              },
-              {
                 "desc": false,
-                "field": "object"
-              },
+                "field": "domain"
+              }
+            ]
+          }
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "fields": {},
+            "sort": [
               {
                 "desc": false,
                 "field": "signal"
-              },
+              }
+            ]
+          }
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "fields": {},
+            "sort": [
               {
                 "desc": false,
-                "field": "domain"
+                "field": "object"
+              }
+            ]
+          }
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "fields": {},
+            "sort": [
+              {
+                "desc": true,
+                "field": "Value"
               }
             ]
           }
@@ -11489,20 +11513,44 @@
                 "fields": {},
                 "sort": [
                   {
-                    "desc": true,
-                    "field": "Value"
-                  },
-                  {
                     "desc": false,
-                    "field": "object"
-                  },
+                    "field": "domain"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "sortBy",
+              "options": {
+                "fields": {},
+                "sort": [
                   {
                     "desc": false,
                     "field": "signal"
-                  },
+                  }
+                ]
+              }
+            },
+            {
+              "id": "sortBy",
+              "options": {
+                "fields": {},
+                "sort": [
                   {
                     "desc": false,
-                    "field": "domain"
+                    "field": "object"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "sortBy",
+              "options": {
+                "fields": {},
+                "sort": [
+                  {
+                    "desc": true,
+                    "field": "Value"
                   }
                 ]
               }
