@@ -397,42 +397,63 @@ def _blob_sha256(root: Path, revision: str, path: str) -> str | None:
     return sha256_bytes(blob.stdout)
 
 
+_HEADER_CHECKS: tuple[tuple[str, object, str], ...] = (
+    ("artifact", "iuphar_rf001_baseline_manifest", "artifact id mismatch"),
+    ("baseline_id", BASELINE_ID, "baseline id mismatch"),
+    ("baseline_revision", BASELINE_REVISION, "baseline revision mismatch"),
+    ("m_semantics_bound", False, "M semantics must stay unbound"),
+    ("fresh_recalculation", False, "baseline is not a recalculation"),
+    (
+        "biological_accuracy_accepted",
+        False,
+        "biological accuracy is not accepted",
+    ),
+)
+
+
 def _check_header(document: dict[str, object], problems: list[str]) -> None:
-    if document.get("artifact") != "iuphar_rf001_baseline_manifest":
-        problems.append("artifact id mismatch")
-    if document.get("baseline_id") != BASELINE_ID:
-        problems.append("baseline id mismatch")
-    if document.get("baseline_revision") != BASELINE_REVISION:
-        problems.append("baseline revision mismatch")
-    if document.get("m_semantics_bound") is not False:
-        problems.append("M semantics must stay unbound")
-    if document.get("fresh_recalculation") is not False:
-        problems.append("baseline is not a recalculation")
-    if document.get("biological_accuracy_accepted") is not False:
-        problems.append("biological accuracy is not accepted")
+    for key, expected, message in _HEADER_CHECKS:
+        if document.get(key) != expected:
+            problems.append(message)
     embedded = document.get("semantics")
+    _check_embedded_semantics(document, embedded, problems)
+    _check_release(document.get("iuphar_release"), embedded, problems)
+
+
+def _check_embedded_semantics(
+    document: dict[str, object], embedded: object, problems: list[str]
+) -> None:
     if not isinstance(embedded, dict):
         problems.append("semantics document is missing")
-    else:
-        digest = sha256_bytes(canonical_json_bytes(embedded))
-        if document.get("semantics_sha256") != digest:
-            problems.append("semantics hash mismatch")
-        if document.get("configuration") != embedded.get("configuration"):
-            problems.append("configuration claim mismatch")
-    release = document.get("iuphar_release")
+        return
+    digest = sha256_bytes(canonical_json_bytes(embedded))
+    if document.get("semantics_sha256") != digest:
+        problems.append("semantics hash mismatch")
+    if document.get("configuration") != embedded.get("configuration"):
+        problems.append("configuration claim mismatch")
+
+
+def _check_release(release: object, embedded: object, problems: list[str]) -> None:
     if not isinstance(release, dict):
         problems.append("iuphar release is missing")
         return
-    for key in ("archive_sha256", "sql_sha256", "targets_csv_sha256"):
-        value = release.get(key)
-        if not isinstance(value, str) or len(value) != _SHA256_WIDTH:
-            problems.append(f"IUPHAR {key} shape mismatch")
+    _check_release_pins(release, problems)
     if release.get("snapshot_bytes") != "source_unavailable":
         problems.append("missing snapshot bytes must stay source_unavailable")
-    if isinstance(embedded, dict) and release.get(
-        "annotation_capability"
-    ) != embedded.get("snapshot_annotation_capability"):
+    if not isinstance(embedded, dict):
+        return
+    recorded = release.get("annotation_capability")
+    expected = embedded.get("snapshot_annotation_capability")
+    if recorded != expected:
         problems.append("snapshot capability mismatch")
+
+
+def _check_release_pins(release: dict[str, object], problems: list[str]) -> None:
+    for key in ("archive_sha256", "sql_sha256", "targets_csv_sha256"):
+        value = release.get(key)
+        if isinstance(value, str) and len(value) == _SHA256_WIDTH:
+            continue
+        problems.append(f"IUPHAR {key} shape mismatch")
 
 
 def _check_material_set(materials: list[object], problems: list[str]) -> None:
