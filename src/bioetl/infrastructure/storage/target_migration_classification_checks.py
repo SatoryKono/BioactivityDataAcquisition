@@ -273,14 +273,15 @@ def _finding_for(
 ) -> TargetAbsenceFinding:
     if recovery is None:
         return TargetAbsenceFinding(target_id, "unresolved", "block")
-    source_gold = _bound_source_row(recovery, "gold")
+    payload = _source_payload(recovery)
+    source_gold = _bound_source_row(recovery, "gold", payload)
     if source_gold is None:
         raise ValueError(
             "target recovery source does not contain the restored gold row"
         )
     recovery = replace(
         recovery,
-        silver_row=_bound_source_row(recovery, "silver"),
+        silver_row=_bound_source_row(recovery, "silver", payload),
         gold_row=source_gold,
     )
     if target_id in all_gold_ids:
@@ -348,11 +349,10 @@ def _silver_record(
 
 
 def _bound_source_row(
-    recovery: TargetRecoveryInput, layer: str
+    recovery: TargetRecoveryInput, layer: str, payload: Mapping[str, object]
 ) -> dict[str, object] | None:
     """Return the row stored in the pinned source, not a parallel caller object."""
     declared = recovery.gold_row if layer == "gold" else recovery.silver_row
-    payload = _source_payload(recovery)
     stored = payload.get(layer)
     if declared is None:
         if stored is not None:

@@ -128,7 +128,8 @@ def load_published_restoration(
     ):
         raise ValueError(ASSAY_TARGET_CLOSURE_ERROR)
     live = _read_live(silver, gold, assay)
-    recoveries = _recoveries_from_document(document, workspace, manifest.parent)
+    written = _read_candidates(manifest.parent)
+    recoveries = _recoveries_from_document(document, workspace, written)
     plan = plan_target_fk_restoration(
         silver_rows=live.silver,
         gold_rows=live.gold,
@@ -138,14 +139,14 @@ def load_published_restoration(
     )
     if plan.blockers:
         raise ValueError(ASSAY_TARGET_CLOSURE_ERROR)
+    additions = _addition_rows(written, plan)
     expected = canonical_json_bytes(
-        _validated_document(manifest.parent, live, plan, workspace)
+        _validated_document(manifest.parent, live, plan, workspace, additions, written)
     )
     if payload != expected:
         raise ValueError(
             "target FK restoration manifest does not match the frozen baseline"
         )
-    additions = _addition_rows(manifest.parent, plan)
     return PublishedTargetRestoration(
         additions,
         {
@@ -178,9 +179,13 @@ def _validated_document(
     live: _LiveTables,
     plan: TargetFKRestorationPlan,
     workspace: Path,
+    additions: Mapping[str, Sequence[Mapping[str, object]]] | None = None,
+    written: Mapping[str, Sequence[Mapping[str, object]]] | None = None,
 ) -> dict[str, object]:
-    additions = _addition_rows(root, plan)
-    _require_preservation(live, root, plan)
+    tables = written if written is not None else _read_candidates(root)
+    if additions is None:
+        additions = _addition_rows(tables, plan)
+    _require_preservation(live, root, plan, tables)
     return _document(
         live,
         plan,
@@ -351,7 +356,7 @@ def _write_candidates(
     originals = {"silver": silver, "gold": gold}
     for layer, table_rows in rows.items():
         _write_layer(originals[layer], root / layer, table_rows)
-    _require_preservation(live, root, plan)
+    _require_preservation(live, root, plan, _read_candidates(root))
 
 
 def _layer_rows(plan: TargetFKRestorationPlan, layer: str) -> list[dict[str, object]]:
@@ -382,9 +387,10 @@ def _require_preservation(
     live: _LiveTables,
     root: Path,
     plan: TargetFKRestorationPlan,
+    written_rows: Mapping[str, Sequence[Mapping[str, object]]],
 ) -> None:
     for layer in ("silver", "gold"):
-        written = by_id(read_delta(root / layer))
+        written = by_id(written_rows[layer])
         original = by_id(getattr(live, layer))
         if set(original) - set(written):
             raise ValueError("existing target rows were dropped")
@@ -406,11 +412,12 @@ def _require_preservation(
 
 
 def _addition_rows(
-    root: Path, plan: TargetFKRestorationPlan
+    written_rows: Mapping[str, Sequence[Mapping[str, object]]],
+    plan: TargetFKRestorationPlan,
 ) -> dict[str, tuple[dict[str, object], ...]]:
     additions: dict[str, tuple[dict[str, object], ...]] = {}
     for layer in ("silver", "gold"):
-        written = by_id(read_delta(root / layer))
+        written = by_id(written_rows[layer])
         rows = []
         for item in plan.restorations:
             if layer not in item.layers:
@@ -441,8 +448,14 @@ def _row_hashes(
     return hashes
 
 
+def _read_candidates(root: Path) -> dict[str, list[dict[str, object]]]:
+    return {layer: read_delta(root / layer) for layer in ("silver", "gold")}
+
+
 def _recoveries_from_document(
-    document: Mapping[str, object], workspace: Path, root: Path
+    document: Mapping[str, object],
+    workspace: Path,
+    written_rows: Mapping[str, Sequence[Mapping[str, object]]],
 ) -> tuple[TargetRecoveryInput, ...]:
     findings = document.get("findings")
     if not isinstance(findings, list):
@@ -450,7 +463,7 @@ def _recoveries_from_document(
     additions = {
         layer: {
             str(row["target_id"]): row
-            for row in read_delta(root / layer)
+            for row in written_rows[layer]
             if row.get("_is_current", True)
         }
         for layer in ("silver", "gold")
