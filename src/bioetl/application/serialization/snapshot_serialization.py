@@ -19,13 +19,19 @@ if TYPE_CHECKING:
 @runtime_checkable
 class _ModelDumpHost(Protocol):
     def model_dump(
-        self, *, mode: str = "python", exclude_none: bool = False
+        self,
+        *,
+        mode: str = "python",
+        exclude_none: bool = False,
+        exclude_unset: bool = False,
     ) -> dict[str, object]: ...
 
 
 @runtime_checkable
 class _DictHost(Protocol):
-    def dict(self, *, exclude_none: bool = False) -> dict[str, object]: ...
+    def dict(
+        self, *, exclude_none: bool = False, exclude_unset: bool = False
+    ) -> dict[str, object]: ...
 
 
 __all__ = ["normalize_snapshot", "to_serializable_mapping"]
@@ -96,11 +102,24 @@ def _public_dict_payload(value: object) -> tuple[bool, object]:
 
 
 def _snapshot_payload(value: object) -> object:
-    """Extract the raw payload for manifest mapping serialization."""
+    """Extract the raw payload for manifest mapping serialization.
+
+    Pydantic payloads use ``exclude_unset=True`` so replay restores only
+    fields that were explicitly supplied (critical for inline DQ overrides).
+    Legacy dump hosts without ``exclude_unset`` fall back to exclude_none-only.
+    """
     if isinstance(value, _ModelDumpHost):
-        return value.model_dump(mode="python", exclude_none=True)
+        try:
+            return value.model_dump(
+                mode="python", exclude_none=True, exclude_unset=True
+            )
+        except TypeError:
+            return value.model_dump(mode="python", exclude_none=True)
     if isinstance(value, _DictHost):
-        return value.dict(exclude_none=True)
+        try:
+            return value.dict(exclude_none=True, exclude_unset=True)
+        except TypeError:
+            return value.dict(exclude_none=True)
     handled, payload = _public_dict_payload(value)
     if handled:
         return payload

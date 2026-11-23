@@ -82,6 +82,8 @@ def finalize_workflow_children(
         "shutdown": "WARN",
     }.get(status, "UNKNOWN")
     for row in report.execution:
+        if row.status == "skipped" and row.error_type == "AlreadyCompletedOnResume":
+            continue
         if not row.pipeline_name or not row.pipeline_run_id:
             continue
         path = _child_path(root, row)
