@@ -36,14 +36,15 @@ class _ModelDumpHost:
         *,
         mode: str = "python",
         exclude_none: bool = False,
+        exclude_unset: bool = False,
     ):
-        del mode, exclude_none
+        del mode, exclude_none, exclude_unset
         return {"kind": "model", "value": 1}
 
 
 class _DictHost:
-    def dict(self, *, exclude_none: bool = False):
-        del exclude_none
+    def dict(self, *, exclude_none: bool = False, exclude_unset: bool = False):
+        del exclude_none, exclude_unset
         return {"kind": "dict", "value": 2}
 
 
