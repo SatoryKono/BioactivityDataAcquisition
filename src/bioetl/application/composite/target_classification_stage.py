@@ -106,6 +106,7 @@ class CompositeTargetClassificationStage:
 
     def __init__(self, session: TargetClassificationRunState) -> None:
         self._session = session
+        self._decisions: dict[str, dict[str, str | None]] = {}
 
     def apply(
         self,
@@ -116,6 +117,7 @@ class CompositeTargetClassificationStage:
         dependency_frames: Mapping[str, pl.DataFrame] | None = None,
     ) -> pl.DataFrame:
         """Classify joined rows. Evidence stays in memory."""
+        self._decisions = {}
         if df.is_empty():
             return df
         if not any(column in df.columns for column in _TARGET_ID_COLUMNS):
@@ -138,8 +140,40 @@ class CompositeTargetClassificationStage:
                 started_at=started,
                 seen=seen,
             )
+            target_id = _text(row.get("target_id")) or _text(
+                row.get("chembl.target.target_id")
+            )
+            if target_id is not None:
+                self._decisions[target_id] = projected
             for name in write_fields:
                 updates[name].append(projected.get(name))
+        result = df
+        for name, values in updates.items():
+            result = result.with_columns(
+                pl.Series(name=name, values=values, dtype=pl.Utf8)
+            )
+        return result
+
+    def seal_decision(self, df: pl.DataFrame) -> pl.DataFrame:
+        """Rewrite the classification decision after seed coalesce.
+
+        ``seed_priority`` fills a null composite field from the seed column.
+        The published decision owns those nulls, so they are written again
+        after conflict resolution.
+        """
+        if df.is_empty() or not self._decisions or "target_id" not in df.columns:
+            return df
+        write_fields = (
+            _FRAME_FIELDS if self._session.mode == "enrich" else _METADATA_FIELDS
+        )
+        updates: dict[str, list[str | None]] = {name: [] for name in write_fields}
+        for row in df.iter_rows(named=True):
+            decision = self._decisions.get(_text(row.get("target_id")) or "")
+            for name in write_fields:
+                if decision is None:
+                    updates[name].append(_text(row.get(name)))
+                    continue
+                updates[name].append(decision.get(name))
         result = df
         for name, values in updates.items():
             result = result.with_columns(

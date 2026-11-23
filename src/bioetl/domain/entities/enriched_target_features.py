@@ -32,7 +32,8 @@ def composite_classification_run_id(run_id: str) -> str:
     """Deterministic occurrence id for one composite classification stage."""
     if not run_id.strip():
         raise ValueError("composite classification requires a run id")
-    return f"{run_id}:{COMPOSITE_CLASSIFICATION_BATCH_ID}"
+    # The evidence store accepts only path segments of letters, digits, and ._-
+    return f"{run_id}.{COMPOSITE_CLASSIFICATION_BATCH_ID}"
 
 
 def composite_classification_row_id(target_id: str) -> str:

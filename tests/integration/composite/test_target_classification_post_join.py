@@ -9,6 +9,8 @@ from unittest.mock import AsyncMock, MagicMock
 import polars as pl
 import pytest
 
+from iuphar_target_class.bioetl_input import project_target_fields
+
 from bioetl.application.composite.coalesce_policy import CoalescePolicyService
 from bioetl.application.composite.conflict_resolver import ConflictResolverService
 from bioetl.application.composite.merger_post_join import (
@@ -64,6 +66,7 @@ class _Classifier:
         ec = business_data.get("target_ec_numbers")
         local = "Enzyme" if isinstance(ec, str) and "3.4.21.5" in ec else None
         projection = dict.fromkeys(TARGET_CLASSIFICATION_FIELDS)
+        projection["iuphar_match_status"] = "not_found"
         projection["local_class"] = local
         projection["effective_class"] = local
         projection["effective_source"] = "local" if local else None
@@ -233,6 +236,7 @@ def test_joined_feature_is_used_and_survives_seed_priority() -> None:
     origins = {item["feature_id"]: item for item in payload["feature_origins"]}
     assert origins["ec"]["present"] is True
     assert origins["ec"]["source_content_hash"] == _SOURCE_HASH
+    assert "P00734" in (project_target_fields(payload, "9606")["uniprot"] or "")
     assert row["effective_class"] == "Enzyme"
     assert row["target_classification_owner"] == COMPOSITE_CLASSIFICATION_OWNER
     assert row["target_classification_completeness"] == "full"
@@ -327,7 +331,7 @@ async def test_successful_write_publishes_then_finalizes() -> None:
         started_monotonic=1.0,
     )
     assert [event[0] for event in evidence.events] == ["publish", "finalize"]
-    occurrence = "run-ok:composite-target-classification"
+    occurrence = "run-ok.composite-target-classification"
     assert evidence.events[0][1] == occurrence
     assert evidence.events[1][1] == occurrence
     assert _classifier.run_ids == [occurrence]
@@ -341,7 +345,7 @@ def test_shadow_mode_keeps_seed_class_columns() -> None:
     assert "effective_class" not in result.columns
     assert result["chembl.target.effective_class"][0] == "Receptor"
     assert result["target_classification_owner"][0] == COMPOSITE_CLASSIFICATION_OWNER
-    assert classifier.run_ids == ["run-shadow:composite-target-classification"]
+    assert classifier.run_ids == ["run-shadow.composite-target-classification"]
 
 
 def test_invalid_keyword_json_is_not_invented() -> None:
@@ -373,6 +377,62 @@ def test_historical_l1_is_not_the_modern_chembl_field() -> None:
     )
     assert agreed_chembl_release(["ChEMBL_35", "ChEMBL_36"]) == (None, "conflict")
     assert agreed_chembl_release([None, 36]) == (None, "unbound")
+
+
+def test_null_classification_fields_are_not_restored_from_seed() -> None:
+    stage, _classifier, _evidence = _stage()
+    frame = _seed_frame().with_columns(
+        pl.lit("123").alias("chembl.target.iuphar_target_id"),
+        pl.lit("Receptor").alias("chembl.target.local_class"),
+        pl.lit("matched").alias("chembl.target.iuphar_match_status"),
+    )
+    ctx = finalize_post_join_context(
+        _host(stage),
+        merged_df=frame,
+        enrichers=(),
+        enrichment_results={},
+        effective_seed_pipeline="chembl_target",
+        run_id="run-null",
+        metadata_timestamp=_STARTED,
+        sources_used=["seed"],
+        dependency_results=None,
+        enricher_dfs={},
+    )
+    row = ctx.merged_df.to_dicts()[0]
+    assert row["iuphar_target_id"] is None
+    assert row["local_class"] is None
+    assert row["iuphar_match_status"] == "not_found"
+    assert row["target_classification_owner"] == COMPOSITE_CLASSIFICATION_OWNER
+
+
+def test_historical_replay_binding_skips_live_profile(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from bioetl.application.services.target_runtime.scope import (
+        bind_target_classification_dependency,
+        reset_target_classification_dependency,
+    )
+    from bioetl.composition.bootstrap.assembly.target_classification_runtime import (
+        build_composite_target_classification_stage,
+    )
+
+    def fail(name: str) -> None:
+        raise AssertionError(name)
+
+    monkeypatch.setattr(
+        "bioetl.composition.bootstrap.assembly.target_classification_runtime.load_pipeline_config",
+        fail,
+    )
+    token = bind_target_classification_dependency({"replay_mode": "historical"})
+    try:
+        assert (
+            build_composite_target_classification_stage(
+                SimpleNamespace(name="composite_target")
+            )
+            is None
+        )
+    finally:
+        reset_target_classification_dependency(token)
 
 
 def test_gold_projection_keeps_unknown_columns_fail_closed() -> None:

@@ -81,6 +81,7 @@ def project_target_fields(
             (
                 *_tokens(data.get("component_accessions")),
                 *_tokens(data.get("target_xref_uniprot_ids")),
+                *_tokens(data.get("uniprot_accession")),
             )
         )
     )

@@ -117,7 +117,18 @@ def build_composite_target_classification_stage(
     """Wire post-join classification only for an enabled composite target."""
     if getattr(config, "name", None) != "composite_target":
         return None
-    yaml_config = load_pipeline_config("chembl_target")
+    binding = get_target_classification_dependency()
+    if isinstance(binding, Mapping) and binding.get("replay_mode") == "historical":
+        return None
+    pinned = binding.get("target_config") if isinstance(binding, Mapping) else None
+    if isinstance(pinned, Mapping):
+        yaml_config = resolve_target_classification_profile(
+            hydrate_target_runtime_config(pinned)
+        ).resolved_yaml_config
+    else:
+        yaml_config = resolve_target_runtime_config(
+            load_pipeline_config("chembl_target")
+        )
     if yaml_config.target_classification.mode == "off":
         return None
     session = build_target_classification_session(yaml_config, get_settings())

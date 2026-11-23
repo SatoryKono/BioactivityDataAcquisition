@@ -11,6 +11,10 @@ from bioetl.application.services.run_reports.observations import (
     bind_run_observations,
     reset_run_observations,
 )
+from bioetl.application.services.target_runtime.scope import (
+    bind_target_classification_dependency,
+    reset_target_classification_dependency,
+)
 from bioetl.application.composite.runtime_wiring_api import (
     JOIN_KEY_NORMALIZATION_POLICIES,
     EnrichmentCrossValidator,
@@ -110,6 +114,18 @@ async def replay_assay(
             settings=settings,
         )
         observation_token = bind_run_observations()
+        classification_token = None
+        if envelope["pipeline"] == "composite_target":
+            pinned = (
+                verified_json("target-classification.json")
+                if "target-classification.json" in objects
+                else None
+            )
+            classification_token = bind_target_classification_dependency(
+                {"target_config": pinned}
+                if pinned is not None
+                else {"replay_mode": "historical"}
+            )
         try:
             merger = build_composite_merge_service(
                 config=config,
@@ -151,6 +167,8 @@ async def replay_assay(
             try:
                 await storage.aclose()
             finally:
+                if classification_token is not None:
+                    reset_target_classification_dependency(classification_token)
                 reset_run_observations(observation_token)
 
 

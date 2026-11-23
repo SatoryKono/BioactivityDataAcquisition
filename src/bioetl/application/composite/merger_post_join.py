@@ -190,6 +190,7 @@ def finalize_post_join_context(
         enricher_dfs=enricher_dfs,
     )
     if stage is not None:
+        merged_df = stage.seal_decision(merged_df)
         merged_df = stage.refresh_content_hash(merged_df)
     records_merged = len(merged_df)
     records_enriched = host._count_enriched_records(
