@@ -16,6 +16,7 @@ from scripts.ops.target_classification_contour import (
     ContourObservations,
     apply_measurements,
     classification_sha256,
+    compare_xlsx_round_trip,
     evaluate_main_contour,
     file_sha256,
     inspect_repository,
@@ -680,6 +681,129 @@ def test_report_refuses_to_replace_an_existing_file(tmp_path: Path) -> None:
 def test_relative_path_escape_is_rejected() -> None:
     with pytest.raises(ValueError, match="refusing path outside"):
         file_sha256(Path("../outside-the-repository"))
+
+
+def test_csv_closed_flags_stay_out_of_current_checks(tmp_path: Path) -> None:
+    evidence, observations = _ready_case(tmp_path)
+    rows: list[dict[str, object]] = []
+    for row in _ROWS:
+        current = dict(row)
+        current["_is_current"] = "True"
+        rows.append(current)
+    for target_id, flag in (
+        ("CHEMBL7", "False"),
+        ("CHEMBL8", "false"),
+        ("CHEMBL9", "0"),
+    ):
+        closed = dict(_ROWS[0])
+        closed["target_id"] = target_id
+        closed["_is_current"] = flag
+        closed["iuphar_class"] = "ion channel"
+        closed["target_class_profile_sha256"] = "f" * 64
+        rows.append(closed)
+    table = tmp_path / "history.csv"
+    repeat = tmp_path / "history-repeat.csv"
+    workbook = tmp_path / "history.xlsx"
+    _write_csv(table, rows)
+    _write_csv(repeat, rows)
+    _write_xlsx(workbook, _ROWS)
+    current_hash = classification_sha256(_ROWS)
+    enrich = dict(evidence["isolated_enrich"])
+    enrich["repeat"] = {
+        "same_inputs": True,
+        "same_versions": True,
+        "classification_sha256": current_hash,
+        "repeat_classification_sha256": current_hash,
+    }
+    enrich["xlsx"] = {
+        "table_sha256": file_sha256(table),
+        "xlsx_sha256": file_sha256(workbook),
+        "historical_columns": ["pref_name"],
+    }
+    evidence["isolated_enrich"] = enrich
+    measured = apply_measurements(
+        observations,
+        evidence,
+        table=table,
+        repeat_table=repeat,
+        xlsx=workbook,
+    )
+    report = evaluate_main_contour(evidence, measured)
+
+    assert _phase(report, "isolated_enrich") == "PASS"
+
+
+def test_live_readback_rejects_missing_classification_fields(
+    tmp_path: Path,
+) -> None:
+    evidence, observations = _ready_case(tmp_path)
+    thin = tuple(
+        {
+            "target_id": row["target_id"],
+            "target_class_profile_sha256": _PROFILE,
+        }
+        for row in _ROWS
+    )
+    silver = tmp_path / "silver-thin.csv"
+    gold = tmp_path / "gold-thin.csv"
+    _write_csv(silver, thin)
+    _write_csv(gold, thin)
+    enrich = dict(evidence["isolated_enrich"])
+    enrich["persisted_silver_sha256"] = file_sha256(silver)
+    enrich["persisted_gold_sha256"] = file_sha256(gold)
+    evidence["isolated_enrich"] = enrich
+    migration = dict(evidence["migration"])
+    migration["promoted"] = True
+    evidence["migration"] = migration
+    evidence["live"] = {
+        "readback": True,
+        "next_run_executed": True,
+        "next_run_id": "next-run",
+        "tables_match_promoted": True,
+        "classification_reproduced": True,
+        "observed_profile_sha256": _PROFILE,
+        "observed_config_sha256": _CONFIG,
+    }
+    measured = apply_measurements(
+        replace(
+            observations,
+            canonical_mode="enrich",
+            canonical_config_sha256=_CONFIG,
+        ),
+        evidence,
+        silver=silver,
+        gold=gold,
+    )
+    report = evaluate_main_contour(evidence, measured)
+    phases = report["phases"]
+    assert isinstance(phases, dict)
+    live = phases["live"]
+    assert isinstance(live, dict)
+
+    assert measured.live_projection_match is False
+    assert _phase(report, "live") == "FAIL"
+    assert "classification_not_reproduced" in live["reasons"]
+    assert report["promotion_decision"] == "ROLLBACK_REQUIRED"
+
+
+def test_standard_xlsx_rejoins_split_historical_text(tmp_path: Path) -> None:
+    import pyarrow as pa
+
+    from bioetl.infrastructure.export.xlsx_text_parts import write_arrow_xlsx
+
+    rows = [dict(row) for row in _ROWS]
+    rows[0]["pref_name"] = "n" * 32768
+    workbook = tmp_path / "split.xlsx"
+    write_arrow_xlsx(
+        pa.Table.from_pylist(rows),
+        workbook,
+        table_name="target",
+        layer="gold",
+    )
+    status, preserved = compare_xlsx_round_trip(rows, workbook, ("pref_name",))
+
+    assert status == "PASS"
+    assert preserved is True
 
 
 def test_smoke_limit_cannot_claim_full_table_proof(tmp_path: Path) -> None:

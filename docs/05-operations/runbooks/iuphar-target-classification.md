@@ -497,10 +497,15 @@ identified by its byte SHA-256. A Delta directory is identified by the SHA-256
 of its current business-field projection, and a pinned hash is not accepted
 when that identity was not measured. Every current enrich, Silver, and Gold
 row must carry the claimed `target_class_profile_sha256`; a digest that is
-only well formed does not confirm the classifier that wrote the rows. Current rows are those with missing or
-true `_is_current`; closed versions do not close an assay FK. Live readback
-compares each current Gold target with the current Silver row of the same id,
-not with the `--limit 1000` smoke table. The command does not promote, edit
+only well formed does not confirm the classifier that wrote the rows. Current
+rows are those with a missing or true `_is_current`. A CSV cell `False`,
+`false`, or `0` is closed before that check. Closed versions do not close an
+assay FK. Live readback compares each current Gold target with the current
+Silver row of the same id. Both rows must contain every classification field;
+a missing field is not a null match. The comparison does not use the
+`--limit 1000` smoke table. A standard XLSX that carries
+`_bioetl_export_manifest` is restored before the historical-column check, so
+text split across cells is joined. The command does not promote, edit
 configuration, or replace an existing report path.
 
 ```powershell

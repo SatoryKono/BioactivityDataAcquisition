@@ -32,8 +32,11 @@ SMOKE_LIMIT = 1000
 _SHA256 = 64
 _COMMIT_SHA = 40
 _TARGET_YAML = "target.yaml"
+_IS_CURRENT = "_is_current"
 _ENRICH_REPEAT = "isolated_enrich.repeat"
 _ENRICH_XLSX = "isolated_enrich.xlsx"
+_CSV_CURRENT_TRUE = frozenset({"1", "t", "true", "yes"})
+_CSV_CURRENT_FALSE = frozenset({"0", "f", "false", "no"})
 _RUN_STATUSES = frozenset({"PASS", "FAIL", "NOT_RUN"})
 _SOURCE_COMPLETENESS = frozenset(
     {"admission_complete", "complete", "incomplete", "not_recorded"}
@@ -145,7 +148,21 @@ def status_distributions(
 
 def _is_current_row(row: dict[str, object]) -> bool:
     """Match migration closure: a missing flag is current, a falsy flag is closed."""
-    return bool(row.get("_is_current", True))
+    return bool(row.get(_IS_CURRENT, True))
+
+
+def _csv_row(row: dict[str, str]) -> dict[str, object]:
+    """Decode a CSV SCD flag before the shared current-row checks."""
+    normalized: dict[str, object] = dict(row)
+    flag = normalized.get(_IS_CURRENT)
+    if not isinstance(flag, str):
+        return normalized
+    token = flag.strip().lower()
+    if token in _CSV_CURRENT_TRUE:
+        normalized[_IS_CURRENT] = True
+    elif token in _CSV_CURRENT_FALSE:
+        normalized[_IS_CURRENT] = False
+    return normalized
 
 
 def _current_rows(rows: list[dict[str, object]]) -> list[dict[str, object]]:
@@ -220,7 +237,7 @@ def load_table(path: Path) -> list[dict[str, object]]:
         with safe.open(
             encoding="utf-8-sig", newline=""
         ) as handle:  # NOSONAR - confined_io_path
-            return [dict(row) for row in csv.DictReader(handle)]
+            return [_csv_row(dict(row)) for row in csv.DictReader(handle)]
     if suffix == ".json":
         payload = json.loads(
             safe.read_text(encoding="utf-8")
@@ -1125,12 +1142,23 @@ def _current_projections_match(
         return False
     for row in gold_current:
         source = silver.get(str(row.get("target_id")))
-        if source is None:
+        if source is None or not _same_classification(source, row):
             return False
-        for field in TARGET_CLASSIFICATION_FIELDS:
-            if _norm_cell(source.get(field)) != _norm_cell(row.get(field)):
-                return False
     return True
+
+
+def _classification_present(row: dict[str, object]) -> bool:
+    return all(field in row for field in TARGET_CLASSIFICATION_FIELDS)
+
+
+def _same_classification(left: dict[str, object], right: dict[str, object]) -> bool:
+    """Missing classification columns are not the same value as null."""
+    if not _classification_present(left) or not _classification_present(right):
+        return False
+    return all(
+        _norm_cell(left.get(field)) == _norm_cell(right.get(field))
+        for field in TARGET_CLASSIFICATION_FIELDS
+    )
 
 
 def _rf008_admitted(claim: dict[str, object]) -> bool:
@@ -1493,12 +1521,35 @@ def _yaml_mapping(path: Path) -> dict[str, object]:
     return _mapping(loaded, str(safe))
 
 
-def _read_xlsx_rows(path: Path) -> list[dict[str, object]]:
+def _xlsx_has_export_manifest(path: Path) -> bool:
     from openpyxl import load_workbook
 
-    safe = _confine(path)
+    from bioetl.infrastructure.export.xlsx_workbook import XLSX_EXPORT_MANIFEST_SHEET
+
     workbook = load_workbook(
-        safe, read_only=True, data_only=True
+        path, read_only=True, data_only=True
+    )  # NOSONAR - confined_io_path
+    try:
+        return XLSX_EXPORT_MANIFEST_SHEET in workbook.sheetnames
+    finally:
+        workbook.close()
+
+
+def _read_xlsx_rows(path: Path) -> list[dict[str, object]]:
+    safe = _confine(path)
+    if _xlsx_has_export_manifest(safe):
+        from bioetl.infrastructure.export.xlsx_workbook import restore_xlsx_table
+
+        restored = restore_xlsx_table(str(safe))  # NOSONAR - confined_io_path
+        return [dict(row) for row in restored.to_pylist()]
+    return _read_plain_xlsx_rows(safe)
+
+
+def _read_plain_xlsx_rows(path: Path) -> list[dict[str, object]]:
+    from openpyxl import load_workbook
+
+    workbook = load_workbook(
+        path, read_only=True, data_only=True
     )  # NOSONAR - confined_io_path
     try:
         worksheet = workbook.worksheets[0]
