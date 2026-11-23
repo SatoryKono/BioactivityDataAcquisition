@@ -32,13 +32,21 @@ from __future__ import annotations
 from dataclasses import replace
 from datetime import UTC, datetime
 from types import SimpleNamespace
+from unittest.mock import Mock
 from uuid import UUID
 
 import pytest
 
 from bioetl.application.services.workflow.control_plane import execution_recording
+from bioetl.application.services.workflow.control_plane._execution_resume_support import (
+    resolve_completed_transform_fingerprints,
+    validate_resume_state,
+)
 from bioetl.application.services.workflow.control_plane.execution_recording import (
     WorkflowExecutionRecorder,
+)
+from bioetl.application.services.workflow.control_plane.mutation_plan import (
+    build_workflow_mutation_plan,
 )
 from bioetl.application.services.workflow.workflow_runner_models import (
     WorkflowRunExecutionResult,
@@ -47,10 +55,17 @@ from bioetl.application.services.workflow.workflow_runner_models import (
 from bioetl.application.services.workflow.workflow_transform_service import (
     WorkflowTransformDestructiveCommit,
     WorkflowTransformExecutionResult,
+    WorkflowTransformService,
 )
+from bioetl.application.workflow.transforms import WorkflowTransformRegistry
 from bioetl.domain.control_plane import WorkflowExecutionState
 from bioetl.domain.types import RunID
-from bioetl.domain.workflow import TransformStepConfig, WorkflowStepConfig
+from bioetl.domain.workflow import (
+    TransformStepConfig,
+    WorkflowConfig,
+    WorkflowStepConfig,
+    WorkflowTransformSpec,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -107,6 +122,93 @@ def _make_context() -> tuple[WorkflowExecutionRecorder, list[WorkflowExecutionSt
         state=_make_state(),
     )
     return context, saved
+
+
+@pytest.mark.asyncio
+async def test_failed_forced_transform_reuses_last_success_on_resume() -> None:
+    context, saved = _make_context()
+    step = TransformStepConfig(step_id="normalize", transform_name="normalize")
+    sibling = TransformStepConfig(step_id="sibling", transform_name="normalize")
+    config = WorkflowConfig(name="test", steps=(step, sibling))
+    context.state = replace(context.state, selected_step_ids=config.step_ids)
+    fingerprints = {
+        item.step_id: WorkflowTransformSpec.from_step(item).fingerprint
+        for item in (step, sibling)
+    }
+    for item in (step, sibling):
+        execution_recording.record_step_started(
+            context, item, fingerprint=fingerprints[item.step_id]
+        )
+        execution_recording.record_step_completed(
+            context,
+            WorkflowStepExecutionResult(
+                step_id=item.step_id,
+                step_kind="transform",
+                status="success",
+                payload={"fingerprint": fingerprints[item.step_id]},
+            ),
+        )
+
+    calls = []
+
+    def fail(spec, upstream):
+        calls.append(spec.step_id)
+        raise RuntimeError("forced failure")
+
+    registry = WorkflowTransformRegistry()
+    registry.register("normalize", fail)
+    service = WorkflowTransformService(registry=registry, metrics=Mock())
+    forced = resolve_completed_transform_fingerprints(
+        state=context.state, force_steps=(step.step_id,), repair_steps=()
+    )
+    assert forced == {"sibling": fingerprints["sibling"]}
+    assert build_workflow_mutation_plan(
+        config, context.state, force_steps=(step.step_id,)
+    ).pending_step_ids == {step.step_id}
+    execution_recording.record_step_started(
+        context, step, fingerprint=fingerprints[step.step_id]
+    )
+    failed = await service.run_step(
+        workflow_name="test", step=step, completed_fingerprints=forced
+    )
+    assert failed.status == "failed"
+    failed_step = WorkflowStepExecutionResult(
+        step_id=step.step_id,
+        step_kind="transform",
+        status=failed.status,
+        error_type=failed.error_type,
+        error_message=failed.error_message,
+    )
+    execution_recording.record_step_completed(context, failed_step)
+    execution_recording.record_workflow_finished(
+        context,
+        WorkflowRunExecutionResult(
+            workflow_name="test", status="failed", steps=(failed_step,)
+        ),
+        completed_at=datetime(2026, 1, 1, 12, 5, tzinfo=UTC),
+    )
+    state = saved[-1]
+    assert state.completed_transform_fingerprints == fingerprints
+    assert {item.step_id: item.status for item in state.steps} == {
+        "normalize": "failed",
+        "sibling": "success",
+    }
+    validate_resume_state(
+        latest_state=state,
+        workflow_name=state.workflow_name,
+        current_fingerprint=state.execution_fingerprint,
+        force_steps=(),
+        repair_steps=(),
+    )
+    restored = resolve_completed_transform_fingerprints(
+        state=state, force_steps=(), repair_steps=()
+    )
+    assert build_workflow_mutation_plan(config, state).pending_step_ids == frozenset()
+    resumed = await service.run_step(
+        workflow_name="test", step=step, completed_fingerprints=restored
+    )
+    assert resumed.status == "skipped"
+    assert calls == ["normalize"]
 
 
 def test_record_workflow_started_updates_running_state_and_clears_repairs() -> None:
