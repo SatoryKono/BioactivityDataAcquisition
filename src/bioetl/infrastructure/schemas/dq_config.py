@@ -295,6 +295,7 @@ class DQConfigFile(BaseModel):
                         max_value=tv.max,
                         pattern=tv.pattern,
                         allowed=tuple(tv.allowed),
+                        max_length=tv.max_length,
                         validator=tv.validator,
                         error_message=tv.error_message,
                     )

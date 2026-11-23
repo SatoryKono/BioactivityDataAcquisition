@@ -175,7 +175,7 @@ class TestFieldValidationToDict:
         result = loader._field_validation_to_dict(fv)
         assert result["field"] == "compound_id"
         assert result["type"] == "not_null"
-        assert "nullable" in result
+        assert "nullable" not in result
 
     def test_includes_min_max_when_set(self) -> None:
         """min/max included in dict when set."""
@@ -428,14 +428,12 @@ class TestNormalizeInlineDqOverrides:
         result = loader._normalize_inline_dq_overrides(yaml_config.dq_overrides)
         assert result["thresholds"] == {"soft_fail": 0.03, "hard_fail": 0.15}
 
-    def test_report_section_included(self) -> None:
-        """Report config section is always included."""
+    def test_omitted_report_section_is_not_an_override(self) -> None:
+        """An omitted report must not replace hierarchy values with defaults."""
         loader = self._make_loader()
         yaml_config = PipelineYamlConfig.model_validate(_base_pipeline_dict())
         result = loader._normalize_inline_dq_overrides(yaml_config.dq_overrides)
-        assert "report" in result
-        assert "enabled" in result["report"]
-        assert "format" in result["report"]
+        assert "report" not in result
 
     def test_field_validations_normalized(self) -> None:
         """field_validations are included when present."""

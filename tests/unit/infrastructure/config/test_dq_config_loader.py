@@ -43,6 +43,10 @@ from typing import Any
 import pytest
 
 from bioetl.infrastructure.config.dq_config_loader import DQConfigLoader
+from bioetl.infrastructure.config.pipeline_dq_resolution import (
+    normalize_inline_dq_overrides,
+)
+from bioetl.infrastructure.schemas.pipeline_config_common import DQYamlConfig
 
 pytestmark = pytest.mark.unit
 
@@ -144,6 +148,47 @@ def loader(test_configs_root: Path) -> DQConfigLoader:
 
 class TestDQConfigLoaderBasics:
     """Basic loading tests for DQConfigLoader."""
+
+    def test_inline_rules_preserve_fields_and_hierarchy(
+        self, loader: DQConfigLoader
+    ) -> None:
+        rule = {
+            "field": "title",
+            "type": "max_length",
+            "max_length": 12,
+            "severity": "warn",
+            "severity_enricher": "warn",
+        }
+        inline = DQYamlConfig.model_validate(
+            {
+                "field_validations": [rule],
+                "conditional_validations": [
+                    {
+                        "name": "conditional",
+                        "condition_field": "kind",
+                        "condition_value": "article",
+                        "then_validations": [rule],
+                    }
+                ],
+            }
+        )
+        result = loader.load(
+            "test_provider", "test_entity", normalize_inline_dq_overrides(inline)
+        )
+        direct = inline.to_domain()
+        assert (
+            next(r for r in result.field_validations if r.field == "title")
+            == (direct.field_validations[0])
+        )
+        assert result.conditional_validations[0] == direct.conditional_validations[0]
+        assert result.hard_fail_threshold == pytest.approx(0.15)
+        assert len(result.cross_field_validations) == 1
+
+        explicit = DQYamlConfig.model_validate({"hard_fail_threshold": 0.2})
+        overridden = loader.load(
+            "test_provider", "test_entity", normalize_inline_dq_overrides(explicit)
+        )
+        assert overridden.hard_fail_threshold == pytest.approx(0.2)
 
     def test_load_defaults_only(self, loader: DQConfigLoader) -> None:
         """Load for unknown provider should use defaults."""
