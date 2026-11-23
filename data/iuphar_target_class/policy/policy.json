@@ -1320,6 +1320,212 @@
     "input_row_id",
     "snapshot_id"
   ],
+  "rf001_semantics": {
+    "artifact": "iuphar_rf001_semantics",
+    "audit_counterexamples": {
+      "false_other": "unmapped/unknown must not become Other Protein Target",
+      "local_into_iuphar": "local_* must not be written into iuphar_* fields",
+      "lost_parents": "multi-parent family paths must retain every intact root_to_leaf path",
+      "matched_counts": "matched counts are not biological_accuracy_accepted",
+      "table_distinct": "Table.Distinct-style collapse must not pick an arbitrary class"
+    },
+    "biological_accuracy_accepted": false,
+    "capability_matrix": {
+      "enriched_composite_target": {
+        "available_after_dependency_joins": [
+          "chembl_target_component",
+          "chembl_protein_class",
+          "chembl_target_protein_classification",
+          "uniprot_idmapping",
+          "uniprot_protein"
+        ],
+        "full_features_available": true,
+        "limits": "Full classification for RF-003+ runs after dependency joins; seed-only projection remains V30 unless enrich is admitted",
+        "may_write_v31_columns": true,
+        "priority": 1,
+        "surface": "configs/composites/target.yaml"
+      },
+      "standalone_chembl_target": {
+        "available_inputs": [
+          "target_id",
+          "target_type",
+          "pref_name",
+          "taxonomy_id",
+          "organism",
+          "target_ec_numbers",
+          "target_xref_uniprot_ids",
+          "component_accessions",
+          "target_protein_synonyms",
+          "target_gene_synonyms"
+        ],
+        "full_features_available": false,
+        "limits": "Early standalone call cannot use post-join UniProt/protein-class features; matched counts on partial inputs are not biological accuracy",
+        "may_write_v31_columns": true,
+        "priority": 2,
+        "surface": "configs/entities/chembl/target.yaml",
+        "unavailable_until_joins": [
+          "uniprot_protein annotations/keywords",
+          "normalized primary UniProt accession from idmapping",
+          "chembl_target_protein_classification L1-L5 summary",
+          "full target_component protein_classifications"
+        ]
+      }
+    },
+    "contract_version": "rf001-2026-11-23",
+    "epic": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/13308",
+    "field_layers": {
+      "decision_status": {
+        "layer": "effective",
+        "meaning": "Resolution completeness and review requirement"
+      },
+      "effective_class": {
+        "layer": "effective",
+        "meaning": "Final class after the resolution table; may be null"
+      },
+      "effective_source": {
+        "layer": "effective",
+        "meaning": "Provenance of effective_class; live tokens are iuphar_normalized, local_rule, or none (resolution maps takes=iuphar → iuphar_normalized)"
+      },
+      "iuphar_annotation_status": {
+        "layer": "iuphar_reference",
+        "meaning": "Availability/completeness of the direct class annotation"
+      },
+      "iuphar_class": {
+        "layer": "iuphar_reference",
+        "meaning": "Direct-layer class from approved type/family mapping only"
+      },
+      "iuphar_match_status": {
+        "layer": "iuphar_reference",
+        "meaning": "Identity outcome against the snapshot catalog"
+      },
+      "iuphar_target_id": {
+        "layer": "iuphar_reference",
+        "meaning": "Matched GtoPdb/IUPHAR public target id from the pinned snapshot"
+      },
+      "legacy_iuphar_class": {
+        "layer": "legacy_comparison",
+        "meaning": "Historical M/Excel class retained for comparison only; not a live write path"
+      },
+      "local_class": {
+        "layer": "local_rules",
+        "meaning": "Class proposed by versioned local rules (EC/annotation/prediction)"
+      },
+      "local_status": {
+        "layer": "local_rules",
+        "meaning": "Support level of the local layer for the row"
+      },
+      "target_class_profile_sha256": {
+        "layer": "effective",
+        "meaning": "SHA-256 of the pinned classification profile envelope"
+      },
+      "target_type": {
+        "examples": "SINGLE PROTEIN, PROTEIN COMPLEX, ORGANISM, ...",
+        "layer": "chembl_object",
+        "meaning": "ChEMBL object/target type; never overwritten by IUPHAR or local rules"
+      }
+    },
+    "issue": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/13309",
+    "legacy_other_policy": {
+      "allowed_when": [
+        "approved direct mapping type other_protein",
+        "approved family mapping whose class is Other Protein Target",
+        "explicit local rule with marks_direct_layer=false supporting that class",
+        "legacy_iuphar_class comparison field carrying a historical M/Excel value"
+      ],
+      "forbidden_when": [
+        "unmapped_type or name/path text containing 'Other'",
+        "L1/L2 or free-text prediction alone without an explicit local rule",
+        "filling iuphar_class from local_* output",
+        "defaulting unknown/partial/ambiguous rows to Other"
+      ],
+      "working_class_name": "Other Protein Target"
+    },
+    "missing_marker_policy": {
+      "base_markers": [
+        "#n/a",
+        "N/A",
+        "n/a",
+        ""
+      ],
+      "change_rule": "A new missing_markers version is a new normalization_version; historical results keep their recorded provenance and are not rewritten",
+      "treat_null_as_missing": true,
+      "treat_whitespace_only_as_missing": true,
+      "version": null,
+      "version_status": "не утверждено"
+    },
+    "path_policy": {
+      "canonical_direction": "root_to_leaf",
+      "graph_defect_policy": "cycle, missing parent, depth/visited limits, or truncated walk do not invent a class from a cut path",
+      "legacy_text_field": "leaf_to_root",
+      "legacy_text_usage": "migration/comparison only; never used to choose a class",
+      "multiple_parents_allowed": true,
+      "structure": "tuple of family ids from root ancestor to leaf family",
+      "table_distinct_policy": "Power Query Table.Distinct / unordered collapse is not an identity decision; ambiguous multi-parent or multi-candidate rows stay ambiguous"
+    },
+    "profile_change_rules": {
+      "classification_schema_version": "Profile envelope field for enabled modes (shadow and enrich): 3.1.0. Distinct from the table/business contract; the adapter rejects a profile that is not 3.1.0",
+      "immutability": "Originals, historical results, and stage-0 copies are preserved; recomputes are separate runs with new digests",
+      "normalization_version": "Missing-marker or identifier normalization changes publish a new normalization_version; current approved value is unset",
+      "profile_envelope": "snapshot_manifest points at the profile envelope; digest is SHA-256 of exact profile bytes; acceptance and biological_accuracy_accepted stay false unless independently proven",
+      "rules_version": "New or edited local/direct rules publish a new rules_version; current baseline is plan-v1-r8",
+      "table_contract": "Business-row / Gold hash scope: off and shadow keep chembl_target_v3.0 (TargetClassificationConfig.contract_version 3.0.0); enrich alone advances to chembl_target_v3.1 / 3.1.0 and the nine additive columns"
+    },
+    "source_unavailable_vs_not_found": {
+      "must_remain_distinct": true,
+      "not_found": "Snapshot is complete and searchable channels yield no catalog hit",
+      "source_unavailable": "Required snapshot sources are incomplete; absence is not confirmed"
+    },
+    "statuses": {
+      "annotation": {
+        "available": "Approved type mapping supplies a direct class",
+        "conflicting": "Family mappings disagree on class",
+        "not_available": "Matched identity without usable direct annotation",
+        "partial": "Only family_only / family mapping supplies a coarse class",
+        "unmapped_type": "Provider type/family present but outside approved mappings"
+      },
+      "completeness": {
+        "admission_complete": "Declared independently reviewed scope is complete for admission",
+        "complete": "Global identity/absence coverage of the declared snapshot scope",
+        "family_only": "Snapshot/export can supply family paths but not a direct target type",
+        "incomplete": "Required snapshot sources or scope receipts are missing"
+      },
+      "decision": {
+        "requires_review": "Outcome needs human/process review or has conflict codes",
+        "resolved": "Resolution table selected an outcome without mandatory review",
+        "unresolved": "No effective class; incomplete rather than conflicting"
+      },
+      "local": {
+        "candidate_only": "Hints exist but cannot write a supported local class",
+        "conflicting": "Supported local rules disagree",
+        "not_supported": "No local support; local_class stays empty",
+        "supported": "At least one explicit local rule supports a class"
+      },
+      "match": {
+        "ambiguous": "Multiple compatible catalog candidates remain",
+        "contract_error": "Internal identity/status inconsistency; processing must not invent a class",
+        "identity_conflict": "Exact channels disagree on identity",
+        "insufficient_input": "Searchable identity input is missing or species-gapped",
+        "matched": "Exactly one catalog identity agreed across exact channels",
+        "not_found": "Snapshot is complete and searchable channels yield no catalog hit",
+        "source_unavailable": "Required snapshot sources are incomplete; absence is not confirmed"
+      },
+      "uncertainty": {
+        "ambiguous": "Multiple candidates remain; do not collapse silently",
+        "conflict": "Disagreement between layers or channels; retain conflict codes",
+        "not_found": "Confirmed absence under a complete searchable snapshot",
+        "partial": "Coarse or incomplete annotation; not a full direct type proof",
+        "source_unavailable": "Source/snapshot gap; distinct from confirmed not_found",
+        "unknown": "Value not computed or not applicable for the row state"
+      }
+    },
+    "working_classes": [
+      "Receptor",
+      "Ion Channel",
+      "Enzyme",
+      "Transporter",
+      "Other Protein Target"
+    ]
+  },
   "role_assignment": "владелец результата — Федор Новиков; исполнитель модуля и проверяющий эталонов — Cursor, назначение владельца 2026-11-11",
   "stage": "1",
   "stage_status": "recorded_without_biological_acceptance",
