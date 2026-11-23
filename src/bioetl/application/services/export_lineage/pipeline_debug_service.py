@@ -8,8 +8,8 @@ from __future__ import annotations
 
 __all__ = ["PipelineDebugService"]
 
-from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
+from dataclasses import dataclass, field, replace
+from typing import TYPE_CHECKING, cast
 
 from bioetl.domain.ports import (
     BreakpointHit,
@@ -24,6 +24,38 @@ if TYPE_CHECKING:
 
 class DebugAbortError(Exception):
     """Raised when user aborts pipeline from a debug breakpoint."""
+
+
+def _copy_containers[T](value: T, memo: dict[int, object]) -> T:
+    """Copy built-in dicts and lists; retain opaque payloads by reference."""
+    if type(value) not in (dict, list):
+        return value
+    value_id = id(value)
+    if value_id in memo:
+        return cast(T, memo[value_id])
+    if isinstance(value, dict):
+        original_dict = cast(dict[object, object], value)
+        result_dict: dict[object, object] = {}
+        memo[value_id] = result_dict
+        result_dict.update(
+            (key, _copy_containers(item, memo)) for key, item in original_dict.items()
+        )
+        return cast(T, result_dict)
+    original_list = cast(list[object], value)
+    result_list: list[object] = []
+    memo[value_id] = result_list
+    result_list.extend(_copy_containers(item, memo) for item in original_list)
+    return cast(T, result_list)
+
+
+def _copy_snapshot(snapshot: PipelineSnapshot) -> PipelineSnapshot:
+    memo: dict[int, object] = {}
+    return replace(
+        snapshot,
+        dq_issues=_copy_containers(snapshot.dq_issues, memo),
+        sample_records=_copy_containers(snapshot.sample_records, memo),
+        metadata=_copy_containers(snapshot.metadata, memo),
+    )
 
 
 @dataclass
@@ -84,7 +116,7 @@ class PipelineDebugService:
             sample_records=sample_records or [],
             metadata=metadata or {},
         )
-        self._snapshots.append(snapshot)
+        self._snapshots.append(_copy_snapshot(snapshot))
         self.debug_port.on_snapshot(snapshot)
         return snapshot
 
@@ -137,12 +169,12 @@ class PipelineDebugService:
 
     @property
     def snapshots(self) -> list[PipelineSnapshot]:
-        """Return all captured snapshots (read-only copy)."""
-        return list(self._snapshots)
+        """Return detached copies of the captured snapshots."""
+        return [_copy_snapshot(snapshot) for snapshot in self._snapshots]
 
     def get_latest_snapshot(self) -> PipelineSnapshot | None:
         """Return the most recent snapshot, or None if no snapshots."""
-        return self._snapshots[-1] if self._snapshots else None
+        return _copy_snapshot(self._snapshots[-1]) if self._snapshots else None
 
     def clear_snapshots(self) -> None:
         """Clear snapshot history."""
