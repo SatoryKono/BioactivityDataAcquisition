@@ -190,6 +190,29 @@ class TestDQConfigLoaderBasics:
         )
         assert overridden.hard_fail_threshold == pytest.approx(0.2)
 
+    def test_inline_thresholds_are_validated_after_hierarchy_merge(
+        self, loader: DQConfigLoader, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setattr(
+            loader,
+            "_load_provider_layer",
+            lambda _provider: {"hard_fail_threshold": 0.5},
+        )
+        soft = DQYamlConfig.model_validate({"soft_fail_threshold": 0.25})
+        result = loader.load(
+            "test_provider", "unknown", normalize_inline_dq_overrides(soft)
+        )
+        assert result.soft_fail_threshold == pytest.approx(0.25)
+        assert result.hard_fail_threshold == pytest.approx(0.5)
+        with pytest.raises(ValueError):
+            soft.to_domain()
+
+        reset = DQYamlConfig.model_validate({"hard_fail_threshold": 0.2})
+        result = loader.load(
+            "test_provider", "unknown", normalize_inline_dq_overrides(reset)
+        )
+        assert result.hard_fail_threshold == pytest.approx(0.2)
+
     def test_load_defaults_only(self, loader: DQConfigLoader) -> None:
         """Load for unknown provider should use defaults."""
         config = loader.load("unknown_provider", "unknown_entity")

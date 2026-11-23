@@ -140,8 +140,8 @@ class DQYamlConfig(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    soft_fail_threshold: float = Field(default=0.05)
-    hard_fail_threshold: float = Field(default=0.20)
+    soft_fail_threshold: float = Field(default=0.05, ge=0, le=1)
+    hard_fail_threshold: float = Field(default=0.20, ge=0, le=1)
     strict_validation: bool = Field(
         default=False,
         description=(
@@ -169,10 +169,11 @@ class DQYamlConfig(BaseModel):
     @model_validator(mode="after")
     def validate_thresholds(self) -> DQYamlConfig:
         """Validate that thresholds are between 0 and 1."""
-        DomainDQConfig.validate_thresholds(
-            soft_fail_threshold=self.soft_fail_threshold,
-            hard_fail_threshold=self.hard_fail_threshold,
-        )
+        if {"soft_fail_threshold", "hard_fail_threshold"} <= self.model_fields_set:
+            DomainDQConfig.validate_thresholds(
+                soft_fail_threshold=self.soft_fail_threshold,
+                hard_fail_threshold=self.hard_fail_threshold,
+            )
         return self
 
     @staticmethod
