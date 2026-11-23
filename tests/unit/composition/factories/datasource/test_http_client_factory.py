@@ -231,7 +231,7 @@ class TestHttpClientFactory:
         client_ctor = MagicMock(return_value="client-from-explicit-registry")
 
         def _raise_missing_source_config(_: str):
-            raise ValueError("missing source config")
+            raise module.SourceConfigNotFoundError("missing source config")
 
         monkeypatch.setattr(module, "load_source_config", _raise_missing_source_config)
         monkeypatch.setattr(module, "UnifiedHTTPClient", client_ctor)
@@ -314,7 +314,7 @@ class TestResolvedHttpConfig:
         registry.get_http_config.return_value = http_config
 
         def _raise(_: str) -> None:
-            raise ValueError("missing")
+            raise module.SourceConfigNotFoundError("missing")
 
         monkeypatch.setattr(module, "load_source_config", _raise)
         monkeypatch.setattr(
@@ -344,7 +344,7 @@ class TestResolvedHttpConfig:
         registry.get_http_config.return_value = http_config
 
         def _raise(_: str) -> None:
-            raise ValueError("missing")
+            raise module.SourceConfigNotFoundError("missing")
 
         monkeypatch.setattr(module, "load_source_config", _raise)
         monkeypatch.setattr(

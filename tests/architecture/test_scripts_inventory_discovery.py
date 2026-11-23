@@ -61,21 +61,20 @@ def test_iter_scripts_includes_non_python_entrypoints_in_current_scope() -> None
     assert not any(path.endswith(".sql") for path in rel_paths)
 
 
-def test_discover_refs_normalizes_windows_path_separators() -> None:
+def test_discover_refs_normalizes_windows_path_separators(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Windows-style script refs should resolve through path aliases."""
     module = _load_inventory_module()
-    root = repo_root()
+    root = tmp_path
     targets = [
         root / "scripts" / "ops" / "launchers" / "codex" / "codex-exec.bat",
         root / "scripts" / "ops" / "launchers" / "codex" / "codex.bat",
         root / "scripts" / "ops" / "runtime" / "wsl" / "start-wsl-proxy.bat",
     ]
-    original_iter_search_files = module._iter_search_files
     docs_dir = root / "docs" / "03-guides" / "development"
     docs_file = docs_dir / "codex-paths.md"
-    original_docs_text = (
-        docs_file.read_text(encoding="utf-8") if docs_file.exists() else None
-    )
+    docs_dir.mkdir(parents=True)
     docs_file.write_text(
         "\n".join(
             (
@@ -91,15 +90,8 @@ def test_discover_refs_normalizes_windows_path_separators() -> None:
     def _iter_only_codex_setup_docs(_: Path) -> list[Path]:
         return [docs_file]
 
-    module._iter_search_files = _iter_only_codex_setup_docs
-    try:
-        refs = module._discover_refs(root, targets)
-    finally:
-        module._iter_search_files = original_iter_search_files
-        if original_docs_text is None:
-            docs_file.unlink(missing_ok=True)
-        else:
-            docs_file.write_text(original_docs_text, encoding="utf-8")
+    monkeypatch.setattr(module, "_iter_search_files", _iter_only_codex_setup_docs)
+    refs = module._discover_refs(root, targets)
 
     codex_exec_key = "/".join(["scripts", "codex-exec.bat"])
     codex_key = "/".join(["scripts", "codex.bat"])

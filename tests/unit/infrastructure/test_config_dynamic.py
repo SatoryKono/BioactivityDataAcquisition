@@ -527,7 +527,6 @@ def test_convention_based_source_file(setup_configs, tmp_path):
                 "provider": "testprovider",
                 "source": {
                     "provider_config": {"provider": "testprovider"},
-                    "pagination": {"id_batch_size": 20},
                 },
             }
         ),
