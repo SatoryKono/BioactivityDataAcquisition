@@ -1,11 +1,11 @@
 {
   "source_branch": "fix/13261-workflow-examples",
-  "source_commit": "792a2ca96cc50e20a5d039f8baa7b01b3db5de58",
-  "source_run_id": "45117454919",
+  "source_commit": "9fa0d1a28f40c25e04a0822ea1eef826ae6d60f2",
+  "source_run_id": "45131874734",
   "source_event": "workflow_dispatch",
-  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/45117454919",
-  "source_tree_sha256": "e05bd2325195c5ac77c1931944c3fed3b754d3791a97ade92aefb21fc99e68d9",
-  "refreshed_at_utc": "2026-11-23T05:40:43.989000+00:00",
+  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/45131874734",
+  "source_tree_sha256": "ddde16221be6a81cccacbdd170a6292b86b34d5af77603e9fe38ffbee7e176a7",
+  "refreshed_at_utc": "2026-11-23T07:47:36.206000+00:00",
   "refresh_status": "captured",
   "coverage_percent": 99.51,
   "coverage": {
