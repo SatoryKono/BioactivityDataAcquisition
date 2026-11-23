@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Protocol
@@ -10,6 +11,96 @@ from bioetl.domain.medallion import GoldWriteMode
 from bioetl.domain.ports import AuditPort
 from bioetl.domain.types import GoldRecord, RunID, ScdConfig
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
+
+_SCD2_SQL_RESERVED = frozenset(
+    [
+        "all",
+        "alter",
+        "and",
+        "any",
+        "as",
+        "asc",
+        "between",
+        "by",
+        "case",
+        "cast",
+        "check",
+        "create",
+        "cross",
+        "current_date",
+        "current_time",
+        "current_timestamp",
+        "delete",
+        "desc",
+        "distinct",
+        "drop",
+        "else",
+        "end",
+        "except",
+        "exists",
+        "false",
+        "fetch",
+        "from",
+        "full",
+        "group",
+        "having",
+        "in",
+        "inner",
+        "insert",
+        "intersect",
+        "into",
+        "is",
+        "join",
+        "left",
+        "like",
+        "limit",
+        "not",
+        "null",
+        "offset",
+        "on",
+        "or",
+        "order",
+        "outer",
+        "primary",
+        "references",
+        "right",
+        "select",
+        "set",
+        "table",
+        "then",
+        "true",
+        "union",
+        "unique",
+        "update",
+        "using",
+        "values",
+        "when",
+        "where",
+        "with",
+    ]
+)
+
+
+def _validate_scd2_column_names(
+    records: list[GoldRecord], scd_config: ScdConfig
+) -> None:
+    """Require unquoted lowercase ASCII identifiers, excluding SQL reserved words."""
+    names = (
+        *scd_config.business_keys,
+        scd_config.valid_from_col,
+        scd_config.valid_to_col,
+        scd_config.current_flag_col,
+        scd_config.version_col,
+        *(name for record in records for name in record),
+    )
+    for name in names:
+        if (
+            not isinstance(name, str)
+            or not re.fullmatch(r"[a-z_][a-z0-9_]*", name)
+            or name in _SCD2_SQL_RESERVED
+        ):
+            raise ValueError(f"Unsupported SCD2 column name: {name!r}")
+
 
 if TYPE_CHECKING:
     from pandera.polars import DataFrameSchema
@@ -158,6 +249,8 @@ async def prepare_gold_write(
     validated_mode = host._validate_write_mode(mode)
     host._validate_records(records)
     host._validate_scd2_requirements(validated_mode, scd_config, ingestion_ts)
+    if validated_mode == GoldWriteMode.SCD2 and scd_config is not None:
+        _validate_scd2_column_names(records, scd_config)
     host._validate_schema_strict(schema, contract_version=contract_version)
     await host._validate_records_against_schema(
         records,

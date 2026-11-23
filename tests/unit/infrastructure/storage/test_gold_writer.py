@@ -522,6 +522,42 @@ class TestGoldWriterValidation:
             )
         assert found.value.receipt.committed_targets == ()
 
+    @pytest.mark.parametrize(
+        ("config", "extra_column"),
+        [
+            ({"business_key": "business key"}, None),
+            ({"business_key": "entity_id", "is_current": "is current"}, None),
+            ({"business_key": "entity_id", "valid_to": 'bad"name'}, None),
+            ({"business_key": "entity_id", "version": "select"}, None),
+            ({"business_key": "entity_id"}, "bad field"),
+            ({"business_key": "entity_id"}, "select"),
+        ],
+    )
+    async def test_scd2_rejects_unsupported_names_before_dispatch(
+        self,
+        gold_writer,
+        valid_records,
+        strict_schema,
+        fixed_ingestion_ts,
+        config,
+        extra_column,
+    ):
+        """Invalid SCD2 configuration and insert fields never reach a writer."""
+        if extra_column:
+            valid_records[0][extra_column] = "value"
+        gold_writer._dispatch_write = AsyncMock()
+        with precommit_error("Unsupported SCD2 column name") as found:
+            await gold_writer.write_gold(
+                table_name="test.table",
+                records=valid_records,
+                schema=strict_schema,
+                mode="scd2",
+                scd_config=config,
+                ingestion_ts=fixed_ingestion_ts,
+            )
+        assert found.value.receipt.committed_targets == ()
+        gold_writer._dispatch_write.assert_not_awaited()
+
     async def test_write_gold_scd2_without_ingestion_ts_raises(
         self, gold_writer, valid_records, strict_schema
     ):
