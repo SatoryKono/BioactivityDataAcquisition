@@ -586,6 +586,62 @@ def test_local_disagreement_is_not_a_resolved_dictionary_fact() -> None:
     assert agreed.decision_status == "resolved"
 
 
+def test_approved_other_survives_an_incomplete_annotation() -> None:
+    partial = decide(
+        BoundaryObservation(
+            case_id="partial-other",
+            dictionary_class=CANONICAL_OTHER,
+            approved_other_mapping=True,
+            uncertainty="partial",
+        )
+    )
+    assert partial.rule_id == "partial_annotation"
+    assert partial.decision_status == "requires_review"
+    assert partial.completeness == "partial"
+    assert partial.iuphar_class == CANONICAL_OTHER
+    assert partial.effective_class == CANONICAL_OTHER
+    assert partial.effective_source == "iuphar"
+
+    conflict = decide(
+        BoundaryObservation(
+            case_id="conflict-other",
+            dictionary_class=CANONICAL_OTHER,
+            approved_other_mapping=True,
+            uncertainty="conflict",
+        )
+    )
+    assert conflict.rule_id == "layer_conflict"
+    assert conflict.decision_status == "requires_review"
+    assert conflict.completeness == "conflict"
+    assert conflict.iuphar_class == CANONICAL_OTHER
+    assert conflict.effective_class == CANONICAL_OTHER
+    assert conflict.effective_source == "iuphar"
+
+    legacy = decide(
+        BoundaryObservation(
+            case_id="partial-legacy-other",
+            dictionary_class=LEGACY_OTHER,
+            approved_other_mapping=True,
+            legacy_field=True,
+            uncertainty="partial",
+        )
+    )
+    assert legacy.rule_id == "partial_annotation"
+    assert legacy.iuphar_class == CANONICAL_OTHER
+    assert legacy.effective_class == CANONICAL_OTHER
+
+    rejected = decide(
+        BoundaryObservation(
+            case_id="partial-unapproved-other",
+            dictionary_class=CANONICAL_OTHER,
+            uncertainty="partial",
+        )
+    )
+    assert rejected.rule_id == "false_other"
+    assert rejected.iuphar_class is None
+    assert rejected.effective_class is None
+
+
 def test_blank_classes_do_not_become_dictionary_or_local_facts() -> None:
     with pytest.raises(ValueError, match="supported local"):
         BoundaryObservation(

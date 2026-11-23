@@ -295,7 +295,7 @@
       "role": "rf001_contract",
       "semantics_bound": false,
       "version_id": null,
-      "worktree_sha256": "6dcfd6766e7c8321bfc69084776f74a5b6cba37cda320c6ff5bd1541079b2d12"
+      "worktree_sha256": "26fea60ceec4d2b827d762331225dc41c6566e1a10bc77ec08eb9f088c79e398"
     },
     {
       "availability": "present",

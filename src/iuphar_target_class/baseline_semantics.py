@@ -887,6 +887,19 @@ def _uncertainty(observation: BoundaryObservation) -> BoundaryDecision | None:
     )
 
 
+def _admitted_dictionary_class(observation: BoundaryObservation) -> str | None:
+    """Keep a real dictionary fact, including an approved canonical Other."""
+    label = observation.dictionary_class
+    if label not in OTHER_LABELS:
+        return label
+    admitted = observation.approved_other_mapping and not (
+        label == LEGACY_OTHER and not observation.legacy_field
+    )
+    if not admitted:
+        return None
+    return CANONICAL_OTHER
+
+
 def _dictionary_or_null(
     observation: BoundaryObservation,
     *,
@@ -894,9 +907,7 @@ def _dictionary_or_null(
     completeness: str,
     codes: tuple[str, ...],
 ) -> BoundaryDecision:
-    dictionary_class = observation.dictionary_class
-    if dictionary_class in OTHER_LABELS:
-        dictionary_class = None
+    dictionary_class = _admitted_dictionary_class(observation)
     return _decision(
         observation,
         rule_id=rule_id,
