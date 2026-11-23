@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "72e42509ca522c4679f51a8e135e96848cc352d6",
+  "source_ref": "72b2f43d2e3e42af74a5a227e663657f0237fde7",
+  "source_reviews": {
+    "src/bioetl/infrastructure/storage/gold/cancellation.py": "Reviewed the cancellation drain: retain the completed child exception as diagnostics; task creation, draining and ownership are unchanged.",
+    "src/bioetl/infrastructure/storage/gold/commit_outcome.py": "Reviewed cancellation outcome translation: preserve existing secondary diagnostics; task creation and lifetime are unchanged.",
+    "src/bioetl/infrastructure/storage/gold/writer_implementation.py": "Reviewed Gold outcome rebinding: preserve existing secondary diagnostics; resource acquisition and lifecycle are unchanged."
+  },
+  "expression_updates": {},
+  "segment_updates": {},
+  "reference_moves": [],
+  "exclusion_moves": [],
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": []
+}
