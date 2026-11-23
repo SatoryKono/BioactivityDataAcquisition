@@ -260,6 +260,7 @@ _LIST_FIELDS = frozenset(
         "effective_subclasses",
         "family_ids",
         "iuphar_class_candidates",
+        "iuphar_family_ids",
         "iuphar_family_paths",
         "local_candidates",
         "local_rule_ids",
@@ -735,12 +736,14 @@ def test_duplicate_identity_is_not_silently_deduplicated() -> None:
 
 
 def test_rows_without_identity_are_not_a_class_match() -> None:
-    historical = {"iuphar_class": "Enzyme", "iuphar_subclass": "Hydrolase"}
-    current = {"iuphar_class": "Enzyme", "iuphar_subclass": "Hydrolase"}
+    historical = {"iuphar_class": "Enzyme"}
+    current = {"iuphar_class": "Enzyme"}
     comparison = _comparison(
         _report((historical,), (current,)), "original_m:new_result"
     )
+    assert comparison["measured"] is True
     assert comparison["class_agreement_count"] == 0
+    assert comparison["semantic_mismatch_count"] == 1
     identity = _field_diff(comparison, "identity")
     assert identity is not None
     assert identity["disposition"] == "unexplained"
@@ -769,6 +772,19 @@ def test_reordered_family_paths_are_not_a_stage0_residual() -> None:
     assert same.residual == ()
     assert same.changes == ()
     assert different.residual == ("input_row_id=1|target_id=T1",)
+    candidates = _identity(
+        iuphar_class="Enzyme",
+        candidate_target_ids=json.dumps(["1", "2"], separators=(",", ":")),
+    )
+    reordered_candidates = _identity(
+        iuphar_class="Enzyme",
+        candidate_target_ids=json.dumps(["2", "1"], separators=(",", ":")),
+    )
+    stage0 = compare_stage0(
+        Stage0Reference("fixture", 1, (candidates,)), (reordered_candidates,)
+    )
+    assert stage0.residual == ()
+    assert stage0.changes == ()
 
 
 @pytest.mark.parametrize(
@@ -792,6 +808,46 @@ def test_same_class_different_rule_provenance_is_detected(field: str) -> None:
     )
     assert comparison["class_agreement_count"] == 1
     assert comparison["class_disagreement_count"] == 0
+
+
+def test_selected_target_and_published_family_ids_are_compared() -> None:
+    historical = _identity(
+        iuphar_class="Enzyme",
+        matched_target_id="1",
+        candidate_target_ids=json.dumps(["1", "2"], separators=(",", ":")),
+        iuphar_family_ids=json.dumps(["10"], separators=(",", ":")),
+    )
+    current = _identity(
+        iuphar_class="Enzyme",
+        matched_target_id="2",
+        candidate_target_ids=json.dumps(["2", "1"], separators=(",", ":")),
+        iuphar_family_ids=json.dumps(["20"], separators=(",", ":")),
+    )
+    comparison = _comparison(
+        _report((historical,), (current,)), "original_m:new_result"
+    )
+    selected = _field_diff(comparison, "matched_target_id")
+    families = _field_diff(comparison, "iuphar_family_ids")
+    assert selected is not None and selected["old_value"] == "1"
+    assert selected["new_value"] == "2"
+    assert selected["disposition"] == "unexplained"
+    assert families is not None and families["old_value"] == '["10"]'
+    assert families["new_value"] == '["20"]'
+    assert _field_diff(comparison, "candidate_target_ids") is None
+    assert comparison["class_agreement_count"] == 1
+    assert comparison["semantic_mismatch_count"] == 2
+
+
+def test_parity_report_refuses_to_follow_a_symlink(tmp_path: Path) -> None:
+    proof = tmp_path / "classification.json"
+    proof.write_text("proof-original", encoding="utf-8")
+    link = tmp_path / M_PARITY_REPORT_FILENAME
+    link.symlink_to(proof.name)
+    report = _report((), ())
+    with pytest.raises(ValueError, match="symlink"):
+        write_m_parity_report(report, tmp_path)
+    assert proof.read_text(encoding="utf-8") == "proof-original"
+    assert link.is_symlink()
 
 
 def test_basis_added_after_the_seal_is_rejected() -> None:

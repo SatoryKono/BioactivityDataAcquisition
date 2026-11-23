@@ -143,8 +143,10 @@ _STAGE0_FIELDS: tuple[str, ...] = (
     "family_ids",
     "iuphar_annotation_status",
     "iuphar_class_candidates",
+    "iuphar_family_ids",
     "iuphar_family_paths",
     "iuphar_subclass",
+    "matched_target_id",
     "iuphar_type_raw",
     "local_candidates",
     "local_class",
@@ -262,7 +264,9 @@ FIELD_GROUPS: dict[str, str] = {
     "iuphar_annotation_status": "local_effective",
     "iuphar_class": "class",
     "iuphar_class_candidates": "candidates",
+    "iuphar_family_ids": "families_paths",
     "iuphar_family_paths": "families_paths",
+    "matched_target_id": "matched_target",
     "iuphar_mapping_rule_id": "provenance",
     "iuphar_mapping_version": "provenance",
     "iuphar_subclass": "subclasses",
@@ -302,6 +306,7 @@ _LIST_FIELDS = frozenset(
         "effective_subclasses",
         "family_ids",
         "iuphar_class_candidates",
+        "iuphar_family_ids",
         "iuphar_family_paths",
         "local_candidates",
         "local_rule_ids",
@@ -1084,10 +1089,19 @@ def _sha256_bytes(payload: bytes) -> str:
 
 
 def _atomic_write_bytes(path: Path, payload: bytes, *, root: Path) -> None:
+    if path.is_symlink() or path.name in PROOF_VERIFICATION_ARTIFACTS:
+        message = (
+            "m-parity report must not follow a symlink or replace a proof artifact"
+        )
+        raise ValueError(message)
     root_resolved = root.resolve()
-    destination = path.resolve()
-    if not destination.is_relative_to(root_resolved):
+    parent = path.parent.resolve()
+    if not parent.is_relative_to(root_resolved):
         message = "path escapes root"
+        raise ValueError(message)
+    destination = parent / path.name
+    if destination.is_symlink():
+        message = "m-parity report must not follow a symlink"
         raise ValueError(message)
     destination.parent.mkdir(parents=True, exist_ok=True)
     temporary: Path | None = None
