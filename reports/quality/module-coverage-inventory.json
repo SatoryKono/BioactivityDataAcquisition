@@ -21476,6 +21476,36 @@
       "source_lines": 138
     },
     {
+      "coverage_percent": null,
+      "coverage_status": "coverage_xml_missing",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
+      "module": "bioetl.infrastructure.export.xlsx_text_parts",
+      "path": "src/bioetl/infrastructure/export/xlsx_text_parts.py",
+      "source_lines": 300
+    },
+    {
+      "coverage_percent": null,
+      "coverage_status": "coverage_xml_missing",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
+      "module": "bioetl.infrastructure.export.xlsx_value_codec",
+      "path": "src/bioetl/infrastructure/export/xlsx_value_codec.py",
+      "source_lines": 204
+    },
+    {
+      "coverage_percent": null,
+      "coverage_status": "coverage_xml_missing",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
+      "module": "bioetl.infrastructure.export.xlsx_workbook",
+      "path": "src/bioetl/infrastructure/export/xlsx_workbook.py",
+      "source_lines": 292
+    },
+    {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
       "covered_lines": 3,
@@ -48008,6 +48038,36 @@
       "source_lines": 138
     },
     {
+      "coverage_percent": null,
+      "coverage_status": "coverage_xml_missing",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
+      "module": "bioetl.infrastructure.export.xlsx_text_parts",
+      "path": "src/bioetl/infrastructure/export/xlsx_text_parts.py",
+      "source_lines": 300
+    },
+    {
+      "coverage_percent": null,
+      "coverage_status": "coverage_xml_missing",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
+      "module": "bioetl.infrastructure.export.xlsx_value_codec",
+      "path": "src/bioetl/infrastructure/export/xlsx_value_codec.py",
+      "source_lines": 204
+    },
+    {
+      "coverage_percent": null,
+      "coverage_status": "coverage_xml_missing",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
+      "module": "bioetl.infrastructure.export.xlsx_workbook",
+      "path": "src/bioetl/infrastructure/export/xlsx_workbook.py",
+      "source_lines": 292
+    },
+    {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
       "covered_lines": 3,
@@ -53070,7 +53130,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-11-20",
-  "source_tree_sha256": "8dfefb28b14bcb0f74a3657d696f50ec642fc3cfe40dfaff163e9e6a9f3db76b",
+  "source_tree_sha256": "5200bd1a94bbec75ca6c26478a1e8f7a6a9417e65b7b2d7ab2b5c898f69b8dcd",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -53225,9 +53285,9 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 2653,
+    "source_module_count": 2656,
     "status_counts": {
-      "coverage_xml_missing": 0,
+      "coverage_xml_missing": 3,
       "fully_covered": 2537,
       "no_executable_lines": 1,
       "partially_covered": 115,
