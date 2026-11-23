@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "72e42509ca522c4679f51a8e135e96848cc352d6",
+  "source_ref": "1f6187f1a2c6e52e2715ce208fe9e7437d7e5097",
+  "source_reviews": {
+    "src/bioetl/application/services/workflow/_observability_workflow_execution.py": "Reviewed manifest-selected diagnostics and identity checks; no external resource acquisition, ownership, or lifecycle changes."
+  },
+  "expression_updates": {},
+  "segment_updates": {},
+  "reference_moves": [],
+  "exclusion_moves": [],
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": []
+}
