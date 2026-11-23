@@ -49,7 +49,10 @@ from bioetl.domain.types import RunType
 from bioetl.infrastructure.config.domain_config_resolver import (
     DomainConfigResolver,
 )
-from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+from bioetl.infrastructure.schemas.pipeline_config import (
+    DQYamlConfig,
+    PipelineYamlConfig,
+)
 
 
 def _make_yaml_config(**overrides: object) -> PipelineYamlConfig:
@@ -63,22 +66,7 @@ def _make_yaml_config(**overrides: object) -> PipelineYamlConfig:
         ),
         "silver_filters": None,
         "gold_filters": None,
-        "dq_overrides": SimpleNamespace(
-            field_validations=[],
-            cross_field_validations=[],
-            conditional_validations=[],
-            soft_fail_threshold=0.05,
-            hard_fail_threshold=0.20,
-            strict_validation=False,
-            invalid_record_policy="drop",
-            report=SimpleNamespace(
-                enabled=True,
-                format="json",
-                include_sample_failures=True,
-                sample_size=10,
-                output_path=None,
-            ),
-        ),
+        "dq_overrides": DQYamlConfig(),
     }
     defaults.update(overrides)
     return cast(PipelineYamlConfig, SimpleNamespace(**defaults))
