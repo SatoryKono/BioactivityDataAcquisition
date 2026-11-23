@@ -67,12 +67,14 @@ def reference_inputs(tmp_path: Path):
         "2026-11-16T00:00:00Z",
         "2026-11-16T00:01:00Z",
     )
+    # The synthetic row carries EC 1.1.1.1, so the local catalog now supports
+    # Enzyme beside the direct Receptor label and the decision stays in review.
     expected = {
         "match_status": "matched",
         "matched_target_id": "1",
         "iuphar_class": "Receptor",
         "iuphar_annotation_status": "available",
-        "decision_status": "resolved",
+        "decision_status": "requires_review",
     }
     spec = {
         "artifact": "bioetl_iuphar_reference_cases",

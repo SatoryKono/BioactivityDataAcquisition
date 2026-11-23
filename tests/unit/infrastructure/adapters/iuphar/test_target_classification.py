@@ -252,9 +252,12 @@ def test_an_ec_input_does_not_replace_direct_iuphar(tmp_path):
         IupharTargetClassificationAdapter(profile), target_ec_numbers="3.4.21.1"
     )
     assert result.projection["iuphar_class"] == "Receptor"
-    # EC text alone does not supply the independent rule evidence needed for a
-    # supported local class. The adapter must not manufacture a local override.
-    assert result.projection["local_class"] is None
+    # EC 3 is a local Enzyme witness. It stays in local_class and does not
+    # replace the official IUPHAR class.
+    assert result.projection["local_class"] == "Enzyme"
+    assert result.projection["effective_class"] == "Receptor"
+    assert result.projection["effective_source"] == "iuphar_normalized"
+    assert result.projection["decision_status"] == "requires_review"
 
 
 @pytest.mark.parametrize(
