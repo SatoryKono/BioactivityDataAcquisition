@@ -1,0 +1,52 @@
+{
+  "acceptable_incompleteness": {
+    "count": 189,
+    "row_identities_verified": false,
+    "status": "source_unavailable",
+    "why": "The pinned snapshot is family_only and its completeness is not certified, so these rows are a source gap rather than a negative match. Row ids are not in the repository."
+  },
+  "artifact": "bioetl_iuphar_rf008_cohort_partition",
+  "axes": {
+    "admission_buckets_sum": 1000,
+    "historical_review_sum": 1000,
+    "note": "Match-status buckets and the historical 6/994 review cut are different axes of the same 1000-input audit. The review cut is not reused as the new admission partition."
+  },
+  "diagnostic_observations_not_acceptance_kpis": {
+    "acceptance_kpi": false,
+    "counterfactual_matched": 633,
+    "counterfactual_source": "Epic #13308 / RF-002: dropping auxiliary UniProt xrefs was counted as 633 matched. That count is not an accuracy KPI.",
+    "intersection_matches": 374,
+    "intersection_source": "Issue #13316 names 374 intersection matches. The row table is not in the repository, so this receipt does not recompute or accept that figure."
+  },
+  "historical_review_not_reused": {
+    "reused_as_new_semantics_admission": false,
+    "reviewed": 6,
+    "unreviewed": 994,
+    "why": "The previous 6 reviewed cases follow the old anchor policy. They do not admit the separated primary/auxiliary semantics."
+  },
+  "inputs": 1000,
+  "issue": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/13316",
+  "qualification_version": "rf008-2026-11-23",
+  "row_identities_in_repository": false,
+  "unreviewed": {
+    "ambiguous": 547,
+    "count": 664,
+    "declared_verified": false,
+    "matched": 117,
+    "why": "Matched and ambiguous audit rows have no independent row-level review in this repository. Unreviewed rows are not labeled verified."
+  },
+  "unsupported": {
+    "count": 147,
+    "status": "outside_supported_taxa",
+    "supported_taxa": [
+      "10090",
+      "10116",
+      "9606"
+    ],
+    "why": "Taxa outside 9606, 10090 and 10116 are outside the contract."
+  },
+  "verified_expectations": {
+    "count": 0,
+    "why": "No control-row identity is pinned here, and the historical 6 cases are not a verified set for the new semantics."
+  }
+}

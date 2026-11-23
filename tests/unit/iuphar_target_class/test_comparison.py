@@ -5,6 +5,7 @@ from __future__ import annotations
 import pytest
 
 from iuphar_target_class.comparison import Stage0Reference, compare_stage0
+from iuphar_target_class.rf008_qualification import evaluate_categories
 
 pytestmark = pytest.mark.unit
 
@@ -233,3 +234,16 @@ def test_absent_historical_decision_is_not_invented_as_unchanged() -> None:
     )
     assert report.changes == ()
     assert report.residual == ("input_row_id=1",)
+
+
+def test_rf008_direct_class_changes_require_evidence() -> None:
+    report = evaluate_categories(("comparison_evidence",))
+    assert report["unexplained_error_count"] == 0
+    cases = report["cases"]
+    assert isinstance(cases, list)
+    by_id = {str(item["case_id"]): item for item in cases if isinstance(item, dict)}
+    unexplained = by_id["cmp-unexplained-direct-class"]["observed"]
+    explained = by_id["cmp-explained-direct-class"]["observed"]
+    assert unexplained == {"change_count": 0, "residual_count": 1}
+    assert explained == {"change_count": 1, "residual_count": 0}
+    assert by_id["cmp-unexplained-direct-class"]["claim"] == "engineering_rule"

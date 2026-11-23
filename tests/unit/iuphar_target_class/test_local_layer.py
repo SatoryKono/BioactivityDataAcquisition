@@ -9,6 +9,7 @@ import pytest
 from iuphar_target_class.local_layer import Prediction, apply_local
 from iuphar_target_class.normalization import parse_ec_numbers
 from iuphar_target_class.policy import PLAN_SOURCE, PLAN_VERSION, RuleRecord
+from iuphar_target_class.rf008_qualification import evaluate_categories
 
 pytestmark = pytest.mark.unit
 
@@ -256,3 +257,26 @@ def test_working_classes_cannot_be_reparented_to_erase_a_conflict(
         apply_local(
             (), rules=rules, keyword_ids=("KW-E", "KW-R"), subclass_of=hierarchy
         )
+
+
+def test_rf008_ec_tf_and_missing_markers_follow_the_source_tables() -> None:
+    report = evaluate_categories(
+        ("ec_category", "multiple_ec", "broad_tf_tag", "missing_marker")
+    )
+    assert report["unexplained_error_count"] == 0
+    cases = report["cases"]
+    assert isinstance(cases, list)
+    ec_cases = [
+        item
+        for item in cases
+        if isinstance(item, dict) and item["category"] == "ec_category"
+    ]
+    assert len(ec_cases) == 7
+    assert all(item["disposition"] == "verified" for item in ec_cases)
+    by_id = {str(item["case_id"]): item for item in cases if isinstance(item, dict)}
+    assert by_id["local-tf-broad"]["observed"] == {
+        "local_class": None,
+        "local_status": "not_supported",
+    }
+    assert by_id["local-ec-7"]["observed"]["ec_categories"] == ["Translocases"]
+    assert by_id["local-ec-7"]["observed"]["local_class"] is None
