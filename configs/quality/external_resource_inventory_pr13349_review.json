@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "catalog_ref": "72e42509ca522c4679f51a8e135e96848cc352d6",
-  "source_ref": "d2db32060f1c3901c81bb510ed15fbe35bb58d2b",
+  "catalog_ref": "2d6272ac102d10a4905f0d6096dff0a8d38ed415",
+  "source_ref": "61993266682b8e677c7a1c0284116d6969cb35cb",
   "source_reviews": {
     "src/bioetl/application/services/workflow/control_plane/_execution_resume_support.py": "Added failed held-step preflight validation; existing state-port save and resource lifecycles are unchanged."
   },
