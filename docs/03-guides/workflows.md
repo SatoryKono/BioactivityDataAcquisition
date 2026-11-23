@@ -397,7 +397,9 @@ Current operator surface:
 The linked issues now define the shipped object behavior on rerun:
 
 - steps with terminal `success` status should normally be skipped on resume;
-- failed steps should be retried;
+- failed steps are retried unless a matching last-success transform fingerprint
+  remains available; a failed forced non-destructive attempt preserves that
+  fingerprint and selector-free resume skips the transform;
 - `started` without terminal event should be treated as incomplete and retriable;
 - destructive transforms must not silently replay after ambiguous crash points;
 - explicit `force` and `repair` actions must be visible in ledger history.
