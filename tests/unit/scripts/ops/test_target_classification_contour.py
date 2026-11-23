@@ -873,9 +873,7 @@ def test_live_readback_rejects_matching_but_wrong_row_profiles(
 ) -> None:
     """Live Silver/Gold may match each other yet disagree with the promoted digest."""
     evidence, observations = _ready_case(tmp_path)
-    wrong = tuple(
-        {**row, "target_class_profile_sha256": _OTHER} for row in _ROWS
-    )
+    wrong = tuple({**row, "target_class_profile_sha256": _OTHER} for row in _ROWS)
     silver = tmp_path / "live-wrong-silver.csv"
     gold = tmp_path / "live-wrong-gold.csv"
     _write_csv(silver, wrong)
