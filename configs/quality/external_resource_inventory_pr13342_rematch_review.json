@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "catalog_ref": "a9bb5f70900e9d4122618b2737b4ed976d207f9d",
-  "source_ref": "e7507c11164c49018773b535e58a8b0929457169",
+  "source_ref": "87f252b517a6d65838c10263aa46514fe5738904",
   "source_reviews": {
     "src/bioetl/infrastructure/storage/target_classification_guard.py": "Rematch after #13343 (#13342): blob relocated vs catalog pin; RF-011 profile/cutover pins retained; no new acquisition sites. Prior: Rematch after #13349 (#13342): blob relocated vs catalog pin; no new acquisition sites.",
     "src/bioetl/infrastructure/storage/target_classification_migration.py": "Rematch after #13343 (#13342): blob relocated vs catalog pin; RF-011 profile/cutover pins retained; no new acquisition sites. Prior: Rematch after #13349 (#13342): blob relocated vs catalog pin; no new acquisition sites.",
@@ -12,7 +12,132 @@
   "expression_updates": {},
   "resource_updates": {},
   "additional_bindings": {},
-  "new_resources": [],
+  "new_resources": [
+    {
+      "identity": "iuphar.bioetl.infrastructure.storage.target_classification_migration_pins.delta",
+      "type": "delta",
+      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+      "lifetime": "owner/operation",
+      "creator": [
+        "_delta_pin"
+      ],
+      "owner": "bioetl.infrastructure.storage.target_classification_migration_pins owns DeltaTable pin reads for RF-011 migration profile checks",
+      "closer": "DeltaTable finishes the native table operation before return; no table handle is stored on a process-global owner.",
+      "shutdown_contract": "Synchronous DeltaTable construction and metadata/version reads release the native handle before _delta_pin returns; failures before allocation have no close obligation.",
+      "production_entrypoint": "opt-in IUPHAR target classification migration prepare/promote/rollback",
+      "call_path": [
+        "target_classification_migration_pins._delta_pin -> DeltaTable"
+      ],
+      "configuration_predicates": [],
+      "scenarios": {
+        "cancellation": {
+          "applicability": "owning async boundary; these primitives are synchronous",
+          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
+          "observation": "Cancel the owner around the call and observe remaining handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
+          "expected": "Preserve the original failure and release any handle this function already acquired.",
+          "observation": "Inject after allocation and during close; inspect retained handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "normal": {
+          "applicability": "applicable",
+          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
+          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "outer caller attempt; the primitive has no internal retry",
+          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
+          "observation": "Compare opened and closed identities per attempt.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "no intrinsic timeout on the synchronous primitive",
+          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
+          "observation": "Observe the outer deadline and whether the call returned.",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "site_selectors": [
+        {
+          "file": "src/bioetl/infrastructure/storage/target_classification_migration_pins.py",
+          "scope": "_delta_pin",
+          "call": "DeltaTable",
+          "expression": "DeltaTable(str(path))"
+        }
+      ],
+      "cleanup_selectors": []
+    },
+    {
+      "identity": "iuphar.bioetl.infrastructure.storage.target_classification_migration_pins.file",
+      "type": "file",
+      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+      "lifetime": "owner/operation",
+      "creator": [
+        "_active_contract_version",
+        "_dependency_schema_versions"
+      ],
+      "owner": "bioetl.infrastructure.storage.target_classification_migration_pins owns ephemeral config/schema reads for RF-011 migration pins",
+      "closer": "Path.read_text and Path.read_bytes release their stream before the owning function returns; no handle is retained on the caller.",
+      "shutdown_contract": "Synchronous pathlib reads own temporary file streams inside read_text/read_bytes; inspect opening/closing inside the library boundary.",
+      "production_entrypoint": "opt-in IUPHAR target classification migration prepare/promote/rollback",
+      "call_path": [
+        "target_classification_migration_pins._active_contract_version -> path.read_text",
+        "target_classification_migration_pins._dependency_schema_versions -> Path.read_bytes"
+      ],
+      "configuration_predicates": [],
+      "scenarios": {
+        "cancellation": {
+          "applicability": "owning async boundary; these primitives are synchronous",
+          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
+          "observation": "Cancel the owner around the call and observe remaining handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
+          "expected": "Preserve the original failure and release any handle this function already acquired.",
+          "observation": "Inject after allocation and during close; inspect retained handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "normal": {
+          "applicability": "applicable",
+          "expected": "The owning function acquires this local file, table, lock, or directory iterator and releases it before return.",
+          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "outer caller attempt; the primitive has no internal retry",
+          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
+          "observation": "Compare opened and closed identities per attempt.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "no intrinsic timeout on the synchronous primitive",
+          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
+          "observation": "Observe the outer deadline and whether the call returned.",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "site_selectors": [
+        {
+          "file": "src/bioetl/infrastructure/storage/target_classification_migration_pins.py",
+          "scope": "_active_contract_version",
+          "call": "path.read_text",
+          "expression": "path.read_text(encoding='utf-8')"
+        },
+        {
+          "file": "src/bioetl/infrastructure/storage/target_classification_migration_pins.py",
+          "scope": "_dependency_schema_versions",
+          "call": "(root / relative).read_bytes",
+          "expression": "(root / relative).read_bytes()"
+        }
+      ],
+      "cleanup_selectors": []
+    }
+  ],
   "new_exclusions": [],
   "segment_updates": {},
   "reference_moves": [
