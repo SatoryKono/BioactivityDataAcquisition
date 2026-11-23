@@ -1834,54 +1834,6 @@ def test_shadow_compare_routes_codex_launchers_and_guidance(changed_file: str) -
             "configs/quality/external_resource_inventory_pr0_unreviewed.json",
         ),
         (
-            "configs/quality/external_resource_inventory_pr13329_review.json",
-            {
-                "tests/architecture/test_external_resource_inventory_catalog.py",
-                "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
-            },
-            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
-        ),
-        (
-            "configs/quality/external_resource_inventory_pr13324_gold_writer_review.json",
-            {
-                "tests/architecture/test_external_resource_inventory_catalog.py",
-                "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
-            },
-            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
-        ),
-        (
-            "configs/quality/external_resource_inventory_pr13341_main_merge_review.json",
-            {
-                "tests/architecture/test_external_resource_inventory_catalog.py",
-                "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
-            },
-            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
-        ),
-        (
-            "configs/quality/external_resource_inventory_pr13341_classification_review.json",
-            {
-                "tests/architecture/test_external_resource_inventory_catalog.py",
-                "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
-            },
-            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
-        ),
-        (
-            "configs/quality/external_resource_inventory_pr13328_workflow_resume_review.json",
-            {
-                "tests/architecture/test_external_resource_inventory_catalog.py",
-                "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
-            },
-            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
-        ),
-        (
-            "configs/quality/external_resource_inventory_pr13328_review.json",
-            {
-                "tests/architecture/test_external_resource_inventory_catalog.py",
-                "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
-            },
-            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
-        ),
-        (
             "configs/quality/external_resource_inventory_pr13166_dq_data_dir_review.json",
             {
                 "tests/architecture/test_external_resource_inventory_catalog.py",
