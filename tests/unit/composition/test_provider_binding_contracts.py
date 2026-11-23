@@ -28,7 +28,7 @@ pytestmark = pytest.mark.unit
 
 def test_absent_pubchem_configuration_keeps_documented_local_defaults(monkeypatch):
     def missing(provider):
-        raise ValueError("provider is not configured")
+        raise pubchem.SourceConfigNotFoundError("provider is not configured")
 
     monkeypatch.setattr(pubchem, "load_source_config", missing)
     assert pubchem._resolve_executor_timeout("absent") == 30.0
