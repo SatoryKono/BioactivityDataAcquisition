@@ -264,6 +264,7 @@ _LIST_FIELDS = frozenset(
         "iuphar_class_candidates",
         "iuphar_family_ids",
         "iuphar_family_paths",
+        "input_errors",
         "local_candidates",
         "local_rule_ids",
         "local_subclasses",
@@ -935,6 +936,40 @@ def test_family_path_node_order_is_a_difference() -> None:
     assert difference["new_value"] == (
         '[{"family_id":"a","leaf_to_root":"a","root_to_leaf":["a","root"]}]'
     )
+
+
+def test_input_validation_errors_are_compared() -> None:
+    historical = _identity(
+        input_validation_status="invalid_input",
+        input_errors=json.dumps(["beta", "alpha"], separators=(",", ":")),
+    )
+    reordered = _identity(
+        input_validation_status="invalid_input",
+        input_errors=json.dumps(["alpha", "beta"], separators=(",", ":")),
+    )
+    changed = _identity(
+        input_validation_status="invalid_input",
+        input_errors=json.dumps(["gamma"], separators=(",", ":")),
+    )
+    same = compare_stage0(Stage0Reference("fixture", 1, (historical,)), (reordered,))
+    different = compare_stage0(Stage0Reference("fixture", 1, (historical,)), (changed,))
+    assert same.residual == ()
+    assert different.residual == ("input_row_id=1|target_id=T1",)
+    same_report = _comparison(
+        _report((historical,), (reordered,)), "original_m:new_result"
+    )
+    changed_report = _comparison(
+        _report((historical,), (changed,)), "original_m:new_result"
+    )
+    assert _field_diff(same_report, "input_errors") is None
+    assert same_report["semantic_mismatch_count"] == 0
+    difference = _field_diff(changed_report, "input_errors")
+    assert difference is not None
+    assert difference["group"] == "local_effective"
+    assert difference["disposition"] == "unexplained"
+    assert difference["old_value"] == '["alpha","beta"]'
+    assert difference["new_value"] == '["gamma"]'
+    assert _field_diff(changed_report, "input_validation_status") is None
 
 
 def test_conflict_codes_change_is_detected() -> None:
