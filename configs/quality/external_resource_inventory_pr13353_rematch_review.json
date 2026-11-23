@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "0d86143e3b52b8e4fd3a92539b24aa2718bf3e09",
+  "source_ref": "281e1f082a3194201c156e99482dec985ad377eb",
+  "source_reviews": {
+    "src/bioetl/application/services/workflow/control_plane/execution_preparation.py": "Rematch after #13349 (#13353): blob relocated vs catalog pin; no new acquisition sites."
+  },
+  "expression_updates": {},
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": [],
+  "segment_updates": {},
+  "reference_moves": {},
+  "line_updates": {}
+}

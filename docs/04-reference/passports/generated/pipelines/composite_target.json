@@ -116,7 +116,16 @@
             "target_type",
             "organism",
             "taxonomy_id",
-            "species_group_flag"
+            "species_group_flag",
+            "iuphar_target_id",
+            "iuphar_class",
+            "iuphar_match_status",
+            "iuphar_annotation_status",
+            "local_class",
+            "effective_class",
+            "effective_source",
+            "decision_status",
+            "target_class_profile_sha256"
           ],
           "name": "classification",
           "provider_order": [
@@ -488,8 +497,8 @@
   "passport_schema_version": "1.0.0",
   "provenance": {
     "projector_version": "1.1.0",
-    "semantic_content_hash": "sha256:aa598f95ee4550fad09dfaffb39e9b549b373b06037f4958740f4e3ef76de7ba",
-    "source_revision": "0d86143e3b52b8e4fd3a92539b24aa2718bf3e09"
+    "semantic_content_hash": "sha256:43c7e4bf50b9ea93f3feac51ce6d0679c95d722012733715906e6c499cccef41",
+    "source_revision": "a9bb5f70900e9d4122618b2737b4ed976d207f9d"
   },
   "silver": {
     "dq_execution": {
