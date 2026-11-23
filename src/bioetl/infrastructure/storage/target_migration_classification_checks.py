@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import hashlib
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import date, datetime
 from pathlib import Path
 from typing import cast
@@ -273,7 +273,16 @@ def _finding_for(
 ) -> TargetAbsenceFinding:
     if recovery is None:
         return TargetAbsenceFinding(target_id, "unresolved", "block")
-    _verify_source_bytes(recovery)
+    source_gold = _bound_source_row(recovery, "gold")
+    if source_gold is None:
+        raise ValueError(
+            "target recovery source does not contain the restored gold row"
+        )
+    recovery = replace(
+        recovery,
+        silver_row=_bound_source_row(recovery, "silver"),
+        gold_row=source_gold,
+    )
     if target_id in all_gold_ids:
         return _blocked(recovery, "contract_mismatch")
     if not _complete_gold_row(recovery.gold_row, gold_columns, target_id):
@@ -325,16 +334,49 @@ def _silver_record(
     silver_columns: set[str],
     target_id: str,
 ) -> Mapping[str, object] | None:
-    if recovery.silver_row is not None:
-        if recovery.silver_row.get("target_id") != target_id:
-            raise ValueError("recovery silver row target_id mismatch")
-        if set(recovery.silver_row) != silver_columns:
-            return None
-        return recovery.silver_row
-    return silver_current.get(target_id)
+    persisted = silver_current.get(target_id)
+    if persisted is not None:
+        return persisted
+    supplied = recovery.silver_row
+    if supplied is None:
+        return None
+    if supplied.get("target_id") != target_id:
+        raise ValueError("recovery silver row target_id mismatch")
+    if set(supplied) != silver_columns:
+        return None
+    return supplied
 
 
-def _verify_source_bytes(recovery: TargetRecoveryInput) -> None:
+def _bound_source_row(
+    recovery: TargetRecoveryInput, layer: str
+) -> dict[str, object] | None:
+    """Return the row stored in the pinned source, not a parallel caller object."""
+    declared = recovery.gold_row if layer == "gold" else recovery.silver_row
+    payload = _source_payload(recovery)
+    stored = payload.get(layer)
+    if declared is None:
+        if stored is not None:
+            raise ValueError(
+                f"target recovery source contains an undeclared {layer} row"
+            )
+        return None
+    if not isinstance(stored, dict):
+        raise ValueError(
+            f"target recovery source does not contain the restored {layer} row"
+        )
+    row = dict(stored)
+    identity = row.get("target_id", row.get("target_chembl_id", recovery.target_id))
+    if identity != recovery.target_id:
+        raise ValueError("target recovery source row does not match the missing target")
+    row["target_id"] = recovery.target_id
+    if canonical_row_sha256(row) != canonical_row_sha256(declared):
+        raise ValueError(
+            f"target recovery {layer} row is not the verified source row"
+        )
+    return row
+
+
+def _source_payload(recovery: TargetRecoveryInput) -> dict[str, object]:
     raw = recovery.source_file.read_bytes()
     if hashlib.sha256(raw).hexdigest() != recovery.source_sha256:
         raise ValueError("target recovery source digest mismatch")
@@ -344,6 +386,7 @@ def _verify_source_bytes(recovery: TargetRecoveryInput) -> None:
     identity = payload.get("target_id", payload.get("target_chembl_id"))
     if identity != recovery.target_id:
         raise ValueError("target recovery source does not identify the missing target")
+    return payload
 
 
 def _complete_gold_row(
@@ -382,11 +425,20 @@ def _business_compatible(
 
 
 def _business_view(row: Mapping[str, object]) -> dict[str, object]:
-    return {
+    record = {
         key: value
         for key, value in hash_input(row).items()
         if key not in TARGET_CLASSIFICATION_FIELDS
     }
+    if "description" not in record:
+        return record
+    description = record["description"]
+    canonical = record.get("target_description", description)
+    if _values_equal(description, canonical) or _empty(description):
+        record.pop("description")
+        if "target_description" not in record and not _empty(canonical):
+            record["target_description"] = canonical
+    return record
 
 
 def _empty(value: object) -> bool:

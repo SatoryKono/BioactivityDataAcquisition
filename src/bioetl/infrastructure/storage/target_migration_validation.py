@@ -328,7 +328,10 @@ def _restoration_additions(
         assay=paths["assay"],
         config=paths["config"],
     )
-    return {layer: dict(_by_id(rows)) for layer, rows in published.additions.items()}
+    return {
+        layer: dict(_by_id(rows)) if rows else {}
+        for layer, rows in published.additions.items()
+    }
 
 
 def _validate_candidate_layer(

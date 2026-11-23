@@ -148,7 +148,10 @@ def load_published_restoration(
     additions = _addition_rows(manifest.parent, plan)
     return PublishedTargetRestoration(
         additions,
-        {layer: frozenset(by_id(rows)) for layer, rows in additions.items()},
+        {
+            layer: frozenset(by_id(rows)) if rows else frozenset()
+            for layer, rows in additions.items()
+        },
     )
 
 
@@ -236,7 +239,10 @@ def _document(
         "schema_version": 1,
         "status": status,
         "baseline": _baseline(live),
-        "findings": [_finding_document(item, row_hashes) for item in plan.findings],
+        "findings": [
+            _finding_document(item, row_hashes, published=closed)
+            for item in plan.findings
+        ],
         "sources": _sources(plan),
         "published_target_ids": published,
         "candidate_files": candidate_files,
@@ -252,7 +258,10 @@ def _document(
 
 
 def _finding_document(
-    item: object, row_hashes: Mapping[str, Mapping[str, str]]
+    item: object,
+    row_hashes: Mapping[str, Mapping[str, str]],
+    *,
+    published: bool,
 ) -> dict[str, object]:
     from bioetl.infrastructure.storage.target_migration_classification_checks import (
         TargetAbsenceFinding,
@@ -262,7 +271,9 @@ def _finding_document(
     if finding is None:
         raise ValueError("target absence finding is incomplete")
     item = finding
+    layers = list(item.layers) if item.disposition == "restore" else []
     hashes = row_hashes.get(item.target_id, {})
+    row_sha256 = {layer: hashes[layer] for layer in layers} if published else {}
     return {
         "target_id": item.target_id,
         "absence_reason": item.absence_reason,
@@ -270,8 +281,8 @@ def _finding_document(
         "source_kind": item.source_kind,
         "source_path": item.source_path,
         "source_sha256": item.source_sha256,
-        "layers": list(item.layers) if item.disposition == "restore" else [],
-        "row_sha256": {layer: hashes[layer] for layer in item.layers},
+        "layers": layers,
+        "row_sha256": row_sha256,
     }
 
 
@@ -381,11 +392,16 @@ def _require_preservation(
             if canonical_row_sha256(written[key]) != canonical_row_sha256(row):
                 raise ValueError(f"existing target changed: {key[0]}")
         added = set(written) - set(original)
-        expected = {
-            key
-            for key, row in by_id(_layer_rows(plan, layer)).items()
-            if row.get("_is_current", True)
-        }
+        planned = _layer_rows(plan, layer)
+        expected = (
+            {
+                key
+                for key, row in by_id(planned).items()
+                if row.get("_is_current", True)
+            }
+            if planned
+            else set()
+        )
         if added != expected:
             raise ValueError("published target cohort does not match the plan")
     assay = root / "assay"

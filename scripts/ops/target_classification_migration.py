@@ -35,6 +35,11 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--run-id")
     parser.add_argument("--run-started-at")
     parser.add_argument(
+        "--restoration-manifest",
+        type=Path,
+        help="Validated assay/target FK restoration manifest",
+    )
+    parser.add_argument(
         "--plan",
         type=Path,
         required=True,
@@ -49,10 +54,25 @@ def main(argv: list[str] | None = None) -> None:
     if paths.workspace.resolve() != active_root:
         parser.error("plan workspace must be the active repository/configs root")
     fields = tuple(document["legacy_include_fields"])
+    if args.restoration_manifest is not None and args.action not in {
+        "freeze-inputs",
+        "prepare",
+    }:
+        parser.error("--restoration-manifest applies to freeze-inputs and prepare")
+    restoration = (
+        None
+        if args.restoration_manifest is None
+        else confined_io_path(args.restoration_manifest, root=active_root)
+    )
     if args.action == "freeze-inputs":
         if args.output is None:
             parser.error("freeze-inputs requires --output NEW_MANIFEST_PATH")
-        freeze_target_inputs(paths, legacy_include_fields=fields, output=args.output)
+        freeze_target_inputs(
+            paths,
+            legacy_include_fields=fields,
+            output=args.output,
+            restoration_manifest=restoration,
+        )
         print(json.dumps({"status": "frozen", "manifest": str(args.output)}))
     elif args.action == "build-candidates":
         if not all(
@@ -86,6 +106,7 @@ def main(argv: list[str] | None = None) -> None:
                 paths,
                 legacy_include_fields=fields,
                 deployment=bind_target_deployment(paths),
+                restoration_manifest=restoration,
             )
         elif args.action == "promote":
             state = promote_target_migration(

@@ -6,6 +6,7 @@ from dataclasses import replace
 from pathlib import Path
 from shutil import copytree, ignore_patterns
 
+import orjson
 import pyarrow as pa
 import pytest
 import yaml
@@ -371,7 +372,16 @@ def test_restored_assay_target_closes_migration_without_changing_assay(rehearsal
             restored_gold[field] = restored_silver[field]
     source = occurrence / "recovery/CHEMBL2237.json"
     source.parent.mkdir()
-    source.write_bytes(b'{"target_id":"CHEMBL2237","origin":"verified-pipeline"}\n')
+    source.write_bytes(
+        orjson.dumps(
+            {
+                "target_id": "CHEMBL2237",
+                "silver": restored_silver,
+                "gold": restored_gold,
+            },
+            option=orjson.OPT_SORT_KEYS,
+        )
+    )
     write_deltalake(
         paths.assay,
         pa.table({"target_id": ["CHEMBL1", None, "CHEMBL2237"]}),
@@ -454,6 +464,13 @@ def test_restored_assay_target_closes_migration_without_changing_assay(rehearsal
     assert _tree_hashes(paths.assay) == assay_gap
     assert any(name.endswith("CHEMBL2237.json") for name in state["dependencies"])
     assert _tree_hashes(paths.gold) == gold_before
+    promoted = promote_target_migration(paths, deployment=binding)
+    assert promoted["phase"] == "promoted"
+    promoted_ids = {
+        row["target_id"] for row in DeltaTable(paths.gold).to_pyarrow_table().to_pylist()
+    }
+    assert promoted_ids == {"CHEMBL1", "CHEMBL2237"}
+    assert _tree_hashes(paths.assay) == assay_gap
 
 
 def test_gold_filter_conflict_stays_a_blocker_and_writes_a_decision(tmp_path):
@@ -491,7 +508,12 @@ def test_gold_filter_conflict_stays_a_blocker_and_writes_a_decision(tmp_path):
         write_deltalake(tmp_path / name, pa.Table.from_pylist(rows))
     source = tmp_path / "recovery/CHEMBL2411.json"
     source.parent.mkdir()
-    source.write_bytes(b'{"target_id":"CHEMBL2411"}\n')
+    source.write_bytes(
+        orjson.dumps(
+            {"target_id": "CHEMBL2411", "silver": blocked, "gold": blocked},
+            option=orjson.OPT_SORT_KEYS,
+        )
+    )
     from bioetl.infrastructure.storage.target_classification_migration import (
         _tree_hashes,
     )
