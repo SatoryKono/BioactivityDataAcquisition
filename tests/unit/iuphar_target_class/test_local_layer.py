@@ -367,6 +367,27 @@ def test_ec7_is_translocase_and_not_transporter() -> None:
     assert with_enzyme.local_class != "Transporter"
 
 
+def test_each_witness_keeps_only_its_own_rules() -> None:
+    rules = local_rules()
+    forward = apply_local(parse_ec_numbers("1.1.1.1;7.1.1.1"), rules=rules)
+    reverse = apply_local(parse_ec_numbers("7.1.1.1|1.1.1.1"), rules=rules)
+    assert forward.local_rules_by_evidence == reverse.local_rules_by_evidence
+    bound = dict(forward.local_rules_by_evidence)
+    assert bound["ec:1.1.1.1"] == ("ec-class:1", "ec:1")
+    assert bound["ec:7.1.1.1"] == ("ec:7",)
+    mixed = apply_local(
+        parse_ec_numbers("3.4.21.1"),
+        rules=rules,
+        keyword_ids=("KW-0675",),
+    )
+    mixed_bound = dict(mixed.local_rules_by_evidence)
+    assert mixed_bound["ec:3.4.21.1"] == ("ec-class:3", "ec:3")
+    assert mixed_bound["keyword:KW-0675"] == ("annotation:KW-0675",)
+    assert set(mixed.local_rule_ids) == {
+        rule_id for rule_ids in mixed_bound.values() for rule_id in rule_ids
+    }
+
+
 @pytest.mark.parametrize(
     ("keyword_id", "class_name"),
     [
@@ -709,3 +730,20 @@ def test_pipeline_reads_prediction_evidence_instead_of_constants() -> None:
         "catalog_sha256=" in record.content for record in independent.evidence.records
     )
     assert independent.result.iuphar_class is None
+    mixed = run({"ec": "1.1.1.1;7.1.1.1"})
+    local_contents = tuple(
+        record.content
+        for record in mixed.evidence.records
+        if record.evidence_type == "local_rule"
+    )
+    assert any(
+        content.startswith("ec:1.1.1.1; rules=ec-class:1,ec:1;")
+        for content in local_contents
+    )
+    assert any(
+        content.startswith("ec:7.1.1.1; rules=ec:7;") for content in local_contents
+    )
+    assert not any(
+        "ec:7.1.1.1" in content and "ec-class:1" in content
+        for content in local_contents
+    )

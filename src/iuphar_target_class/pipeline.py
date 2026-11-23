@@ -393,12 +393,13 @@ def _evidence(
                 "match",
             )
         )
+    rules_for_evidence = dict(local.local_rules_by_evidence)
     draft.extend(
         EvidenceDraft(
             row.input_row_id,
             "local_rule",
             hashlib.sha256(ref.encode()).hexdigest(),
-            local_evidence_content(ref, local.local_rule_ids),
+            local_evidence_content(ref, rules_for_evidence[ref]),
             "local",
         )
         for ref in local.local_evidence_ids

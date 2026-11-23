@@ -307,8 +307,8 @@ def local_rules_catalog_sha256() -> str:
 
 
 def local_evidence_content(ref: str, rule_ids: tuple[str, ...]) -> str:
-    """Bind one local witness to the rule ids and the catalog hash."""
-    rules = ",".join(rule_ids)
+    """Bind one local witness to its own rule ids and the catalog hash."""
+    rules = ",".join(sorted(rule_ids))
     digest = local_rules_catalog_sha256()
     return (
         f"{ref}; rules={rules}; catalog={LOCAL_CATALOG_VERSION}; "

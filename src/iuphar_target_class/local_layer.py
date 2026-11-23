@@ -371,6 +371,23 @@ def _assemble(
                 ),
             )
         ),
+        local_rules_by_evidence=_rules_by_evidence(support, observations),
+    )
+
+
+def _rules_by_evidence(
+    support: tuple[_Support, ...],
+    observations: tuple[tuple[str, str], ...],
+) -> tuple[tuple[str, tuple[str, ...]], ...]:
+    """Keep each witness bound to the rules that actually fired for it."""
+    grouped: dict[str, set[str]] = {}
+    for item in support:
+        grouped.setdefault(item.evidence_id, set()).add(item.rule_id)
+    for rule_id, evidence_id in observations:
+        grouped.setdefault(evidence_id, set()).add(rule_id)
+    return tuple(
+        (evidence_id, tuple(sorted(grouped[evidence_id])))
+        for evidence_id in sorted(grouped)
     )
 
 
