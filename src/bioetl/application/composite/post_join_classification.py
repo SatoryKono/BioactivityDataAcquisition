@@ -123,9 +123,7 @@ def apply_post_join_target_classification(
     }
     result_df = merged_df
     for column_name, values in updates.items():
-        result_df = result_df.with_columns(
-            pl.Series(name=column_name, values=values)
-        )
+        result_df = result_df.with_columns(pl.Series(name=column_name, values=values))
 
     host._logger.info(
         "RF-003 post-join classification applied after dependency joins",

@@ -136,8 +136,7 @@ FEATURE_SOURCES: Final[Mapping[str, tuple[str, ...]]] = MappingProxyType(
 )
 
 _L1_L2_PROVENANCE: Final = (
-    "chembl_target_protein_classification_summary:"
-    "predicted_layer_not_iuphar_identity"
+    "chembl_target_protein_classification_summary:predicted_layer_not_iuphar_identity"
 )
 
 

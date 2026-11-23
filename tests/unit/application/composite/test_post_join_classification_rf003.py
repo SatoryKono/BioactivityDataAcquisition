@@ -112,9 +112,7 @@ def test_publish_finalize_and_discard_bound_to_session() -> None:
         host, run_id="run-1", metadata_timestamp=ts, indices=(0, 1)
     )
     assert session.publish.call_count == 2
-    finalize_post_join_classification(
-        host, run_id="run-1", metadata_timestamp=ts
-    )
+    finalize_post_join_classification(host, run_id="run-1", metadata_timestamp=ts)
     session.finalize.assert_called_once()
     discard_post_join_classification(
         host, run_id="run-1", metadata_timestamp=ts, indices=(0,)
