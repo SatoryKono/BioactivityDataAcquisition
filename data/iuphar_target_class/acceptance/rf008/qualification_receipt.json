@@ -147,17 +147,14 @@
     "intersection_matches": 374
   },
   "engineering_acceptance": {
-    "explained_previous_policy_count": 2,
+    "explained_previous_policy_count": 0,
     "independent_case_count": 37,
     "status": "PASS",
     "unexplained_error_count": 0,
-    "verified_expectation_count": 35
+    "verified_expectation_count": 37
   },
   "enrich_admitted": false,
-  "explained_previous_policy_case_ids": [
-    "match-auxiliary-projection",
-    "match-auxiliary-unknown-xref"
-  ],
+  "explained_previous_policy_case_ids": [],
   "historical_acceptance_not_reused": {
     "files_sha256": {
       "data/iuphar_target_class/acceptance/stages_0_3_report.json": "b5c88d82d45e5b679e68f23ec06d830b6f935ab2906c6f24d61f3440e54d2fe2",
@@ -172,7 +169,7 @@
   "issue": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/13316",
   "pins": {
     "classification_schema_version": "3.1.0",
-    "expectations_sha256": "4ad503802b86e3ffe33652bfb97c83f3c7584ea0882b569e048e20e37c52b589",
+    "expectations_sha256": "f1e98fae6a82366906a28ec9ac2a395f52bc4098bab049fc63d5b12d0c908c93",
     "normalization": {
       "normalization_sha256": "72f39b0e080f20ce484b81795a6d0aeffac091b4f7f8e54c68f99ef814fe3b26",
       "normalization_version": "bioetl-iuphar-input-v1",
@@ -1061,28 +1058,26 @@
       "case_id": "match-auxiliary-projection",
       "category": "auxiliary_anchor",
       "claim": "engineering_rule",
-      "disposition": "explained_previous_policy",
+      "disposition": "verified",
       "evidence": {
         "source": "component_accessions is the primary accession; target_xref_uniprot_ids is auxiliary. RF-002."
       },
       "expected": {
-        "auxiliary_uniprot": [
-          "Q99999"
-        ],
-        "primary_uniprot": [
-          "P35372"
-        ],
-        "uniprot": "P35372"
+        "uniprot": "P35372",
+        "uniprot_equivalent": null,
+        "uniprot_xref": "Q99999"
       },
       "observed": {
-        "uniprot": "P35372|Q99999"
+        "uniprot": "P35372",
+        "uniprot_equivalent": null,
+        "uniprot_xref": "Q99999"
       }
     },
     {
       "case_id": "match-auxiliary-unknown-xref",
       "category": "auxiliary_anchor",
       "claim": "engineering_rule",
-      "disposition": "explained_previous_policy",
+      "disposition": "verified",
       "evidence": {
         "source": "RF-002: an unknown auxiliary UniProt xref must not be a required object id. Issue #13310."
       },
@@ -1091,8 +1086,8 @@
         "matched_target_id": "primary"
       },
       "observed": {
-        "match_status": "ambiguous",
-        "matched_target_id": null
+        "match_status": "matched",
+        "matched_target_id": "primary"
       }
     },
     {

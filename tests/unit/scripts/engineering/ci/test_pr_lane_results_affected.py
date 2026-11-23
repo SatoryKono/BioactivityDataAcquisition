@@ -455,6 +455,7 @@ def test_passport_artifacts_keep_the_projector_owner(tmp_path: Path) -> None:
 def test_iuphar_shadow_paths_keep_explicit_owners(tmp_path: Path) -> None:
     owners = (
         "tests/unit/iuphar_target_class/test_csv_io.py",
+        "tests/unit/iuphar_target_class/test_identifier_roles_rf002.py",
         "tests/unit/iuphar_target_class/test_integration_acceptance.py",
         "tests/unit/iuphar_target_class/test_reference_coverage_v2.py",
         "tests/architecture/test_codex_skill_agent_links.py",
@@ -505,9 +506,14 @@ def test_iuphar_shadow_paths_keep_explicit_owners(tmp_path: Path) -> None:
 
 
 def test_iuphar_policy_paths_keep_the_policy_owner(tmp_path: Path) -> None:
-    owner = tmp_path / "tests/unit/iuphar_target_class/test_policy.py"
-    owner.parent.mkdir(parents=True)
-    owner.write_text("def test_policy():\n    assert True\n", encoding="utf-8")
+    owners = (
+        "tests/unit/iuphar_target_class/test_policy.py",
+        "tests/unit/iuphar_target_class/test_identifier_roles_rf002.py",
+    )
+    for owner in owners:
+        path = tmp_path / owner
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("def test_policy():\n    assert True\n", encoding="utf-8")
     report = build_shadow_compare(
         [
             "src/iuphar_target_class/policy.py",
@@ -515,7 +521,7 @@ def test_iuphar_policy_paths_keep_the_policy_owner(tmp_path: Path) -> None:
         ],
         repo_root=tmp_path,
     )
-    assert report["selected"] == ["tests/unit/iuphar_target_class/test_policy.py"]
+    assert report["selected"] == list(owners)
     assert report["covers_full_suite"] is False
     for unowned in (
         "src/iuphar_target_class/unmapped.py",
@@ -1789,6 +1795,14 @@ def test_shadow_compare_routes_codex_launchers_and_guidance(changed_file: str) -
         ),
         (
             "configs/quality/external_resource_inventory_pr13324_gold_writer_review.json",
+            {
+                "tests/architecture/test_external_resource_inventory_catalog.py",
+                "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+            },
+            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
+        ),
+        (
+            "configs/quality/external_resource_inventory_pr13360_rf002_review.json",
             {
                 "tests/architecture/test_external_resource_inventory_catalog.py",
                 "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",

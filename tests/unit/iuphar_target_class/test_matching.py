@@ -397,11 +397,15 @@ def test_rf008_anchor_cases_keep_an_evidence_disposition() -> None:
     auxiliary = by_id["match-auxiliary-unknown-xref"]
     conflict = by_id["match-conflict-two-primaries"]
     named = by_id["match-name-only"]
-    assert auxiliary["disposition"] == "explained_previous_policy"
+    assert auxiliary["disposition"] == "verified"
     assert auxiliary["evidence"]
     projection = by_id["match-auxiliary-projection"]
-    assert projection["disposition"] == "explained_previous_policy"
-    assert projection["observed"] == {"uniprot": "P35372|Q99999"}
+    assert projection["disposition"] == "verified"
+    assert projection["observed"] == {
+        "uniprot": "P35372",
+        "uniprot_equivalent": None,
+        "uniprot_xref": "Q99999",
+    }
     assert conflict["disposition"] == "verified"
     assert named["observed"] == {
         "match_status": "ambiguous",
@@ -414,9 +418,9 @@ def test_rf008_projection_forwards_separated_uniprot_fields(
 ) -> None:
     def _separated(_data: object, _taxon: str) -> dict[str, object]:
         return {
-            "auxiliary_uniprot": ["Q99999"],
-            "primary_uniprot": ["P35372"],
             "uniprot": "P35372",
+            "uniprot_equivalent": None,
+            "uniprot_xref": "Q99999",
         }
 
     monkeypatch.setattr(
@@ -430,7 +434,7 @@ def test_rf008_projection_forwards_separated_uniprot_fields(
             "taxon": "9606",
         }
     ) == {
-        "auxiliary_uniprot": ["Q99999"],
-        "primary_uniprot": ["P35372"],
         "uniprot": "P35372",
+        "uniprot_equivalent": None,
+        "uniprot_xref": "Q99999",
     }
