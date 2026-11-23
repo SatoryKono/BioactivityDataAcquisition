@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-pytestmark = pytest.mark.unit
+pytestmark = [pytest.mark.unit, pytest.mark.repo_backed, pytest.mark.subprocess_backed]
 
 
 def test_pipeline_callback_consumer_types(tmp_path: Path) -> None:

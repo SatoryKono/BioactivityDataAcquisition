@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "936cace9a144b397f68a86870f62da9946b97f5d",
+  "source_ref": "426785e94c593389e182980d34cd7c1bffd46365",
+  "source_reviews": {
+    "src/bioetl/domain/ports/pipeline_callbacks.py": "Replace the type-checking-only object alias with the actual PipelineContext import. Runtime imports and external resource acquisition, ownership, and cleanup remain unchanged; no runtime qualification is inferred."
+  }
+}
