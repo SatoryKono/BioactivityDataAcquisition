@@ -267,8 +267,7 @@ devin: devin-setup
 # DeepWiki management
 deepwiki-backup:
 	@echo "Backing up wiki files..."
-	@git add .devin/wiki-*.json
-	@git commit -m "backup: wiki files before DeepWiki regeneration" || echo "No changes to backup"
+	@PYTHONDONTWRITEBYTECODE=1 python3 scripts/ai/update_deepwiki.py --backup
 
 deepwiki-update:
 	@PYTHONDONTWRITEBYTECODE=1 python3 scripts/ai/update_deepwiki.py --emit-modules
