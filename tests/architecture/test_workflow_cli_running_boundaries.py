@@ -12,12 +12,35 @@
 
 from __future__ import annotations
 
+import shlex
+
+import click
 import pytest
 
 from pathlib import Path
 
+from bioetl.interfaces.cli.main import cli
+
 
 pytestmark = pytest.mark.architecture
+
+
+def test_documented_bounded_chembl_pack_examples_parse() -> None:
+    """Published bounded commands must remain compatible with the shipped CLI."""
+    docs = Path("docs/03-guides/workflows.md").read_text(encoding="utf-8")
+    examples = [
+        shlex.split(line)[3:]
+        for line in docs.splitlines()
+        if line.startswith("bioetl workflow run chembl_reference_pack --limit 100 ")
+    ]
+    assert len(examples) == 2
+    workflow = cli.get_command(click.Context(cli), "workflow")
+    assert isinstance(workflow, click.Group)
+    run = workflow.get_command(click.Context(workflow), "run")
+    assert run is not None
+    for args in examples:
+        with run.make_context("run", args):
+            pass
 
 
 def test_workflow_catalog_declares_inventory_boundary() -> None:
