@@ -8,6 +8,8 @@ from bioetl.domain.config import DQConfig
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.schemas.dq_config import DQConfigFile
 
+from ._dq_config_normalization import normalize_threshold_aliases
+
 __all__ = [
     "build_dq_cache_key",
     "map_dq_config",
@@ -45,6 +47,7 @@ def merge_dq_config_hierarchy(
             "Required DQ defaults file not found in configs/base/quality.yaml. "
             "Create defaults in this location."
         )
+    merged = normalize_threshold_aliases(merged)
 
     for layer in (
         load_provider_layer(provider),
@@ -52,7 +55,7 @@ def merge_dq_config_hierarchy(
         inline_overrides or {},
     ):
         if layer:
-            merged = deep_merge(merged, layer)
+            merged = deep_merge(merged, normalize_threshold_aliases(layer))
 
     if relaxed_dq:
         merged = deep_merge(
