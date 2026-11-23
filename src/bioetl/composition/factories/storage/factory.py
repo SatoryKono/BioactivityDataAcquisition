@@ -104,16 +104,13 @@ class StorageFactory:
             audit: Canonical runtime audit port shared across storage and runner lifecycle.
             tracing: Optional TracingPort. When omitted, composition resolves an
                 explicit NoOpTracing for the layer writers.
-            metadata_coordinator: Coordinator for metadata side-effects. Required
-                when Gold metadata is enabled; otherwise defaults to None.
+            metadata_coordinator: Optional coordinator for metadata side-effects;
+                defaults to None.
             silver_validator: Optional PyArrow schema validator for Silver records;
                 defaults to None.
 
         Returns:
             StorageContext with assembled adapter and resolved layer paths.
-
-        Raises:
-            ValueError: If Gold metadata is enabled without a coordinator.
         """
         ctx = build_storage_creation_context(
             settings=settings,
