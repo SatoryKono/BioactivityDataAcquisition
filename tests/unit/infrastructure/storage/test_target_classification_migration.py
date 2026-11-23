@@ -110,6 +110,44 @@ def test_second_table_activation_failure_restores_first_table(paths, monkeypatch
     assert yaml.safe_load(paths.config.read_bytes())["fixture"] == "config"
 
 
+def test_assay_cohort_change_after_prepare_blocks_promotion(paths):
+    migration.prepare_target_migration(paths, legacy_include_fields=("target_id",))
+    (paths.assay / "part.parquet").write_bytes(b"replacement-cohort")
+    with pytest.raises(ValueError, match="assay reference cohort changed"):
+        migration.promote_target_migration(paths)
+    assert (paths.silver / "part.parquet").read_bytes() == b"silver"
+    assert not (paths.backup / "original-silver").exists()
+
+
+def test_uninstalled_v32_transition_writes_nothing(paths):
+    with pytest.raises(ValueError, match="3.2.0 is not installed"):
+        migration.prepare_target_migration(
+            paths,
+            legacy_include_fields=("target_id",),
+            destination_profile="V32",
+        )
+    assert not paths.backup.exists()
+
+
+def test_deployment_role_cannot_promote_without_rf013(paths):
+    from bioetl.infrastructure.storage.target_deployment_binding import (
+        TargetDeploymentBinding,
+    )
+
+    binding = TargetDeploymentBinding(
+        str(paths.config),
+        "a" * 64,
+        "b" * 64,
+        str(paths.silver),
+        str(paths.gold),
+        "c" * 64,
+        "d" * 64,
+    )
+    with pytest.raises(ValueError, match="reserved for RF-013"):
+        migration.promote_target_migration(paths, deployment=binding)
+    assert not paths.backup.exists()
+
+
 def test_canonical_change_after_backup_is_not_overwritten(paths):
     migration.prepare_target_migration(paths, legacy_include_fields=("target_id",))
     (paths.gold / "part.parquet").write_bytes(b"new legitimate writer")

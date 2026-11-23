@@ -13,9 +13,14 @@ from collections.abc import Iterator, Mapping
 from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
-from typing import NotRequired, TypedDict, cast
+from typing import TYPE_CHECKING, NotRequired, TypedDict, cast
+
+if TYPE_CHECKING:
+    from deltalake import DeltaTable
 
 import orjson
+import pyarrow as pa
+import yaml
 
 if sys.platform == "win32":
     import msvcrt
@@ -24,6 +29,10 @@ else:
 
 from bioetl.infrastructure.control_plane.evidence_location_publish import (
     publish_bytes_if_absent,
+)
+from bioetl.infrastructure.storage.target_classification_guard import (
+    classification_profile_name,
+    contract_version_for_profile,
 )
 from bioetl.infrastructure.storage.target_deployment_binding import (
     TargetDeploymentBinding,
@@ -38,9 +47,92 @@ from bioetl.infrastructure.storage.target_migration_validation import (
     assert_no_managed_writers,
     validate_target_candidate,
 )
-from iuphar_target_class.stage0.io import canonical_json_bytes, sha256_file
+from iuphar_target_class.stage0.io import (
+    canonical_json_bytes,
+    sha256_bytes,
+    sha256_file,
+)
 
 _JOURNAL_JSON = "journal.json"
+_CANONICAL_CUTOVER = "RF-013"
+# Physical transitions the driver can execute. 3.2.0 stays declared and
+# refused until its field contract is installed and this set is updated.
+_EXECUTABLE_TRANSITIONS = frozenset({("V30", "V31")})
+_BLOCKED_TRANSITIONS = {
+    ("V30", "V32"): (
+        "destination contract 3.2.0 is not installed; "
+        "refusing to treat it as a V31 promotion"
+    ),
+    ("V31", "V32"): (
+        "destination contract 3.2.0 is not installed; "
+        "refusing to treat it as a V31 promotion"
+    ),
+}
+
+
+@dataclass(frozen=True, slots=True)
+class TargetMigrationTransition:
+    """One explicit source/destination pair, never an implicit enrich upgrade."""
+
+    source_profile: str
+    destination_profile: str
+    source_contract_version: str
+    destination_contract_version: str
+
+
+def resolve_target_migration_transition(
+    source_profile: str, destination_profile: str
+) -> TargetMigrationTransition:
+    """Accept only catalogued executable transitions; reject every other pair."""
+    if (source_profile, destination_profile) in _BLOCKED_TRANSITIONS:
+        raise ValueError(_BLOCKED_TRANSITIONS[(source_profile, destination_profile)])
+    if (source_profile, destination_profile) not in _EXECUTABLE_TRANSITIONS:
+        raise ValueError(
+            "unsupported target migration transition "
+            f"{source_profile} -> {destination_profile}"
+        )
+    return TargetMigrationTransition(
+        source_profile,
+        destination_profile,
+        contract_version_for_profile(source_profile),
+        contract_version_for_profile(destination_profile),
+    )
+
+
+def require_rf009_fk_restoration(
+    assay_target_ids: set[str], gold_target_ids: set[str]
+) -> dict[str, object]:
+    """Block promotion until every current assay target exists in Gold."""
+    missing = sorted(assay_target_ids - gold_target_ids)
+    if missing:
+        raise ValueError(
+            "assay/target FK restoration RF-009 is required before promotion "
+            f"({len(missing)} missing target ids)"
+        )
+    return {
+        "dependency": "RF-009",
+        "artifact": "bioetl_target_fk_repair_candidate",
+        "status": "closed",
+        "missing_target_ids": [],
+        "assay_target_id_sha256": _id_digest(assay_target_ids),
+        "gold_target_id_sha256": _id_digest(gold_target_ids),
+    }
+
+
+def _id_digest(ids: set[str]) -> str:
+    return sha256_bytes("\n".join(sorted(ids)).encode())
+
+
+def _assert_canonical_cutover(
+    deployment: TargetDeploymentBinding | None, cutover_authority: str
+) -> None:
+    """Keep canonical deployment promotion behind RF-013."""
+    if (
+        deployment is not None
+        and deployment.role == "deployment"
+        and cutover_authority != _CANONICAL_CUTOVER
+    ):
+        raise ValueError("canonical table promotion is reserved for RF-013")
 
 
 class TargetMigrationJournal(TypedDict):
@@ -62,6 +154,16 @@ class TargetMigrationJournal(TypedDict):
     dependencies: dict[str, str]
     dependency_backups: dict[str, str]
     restored_dependencies: NotRequired[list[str]]
+    source_profile: str
+    destination_profile: str
+    source_contract_version: str
+    destination_contract_version: str
+    table_versions: dict[str, dict[str, object]]
+    candidate_profiles: dict[str, str]
+    config_contract_version: str
+    destination_config_contract_version: str
+    dependency_schema_versions: dict[str, int]
+    fk_restoration: dict[str, object]
 
 
 @dataclass(frozen=True, slots=True)
@@ -184,16 +286,266 @@ def _restore_pairs(paths: dict[str, Path], state: TargetMigrationJournal) -> Non
     _save(backup, state)
 
 
+def _delta_pin(path: Path, *, classify: bool) -> dict[str, object] | None:
+    """Read one Delta identity, or None when the directory is not a table."""
+    from deltalake import DeltaTable
+    from deltalake.exceptions import DeltaError
+
+    try:
+        table = DeltaTable(str(path))
+        fields = frozenset(field.name for field in table.schema().fields)
+    except (OSError, DeltaError, RuntimeError, pa.ArrowInvalid):
+        return None
+    profile = classification_profile_name(fields) if classify else ""
+    target_ids: set[str] = set()
+    if "target_id" in fields:
+        try:
+            target_ids = _target_ids(table)
+        except (OSError, DeltaError, RuntimeError, pa.ArrowInvalid):
+            return None
+    return {
+        "version": table.version(),
+        "table_id": table.metadata().id,
+        "profile": profile,
+        "contract_version": contract_version_for_profile(profile) if profile else "",
+        "target_id_sha256": _id_digest(target_ids) if "target_id" in fields else "",
+        "target_ids": target_ids,
+    }
+
+
+def _target_ids(table: DeltaTable) -> set[str]:
+    names = {field.name for field in table.schema().fields}
+    columns = ["target_id"]
+    if "_is_current" in names:
+        columns.append("_is_current")
+    ids: set[str] = set()
+    for row in table.to_pyarrow_table(columns=columns).to_pylist():
+        if row.get("_is_current", True) is not True:
+            continue
+        value = row.get("target_id")
+        if value is None:
+            continue
+        if not isinstance(value, str) or not value:
+            raise ValueError(
+                "assay/target FK restoration RF-009 found an invalid target id"
+            )
+        ids.add(value)
+    return ids
+
+
+def _source_pins(checked: dict[str, Path]) -> dict[str, dict[str, object]] | None:
+    pins: dict[str, dict[str, object]] = {}
+    for name in ("silver", "gold", "assay"):
+        pin = _delta_pin(checked[name], classify=name != "assay")
+        if pin is None:
+            return None
+        pins[name] = pin
+    if pins["silver"]["profile"] != pins["gold"]["profile"]:
+        raise ValueError("mixed V30/V31 target destinations; recovery required")
+    return pins
+
+
+def _public_pins(
+    pins: dict[str, dict[str, object]] | None,
+) -> dict[str, dict[str, object]]:
+    if pins is None:
+        return {}
+    return {
+        name: {key: value for key, value in pin.items() if key != "target_ids"}
+        for name, pin in pins.items()
+    }
+
+
+def _assert_source_profiles(
+    pins: dict[str, dict[str, object]] | None, transition: TargetMigrationTransition
+) -> None:
+    if pins is None:
+        return
+    for name in ("silver", "gold"):
+        observed = pins[name]["profile"]
+        if observed != transition.source_profile:
+            raise ValueError(
+                f"source table profile is {observed}, "
+                f"plan source_profile is {transition.source_profile}"
+            )
+
+
+def _fk_restoration(
+    pins: dict[str, dict[str, object]] | None,
+) -> dict[str, object]:
+    if pins is None:
+        return {
+            "dependency": "RF-009",
+            "artifact": "bioetl_target_fk_repair_candidate",
+            "status": "unreadable",
+            "missing_target_ids": [],
+            "assay_target_id_sha256": "",
+            "gold_target_id_sha256": "",
+        }
+    assay_ids = pins["assay"]["target_ids"]
+    gold_ids = pins["gold"]["target_ids"]
+    if not isinstance(assay_ids, set) or not isinstance(gold_ids, set):
+        raise ValueError(
+            "assay/target FK restoration RF-009 found an invalid target id"
+        )
+    return require_rf009_fk_restoration(assay_ids, gold_ids)
+
+
+def _candidate_profiles(
+    checked: dict[str, Path], transition: TargetMigrationTransition
+) -> dict[str, str]:
+    pins = [
+        _delta_pin(checked[name], classify=True)
+        for name in ("candidate_silver", "candidate_gold")
+    ]
+    if any(pin is None for pin in pins):
+        if any(pin is not None for pin in pins):
+            raise ValueError("candidate table version is not readable")
+        return {}
+    profiles: dict[str, str] = {}
+    for name, pin in zip(("silver", "gold"), pins, strict=True):
+        if pin is None:
+            continue
+        observed = str(pin["profile"])
+        if observed != transition.destination_profile:
+            raise ValueError(
+                f"candidate table profile is {observed}, "
+                f"plan destination_profile is {transition.destination_profile}"
+            )
+        profiles[name] = observed
+    return profiles
+
+
+def _active_contract_version(path: Path) -> str:
+    document = yaml.safe_load(path.read_text(encoding="utf-8"))
+    if not isinstance(document, dict):
+        return ""
+    contracts = document.get("contracts")
+    if not isinstance(contracts, dict):
+        return ""
+    version = contracts.get("active_version")
+    return version if isinstance(version, str) else ""
+
+
+def _dependency_schema_versions(
+    workspace: Path, dependencies: Mapping[str, object]
+) -> dict[str, int]:
+    versions: dict[str, int] = {}
+    root = workspace.resolve()
+    for relative in dependencies:
+        try:
+            document = orjson.loads((root / relative).read_bytes())
+        except (OSError, orjson.JSONDecodeError):
+            continue
+        if isinstance(document, dict) and type(document.get("schema_version")) is int:
+            versions[relative] = int(document["schema_version"])
+    return versions
+
+
+def _assert_plan_profiles(
+    state: TargetMigrationJournal,
+    source_profile: str | None,
+    destination_profile: str | None,
+) -> None:
+    if source_profile is None and destination_profile is None:
+        return
+    if source_profile is None or destination_profile is None:
+        raise ValueError("plan profiles must name both source and destination")
+    recorded = (
+        state.get("source_profile", "V30"),
+        state.get("destination_profile", "V31"),
+    )
+    if (source_profile, destination_profile) != recorded:
+        raise ValueError("plan profiles differ from the prepared migration")
+
+
+def _assert_recorded_versions(
+    checked: dict[str, Path], state: TargetMigrationJournal
+) -> None:
+    recorded = state.get("table_versions") or {}
+    if not recorded:
+        return
+    current = _source_pins(checked)
+    if current is None:
+        raise ValueError("recorded source versions are no longer readable")
+    live = _public_pins(current)
+    for name, previous in recorded.items():
+        observed = live[name]
+        if (
+            observed["version"] != previous["version"]
+            or observed["table_id"] != previous["table_id"]
+        ):
+            raise ValueError("source table version changed since preparation")
+        if observed["profile"] != previous["profile"]:
+            raise ValueError("source table profile changed since preparation")
+        if observed["target_id_sha256"] != previous["target_id_sha256"]:
+            if name == "assay":
+                raise ValueError("assay reference cohort changed since preparation")
+            if name == "gold":
+                raise ValueError("baseline target cohort changed since preparation")
+            raise ValueError("source cohort changed since preparation")
+    restoration = state.get("fk_restoration") or {}
+    if restoration.get("status") == "closed":
+        assay_ids = current["assay"]["target_ids"]
+        gold_ids = current["gold"]["target_ids"]
+        if not isinstance(assay_ids, set) or not isinstance(gold_ids, set):
+            raise ValueError(
+                "assay/target FK restoration RF-009 found an invalid target id"
+            )
+        require_rf009_fk_restoration(assay_ids, gold_ids)
+
+
+def _assert_recorded_contracts(
+    checked: dict[str, Path], state: TargetMigrationJournal, workspace: Path
+) -> None:
+    if (
+        "config_contract_version" in state
+        and _active_contract_version(checked["config"])
+        != state["config_contract_version"]
+    ):
+        raise ValueError("config contract version changed since preparation")
+    if (
+        "destination_config_contract_version" in state
+        and _active_contract_version(checked["candidate_config"])
+        != state["destination_config_contract_version"]
+    ):
+        raise ValueError("candidate config contract version changed since preparation")
+    recorded = state["dependency_schema_versions"]
+    if _dependency_schema_versions(workspace, recorded) != recorded:
+        raise ValueError("dependency schema version changed since preparation")
+
+
+def _assert_recorded_candidates(
+    checked: dict[str, Path],
+    transition: TargetMigrationTransition,
+    state: TargetMigrationJournal,
+) -> None:
+    recorded = state.get("candidate_profiles") or {}
+    if not recorded:
+        return
+    if _candidate_profiles(checked, transition) != recorded:
+        raise ValueError("candidate table profile changed since preparation")
+
+
 def prepare_target_migration(
     paths: TargetMigrationPaths,
     *,
     legacy_include_fields: tuple[str, ...],
     deployment: TargetDeploymentBinding | None = None,
+    source_profile: str = "V30",
+    destination_profile: str = "V31",
 ) -> TargetMigrationJournal:
     """Validate complete cohorts and copy the entire recoverable old bundle."""
+    transition = resolve_target_migration_transition(
+        source_profile, destination_profile
+    )
     checked = paths.checked()
     validate_deployment_binding(checked, deployment)
     with _lock(paths.workspace):
+        pins = _source_pins(checked)
+        _assert_source_profiles(pins, transition)
+        fk_restoration = _fk_restoration(pins)
+        candidate_profiles = _candidate_profiles(checked, transition)
         validation = validate_target_candidate(
             checked, legacy_include_fields, workspace=paths.workspace
         )
@@ -225,7 +577,7 @@ def prepare_target_migration(
             raise ValueError("canonical target changed during backup; refuse promotion")
         state: TargetMigrationJournal = {
             "artifact": "bioetl_target_migration",
-            "schema_version": 1,
+            "schema_version": 2,
             "phase": "prepared",
             "paths": {k: str(v) for k, v in checked.items()},
             "original_hashes": before,
@@ -241,15 +593,35 @@ def prepare_target_migration(
             "deployment_binding": deployment.document() if deployment else {},
             "dependencies": dependencies,
             "dependency_backups": dependency_backups,
+            "source_profile": transition.source_profile,
+            "destination_profile": transition.destination_profile,
+            "source_contract_version": transition.source_contract_version,
+            "destination_contract_version": transition.destination_contract_version,
+            "table_versions": _public_pins(pins),
+            "candidate_profiles": candidate_profiles,
+            "config_contract_version": _active_contract_version(checked["config"]),
+            "destination_config_contract_version": _active_contract_version(
+                checked["candidate_config"]
+            ),
+            "dependency_schema_versions": _dependency_schema_versions(
+                paths.workspace, dependencies
+            ),
+            "fk_restoration": fk_restoration,
         }
         _save(checked["backup"], state)
         return state
 
 
 def promote_target_migration(
-    paths: TargetMigrationPaths, *, deployment: TargetDeploymentBinding | None = None
+    paths: TargetMigrationPaths,
+    *,
+    deployment: TargetDeploymentBinding | None = None,
+    source_profile: str | None = None,
+    destination_profile: str | None = None,
+    cutover_authority: str = "",
 ) -> TargetMigrationJournal:
     """Cut over a validated complete bundle, retaining originals for rollback."""
+    _assert_canonical_cutover(deployment, cutover_authority)
     checked = paths.checked()
     validate_deployment_binding(checked, deployment)
     with _lock(paths.workspace):
@@ -258,6 +630,14 @@ def promote_target_migration(
             orjson.loads((checked["backup"] / _JOURNAL_JSON).read_bytes()),
         )
         _assert_prepared_identity(checked, state, deployment)
+        _assert_plan_profiles(state, source_profile, destination_profile)
+        transition = resolve_target_migration_transition(
+            str(state.get("source_profile", "V30")),
+            str(state.get("destination_profile", "V31")),
+        )
+        _assert_recorded_versions(checked, state)
+        _assert_recorded_contracts(checked, state, paths.workspace)
+        _assert_recorded_candidates(checked, transition, state)
         verify_target_dependencies(paths.workspace, state["dependencies"])
         verify_target_dependencies(paths.workspace, state["dependency_backups"])
         _verify_prepared_bytes(checked, state)
@@ -296,6 +676,8 @@ def _assert_prepared_identity(
     state: TargetMigrationJournal,
     deployment: TargetDeploymentBinding | None,
 ) -> None:
+    if state.get("schema_version") not in {1, 2}:
+        raise ValueError("unsupported target migration journal")
     if state["phase"] != "prepared" or state["paths"] != {
         key: str(value) for key, value in checked.items()
     }:
@@ -317,7 +699,12 @@ def _verify_prepared_bytes(
             raise ValueError("candidate bytes changed since validation")
 
 
-def rollback_target_migration(paths: TargetMigrationPaths) -> TargetMigrationJournal:
+def rollback_target_migration(
+    paths: TargetMigrationPaths,
+    *,
+    source_profile: str | None = None,
+    destination_profile: str | None = None,
+) -> TargetMigrationJournal:
     """Restore paired physical tables plus original configuration, never clear."""
     checked = paths.checked()
     with _lock(paths.workspace):
@@ -325,6 +712,7 @@ def rollback_target_migration(paths: TargetMigrationPaths) -> TargetMigrationJou
             "TargetMigrationJournal",
             orjson.loads((checked["backup"] / _JOURNAL_JSON).read_bytes()),
         )
+        _assert_plan_profiles(state, source_profile, destination_profile)
         if state["phase"] not in {"promoted", "promoting"}:
             raise ValueError("migration has no activated bundle to restore")
         if state["paths"] != {k: str(v) for k, v in checked.items()}:

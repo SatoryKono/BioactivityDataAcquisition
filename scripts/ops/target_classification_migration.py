@@ -19,6 +19,7 @@ from bioetl.infrastructure.storage.target_classification_migration import (
     TargetMigrationPaths,
     prepare_target_migration,
     promote_target_migration,
+    resolve_target_migration_transition,
     rollback_target_migration,
 )
 
@@ -38,11 +39,20 @@ def main(argv: list[str] | None = None) -> None:
         "--plan",
         type=Path,
         required=True,
-        help="JSON: explicit paths and frozen legacy_include_fields",
+        help=(
+            "JSON: explicit paths, source_profile, destination_profile "
+            "and frozen legacy_include_fields"
+        ),
     )
     args = parser.parse_args(argv)
     active_root = resolve_configs_root().resolve().parent
     document = json.loads(confined_io_path(args.plan, root=active_root).read_bytes())
+    source_profile, destination_profile = _plan_profiles(parser, document)
+    if args.action == "promote" and document.get("cutover_authority") != "RF-013":
+        parser.error(
+            "canonical table promotion is reserved for RF-013; "
+            "plan has no cutover authority"
+        )
     paths = TargetMigrationPaths(
         **{key: Path(value) for key, value in document["paths"].items()}
     )
@@ -86,21 +96,53 @@ def main(argv: list[str] | None = None) -> None:
                 paths,
                 legacy_include_fields=fields,
                 deployment=bind_target_deployment(paths),
+                source_profile=source_profile,
+                destination_profile=destination_profile,
             )
         elif args.action == "promote":
             state = promote_target_migration(
-                paths, deployment=bind_target_deployment(paths)
+                paths,
+                deployment=bind_target_deployment(paths),
+                source_profile=source_profile,
+                destination_profile=destination_profile,
+                cutover_authority="RF-013",
             )
         else:
-            state = rollback_target_migration(paths)
+            state = rollback_target_migration(
+                paths,
+                source_profile=source_profile,
+                destination_profile=destination_profile,
+            )
         print(
             json.dumps(
                 {
                     "phase": state["phase"],
                     "journal": str(paths.backup / "journal.json"),
+                    "source_profile": state["source_profile"],
+                    "destination_profile": state["destination_profile"],
+                    "source_contract_version": state["source_contract_version"],
+                    "destination_contract_version": state[
+                        "destination_contract_version"
+                    ],
+                    "fk_restoration": state["fk_restoration"]["status"],
                 }
             )
         )
+
+
+def _plan_profiles(
+    parser: argparse.ArgumentParser, document: dict[str, object]
+) -> tuple[str, str]:
+    """Require an explicit executable transition; do not infer 3.2.0."""
+    source = document.get("source_profile")
+    destination = document.get("destination_profile")
+    if not isinstance(source, str) or not isinstance(destination, str):
+        parser.error("plan requires explicit source_profile and destination_profile")
+    try:
+        resolve_target_migration_transition(source, destination)
+    except ValueError as error:
+        parser.error(str(error))
+    return source, destination
 
 
 if __name__ == "__main__":

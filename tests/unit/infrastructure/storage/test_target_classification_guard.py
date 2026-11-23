@@ -9,8 +9,10 @@ import pytest
 from deltalake import write_deltalake
 
 from bioetl.domain.config.target_classification import TARGET_CLASSIFICATION_FIELDS
+from bioetl.infrastructure.storage import target_classification_guard as guard
 from bioetl.infrastructure.storage.target_classification_guard import (
     assert_target_table_compatibility,
+    classification_profile_name,
     get_target_table_profile,
 )
 
@@ -73,6 +75,36 @@ def test_profile_inspection_refuses_mixed_pair_and_supports_partial_run(
     _table(gold, TARGET_CLASSIFICATION_FIELDS)
     with pytest.raises(ValueError, match="mixed V30/V31"):
         get_target_table_profile(silver_path=silver, gold_path=gold)
+
+
+def test_v32_fields_do_not_become_an_implicit_v31_profile(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(guard, "TARGET_CLASSIFICATION_V32_FIELDS", ("iuphar_subclass",))
+    fields = frozenset((*TARGET_CLASSIFICATION_FIELDS, "iuphar_subclass"))
+    assert classification_profile_name(fields) == "V32"
+    silver, gold = tmp_path / "silver", tmp_path / "gold"
+    _table(silver, (*TARGET_CLASSIFICATION_FIELDS, "iuphar_subclass"))
+    _table(gold, (*TARGET_CLASSIFICATION_FIELDS, "iuphar_subclass"))
+    with pytest.raises(ValueError, match="explicit migration profile"):
+        get_target_table_profile(silver_path=silver, gold_path=gold)
+    with pytest.raises(ValueError, match="explicit migration profile"):
+        assert_target_table_compatibility(
+            silver_path=silver, gold_path=gold, mode="enrich"
+        )
+
+
+def test_partial_v32_contract_requires_recovery(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        guard,
+        "TARGET_CLASSIFICATION_V32_FIELDS",
+        ("iuphar_subclass", "iuphar_family_id"),
+    )
+    fields = frozenset((*TARGET_CLASSIFICATION_FIELDS, "iuphar_subclass"))
+    with pytest.raises(ValueError, match="incomplete target classification"):
+        classification_profile_name(fields)
 
 
 def test_partial_schema_and_unrecognised_directory_require_recovery(
