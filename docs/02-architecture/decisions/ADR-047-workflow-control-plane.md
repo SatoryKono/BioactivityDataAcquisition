@@ -114,11 +114,15 @@ semantic execution fingerprint. Recovery controls such as:
 do not participate in the fingerprint because they change operator recovery
 intent, not execution identity.
 
-For an incremental execution whose effective start offset was pinned in its
-manifest, resume restores an omitted workflow default and inherited step
-offsets from that manifest before comparing the fingerprint. Explicit offsets
-and all other execution inputs remain subject to the same fingerprint check.
-Resume never derives its window from a later successful execution.
+When an execution manifest pins an effective start offset, resume restores that
+offset and the corresponding inherited step offsets before comparing the
+fingerprint, including for older manifests without an incremental marker. The
+pinned offset takes precedence over the supplied workflow default; other
+execution inputs remain subject to the fingerprint check. If the offset needed
+to match the saved identity is missing or invalid, resume fails closed. When no
+offset is saved or supplied, ordinary resume is allowed only if the original
+fingerprint matches exactly. Resume never derives its window from a later
+successful execution.
 
 ### Default resume behavior
 

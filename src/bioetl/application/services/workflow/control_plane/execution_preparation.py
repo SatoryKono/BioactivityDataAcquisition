@@ -138,34 +138,18 @@ def _prepare_resumed_execution(
         manifest_service=manifest_service,
         latest_state=latest_state,
     )
-    # Only fill an omitted default; explicit changes must still fail identity.
-    pinned_offset = manifest.defaults.get("start_offset")
-    if (
-        config.defaults.start_offset is None
-        and type(pinned_offset) is int
-        and pinned_offset >= 0
-    ):
-        pinned_steps = {
-            step.step_id
-            for step in manifest.steps
-            if step.run_options is not None
-            and step.run_options.get("start_offset") == pinned_offset
-        }
-        config = replace(
-            config,
-            defaults=replace(config.defaults, start_offset=pinned_offset),
-            steps=tuple(
-                _workflow_step_with_start_offset(step, pinned_offset)
-                if isinstance(step, WorkflowStepConfig)
-                and step.run_options.start_offset is None
-                and step.step_id in pinned_steps
-                else step
-                for step in config.steps
-            ),
-        )
+    config = _restore_pinned_offset(config, manifest)
     current_fingerprint = manifest_service.compute_execution_fingerprint(
         replace(request, config=config)
     )
+    if "start_offset" not in manifest.defaults and (
+        config.defaults.start_offset is not None
+        or current_fingerprint != latest_state.execution_fingerprint
+    ):
+        raise RuntimeError(
+            "Workflow resume failed: manifest has no pinned start_offset "
+            "and the execution fingerprint does not match"
+        )
     validate_resume_state(
         latest_state=latest_state,
         workflow_name=config.name,
@@ -194,6 +178,41 @@ def _prepare_resumed_execution(
         ),
         resumed=True,
     )
+
+
+def _restore_pinned_offset(
+    config: WorkflowConfig, manifest: WorkflowManifest
+) -> WorkflowConfig:
+    if "start_offset" not in manifest.defaults:
+        return config
+    pinned_offset = manifest.defaults["start_offset"]
+    if type(pinned_offset) is not int or pinned_offset < 0:
+        raise RuntimeError(
+            "Workflow resume failed: manifest has invalid pinned start_offset"
+        )
+    pinned_steps = _pinned_step_ids(manifest, pinned_offset)
+    inherited_offset = config.defaults.start_offset
+    return replace(
+        config,
+        defaults=replace(config.defaults, start_offset=pinned_offset),
+        steps=tuple(
+            _workflow_step_with_start_offset(step, pinned_offset)
+            if isinstance(step, WorkflowStepConfig)
+            and step.run_options.start_offset in (None, inherited_offset)
+            and step.step_id in pinned_steps
+            else step
+            for step in config.steps
+        ),
+    )
+
+
+def _pinned_step_ids(manifest: WorkflowManifest, offset: int) -> set[str]:
+    return {
+        step.step_id
+        for step in manifest.steps
+        if step.run_options is not None
+        and step.run_options.get("start_offset") == offset
+    }
 
 
 def _build_initial_state(manifest: WorkflowManifest) -> WorkflowExecutionState:

@@ -276,9 +276,23 @@ def test_resume_restores_pinned_incremental_window_without_latest_state() -> Non
 
     manual = prepare_workflow_execution(config=created.config, **args)
     assert manual.config == created.config
-    changed = replace(config, defaults=replace(config.defaults, start_offset=76))
+    original_offset = replace(
+        config, defaults=replace(config.defaults, start_offset=25)
+    )
+    assert (
+        prepare_workflow_execution(config=original_offset, **args).config
+        == created.config
+    )
+    changed = replace(config, defaults=replace(config.defaults, limit=76))
     with pytest.raises(RuntimeError, match="same execution fingerprint"):
         prepare_workflow_execution(config=changed, **args)
     manifest_port.get.return_value = replace(created.manifest, defaults={})
-    with pytest.raises(RuntimeError, match="same execution fingerprint"):
+    with pytest.raises(RuntimeError, match="manifest has no pinned start_offset"):
+        prepare_workflow_execution(config=config, **args)
+    with pytest.raises(RuntimeError, match="manifest has no pinned start_offset"):
+        prepare_workflow_execution(config=created.config, **args)
+    manifest_port.get.return_value = replace(
+        created.manifest, defaults={"start_offset": -1}
+    )
+    with pytest.raises(RuntimeError, match="invalid pinned start_offset"):
         prepare_workflow_execution(config=config, **args)
