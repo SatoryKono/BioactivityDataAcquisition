@@ -526,11 +526,11 @@ Canonical examples:
 
 ```bash
 bioetl workflow run chembl_reference_pack --dry-run
-bioetl workflow run chembl_reference_pack --limit 100 --required-persistence-profile degraded_observable --no-health-server --no-ensure-observability-backend
+bioetl workflow run chembl_reference_pack --limit 100 --required-persistence-profile degraded_observable --no-ensure-observability-backend
 bioetl workflow run chembl_reference_pack --use-cached-bronze --cached-bronze-date 2026-06-29
 bioetl workflow run chembl_reference_pack --resume-last
 bioetl workflow run chembl_reference_pack --only-steps run_chembl_target,run_chembl_target_component
-bioetl workflow run chembl_reference_pack --limit 100 --only-steps run_chembl_subcellular_fraction,run_chembl_publication_term --required-persistence-profile degraded_observable --no-health-server --no-ensure-observability-backend
+bioetl workflow run chembl_reference_pack --limit 100 --only-steps run_chembl_subcellular_fraction,run_chembl_publication_term --required-persistence-profile degraded_observable --no-ensure-observability-backend
 ```
 
 Operator notes:
