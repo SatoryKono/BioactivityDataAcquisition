@@ -48,6 +48,10 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.domain.config import DQConfig
+from bioetl.infrastructure.config.dq_config_loader import DQConfigLoader
+from bioetl.infrastructure.config.pipeline_dq_resolution import (
+    resolve_pipeline_dq_config,
+)
 import bioetl.infrastructure.config.pipeline_config_loader as pipeline_config_loader_module
 from bioetl.infrastructure.config.pipeline_config_loader import PipelineConfigLoader
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
@@ -95,6 +99,56 @@ class _DummyFilterLoader:
     def clear_cache(self) -> None:
         # In-memory test double does not maintain a cache.
         return None
+
+
+@pytest.mark.parametrize(
+    ("override", "expected"),
+    [
+        ({}, {}),
+        ({"report": {}}, {}),
+        ({"field_validations": []}, {}),
+        ({"invalid_record_policy": "fail"}, {"invalid_record_policy": "fail"}),
+        ({"strict_validation": True}, {"strict_validation": True}),
+        ({"report": {"enabled": False}}, {"report": {"enabled": False}}),
+        ({"soft_fail_threshold": 0.05}, {"soft_fail_threshold": 0.05}),
+        ({"hard_fail_threshold": 0.2}, {"hard_fail_threshold": 0.2}),
+        ({"soft_fail_threshold": 0.03}, {"soft_fail_threshold": 0.03}),
+    ],
+)
+def test_inline_overrides_preserve_hierarchy(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, override: dict, expected: dict
+) -> None:
+    """Only supplied inline leaves override the real loader's hierarchy."""
+    loader = DQConfigLoader(tmp_path)
+    monkeypatch.setattr(
+        loader,
+        "_load_defaults_layer",
+        lambda: {
+            "thresholds": {"soft_fail": 0.1, "hard_fail": 0.4},
+            "strict_validation": False,
+            "invalid_record_policy": "skip",
+            "report": {"enabled": True, "format": "yaml", "sample_size": 3},
+        },
+    )
+    config = PipelineYamlConfig.model_validate(
+        {**_base_pipeline_dict(), "dq_overrides": override}
+    )
+    baseline = resolve_pipeline_dq_config(
+        PipelineYamlConfig.model_validate(_base_pipeline_dict()), dq_loader=loader
+    )
+    actual = resolve_pipeline_dq_config(config, dq_loader=loader)
+    for field in (
+        "soft_fail_threshold",
+        "hard_fail_threshold",
+        "strict_validation",
+        "invalid_record_policy",
+    ):
+        assert getattr(actual, field) == expected.get(field, getattr(baseline, field))
+    assert actual.report.enabled == expected.get("report", {}).get(
+        "enabled", baseline.report.enabled
+    )
+    assert actual.report.format == baseline.report.format
+    assert actual.report.sample_size == baseline.report.sample_size
 
 
 # ---------------------------------------------------------------------------
@@ -428,14 +482,12 @@ class TestNormalizeInlineDqOverrides:
         result = loader._normalize_inline_dq_overrides(yaml_config.dq_overrides)
         assert result["thresholds"] == {"soft_fail": 0.03, "hard_fail": 0.15}
 
-    def test_report_section_included(self) -> None:
-        """Report config section is always included."""
+    def test_unsupplied_report_section_excluded(self) -> None:
+        """An absent report does not override the hierarchy."""
         loader = self._make_loader()
         yaml_config = PipelineYamlConfig.model_validate(_base_pipeline_dict())
         result = loader._normalize_inline_dq_overrides(yaml_config.dq_overrides)
-        assert "report" in result
-        assert "enabled" in result["report"]
-        assert "format" in result["report"]
+        assert "report" not in result
 
     def test_field_validations_normalized(self) -> None:
         """field_validations are included when present."""
