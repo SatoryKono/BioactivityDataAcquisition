@@ -78,19 +78,22 @@ def _run(*rows, snapshot=None):
     )
 
 
-def test_auxiliary_same_species_hit_is_an_identity_conflict():
+def test_auxiliary_same_species_hit_stays_off_the_identity_channel():
     batch = _run(
         RawTargetRow(
             "aux",
             {
                 "uniprot": "P12345",
-                "auxiliary_uniprot": "Q12345",
+                "uniprot_xref": "Q12345",
                 "organism": "Human",
             },
             "protein",
         )
     )
-    assert batch.rows[0].result.match_status == "identity_conflict"
+    result = batch.rows[0].result
+    assert result.match_status == "matched"
+    assert result.matched_target_id == "1"
+    assert "auxiliary_uniprot_divergence" in {item.code for item in result.diagnostics}
 
 
 def test_current_rule_catalog_keeps_the_direct_iuphar_class():
@@ -318,6 +321,46 @@ def test_invalid_evidence_identity_cannot_publish_derived_fields(identity):
     assert row["raw_fields"] == raw
 
 
+def test_auxiliary_xref_divergence_survives_primary_shortlist():
+    """RF-002 / Codex P2: auxiliary hits outside the primary shortlist still diverge.
+
+    Primary shortlist must not admit auxiliary targets into identity channels, but
+    diagnostics look them up separately so same-species xref hits become
+    ``auxiliary_uniprot_divergence`` rather than a false unknown.
+    """
+    snapshot = pipeline.IndexedSnapshot.build(
+        snapshot_id="fixture",
+        mapping_version="fixture-release",
+        complete=True,
+        catalog=(
+            CatalogTarget("1", ("P11111",), None, None, "Human", (), ()),
+            CatalogTarget("2", ("Q88888",), None, None, "Human", (), ()),
+        ),
+        annotations={},
+        family_nodes=(),
+        type_to_class={},
+        family_to_class={},
+    )
+    batch = _run(
+        RawTargetRow(
+            "aux-div",
+            {
+                "uniprot": "P11111",
+                "uniprot_xref": "Q88888",
+                "organism": "Human",
+            },
+            "protein",
+        ),
+        snapshot=snapshot,
+    )
+    result = batch.rows[0].result
+    codes = {item.code for item in result.diagnostics}
+    assert result.match_status == "matched"
+    assert result.matched_target_id == "1"
+    assert "auxiliary_uniprot_divergence" in codes
+    assert "unknown_auxiliary_uniprot" not in codes
+
+
 def test_identity_conflict_publishes_the_cross_species_witnesses():
     base = _snapshot()
     snapshot = pipeline.IndexedSnapshot.build(
@@ -349,10 +392,11 @@ def test_identity_conflict_publishes_the_cross_species_witnesses():
         "1",
         "2",
     }
-    assert {row["source_id"] for row in json.loads(rendered["evidence.json"])} == {
-        "1",
-        "2",
+    evidence_sources = {
+        row["source_id"] for row in json.loads(rendered["evidence.json"])
     }
+    assert {"1", "2"}.issubset(evidence_sources)
+    assert "primary_uniprot" in evidence_sources
     assert result.effective_class is None
     only_mouse = _run(
         RawTargetRow("filtered", {"uniprot": "Q88888", "organism": "Human"}, "protein"),

@@ -768,8 +768,9 @@
       },
       "executor": "projection",
       "expected": {
-        "auxiliary_uniprot": "Q99999",
-        "uniprot": "P35372"
+        "uniprot": "P35372",
+        "uniprot_equivalent": null,
+        "uniprot_xref": "Q99999"
       },
       "fixture": {
         "component_accessions": [
@@ -797,6 +798,9 @@
         "matched_target_id": "primary"
       },
       "fixture": {
+        "auxiliary_uniprot_ids": [
+          "Q99999"
+        ],
         "catalog": [
           {
             "species": "human",
@@ -807,8 +811,7 @@
         "organism": "human",
         "snapshot_complete": true,
         "uniprot_ids": [
-          "P35372",
-          "Q99999"
+          "P35372"
         ]
       },
       "previous_policy": {

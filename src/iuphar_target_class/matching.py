@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
+from typing import cast
 
 from .models import Diagnostic, MatchResult
 
@@ -21,8 +22,8 @@ METHOD_ORDER = (
     EXACT_NAME,
     EXACT_SYNONYM,
 )
-MATCHING_POLICY_VERSION = "iuphar-matching-v2"
-STRICT_ANCHOR_FIELDS = ("target_id", "uniprot_ids", "gene_id", "gene_symbol")
+UNKNOWN_AUXILIARY = "unknown_auxiliary_uniprot"
+AUXILIARY_DIVERGENCE = "auxiliary_uniprot_divergence"
 
 
 @dataclass(frozen=True, slots=True)
@@ -40,7 +41,12 @@ class CatalogTarget:
 
 @dataclass(frozen=True, slots=True)
 class MatchQuery:
-    """Identifiers already normalized. Original text is not repaired here."""
+    """Identifiers already normalized. Original text is not repaired here.
+
+    ``uniprot_ids`` are primary/trusted anchors (exact channels).
+    ``auxiliary_uniprot_ids`` are diagnostic-only cross-references (RF-002);
+    they must not open empty exact-channels or qualify as identity_conflict.
+    """
 
     target_id: str | None
     uniprot_ids: tuple[str, ...]
@@ -189,6 +195,7 @@ def validate_identity(
     candidates: tuple[Candidate, ...],
     *,
     snapshot_complete: bool,
+    auxiliary_catalog: tuple[CatalogTarget, ...] | None = None,
 ) -> MatchResult:
     """Turn the full candidate list into one match status.
 
@@ -196,12 +203,18 @@ def validate_identity(
     ----------
     query : MatchQuery
         Normalized query; this function does not validate the input-row schema.
+        Primary ``uniprot_ids`` remain strict; ``auxiliary_uniprot_ids`` only
+        contribute RF-002 diagnostics (see ``identifier_roles``).
     catalog : tuple[CatalogTarget, ...]
-        Targets from the same snapshot used to collect candidates.
+        Targets used for primary identity channels (may be a shortlist).
     candidates : tuple[Candidate, ...]
         Complete channel hits from ``collect_candidates``.
     snapshot_complete : bool
         Whether all required snapshot sources are present.
+    auxiliary_catalog : tuple[CatalogTarget, ...] | None
+        Optional broader catalog for auxiliary-xref diagnostics only. Defaults
+        to ``catalog``. Must include auxiliary UniProt hits that are absent
+        from a primary shortlist so divergence is not misreported as unknown.
 
     Returns
     -------
@@ -210,7 +223,12 @@ def validate_identity(
         searchable query fields, ``not_found`` on a complete snapshot means
         no query-channel hits; it does not assert biological absence.
     """
-    return _decide(query, catalog, candidates, snapshot_complete=snapshot_complete)
+    result = _decide(query, catalog, candidates, snapshot_complete=snapshot_complete)
+    return _attach_auxiliary_diagnostics(
+        query,
+        catalog if auxiliary_catalog is None else auxiliary_catalog,
+        result,
+    )
 
 
 def resolve_match(
@@ -285,137 +303,24 @@ def _decide(
         and set(everyone) == {agreed}
         and _matches_requested_species(query, catalog, agreed)
     ):
-        return _apply_auxiliary(
-            query,
-            catalog,
-            _result(
-                "matched",
-                agreed,
-                (agreed,),
-                _methods(candidates, {agreed}),
-                (),
-            ),
+        return _result(
+            "matched",
+            agreed,
+            (agreed,),
+            _methods(candidates, {agreed}),
+            (),
         )
     if everyone:
-        return _apply_auxiliary(
-            query,
-            catalog,
-            _result(
-                "ambiguous",
-                None,
-                everyone,
-                _methods(candidates, set(everyone)),
-                ("ambiguous_match",),
-            ),
+        return _result(
+            "ambiguous",
+            None,
+            everyone,
+            _methods(candidates, set(everyone)),
+            ("ambiguous_match",),
         )
     if not snapshot_complete:
-        decided = _result("source_unavailable", None, (), (), ("source_unavailable",))
-    else:
-        decided = _result("not_found", None, (), (), ())
-    return _apply_auxiliary(query, catalog, decided)
-
-
-def _note_auxiliary_accession(
-    accession: str,
-    query: MatchQuery,
-    catalog: tuple[CatalogTarget, ...],
-    reliable: set[str],
-    extra: list[Diagnostic],
-    conflict_ids: set[str],
-) -> None:
-    """Record one auxiliary accession. A disjoint same-species hit is a conflict."""
-    hits = [item for item in catalog if accession in item.uniprot_ids]
-    if not hits:
-        extra.append(
-            Diagnostic(
-                "auxiliary_uniprot_unknown",
-                "info",
-                "auxiliary UniProt cross-reference is not in the snapshot",
-            )
-        )
-        return
-    same_species = [
-        item
-        for item in hits
-        if query.organism is None or item.species == query.organism
-    ]
-    same_ids = {item.target_id for item in same_species}
-    if not same_species:
-        extra.append(
-            Diagnostic(
-                "auxiliary_uniprot_species_gap",
-                "warning",
-                "auxiliary UniProt cross-reference is outside the requested species",
-            )
-        )
-        return
-    if reliable and same_ids.isdisjoint(reliable):
-        conflict_ids.update(same_ids)
-        conflict_ids.update(reliable)
-        return
-    if not reliable:
-        extra.append(
-            Diagnostic(
-                "auxiliary_uniprot_not_identity",
-                "info",
-                "auxiliary UniProt cross-reference does not confirm identity",
-            )
-        )
-        return
-    extra.append(
-        Diagnostic(
-            "auxiliary_uniprot_observed",
-            "info",
-            "auxiliary UniProt cross-reference agrees with the required anchor",
-        )
-    )
-
-
-def _apply_auxiliary(
-    query: MatchQuery,
-    catalog: tuple[CatalogTarget, ...],
-    result: MatchResult,
-) -> MatchResult:
-    """Record auxiliary UniProt xrefs without making them required anchors.
-
-    A missing auxiliary accession is diagnostic. A same-species hit on a
-    different target than a reliable identifier is an identity conflict.
-    Auxiliary accessions never confirm a match by themselves, and their order
-    does not change the decision.
-    """
-    if not query.auxiliary_uniprot_ids:
-        return result
-    extra: list[Diagnostic] = []
-    conflict_ids: set[str] = set()
-    reliable = (
-        {result.matched_target_id}
-        if result.match_status == "matched" and result.matched_target_id
-        else set()
-    )
-    for accession in sorted(set(query.auxiliary_uniprot_ids)):
-        _note_auxiliary_accession(
-            accession, query, catalog, reliable, extra, conflict_ids
-        )
-    if conflict_ids:
-        return _result(
-            "identity_conflict",
-            None,
-            tuple(sorted(conflict_ids)),
-            (UNIPROT,),
-            ("identity_conflict",),
-        )
-    if not extra:
-        return result
-    return enforce_match_invariant(
-        MatchResult(
-            match_status=result.match_status,
-            matched_target_id=result.matched_target_id,
-            candidate_target_ids=result.candidate_target_ids,
-            match_method=result.match_method,
-            match_evidence_ids=result.match_evidence_ids,
-            diagnostics=result.diagnostics + tuple(extra),
-        )
-    )
+        return _result("source_unavailable", None, (), (), ("source_unavailable",))
+    return _result("not_found", None, (), (), ())
 
 
 def _identity_conflict(
@@ -630,4 +535,50 @@ def _result(
             match_evidence_ids=(),
             diagnostics=diagnostics,
         )
+    )
+
+
+def _attach_auxiliary_diagnostics(
+    query: MatchQuery,
+    catalog: tuple[CatalogTarget, ...],
+    result: MatchResult,
+) -> MatchResult:
+    """Record unknown/divergent auxiliary UniProt xrefs without changing status.
+
+    Auxiliary hits never open exact channels and never promote name-only rows
+    to ``matched`` (RF-002 / ``identifier_roles.MATCHING_POLICY_VERSION``).
+    """
+    if not query.auxiliary_uniprot_ids:
+        return result
+    extras: list[Diagnostic] = []
+    targets = _species_targets(query, catalog)
+    for accession in query.auxiliary_uniprot_ids:
+        hits = _ids(
+            target.target_id for target in targets if accession in target.uniprot_ids
+        )
+        if not hits:
+            extras.append(
+                Diagnostic(
+                    UNKNOWN_AUXILIARY,
+                    "info",
+                    f"{UNKNOWN_AUXILIARY}:{accession}",
+                )
+            )
+            continue
+        # RF-002: warn when any catalog hit differs from the primary decision,
+        # even if the matched target is also among the hits.
+        if result.matched_target_id is not None and any(
+            target_id != result.matched_target_id for target_id in hits
+        ):
+            extras.append(
+                Diagnostic(
+                    AUXILIARY_DIVERGENCE,
+                    "warning",
+                    f"{AUXILIARY_DIVERGENCE}:{accession}",
+                )
+            )
+    if not extras:
+        return result
+    return cast(
+        MatchResult, replace(result, diagnostics=(*result.diagnostics, *extras))
     )

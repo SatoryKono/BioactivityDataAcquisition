@@ -81,22 +81,19 @@ def plain_target_value(value: object) -> object:
 def project_target_fields(
     data: Mapping[str, object], taxon: str | None
 ) -> dict[str, str | None]:
-    """Project primary component accessions separately from auxiliary xrefs.
+    """Project ChEMBL target fields onto the offline classification kernel.
 
-    ``uniprot`` carries component accessions. Those are required anchors for a
-    single protein and still do not prove a complex. ``auxiliary_uniprot``
-    keeps every other UniProt cross-reference for evidence. An unknown
-    auxiliary accession must not become an empty required exact channel.
+    RF-002 (#13310): ``component_accessions`` are primary UniProt anchors;
+    ``target_xref_uniprot_ids`` are split into proven equivalents (overlap with
+    primary) and auxiliary xrefs. Only primary values fill ``uniprot`` so
+    unknown auxiliary tokens cannot open empty exact-channels. All original
+    business fields remain in ``source_business_data``.
     """
     primary = tuple(dict.fromkeys(_tokens(data.get("component_accessions"))))
-    auxiliary = tuple(
-        dict.fromkeys(
-            token
-            for token in _tokens(data.get("target_xref_uniprot_ids"))
-            if token not in primary
-        )
-    )
-    accessions = primary
+    xref = tuple(dict.fromkeys(_tokens(data.get("target_xref_uniprot_ids"))))
+    primary_set = set(primary)
+    proven = tuple(item for item in xref if item in primary_set)
+    auxiliary = tuple(item for item in xref if item not in primary_set)
     synonyms = tuple(
         dict.fromkeys(
             (
@@ -109,8 +106,9 @@ def project_target_fields(
         "target_chembl_id": _text(data.get("target_id")),
         # ChEMBL identity is never passed as the kernel's explicit IUPHAR ID.
         "target_id": _text(data.get("iuphar_target_id")),
-        "uniprot": "|".join(accessions) or None,
-        "auxiliary_uniprot": "|".join(auxiliary) or None,
+        "uniprot": "|".join(primary) or None,
+        "uniprot_equivalent": "|".join(proven) or None,
+        "uniprot_xref": "|".join(auxiliary) or None,
         "organism": taxon,
         "source_organism": _text(data.get("organism")),
         "name": _text(data.get("pref_name")),

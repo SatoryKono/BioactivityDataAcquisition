@@ -328,18 +328,6 @@ def _shortlist(query: MatchQuery, ctx: IndexedSnapshot) -> tuple[CatalogTarget, 
     return tuple(ctx.catalog[i] for i in sorted(indexes))
 
 
-def _auxiliary_rows(
-    query: MatchQuery, ctx: IndexedSnapshot
-) -> tuple[CatalogTarget, ...]:
-    """Expose auxiliary accessions to conflict checks, not to exact channels."""
-    indexes = {
-        index
-        for value in query.auxiliary_uniprot_ids
-        for index in ctx.lookup.get(("uniprot", value), ())
-    }
-    return tuple(ctx.catalog[index] for index in sorted(indexes))
-
-
 def _conflict_catalog(
     shortlist: tuple[CatalogTarget, ...], ctx: IndexedSnapshot
 ) -> tuple[CatalogTarget, ...]:
@@ -348,6 +336,38 @@ def _conflict_catalog(
     if not ids:
         return shortlist
     return tuple(row for row in ctx.catalog if row.target_id in ids)
+
+
+def _auxiliary_diagnostic_catalog(
+    query: MatchQuery,
+    identity_catalog: tuple[CatalogTarget, ...],
+    ctx: IndexedSnapshot,
+) -> tuple[CatalogTarget, ...]:
+    """Resolve auxiliary UniProt rows without admitting them to identity channels.
+
+    RF-002: primary shortlist omits auxiliary xrefs on purpose. Diagnostics still
+    need those catalog rows so a same-species hit becomes
+    ``auxiliary_uniprot_divergence`` rather than a false
+    ``unknown_auxiliary_uniprot``.
+    """
+    if not query.auxiliary_uniprot_ids:
+        return identity_catalog
+    indexes = {
+        index
+        for accession in query.auxiliary_uniprot_ids
+        for index in ctx.lookup.get(("uniprot", accession), ())
+    }
+    if not indexes:
+        return identity_catalog
+    seen = {row.target_id for row in identity_catalog}
+    extras = tuple(
+        ctx.catalog[index]
+        for index in sorted(indexes)
+        if ctx.catalog[index].target_id not in seen
+    )
+    if not extras:
+        return identity_catalog
+    return (*identity_catalog, *extras)
 
 
 def _ancestor_records(
@@ -404,6 +424,21 @@ def _evidence(
         )
         for hit in hits
     ]
+    for role, values in (
+        ("primary_uniprot", row.uniprot_accessions),
+        ("equivalent_uniprot", row.equivalent_uniprot_accessions),
+        ("auxiliary_uniprot", row.auxiliary_uniprot_accessions),
+    ):
+        for accession in values:
+            draft.append(
+                EvidenceDraft(
+                    row.input_row_id,
+                    "match",
+                    role,
+                    accession,
+                    "match",
+                )
+            )
     if annotation is not None and match.matched_target_id and annotation.raw_payload:
         draft.append(
             EvidenceDraft(
@@ -461,15 +496,19 @@ def classify_target(
         row.taxon,
         row.name,
         row.synonyms,
-        row.auxiliary_uniprot_ids,
+        auxiliary_uniprot_ids=row.auxiliary_uniprot_accessions,
     )
     subset = _shortlist(query, snapshot)
     hits = collect_candidates(query, subset)
+    identity_catalog = _conflict_catalog(subset, snapshot)
     match = validate_identity(
         query,
-        _conflict_catalog((*subset, *_auxiliary_rows(query, snapshot)), snapshot),
+        identity_catalog,
         hits,
         snapshot_complete=snapshot.complete,
+        auxiliary_catalog=_auxiliary_diagnostic_catalog(
+            query, identity_catalog, snapshot
+        ),
     )
     match = _scope_match(row, match, snapshot)
     hits = _publication_hits(query, subset, hits, match)

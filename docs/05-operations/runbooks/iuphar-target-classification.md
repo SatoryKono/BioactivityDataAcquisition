@@ -28,6 +28,20 @@ Before changing rules or admitting enrich, use the RF-001 contract:
 `not_found`. `biological_accuracy_accepted` stays false unless proven.
 Matched counts are not biological accuracy.
 
+## UniProt identifier roles (RF-002)
+
+Primary object accessions (`component_accessions` → kernel `uniprot`) are
+strict exact-channel anchors. Auxiliary `target_xref_uniprot_ids` project to
+`uniprot_xref` and only produce diagnostics (`unknown_auxiliary_uniprot` /
+`auxiliary_uniprot_divergence`); they must not force false `ambiguous`.
+Proven overlaps become `uniprot_equivalent` (evidence only).
+
+- Roles: [`17-iuphar-uniprot-identifier-roles.md`](../../04-reference/pipelines/chembl/17-iuphar-uniprot-identifier-roles.md)
+- Machine contract: `src/iuphar_target_class/identifier_roles.py`
+- Policy pin: `data/iuphar_target_class/rf002/matching_policy.json`
+- Matching policy version: `rf002-uniprot-roles-2026-11-23` (legacy merged
+  anchors do not qualify this policy; RF-008 admits independently)
+
 ## Trigger
 
 Use this runbook to validate an offline IUPHAR classification dependency,

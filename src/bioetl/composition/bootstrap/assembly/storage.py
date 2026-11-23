@@ -282,6 +282,7 @@ def build_target_classification_session(
         normalization_version=profile.normalization_version,
         rules_version=profile.rules_version,
         classification_schema_version=profile.classification_schema_version,
+        matching_policy_version=profile.matching_policy_version,
     )
     expected = config.target_classification.to_domain().contract_version
     if mode == "enrich" and profile.classification_schema_version != expected:
@@ -295,6 +296,7 @@ def build_target_classification_session(
         normalization_version=profile.normalization_version,
         rules_version=profile.rules_version,
         classification_schema_version=profile.classification_schema_version,
+        matching_policy_version=profile.matching_policy_version,
     )
 
 

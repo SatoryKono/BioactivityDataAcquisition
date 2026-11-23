@@ -597,7 +597,8 @@ def _auxiliary_anchor_case() -> dict[str, object]:
             ],
             "organism": "human",
             "snapshot_complete": True,
-            "uniprot_ids": ["P35372", "Q99999"],
+            "uniprot_ids": ["P35372"],
+            "auxiliary_uniprot_ids": ["Q99999"],
         },
         {"match_status": "matched", "matched_target_id": "primary"},
         previous_policy={"match_status": "ambiguous", "matched_target_id": None},
@@ -622,8 +623,9 @@ def _projection_case() -> dict[str, object]:
             "taxon": "9606",
         },
         {
-            "auxiliary_uniprot": "Q99999",
             "uniprot": "P35372",
+            "uniprot_equivalent": None,
+            "uniprot_xref": "Q99999",
         },
         previous_policy={"uniprot": "P35372|Q99999"},
         claim="engineering_rule",
@@ -1138,6 +1140,9 @@ def _execute_match(fixture: Mapping[str, object]) -> dict[str, object]:
         _optional_str(fixture.get("organism")),
         _optional_str(fixture.get("name")),
         tuple(str(item) for item in _sequence(fixture.get("synonyms", []))),
+        tuple(
+            str(item) for item in _sequence(fixture.get("auxiliary_uniprot_ids", []))
+        ),
     )
     result = resolve_match(
         query, catalog, snapshot_complete=bool(fixture["snapshot_complete"])
@@ -1162,7 +1167,7 @@ def _execute_projection(fixture: Mapping[str, object]) -> dict[str, object]:
     )
     observed: dict[str, object] = {
         key: projected[key]
-        for key in ("auxiliary_uniprot", "primary_uniprot", "uniprot")
+        for key in ("uniprot", "uniprot_equivalent", "uniprot_xref")
         if key in projected
     }
     return observed

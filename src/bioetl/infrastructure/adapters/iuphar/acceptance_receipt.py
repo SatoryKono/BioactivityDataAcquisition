@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from pathlib import Path
 
+from iuphar_target_class.identifier_roles import MATCHING_POLICY_VERSION
 from iuphar_target_class.policy import LOCAL_RULE_CATALOG_VERSION, PLAN_VERSION
 
 from ._manifest import checked_document, header, referenced_path, require_sha256, text
@@ -18,10 +19,26 @@ from .snapshot_models import (
     LoadedIupharSnapshot,
 )
 
+_VERSION_KEYS = (
+    "normalization_version",
+    "rules_version",
+    "classification_schema_version",
+    "matching_policy_version",
+)
 _ADMITTED_PROFILE_VERSIONS = frozenset(
     {
-        (NORMALIZATION_VERSION, PLAN_VERSION, CLASSIFICATION_SCHEMA_VERSION),
-        (NORMALIZATION_VERSION, LOCAL_RULE_CATALOG_VERSION, "3.2.0"),
+        (
+            NORMALIZATION_VERSION,
+            PLAN_VERSION,
+            CLASSIFICATION_SCHEMA_VERSION,
+            MATCHING_POLICY_VERSION,
+        ),
+        (
+            NORMALIZATION_VERSION,
+            LOCAL_RULE_CATALOG_VERSION,
+            "3.2.0",
+            MATCHING_POLICY_VERSION,
+        ),
     }
 )
 
@@ -40,14 +57,7 @@ def validate_acceptance_receipt(
         raise ValueError("acceptance belongs to a different IUPHAR snapshot")
     if document.get("reference_cases_accepted") is not True:
         raise ValueError("independent IUPHAR reference cases are not accepted")
-    versions = tuple(
-        document.get(key)
-        for key in (
-            "normalization_version",
-            "rules_version",
-            "classification_schema_version",
-        )
-    )
+    versions = tuple(document.get(key) for key in _VERSION_KEYS)
     if versions not in _ADMITTED_PROFILE_VERSIONS:
         raise ValueError("acceptance versions differ from the executing adapter")
     _executed_checks(document.get("checks"))
@@ -84,7 +94,7 @@ def _load_acceptance(
     root: Path,
     snapshot: LoadedIupharSnapshot,
     required: bool,
-) -> tuple[str, tuple[str, str, str]] | None:
+) -> tuple[str, tuple[str, str, str, str]] | None:
     reference = document.get("acceptance")
     if reference is None:
         if required:
@@ -97,11 +107,7 @@ def _load_acceptance(
     validate_acceptance_receipt(
         receipt, snapshot_manifest_sha256=snapshot.snapshot_manifest_sha256
     )
-    versions = (
-        text(receipt, "normalization_version"),
-        text(receipt, "rules_version"),
-        text(receipt, "classification_schema_version"),
-    )
+    versions = tuple(text(receipt, key) for key in _VERSION_KEYS)
     return digest, versions
 
 
@@ -125,11 +131,7 @@ def load_profile(
     loaded_acceptance = _load_acceptance(
         document, path.parent, snapshot, require_acceptance
     )
-    versions = (
-        text(document, "normalization_version"),
-        text(document, "rules_version"),
-        text(document, "classification_schema_version"),
-    )
+    versions = tuple(text(document, key) for key in _VERSION_KEYS)
     if versions not in _ADMITTED_PROFILE_VERSIONS:
         raise ValueError("IUPHAR profile versions differ from the executing adapter")
     acceptance_hash = None

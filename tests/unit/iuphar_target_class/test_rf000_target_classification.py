@@ -68,7 +68,8 @@ def test_primary_uniprot_is_separate_from_auxiliary_xref() -> None:
         "9606",
     )
     assert fields["uniprot"] == "P11111"
-    assert fields["auxiliary_uniprot"] == "Q99999"
+    assert fields["uniprot_equivalent"] == "P11111"
+    assert fields["uniprot_xref"] == "Q99999"
 
 
 def test_input_manifest_does_not_mutate_the_original() -> None:

@@ -86,31 +86,15 @@ def _make_services() -> MagicMock:
 
 
 def _make_pipeline_config() -> MagicMock:
+    from bioetl.infrastructure.schemas.pipeline_config_dq import DQYamlConfig
+
     config = MagicMock()
     config.provider = "chembl"
     config.entity_type = "activity"
-    config.dq_config_file = None
     config.source = {"api": {"rate_limit": 10.0}}
-    config.dq_overrides.model_fields_set = {
-        "soft_fail_threshold",
-        "hard_fail_threshold",
-        "invalid_record_policy",
-        "report",
-    }
-    config.dq_overrides.soft_fail_threshold = 0.05
-    config.dq_overrides.hard_fail_threshold = 0.20
-    config.dq_overrides.invalid_record_policy = "quarantine"
-    config.dq_overrides.report.format = "json"
-    config.dq_overrides.report.output_path = "reports/dq"
-    config.dq_overrides.report.enabled = True
-    config.dq_overrides.report.model_dump.return_value = {
-        "enabled": True,
-        "format": "json",
-        "output_path": "reports/dq",
-    }
-    config.dq_overrides.field_validations = []
-    config.dq_overrides.cross_field_validations = []
-    config.dq_overrides.conditional_validations = []
+    # Explicit None avoids MagicMock auto-attrs forcing a broken DQConfigFile path.
+    config.dq_config_file = None
+    config.dq_overrides = DQYamlConfig()
     return config
 
 

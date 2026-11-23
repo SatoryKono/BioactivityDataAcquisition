@@ -50,6 +50,7 @@ from bioetl.infrastructure.config.domain_config_resolver import (
     DomainConfigResolver,
 )
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+from bioetl.infrastructure.schemas.pipeline_config_dq import DQYamlConfig
 
 
 def _make_yaml_config(**overrides: object) -> PipelineYamlConfig:
@@ -63,24 +64,10 @@ def _make_yaml_config(**overrides: object) -> PipelineYamlConfig:
         ),
         "silver_filters": None,
         "gold_filters": None,
-        "dq_overrides": SimpleNamespace(
-            model_fields_set=frozenset(),
-            field_validations=[],
-            cross_field_validations=[],
-            conditional_validations=[],
-            soft_fail_threshold=0.05,
-            hard_fail_threshold=0.20,
-            strict_validation=False,
-            invalid_record_policy="drop",
-            report=SimpleNamespace(
-                model_dump=lambda **_kwargs: {},
-                enabled=True,
-                format="json",
-                include_sample_failures=True,
-                sample_size=10,
-                output_path=None,
-            ),
-        ),
+        # Default DQYamlConfig keeps model_fields_set empty so DomainConfigResolver
+        # treats inline overrides as absent (#13326 / Class selection of composition).
+        "dq_overrides": DQYamlConfig(),
+        "dq_config_file": None,
     }
     defaults.update(overrides)
     return cast(PipelineYamlConfig, SimpleNamespace(**defaults))
