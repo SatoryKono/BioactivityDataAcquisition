@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+from typing import Any
 
 from bioetl.composition.bootstrap.cli.metrics import bind_target_deployment
 from bioetl.infrastructure.config.config_root import resolve_configs_root
@@ -97,72 +98,107 @@ def main(argv: list[str] | None = None) -> int:
     )
     if paths.workspace.resolve() != active_root:
         parser.error("plan workspace must be the active repository/configs root")
+    _execute_plan(parser, args, paths, document, source_profile, destination_profile)
+    return 0
+
+
+def _execute_plan(
+    parser: argparse.ArgumentParser,
+    args: argparse.Namespace,
+    paths: TargetMigrationPaths,
+    document: dict[str, Any],
+    source_profile: str,
+    destination_profile: str,
+) -> None:
+    """Run one planned migration action after the shared plan checks."""
     fields = tuple(document["legacy_include_fields"])
     if args.action == "freeze-inputs":
-        if args.output is None:
-            parser.error("freeze-inputs requires --output NEW_MANIFEST_PATH")
-        freeze_target_inputs(paths, legacy_include_fields=fields, output=args.output)
-        print(json.dumps({"status": "frozen", "manifest": str(args.output)}))
+        _freeze_inputs(parser, args, paths, fields)
     elif args.action == "build-candidates":
-        if not all(
-            (
-                args.input_manifest,
-                args.input_manifest_sha256,
-                args.output,
-                args.run_id,
-                args.run_started_at,
-            )
-        ):
-            parser.error(
-                "build-candidates requires pinned input manifest, output directory and run identity"
-            )
-        build_target_candidates(
-            TargetCandidateBuildRequest(
-                paths,
-                args.input_manifest,
-                args.input_manifest_sha256,
-                args.output,
-                fields,
-                args.run_id,
-                args.run_started_at,
-                bind_target_deployment(paths),
-            )
+        _build_candidates(parser, args, paths, fields)
+    elif args.action == "prepare":
+        state = prepare_target_migration(
+            paths,
+            legacy_include_fields=fields,
+            deployment=bind_target_deployment(paths),
+            source_profile=source_profile,
+            destination_profile=destination_profile,
         )
-        print(json.dumps({"status": "complete", "output": str(args.output)}))
+        _print_migration_state(paths, state)
+    elif args.action == "promote":
+        state = promote_target_migration(
+            paths,
+            deployment=bind_target_deployment(paths),
+            source_profile=source_profile,
+            destination_profile=destination_profile,
+            cutover_authority="RF-013",
+        )
+        _print_migration_state(paths, state)
     else:
-        if args.action == "prepare":
-            state = prepare_target_migration(
-                paths,
-                legacy_include_fields=fields,
-                deployment=bind_target_deployment(paths),
-                source_profile=source_profile,
-                destination_profile=destination_profile,
-            )
-        elif args.action == "promote":
-            state = promote_target_migration(
-                paths,
-                deployment=bind_target_deployment(paths),
-                source_profile=source_profile,
-                destination_profile=destination_profile,
-                cutover_authority="RF-013",
-            )
-        else:
-            state = rollback_target_migration(
-                paths,
-                source_profile=source_profile,
-                destination_profile=destination_profile,
-            )
-        reported = migration_status(state)
-        print(
-            json.dumps(
-                {
-                    "phase": state["phase"],
-                    "journal": str(paths.backup / "journal.json"),
-                    **reported,
-                }
-            )
+        state = rollback_target_migration(
+            paths,
+            source_profile=source_profile,
+            destination_profile=destination_profile,
         )
-    return 0
+        _print_migration_state(paths, state)
+
+
+def _freeze_inputs(
+    parser: argparse.ArgumentParser,
+    args: argparse.Namespace,
+    paths: TargetMigrationPaths,
+    fields: tuple[Any, ...],
+) -> None:
+    if args.output is None:
+        parser.error("freeze-inputs requires --output NEW_MANIFEST_PATH")
+    freeze_target_inputs(paths, legacy_include_fields=fields, output=args.output)
+    print(json.dumps({"status": "frozen", "manifest": str(args.output)}))
+
+
+def _build_candidates(
+    parser: argparse.ArgumentParser,
+    args: argparse.Namespace,
+    paths: TargetMigrationPaths,
+    fields: tuple[Any, ...],
+) -> None:
+    if not all(
+        (
+            args.input_manifest,
+            args.input_manifest_sha256,
+            args.output,
+            args.run_id,
+            args.run_started_at,
+        )
+    ):
+        parser.error(
+            "build-candidates requires pinned input manifest, output directory and run identity"
+        )
+    build_target_candidates(
+        TargetCandidateBuildRequest(
+            paths,
+            args.input_manifest,
+            args.input_manifest_sha256,
+            args.output,
+            fields,
+            args.run_id,
+            args.run_started_at,
+            bind_target_deployment(paths),
+        )
+    )
+    print(json.dumps({"status": "complete", "output": str(args.output)}))
+
+
+def _print_migration_state(paths: TargetMigrationPaths, state: dict[str, Any]) -> None:
+    reported = migration_status(state)
+    print(
+        json.dumps(
+            {
+                "phase": state["phase"],
+                "journal": str(paths.backup / "journal.json"),
+                **reported,
+            }
+        )
+    )
 
 
 def _contour_report(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
