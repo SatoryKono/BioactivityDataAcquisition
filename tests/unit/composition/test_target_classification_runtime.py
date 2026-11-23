@@ -114,7 +114,7 @@ def shadow_config(tmp_path: Path, monkeypatch) -> PipelineYamlConfig:
             "snapshot": snapshot,
             "acceptance": None,
             "normalization_version": "bioetl-iuphar-input-v1",
-            "rules_version": "plan-v1-r8",
+            "rules_version": "plan-v1-r9",
             "classification_schema_version": "3.1.0",
         },
     )
