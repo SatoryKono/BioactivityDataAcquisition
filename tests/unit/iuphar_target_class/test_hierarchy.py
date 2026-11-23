@@ -647,3 +647,27 @@ def test_unrequested_deep_branch_blocks_admission_in_either_id_order(
     )
     assert allowed.admitted is True
     assert allowed.diagnostics == ()
+
+
+def test_unrelated_request_blocks_a_deeper_chain_in_either_naming() -> None:
+    forward = (
+        FamilyNode("a", (), "root"),
+        FamilyNode("b", ("a",), "mid"),
+        FamilyNode("c", ("b",), "leaf"),
+        FamilyNode("ok", (), "other"),
+    )
+    reverse = (
+        FamilyNode("c", (), "root"),
+        FamilyNode("b", ("c",), "mid"),
+        FamilyNode("a", ("b",), "leaf"),
+        FamilyNode("ok", (), "other"),
+    )
+    for nodes in (forward, reverse):
+        blocked = admit_family_graph(
+            nodes,
+            ("ok",),
+            max_depth=1,
+            max_visited_nodes=10_000,
+        )
+        assert blocked.admitted is False
+        assert blocked.diagnostics[0].message == "превышение лимита"

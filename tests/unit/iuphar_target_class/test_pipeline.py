@@ -395,11 +395,78 @@ def test_approved_runtime_uses_exact_merged_mapping_release():
         pipeline.IndexedSnapshot.from_approved_gtopdb(release="stale", **args)
     ready = pipeline.IndexedSnapshot.from_approved_gtopdb(release="2026.3.1", **args)
     assert len(ready.family_to_class) == 744 and "694" not in ready.family_to_class
+    assert ready.family_to_subclass == {}
     row = _run(RawTargetRow("r1", {"target_id": "1"}, "protein"), snapshot=ready).rows[
         0
     ]
     assert row.result.iuphar_class == "Receptor"
     assert row.result.iuphar_mapping_version == "2026.3.1"
+
+
+def test_approved_snapshot_blocks_a_graph_with_a_missing_parent(monkeypatch):
+    monkeypatch.setattr(pipeline, "FAMILY_ROWS", ((1, "gpcr", (9,)),))
+    raw = '{"id":"1","type":"gpcr"}'
+    annotation = ProviderAnnotation(
+        "1",
+        "gpcr",
+        ("1",),
+        hashlib.sha256(raw.encode()).hexdigest(),
+        None,
+        raw,
+    )
+    with pytest.raises(ValueError, match="отсутствующий родитель"):
+        pipeline.IndexedSnapshot.from_approved_gtopdb(
+            snapshot_id="fixture",
+            release="2026.3.1",
+            complete=False,
+            catalog=(CatalogTarget("1", (), None, None, None, (), ()),),
+            annotations={"1": annotation},
+        )
+
+
+def test_explicit_subclass_reaches_the_row_and_an_unrelated_cycle_blocks_it():
+    base = _snapshot()
+    classified = pipeline.IndexedSnapshot.build(
+        snapshot_id=base.snapshot_id,
+        mapping_version=base.mapping_version,
+        complete=base.complete,
+        catalog=base.catalog,
+        annotations=dict(base.annotations),
+        family_nodes=base.families["family"],
+        type_to_class=dict(base.type_to_class),
+        family_to_class=dict(base.family_to_class),
+        family_to_subclass={"family": "Kinase"},
+    )
+    row = _run(
+        RawTargetRow("row-a", {"target_id": "1", "organism": "Human"}, "protein"),
+        snapshot=classified,
+    ).rows[0]
+    assert row.result.iuphar_class == "Receptor"
+    assert row.result.iuphar_subclass == "Kinase"
+    assert row.direct is not None
+    assert row.direct.subclass_origin == "subclass_dictionary"
+    assert row.direct.annotation_capability == "family_only"
+    blocked = pipeline.IndexedSnapshot.build(
+        snapshot_id=base.snapshot_id,
+        mapping_version=base.mapping_version,
+        complete=base.complete,
+        catalog=base.catalog,
+        annotations=dict(base.annotations),
+        family_nodes=(
+            *base.families["family"],
+            FamilyNode("left", ("right",), "other"),
+            FamilyNode("right", ("left",), "other"),
+        ),
+        type_to_class=dict(base.type_to_class),
+        family_to_class=dict(base.family_to_class),
+        family_to_subclass={"family": "Kinase"},
+    )
+    bad = _run(
+        RawTargetRow("row-a", {"target_id": "1", "organism": "Human"}, "protein"),
+        snapshot=blocked,
+    ).rows[0]
+    assert bad.result.iuphar_subclass is None
+    assert any(item.message == "цикл" for item in bad.result.diagnostics)
 
 
 def _stage0_fixture(tmp_path):

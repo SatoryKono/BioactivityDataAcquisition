@@ -18,7 +18,12 @@ from .evidence import (
     require_class_chain,
 )
 from .gtopdb_2026_3_1 import FAMILY_ROWS
-from .hierarchy import FamilyNode, HierarchyResult, normalize_provider_class
+from .hierarchy import (
+    FamilyNode,
+    HierarchyResult,
+    admit_family_graph,
+    normalize_provider_class,
+)
 from .iuphar_mapping import approved_class_mappings
 from .local_layer import Prediction, apply_local
 from .matching import (
@@ -41,7 +46,7 @@ from .models import (
     ValidatedInput,
 )
 from .normalization import isolated_invalid_result, validate_input
-from .policy import GRAPH_MAX_VISITED_NODES, local_rules, validate_rules
+from .policy import local_rules, validate_rules
 from .resolution import ResolutionInput, select_effective_class
 
 
@@ -64,6 +69,7 @@ class IndexedSnapshot:
         default_factory=dict
     )
     admission_complete: bool | None = None
+    family_to_subclass: Mapping[str, str] = field(default_factory=dict)
 
     @classmethod
     def from_approved_gtopdb(
@@ -77,13 +83,20 @@ class IndexedSnapshot:
         complex_ids: frozenset[str] = frozenset(),
         species_annotations: Mapping[tuple[str, str], ProviderAnnotation] | None = None,
         admission_complete: bool | None = None,
+        family_to_subclass: Mapping[str, str] | None = None,
     ) -> IndexedSnapshot:
-        """Bind a frozen provider snapshot to the exact approved release."""
+        """Bind a frozen provider snapshot to the exact approved release.
+
+        The full pinned family graph is admitted before the snapshot exists.
+        A cycle, a missing parent, or a root distance above the limit blocks
+        the snapshot, including a branch that no requested target uses.
+        """
         types, families = approved_class_mappings(release)
         nodes = tuple(
             FamilyNode(str(family), tuple(map(str, parents)), source_type)
             for family, source_type, parents in FAMILY_ROWS
         )
+        _require_admitted_family_graph(nodes)
         return cls.build(
             snapshot_id=snapshot_id,
             mapping_version=release,
@@ -96,6 +109,7 @@ class IndexedSnapshot:
             complex_ids=complex_ids,
             species_annotations=species_annotations,
             admission_complete=admission_complete,
+            family_to_subclass=family_to_subclass,
         )
 
     @classmethod
@@ -113,6 +127,7 @@ class IndexedSnapshot:
         complex_ids: frozenset[str] = frozenset(),
         species_annotations: Mapping[tuple[str, str], ProviderAnnotation] | None = None,
         admission_complete: bool | None = None,
+        family_to_subclass: Mapping[str, str] | None = None,
     ) -> IndexedSnapshot:
         """Index all channels once and verify recorded provider payload hashes."""
         lookup, families = _snapshot_indexes(catalog, family_nodes)
@@ -133,6 +148,7 @@ class IndexedSnapshot:
             complex_ids,
             MappingProxyType(scoped),
             admission_complete,
+            MappingProxyType(dict(family_to_subclass or {})),
         )
 
 
@@ -318,20 +334,25 @@ def _conflict_catalog(
     return tuple(row for row in ctx.catalog if row.target_id in ids)
 
 
-def _ancestor_records(
-    ctx: IndexedSnapshot, ids: tuple[str, ...]
-) -> tuple[FamilyNode, ...]:
-    seen: set[str] = set()
-    pending = list(ids)
+def _require_admitted_family_graph(nodes: tuple[FamilyNode, ...]) -> None:
+    """Block an approved snapshot whose family graph fails structural admission.
+
+    No family id is requested here. The visit budget belongs to one
+    classification walk. Every supplied node is still checked for a cycle,
+    a missing parent, and root distance.
+    """
+    admission = admit_family_graph(nodes, ())
+    if admission.admitted:
+        return
+    detail = "; ".join(item.message for item in admission.diagnostics)
+    raise ValueError(f"approved family graph is not admitted: {detail}")
+
+
+def _snapshot_family_nodes(ctx: IndexedSnapshot) -> tuple[FamilyNode, ...]:
+    """Return every stored family row, including branches no target requests."""
     records: list[FamilyNode] = []
-    while pending and len(seen) <= GRAPH_MAX_VISITED_NODES:
-        key = pending.pop()
-        if key in seen:
-            continue
-        seen.add(key)
-        nodes = ctx.families.get(key, ())
-        records.extend(nodes)
-        pending.extend(parent for node in nodes for parent in node.parent_ids)
+    for family_id in sorted(ctx.families):
+        records.extend(ctx.families[family_id])
     return tuple(records)
 
 
@@ -344,9 +365,10 @@ def _direct(
     return normalize_provider_class(
         type_name=annotation.type_raw.strip().lower() if annotation.type_raw else None,
         family_ids=annotation.family_ids,
-        nodes=_ancestor_records(ctx, annotation.family_ids),
+        nodes=_snapshot_family_nodes(ctx),
         type_to_class=ctx.type_to_class,
         family_to_class=ctx.family_to_class,
+        family_to_subclass=ctx.family_to_subclass,
     )
 
 
