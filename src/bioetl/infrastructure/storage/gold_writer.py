@@ -18,6 +18,7 @@ from bioetl.domain.types import (
     resolve_gold_contract_version,
 )
 from bioetl.domain.types.gold_contracts import GoldWriteReceipt
+from bioetl.domain.value_objects.silver_result import SilverWriteResult
 from bioetl.infrastructure.storage.base_delta_writer import (
     BaseDeltaWriter,
     _clear_delta_tables,
@@ -80,7 +81,6 @@ if TYPE_CHECKING:
         GoldRecord,
         RunID,
     )
-    from bioetl.domain.value_objects.silver_result import SilverWriteResult
     from bioetl.infrastructure.storage.gold.runtime_helpers import (
         GoldWriterRuntimeServices,
     )
@@ -215,6 +215,10 @@ class GoldWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
         silver_refs: list[SilverWriteResult] | None = None,
     ) -> GoldWriteReceipt:
         """Validate and write Gold records, including SCD2 and dual-write flows."""
+        if silver_refs is not None and any(
+            not isinstance(ref, SilverWriteResult) for ref in silver_refs
+        ):
+            raise TypeError("silver_refs must contain only SilverWriteResult objects")
         span_context = (
             self._tracing.get_tracer(__name__).start_as_current_span("write_gold")
             if self._tracing is not None
