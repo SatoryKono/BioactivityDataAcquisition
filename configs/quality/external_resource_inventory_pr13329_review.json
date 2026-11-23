@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "1674b3752e7ae8959298e2c4f3f5dce63f34644e",
+  "source_ref": "1674b3752e7ae8959298e2c4f3f5dce63f34644e",
+  "source_reviews": {
+    "src/bioetl/infrastructure/config/pipeline_dq_resolution.py": "Reviewed inline DQ override provenance and normalization refactoring; no external resource acquisition, ownership or lifecycle changes."
+  }
+}
