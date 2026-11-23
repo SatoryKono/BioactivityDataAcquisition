@@ -2371,6 +2371,9 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
             "tests/unit/repo_backed/scripts/test_check_skills_mirror.py",
         ),
     ),
+    ".devin/workflows/deepwiki-regeneration.md": (
+        "tests/unit/scripts/ai/test_update_deepwiki.py",
+    ),
     # Canonical Cursor/Windsurf rule docs → sync contract (alwaysApply / globs).
     "docs/00-project/ai/rules/": (SYNC_CURSOR_RULES_TEST,),
     ".devin/workflows/qodo-sync.md": (SYNC_CURSOR_RULES_TEST,),
