@@ -208,6 +208,16 @@ def _ready_case(tmp_path: Path) -> tuple[dict[str, object], ContourObservations]
     workbook = tmp_path / "targets.xlsx"
     discrepancy = tmp_path / "discrepancy.json"
     expectations = tmp_path / "expectations.json"
+    shadow_business = tmp_path / "shadow-business.csv"
+    shadow_classification = tmp_path / "shadow-classification.csv"
+    _write_csv(
+        shadow_business,
+        tuple(
+            {"target_id": row["target_id"], "pref_name": row["pref_name"]}
+            for row in _ROWS
+        ),
+    )
+    _write_csv(shadow_classification, _ROWS)
     _write_csv(table, _ROWS)
     _write_csv(repeat, _ROWS)
     _write_csv(silver, _ROWS)
@@ -296,10 +306,13 @@ def _ready_case(tmp_path: Path) -> tuple[dict[str, object], ContourObservations]
         parsed,
         discrepancy_report=discrepancy,
         expectations=expectations,
-        shadow_table=table,
+        shadow_table=shadow_business,
+        shadow_classification=shadow_classification,
         table=table,
         repeat_table=repeat,
         xlsx=workbook,
+        isolated_silver=silver,
+        isolated_gold=gold,
         silver=silver,
         gold=gold,
         assay=assay,
@@ -354,7 +367,7 @@ def test_ready_report_does_not_treat_matched_count_as_biological_acceptance(
         "ambiguous": 1,
         "matched": 1,
     }
-    assert report["distribution_source"] == "shadow_table"
+    assert report["distribution_source"] == "shadow_classification"
 
 
 def test_shadow_pass_does_not_pass_enrich(tmp_path: Path) -> None:
@@ -560,25 +573,48 @@ def test_closed_gold_version_does_not_close_a_current_assay_fk() -> None:
     )
 
 
-def test_shadow_counts_are_not_taken_from_the_enrich_table(tmp_path: Path) -> None:
+def test_shadow_counts_come_from_classification_not_the_business_table(
+    tmp_path: Path,
+) -> None:
     evidence, observations = _ready_case(tmp_path)
+    business = tmp_path / "v30.csv"
+    _write_csv(
+        business,
+        tuple(
+            {"target_id": row["target_id"], "pref_name": row["pref_name"]}
+            for row in _ROWS
+        ),
+    )
     shorter = tmp_path / "smoke.csv"
     _write_csv(shorter, (_ROWS[0],))
     measured = apply_measurements(
         observations,
         evidence,
-        shadow_table=tmp_path / "enrich.csv",
+        shadow_table=business,
+        shadow_classification=tmp_path / "shadow-classification.csv",
         table=shorter,
         repeat_table=shorter,
     )
     report = evaluate_main_contour(evidence, measured)
 
     assert _phase(report, "shadow") == "PASS"
+    assert report["distribution_source"] == "shadow_classification"
     assert report["distributions"]["iuphar_match_status"] == {
         "ambiguous": 1,
         "matched": 1,
     }
     assert _phase(report, "isolated_enrich") == "FAIL"
+
+    business_only = apply_measurements(
+        replace(observations, shadow_classification_rows=None),
+        evidence,
+        shadow_table=business,
+    )
+    business_report = evaluate_main_contour(evidence, business_only)
+    reasons = business_report["phases"]["shadow"]["reasons"]
+    assert isinstance(reasons, list)
+    assert "shadow_classification_not_read" in reasons
+    assert "status_count_conflict" not in reasons
 
 
 def test_directory_identity_is_measured_for_silver(
@@ -591,7 +627,7 @@ def test_directory_identity_is_measured_for_silver(
         "scripts.ops.target_classification_contour.load_table",
         lambda _path: list(_ROWS),
     )
-    measured = apply_measurements(observations, evidence, silver=directory)
+    measured = apply_measurements(observations, evidence, isolated_silver=directory)
     assert measured.silver_sha256 == logical_projection_sha256(list(_ROWS))
     report = evaluate_main_contour(evidence, measured)
     assert "silver_hash_conflict" in report["phases"]["isolated_enrich"]["reasons"]
@@ -748,10 +784,6 @@ def test_live_readback_rejects_missing_classification_fields(
     gold = tmp_path / "gold-thin.csv"
     _write_csv(silver, thin)
     _write_csv(gold, thin)
-    enrich = dict(evidence["isolated_enrich"])
-    enrich["persisted_silver_sha256"] = file_sha256(silver)
-    enrich["persisted_gold_sha256"] = file_sha256(gold)
-    evidence["isolated_enrich"] = enrich
     migration = dict(evidence["migration"])
     migration["promoted"] = True
     evidence["migration"] = migration
@@ -781,8 +813,95 @@ def test_live_readback_rejects_missing_classification_fields(
     assert isinstance(live, dict)
 
     assert measured.live_projection_match is False
+    assert measured.silver_sha256 == observations.silver_sha256
+    assert _phase(report, "isolated_enrich") == "PASS"
     assert _phase(report, "live") == "FAIL"
     assert "classification_not_reproduced" in live["reasons"]
+    assert report["promotion_decision"] == "ROLLBACK_REQUIRED"
+
+
+def test_main_contour_readback_does_not_replace_isolated_hashes(
+    tmp_path: Path,
+) -> None:
+    evidence, observations = _ready_case(tmp_path)
+    extra = dict(_ROWS[0])
+    extra["target_id"] = "CHEMBL3"
+    rows = (*_ROWS, extra)
+    silver = tmp_path / "main-silver.csv"
+    gold = tmp_path / "main-gold.csv"
+    _write_csv(silver, rows)
+    _write_csv(gold, rows)
+    migration = dict(evidence["migration"])
+    migration["promoted"] = True
+    evidence["migration"] = migration
+    evidence["live"] = {
+        "readback": True,
+        "next_run_executed": True,
+        "next_run_id": "next-run",
+        "tables_match_promoted": True,
+        "classification_reproduced": True,
+        "observed_profile_sha256": _PROFILE,
+        "observed_config_sha256": _CONFIG,
+    }
+    measured = apply_measurements(
+        replace(
+            observations,
+            canonical_mode="enrich",
+            canonical_config_sha256=_CONFIG,
+        ),
+        evidence,
+        silver=silver,
+        gold=gold,
+    )
+    report = evaluate_main_contour(evidence, measured)
+
+    assert measured.silver_sha256 == observations.silver_sha256
+    assert measured.gold_sha256 == observations.gold_sha256
+    assert _phase(report, "isolated_enrich") == "PASS"
+    assert _phase(report, "live") == "PASS"
+    assert report["promotion_decision"] == "LIVE_ACCEPTED"
+
+
+def test_duplicate_current_target_id_blocks_live_acceptance(
+    tmp_path: Path,
+) -> None:
+    evidence, observations = _ready_case(tmp_path)
+    conflict = dict(_ROWS[0])
+    conflict["effective_class"] = "gpcr"
+    silver_rows = (conflict, *_ROWS)
+    silver = tmp_path / "duplicate-silver.csv"
+    _write_csv(silver, silver_rows)
+    migration = dict(evidence["migration"])
+    migration["promoted"] = True
+    evidence["migration"] = migration
+    evidence["live"] = {
+        "readback": True,
+        "next_run_executed": True,
+        "next_run_id": "next-run",
+        "tables_match_promoted": True,
+        "classification_reproduced": True,
+        "observed_profile_sha256": _PROFILE,
+        "observed_config_sha256": _CONFIG,
+    }
+    measured = apply_measurements(
+        replace(
+            observations,
+            canonical_mode="enrich",
+            canonical_config_sha256=_CONFIG,
+        ),
+        evidence,
+        silver=silver,
+        gold=tmp_path / "gold.csv",
+    )
+    report = evaluate_main_contour(evidence, measured)
+    phases = report["phases"]
+    assert isinstance(phases, dict)
+    live = phases["live"]
+    assert isinstance(live, dict)
+
+    assert measured.duplicate_current_target_ids is True
+    assert _phase(report, "live") == "FAIL"
+    assert "duplicate_current_target_id" in live["reasons"]
     assert report["promotion_decision"] == "ROLLBACK_REQUIRED"
 
 

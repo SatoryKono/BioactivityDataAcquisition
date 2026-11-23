@@ -488,9 +488,13 @@ restore with the rollback command above. Do not switch the mode to `"off"`
 instead of restoring the tables.
 
 Write the evidence JSON outside the committed tree. Point the command at the
-actual discrepancy report, independent expectations, shadow table, enrich
-table, repeat table, XLSX, Silver, Gold, and assay inputs. `--shadow-table`
-is the shadow cohort; `--table` is only the isolated enrich cohort. The
+actual discrepancy report, independent expectations, shadow business table,
+shadow classification artifact, enrich table, repeat table, XLSX, isolated
+Silver/Gold, main-contour Silver/Gold, and assay inputs. `--shadow-table` is
+the unchanged V30 business cohort. `--shadow-classification` supplies the
+status distributions; the business table does not. `--table`,
+`--isolated-silver`, and `--isolated-gold` are the `--limit 1000` enrich
+cohort. `--silver` and `--gold` are only the later main-contour readback. The
 command recomputes hashes, status distributions, XLSX round-trip, historical
 columns, current assay FK closure, and the canonical config digest. A file is
 identified by its byte SHA-256. A Delta directory is identified by the SHA-256
@@ -501,9 +505,10 @@ only well formed does not confirm the classifier that wrote the rows. Current
 rows are those with a missing or true `_is_current`. A CSV cell `False`,
 `false`, or `0` is closed before that check. Closed versions do not close an
 assay FK. Live readback compares each current Gold target with the current
-Silver row of the same id. Both rows must contain every classification field;
-a missing field is not a null match. The comparison does not use the
-`--limit 1000` smoke table. A standard XLSX that carries
+Silver row of the same id. Two current rows of one id fail that readback.
+Both rows must contain every classification field; a missing field is not a
+null match. The comparison does not use the `--limit 1000` smoke table, and
+the smoke hashes are not taken from the main-contour tables. A standard XLSX that carries
 `_bioetl_export_manifest` is restored before the historical-column check, so
 text split across cells is joined. The command does not promote, edit
 configuration, or replace an existing report path.
@@ -513,12 +518,15 @@ configuration, or replace an existing report path.
   --evidence 'PATH_TO_CONTOUR_EVIDENCE_JSON' `
   --discrepancy-report 'PATH_TO_DISCREPANCY_REPORT' `
   --expectations 'PATH_TO_INDEPENDENT_EXPECTATIONS' `
-  --shadow-table 'PATH_TO_SHADOW_TABLE' `
+  --shadow-table 'PATH_TO_SHADOW_BUSINESS_TABLE' `
+  --shadow-classification 'PATH_TO_SHADOW_CLASSIFICATION_TABLE' `
   --table 'PATH_TO_ENRICH_TABLE' `
   --repeat-table 'PATH_TO_REPEAT_ENRICH_TABLE' `
   --xlsx 'PATH_TO_STANDARD_XLSX' `
-  --silver 'PATH_TO_SILVER_TABLE' `
-  --gold 'PATH_TO_GOLD_TABLE' `
+  --isolated-silver 'PATH_TO_ISOLATED_SILVER' `
+  --isolated-gold 'PATH_TO_ISOLATED_GOLD' `
+  --silver 'PATH_TO_MAIN_SILVER' `
+  --gold 'PATH_TO_MAIN_GOLD' `
   --assay 'PATH_TO_ASSAY_TABLE' `
   --output 'NEW_CONTOUR_REPORT_JSON' `
   --require-ready

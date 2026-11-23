@@ -85,6 +85,8 @@ class ContourObservations:
     discrepancy_report_sha256: str | None = None
     expectations_sha256: str | None = None
     shadow_rows: tuple[dict[str, object], ...] | None = None
+    shadow_classification_rows: tuple[dict[str, object], ...] | None = None
+    duplicate_current_target_ids: bool | None = None
     xlsx_status: str = "NOT_RUN"
     xlsx_table_sha256: str | None = None
     xlsx_file_sha256: str | None = None
@@ -372,10 +374,17 @@ def _record_hash(updates: dict[str, object], key: str, path: Path | None) -> Non
         updates[key] = file_sha256(path)
 
 
-def _record_shadow(updates: dict[str, object], path: Path | None) -> None:
-    if path is None:
-        return
-    updates["shadow_rows"] = tuple(_current_rows(load_table(path)))
+def _record_shadow(
+    updates: dict[str, object],
+    path: Path | None,
+    classification: Path | None,
+) -> None:
+    if path is not None:
+        updates["shadow_rows"] = tuple(_current_rows(load_table(path)))
+    if classification is not None:
+        updates["shadow_classification_rows"] = tuple(
+            _current_rows(load_table(classification))
+        )
 
 
 def _record_enrich_table(
@@ -417,23 +426,39 @@ def _record_xlsx(
     updates["xlsx_file_sha256"] = file_sha256(xlsx)
 
 
-def _record_persisted(
+def _record_isolated(
+    updates: dict[str, object],
+    silver: Path | None,
+    gold: Path | None,
+) -> None:
+    """Hash the isolated enrich tables, not the later main-contour readback."""
+    if silver is not None:
+        rows = load_table(silver)
+        updates["silver_sha256"] = table_identity_sha256(silver, rows)
+        updates["silver_profile_values"] = _profile_values(rows)
+    if gold is not None:
+        rows = load_table(gold)
+        updates["gold_sha256"] = table_identity_sha256(gold, rows)
+        updates["gold_profile_values"] = _profile_values(rows)
+
+
+def _record_live(
     updates: dict[str, object],
     silver: Path | None,
     gold: Path | None,
 ) -> list[dict[str, object]] | None:
+    """Compare the main-contour readback without replacing isolated hashes."""
     silver_rows = load_table(silver) if silver is not None else None
     gold_rows = load_table(gold) if gold is not None else None
-    if silver_rows is not None and silver is not None:
-        updates["silver_sha256"] = table_identity_sha256(silver, silver_rows)
-        updates["silver_profile_values"] = _profile_values(silver_rows)
-    if gold_rows is not None and gold is not None:
-        updates["gold_sha256"] = table_identity_sha256(gold, gold_rows)
-        updates["gold_profile_values"] = _profile_values(gold_rows)
-    if silver_rows is not None and gold_rows is not None:
-        updates["live_projection_match"] = _current_projections_match(
-            silver_rows, gold_rows
-        )
+    if silver_rows is None or gold_rows is None:
+        return gold_rows
+    duplicate = _has_duplicate_current_ids(silver_rows) or _has_duplicate_current_ids(
+        gold_rows
+    )
+    updates["duplicate_current_target_ids"] = duplicate
+    updates["live_projection_match"] = (
+        False if duplicate else _current_projections_match(silver_rows, gold_rows)
+    )
     return gold_rows
 
 
@@ -455,9 +480,12 @@ def apply_measurements(
     discrepancy_report: Path | None = None,
     expectations: Path | None = None,
     shadow_table: Path | None = None,
+    shadow_classification: Path | None = None,
     table: Path | None = None,
     repeat_table: Path | None = None,
     xlsx: Path | None = None,
+    isolated_silver: Path | None = None,
+    isolated_gold: Path | None = None,
     silver: Path | None = None,
     gold: Path | None = None,
     assay: Path | None = None,
@@ -466,10 +494,11 @@ def apply_measurements(
     updates: dict[str, object] = {}
     _record_hash(updates, "discrepancy_report_sha256", discrepancy_report)
     _record_hash(updates, "expectations_sha256", expectations)
-    _record_shadow(updates, shadow_table)
+    _record_shadow(updates, shadow_table, shadow_classification)
     table_rows = _record_enrich_table(updates, table, repeat_table)
     _record_xlsx(updates, evidence, table_rows, xlsx)
-    gold_rows = _record_persisted(updates, silver, gold)
+    _record_isolated(updates, isolated_silver, isolated_gold)
+    gold_rows = _record_live(updates, silver, gold)
     _record_fk(updates, assay, gold_rows)
     return cast(ContourObservations, replace(observations, **updates))
 
@@ -832,7 +861,9 @@ def _evaluate_live(
         live["observed_config_sha256"] != observations.canonical_config_sha256
     ):
         reasons.append("live_config_mismatch")
-    if observations.live_projection_match is None:
+    if observations.duplicate_current_target_ids is True:
+        reasons.append("duplicate_current_target_id")
+    elif observations.live_projection_match is None:
         reasons.append("classification_readback_missing")
     elif observations.live_projection_match is not True:
         reasons.append("classification_not_reproduced")
@@ -1057,8 +1088,11 @@ def _distributions(
     document: dict[str, object],
     observations: ContourObservations,
 ) -> tuple[dict[str, dict[str, int]], str]:
-    if observations.shadow_rows is not None:
-        return status_distributions(observations.shadow_rows), "shadow_table"
+    if observations.shadow_classification_rows is not None:
+        return (
+            status_distributions(observations.shadow_classification_rows),
+            "shadow_classification",
+        )
     shadow = cast(dict[str, object], document["shadow"])
     if shadow["executed"] is True:
         return cast(dict[str, dict[str, int]], shadow["status_counts"]), "evidence"
@@ -1076,14 +1110,53 @@ def _distribution_reasons(
         if sum(counts[field].values()) != row_count:
             reasons.append("status_count_row_mismatch")
             break
-    if observations.shadow_rows is None:
+    reasons.extend(_shadow_business_reasons(observations, row_count))
+    classification = observations.shadow_classification_rows
+    if observations.shadow_rows is not None and classification is None:
+        reasons.append("shadow_classification_not_read")
         return reasons
-    if len(observations.shadow_rows) != row_count:
-        reasons.append("row_count_conflict")
-    observed = status_distributions(observations.shadow_rows)
-    if observed != counts:
+    if classification is None:
+        return reasons
+    if len(classification) != row_count:
+        reasons.append("shadow_classification_row_count")
+    if status_distributions(classification) != counts:
         reasons.append("status_count_conflict")
     return reasons
+
+
+def _shadow_business_reasons(
+    observations: ContourObservations, row_count: int
+) -> list[str]:
+    business = observations.shadow_rows
+    if business is None:
+        return []
+    reasons: list[str] = []
+    if len(business) != row_count:
+        reasons.append("row_count_conflict")
+    if not _shadow_business_unchanged(business):
+        reasons.append("shadow_business_rows_changed")
+    classification = observations.shadow_classification_rows
+    if classification is not None and _current_id_set(business) != _current_id_set(
+        classification
+    ):
+        reasons.append("shadow_cohort_mismatch")
+    return reasons
+
+
+def _shadow_business_unchanged(rows: tuple[dict[str, object], ...]) -> bool:
+    """A V30 shadow table keeps classification fields out of the business row."""
+    forbidden = frozenset(TARGET_CLASSIFICATION_FIELDS)
+    return all(forbidden.isdisjoint(row) for row in rows)
+
+
+def _current_id_set(
+    rows: tuple[dict[str, object], ...] | list[dict[str, object]],
+) -> set[str]:
+    return {
+        target_id
+        for row in rows
+        if (target_id := _norm_cell(row.get("target_id"))) is not None
+    }
 
 
 def _hash_pair(observed: str | None, attested: object, label: str) -> list[str]:
@@ -1123,25 +1196,36 @@ def _measured_identity(
     return []
 
 
+def _index_current_rows(
+    rows: list[dict[str, object]],
+) -> dict[str, dict[str, object]] | None:
+    """Index one current row per target. Duplicate current ids are rejected."""
+    indexed: dict[str, dict[str, object]] = {}
+    for row in _current_rows(rows):
+        target_id = _norm_cell(row.get("target_id"))
+        if target_id is None:
+            continue
+        if target_id in indexed:
+            return None
+        indexed[target_id] = row
+    return indexed
+
+
+def _has_duplicate_current_ids(rows: list[dict[str, object]]) -> bool:
+    return _index_current_rows(rows) is None
+
+
 def _current_projections_match(
     silver_rows: list[dict[str, object]],
     gold_rows: list[dict[str, object]],
 ) -> bool:
     """Current Gold classification must match the current Silver row of the same id."""
-    silver = {
-        str(row.get("target_id")): row
-        for row in _current_rows(silver_rows)
-        if _norm_cell(row.get("target_id")) is not None
-    }
-    gold_current = [
-        row
-        for row in _current_rows(gold_rows)
-        if _norm_cell(row.get("target_id")) is not None
-    ]
-    if not gold_current:
+    silver = _index_current_rows(silver_rows)
+    gold = _index_current_rows(gold_rows)
+    if silver is None or gold is None or not gold:
         return False
-    for row in gold_current:
-        source = silver.get(str(row.get("target_id")))
+    for target_id, row in gold.items():
+        source = silver.get(target_id)
         if source is None or not _same_classification(source, row):
             return False
     return True
