@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
+from contextvars import Token
 from pathlib import Path
-from uuid import UUID
 from typing import Literal, cast
+from uuid import UUID
 
 from bioetl.application.ports.storage import CompositeMergeStorageProtocol
 from bioetl.application.services.run_reports.observations import (
@@ -62,6 +64,26 @@ from bioetl.application.composite.helpers.replay_context import (
 )
 
 
+def _bind_replay_classification(
+    envelope: JsonDict,
+    objects: JsonDict,
+    verified_json: Callable[[str], JsonDict],
+) -> Token[dict[str, object] | None] | None:
+    if envelope["pipeline"] != "composite_target":
+        return None
+    pinned = (
+        verified_json("target-classification.json")
+        if "target-classification.json" in objects
+        else None
+    )
+    payload: dict[str, object] = (
+        {"target_config": pinned}
+        if pinned is not None
+        else {"replay_mode": "historical"}
+    )
+    return bind_target_classification_dependency(payload)
+
+
 async def replay_assay(
     root: Path,
     envelope_hash: str,
@@ -114,18 +136,9 @@ async def replay_assay(
             settings=settings,
         )
         observation_token = bind_run_observations()
-        classification_token = None
-        if envelope["pipeline"] == "composite_target":
-            pinned = (
-                verified_json("target-classification.json")
-                if "target-classification.json" in objects
-                else None
-            )
-            classification_token = bind_target_classification_dependency(
-                {"target_config": pinned}
-                if pinned is not None
-                else {"replay_mode": "historical"}
-            )
+        classification_token = _bind_replay_classification(
+            envelope, objects, verified_json
+        )
         try:
             merger = build_composite_merge_service(
                 config=config,

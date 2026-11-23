@@ -9,8 +9,8 @@ from bioetl.application.core.wiring.registry import (
     TargetTransformer,
 )
 from bioetl.application.core.wiring.transformer import BaseTransformer
-from bioetl.application.composite.target_classification_stage import (
-    CompositeTargetClassificationStage,
+from bioetl.application.composite.helpers.target_classification_stage import (
+    CompositeTargetClassification,
 )
 from bioetl.application.services.target_runtime.scope import (
     get_target_classification_dependency,
@@ -113,7 +113,7 @@ def select_target_transformer(
 
 def build_composite_target_classification_stage(
     config: object,
-) -> CompositeTargetClassificationStage | None:
+) -> CompositeTargetClassification | None:
     """Wire post-join classification only for an enabled composite target."""
     if getattr(config, "name", None) != "composite_target":
         return None
@@ -134,7 +134,7 @@ def build_composite_target_classification_stage(
     session = build_target_classification_session(yaml_config, get_settings())
     if session is None:
         return None
-    return CompositeTargetClassificationStage(session)
+    return CompositeTargetClassification(session)
 
 
 def configure_target_transformer(

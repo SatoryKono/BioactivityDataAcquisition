@@ -11,10 +11,10 @@ import polars as pl
 
 from bioetl.application.composite.column_service import ColumnOrderService
 from bioetl.application.composite.conflict_resolver import ConflictResolverService
-from bioetl.application.composite.target_classification_stage import (
-    CompositeTargetClassificationStage,
+from bioetl.application.composite.helpers.target_classification_stage import (
+    CompositeTargetClassification,
+    apply_joined_classification,
 )
-from bioetl.application.runtime_timestamps import derive_completion_timestamp
 from bioetl.domain.composite import EnricherConfig
 from bioetl.domain.composite.cross_validation import CrossValidationStats
 from bioetl.domain.composite.result import (
@@ -136,9 +136,9 @@ def finalize_merged_dataframe(
 
 def _bound_classification_stage(
     host: object,
-) -> CompositeTargetClassificationStage | None:
+) -> CompositeTargetClassification | None:
     stage = getattr(host, "_target_classification_stage", None)
-    if isinstance(stage, CompositeTargetClassificationStage):
+    if isinstance(stage, CompositeTargetClassification):
         return stage
     return None
 
@@ -166,17 +166,13 @@ def finalize_post_join_context(
         effective_seed_pipeline=effective_seed_pipeline,
     )
     stage = _bound_classification_stage(host)
-    if stage is not None:
-        try:
-            merged_df = stage.apply(
-                merged_df,
-                run_id=run_id,
-                started_at=classification_started_at or metadata_timestamp,
-                dependency_frames=dependency_dfs,
-            )
-        except Exception:
-            stage.abandon(run_id)
-            raise
+    merged_df = apply_joined_classification(
+        stage,
+        merged_df,
+        run_id=run_id,
+        started_at=classification_started_at or metadata_timestamp,
+        dependency_frames=dependency_dfs,
+    )
     merged_df = finalize_merged_dataframe(
         host,
         merged_df=merged_df,
@@ -202,61 +198,6 @@ def finalize_post_join_context(
         merged_df=merged_df,
         records_merged=records_merged,
         records_enriched=records_enriched,
-        cv_stats=cv_stats,
-        quarantine_payloads=quarantine_payloads,
-    )
-
-
-async def persist_and_build_result(
-    host: MergePostJoinWorkflowContext,
-    *,
-    merged_df: pl.DataFrame,
-    enrichers: Sequence[EnricherConfig],
-    records_merged: int,
-    records_from_seed: int,
-    records_enriched: int,
-    sources_used: list[str],
-    cv_stats: CrossValidationStats | None,
-    quarantine_payloads: list[dict[str, object]],
-    metadata_timestamp: datetime | None,
-    run_id: str,
-    started_at: datetime,
-    started_monotonic: float,
-) -> MergeResult:
-    """Persist merge outputs and build the domain ``MergeResult``."""
-    stage = _bound_classification_stage(host)
-    try:
-        await host._write_outputs(
-            merged_df,
-            metadata_timestamp=metadata_timestamp,
-            run_id=run_id,
-            sources_used=sources_used,
-        )
-    except Exception:
-        if stage is not None:
-            stage.abandon(run_id)
-        raise
-    if stage is not None:
-        stage.commit(run_id)
-    _, duration = derive_completion_timestamp(
-        started_at=started_at,
-        started_monotonic=started_monotonic,
-    )
-
-    host._logger.info(
-        "Merge completed",
-        records_merged=records_merged,
-        sources_used=sources_used,
-        duration_seconds=duration,
-    )
-    return host._build_merge_result(
-        merged_df=merged_df,
-        enrichers=enrichers,
-        records_merged=records_merged,
-        records_from_seed=records_from_seed,
-        records_enriched=records_enriched,
-        sources_used=sources_used,
-        duration_seconds=duration,
         cv_stats=cv_stats,
         quarantine_payloads=quarantine_payloads,
     )

@@ -107,6 +107,11 @@ areas:
       - src/bioetl/application/composite/aggregator.py
       - src/bioetl/application/composite/target_protein_classification_summary.py
       - src/bioetl/application/composite/helpers/merger_orchestration_types.py
+      - src/bioetl/application/composite/helpers/merger_post_join_persist.py
+      - src/bioetl/application/composite/helpers/target_classification_bundle.py
+      - src/bioetl/application/composite/helpers/target_classification_features.py
+      - src/bioetl/application/composite/helpers/target_classification_stage.py
+      - src/bioetl/application/composite/helpers/target_classification_values.py
   - name: coordinator
     responsibility: "Enrichment coordination, planning, result handling."
     depends_on: [dependency, join]

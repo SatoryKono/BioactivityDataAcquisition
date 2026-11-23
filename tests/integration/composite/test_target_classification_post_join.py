@@ -13,12 +13,14 @@ from iuphar_target_class.bioetl_input import project_target_fields
 
 from bioetl.application.composite.coalesce_policy import CoalescePolicyService
 from bioetl.application.composite.conflict_resolver import ConflictResolverService
-from bioetl.application.composite.merger_post_join import (
-    finalize_post_join_context,
+from bioetl.application.composite.helpers.merger_post_join_persist import (
     persist_and_build_result,
 )
-from bioetl.application.composite.target_classification_stage import (
-    CompositeTargetClassificationStage,
+from bioetl.application.composite.merger_post_join import (
+    finalize_post_join_context,
+)
+from bioetl.application.composite.helpers.target_classification_stage import (
+    CompositeTargetClassification,
     project_gold_classification_frame,
 )
 from bioetl.application.pipelines.chembl.target_protein_classification_summary import (
@@ -28,7 +30,7 @@ from bioetl.application.services.target_runtime.classification import (
     TargetClassificationRunState,
 )
 from bioetl.domain.config.target_classification import TARGET_CLASSIFICATION_FIELDS
-from bioetl.domain.composite.config import MergeConfig
+from bioetl.domain.composite import MergeConfig
 from bioetl.domain.entities.enriched_target_features import (
     COMPOSITE_CLASSIFICATION_OWNER,
     hierarchy_fields_are_equivalent,
@@ -98,7 +100,7 @@ class _Evidence:
 
 def _stage(
     mode: str = "enrich",
-) -> tuple[CompositeTargetClassificationStage, _Classifier, _Evidence]:
+) -> tuple[CompositeTargetClassification, _Classifier, _Evidence]:
     classifier = _Classifier()
     evidence = _Evidence()
     session = TargetClassificationRunState(
@@ -109,7 +111,7 @@ def _stage(
         rules_version="plan-v1-r8",
         classification_schema_version="3.1.0",
     )
-    return CompositeTargetClassificationStage(session), classifier, evidence
+    return CompositeTargetClassification(session), classifier, evidence
 
 
 def _resolver() -> ConflictResolverService:
@@ -126,7 +128,7 @@ def _resolver() -> ConflictResolverService:
     )
 
 
-def _host(stage: CompositeTargetClassificationStage) -> MagicMock:
+def _host(stage: CompositeTargetClassification) -> MagicMock:
     host = MagicMock()
     resolver = _resolver()
     host._target_classification_stage = stage
