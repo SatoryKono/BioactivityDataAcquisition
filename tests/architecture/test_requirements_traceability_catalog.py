@@ -18,6 +18,7 @@ aliases (REQ-ARCH family members past CSV 001-007, REQ-PERF-*, …).
 from __future__ import annotations
 
 import csv
+import os
 import re
 import subprocess
 import sys
@@ -214,7 +215,12 @@ def test_named_pytest_selectors_resolve() -> None:
         for row in rows
         for match in re.finditer(
             r"tests/[A-Za-z0-9_./-]+\.py(?:::[A-Za-z0-9_\[\].-]+)+",
-            row.get("executable_surface") or "",
+            " ".join(
+                (
+                    row.get("executable_surface") or "",
+                    row.get("verification_method") or "",
+                )
+            ),
         )
     ]
     failures = []
@@ -230,6 +236,7 @@ def test_named_pytest_selectors_resolve() -> None:
                 "-q",
             ],
             cwd=_ROOT,
+            env={**os.environ, "PYTEST_ADDOPTS": ""},
             capture_output=True,
             text=True,
             check=False,
