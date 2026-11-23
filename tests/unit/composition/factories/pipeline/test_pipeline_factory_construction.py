@@ -64,6 +64,7 @@ def _make_yaml_config(**overrides: object) -> PipelineYamlConfig:
         "silver_filters": None,
         "gold_filters": None,
         "dq_overrides": SimpleNamespace(
+            model_fields_set=frozenset(),
             field_validations=[],
             cross_field_validations=[],
             conditional_validations=[],
@@ -72,6 +73,7 @@ def _make_yaml_config(**overrides: object) -> PipelineYamlConfig:
             strict_validation=False,
             invalid_record_policy="drop",
             report=SimpleNamespace(
+                model_dump=lambda **_kwargs: {},
                 enabled=True,
                 format="json",
                 include_sample_failures=True,
