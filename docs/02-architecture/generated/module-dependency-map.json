@@ -1,12 +1,12 @@
 {
   "summary": {
-    "scanned_modules": 2657,
-    "total_internal_imports": 8802,
+    "scanned_modules": 2654,
+    "total_internal_imports": 8791,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 330,
     "violations": 0,
-    "source_fingerprint": "9c822790d55a3a70f49c91f8e9e3c2f4545734ff1258431e25b6b0b08a585a42"
+    "source_fingerprint": "91c4c4a712bd50dd7b606311bab3664203d689cf0a922cb1ccc937c75076e9aa"
   },
   "layer_edges": [
     {
@@ -54,13 +54,13 @@
     {
       "source": "infrastructure",
       "target": "domain",
-      "imports": 829,
+      "imports": 828,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "infrastructure",
-      "imports": 1413,
+      "imports": 1403,
       "allowed": true
     },
     {
@@ -117,12 +117,12 @@
     {
       "source": "infrastructure.storage",
       "target": "domain.types",
-      "imports": 84
+      "imports": 83
     },
     {
       "source": "infrastructure.storage",
       "target": "domain.ports",
-      "imports": 67
+      "imports": 68
     },
     {
       "source": "application.services",
