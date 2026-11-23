@@ -306,6 +306,17 @@ def test_published_manifest_matches_the_current_contract() -> None:
     assert release["targets_csv_sha256"] == TARGETS_CSV_SHA256
 
 
+def test_swapped_material_bytes_fail_verification() -> None:
+    document = json.loads((ROOT / MANIFEST_RELATIVE_PATH).read_text(encoding="utf-8"))
+    by_id = {row["material_id"]: row for row in document["materials"]}
+    rules = by_id["rules_record"]
+    control = by_id["control_target"]
+    for key in ("path", "baseline_sha256", "worktree_sha256", "delta"):
+        rules[key] = control[key]
+    problems = verify_baseline_manifest(ROOT, document)
+    assert "rules_record path mismatch" in problems
+
+
 def test_manifest_hashes_and_required_roles_hold() -> None:
     path = ROOT / MANIFEST_RELATIVE_PATH
     document = json.loads(path.read_text(encoding="utf-8"))

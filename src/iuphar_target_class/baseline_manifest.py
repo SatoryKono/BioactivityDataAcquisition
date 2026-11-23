@@ -448,6 +448,7 @@ def _check_material_set(materials: list[object], problems: list[str]) -> None:
 
 def _check_material(row: dict[str, object], problems: list[str]) -> None:
     material_id = str(row.get("material_id"))
+    _check_spec_binding(material_id, row, problems)
     availability = row.get("availability")
     if availability == "not_found":
         problems.append(f"{material_id} uses confirmed not_found")
@@ -459,6 +460,24 @@ def _check_material(row: dict[str, object], problems: list[str]) -> None:
         problems.append(f"{material_id} has unknown availability")
         return
     _check_present(material_id, row, problems)
+
+
+def _check_spec_binding(
+    material_id: str, row: dict[str, object], problems: list[str]
+) -> None:
+    spec = next(
+        (item for item in MATERIAL_SPECS if item.material_id == material_id),
+        None,
+    )
+    if spec is None:
+        problems.append(f"{material_id} is not a baseline material")
+        return
+    if row.get("role") != spec.role:
+        problems.append(f"{material_id} role mismatch")
+    if row.get("path") != spec.path:
+        problems.append(f"{material_id} path mismatch")
+    if row.get("availability") != spec.availability:
+        problems.append(f"{material_id} availability mismatch")
 
 
 def _check_unavailable(
