@@ -57,12 +57,12 @@ def _normalize_thresholds(
         if flat not in result:
             continue
         value = result.pop(flat)
-        if nested in thresholds and _THRESHOLD_VALUE.validate_python(
-            thresholds[nested]
-        ) != _THRESHOLD_VALUE.validate_python(value):
-            raise ValueError(
-                f"Conflicting DQ threshold aliases: {flat} and thresholds.{nested}"
-            )
+        if nested in thresholds:
+            existing = _THRESHOLD_VALUE.validate_python(thresholds[nested])
+            if existing != _THRESHOLD_VALUE.validate_python(value):
+                raise ValueError(
+                    f"Conflicting DQ threshold aliases: {flat} and thresholds.{nested}"
+                )
         thresholds[nested] = value
 
     result["thresholds"] = thresholds

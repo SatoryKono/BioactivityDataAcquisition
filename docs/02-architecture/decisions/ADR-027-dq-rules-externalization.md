@@ -128,13 +128,11 @@ dq-config-file: ../../entities/chembl/activity.yaml
 | Nested dicts                       | Recursive merge        | `thresholds.soft-fail` merged with `thresholds.hard-fail` |
 | Other lists                        | Override (later wins)  | `allowed: [A, B]` replaces `[X, Y]`                       |
 
-The threshold aliases `soft_fail_threshold` and `hard_fail_threshold` are
-equivalent to `thresholds.soft_fail` and `thresholds.hard_fail`. Normalize them
-within each layer before merging, so the later layer wins regardless of spelling.
-If both spellings occur in one layer, numerically equal values are accepted and
-different values are rejected. Relaxed DQ overrides both thresholds after all
-layers. The loader accepts both shapes in its inline input; pipeline YAML
-`dq_overrides` is validated separately and currently accepts only flat aliases.
+Quality YAML accepts `soft_fail_threshold` and `hard_fail_threshold` as aliases
+for `thresholds.soft_fail` and `thresholds.hard_fail`. The loader normalizes each
+layer before merging. When both spellings occur in the same layer, their numeric
+values must agree. Inline pipeline `dq_overrides` accepts the two flat keys.
+Relaxed DQ overrides both thresholds after all layers have been merged.
 
 **Deduplication key** for validation lists:
 
