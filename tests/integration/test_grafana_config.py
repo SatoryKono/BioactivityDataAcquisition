@@ -27,6 +27,7 @@ from tests.integration._grafana_test_support import (
     _assert_operator_context_shell_contract,
     _assert_provider_health_variable_contract,
     _assert_standard_variable_contract,
+    _assert_workflow_context_variable,
     _extract_selector_labels,
     _unknown_metrics_for_query,
     get_dashboard_navigation_links,
@@ -575,15 +576,9 @@ def _assert_overview_identity_panel(dashboard: dict) -> None:
 
 
 def _assert_overview_variable_sources(
-    dashboard: dict, variable_map: dict[str, dict]
+    dashboard_path: Path, dashboard: dict, variable_map: dict[str, dict]
 ) -> None:
-    workflow_var = variable_map["workflow"]
-    workflow_query = workflow_var.get("query", {})
-    workflow_query_text = (
-        workflow_query.get("query", "") if isinstance(workflow_query, dict) else ""
-    )
-    assert workflow_var.get("datasource") == _canonical_prometheus_datasource()
-    assert "bioetl_workflow_universe" in workflow_query_text
+    _assert_workflow_context_variable(dashboard_path, variable_map)
 
     pipeline_var = variable_map["pipeline"]
     pipeline_query = pipeline_var.get("query", {})
@@ -1059,7 +1054,7 @@ def test_variable_query_sources(dashboard_path):
         _assert_workflow_overview_variable_sources(dashboard_path, variable_map)
         return
     if name == "bioetl-overview-v2.json":
-        _assert_overview_variable_sources(dashboard, variable_map)
+        _assert_overview_variable_sources(dashboard_path, dashboard, variable_map)
         return
     if name == "bioetl-provider-health-v2.json":
         _assert_provider_health_variable_contract(dashboard_path, variable_map)
