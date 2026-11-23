@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
 
 if TYPE_CHECKING:
+    from openpyxl.cell.cell import Cell, MergedCell
     from openpyxl.workbook.workbook import Workbook
     from pandas import DataFrame
 
@@ -195,6 +196,27 @@ def _xlsx_part_groups(
     return grouped
 
 
+def _restored_cell_value(
+    cell: Cell | MergedCell,
+    sheet_title: str,
+    grouped: dict[tuple[str, int, int], list[tuple[int, str]]],
+) -> object:
+    row_index = cell.row
+    column_index = cell.column
+    if row_index is None or column_index is None:
+        return cell.value
+    ordered = tuple(
+        value
+        for _index, value in sorted(
+            grouped.get((sheet_title, row_index, column_index), [])
+        )
+    )
+    replacement = restore_xlsx_text(cell.value, ordered)
+    if replacement is None:
+        return cell.value
+    return replacement
+
+
 def restore_xlsx_long_text(path: Path) -> dict[str, list[list[object]]]:
     """Read a workbook and concatenate verified long-text parts."""
     import openpyxl
@@ -207,17 +229,9 @@ def restore_xlsx_long_text(path: Path) -> dict[str, list[list[object]]]:
             continue
         rows: list[list[object]] = []
         for cells in sheet.iter_rows():
-            values: list[object] = []
-            for cell in cells:
-                row_index = cell.row
-                column_index = cell.column
-                if row_index is None or column_index is None:
-                    continue
-                key = (sheet.title, row_index, column_index)
-                ordered = tuple(value for _index, value in sorted(grouped.get(key, [])))
-                replacement = restore_xlsx_text(cell.value, ordered)
-                values.append(cell.value if replacement is None else replacement)
-            rows.append(values)
+            rows.append(
+                [_restored_cell_value(cell, sheet.title, grouped) for cell in cells]
+            )
         restored[sheet.title] = rows
     return restored
 
