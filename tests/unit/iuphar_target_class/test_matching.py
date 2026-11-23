@@ -1013,3 +1013,57 @@ def test_unqualified_run_keeps_unknown_auxiliary_as_a_required_anchor() -> None:
     assert "auxiliary_uniprot_unresolved" not in {
         item.code for item in result.diagnostics
     }
+
+
+def test_strict_anchor_keeps_a_xref_that_is_also_an_equivalent() -> None:
+    from iuphar_target_class.pipeline import IndexedSnapshot, classify_batch
+
+    payload = {
+        "target_id": "CHEMBL4",
+        "component_accessions": '["P11111"]',
+        "target_xref_uniprot_ids": "Q99999",
+        "proven_uniprot_equivalents": "Q99999",
+        "pref_name": "example",
+    }
+    fields = project_target_fields(
+        payload, "9606", projection_policy=UNIPROT_PROJECTION_POLICY_V2
+    )
+    assert fields["uniprot"] == "P11111"
+    assert partition_uniprot_roles(payload).auxiliary_ids == ()
+    snapshot = IndexedSnapshot.build(
+        snapshot_id="fixture",
+        mapping_version="fixture",
+        complete=True,
+        catalog=(_target("1", uniprot="P11111", species="9606"),),
+        annotations={},
+        family_nodes=(),
+        type_to_class={},
+        family_to_class={},
+    )
+    overlapped = classify_batch(
+        (RawTargetRow("row-overlap", fields, "protein"),),
+        snapshot=snapshot,
+        provenance=RunProvenance("fixture", "n", "r", "s", "t", "t"),
+        run_id="run-overlap",
+    )
+    assert overlapped.rows[0].result.match_status == "ambiguous"
+    assert overlapped.rows[0].result.matched_target_id is None
+
+    equivalent_only = project_target_fields(
+        {
+            "target_id": "CHEMBL3",
+            "component_accessions": '["P11111"]',
+            "proven_uniprot_equivalents": "Q99999",
+            "pref_name": "example",
+        },
+        "9606",
+    )
+    assert equivalent_only["uniprot"] == "P11111"
+    kept = classify_batch(
+        (RawTargetRow("row-equivalent", equivalent_only, "protein"),),
+        snapshot=snapshot,
+        provenance=RunProvenance("fixture", "n", "r", "s", "t", "t"),
+        run_id="run-equivalent",
+    )
+    assert kept.rows[0].result.match_status == "matched"
+    assert kept.rows[0].result.matched_target_id == "1"

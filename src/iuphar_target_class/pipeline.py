@@ -10,7 +10,10 @@ from dataclasses import dataclass, field, replace
 from types import MappingProxyType
 from typing import Literal
 
-from .bioetl_input import uniprot_roles_from_business_json
+from .bioetl_input import (
+    strict_anchors_from_business_json,
+    uniprot_roles_from_business_json,
+)
 from .evidence import (
     ContractDefect,
     EvidenceDraft,
@@ -475,13 +478,14 @@ def _match_query(row: ValidatedInput) -> MatchQuery:
     ):
         message = f"unknown matching policy: {policy}"
         raise ValueError(message)
-    roles = uniprot_roles_from_business_json(row.raw_fields.get("source_business_data"))
+    payload = row.raw_fields.get("source_business_data")
+    roles = uniprot_roles_from_business_json(payload)
     if policy != MATCHING_POLICY_ROLE_SEPARATED_V2:
-        accessions = row.uniprot_accessions
-        if roles is not None:
-            accessions = tuple(
-                dict.fromkeys((*roles.primary_ids, *roles.auxiliary_ids))
-            )
+        # Keep every original xref. Role partition drops a xref that is also
+        # a proven equivalent, and that must not become a silent match.
+        accessions = strict_anchors_from_business_json(payload)
+        if accessions is None:
+            accessions = row.uniprot_accessions
         return MatchQuery(
             row.target_id,
             accessions,

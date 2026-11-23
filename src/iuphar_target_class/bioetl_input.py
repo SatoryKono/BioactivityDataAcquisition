@@ -144,12 +144,24 @@ def partition_uniprot_roles(data: Mapping[str, object]) -> UniprotIdentifierRole
     return UniprotIdentifierRoles(primary, equivalent, auxiliary, evidence)
 
 
-def uniprot_roles_from_business_json(payload: object) -> UniprotIdentifierRoles | None:
-    """Read role fields from stored business JSON, or skip historical rows.
+def strict_uniprot_anchors(data: Mapping[str, object]) -> tuple[str, ...]:
+    """Required anchors for the historical strict policy.
 
-    Kernel rows that only carry a merged ``uniprot`` string stay on the strict
-    anchor API. A payload qualifies only when it still has the source fields.
+    The list is every component accession plus every xref, in first-seen
+    order. A xref that is also a proven equivalent stays here.
+    ``partition_uniprot_roles`` removes that overlap from ``auxiliary_ids``;
+    strict matching must not drop it.
     """
+    return _ordered(
+        (
+            *_role_tokens(data.get("component_accessions")),
+            *_role_tokens(data.get("target_xref_uniprot_ids")),
+        )
+    )
+
+
+def _business_role_payload(payload: object) -> Mapping[str, object] | None:
+    """Return business JSON when it still carries UniProt role fields."""
     if not isinstance(payload, str) or not payload.startswith("{"):
         return None
     try:
@@ -159,6 +171,26 @@ def uniprot_roles_from_business_json(payload: object) -> UniprotIdentifierRoles 
     if not isinstance(loaded, Mapping):
         return None
     if not any(key in loaded for key in _UNIPROT_ROLE_KEYS):
+        return None
+    return loaded
+
+
+def strict_anchors_from_business_json(payload: object) -> tuple[str, ...] | None:
+    """Strict anchors from stored business JSON, or None for historical rows."""
+    loaded = _business_role_payload(payload)
+    if loaded is None:
+        return None
+    return strict_uniprot_anchors(loaded)
+
+
+def uniprot_roles_from_business_json(payload: object) -> UniprotIdentifierRoles | None:
+    """Read role fields from stored business JSON, or skip historical rows.
+
+    Kernel rows that only carry a merged ``uniprot`` string stay on the strict
+    anchor API. A payload qualifies only when it still has the source fields.
+    """
+    loaded = _business_role_payload(payload)
+    if loaded is None:
         return None
     return partition_uniprot_roles(loaded)
 
@@ -249,6 +281,8 @@ __all__ = [
     "partition_uniprot_roles",
     "plain_target_value",
     "project_target_fields",
+    "strict_anchors_from_business_json",
+    "strict_uniprot_anchors",
     "target_input_eligibility",
     "uniprot_roles_from_business_json",
 ]
