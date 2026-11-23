@@ -30,7 +30,7 @@ def _run(loaded, **fields):
         provenance=RunProvenance(
             snapshot.snapshot_id,
             "bioetl-iuphar-input-v1",
-            "plan-v1-r8",
+            "plan-v1-r9",
             "3.1.0",
             loaded.retrieved_at,
             "frozen",
