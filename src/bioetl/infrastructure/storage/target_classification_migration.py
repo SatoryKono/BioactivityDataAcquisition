@@ -99,6 +99,28 @@ def resolve_target_migration_transition(
     )
 
 
+def migration_status(state: Mapping[str, object]) -> dict[str, str]:
+    """Report journal identity, including a schema-1 journal without V2 fields."""
+    restoration = state.get("fk_restoration")
+    status = "unrecorded"
+    if isinstance(restoration, Mapping):
+        value = restoration.get("status")
+        if isinstance(value, str):
+            status = value
+
+    def text(key: str, default: str) -> str:
+        value = state.get(key, default)
+        return value if isinstance(value, str) else default
+
+    return {
+        "source_profile": text("source_profile", "V30"),
+        "destination_profile": text("destination_profile", "V31"),
+        "source_contract_version": text("source_contract_version", "3.0.0"),
+        "destination_contract_version": text("destination_contract_version", "3.1.0"),
+        "fk_restoration": status,
+    }
+
+
 def require_rf009_fk_restoration(
     assay_target_ids: set[str], gold_target_ids: set[str]
 ) -> dict[str, object]:
@@ -314,12 +336,19 @@ def _delta_pin(path: Path, *, classify: bool) -> dict[str, object] | None:
 
 
 def _target_ids(table: DeltaTable) -> set[str]:
+    """Read current target ids without a native Delta scan.
+
+    ``read_delta_records`` avoids the Windows ``to_pyarrow_table`` hang while
+    the migration lock is held.
+    """
+    from bioetl.infrastructure.storage.delta.table_ops import read_delta_records
+
     names = {field.name for field in table.schema().fields}
     columns = ["target_id"]
     if "_is_current" in names:
         columns.append("_is_current")
     ids: set[str] = set()
-    for row in table.to_pyarrow_table(columns=columns).to_pylist():
+    for row in read_delta_records(table, columns=columns):
         if row.get("_is_current", True) is not True:
             continue
         value = row.get("target_id")
@@ -510,9 +539,26 @@ def _assert_recorded_contracts(
         != state["destination_config_contract_version"]
     ):
         raise ValueError("candidate config contract version changed since preparation")
-    recorded = state["dependency_schema_versions"]
-    if _dependency_schema_versions(workspace, recorded) != recorded:
+    raw = _optional_journal(state)
+    recorded = raw.get("dependency_schema_versions")
+    if not isinstance(recorded, dict):
+        if raw.get("schema_version") == 1:
+            return
+        raise ValueError("migration journal is missing dependency schema versions")
+    versions = {
+        str(key): value
+        for key, value in recorded.items()
+        if isinstance(key, str) and type(value) is int
+    }
+    if len(versions) != len(recorded):
         raise ValueError("dependency schema version changed since preparation")
+    if _dependency_schema_versions(workspace, versions) != versions:
+        raise ValueError("dependency schema version changed since preparation")
+
+
+def _optional_journal(state: TargetMigrationJournal) -> dict[str, object]:
+    """Read a loaded journal as a mapping so schema 1 may omit schema 2 keys."""
+    return cast("dict[str, object]", state)
 
 
 def _assert_recorded_candidates(
@@ -600,6 +646,8 @@ def prepare_target_migration(
             "table_versions": _public_pins(pins),
             "candidate_profiles": candidate_profiles,
             "config_contract_version": _active_contract_version(checked["config"]),
+            # On-disk YAML active_version. The effective enrich contract is
+            # destination_contract_version, not this declared document version.
             "destination_config_contract_version": _active_contract_version(
                 checked["candidate_config"]
             ),

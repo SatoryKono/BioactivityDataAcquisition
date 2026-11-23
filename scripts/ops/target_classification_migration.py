@@ -17,6 +17,7 @@ from bioetl.infrastructure.storage.target_candidates import (
 
 from bioetl.infrastructure.storage.target_classification_migration import (
     TargetMigrationPaths,
+    migration_status,
     prepare_target_migration,
     promote_target_migration,
     resolve_target_migration_transition,
@@ -113,18 +114,13 @@ def main(argv: list[str] | None = None) -> None:
                 source_profile=source_profile,
                 destination_profile=destination_profile,
             )
+        reported = migration_status(state)
         print(
             json.dumps(
                 {
                     "phase": state["phase"],
                     "journal": str(paths.backup / "journal.json"),
-                    "source_profile": state["source_profile"],
-                    "destination_profile": state["destination_profile"],
-                    "source_contract_version": state["source_contract_version"],
-                    "destination_contract_version": state[
-                        "destination_contract_version"
-                    ],
-                    "fk_restoration": state["fk_restoration"]["status"],
+                    **reported,
                 }
             )
         )
