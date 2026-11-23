@@ -428,14 +428,40 @@ class TestNormalizeInlineDqOverrides:
         result = loader._normalize_inline_dq_overrides(yaml_config.dq_overrides)
         assert result["thresholds"] == {"soft_fail": 0.03, "hard_fail": 0.15}
 
-    def test_report_section_included(self) -> None:
-        """Report config section is always included."""
+    def test_unsupplied_report_is_omitted(self) -> None:
+        """Unspecified settings do not override hierarchy values."""
         loader = self._make_loader()
         yaml_config = PipelineYamlConfig.model_validate(_base_pipeline_dict())
         result = loader._normalize_inline_dq_overrides(yaml_config.dq_overrides)
-        assert "report" in result
-        assert "enabled" in result["report"]
-        assert "format" in result["report"]
+        assert result == {}
+
+    @pytest.mark.parametrize(
+        ("overrides", "expected"),
+        [
+            ({"soft_fail_threshold": 0.05}, {"thresholds": {"soft_fail": 0.05}}),
+            ({"hard_fail_threshold": 0.2}, {"thresholds": {"hard_fail": 0.2}}),
+            ({"strict_validation": False}, {"strict_validation": False}),
+            (
+                {"invalid_record_policy": "quarantine"},
+                {"invalid_record_policy": "quarantine"},
+            ),
+            ({"report": {"enabled": True}}, {"report": {"enabled": True}}),
+            ({"report": {"format": "json"}}, {"report": {"format": "json"}}),
+            (
+                {"report": {"include_sample_failures": True}},
+                {"report": {"include_sample_failures": True}},
+            ),
+            ({"report": {"sample_size": 10}}, {"report": {"sample_size": 10}}),
+            ({"report": {"output_path": None}}, {"report": {"output_path": None}}),
+        ],
+    )
+    def test_explicit_defaults_remain_overrides(self, overrides, expected) -> None:
+        loader = self._make_loader()
+        config = PipelineYamlConfig.model_validate(
+            {**_base_pipeline_dict(), "dq_overrides": overrides}
+        )
+        assert loader._has_inline_dq_overrides(config)
+        assert loader._normalize_inline_dq_overrides(config.dq_overrides) == expected
 
     def test_field_validations_normalized(self) -> None:
         """field_validations are included when present."""
@@ -454,6 +480,7 @@ class TestNormalizeInlineDqOverrides:
         result = loader._normalize_inline_dq_overrides(yaml_config.dq_overrides)
         assert "entity_field_validations" in result
         assert len(result["entity_field_validations"]) == 2
+        assert set(result) == {"entity_field_validations"}
 
     def test_cross_field_validations_normalized(self) -> None:
         """cross_field_validations are included when present."""
