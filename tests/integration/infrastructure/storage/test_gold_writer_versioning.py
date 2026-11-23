@@ -114,7 +114,7 @@ async def test_scd2_rejects_null_business_keys_before_dispatch(tmp_path: Path) -
     schema = DataFrameSchema(
         {
             "entity_id": Column(str, nullable=False),
-            "part": Column(str, nullable=True),
+            "part": Column(float, nullable=True, coerce=True),
             "content_hash": Column(str, nullable=False),
         },
         strict=True,
@@ -123,7 +123,7 @@ async def test_scd2_rejects_null_business_keys_before_dispatch(tmp_path: Path) -
     config = ScdConfig(business_key=("entity_id", "part"))
     timestamp = datetime(2026, 11, 23, tzinfo=UTC)
 
-    async def write(part: str | None, content_hash: str) -> None:
+    async def write(part: float | None, content_hash: str) -> None:
         await writer.write_gold(
             table_name="test.record",
             records=[{"entity_id": "one", "part": part, "content_hash": content_hash}],
@@ -134,23 +134,23 @@ async def test_scd2_rejects_null_business_keys_before_dispatch(tmp_path: Path) -
             ingestion_ts=timestamp,
         )
 
-    for content_hash in ("a", "b"):
+    for part, content_hash in ((None, "a"), (float("nan"), "b")):
         with pytest.raises(GoldWriteFailure, match="business key 'part'") as error:
-            await write(None, content_hash)
+            await write(part, content_hash)
         assert error.value.receipt.category == GoldWriteCategory.NOT_COMMITTED
         assert not _versioned_table_path(tmp_path / "gold", "test.record").exists()
 
-    await write("x", "a")
+    await write(1.0, "a")
     table_path = _versioned_table_path(tmp_path / "gold", "test.record")
     first_version = load_delta_table(str(table_path)).version()
-    for content_hash in ("a", "b"):
+    for part, content_hash in ((None, "a"), (float("nan"), "b")):
         with pytest.raises(GoldWriteFailure, match="business key 'part'") as error:
-            await write(None, content_hash)
+            await write(part, content_hash)
         assert error.value.receipt.category == GoldWriteCategory.NOT_COMMITTED
         assert load_delta_table(str(table_path)).version() == first_version
-    await write("x", "a")
+    await write(1.0, "a")
     assert load_delta_table(str(table_path)).version() == first_version
-    await write("x", "b")
+    await write(1.0, "b")
     rows = _load_delta_rows(table_path)
     assert len(rows) == 2
     assert sorted(row["version"] for row in rows) == [1, 2]
