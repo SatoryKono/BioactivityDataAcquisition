@@ -8,7 +8,9 @@ confirmed ``not_found``.
 
 from __future__ import annotations
 
+import re
 import subprocess
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -29,7 +31,9 @@ from .stage0.io import atomic_write_bytes, canonical_json_bytes, sha256_bytes
 
 MANIFEST_RELATIVE_PATH = "data/iuphar_target_class/baseline/rf001/manifest.json"
 BASELINE_REVISION = "e01ca762a3ffc5f2a4bd4ea89f17fa807e49b9e2"
+INCOMPLETE_HISTORY = "baseline revision is not in this checkout"
 _SHA256_WIDTH = 64
+_REVISION_PATTERN = r"[0-9a-f]{40}"
 
 _M_NOTE = (
     "Исходный M в этом checkout отсутствует. Каталог stage0 не содержит "
@@ -225,13 +229,15 @@ MATERIAL_SPECS: tuple[MaterialSpec, ...] = (
 def build_baseline_manifest(repo_root: Path) -> dict[str, object]:
     """Hash the checkout against the pinned baseline revision."""
     root = repo_root.resolve()
-    semantics = canonical_json_bytes(contract_document())
+    if not _commit_available(root, BASELINE_REVISION):
+        raise RuntimeError(INCOMPLETE_HISTORY)
+    semantics = contract_document()
     return {
         "artifact": "iuphar_rf001_baseline_manifest",
         "baseline_id": BASELINE_ID,
         "baseline_revision": BASELINE_REVISION,
         "biological_accuracy_accepted": False,
-        "configuration": contract_document()["configuration"],
+        "configuration": semantics["configuration"],
         "fresh_recalculation": False,
         "issue": ISSUE,
         "iuphar_release": {
@@ -245,7 +251,8 @@ def build_baseline_manifest(repo_root: Path) -> dict[str, object]:
         "m_semantics_bound": False,
         "materials": [_material_row(root, spec) for spec in MATERIAL_SPECS],
         "recorded_on": RECORDED_ON,
-        "semantics_sha256": sha256_bytes(semantics),
+        "semantics": semantics,
+        "semantics_sha256": sha256_bytes(canonical_json_bytes(semantics)),
     }
 
 
@@ -259,11 +266,20 @@ def verify_baseline_manifest(
     if not isinstance(materials, list):
         return ("materials is missing",)
     _check_material_set(materials, problems)
+    root = repo_root.resolve()
+    present: list[Mapping[str, object]] = []
     for row in materials:
         if isinstance(row, dict):
-            _check_material(repo_root.resolve(), row, problems)
+            _check_material(row, problems)
+            if row.get("availability") == "present":
+                present.append(row)
         else:
             problems.append("material row is not an object")
+    revision = document.get("baseline_revision")
+    if isinstance(revision, str):
+        problems.extend(historical_blob_problems(root, revision, present))
+    else:
+        problems.append(INCOMPLETE_HISTORY)
     return tuple(problems)
 
 
@@ -282,7 +298,7 @@ def _material_row(root: Path, spec: MaterialSpec) -> dict[str, object]:
     if spec.path is None:
         raise ValueError(f"{spec.material_id} is present but has no path")
     worktree = sha256_bytes((root / spec.path).read_bytes())
-    baseline = _revision_sha256(root, spec.path)
+    baseline = _blob_sha256(root, BASELINE_REVISION, spec.path)
     return {
         "availability": "present",
         "baseline_sha256": baseline,
@@ -323,9 +339,47 @@ def _delta(baseline: str | None, worktree: str) -> str:
     return "content_changed_by_rf001"
 
 
-def _revision_sha256(root: Path, path: str) -> str | None:
+def historical_blob_problems(
+    root: Path,
+    revision: str,
+    rows: list[Mapping[str, object]],
+) -> tuple[str, ...]:
+    """Compare recorded baseline hashes to one git commit.
+
+    A missing commit is incomplete history. It is not evidence that each path
+    was absent, and it does not consult the live worktree.
+    """
+    if not _commit_available(root, revision):
+        return (INCOMPLETE_HISTORY,)
+    problems: list[str] = []
+    for row in rows:
+        if row.get("availability") != "present":
+            continue
+        material_id = str(row.get("material_id"))
+        path = row.get("path")
+        if not isinstance(path, str):
+            problems.append(f"{material_id} path is missing")
+            continue
+        if row.get("baseline_sha256") != _blob_sha256(root, revision, path):
+            problems.append(f"{material_id} baseline hash mismatch")
+    return tuple(problems)
+
+
+def _commit_available(root: Path, revision: str) -> bool:
+    if re.fullmatch(_REVISION_PATTERN, revision) is None:
+        return False
     probe = subprocess.run(
-        ["git", "cat-file", "-e", f"{BASELINE_REVISION}:{path}"],
+        ["git", "cat-file", "-e", f"{revision}^{{commit}}"],
+        cwd=root,
+        capture_output=True,
+        check=False,
+    )
+    return probe.returncode == 0
+
+
+def _blob_sha256(root: Path, revision: str, path: str) -> str | None:
+    probe = subprocess.run(
+        ["git", "cat-file", "-e", f"{revision}:{path}"],
         cwd=root,
         capture_output=True,
         check=False,
@@ -333,7 +387,7 @@ def _revision_sha256(root: Path, path: str) -> str | None:
     if probe.returncode != 0:
         return None
     blob = subprocess.run(
-        ["git", "cat-file", "blob", f"{BASELINE_REVISION}:{path}"],
+        ["git", "cat-file", "blob", f"{revision}:{path}"],
         cwd=root,
         capture_output=True,
         check=False,
@@ -356,28 +410,29 @@ def _check_header(document: dict[str, object], problems: list[str]) -> None:
         problems.append("baseline is not a recalculation")
     if document.get("biological_accuracy_accepted") is not False:
         problems.append("biological accuracy is not accepted")
-    expected = sha256_bytes(canonical_json_bytes(contract_document()))
-    if document.get("semantics_sha256") != expected:
-        problems.append("semantics hash mismatch")
+    embedded = document.get("semantics")
+    if not isinstance(embedded, dict):
+        problems.append("semantics document is missing")
+    else:
+        digest = sha256_bytes(canonical_json_bytes(embedded))
+        if document.get("semantics_sha256") != digest:
+            problems.append("semantics hash mismatch")
+        if document.get("configuration") != embedded.get("configuration"):
+            problems.append("configuration claim mismatch")
     release = document.get("iuphar_release")
     if not isinstance(release, dict):
         problems.append("iuphar release is missing")
         return
-    if (
-        release.get("release") != RELEASE
-        or release.get("archive_sha256") != ARCHIVE_SHA256
-    ):
-        problems.append("IUPHAR archive pin mismatch")
-    if release.get("sql_sha256") != SQL_SHA256:
-        problems.append("IUPHAR SQL pin mismatch")
-    if release.get("targets_csv_sha256") != TARGETS_CSV_SHA256:
-        problems.append("IUPHAR CSV pin mismatch")
-    if release.get("annotation_capability") != SNAPSHOT_ANNOTATION_CAPABILITY:
-        problems.append("snapshot capability mismatch")
+    for key in ("archive_sha256", "sql_sha256", "targets_csv_sha256"):
+        value = release.get(key)
+        if not isinstance(value, str) or len(value) != _SHA256_WIDTH:
+            problems.append(f"IUPHAR {key} shape mismatch")
     if release.get("snapshot_bytes") != "source_unavailable":
         problems.append("missing snapshot bytes must stay source_unavailable")
-    if document.get("configuration") != contract_document()["configuration"]:
-        problems.append("configuration claim mismatch")
+    if isinstance(embedded, dict) and release.get(
+        "annotation_capability"
+    ) != embedded.get("snapshot_annotation_capability"):
+        problems.append("snapshot capability mismatch")
 
 
 def _check_material_set(materials: list[object], problems: list[str]) -> None:
@@ -391,7 +446,7 @@ def _check_material_set(materials: list[object], problems: list[str]) -> None:
         problems.append("material role set mismatch")
 
 
-def _check_material(root: Path, row: dict[str, object], problems: list[str]) -> None:
+def _check_material(row: dict[str, object], problems: list[str]) -> None:
     material_id = str(row.get("material_id"))
     availability = row.get("availability")
     if availability == "not_found":
@@ -403,7 +458,7 @@ def _check_material(root: Path, row: dict[str, object], problems: list[str]) -> 
     if availability != "present":
         problems.append(f"{material_id} has unknown availability")
         return
-    _check_present(root, material_id, row, problems)
+    _check_present(material_id, row, problems)
 
 
 def _check_unavailable(
@@ -425,23 +480,15 @@ def _check_unavailable(
 
 
 def _check_present(
-    root: Path,
     material_id: str,
     row: dict[str, object],
     problems: list[str],
 ) -> None:
-    path = row.get("path")
-    if not isinstance(path, str):
+    if not isinstance(row.get("path"), str):
         problems.append(f"{material_id} path is missing")
         return
     worktree = row.get("worktree_sha256")
     baseline = row.get("baseline_sha256")
-    actual = sha256_bytes((root / path).read_bytes())
-    if worktree != actual:
-        problems.append(f"{material_id} worktree hash mismatch")
-    revision_hash = _revision_sha256(root, path)
-    if baseline != revision_hash:
-        problems.append(f"{material_id} baseline hash mismatch")
     if not _delta_matches(row.get("delta"), baseline, worktree):
         problems.append(f"{material_id} delta does not match the hashes")
     if not _sha256_or_none(baseline) or not _sha256_or_none(worktree):
@@ -470,10 +517,12 @@ def _sha256_or_none(value: object) -> bool:
 
 __all__ = [
     "BASELINE_REVISION",
+    "INCOMPLETE_HISTORY",
     "MANIFEST_RELATIVE_PATH",
     "MATERIAL_SPECS",
     "MaterialSpec",
     "build_baseline_manifest",
+    "historical_blob_problems",
     "verify_baseline_manifest",
     "write_baseline_manifest",
 ]

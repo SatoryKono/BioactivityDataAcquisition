@@ -229,7 +229,7 @@
       "role": "rf001_contract",
       "semantics_bound": false,
       "version_id": null,
-      "worktree_sha256": "881e613a671205e9ab0982c18260ea98a46ef3b89a139652151795b29fc7141a"
+      "worktree_sha256": "c6a59f410aba0fb72e0cf862ad75c887c0f1ff04217ccfc44b705925f8071505"
     },
     {
       "availability": "present",
@@ -295,7 +295,7 @@
       "role": "rf001_contract",
       "semantics_bound": false,
       "version_id": null,
-      "worktree_sha256": "31afebc2cfd65ad2fc8eeb65f353c6aa42bf3fb6bd2590b151b4e8a6dd2385d4"
+      "worktree_sha256": "827c8c0f75d40ef2acc0cd94937ec32381192cfc38f5b877e24085bc4b0bf822"
     },
     {
       "availability": "present",
@@ -364,5 +364,362 @@
     }
   ],
   "recorded_on": "2026-11-23",
-  "semantics_sha256": "acdf4351af013cbcead7c8e309bd02b84f990d42b38e17504622f117d0e4a043"
+  "semantics": {
+    "artifact": "iuphar_rf001_baseline_semantics",
+    "baseline_id": "iuphar-rf001-baseline-2026-11-23",
+    "biological_accuracy_accepted": false,
+    "capabilities": [
+      {
+        "classification_limit": "Класс, которому нужны признаки после joins, остаётся partial или insufficient_input. Зафиксированный mode — off, контракт 3.0.0, канонические таблицы V30.",
+        "present_features": [
+          "target_id",
+          "target_type",
+          "pref_name",
+          "organism",
+          "taxonomy_id",
+          "target_row_ec_numbers",
+          "target_row_xrefs",
+          "seed_component_id_lists"
+        ],
+        "stage": "standalone_before_dependency_joins",
+        "surface": "chembl_target",
+        "unavailable_features": [
+          "uniprot_protein_record",
+          "protein_class_l1_l5",
+          "component_classifications_after_target_component"
+        ]
+      },
+      {
+        "classification_limit": "Незапущенная зависимость даёт source_unavailable для своих признаков. Завершённая зависимость без строки даёт not_found для этого join. local_* по-прежнему не копируется в iuphar_*. Канонические таблицы остаются V30 до отдельной миграции.",
+        "present_features": [
+          "seed_features",
+          "target_component",
+          "protein_class_hierarchy",
+          "uniprot_accession_when_mapping_status_found",
+          "uniprot_protein"
+        ],
+        "stage": "after_ordered_dependency_joins",
+        "surface": "composite_target",
+        "unavailable_features": [
+          "features_of_a_dependency_that_did_not_run",
+          "features_absent_from_a_completed_dependency"
+        ]
+      }
+    ],
+    "configuration": {
+      "composite_version": "1.3.0",
+      "entity_contract": "3.0.0",
+      "entity_mode": "off",
+      "table_generation": "V30"
+    },
+    "contract_versions": {
+      "classifier": "iuphar-classifier-rf001-1",
+      "normalization": "iuphar-normalization-rf001-1",
+      "profile_change": "iuphar-profile-change-rf001-1",
+      "rules": "iuphar-rules-rf001-1",
+      "table": "iuphar-table-rf001-1"
+    },
+    "decision_table": [
+      {
+        "completeness": "conflict",
+        "covers": [
+          "conflict"
+        ],
+        "decision_status": "contract_defect",
+        "effective_class": "null",
+        "effective_source": "null",
+        "rule_id": "layer_mix",
+        "when": "Локальный вывод записан в поле iuphar_*"
+      },
+      {
+        "completeness": "ambiguous",
+        "covers": [
+          "ambiguous"
+        ],
+        "decision_status": "requires_review",
+        "effective_class": "null",
+        "effective_source": "null",
+        "rule_id": "undefined_table_distinct",
+        "when": "Несколько различных строк схлопнуты без полного ключа, как Table.Distinct"
+      },
+      {
+        "completeness": "source_unavailable",
+        "covers": [
+          "source_unavailable"
+        ],
+        "decision_status": "requires_review",
+        "effective_class": "local class",
+        "effective_source": "local",
+        "rule_id": "source_unavailable_supported_local",
+        "when": "Источник недоступен, supported local сохраняется отдельно от iuphar_*"
+      },
+      {
+        "completeness": "source_unavailable",
+        "covers": [
+          "source_unavailable"
+        ],
+        "decision_status": "unresolved",
+        "effective_class": "null",
+        "effective_source": "null",
+        "rule_id": "source_unavailable",
+        "when": "Источник недоступен и supported local нет"
+      },
+      {
+        "completeness": "not_found",
+        "covers": [
+          "not_found"
+        ],
+        "decision_status": "requires_review",
+        "effective_class": "null",
+        "effective_source": "null",
+        "rule_id": "confirmed_not_found_conflict",
+        "when": "Полный источник не содержит идентификатор, local конфликтует"
+      },
+      {
+        "completeness": "not_found",
+        "covers": [
+          "not_found"
+        ],
+        "decision_status": "resolved",
+        "effective_class": "local class",
+        "effective_source": "local",
+        "rule_id": "confirmed_not_found_supported_local",
+        "when": "Полный источник не содержит идентификатор, supported local сохраняется"
+      },
+      {
+        "completeness": "not_found",
+        "covers": [
+          "not_found"
+        ],
+        "decision_status": "unresolved",
+        "effective_class": "null",
+        "effective_source": "null",
+        "rule_id": "confirmed_not_found",
+        "when": "Полный источник не содержит идентификатор и supported local нет"
+      },
+      {
+        "completeness": "partial",
+        "covers": [
+          "partial"
+        ],
+        "decision_status": "requires_review",
+        "effective_class": "null",
+        "effective_source": "null",
+        "rule_id": "dropped_parents",
+        "when": "Сохранённый путь теряет или подменяет хотя бы одного родителя"
+      },
+      {
+        "completeness": "unknown",
+        "covers": [
+          "unknown"
+        ],
+        "decision_status": "unresolved",
+        "effective_class": "null",
+        "effective_source": "null",
+        "rule_id": "false_other",
+        "when": "Other или Other Protein Target без утверждённого отображения"
+      },
+      {
+        "completeness": "complete",
+        "covers": [],
+        "decision_status": "resolved",
+        "effective_class": "Other Protein Target",
+        "effective_source": "iuphar",
+        "rule_id": "legacy_other_alias",
+        "when": "Токен Other лежит в legacy-поле и есть утверждённое отображение"
+      },
+      {
+        "completeness": "complete",
+        "covers": [],
+        "decision_status": "resolved",
+        "effective_class": "Other Protein Target",
+        "effective_source": "iuphar",
+        "rule_id": "admissible_other",
+        "when": "Утверждённое отображение даёт каноническую метку Other Protein Target"
+      },
+      {
+        "completeness": "unknown",
+        "covers": [
+          "unknown"
+        ],
+        "decision_status": "unresolved",
+        "effective_class": "null",
+        "effective_source": "null",
+        "rule_id": "unknown",
+        "when": "Класс не определён и подстановки нет"
+      },
+      {
+        "completeness": "partial",
+        "covers": [
+          "partial"
+        ],
+        "decision_status": "requires_review",
+        "effective_class": "dictionary class or null",
+        "effective_source": "iuphar only when a dictionary class exists",
+        "rule_id": "partial_annotation",
+        "when": "Аннотация справочника неполна, путь при этом не схлопнут"
+      },
+      {
+        "completeness": "ambiguous",
+        "covers": [
+          "ambiguous"
+        ],
+        "decision_status": "requires_review",
+        "effective_class": "null",
+        "effective_source": "null",
+        "rule_id": "ambiguous_match",
+        "when": "Несколько кандидатов остаются при заданном полном ключе"
+      },
+      {
+        "completeness": "conflict",
+        "covers": [
+          "conflict"
+        ],
+        "decision_status": "requires_review",
+        "effective_class": "dictionary class or null",
+        "effective_source": "iuphar only when a dictionary class exists",
+        "rule_id": "layer_conflict",
+        "when": "Справочник и local rules расходятся; оба значения сохраняются"
+      },
+      {
+        "completeness": "complete",
+        "covers": [],
+        "decision_status": "resolved",
+        "effective_class": "dictionary class",
+        "effective_source": "iuphar",
+        "rule_id": "dictionary_resolved",
+        "when": "Есть факт справочника и нет неопределённости, конфликта или смешения"
+      }
+    ],
+    "field_dictionary": [
+      {
+        "layer": "chembl_object_type",
+        "meaning": "Тип объекта ChEMBL. Не класс IUPHAR и не вывод local rules.",
+        "name": "target_type"
+      },
+      {
+        "layer": "dictionary",
+        "meaning": "Идентификатор мишени в справочнике. Локальный вывод сюда не пишется.",
+        "name": "iuphar_target_id"
+      },
+      {
+        "layer": "dictionary",
+        "meaning": "Класс из утверждённого отображения type или family справочника.",
+        "name": "iuphar_class"
+      },
+      {
+        "layer": "dictionary",
+        "meaning": "Статус поиска в справочнике. not_found только на полном источнике.",
+        "name": "iuphar_match_status"
+      },
+      {
+        "layer": "dictionary",
+        "meaning": "Полнота аннотации справочника, а не статус локального правила.",
+        "name": "iuphar_annotation_status"
+      },
+      {
+        "layer": "local_rule",
+        "meaning": "Класс локальных правил. Это не факт справочника.",
+        "name": "local_class"
+      },
+      {
+        "layer": "decision",
+        "meaning": "Итоговый класс таблицы решений. Пустое значение допустимо.",
+        "name": "effective_class"
+      },
+      {
+        "layer": "decision",
+        "meaning": "Слой источника итога: iuphar, local или пусто.",
+        "name": "effective_source"
+      },
+      {
+        "layer": "decision",
+        "meaning": "Статус решения: resolved, requires_review, unresolved, contract_defect.",
+        "name": "decision_status"
+      },
+      {
+        "layer": "profile_identity",
+        "meaning": "SHA-256 закреплённого профиля. Не класс и не источник класса.",
+        "name": "target_class_profile_sha256"
+      }
+    ],
+    "issue": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/13309",
+    "legacy_other": {
+      "admissible_when": "Токен Other хранится в legacy-поле, а утверждённое отображение той же строки даёт Other Protein Target.",
+      "canonical_label": "Other Protein Target",
+      "forbidden_as_fill_in_for": [
+        "unknown",
+        "partial",
+        "ambiguous",
+        "conflict",
+        "source_unavailable",
+        "not_found"
+      ],
+      "legacy_token": "Other"
+    },
+    "m_semantics_bound": false,
+    "missing_markers": {
+      "base": [
+        "#n/a",
+        "N/A",
+        "n/a",
+        ""
+      ],
+      "does_not_mean": [
+        "not_found",
+        "Other Protein Target",
+        "Other"
+      ],
+      "effect": "absence",
+      "null_is_marker": true,
+      "version": null,
+      "version_status": "не утверждено",
+      "whitespace_only_is_marker": true
+    },
+    "path_policy": {
+      "collapse": "forbidden",
+      "direction": "root_to_leaf",
+      "display_is_source_of_truth": "false",
+      "display_separator": " → ",
+      "member": "family_id",
+      "multiple_parents": "retain_all"
+    },
+    "profile_change_rules": [
+      {
+        "rule_id": "immutable-baseline",
+        "statement": "Manifest RF-001 не перезаписывается. Новая семантика публикует новый baseline id и новый manifest."
+      },
+      {
+        "rule_id": "version-bump",
+        "statement": "Смена rules, normalization, classifier или table contract, байтов снимка, приёмки или схемы классификации требует новой версии профиля."
+      },
+      {
+        "rule_id": "digest-binds-bytes",
+        "statement": "Digest профиля — SHA-256 точных байтов. Тот же digest для других байтов является дефектом контракта."
+      },
+      {
+        "rule_id": "mode-does-not-migrate",
+        "statement": "mode off и shadow оставляют канонические таблицы на контракте 3.0.0. mode enrich выбирает 3.1.0 только для запуска с закреплённым профилем и не мигрирует канонические таблицы."
+      },
+      {
+        "rule_id": "recalculation-is-separate",
+        "statement": "Кэш результата и пересчёт — разные роли. Пересчёт получает новый артефакт и новый SHA-256."
+      },
+      {
+        "rule_id": "m-claim-needs-version",
+        "statement": "Утверждение о семантике M допустимо только с version_id и SHA-256 записи m_source. Непривязанный источник не поддерживает такое утверждение."
+      },
+      {
+        "rule_id": "missing-markers-stay-unapproved",
+        "statement": "missing_markers_version остаётся пустой, пока нет отдельного утверждения. Смена набора маркеров повышает версию normalization."
+      },
+      {
+        "rule_id": "full-features-after-joins",
+        "statement": "Полный набор признаков допустим только после dependency joins composite target. Standalone chembl_target эти признаки не заявляет."
+      }
+    ],
+    "recorded_on": "2026-11-23",
+    "snapshot_annotation_capability": "family_only"
+  },
+  "semantics_sha256": "5d817457925a46eec6eecaa987b809ef2564ecceca6d35ecfa4d69fd9c6cdfe8"
 }

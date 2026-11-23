@@ -105,6 +105,7 @@ class BoundaryObservation:
     uncertainty: str | None = None
     dictionary_class: str | None = None
     local_class: str | None = None
+    local_status: str = "absent"
 
     def __post_init__(self) -> None:
         if not self.case_id.strip():
@@ -118,6 +119,15 @@ class BoundaryObservation:
             and self.uncertainty not in UNCERTAINTY_STATUSES
         ):
             raise ValueError("uncertainty is outside the uncertainty vocabulary")
+        if self.local_status not in {
+            "supported",
+            "conflicting",
+            "candidate_only",
+            "absent",
+        }:
+            raise ValueError("local_status is outside the local vocabulary")
+        if self.local_status == "supported" and not self.local_class:
+            raise ValueError("supported local requires local_class")
 
 
 @dataclass(frozen=True, slots=True)
@@ -210,8 +220,17 @@ DECISION_RULES: tuple[DecisionRule, ...] = (
         ("ambiguous",),
     ),
     DecisionRule(
+        "source_unavailable_supported_local",
+        "Источник недоступен, supported local сохраняется отдельно от iuphar_*",
+        "requires_review",
+        "local class",
+        "local",
         "source_unavailable",
-        "Байты или сервис источника не получены",
+        ("source_unavailable",),
+    ),
+    DecisionRule(
+        "source_unavailable",
+        "Источник недоступен и supported local нет",
         "unresolved",
         "null",
         "null",
@@ -219,13 +238,40 @@ DECISION_RULES: tuple[DecisionRule, ...] = (
         ("source_unavailable",),
     ),
     DecisionRule(
+        "confirmed_not_found_conflict",
+        "Полный источник не содержит идентификатор, local конфликтует",
+        "requires_review",
+        "null",
+        "null",
+        "not_found",
+        ("not_found",),
+    ),
+    DecisionRule(
+        "confirmed_not_found_supported_local",
+        "Полный источник не содержит идентификатор, supported local сохраняется",
+        "resolved",
+        "local class",
+        "local",
+        "not_found",
+        ("not_found",),
+    ),
+    DecisionRule(
         "confirmed_not_found",
-        "Полный источник просмотрен, идентификатор отсутствует",
+        "Полный источник не содержит идентификатор и supported local нет",
         "unresolved",
         "null",
         "null",
         "not_found",
         ("not_found",),
+    ),
+    DecisionRule(
+        "dropped_parents",
+        "Сохранённый путь теряет или подменяет хотя бы одного родителя",
+        "requires_review",
+        "null",
+        "null",
+        "partial",
+        ("partial",),
     ),
     DecisionRule(
         "false_other",
@@ -253,15 +299,6 @@ DECISION_RULES: tuple[DecisionRule, ...] = (
         "iuphar",
         "complete",
         (),
-    ),
-    DecisionRule(
-        "dropped_parents",
-        "Сохранённый путь теряет или подменяет хотя бы одного родителя",
-        "requires_review",
-        "null",
-        "null",
-        "partial",
-        ("partial",),
     ),
     DecisionRule(
         "unknown",
@@ -614,9 +651,24 @@ def _undefined_distinct(observation: BoundaryObservation) -> BoundaryDecision | 
     )
 
 
+def _supported_local(observation: BoundaryObservation) -> bool:
+    return observation.local_status == "supported" and bool(observation.local_class)
+
+
 def _source_unavailable(observation: BoundaryObservation) -> BoundaryDecision | None:
     if observation.source_state != "source_unavailable":
         return None
+    if _supported_local(observation):
+        return _decision(
+            observation,
+            rule_id="source_unavailable_supported_local",
+            decision_status="requires_review",
+            effective_class=observation.local_class,
+            effective_source="local",
+            iuphar_class=None,
+            completeness="source_unavailable",
+            codes=("source_unavailable",),
+        )
     return _decision(
         observation,
         rule_id="source_unavailable",
@@ -632,6 +684,28 @@ def _source_unavailable(observation: BoundaryObservation) -> BoundaryDecision | 
 def _confirmed_not_found(observation: BoundaryObservation) -> BoundaryDecision | None:
     if observation.source_state != "not_found":
         return None
+    if observation.local_status == "conflicting":
+        return _decision(
+            observation,
+            rule_id="confirmed_not_found_conflict",
+            decision_status="requires_review",
+            effective_class=None,
+            effective_source=None,
+            iuphar_class=None,
+            completeness="not_found",
+            codes=("confirmed_not_found",),
+        )
+    if _supported_local(observation):
+        return _decision(
+            observation,
+            rule_id="confirmed_not_found_supported_local",
+            decision_status="resolved",
+            effective_class=observation.local_class,
+            effective_source="local",
+            iuphar_class=None,
+            completeness="not_found",
+            codes=("confirmed_not_found",),
+        )
     return _decision(
         observation,
         rule_id="confirmed_not_found",
@@ -799,15 +873,14 @@ def _otherwise_unknown(observation: BoundaryObservation) -> BoundaryDecision | N
 
 
 def _reject_substituted_absence(decision: BoundaryDecision) -> None:
-    if decision.rule_id == "source_unavailable" and "not_found" in decision.codes:
+    if decision.completeness == "source_unavailable" and "not_found" in decision.codes:
         raise RuntimeError("source_unavailable must not be rewritten as not_found")
-    if (
-        decision.rule_id == "confirmed_not_found"
-        and "source_unavailable" in decision.codes
-    ):
+    if decision.completeness == "not_found" and "source_unavailable" in decision.codes:
         raise RuntimeError("confirmed not_found must not be rewritten as unavailable")
     if decision.effective_source == "iuphar" and decision.iuphar_class is None:
         raise RuntimeError("iuphar source requires a dictionary class")
+    if decision.effective_source == "local" and decision.local_class is None:
+        raise RuntimeError("local source requires a local class")
 
 
 _WALKER = (
@@ -815,8 +888,8 @@ _WALKER = (
     _undefined_distinct,
     _source_unavailable,
     _confirmed_not_found,
-    _other_decision,
     _dropped_parents,
+    _other_decision,
     _uncertainty,
     _dictionary_resolved,
     _otherwise_unknown,

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -10,8 +11,17 @@ import yaml
 
 from bioetl.domain.config.target_classification import TARGET_CLASSIFICATION_FIELDS
 from iuphar_target_class.baseline_manifest import (
+    INCOMPLETE_HISTORY,
     MANIFEST_RELATIVE_PATH,
+    build_baseline_manifest,
+    historical_blob_problems,
     verify_baseline_manifest,
+)
+from iuphar_target_class.gtopdb_2026_3_1 import (
+    ARCHIVE_SHA256,
+    RELEASE,
+    SQL_SHA256,
+    TARGETS_CSV_SHA256,
 )
 from iuphar_target_class.baseline_semantics import (
     CANONICAL_OTHER,
@@ -39,7 +49,7 @@ from iuphar_target_class.policy import (
     baseline_contract,
     policy_document,
 )
-from iuphar_target_class.stage0.io import canonical_json_bytes
+from iuphar_target_class.stage0.io import canonical_json_bytes, sha256_bytes
 
 pytestmark = pytest.mark.unit
 ROOT = Path(__file__).resolve().parents[3]
@@ -225,10 +235,83 @@ def test_committed_configs_match_the_baseline_claim() -> None:
     assert f'"annotation_capability": "{SNAPSHOT_ANNOTATION_CAPABILITY}"' in snapshot
 
 
+def test_supported_local_stays_out_of_the_dictionary_layer() -> None:
+    unavailable = decide(
+        BoundaryObservation(
+            case_id="unavailable-local",
+            source_state="source_unavailable",
+            local_class="Enzyme",
+            local_status="supported",
+        )
+    )
+    assert unavailable.rule_id == "source_unavailable_supported_local"
+    assert unavailable.effective_class == "Enzyme"
+    assert unavailable.effective_source == "local"
+    assert unavailable.iuphar_class is None
+    assert unavailable.decision_status == "requires_review"
+    assert unavailable.completeness == "source_unavailable"
+    assert unavailable.codes == ("source_unavailable",)
+
+    confirmed = decide(
+        BoundaryObservation(
+            case_id="not-found-local",
+            source_state="not_found",
+            local_class="Enzyme",
+            local_status="supported",
+        )
+    )
+    assert confirmed.rule_id == "confirmed_not_found_supported_local"
+    assert confirmed.effective_class == "Enzyme"
+    assert confirmed.effective_source == "local"
+    assert confirmed.iuphar_class is None
+    assert confirmed.decision_status == "resolved"
+    assert confirmed.codes == ("confirmed_not_found",)
+
+    conflict = decide(
+        BoundaryObservation(
+            case_id="not-found-conflict",
+            source_state="not_found",
+            local_status="conflicting",
+        )
+    )
+    assert conflict.rule_id == "confirmed_not_found_conflict"
+    assert conflict.effective_class is None
+    assert "source_unavailable" not in conflict.codes
+
+
+def test_dropped_parents_outrank_an_admissible_other() -> None:
+    decision = decide(
+        BoundaryObservation(
+            case_id="other-and-parents",
+            assigned_label=CANONICAL_OTHER,
+            approved_other_mapping=True,
+            parent_ids=("10", "20"),
+            retained_parent_ids=("10",),
+        )
+    )
+    assert decision.rule_id == "dropped_parents"
+    assert decision.decision_status == "requires_review"
+    assert decision.completeness == "partial"
+    assert decision.effective_class is None
+    assert decision.iuphar_class is None
+
+
+def test_published_manifest_matches_the_current_contract() -> None:
+    document = json.loads((ROOT / MANIFEST_RELATIVE_PATH).read_text(encoding="utf-8"))
+    assert document["semantics"] == contract_document()
+    release = document["iuphar_release"]
+    assert release["release"] == RELEASE
+    assert release["archive_sha256"] == ARCHIVE_SHA256
+    assert release["sql_sha256"] == SQL_SHA256
+    assert release["targets_csv_sha256"] == TARGETS_CSV_SHA256
+
+
 def test_manifest_hashes_and_required_roles_hold() -> None:
     path = ROOT / MANIFEST_RELATIVE_PATH
     document = json.loads(path.read_text(encoding="utf-8"))
     problems = verify_baseline_manifest(ROOT, document)
+    if problems == (INCOMPLETE_HISTORY,):
+        pytest.skip(INCOMPLETE_HISTORY)
     assert problems == ()
     materials = document["materials"]
     by_id = {row["material_id"]: row for row in materials}
@@ -254,3 +337,108 @@ def test_manifest_hashes_and_required_roles_hold() -> None:
     assert introduced == {"manifest_source", "semantics_source"}
     encoded = canonical_json_bytes(document)
     assert path.read_bytes() == encoded
+
+
+def _git(repo: Path, *args: str) -> str:
+    completed = subprocess.run(
+        ["git", *args],
+        cwd=repo,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    return completed.stdout.strip()
+
+
+def _init_repo(repo: Path) -> None:
+    repo.mkdir()
+    _git(repo, "init")
+    _git(repo, "config", "user.email", "rf001@example.com")
+    _git(repo, "config", "user.name", "RF-001")
+
+
+def test_missing_revision_is_one_incomplete_history_problem(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    _init_repo(repo)
+    rows = [
+        {
+            "availability": "present",
+            "baseline_sha256": "b" * 64,
+            "material_id": "classifier_source",
+            "path": "missing.py",
+        }
+    ]
+    problems = historical_blob_problems(repo, "a" * 40, rows)
+    assert problems == (INCOMPLETE_HISTORY,)
+
+
+def test_absent_path_on_an_available_revision_stays_absent(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    _init_repo(repo)
+    (repo / "kept.py").write_text("kept\n", encoding="utf-8")
+    _git(repo, "add", "kept.py")
+    _git(repo, "commit", "-m", "baseline")
+    revision = _git(repo, "rev-parse", "HEAD")
+    absent = historical_blob_problems(
+        repo,
+        revision,
+        [
+            {
+                "availability": "present",
+                "baseline_sha256": None,
+                "material_id": "semantics_source",
+                "path": "added-later.py",
+            }
+        ],
+    )
+    assert absent == ()
+    mismatched = historical_blob_problems(
+        repo,
+        revision,
+        [
+            {
+                "availability": "present",
+                "baseline_sha256": "c" * 64,
+                "material_id": "semantics_source",
+                "path": "added-later.py",
+            }
+        ],
+    )
+    assert mismatched == ("semantics_source baseline hash mismatch",)
+
+
+def test_later_file_bytes_do_not_fail_historical_verification(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    _init_repo(repo)
+    target = repo / "classifier.py"
+    target.write_text("original\n", encoding="utf-8")
+    _git(repo, "add", "classifier.py")
+    _git(repo, "commit", "-m", "baseline")
+    revision = _git(repo, "rev-parse", "HEAD")
+    original = sha256_bytes(b"original\n")
+    target.write_text("later\n", encoding="utf-8")
+    problems = historical_blob_problems(
+        repo,
+        revision,
+        [
+            {
+                "availability": "present",
+                "baseline_sha256": original,
+                "material_id": "classifier_source",
+                "path": "classifier.py",
+                "worktree_sha256": sha256_bytes(b"later\n"),
+            }
+        ],
+    )
+    assert problems == ()
+
+
+def test_rebuild_refuses_when_the_revision_object_is_missing(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        "iuphar_target_class.baseline_manifest.BASELINE_REVISION",
+        "a" * 40,
+    )
+    with pytest.raises(RuntimeError, match=INCOMPLETE_HISTORY):
+        build_baseline_manifest(ROOT)
