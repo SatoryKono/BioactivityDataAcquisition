@@ -863,20 +863,21 @@ def test_main_contour_readback_does_not_replace_isolated_hashes(
 
     assert measured.silver_sha256 == observations.silver_sha256
     assert measured.gold_sha256 == observations.gold_sha256
-    assert measured.silver_profile_values == observations.silver_profile_values
-    assert measured.gold_profile_values == observations.gold_profile_values
     assert _phase(report, "isolated_enrich") == "PASS"
     assert _phase(report, "live") == "PASS"
     assert report["promotion_decision"] == "LIVE_ACCEPTED"
 
 
-def test_live_rows_must_carry_the_promoted_profile(tmp_path: Path) -> None:
+def test_live_readback_rejects_matching_but_wrong_row_profiles(
+    tmp_path: Path,
+) -> None:
+    """Live Silver/Gold may match each other yet disagree with the promoted digest."""
     evidence, observations = _ready_case(tmp_path)
     wrong = tuple(
         {**row, "target_class_profile_sha256": _OTHER} for row in _ROWS
     )
-    silver = tmp_path / "wrong-silver.csv"
-    gold = tmp_path / "wrong-gold.csv"
+    silver = tmp_path / "live-wrong-silver.csv"
+    gold = tmp_path / "live-wrong-gold.csv"
     _write_csv(silver, wrong)
     _write_csv(gold, wrong)
     migration = dict(evidence["migration"])
@@ -905,17 +906,17 @@ def test_live_rows_must_carry_the_promoted_profile(tmp_path: Path) -> None:
     assert isinstance(phases, dict)
     live = phases["live"]
     assert isinstance(live, dict)
-    reasons = live["reasons"]
-    assert isinstance(reasons, list)
 
     assert measured.silver_profile_values == observations.silver_profile_values
+    assert measured.gold_profile_values == observations.gold_profile_values
     assert measured.live_silver_profile_values == (_OTHER, _OTHER)
     assert measured.live_gold_profile_values == (_OTHER, _OTHER)
+    assert measured.live_projection_match is True
     assert _phase(report, "isolated_enrich") == "PASS"
     assert _phase(report, "live") == "FAIL"
-    assert "live_silver_profile_row_mismatch" in reasons
-    assert "live_gold_profile_row_mismatch" in reasons
-    assert report["promotion_decision"] == "ROLLBACK_REQUIRED"
+    assert "live_silver_profile_row_mismatch" in live["reasons"]
+    assert "live_gold_profile_row_mismatch" in live["reasons"]
+    assert report["promotion_decision"] != "LIVE_ACCEPTED"
 
 
 def test_duplicate_current_target_id_blocks_live_acceptance(

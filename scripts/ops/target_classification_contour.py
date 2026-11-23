@@ -849,31 +849,6 @@ def _evaluate_migration(
     return _phase("FAIL" if reasons else "PASS", _unique(reasons))
 
 
-def _live_profile_reasons(
-    observations: ContourObservations, migration: dict[str, object]
-) -> list[str]:
-    """Current main-contour rows must carry the promoted profile."""
-    profile = migration["effective_profile_sha256"]
-    reasons: list[str] = []
-    reasons.extend(
-        _profile_row_reasons(
-            observations.live_silver_profile_values,
-            profile,
-            "live_silver_profile_rows_not_measured",
-            "live_silver_profile_row_mismatch",
-        )
-    )
-    reasons.extend(
-        _profile_row_reasons(
-            observations.live_gold_profile_values,
-            profile,
-            "live_gold_profile_rows_not_measured",
-            "live_gold_profile_row_mismatch",
-        )
-    )
-    return reasons
-
-
 def _live_projection_reasons(observations: ContourObservations) -> list[str]:
     if observations.duplicate_current_target_ids is True:
         return ["duplicate_current_target_id"]
@@ -882,6 +857,29 @@ def _live_projection_reasons(observations: ContourObservations) -> list[str]:
     if observations.live_projection_match is not True:
         return ["classification_not_reproduced"]
     return []
+
+
+def _live_profile_reasons(
+    observations: ContourObservations, profile: object
+) -> list[str]:
+    """Every measured live row must carry the promoted profile digest.
+
+    Unmeasured live tables stay gated by ``live_projection_match`` so evidence
+    without ``--silver``/``--gold`` is unchanged; measured wrong profiles fail.
+    """
+    reasons: list[str] = []
+    cohorts = (
+        (observations.live_silver_profile_values, "live_silver_profile_row_mismatch"),
+        (observations.live_gold_profile_values, "live_gold_profile_row_mismatch"),
+    )
+    if not _pinned(profile):
+        return reasons
+    for observed, mismatch_code in cohorts:
+        if observed is None:
+            continue
+        if not observed or any(value != profile for value in observed):
+            reasons.append(mismatch_code)
+    return reasons
 
 
 def _evaluate_live(
@@ -909,7 +907,9 @@ def _evaluate_live(
         live["observed_config_sha256"] != observations.canonical_config_sha256
     ):
         reasons.append("live_config_mismatch")
-    reasons.extend(_live_profile_reasons(observations, migration))
+    reasons.extend(
+        _live_profile_reasons(observations, migration["effective_profile_sha256"])
+    )
     reasons.extend(_live_projection_reasons(observations))
     if live["classification_reproduced"] is not True:
         reasons.append("classification_reproduced_not_attested")
