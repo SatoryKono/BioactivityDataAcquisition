@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import argparse
+import sys
 from pathlib import Path
 
 from bioetl.infrastructure.adapters.iuphar import load_profile
+from iuphar_target_class.delivery_verification import publish_acceptance_reports
 from iuphar_target_class.integration_acceptance import (
     IntegrationAcceptanceRequest,
     run_integration_acceptance,
@@ -53,6 +55,19 @@ def main(argv: list[str] | None = None) -> int:
         snapshot=profile.snapshot.snapshot,
         output_dir=args.output_dir,
     )
+    try:
+        publish_acceptance_reports(
+            args.output_dir,
+            root=args.output_dir,
+            receipt=receipt,
+            profile_sha256=args.profile_sha256,
+            source_name=args.profile.name,
+            pipeline_proof=args.pipeline_proof,
+            pipeline_report=args.pipeline_report,
+        )
+    except (OSError, ValueError) as error:
+        print(f"verification reports not published: {error}", file=sys.stderr)
+        return 2
     print(f"{receipt['status']}: {args.output_dir / 'acceptance.json'}")
     return 0 if receipt["status"] == "PASS" else 2
 
