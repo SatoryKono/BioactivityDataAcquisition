@@ -53070,7 +53070,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-11-20",
-  "source_tree_sha256": "98ec6e23ebf80d5f6059db45d9a31fff556a6b2c94f89b9cefbc3e2db15d39c6",
+  "source_tree_sha256": "afc824b351f07b678e49d29b23c646d2e1b997cc53a46e104b80320e3d831f05",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
