@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "50f44c2379fd9303d5bcb28c278d5e3842c4bc4e",
+  "source_ref": "c1951dd0cc031f0b245c5409b9196caee3bcb462",
+  "source_reviews": {
+    "src/bioetl/application/serialization/snapshot_serialization.py": "Merged the supplied inline DQ snapshot serialization from main. Existing serialization calls stay in place; no new external resource acquisition or ownership change.",
+    "src/bioetl/application/services/run_reports/workflow_observations.py": "Merged the resume path that skips already completed child reports. Existing store read and write exclusions keep their ownership; no new runtime qualification.",
+    "src/bioetl/application/services/workflow/workflow_runner_reports.py": "Merged the resume path that does not archive a restored child again. Existing report-store access and ownership are unchanged.",
+    "src/bioetl/application/services/workflow/workflow_runner_transitions.py": "Merged the resume transition that keeps the restored RunResult and identity. No acquisition call sites and no ownership change.",
+    "src/bioetl/infrastructure/config/pipeline_dq_resolution.py": "Merged preservation of explicitly supplied inline DQ settings. Threshold and report mapping stays in process; no external resource acquisition or lifecycle change."
+  },
+  "expression_updates": {},
+  "segment_updates": {},
+  "line_updates": {},
+  "reference_moves": [],
+  "exclusion_moves": [],
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": []
+}
