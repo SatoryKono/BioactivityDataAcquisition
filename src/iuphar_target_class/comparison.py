@@ -969,15 +969,19 @@ def _canonical_object(value: str) -> str:
 def _closest_historical_row(
     rows: tuple[Mapping[str, str], ...], survivor: Mapping[str, str]
 ) -> Mapping[str, str]:
-    """Pick the historical duplicate whose compared fields are nearest the survivor."""
+    """Pick the nearest historical duplicate. Equal distances use a stable signature."""
 
-    def distance(row: Mapping[str, str]) -> int:
-        return sum(
+    def rank(row: Mapping[str, str]) -> tuple[int, str]:
+        distance = sum(
             _observe(row, field) != _observe(survivor, field)
             for field in COMPARED_FIELDS
         )
+        signature = json.dumps(
+            sorted(row.items()), ensure_ascii=False, separators=(",", ":")
+        )
+        return distance, signature
 
-    return min(rows, key=distance)
+    return min(rows, key=rank)
 
 
 def _canonical_family_paths(loaded: list[object]) -> str:

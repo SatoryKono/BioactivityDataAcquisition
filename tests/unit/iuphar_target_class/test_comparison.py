@@ -754,6 +754,45 @@ def test_duplicate_identity_is_not_silently_deduplicated() -> None:
     assert lost["class_agreement_count"] == 0
 
 
+def test_tied_historical_duplicates_use_a_stable_signature() -> None:
+    enzyme = _identity(iuphar_class="Enzyme", iuphar_subclass="Hydrolase")
+    receptor = _identity(iuphar_class="Receptor", iuphar_subclass="Transferase")
+    survivor = (_identity(iuphar_class="Enzyme", iuphar_subclass="Transferase"),)
+    dedup = register_difference_basis(
+        basis_id="dedup-tie",
+        category="nondeterministic_dedup_removed",
+        statement="устранение недетерминированного dedup зафиксировано до запуска",
+        field="identity",
+        source_pair="original_m:new_result",
+        target_id="T1",
+    )
+    subclass = register_difference_basis(
+        basis_id="subclass-tie",
+        category="ec_fix",
+        statement="смена подкласса зафиксирована до запуска",
+        field="iuphar_subclass",
+        source_pair="original_m:new_result",
+        target_id="T1",
+    )
+    seal = seal_difference_bases((dedup, subclass))
+    forward = _comparison(
+        _report((enzyme, receptor), survivor, basis_seal=seal),
+        "original_m:new_result",
+    )
+    reverse = _comparison(
+        _report((receptor, enzyme), survivor, basis_seal=seal),
+        "original_m:new_result",
+    )
+    assert forward == reverse
+    assert forward["unexplained_count"] == reverse["unexplained_count"] == 0
+    subclass_diff = _field_diff(forward, "iuphar_subclass")
+    assert subclass_diff is not None
+    assert subclass_diff["disposition"] == "allowed"
+    assert subclass_diff["old_value"] == "Hydrolase"
+    assert subclass_diff["new_value"] == "Transferase"
+    assert _field_diff(forward, "iuphar_class") is None
+
+
 def test_rows_without_identity_are_not_a_class_match() -> None:
     historical = {"iuphar_class": "Enzyme"}
     current = {"iuphar_class": "Enzyme"}
