@@ -48,13 +48,16 @@ def create_gold_writer(
         logger: LoggerPort for structured logging.
         tracing: Explicit TracingPort resolved by composition bootstrap.
         csv_exporter: Optional CSV exporter for parallel Gold CSV output.
-        metadata_coordinator: Optional coordinator for metadata side-effects.
+        metadata_coordinator: Required when Gold metadata is enabled.
         transform_version: Transform version tag written to Gold metadata.
         transform_steps: Ordered transform step labels for metadata.
         flat_structure: If True, writes files without provider/entity subdirectories.
 
     Returns:
         Configured GoldWriter instance for the Gold storage layer.
+
+    Raises:
+        ValueError: If Gold metadata is enabled without a coordinator.
     """
     save_metadata = config.save_metadata if config else False
     lineage_store = (
