@@ -9,7 +9,7 @@ from __future__ import annotations
 __all__ = ["PipelineDebugService"]
 
 from dataclasses import dataclass, field, replace
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, cast
 
 from bioetl.domain.ports import (
     BreakpointHit,
@@ -26,27 +26,30 @@ class DebugAbortError(Exception):
     """Raised when user aborts pipeline from a debug breakpoint."""
 
 
-def _copy_containers(value: Any, memo: dict[int, Any]) -> Any:
+def _copy_containers[T](value: T, memo: dict[int, object]) -> T:
     """Copy built-in dicts and lists; retain opaque payloads by reference."""
     if type(value) not in (dict, list):
         return value
-    if id(value) in memo:
-        return memo[id(value)]
+    value_id = id(value)
+    if value_id in memo:
+        return cast(T, memo[value_id])
     if isinstance(value, dict):
-        result: Any = {}
-        memo[id(value)] = result
-        result.update(
-            (key, _copy_containers(item, memo)) for key, item in value.items()
+        original_dict = cast(dict[object, object], value)
+        result_dict: dict[object, object] = {}
+        memo[value_id] = result_dict
+        result_dict.update(
+            (key, _copy_containers(item, memo)) for key, item in original_dict.items()
         )
-    else:
-        result = []
-        memo[id(value)] = result
-        result.extend(_copy_containers(item, memo) for item in value)
-    return result
+        return cast(T, result_dict)
+    original_list = cast(list[object], value)
+    result_list: list[object] = []
+    memo[value_id] = result_list
+    result_list.extend(_copy_containers(item, memo) for item in original_list)
+    return cast(T, result_list)
 
 
 def _copy_snapshot(snapshot: PipelineSnapshot) -> PipelineSnapshot:
-    memo: dict[int, Any] = {}
+    memo: dict[int, object] = {}
     return replace(
         snapshot,
         dq_issues=_copy_containers(snapshot.dq_issues, memo),
