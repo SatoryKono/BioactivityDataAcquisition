@@ -522,6 +522,22 @@ def test_workflow_runbook_selects_resume_and_archive_contracts(tmp_path: Path) -
     assert report["covers_full_suite"] is False
 
 
+def test_checkpoint_debugging_runbook_selects_workflow_diagnostics(
+    tmp_path: Path,
+) -> None:
+    owner = "tests/unit/application/services/test_observability_workflow_service.py"
+    path = tmp_path / owner
+    path.parent.mkdir(parents=True)
+    path.write_text("def test_owner():\n    assert True\n", encoding="utf-8")
+
+    report = build_shadow_compare(
+        ["docs/05-operations/runbooks/checkpoint-debugging.md"], repo_root=tmp_path
+    )
+
+    assert report["selected"] == [owner]
+    assert report["covers_full_suite"] is False
+
+
 def test_iuphar_policy_paths_keep_the_policy_owner(tmp_path: Path) -> None:
     owner = tmp_path / "tests/unit/iuphar_target_class/test_policy.py"
     owner.parent.mkdir(parents=True)
@@ -1831,7 +1847,6 @@ def test_shadow_compare_routes_codex_launchers_and_guidance(changed_file: str) -
         ),
         (
             "configs/quality/external_resource_inventory_pr13328_review.json",
-            "configs/quality/external_resource_inventory_pr13348_review.json",
             {
                 "tests/architecture/test_external_resource_inventory_catalog.py",
                 "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
