@@ -45,6 +45,7 @@ from bioetl.composition.runtime_builders import inputs_resolver
 from bioetl.composition.runtime_builders import inputs_runtime_assembly as _assembly
 from bioetl.application.services.control_plane import RunLedgerService
 from bioetl.infrastructure.control_plane import FileRunLedgerStore, FileRunManifestStore
+from bioetl.infrastructure.config.source_config_loader import SourceConfigNotFoundError
 from tests.unit.application.services.run_manifest_test_support import (
     make_run_manifest,
 )
@@ -117,6 +118,10 @@ def _make_yaml_config(**overrides: object) -> SimpleNamespace:
 
 def _raise_value_error(_provider: str) -> object:
     raise ValueError("invalid provider config")
+
+
+def _raise_missing(_provider: str) -> object:
+    raise SourceConfigNotFoundError("missing provider config")
 
 
 def _missing_pagination(_provider: str) -> object:
@@ -303,7 +308,7 @@ def test_resolve_filter_batch_size_falls_back_to_source_config_pagination() -> N
 @pytest.mark.unit
 @pytest.mark.parametrize(
     "loader",
-    [_raise_value_error, _missing_pagination, _non_int_pagination],
+    [_raise_missing, _missing_pagination, _non_int_pagination],
 )
 def test_resolve_filter_batch_size_returns_none_on_loader_error_or_invalid_value(
     loader: object,
@@ -316,6 +321,13 @@ def test_resolve_filter_batch_size_returns_none_on_loader_error_or_invalid_value
     )
 
     assert result is None
+
+
+def test_resolve_filter_batch_size_propagates_invalid_configuration() -> None:
+    with pytest.raises(ValueError, match="invalid provider config"):
+        _assembly.resolve_filter_batch_size(
+            _make_yaml_config(), load_source_config_fn=_raise_value_error
+        )
 
 
 @pytest.mark.unit

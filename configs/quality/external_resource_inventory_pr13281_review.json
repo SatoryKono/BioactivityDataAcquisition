@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "289ea2a75d851d51d0613146f57e21a7b1e1904b",
+  "source_ref": "9dd2b2d9f32e5bc3944087141ae01783370f2c86",
+  "source_reviews": {
+    "src/bioetl/application/ports/pipeline.py": "Reviewed the main branch change: removes a type suppression on an import; no resource acquisition or lifecycle changes.",
+    "src/bioetl/composition/factories/datasource/http_client.py": "Reviewed the diff: narrow the missing-source exception handler; client creation and resource lifecycle are unchanged.",
+    "src/bioetl/composition/factories/datasource/pubchem.py": "Reviewed the diff: narrow missing-source exception handlers; executor creation, ownership and shutdown are unchanged.",
+    "src/bioetl/composition/providers/_config_helpers.py": "Reviewed the diff: narrow the missing-source exception handler; provider resource creation and ownership are unchanged.",
+    "src/bioetl/composition/runtime_builders/_inputs_resolution_support.py": "Reviewed the diff: narrow the optional source-loader exception handler; no external resource lifecycle is changed.",
+    "src/bioetl/infrastructure/config/pipeline_payload_normalization.py": "Reviewed the diff: narrow the optional source-loader exception handler; no external resource lifecycle is changed.",
+    "src/bioetl/infrastructure/config/source_config_loader.py": "Reviewed the diff: introduce a distinct exception for a missing source file; resource acquisition and ownership are unchanged."
+  },
+  "expression_updates": {},
+  "segment_updates": {},
+  "reference_moves": [],
+  "exclusion_moves": [],
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": []
+}

@@ -169,11 +169,14 @@ def test_config_helpers_fall_back_when_source_config_missing(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     from bioetl.composition.providers import _config_helpers as helpers
+    from bioetl.infrastructure.config.source_config_loader import (
+        SourceConfigNotFoundError,
+    )
 
-    def _raise_value_error(provider: str) -> object:
-        raise ValueError(provider)
+    def _raise_missing(provider: str) -> object:
+        raise SourceConfigNotFoundError(provider)
 
-    monkeypatch.setattr(helpers, "load_source_config", _raise_value_error)
+    monkeypatch.setattr(helpers, "load_source_config", _raise_missing)
 
     assert helpers._get_source_config("missing") is None
     assert helpers._get_batch_size_from_config("missing", default=25) == 25

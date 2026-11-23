@@ -6,7 +6,7 @@
 ## Summary
 
 - Scanned modules: `2651`
-- Internal import edges (raw): `8780`
+- Internal import edges (raw): `8781`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `330`
@@ -26,7 +26,7 @@ flowchart LR
     composition -->|254 OK| application
     composition -->|688 OK| composition
     composition -->|336 OK| domain
-    composition -->|361 OK| infrastructure
+    composition -->|362 OK| infrastructure
     domain -->|1330 OK| domain
     infrastructure -->|825 OK| domain
     infrastructure -->|1397 OK| infrastructure
@@ -45,7 +45,7 @@ flowchart LR
 | `composition`    | `application`    |     254 | allowed |
 | `composition`    | `composition`    |     688 | allowed |
 | `composition`    | `domain`         |     336 | allowed |
-| `composition`    | `infrastructure` |     361 | allowed |
+| `composition`    | `infrastructure` |     362 | allowed |
 | `domain`         | `domain`         |    1330 | allowed |
 | `infrastructure` | `domain`         |     825 | allowed |
 | `infrastructure` | `infrastructure` |    1397 | allowed |
@@ -90,10 +90,10 @@ flowchart LR
 | `infrastructure.config`        | `domain.types`                 |      26 |
 | `application.services`         | `domain.value_objects`         |      25 |
 | `interfaces.http`              | `application.services`         |      25 |
+| `composition.runtime_builders` | `infrastructure.config`        |      24 |
 | `infrastructure.adapters`      | `domain.exceptions`            |      24 |
 | `application.pipelines`        | `domain.entities`              |      23 |
 | `application.services`         | `domain.exceptions`            |      23 |
-| `composition.runtime_builders` | `infrastructure.config`        |      23 |
 | `interfaces.cli`               | `composition.runtime_builders` |      23 |
 | `application.core`             | `domain.normalization`         |      22 |
 | `application.services`         | `domain.normalization`         |      22 |

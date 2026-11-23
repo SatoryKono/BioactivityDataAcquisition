@@ -29,7 +29,10 @@ from bioetl.infrastructure.adapters.pubchem.fetch_flow import (
 from bioetl.infrastructure.adapters.pubchem.fetch_strategies import (
     PubChemFetchStrategies,
 )
-from bioetl.infrastructure.config.source_config_loader import load_source_config
+from bioetl.infrastructure.config.source_config_loader import (
+    SourceConfigNotFoundError,
+    load_source_config,
+)
 
 __all__ = ["PubChemRuntimeDependencies", "create_pubchem_adapter"]
 
@@ -57,7 +60,7 @@ def _resolve_rate_limit(provider: str) -> tuple[float, int]:
     """Resolve provider rate-limit config with stable defaults."""
     try:
         source_config = load_source_config(provider)
-    except ValueError:
+    except SourceConfigNotFoundError:
         return 5.0, 10
     return (
         source_config.rate_limit.requests_per_second,
@@ -69,7 +72,7 @@ def _resolve_circuit_breaker(provider: str) -> tuple[int, int]:
     """Resolve provider circuit-breaker config with stable defaults."""
     try:
         source_config = load_source_config(provider)
-    except ValueError:
+    except SourceConfigNotFoundError:
         return 5, 300
     return (
         source_config.circuit_breaker.failure_threshold,
@@ -81,7 +84,7 @@ def _resolve_retry_config(provider: str) -> RetryConfig:
     """Bind the SDK request retry budget to the canonical provider configuration."""
     try:
         source_config = load_source_config(provider)
-    except ValueError:
+    except SourceConfigNotFoundError:
         return RetryConfig()
     return RetryConfig(
         max_attempts=max(1, source_config.max_retries),
@@ -94,7 +97,7 @@ def _resolve_executor_timeout(provider: str) -> float:
     """Read the provider SDK bridge timeout. Missing config keeps 30 seconds."""
     try:
         source_config = load_source_config(provider)
-    except ValueError:
+    except SourceConfigNotFoundError:
         return 30.0
     return float(source_config.timeout_sec)
 

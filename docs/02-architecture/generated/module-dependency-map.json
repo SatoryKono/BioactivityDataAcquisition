@@ -1,12 +1,12 @@
 {
   "summary": {
     "scanned_modules": 2651,
-    "total_internal_imports": 8780,
+    "total_internal_imports": 8781,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 330,
     "violations": 0,
-    "source_fingerprint": "be01198b7539de292dfa8ee37f4f2d2b88528fa7f430bdb1de2a25942dcf868f"
+    "source_fingerprint": "9c33a46a0935b22163a6183dcbbbb80f7cee4cde16ee11efea9c0dcf02a117ac"
   },
   "layer_edges": [
     {
@@ -42,7 +42,7 @@
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 361,
+      "imports": 362,
       "allowed": true
     },
     {
@@ -250,6 +250,11 @@
       "imports": 25
     },
     {
+      "source": "composition.runtime_builders",
+      "target": "infrastructure.config",
+      "imports": 24
+    },
+    {
       "source": "infrastructure.adapters",
       "target": "domain.exceptions",
       "imports": 24
@@ -262,11 +267,6 @@
     {
       "source": "application.services",
       "target": "domain.exceptions",
-      "imports": 23
-    },
-    {
-      "source": "composition.runtime_builders",
-      "target": "infrastructure.config",
       "imports": 23
     },
     {

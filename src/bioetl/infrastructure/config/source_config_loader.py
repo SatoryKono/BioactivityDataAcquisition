@@ -24,6 +24,10 @@ from bioetl.infrastructure.config.source_normalizers.source import (
 from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
 
 
+class SourceConfigNotFoundError(FileNotFoundError):
+    """A provider's source configuration file does not exist."""
+
+
 def read_source_config_payload(
     provider: str,
     *,
@@ -37,7 +41,7 @@ def read_source_config_payload(
     resolved_configs_root = resolve_configs_root(configs_root)
     unified_path = resolved_configs_root / "providers" / f"{provider}.yaml"
     if not unified_path.exists():
-        raise ValueError(
+        raise SourceConfigNotFoundError(
             f"Source configuration file not found: {unified_path}. "
             "Create provider config with source/rate_limit/circuit_breaker settings."
         )

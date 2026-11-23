@@ -160,7 +160,7 @@ def test_http_config_uses_bounded_fallback_without_registry_config(
     )
 
     def missing_source(_provider: str) -> object:
-        raise ValueError("not configured")
+        raise http_client.SourceConfigNotFoundError("not configured")
 
     monkeypatch.setattr(http_client, "load_source_config", missing_source)
 

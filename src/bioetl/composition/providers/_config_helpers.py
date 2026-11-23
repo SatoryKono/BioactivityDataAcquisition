@@ -13,7 +13,10 @@ from bioetl.composition.bootstrap_contexts import (
 from bioetl.composition.providers._models import ProviderSettingsProtocol
 from bioetl.domain.ports import DataSourcePort
 from bioetl.domain.resilience import AdapterConfig
-from bioetl.infrastructure.config.source_config_loader import load_source_config
+from bioetl.infrastructure.config.source_config_loader import (
+    SourceConfigNotFoundError,
+    load_source_config,
+)
 from bioetl.composition.providers._registration_contracts import (
     resolve_provider_assembly_support,
 )
@@ -50,7 +53,7 @@ def _get_source_config(provider: str) -> SourceYamlConfig | None:
     """Load ``configs/providers/{provider}.yaml`` or return ``None``."""
     try:
         return load_source_config(provider)
-    except ValueError:
+    except SourceConfigNotFoundError:
         return None
 
 
