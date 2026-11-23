@@ -3,13 +3,59 @@
 from __future__ import annotations
 
 import json
+import subprocess
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
 from scripts.ai.update_deepwiki import MODULES, DeepWikiUpdater
 
 pytestmark = pytest.mark.unit
+
+
+@pytest.mark.parametrize(
+    ("branch", "staged", "unstaged", "changes", "expected", "commands"),
+    [
+        (b"main\n", b"", b"", 0, False, 1),
+        (b"", b"", b"", 0, False, 1),
+        (b"fix/wiki\n", b"other.txt\0", b"", 0, False, 2),
+        (b"fix/wiki\n", b".devin/wiki.json\0other.txt\0", b"", 0, False, 2),
+        (b"fix/wiki\n", b".devin/wiki/sub.json\0", b"", 0, False, 2),
+        (b"fix/wiki\n", b".devin/wiki.json\0", b".devin/wiki.json\0", 0, False, 3),
+        (b"fix/wiki\n", b"", b"", 1, True, 6),
+        (b"fix/wiki\n", b".devin/wiki-core.json\0", b"", 1, True, 6),
+        (b"fix/wiki\n", b"", b"", 0, True, 5),
+        (b"fix/wiki\n", b"", b"", 2, False, 5),
+    ],
+)
+def test_backup_preconditions(
+    repo: Path,
+    branch: bytes,
+    staged: bytes,
+    unstaged: bytes,
+    changes: int,
+    expected: bool,
+    commands: int,
+) -> None:
+    def run(argv: list[str], **kwargs: object) -> subprocess.CompletedProcess[bytes]:
+        if argv[1:3] == ["branch", "--show-current"]:
+            return subprocess.CompletedProcess(argv, 0, stdout=branch)
+        if "--name-only" in argv and "--cached" in argv:
+            return subprocess.CompletedProcess(argv, 0, stdout=staged)
+        if "--name-only" in argv:
+            return subprocess.CompletedProcess(argv, 0, stdout=unstaged)
+        if "--quiet" in argv:
+            return subprocess.CompletedProcess(argv, changes, stdout=b"")
+        return subprocess.CompletedProcess(argv, 0, stdout=b"")
+
+    with patch("scripts.ai.update_deepwiki.subprocess.run", side_effect=run) as mock:
+        assert DeepWikiUpdater(repo).backup_wiki_files() is expected
+    calls = [call.args[0] for call in mock.call_args_list]
+    assert len(calls) == commands
+    if commands >= 5:
+        assert calls[3] == ["git", "add", ":(glob).devin/wiki*.json"]
+    assert any(call[1] == "commit" for call in calls) == (commands == 6)
 
 
 def _page(title: str, parent: str | None = None, anchor: str = "AGENTS.md") -> dict:
