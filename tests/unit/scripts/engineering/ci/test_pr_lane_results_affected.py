@@ -504,6 +504,24 @@ def test_iuphar_shadow_paths_keep_explicit_owners(tmp_path: Path) -> None:
             build_shadow_compare([unowned], repo_root=tmp_path)
 
 
+def test_workflow_runbook_selects_resume_and_archive_contracts(tmp_path: Path) -> None:
+    owners = {
+        "tests/unit/application/services/test_selected_snapshot_resume_contracts.py",
+        "tests/unit/application/services/test_workflow_child_archive_contract.py",
+    }
+    for owner in owners:
+        path = tmp_path / owner
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("def test_owner():\n    assert True\n", encoding="utf-8")
+
+    report = build_shadow_compare(
+        ["docs/05-operations/runbooks/workflow-control-plane.md"], repo_root=tmp_path
+    )
+
+    assert set(report["selected"]) == owners
+    assert report["covers_full_suite"] is False
+
+
 def test_iuphar_policy_paths_keep_the_policy_owner(tmp_path: Path) -> None:
     owner = tmp_path / "tests/unit/iuphar_target_class/test_policy.py"
     owner.parent.mkdir(parents=True)
@@ -1789,6 +1807,22 @@ def test_shadow_compare_routes_codex_launchers_and_guidance(changed_file: str) -
         ),
         (
             "configs/quality/external_resource_inventory_pr13324_gold_writer_review.json",
+            {
+                "tests/architecture/test_external_resource_inventory_catalog.py",
+                "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+            },
+            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
+        ),
+        (
+            "configs/quality/external_resource_inventory_pr13328_workflow_resume_review.json",
+            {
+                "tests/architecture/test_external_resource_inventory_catalog.py",
+                "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+            },
+            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
+        ),
+        (
+            "configs/quality/external_resource_inventory_pr13328_review.json",
             {
                 "tests/architecture/test_external_resource_inventory_catalog.py",
                 "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
