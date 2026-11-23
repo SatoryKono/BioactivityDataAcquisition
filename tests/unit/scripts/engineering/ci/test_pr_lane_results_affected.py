@@ -21,6 +21,20 @@ pytestmark = pytest.mark.unit
 
 HEAD = "a" * 40
 
+_INVENTORY_REVIEW_OWNERS = {
+    "tests/architecture/test_external_resource_inventory_catalog.py",
+    "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+}
+
+
+def _inventory_review_case(path: str) -> tuple[str, set[str], str]:
+    """Return one reviewed inventory path with its bounded owners."""
+    return (
+        path,
+        _INVENTORY_REVIEW_OWNERS,
+        "configs/quality/external_resource_inventory_pr0_unreviewed.json",
+    )
+
 
 def test_requirements_crosswalk_routes_to_traceability_guards() -> None:
     repo_root = Path(__file__).resolve().parents[5]
@@ -1781,149 +1795,59 @@ def test_shadow_compare_routes_codex_launchers_and_guidance(changed_file: str) -
             {"tests/unit/scripts/test_generate_dashboard_content_contract.py"},
             "grafana/service-dashboards/not-reviewed.json",
         ),
-        (
-            "configs/quality/external_resource_inventory_pr13061_review.json",
-            {
-                "tests/architecture/test_external_resource_inventory_catalog.py",
-                "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
-            },
-            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
+        _inventory_review_case(
+            "configs/quality/external_resource_inventory_pr13061_review.json"
         ),
-        (
-            "configs/quality/external_resource_inventory_pr13266_review.json",
-            {
-                "tests/architecture/test_external_resource_inventory_catalog.py",
-                "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
-            },
-            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
+        _inventory_review_case(
+            "configs/quality/external_resource_inventory_pr13266_review.json"
         ),
-        (
-            "configs/quality/external_resource_inventory_pr13281_review.json",
-            {
-                "tests/architecture/test_external_resource_inventory_catalog.py",
-                "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
-            },
-            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
+        _inventory_review_case(
+            "configs/quality/external_resource_inventory_pr13281_review.json"
         ),
-        (
-            "configs/quality/external_resource_inventory_pr13329_review.json",
-            {
-                "tests/architecture/test_external_resource_inventory_catalog.py",
-                "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
-            },
-            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
+        _inventory_review_case(
+            "configs/quality/external_resource_inventory_pr13329_review.json"
         ),
-        (
-            "configs/quality/external_resource_inventory_pr13324_gold_writer_review.json",
-            {
-                "tests/architecture/test_external_resource_inventory_catalog.py",
-                "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
-            },
-            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
+        _inventory_review_case(
+            "configs/quality/external_resource_inventory_pr13324_gold_writer_review.json"
         ),
-        (
-            "configs/quality/external_resource_inventory_pr13328_workflow_resume_review.json",
-            {
-                "tests/architecture/test_external_resource_inventory_catalog.py",
-                "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
-            },
-            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
+        _inventory_review_case(
+            "configs/quality/external_resource_inventory_pr13328_workflow_resume_review.json"
         ),
-        (
-            "configs/quality/external_resource_inventory_pr13328_review.json",
-            {
-                "tests/architecture/test_external_resource_inventory_catalog.py",
-                "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
-            },
-            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
+        _inventory_review_case(
+            "configs/quality/external_resource_inventory_pr13328_review.json"
         ),
-        (
-            "configs/quality/external_resource_inventory_pr13344_fk_restoration_review.json",
-            {
-                "tests/architecture/test_external_resource_inventory_catalog.py",
-                "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
-            },
-            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
+        _inventory_review_case(
+            "configs/quality/external_resource_inventory_pr13344_fk_restoration_review.json"
         ),
-        (
-            "configs/quality/external_resource_inventory_pr13166_dq_data_dir_review.json",
-            {
-                "tests/architecture/test_external_resource_inventory_catalog.py",
-                "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
-            },
-            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
+        _inventory_review_case(
+            "configs/quality/external_resource_inventory_pr13166_dq_data_dir_review.json"
         ),
-        (
-            "configs/quality/external_resource_inventory_pr13166_metrics_fold_review.json",
-            {
-                "tests/architecture/test_external_resource_inventory_catalog.py",
-                "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
-            },
-            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
+        _inventory_review_case(
+            "configs/quality/external_resource_inventory_pr13166_metrics_fold_review.json"
         ),
-        (
-            "configs/quality/external_resource_inventory_pr13166_import_owners_review.json",
-            {
-                "tests/architecture/test_external_resource_inventory_catalog.py",
-                "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
-            },
-            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
+        _inventory_review_case(
+            "configs/quality/external_resource_inventory_pr13166_import_owners_review.json"
         ),
-        (
-            "configs/quality/external_resource_inventory_pr13166_delta_evolution_review.json",
-            {
-                "tests/architecture/test_external_resource_inventory_catalog.py",
-                "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
-            },
-            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
+        _inventory_review_case(
+            "configs/quality/external_resource_inventory_pr13166_delta_evolution_review.json"
         ),
-        (
-            "configs/quality/external_resource_inventory_pr13166_pagination_abort_review.json",
-            {
-                "tests/architecture/test_external_resource_inventory_catalog.py",
-                "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
-            },
-            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
+        _inventory_review_case(
+            "configs/quality/external_resource_inventory_pr13166_pagination_abort_review.json"
         ),
-        (
-            "configs/quality/external_resource_inventory_pr13113_review.json",
-            {
-                "tests/architecture/test_external_resource_inventory_catalog.py",
-                "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
-            },
-            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
+        _inventory_review_case(
+            "configs/quality/external_resource_inventory_pr13113_review.json"
         ),
-        (
-            "configs/quality/external_resource_inventory_pr13113_refactor_review.json",
-            {
-                "tests/architecture/test_external_resource_inventory_catalog.py",
-                "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
-            },
-            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
+        _inventory_review_case(
+            "configs/quality/external_resource_inventory_pr13113_refactor_review.json"
         ),
-        (
-            "configs/quality/external_resource_inventory_pr13113_main_f2f4_merge_review.json",
-            {
-                "tests/architecture/test_external_resource_inventory_catalog.py",
-                "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
-            },
-            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
+        _inventory_review_case(
+            "configs/quality/external_resource_inventory_pr13113_main_f2f4_merge_review.json"
         ),
-        (
-            "configs/quality/external_resource_inventory_pr13113_main_13118_review.json",
-            {
-                "tests/architecture/test_external_resource_inventory_catalog.py",
-                "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
-            },
-            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
+        _inventory_review_case(
+            "configs/quality/external_resource_inventory_pr13113_main_13118_review.json"
         ),
-        (
-            "configs/quality/external_resource_inventory_pr13113_s5886_tip_review.json",
-            {
-                "tests/architecture/test_external_resource_inventory_catalog.py",
-                "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
-            },
-            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
+        _inventory_review_case(
+            "configs/quality/external_resource_inventory_pr13113_s5886_tip_review.json"
         ),
         (
             "docs/reports/dashboard-ux-checks/2026-11-11.md",
