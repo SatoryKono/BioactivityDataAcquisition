@@ -29,8 +29,29 @@ from bioetl.infrastructure.storage.versioned_table_resolver import (
 
 __all__ = ["DeltaReader"]
 
+# Read by the XLSX export manifest. Keeps the file tied to the Delta version
+# that this read actually opened.
+_TABLE_VERSION_METADATA_KEY = b"bioetl.table_version"
+
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
+
+
+def _opened_table_version(table: object) -> object:
+    """Return a Delta version when the opened table exposes one."""
+    version = getattr(table, "version", None)
+    if not callable(version):
+        return None
+    return version()
+
+
+def _with_table_version(table: pa.Table, version: object) -> pa.Table:
+    """Attach the opened Delta version without changing row values."""
+    if isinstance(version, bool) or not isinstance(version, int):
+        return table
+    metadata = dict(table.schema.metadata or {})
+    metadata[_TABLE_VERSION_METADATA_KEY] = str(version).encode("ascii")
+    return table.replace_schema_metadata(metadata)
 
 
 def _count_delta_rows(dt: DeltaTable, resolved_path: Path) -> int:
@@ -125,19 +146,23 @@ class DeltaReader:
 
             scanner = dt.to_pyarrow_dataset().scanner(columns=columns)
             if limit is not None:
-                return cast(pa.Table, scanner.head(limit))
-
-            row_count = _try_native_delta_row_count(dt)
-            if row_count is not None:
-                return cast(pa.Table, scanner.head(row_count))
-            # Unbounded full read: never fall back to a synthetic head limit
-            # that would silently truncate when native count is unavailable.
-            to_table = getattr(scanner, "to_table", None)
-            if callable(to_table):
-                return cast(pa.Table, to_table())
-            # Last-resort head with the documented full-read ceiling only when
-            # the scanner surface lacks an uncapped materialization API.
-            return cast(pa.Table, scanner.head(_FULL_READ_HEAD_LIMIT))
+                table = cast(pa.Table, scanner.head(limit))
+            else:
+                row_count = _try_native_delta_row_count(dt)
+                if row_count is not None:
+                    table = cast(pa.Table, scanner.head(row_count))
+                else:
+                    # Unbounded full read: never fall back to a synthetic head
+                    # limit that would silently truncate when native count is
+                    # unavailable.
+                    to_table = getattr(scanner, "to_table", None)
+                    if callable(to_table):
+                        table = cast(pa.Table, to_table())
+                    else:
+                        # Last-resort head with the documented full-read ceiling
+                        # only when the scanner has no uncapped materialization.
+                        table = cast(pa.Table, scanner.head(_FULL_READ_HEAD_LIMIT))
+            return _with_table_version(table, _opened_table_version(dt))
 
         self._logger.debug(
             "Reading Delta table",

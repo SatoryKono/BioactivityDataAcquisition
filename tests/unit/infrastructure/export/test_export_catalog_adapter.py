@@ -49,18 +49,12 @@ def test_list_tables_returns_discovered_delta_tables(
     tmp_path: Path,
 ) -> None:
     base_path = tmp_path / "silver"
-    (base_path / "chembl" / "default" / "chembl.activity" / "_delta_log").mkdir(
-        parents=True
-    )
+    table_path = base_path / "chembl" / "activity"
+    (table_path / "_delta_log").mkdir(parents=True)
 
     tables = adapter.list_tables(base_path=base_path, layer="silver")
 
-    assert tables == [
-        (
-            "chembl.activity",
-            str(base_path / "chembl" / "default" / "chembl.activity"),
-        )
-    ]
+    assert tables == [("chembl.activity", str(table_path.resolve()))]
 
 
 def test_list_tables_returns_empty_for_missing_base(
@@ -74,7 +68,7 @@ def test_resolve_table_path_returns_matching_table(
     adapter: ExportCatalogAdapter,
     tmp_path: Path,
 ) -> None:
-    table_path = tmp_path / "gold" / "chembl" / "default" / "chembl.activity"
+    table_path = tmp_path / "gold" / "chembl" / "activity"
     (table_path / "_delta_log").mkdir(parents=True)
 
     resolved = adapter.resolve_table_path(
@@ -84,6 +78,37 @@ def test_resolve_table_path_returns_matching_table(
     )
 
     assert resolved == str(table_path.resolve())
+
+
+def test_resolve_table_path_uses_target_contract_without_extra_level(
+    adapter: ExportCatalogAdapter,
+    tmp_path: Path,
+) -> None:
+    silver = tmp_path / "silver" / "chembl" / "target"
+    gold = tmp_path / "gold" / "chembl" / "target"
+    (silver / "_delta_log").mkdir(parents=True)
+    (gold / "_delta_log").mkdir(parents=True)
+    decoy_root = tmp_path / "decoy"
+    decoy = decoy_root / "chembl" / "target" / "chembl.target"
+    (decoy / "_delta_log").mkdir(parents=True)
+
+    assert adapter.resolve_table_path(
+        base_path=tmp_path / "silver",
+        table_name="chembl.target",
+        layer="silver",
+    ) == str(silver.resolve())
+    assert adapter.list_tables(base_path=tmp_path / "gold", layer="gold") == [
+        ("chembl.target", str(gold.resolve()))
+    ]
+    with pytest.raises(FileNotFoundError, match="chembl.target"):
+        adapter.resolve_table_path(
+            base_path=decoy_root,
+            table_name="chembl.target",
+            layer="gold",
+        )
+    assert adapter.list_tables(base_path=decoy_root, layer="gold") == [
+        ("chembl.target.chembl.target", str(decoy.resolve()))
+    ]
 
 
 def test_resolve_table_path_raises_for_missing_base(
