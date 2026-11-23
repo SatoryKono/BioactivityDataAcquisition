@@ -7,7 +7,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, replace
 from datetime import date, datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, cast
+from typing import Protocol, cast
 
 import orjson
 
@@ -15,8 +15,12 @@ from bioetl.domain.config.target_classification import TARGET_CLASSIFICATION_FIE
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.storage.target_migration_row_ops import by_id, hash_input
 
-if TYPE_CHECKING:
-    from bioetl.domain.filtering.gold_config import GoldFilterConfig
+
+class GoldRowFilter(Protocol):
+    """Structural Gold filter used without a domain import at runtime."""
+
+    def should_include(self, record: JsonDict) -> bool:
+        """Return whether one Gold row passes the active filter."""
 
 
 ADMISSIBLE_ABSENCE_REASONS = frozenset({"limited_sample", "incomplete_load"})
@@ -125,7 +129,7 @@ def plan_target_fk_restoration(
     gold_rows: Sequence[Mapping[str, object]],
     assay_rows: Sequence[Mapping[str, object]],
     recoveries: Sequence[TargetRecoveryInput],
-    gold_filter: GoldFilterConfig,
+    gold_filter: GoldRowFilter,
 ) -> TargetFKRestorationPlan:
     """Classify every missing assay FK. Incomplete rows stay unresolved."""
     if not gold_rows or not silver_rows:
@@ -188,7 +192,7 @@ def _finding_for(
     silver_columns: set[str],
     all_gold_ids: set[str],
     silver_current: Mapping[str, Mapping[str, object]],
-    gold_filter: GoldFilterConfig,
+    gold_filter: GoldRowFilter,
 ) -> TargetAbsenceFinding:
     if recovery is None:
         return TargetAbsenceFinding(target_id, "unresolved", "block")

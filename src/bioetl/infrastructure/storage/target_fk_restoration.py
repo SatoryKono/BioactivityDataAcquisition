@@ -11,7 +11,6 @@ import hashlib
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 import orjson
 import pyarrow as pa
@@ -35,6 +34,7 @@ from bioetl.infrastructure.storage.target_fk_restoration_documents import (
 )
 from bioetl.infrastructure.storage.target_fk_restoration_plan import (
     ASSAY_TARGET_CLOSURE_ERROR,
+    GoldRowFilter,
     TargetFKRestorationPlan,
     TargetRecoveryInput,
     canonical_row_sha256,
@@ -45,9 +45,6 @@ from bioetl.infrastructure.storage.target_migration_row_ops import (
     read_delta,
 )
 from iuphar_target_class.stage0.io import atomic_write_bytes, canonical_json_bytes
-
-if TYPE_CHECKING:
-    from bioetl.domain.filtering.gold_config import GoldFilterConfig
 
 _MANIFEST = "manifest.json"
 _DECISION = "contract-decision.json"
@@ -61,7 +58,7 @@ class PublishedTargetRestoration:
     addition_keys: Mapping[str, frozenset[tuple[str, int | None]]]
 
 
-def load_target_gold_filter(config: Path) -> GoldFilterConfig:
+def load_target_gold_filter(config: Path) -> GoldRowFilter:
     """Load the executable Gold filter from the entity configuration."""
     document = yaml.safe_load(config.read_text(encoding="utf-8"))
     if not isinstance(document, dict):
