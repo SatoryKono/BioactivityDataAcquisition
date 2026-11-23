@@ -1,11 +1,11 @@
 {
-  "source_branch": "dependabot/uv/uv-minor-patch-bd90103f66",
-  "source_commit": "600f461177194413ef23e37cf59834437ac5f583",
-  "source_run_id": "45080790597",
+  "source_branch": "fix/13261-workflow-examples",
+  "source_commit": "9fa0d1a28f40c25e04a0822ea1eef826ae6d60f2",
+  "source_run_id": "45131874734",
   "source_event": "workflow_dispatch",
-  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/45080790597",
-  "source_tree_sha256": "03b73501d47888e828f77122651e85b1b0693a26df2240b1569ae17fcd62a542",
-  "refreshed_at_utc": "2026-11-22T23:14:47.180000+00:00",
+  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/45131874734",
+  "source_tree_sha256": "ddde16221be6a81cccacbdd170a6292b86b34d5af77603e9fe38ffbee7e176a7",
+  "refreshed_at_utc": "2026-11-23T07:47:36.206000+00:00",
   "refresh_status": "captured",
   "coverage_percent": 99.51,
   "coverage": {
