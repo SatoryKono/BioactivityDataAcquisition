@@ -62,6 +62,7 @@ def version_identity(provenance: RunProvenance) -> dict[str, object]:
         "normalization_version": provenance.normalization_version,
         "rules_version": provenance.rules_version,
         "classification_schema_version": provenance.schema_version,
+        "matching_policy_version": provenance.matching_policy_version,
     }
     if any(
         not isinstance(value, str) or not value.strip() for value in result.values()

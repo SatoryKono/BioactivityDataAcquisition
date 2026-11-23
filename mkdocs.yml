@@ -431,6 +431,7 @@ nav:
               - "Molecule": 04-reference/pipelines/chembl/03-molecule-spec.md
               - "Target": 04-reference/pipelines/chembl/04-target-spec.md
               - "IUPHAR Target Classification Semantics": 04-reference/pipelines/chembl/16-iuphar-target-classification-semantics.md
+              - "IUPHAR UniProt Identifier Roles": 04-reference/pipelines/chembl/17-iuphar-uniprot-identifier-roles.md
               - "Activity": 04-reference/pipelines/chembl/05-activity-spec.md
               - "Assay": 04-reference/pipelines/chembl/06-assay-spec.md
               - "Publication": 04-reference/pipelines/chembl/07-publication-spec.md
