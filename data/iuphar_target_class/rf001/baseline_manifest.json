@@ -1,0 +1,416 @@
+{
+  "artifact": "iuphar_rf001_baseline_manifest",
+  "audit_2026_11_23_control_counts": {
+    "acceptance_reviewed": 6,
+    "acceptance_unreviewed": 994,
+    "ambiguous": 547,
+    "ambiguous_extra_unknown_uniprot_anchors": 516,
+    "counterfactual_matched_not_accuracy": 633,
+    "inputs": 1000,
+    "matched": 117,
+    "note": "Observation from epic #13308; matched counts ≠ biological accuracy.",
+    "outside_supported_taxa": 147,
+    "source_unavailable": 189
+  },
+  "biological_accuracy_accepted": false,
+  "contract_version": "rf001-2026-11-23",
+  "epic": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/13308",
+  "external_not_in_repo": [
+    {
+      "name": "local_excel_m_result_cache",
+      "reason": "Machine-local Excel/M outputs were audited but not copied into the repository; originals remain outside git.",
+      "status": "not_pinned"
+    },
+    {
+      "name": "control_gold_target_assay_tables",
+      "reason": "Gold assay/target FK gap (37 missing targets) is tracked by RF-009; not rewritten by RF-001.",
+      "status": "referenced_in_epic"
+    }
+  ],
+  "git": {
+    "branch_tip_sha_at_record": "4fa8c825a5356b135f1ba388d01e41ee79ea6a10",
+    "note": "pinned_artifacts are the immutable RF-001 provenance set. mutable_surfaces are referenced for navigation; their advisory digests are not CI-enforced so comment-level edits do not break the baseline.",
+    "origin_main_sha": "e01ca762a3ffc5f2a4bd4ea89f17fa807e49b9e2"
+  },
+  "immutability": {
+    "biological_accuracy_accepted": false,
+    "hash_lock_scope": "pinned_artifacts_only",
+    "new_versions_require_separate_publication": true,
+    "originals_preserved": true
+  },
+  "issue": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/13309",
+  "m_code": {
+    "excel_cache_confirms_fresh_recalc": false,
+    "note": "Stage-0 left m_code_version_status unset; audit 2026-11-23 treats saved Excel results as a separate cache, not as M source of truth.",
+    "status": "не установлено",
+    "versions_table": "data/iuphar_target_class/stage0/m_code_versions.csv"
+  },
+  "mutable_surfaces": {
+    "configs/composites/target.yaml": {
+      "advisory_sha256_at_record": "50b0a655f5b4071a7c16b35d3286a60dcd56f9db0b65c4cd37eebd31567b4ebd",
+      "bytes": 21466,
+      "path": "configs/composites/target.yaml",
+      "pin_policy": "not_hash_locked",
+      "reason": "Capability notes may be clarified without republishing the immutable baseline.",
+      "role": "enriched_composite_target_config"
+    },
+    "configs/entities/chembl/target.yaml": {
+      "advisory_sha256_at_record": "7b88ae2f3b93b44fccfce980e1bd0027ec4ef0a425ea282679dc1b904d784843",
+      "bytes": 10963,
+      "path": "configs/entities/chembl/target.yaml",
+      "pin_policy": "not_hash_locked",
+      "reason": "Comment/docs edits on the live config must not invalidate RF-001; mode remains off until a later RF.",
+      "role": "standalone_chembl_target_config"
+    },
+    "data/iuphar_target_class/policy/policy.json": {
+      "advisory_sha256_at_record": "e8b71c780082270b2058adaa042c99235fa262c133b9ea54d0f76ab877342baa",
+      "bytes": 43153,
+      "path": "data/iuphar_target_class/policy/policy.json",
+      "pin_policy": "versioned_separately",
+      "reason": "policy.json remains the stage-1 rebuild gate (test_committed_policy_matches_rebuild); RF-001 embeds rf001_semantics without treating every clarifying edit as a new historical baseline pin.",
+      "role": "stage1_policy_document"
+    },
+    "docs/04-reference/contracts/gold/chembl_target_v3.1.json": {
+      "advisory_sha256_at_record": "0f2830a9fd61c831ddf4717a00922d97f7af852ba13af1aa06b03cf28c0e669e",
+      "bytes": 6301,
+      "path": "docs/04-reference/contracts/gold/chembl_target_v3.1.json",
+      "pin_policy": "not_hash_locked",
+      "reason": "Generated contract export; identity is the Pandera/schema source, not this RF-001 pin set.",
+      "role": "gold_v31_contract_export"
+    },
+    "docs/04-reference/pipelines/chembl/04-target-spec.md": {
+      "advisory_sha256_at_record": "fff7349ccf4e1b43af20f58b931a22cd443605a4321448a09023fe84373d3cdf",
+      "bytes": 3780,
+      "path": "docs/04-reference/pipelines/chembl/04-target-spec.md",
+      "pin_policy": "not_hash_locked",
+      "reason": "Cross-link surface only for RF-001.",
+      "role": "target_pipeline_spec"
+    },
+    "docs/04-reference/pipelines/chembl/16-iuphar-target-classification-semantics.md": {
+      "advisory_sha256_at_record": "021d512dc1da404c5c51f7ef3f0cf92a229bb68a01b8106e7671ca5fbed17969",
+      "bytes": 5564,
+      "path": "docs/04-reference/pipelines/chembl/16-iuphar-target-classification-semantics.md",
+      "pin_policy": "not_hash_locked",
+      "reason": "Human-facing mirror of semantics.py; prose edits are expected.",
+      "role": "rf001_semantics_doc"
+    },
+    "docs/05-operations/runbooks/iuphar-target-classification.md": {
+      "advisory_sha256_at_record": "9482ee473704220745e122d6dced0ac1be1da56efd78627c0b5bb8f820a56803",
+      "bytes": 29827,
+      "path": "docs/05-operations/runbooks/iuphar-target-classification.md",
+      "pin_policy": "not_hash_locked",
+      "reason": "Operator guidance; RF-001 pointer may be clarified without baseline churn.",
+      "role": "classification_runbook"
+    },
+    "src/bioetl/domain/config/target_classification.py": {
+      "advisory_sha256_at_record": "d4033bdbb33ab88049effb0b6bdc62520f8c58e74056c486a5e24a79045dddba",
+      "bytes": 4328,
+      "path": "src/bioetl/domain/config/target_classification.py",
+      "pin_policy": "not_hash_locked",
+      "reason": "Field-layer constants are covered by unit tests; hash lock would break on docstring edits.",
+      "role": "domain_config_contract"
+    },
+    "src/iuphar_target_class/gtopdb_2026_3_1.py": {
+      "advisory_sha256_at_record": "a18741fbbfcce8365a35acc930c9c9e2dc254e894c50391bb5a441dc3f882a1f",
+      "bytes": 29112,
+      "path": "src/iuphar_target_class/gtopdb_2026_3_1.py",
+      "pin_policy": "versioned_separately",
+      "reason": "Upstream digests are recorded under upstream_iuphar; the Python constants module is not the artifact pin.",
+      "role": "upstream_release_constants"
+    },
+    "src/iuphar_target_class/policy.py": {
+      "advisory_sha256_at_record": "028da91ce5a2f77c3d969c434d7458300efbaf518849833df053b907df0274ad",
+      "bytes": 18812,
+      "path": "src/iuphar_target_class/policy.py",
+      "pin_policy": "not_hash_locked",
+      "reason": "Committed policy.json is the frozen stage-1 document; builder may gain comments.",
+      "role": "stage1_policy_builder"
+    },
+    "src/iuphar_target_class/semantics.py": {
+      "advisory_sha256_at_record": "90edef16723a0b6459a85ea9f037b9b1a3d89e83e64dcbeab315b28729c6d851",
+      "bytes": 15460,
+      "path": "src/iuphar_target_class/semantics.py",
+      "pin_policy": "not_hash_locked",
+      "reason": "Vocabulary is asserted by tests against semantics_document(); clarifying text may change.",
+      "role": "rf001_semantics_module"
+    }
+  },
+  "pinned_artifacts": {
+    "data/iuphar_target_class/acceptance/stages_0_3_report.json": {
+      "bytes": 3564,
+      "group": "acceptance",
+      "pin_policy": "immutable_hash_locked",
+      "sha256": "b5c88d82d45e5b679e68f23ec06d830b6f935ab2906c6f24d61f3440e54d2fe2"
+    },
+    "data/iuphar_target_class/acceptance/tc10/engineering-run-receipt.json": {
+      "bytes": 1223,
+      "group": "acceptance",
+      "pin_policy": "immutable_hash_locked",
+      "sha256": "746aa6e5095dd72ae846af8219b3cfd0718c1e621ba618e14afc40108794cf7e"
+    },
+    "data/iuphar_target_class/acceptance/tc10/traceability.json": {
+      "bytes": 15875,
+      "group": "acceptance",
+      "pin_policy": "immutable_hash_locked",
+      "sha256": "6945bcfbbffeba3fbad04d9eeb882f0463dacdd5fda405809cf4611e02bf6e62"
+    },
+    "data/iuphar_target_class/acceptance/volume_fixture.json": {
+      "bytes": 527,
+      "group": "acceptance",
+      "pin_policy": "immutable_hash_locked",
+      "sha256": "30e7771d411f0202ce034c474f5df252c79b3e25b9d26d14a19d5665c23df1ac"
+    },
+    "data/iuphar_target_class/stage0/content_checks.csv": {
+      "bytes": 4200,
+      "group": "saved_results_and_control",
+      "pin_policy": "immutable_hash_locked",
+      "sha256": "1a7f314a0026b441c6470828a311d874fc33c821d9617b06fcb2336aff6f3afd"
+    },
+    "data/iuphar_target_class/stage0/m_code_versions.csv": {
+      "bytes": 36,
+      "group": "m_code",
+      "pin_policy": "immutable_hash_locked",
+      "sha256": "5bac637430710ee8dce9085be403c5e24f1dca07b48d12176297617d999bc2f3"
+    },
+    "data/iuphar_target_class/stage0/manifest.json": {
+      "bytes": 1922,
+      "group": "saved_results_and_control",
+      "pin_policy": "immutable_hash_locked",
+      "sha256": "45a21d28e2c464b7e97b5d16680d810529465ccb26d62682fce3a8cec39e35af"
+    },
+    "data/iuphar_target_class/stage0/provenance_map.csv": {
+      "bytes": 348,
+      "group": "saved_results_and_control",
+      "pin_policy": "immutable_hash_locked",
+      "sha256": "2060cf7e8606a92d9e568cb516ed156170cefb5fd944ea5f40be0d7f8375c091"
+    },
+    "data/iuphar_target_class/stage0/stage_report.json": {
+      "bytes": 1860,
+      "group": "saved_results_and_control",
+      "pin_policy": "immutable_hash_locked",
+      "sha256": "1da39378c87a9d6096d55a2fb5874d4232c4b58d171673e1fcd4d85ff71dac7e"
+    },
+    "data/iuphar_target_class/stage0/survey.json": {
+      "bytes": 4886,
+      "group": "saved_results_and_control",
+      "pin_policy": "immutable_hash_locked",
+      "sha256": "116319a651b20361154ea5e270afc6cc7494f6acfd87a48e59df24f8a051d1ef"
+    }
+  },
+  "recorded_at_utc": "2026-11-23T12:15:00Z",
+  "schema_version": 2,
+  "semantics": {
+    "artifact": "iuphar_rf001_semantics",
+    "audit_counterexamples": {
+      "false_other": "unmapped/unknown must not become Other Protein Target",
+      "local_into_iuphar": "local_* must not be written into iuphar_* fields",
+      "lost_parents": "multi-parent family paths must retain every intact root_to_leaf path",
+      "matched_counts": "matched counts are not biological_accuracy_accepted",
+      "table_distinct": "Table.Distinct-style collapse must not pick an arbitrary class"
+    },
+    "biological_accuracy_accepted": false,
+    "capability_matrix": {
+      "enriched_composite_target": {
+        "available_after_dependency_joins": [
+          "chembl_target_component",
+          "chembl_protein_class",
+          "chembl_target_protein_classification",
+          "uniprot_idmapping",
+          "uniprot_protein"
+        ],
+        "full_features_available": true,
+        "limits": "Full classification for RF-003+ runs after dependency joins; seed-only projection remains V30 unless enrich is admitted",
+        "may_write_v31_columns": true,
+        "priority": 1,
+        "surface": "configs/composites/target.yaml"
+      },
+      "standalone_chembl_target": {
+        "available_inputs": [
+          "target_id",
+          "target_type",
+          "pref_name",
+          "taxonomy_id",
+          "organism",
+          "target_ec_numbers",
+          "target_xref_uniprot_ids",
+          "component_accessions",
+          "target_protein_synonyms",
+          "target_gene_synonyms"
+        ],
+        "full_features_available": false,
+        "limits": "Early standalone call cannot use post-join UniProt/protein-class features; matched counts on partial inputs are not biological accuracy",
+        "may_write_v31_columns": true,
+        "priority": 2,
+        "surface": "configs/entities/chembl/target.yaml",
+        "unavailable_until_joins": [
+          "uniprot_protein annotations/keywords",
+          "normalized primary UniProt accession from idmapping",
+          "chembl_target_protein_classification L1-L5 summary",
+          "full target_component protein_classifications"
+        ]
+      }
+    },
+    "contract_version": "rf001-2026-11-23",
+    "epic": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/13308",
+    "field_layers": {
+      "decision_status": {
+        "layer": "effective",
+        "meaning": "Resolution completeness and review requirement"
+      },
+      "effective_class": {
+        "layer": "effective",
+        "meaning": "Final class after the resolution table; may be null"
+      },
+      "effective_source": {
+        "layer": "effective",
+        "meaning": "Provenance of effective_class: iuphar, local_rule, or none"
+      },
+      "iuphar_annotation_status": {
+        "layer": "iuphar_reference",
+        "meaning": "Availability/completeness of the direct class annotation"
+      },
+      "iuphar_class": {
+        "layer": "iuphar_reference",
+        "meaning": "Direct-layer class from approved type/family mapping only"
+      },
+      "iuphar_match_status": {
+        "layer": "iuphar_reference",
+        "meaning": "Identity outcome against the snapshot catalog"
+      },
+      "iuphar_target_id": {
+        "layer": "iuphar_reference",
+        "meaning": "Matched GtoPdb/IUPHAR public target id from the pinned snapshot"
+      },
+      "legacy_iuphar_class": {
+        "layer": "legacy_comparison",
+        "meaning": "Historical M/Excel class retained for comparison only; not a live write path"
+      },
+      "local_class": {
+        "layer": "local_rules",
+        "meaning": "Class proposed by versioned local rules (EC/annotation/prediction)"
+      },
+      "local_status": {
+        "layer": "local_rules",
+        "meaning": "Support level of the local layer for the row"
+      },
+      "target_class_profile_sha256": {
+        "layer": "effective",
+        "meaning": "SHA-256 of the pinned classification profile envelope"
+      },
+      "target_type": {
+        "examples": "SINGLE PROTEIN, PROTEIN COMPLEX, ORGANISM, ...",
+        "layer": "chembl_object",
+        "meaning": "ChEMBL object/target type; never overwritten by IUPHAR or local rules"
+      }
+    },
+    "issue": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/13309",
+    "legacy_other_policy": {
+      "allowed_when": [
+        "approved direct mapping type other_protein",
+        "approved family mapping whose class is Other Protein Target",
+        "explicit local rule with marks_direct_layer=false supporting that class",
+        "legacy_iuphar_class comparison field carrying a historical M/Excel value"
+      ],
+      "forbidden_when": [
+        "unmapped_type or name/path text containing 'Other'",
+        "L1/L2 or free-text prediction alone without an explicit local rule",
+        "filling iuphar_class from local_* output",
+        "defaulting unknown/partial/ambiguous rows to Other"
+      ],
+      "working_class_name": "Other Protein Target"
+    },
+    "missing_marker_policy": {
+      "base_markers": [
+        "#n/a",
+        "N/A",
+        "n/a",
+        ""
+      ],
+      "change_rule": "A new missing_markers version is a new normalization_version; historical results keep their recorded provenance and are not rewritten",
+      "treat_null_as_missing": true,
+      "treat_whitespace_only_as_missing": true,
+      "version": null,
+      "version_status": "не утверждено"
+    },
+    "path_policy": {
+      "canonical_direction": "root_to_leaf",
+      "graph_defect_policy": "cycle, missing parent, depth/visited limits, or truncated walk do not invent a class from a cut path",
+      "legacy_text_field": "leaf_to_root",
+      "legacy_text_usage": "migration/comparison only; never used to choose a class",
+      "multiple_parents_allowed": true,
+      "structure": "tuple of family ids from root ancestor to leaf family",
+      "table_distinct_policy": "Power Query Table.Distinct / unordered collapse is not an identity decision; ambiguous multi-parent or multi-candidate rows stay ambiguous"
+    },
+    "profile_change_rules": {
+      "classification_schema_version": "Profile envelope field for enabled modes (shadow and enrich): 3.1.0. Distinct from the table/business contract; the adapter rejects a profile that is not 3.1.0",
+      "immutability": "Originals, historical results, and stage-0 copies are preserved; recomputes are separate runs with new digests",
+      "normalization_version": "Missing-marker or identifier normalization changes publish a new normalization_version; current approved value is unset",
+      "profile_envelope": "snapshot_manifest points at the profile envelope; digest is SHA-256 of exact profile bytes; acceptance and biological_accuracy_accepted stay false unless independently proven",
+      "rules_version": "New or edited local/direct rules publish a new rules_version; current baseline is plan-v1-r8",
+      "table_contract": "Business-row / Gold hash scope: off and shadow keep chembl_target_v3.0 (TargetClassificationConfig.contract_version 3.0.0); enrich alone advances to chembl_target_v3.1 / 3.1.0 and the nine additive columns"
+    },
+    "source_unavailable_vs_not_found": {
+      "must_remain_distinct": true,
+      "not_found": "Snapshot is complete and searchable channels yield no catalog hit",
+      "source_unavailable": "Required snapshot sources are incomplete; absence is not confirmed"
+    },
+    "statuses": {
+      "annotation": {
+        "available": "Approved type mapping supplies a direct class",
+        "conflicting": "Family mappings disagree on class",
+        "not_available": "Matched identity without usable direct annotation",
+        "partial": "Only family_only / family mapping supplies a coarse class",
+        "unmapped_type": "Provider type/family present but outside approved mappings"
+      },
+      "completeness": {
+        "admission_complete": "Declared independently reviewed scope is complete for admission",
+        "complete": "Global identity/absence coverage of the declared snapshot scope",
+        "family_only": "Snapshot/export can supply family paths but not a direct target type",
+        "incomplete": "Required snapshot sources or scope receipts are missing"
+      },
+      "decision": {
+        "requires_review": "Outcome needs human/process review or has conflict codes",
+        "resolved": "Resolution table selected an outcome without mandatory review",
+        "unresolved": "No effective class; incomplete rather than conflicting"
+      },
+      "local": {
+        "candidate_only": "Hints exist but cannot write a supported local class",
+        "conflicting": "Supported local rules disagree",
+        "not_supported": "No local support; local_class stays empty",
+        "supported": "At least one explicit local rule supports a class"
+      },
+      "match": {
+        "ambiguous": "Multiple compatible catalog candidates remain",
+        "contract_error": "Internal identity/status inconsistency; processing must not invent a class",
+        "identity_conflict": "Exact channels disagree on identity",
+        "insufficient_input": "Searchable identity input is missing or species-gapped",
+        "matched": "Exactly one catalog identity agreed across exact channels",
+        "not_found": "Snapshot is complete and searchable channels yield no catalog hit",
+        "source_unavailable": "Required snapshot sources are incomplete; absence is not confirmed"
+      },
+      "uncertainty": {
+        "ambiguous": "Multiple candidates remain; do not collapse silently",
+        "conflict": "Disagreement between layers or channels; retain conflict codes",
+        "not_found": "Confirmed absence under a complete searchable snapshot",
+        "partial": "Coarse or incomplete annotation; not a full direct type proof",
+        "source_unavailable": "Source/snapshot gap; distinct from confirmed not_found",
+        "unknown": "Value not computed or not applicable for the row state"
+      }
+    },
+    "working_classes": [
+      "Receptor",
+      "Ion Channel",
+      "Enzyme",
+      "Transporter",
+      "Other Protein Target"
+    ]
+  },
+  "upstream_iuphar": {
+    "annotation_capability": "family_only",
+    "archive_sha256": "225dd1d3928012d8d0f2f3e79445f6e32d9d284222a212e15a09e56c60da0874",
+    "gtopdb_release": "2026.3.1",
+    "snapshot_completeness_certified": false,
+    "sql_sha256": "5a50518bd2f8ce512ef270fe7ebd4937e7af8debb9db389ce1a8f15fad8c2b0d",
+    "targets_csv_sha256": "9e91ae4eed1e147f0c5b01dd2e0645c2d57edb39442114d3128c70232b0d39fb"
+  }
+}
