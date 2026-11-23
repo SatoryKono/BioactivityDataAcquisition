@@ -23,6 +23,7 @@ from iuphar_target_class.pipeline_acceptance import (
     load_admitted_cohort,
     run_admitted_volume,
 )
+from iuphar_target_class.policy import LOCAL_RULE_CATALOG_VERSION
 from iuphar_target_class.pipeline_io import (
     publish_batch,
     read_legacy_batch,
@@ -74,6 +75,42 @@ def _run(*rows, snapshot=None):
         provenance=_provenance(),
         run_id="fixed",
     )
+
+
+def test_auxiliary_same_species_hit_is_an_identity_conflict():
+    batch = _run(
+        RawTargetRow(
+            "aux",
+            {
+                "uniprot": "P12345",
+                "auxiliary_uniprot": "Q12345",
+                "organism": "Human",
+            },
+            "protein",
+        )
+    )
+    assert batch.rows[0].result.match_status == "identity_conflict"
+
+
+def test_current_rule_catalog_keeps_the_direct_iuphar_class():
+    provenance = replace(_provenance(), rules_version=LOCAL_RULE_CATALOG_VERSION)
+    batch = pipeline.classify_batch(
+        (
+            RawTargetRow(
+                "ec",
+                {"target_id": "1", "organism": "Human", "ec": "3.4.21.1"},
+                "protein",
+            ),
+        ),
+        snapshot=_snapshot(),
+        provenance=provenance,
+        run_id="fixed",
+    )
+    result = batch.rows[0].result
+    assert result.iuphar_class == "Receptor"
+    assert result.iuphar_subclass == "GPCR"
+    assert result.local_class == "Enzyme"
+    assert result.effective_class == "Receptor"
 
 
 def test_indexed_pipeline__empty_batch__reports_empty():

@@ -10,9 +10,13 @@ import orjson
 import pyarrow as pa
 from deltalake import DeltaTable, write_deltalake
 
-from bioetl.domain.config.target_classification import TARGET_CLASSIFICATION_FIELDS
+from bioetl.domain.config.target_classification import (
+    TARGET_CLASSIFICATION_DETAIL_FIELDS,
+    TARGET_CLASSIFICATION_FIELDS,
+)
 from bioetl.domain.normalization.profiles.chembl_target_classification import (
     target_v31_normalization_profile,
+    target_v32_normalization_profile,
 )
 from bioetl.infrastructure.adapters.iuphar import (
     IupharTargetClassificationAdapter,
@@ -203,18 +207,21 @@ def _verified_inputs(
 
 
 def _write_layer(
-    destination: Path, original: Path, rows: list[dict[str, object]]
+    destination: Path,
+    original: Path,
+    rows: list[dict[str, object]],
+    columns: tuple[str, ...] = TARGET_CLASSIFICATION_FIELDS,
 ) -> None:
-    """Write additive V31 fields while retaining the original Delta schema."""
+    """Write additive classification fields while retaining the original Delta schema."""
     table = DeltaTable(str(original))
     old_schema = delta_schema_to_pyarrow(table.schema())
     names = set(old_schema.names)
-    if names.intersection(TARGET_CLASSIFICATION_FIELDS):
+    if names.intersection(columns):
         raise ValueError("candidate builder requires a legacy V30 source")
     schema = pa.schema(
         [
             *old_schema,
-            *(pa.field(name, pa.string()) for name in TARGET_CLASSIFICATION_FIELDS),
+            *(pa.field(name, pa.string()) for name in columns),
         ]
     )
     output = pa.Table.from_pylist(rows, schema=schema)
@@ -236,7 +243,18 @@ def build_target_candidates(request: TargetCandidateBuildRequest) -> dict[str, o
     _safe_output(request.output_dir, request.paths, directory=True)
     frozen = _verified_inputs(request, checked)
     profile = _load_candidate_profile(checked, workspace=request.paths.workspace)
+    from bioetl.infrastructure.storage.target_migration_validation import (
+        _candidate_table_contract,
+    )
+
+    contract = _candidate_table_contract(checked)
+    columns = TARGET_CLASSIFICATION_FIELDS
     fields = _frozen_v31_hash_fields(checked, request.legacy_include_fields)
+    normalization = target_v31_normalization_profile()
+    if contract == "3.2.0":
+        columns = (*columns, *TARGET_CLASSIFICATION_DETAIL_FIELDS)
+        fields = tuple(dict.fromkeys((*fields, *TARGET_CLASSIFICATION_DETAIL_FIELDS)))
+        normalization = target_v32_normalization_profile()
     old_silver, old_gold = _read_delta(checked["silver"]), _read_delta(checked["gold"])
     expected_cohorts = _cohort_keys(old_silver, old_gold)
     if frozen["cohorts"] != expected_cohorts:
@@ -255,7 +273,6 @@ def build_target_candidates(request: TargetCandidateBuildRequest) -> dict[str, o
     projections: dict[str, dict[str, str | None]] = {}
     new_silver: list[dict[str, object]] = []
     row_ids = []
-    normalization = target_v31_normalization_profile()
     for row in old_silver:
         identity = str(row["target_id"])
         result = adapter.classify_record(
@@ -264,8 +281,9 @@ def build_target_candidates(request: TargetCandidateBuildRequest) -> dict[str, o
             run_id=request.run_id,
             run_started_at=request.run_started_at,
         )
-        projections[identity] = dict(result.projection)
-        updated = {**row, **result.projection}
+        projected = {name: result.projection.get(name) for name in columns}
+        projections[identity] = projected
+        updated = {**row, **projected}
         updated["content_hash"] = _scoped_target_hash(updated, fields, normalization)
         new_silver.append(updated)
         store.publish_result(result, run_id=request.run_id, batch_id="frozen-silver")
@@ -276,8 +294,8 @@ def build_target_candidates(request: TargetCandidateBuildRequest) -> dict[str, o
         updated["content_hash"] = _scoped_target_hash(updated, fields, normalization)
         new_gold.append(updated)
     _verified_inputs(request, checked)
-    _write_layer(checked["candidate_silver"], checked["silver"], new_silver)
-    _write_layer(checked["candidate_gold"], checked["gold"], new_gold)
+    _write_layer(checked["candidate_silver"], checked["silver"], new_silver, columns)
+    _write_layer(checked["candidate_gold"], checked["gold"], new_gold, columns)
     validation = validate_target_candidate(
         checked, request.legacy_include_fields, workspace=request.paths.workspace
     )

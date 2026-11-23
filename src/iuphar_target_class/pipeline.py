@@ -17,7 +17,7 @@ from .evidence import (
     build_evidence_table,
     require_class_chain,
 )
-from .gtopdb_2026_3_1 import FAMILY_ROWS
+from .gtopdb_2026_3_1 import EXPLICIT_TYPE_SUBCLASSES, FAMILY_ROWS
 from .hierarchy import FamilyNode, HierarchyResult, normalize_provider_class
 from .iuphar_mapping import approved_class_mappings
 from .local_layer import Prediction, apply_local
@@ -43,6 +43,7 @@ from .models import (
 from .normalization import isolated_invalid_result, validate_input
 from .policy import (
     GRAPH_MAX_VISITED_NODES,
+    LOCAL_RULE_CATALOG_VERSION,
     classification_local_rules,
     local_rules,
     validate_rules,
@@ -313,6 +314,18 @@ def _shortlist(query: MatchQuery, ctx: IndexedSnapshot) -> tuple[CatalogTarget, 
     return tuple(ctx.catalog[i] for i in sorted(indexes))
 
 
+def _auxiliary_rows(
+    query: MatchQuery, ctx: IndexedSnapshot
+) -> tuple[CatalogTarget, ...]:
+    """Expose auxiliary accessions to conflict checks, not to exact channels."""
+    indexes = {
+        index
+        for value in query.auxiliary_uniprot_ids
+        for index in ctx.lookup.get(("uniprot", value), ())
+    }
+    return tuple(ctx.catalog[index] for index in sorted(indexes))
+
+
 def _conflict_catalog(
     shortlist: tuple[CatalogTarget, ...], ctx: IndexedSnapshot
 ) -> tuple[CatalogTarget, ...]:
@@ -352,6 +365,7 @@ def _direct(
         nodes=_ancestor_records(ctx, annotation.family_ids),
         type_to_class=ctx.type_to_class,
         family_to_class=ctx.family_to_class,
+        type_to_subclass=dict(EXPLICIT_TYPE_SUBCLASSES),
     )
 
 
@@ -436,7 +450,7 @@ def classify_target(
     hits = collect_candidates(query, subset)
     match = validate_identity(
         query,
-        _conflict_catalog(subset, snapshot),
+        _conflict_catalog((*subset, *_auxiliary_rows(query, snapshot)), snapshot),
         hits,
         snapshot_complete=snapshot.complete,
     )
@@ -643,9 +657,14 @@ def _complete(
     annotation: ProviderAnnotation | None,
     direct: HierarchyResult | None,
 ) -> RowResult:
+    rules = (
+        classification_local_rules()
+        if row.provenance.rules_version == LOCAL_RULE_CATALOG_VERSION
+        else local_rules()
+    )
     local = apply_local(
         row.ec_numbers,
-        rules=classification_local_rules(),
+        rules=rules,
         keyword_ids=row.keywords,
         free_text=row.name,
         organism=row.taxon,

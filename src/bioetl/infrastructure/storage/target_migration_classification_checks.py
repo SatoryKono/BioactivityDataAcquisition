@@ -5,7 +5,11 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from pathlib import Path
 
-from bioetl.domain.config.target_classification import TARGET_CLASSIFICATION_FIELDS
+from bioetl.domain.config.target_classification import (
+    TARGET_CLASSIFICATION_DETAIL_FIELDS,
+    TARGET_CLASSIFICATION_FIELDS,
+)
+from bioetl.domain.normalization.profiles.base import NormalizationProfile
 from bioetl.domain.normalization.profiles.chembl_target_classification import (
     target_v31_normalization_profile,
 )
@@ -22,12 +26,14 @@ from bioetl.infrastructure.storage.target_migration_row_ops import (
 
 
 def verify_candidate_hashes(
-    rows: Sequence[Mapping[str, object]], include_fields: tuple[str, ...]
+    rows: Sequence[Mapping[str, object]],
+    include_fields: tuple[str, ...],
+    profile: NormalizationProfile | None = None,
 ) -> None:
     """Reject arbitrary or stale candidate hashes, including classification drift."""
-    profile = target_v31_normalization_profile()
+    selected = profile or target_v31_normalization_profile()
     for row in rows:
-        if row.get("content_hash") != scoped_target_hash(row, include_fields, profile):
+        if row.get("content_hash") != scoped_target_hash(row, include_fields, selected):
             raise ValueError("candidate V31 content hash verification failed")
 
 
@@ -76,7 +82,13 @@ def assert_classification_projection(
     row: Mapping[str, object], expected: Mapping[str, str | None]
 ) -> None:
     """Keep direct, local and effective fields equal to the admitted classifier."""
-    for field in TARGET_CLASSIFICATION_FIELDS:
+    fields = TARGET_CLASSIFICATION_FIELDS
+    if any(name in expected for name in TARGET_CLASSIFICATION_DETAIL_FIELDS):
+        fields = (
+            *fields,
+            *(name for name in TARGET_CLASSIFICATION_DETAIL_FIELDS if name in expected),
+        )
+    for field in fields:
         if row.get(field) != expected[field]:
             raise ValueError(
                 f"candidate classification differs from admitted source: {field}"

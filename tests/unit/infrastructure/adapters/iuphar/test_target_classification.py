@@ -23,6 +23,7 @@ from bioetl.infrastructure.adapters.iuphar import (
     parse_target_payloads,
     validate_acceptance_receipt,
 )
+from iuphar_target_class.policy import LOCAL_RULE_CATALOG_VERSION
 from bioetl.infrastructure.adapters.iuphar.snapshot_loader import (
     OUTPUT_NAMES,
     REQUIRED_ACCEPTANCE_CHECKS,
@@ -69,6 +70,8 @@ def _profile(
     *,
     accepted: bool = False,
     target_changes: dict[str, object] | None = None,
+    rules_version: str = "plan-v1-r8",
+    schema_version: str = "3.1.0",
     **snapshot_changes: object,
 ):
     if accepted:
@@ -131,8 +134,8 @@ def _profile(
         "snapshot": snapshot_ref,
         "acceptance": acceptance,
         "normalization_version": "bioetl-iuphar-input-v1",
-        "rules_version": "plan-v1-r8",
-        "classification_schema_version": "3.1.0",
+        "rules_version": rules_version,
+        "classification_schema_version": schema_version,
     }
     ref = _write(tmp_path, "profile.json", profile)
     return load_profile(
@@ -253,7 +256,31 @@ def test_an_ec_input_does_not_replace_direct_iuphar(tmp_path):
     )
     assert result.projection["iuphar_class"] == "Receptor"
     assert result.projection["effective_class"] == "Receptor"
+    assert result.projection["local_class"] is None
+    output = json.loads(
+        next(a.payload for a in result.artifacts if a.name == "classification.json")
+    )[0]
+    assert output["iuphar_subclass"] == "GPCR"
+    assert output["iuphar_subclasses"] == ["GPCR"]
+
+
+def test_current_rule_catalog_records_the_enzyme_subclass(tmp_path):
+    profile = _profile(
+        tmp_path,
+        target_changes={"type": "gpcr"},
+        required_target_types=["gpcr"],
+        rules_version=LOCAL_RULE_CATALOG_VERSION,
+        schema_version="3.2.0",
+    )
+    result = _classify(
+        IupharTargetClassificationAdapter(profile), target_ec_numbers="3.4.21.1"
+    )
+    assert profile.classification_schema_version == "3.2.0"
+    assert result.projection["iuphar_class"] == "Receptor"
+    assert result.projection["effective_class"] == "Receptor"
     assert result.projection["local_class"] == "Enzyme"
+    assert "Hydrolase" in str(result.projection["local_subclasses"])
+    assert result.projection["iuphar_subclasses"] == '["GPCR"]'
 
 
 @pytest.mark.parametrize(

@@ -58,6 +58,16 @@ def paths(tmp_path, monkeypatch):
     )
 
 
+def test_live_v32_promotion_is_refused_before_the_tables_move(paths):
+    document = yaml.safe_load(paths.candidate_config.read_text())
+    document["pipeline"]["target_classification"]["table_contract"] = "3.2.0"
+    paths.candidate_config.write_text(yaml.safe_dump(document))
+    migration.prepare_target_migration(paths, legacy_include_fields=("target_id",))
+    with pytest.raises(ValueError, match="live 3.2.0 target promotion is refused"):
+        migration.promote_target_migration(paths)
+    assert (paths.silver / "part.parquet").read_bytes() == b"silver"
+
+
 def test_promote_and_rollback_restore_physical_logs_data_and_config(paths):
     migration.prepare_target_migration(paths, legacy_include_fields=("target_id",))
     assert (paths.backup / "copy-silver/_delta_log/000.json").read_text() == "silver"

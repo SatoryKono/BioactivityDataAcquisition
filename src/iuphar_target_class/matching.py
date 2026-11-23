@@ -315,6 +315,62 @@ def _decide(
     return _apply_auxiliary(query, catalog, decided)
 
 
+def _note_auxiliary_accession(
+    accession: str,
+    query: MatchQuery,
+    catalog: tuple[CatalogTarget, ...],
+    reliable: set[str],
+    extra: list[Diagnostic],
+    conflict_ids: set[str],
+) -> None:
+    """Record one auxiliary accession. A disjoint same-species hit is a conflict."""
+    hits = [item for item in catalog if accession in item.uniprot_ids]
+    if not hits:
+        extra.append(
+            Diagnostic(
+                "auxiliary_uniprot_unknown",
+                "info",
+                "auxiliary UniProt cross-reference is not in the snapshot",
+            )
+        )
+        return
+    same_species = [
+        item
+        for item in hits
+        if query.organism is None or item.species == query.organism
+    ]
+    same_ids = {item.target_id for item in same_species}
+    if not same_species:
+        extra.append(
+            Diagnostic(
+                "auxiliary_uniprot_species_gap",
+                "warning",
+                "auxiliary UniProt cross-reference is outside the requested species",
+            )
+        )
+        return
+    if reliable and same_ids.isdisjoint(reliable):
+        conflict_ids.update(same_ids)
+        conflict_ids.update(reliable)
+        return
+    if not reliable:
+        extra.append(
+            Diagnostic(
+                "auxiliary_uniprot_not_identity",
+                "info",
+                "auxiliary UniProt cross-reference does not confirm identity",
+            )
+        )
+        return
+    extra.append(
+        Diagnostic(
+            "auxiliary_uniprot_observed",
+            "info",
+            "auxiliary UniProt cross-reference agrees with the required anchor",
+        )
+    )
+
+
 def _apply_auxiliary(
     query: MatchQuery,
     catalog: tuple[CatalogTarget, ...],
@@ -337,50 +393,8 @@ def _apply_auxiliary(
         else set()
     )
     for accession in sorted(set(query.auxiliary_uniprot_ids)):
-        hits = [item for item in catalog if accession in item.uniprot_ids]
-        if not hits:
-            extra.append(
-                Diagnostic(
-                    "auxiliary_uniprot_unknown",
-                    "info",
-                    "auxiliary UniProt cross-reference is not in the snapshot",
-                )
-            )
-            continue
-        same_species = [
-            item
-            for item in hits
-            if query.organism is None or item.species == query.organism
-        ]
-        same_ids = {item.target_id for item in same_species}
-        if not same_species:
-            extra.append(
-                Diagnostic(
-                    "auxiliary_uniprot_species_gap",
-                    "warning",
-                    "auxiliary UniProt cross-reference is outside the requested species",
-                )
-            )
-            continue
-        if reliable and same_ids.isdisjoint(reliable):
-            conflict_ids.update(same_ids)
-            conflict_ids.update(reliable)
-            continue
-        if not reliable:
-            extra.append(
-                Diagnostic(
-                    "auxiliary_uniprot_not_identity",
-                    "info",
-                    "auxiliary UniProt cross-reference does not confirm identity",
-                )
-            )
-            continue
-        extra.append(
-            Diagnostic(
-                "auxiliary_uniprot_observed",
-                "info",
-                "auxiliary UniProt cross-reference agrees with the required anchor",
-            )
+        _note_auxiliary_accession(
+            accession, query, catalog, reliable, extra, conflict_ids
         )
     if conflict_ids:
         return _result(

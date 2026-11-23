@@ -269,8 +269,13 @@ def promote_target_migration(
         from bioetl.infrastructure.storage.target_contract_transition import (
             assert_live_promotion_allowed,
         )
+        from bioetl.infrastructure.storage.target_migration_validation import (
+            _candidate_table_contract,
+        )
 
-        assert_live_promotion_allowed(state)
+        plan = dict(state)
+        plan["table_contract"] = _candidate_table_contract(checked)
+        assert_live_promotion_allowed(plan)
         if _tree_hashes(checked["assay"]) != state["assay_hashes"]:
             raise ValueError("assay reference cohort changed since preparation")
         state["phase"] = "promoting"

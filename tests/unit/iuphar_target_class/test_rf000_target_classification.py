@@ -23,6 +23,9 @@ from bioetl.infrastructure.export.export_writer_adapter import (
     restore_xlsx_long_text,
     restore_xlsx_text,
 )
+from bioetl.composition.bootstrap.assembly.storage import (
+    _equivalent_target_binding,
+)
 from bioetl.infrastructure.storage.target_contract_transition import (
     assert_live_promotion_allowed,
     plan_target_contract_transition,
@@ -31,7 +34,11 @@ from bioetl.infrastructure.storage.target_migration_classification_checks import
     reject_unverified_fk_addition,
 )
 from iuphar_target_class.bioetl_input import project_target_fields
-from iuphar_target_class.comparison import Stage0Reference, build_m_parity_report
+from iuphar_target_class.comparison import (
+    Stage0Reference,
+    _same_classification,
+    build_m_parity_report,
+)
 from iuphar_target_class.enablement import contour_status
 from iuphar_target_class.policy import (
     classification_local_rules,
@@ -221,3 +228,27 @@ def test_unverified_target_rows_and_live_v32_promotion_are_refused() -> None:
     with pytest.raises(ValueError, match="live 3.2.0"):
         assert_live_promotion_allowed({"table_contract": "3.2.0"})
     assert_live_promotion_allowed({})
+
+
+def test_family_paths_count_only_when_both_rows_carry_them() -> None:
+    shared = {"iuphar_class": "Enzyme", "iuphar_family_paths": '[["Enzyme"]]'}
+    other = {"iuphar_class": "Enzyme", "iuphar_family_paths": '[["Receptor"]]'}
+    missing = {"iuphar_class": "Enzyme"}
+    assert not _same_classification(shared, other)
+    assert _same_classification(shared, missing)
+
+
+def test_missing_table_contract_matches_an_explicit_null() -> None:
+    stored = {"target_config": {"target_classification": {"mode": "off"}}}
+    current = {
+        "target_config": {
+            "target_classification": {"mode": "off", "table_contract": None}
+        }
+    }
+    changed = {
+        "target_config": {
+            "target_classification": {"mode": "enrich", "table_contract": None}
+        }
+    }
+    assert _equivalent_target_binding(stored, current)
+    assert not _equivalent_target_binding(stored, changed)

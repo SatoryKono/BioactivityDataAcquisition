@@ -125,6 +125,7 @@ _DETAIL_FIELDS = (
     "iuphar_subclass",
     "iuphar_subclasses",
     "iuphar_paths",
+    "iuphar_family_paths",
     "iuphar_type_raw",
     "iuphar_annotation_capability",
     "local_subclasses",

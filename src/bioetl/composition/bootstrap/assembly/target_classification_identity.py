@@ -15,11 +15,15 @@ from bioetl.composition.factories.pipeline.run_context_contract_identity import 
 from bioetl.composition.bootstrap.assembly.target_classification_runtime import (
     resolve_target_runtime_config,
 )
+from bioetl.domain.contracts.gold.chembl_target_classification import (
+    target_v32_schema_hash,
+)
 from bioetl.domain.context import PipelineRunContext
 from bioetl.domain.control_plane import RunInputSnapshotRef, RunManifest, RunSourceRef
 from bioetl.domain.control_plane.effective_config_artifact import ConfigSourceRef
 from bioetl.domain.normalization.profiles.chembl_target_classification import (
     target_v31_normalization_profile,
+    target_v32_normalization_profile,
 )
 from bioetl.infrastructure.config.contract_identity_resolution import (
     RunManifestContractIdentity,
@@ -40,20 +44,27 @@ def target_classification_contract_schema_identity(
         config.entity_type,
     ) != ("chembl", "target"):
         return None
-    if config.target_classification.mode != "enrich":
+    classification = config.target_classification
+    if classification.mode != "enrich":
         return None
-
+    if classification.table_contract == "3.2.0":
+        return ("3.2.0", target_v32_schema_hash())
     return ("3.1.0", target_v31_schema_hash())
 
 
 def target_classification_normalization_identity(
     config: object,
 ) -> tuple[str, str, str] | None:
-    """Bind the actual additive V31 normalization profile to execution metadata."""
-    if target_classification_contract_schema_identity(config) is None:
+    """Bind the selected additive normalization profile to execution metadata."""
+    schema_identity = target_classification_contract_schema_identity(config)
+    if schema_identity is None:
         return None
-
-    identity = target_v31_normalization_profile().identity
+    profile = (
+        target_v32_normalization_profile()
+        if schema_identity[0] == "3.2.0"
+        else target_v31_normalization_profile()
+    )
+    identity = profile.identity
     return identity.profile_name, identity.profile_version, identity.profile_hash
 
 

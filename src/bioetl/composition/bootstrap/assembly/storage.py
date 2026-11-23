@@ -282,6 +282,11 @@ def build_target_classification_session(
         rules_version=profile.rules_version,
         classification_schema_version=profile.classification_schema_version,
     )
+    expected = config.target_classification.to_domain().contract_version
+    if mode == "enrich" and profile.classification_schema_version != expected:
+        raise ValueError(
+            "target classification profile schema does not match table_contract"
+        )
     return TargetClassificationRunState(
         classifier=classifier,
         evidence=store,
@@ -290,6 +295,32 @@ def build_target_classification_session(
         rules_version=profile.rules_version,
         classification_schema_version=profile.classification_schema_version,
     )
+
+
+def _equivalent_target_binding(
+    stored: Mapping[str, object], binding: Mapping[str, object]
+) -> bool:
+    """Treat a missing table_contract and an explicit null as the same pin."""
+    return _normalize_target_binding(stored) == _normalize_target_binding(binding)
+
+
+def _normalize_target_binding(value: Mapping[str, object]) -> dict[str, object]:
+    rendered = dict(value)
+    config = rendered.get("target_config")
+    if not isinstance(config, dict):
+        return rendered
+    classification = config.get("target_classification")
+    if (
+        not isinstance(classification, dict)
+        or classification.get("table_contract") is not None
+    ):
+        return rendered
+    config = dict(config)
+    config["target_classification"] = {
+        key: item for key, item in classification.items() if key != "table_contract"
+    }
+    rendered["target_config"] = config
+    return rendered
 
 
 def preflight_workflow_target_dependencies(
@@ -338,6 +369,6 @@ def preflight_workflow_target_dependencies(
                 "snapshot_id": profile.snapshot.snapshot.snapshot_id,
             }
         )
-    if isinstance(stored, Mapping) and dict(stored) != binding:
+    if isinstance(stored, Mapping) and not _equivalent_target_binding(stored, binding):
         raise ValueError("stored target classification dependency identity changed")
     return {TARGET_CLASSIFICATION_DEPENDENCY_KEY: binding}

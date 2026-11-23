@@ -41,32 +41,38 @@ class EcInference:
     support: tuple[_Support, ...]
 
 
+def _reject_local_rule(rule: RuleRecord) -> None:
+    """Reject one rule that would invent a class or a subclass parent."""
+    conditions = rule.input_conditions.casefold()
+    output = rule.output.casefold()
+    if (
+        "zinc finger" in conditions or "transcription factor" in conditions
+    ) and "nuclear hormone" in output:
+        message = (
+            f"rule {rule.rule_id} must not assign a nuclear hormone receptor "
+            "from a zinc finger or transcription-factor tag"
+        )
+        raise ValueError(message)
+    if rule.family == "annotation" and rule.output not in WORKING_CLASSES:
+        message = f"rule {rule.rule_id} output is outside the class dictionary"
+        raise ValueError(message)
+    if (
+        rule.family == "ec_class"
+        and rule.output not in WORKING_CLASSES
+        and rule.parent_class not in WORKING_CLASSES
+    ):
+        message = f"rule {rule.rule_id} subclass requires a working-class parent"
+        raise ValueError(message)
+    if rule.output == "Multifunctional":
+        message = f"rule {rule.rule_id} must not assign Multifunctional"
+        raise ValueError(message)
+
+
 def validate_local_config(rules: tuple[RuleRecord, ...]) -> None:
     """Reject a broken rule before any row is processed."""
     validate_rules(rules)
     for rule in rules:
-        conditions = rule.input_conditions.casefold()
-        output = rule.output.casefold()
-        if (
-            "zinc finger" in conditions or "transcription factor" in conditions
-        ) and "nuclear hormone" in output:
-            message = (
-                f"rule {rule.rule_id} must not assign a nuclear hormone receptor "
-                "from a zinc finger or transcription-factor tag"
-            )
-            raise ValueError(message)
-        if rule.family == "annotation" and rule.output not in WORKING_CLASSES:
-            message = f"rule {rule.rule_id} output is outside the class dictionary"
-            raise ValueError(message)
-        if rule.family == "ec_class" and rule.output not in WORKING_CLASSES:
-            if rule.parent_class not in WORKING_CLASSES:
-                message = (
-                    f"rule {rule.rule_id} subclass requires a working-class parent"
-                )
-                raise ValueError(message)
-        if rule.output == "Multifunctional":
-            message = f"rule {rule.rule_id} must not assign Multifunctional"
-            raise ValueError(message)
+        _reject_local_rule(rule)
 
 
 def infer_from_ec(

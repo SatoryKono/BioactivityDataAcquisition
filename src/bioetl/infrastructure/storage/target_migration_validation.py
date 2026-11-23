@@ -16,6 +16,10 @@ from bioetl.domain.config.target_classification import (
     TARGET_CLASSIFICATION_FIELDS,
 )
 from bioetl.domain.normalization.profiles.chembl_target import CHEMBL_TARGET_PROFILE
+from bioetl.domain.normalization.profiles.chembl_target_classification import (
+    target_v31_normalization_profile,
+    target_v32_normalization_profile,
+)
 from bioetl.infrastructure.adapters.iuphar.acceptance_receipt import load_profile
 from bioetl.infrastructure.adapters.iuphar.snapshot_loader import LoadedIupharProfile
 from bioetl.infrastructure.storage.target_migration_classification_checks import (
@@ -264,6 +268,7 @@ def validate_target_candidate(
             profile.profile_sha256,
             legacy_include_fields,
             include_fields,
+            contract,
         )
     _verify_source_classifications(layers, profile)
     _assert_candidate_cohort_closure(paths, layers["gold"])
@@ -302,6 +307,7 @@ def _validate_candidate_layer(
     profile_sha256: str,
     legacy_include_fields: tuple[str, ...],
     v31_include_fields: tuple[str, ...],
+    contract: str,
 ) -> tuple[dict[str, object], list[dict[str, object]]]:
     """Validate one full layer and its unchanged legacy/hash projection."""
     old = _read_delta(paths[name])
@@ -310,11 +316,16 @@ def _validate_candidate_layer(
         compare_target_rows(old, new, legacy_include_fields)
     )
     result["physical_projection"] = _validate_physical_projection(
-        name, schema, old, new
+        name, schema, old, new, contract
     )
     if any(row.get("target_class_profile_sha256") != profile_sha256 for row in new):
         raise ValueError("candidate rows belong to another IUPHAR profile")
-    _verify_candidate_hashes(new, v31_include_fields)
+    hash_profile = (
+        target_v32_normalization_profile()
+        if contract == "3.2.0"
+        else target_v31_normalization_profile()
+    )
+    _verify_candidate_hashes(new, v31_include_fields, hash_profile)
     return result, new
 
 
@@ -332,6 +343,7 @@ def _validate_physical_projection(
     model: type[DataFrameModel],
     old: Sequence[Mapping[str, object]],
     new: Sequence[Mapping[str, object]],
+    contract: str = "3.1.0",
 ) -> dict[str, object]:
     """Validate a frozen physical projection without changing runtime schemas.
 
@@ -340,12 +352,18 @@ def _validate_physical_projection(
     never materialized into the preserved rows or used as invented provenance.
     """
     previous, current = _physical_columns(old), _physical_columns(new)
-    if previous.intersection(TARGET_CLASSIFICATION_FIELDS):
+    added = set(TARGET_CLASSIFICATION_FIELDS)
+    if contract == "3.2.0":
+        added.update(TARGET_CLASSIFICATION_DETAIL_FIELDS)
+    if previous.intersection(added):
         raise ValueError("physical target migration requires a legacy V30 cohort")
-    if current != previous.union(TARGET_CLASSIFICATION_FIELDS):
-        raise ValueError(
-            "candidate physical columns must equal old columns plus nine classification fields"
+    if current != previous.union(added):
+        message = (
+            "candidate physical columns must equal old columns plus the 3.2.0 classification fields"
+            if contract == "3.2.0"
+            else "candidate physical columns must equal old columns plus nine classification fields"
         )
+        raise ValueError(message)
     schema = model.to_schema()
     omissions = sorted(
         _OMITTABLE_RUNTIME_COLUMNS[layer].intersection(schema.columns) - previous
@@ -361,7 +379,11 @@ def _validate_physical_projection(
     return {
         "policy_id": _LEGACY_PHYSICAL_POLICY
         if any((omissions, storage, nullable_absences))
-        else "target_v31_runtime_shape",
+        else (
+            "target_v32_runtime_shape"
+            if contract == "3.2.0"
+            else "target_v31_runtime_shape"
+        ),
         "omitted_runtime_columns": omissions,
         "logical_nullable_absences": nullable_absences,
         "storage_envelope_columns": storage,
