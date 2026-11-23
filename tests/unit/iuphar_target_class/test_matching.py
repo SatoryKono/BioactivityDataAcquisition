@@ -376,8 +376,11 @@ def test_rf008_anchor_cases_keep_an_evidence_disposition() -> None:
     assert auxiliary["disposition"] == "explained_previous_policy"
     assert auxiliary["evidence"]
     projection = by_id["match-auxiliary-projection"]
-    assert projection["disposition"] == "explained_previous_policy"
-    assert projection["observed"] == {"uniprot": "P35372|Q99999"}
+    assert projection["disposition"] == "verified"
+    assert projection["observed"] == {
+        "auxiliary_uniprot": "Q99999",
+        "uniprot": "P35372",
+    }
     assert conflict["disposition"] == "verified"
     assert named["observed"] == {
         "match_status": "ambiguous",
