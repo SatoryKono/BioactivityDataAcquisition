@@ -172,6 +172,26 @@
         },
         {
           "fields": [
+            "iuphar_target_id",
+            "iuphar_class",
+            "iuphar_match_status",
+            "iuphar_annotation_status",
+            "local_class",
+            "effective_class",
+            "effective_source",
+            "decision_status",
+            "target_class_profile_sha256",
+            "target_classification_owner",
+            "target_classification_completeness",
+            "target_classification_absent_features"
+          ],
+          "name": "target_classification_outcome",
+          "provider_order": [
+            "composite"
+          ]
+        },
+        {
+          "fields": [
             "protein_classifications",
             "target_protein_class_id_L1",
             "target_protein_class_name_L1",
@@ -497,8 +517,8 @@
   "passport_schema_version": "1.0.0",
   "provenance": {
     "projector_version": "1.1.0",
-    "semantic_content_hash": "sha256:43c7e4bf50b9ea93f3feac51ce6d0679c95d722012733715906e6c499cccef41",
-    "source_revision": "sha256:89ee31c19bf649b3e9536627796a1510ea397f67ae0c4e7d913b45d9637fbb25"
+    "semantic_content_hash": "sha256:c3be50b172259a4fa215edc570229a5782b6e406b5555e15f70c96ab51aefca5",
+    "source_revision": "sha256:42fa432e24757e8611570ffb105fd959efce3431fa80ede9ccfda7b1b5f8866d"
   },
   "silver": {
     "dq_execution": {
