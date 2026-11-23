@@ -177,7 +177,7 @@ def test_first_window_coverage_set_range_and_refresh_copy() -> None:
         assert dashboard["timezone"] == "browser", path.name
         if path.stem == "bioetl-run-explorer-v1":
             assert "independent of the time range" in blob
-            assert "Last 20 launches" in blob
+            assert "Last 20 pipeline runs" in blob
         elif path.stem == "bioetl-incident-v1":
             assert "CURRENT" in blob
             assert "Run ID does not filter this card" in blob

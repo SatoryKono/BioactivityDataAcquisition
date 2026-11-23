@@ -18,7 +18,7 @@ DESCRIPTION = (
     "This saved verdict does not authorize replay."
 )
 STATUS_DESCRIPTION = (
-    "SELECTED RUN · Overall verdict is the data quality assessment of this Run ID. "
+    "SELECTED RUN · Overall verdict summarizes the saved domain checks for this run. "
     "Processing is the ETL outcome. Trust is the saved Trust verdict and does not "
     "authorize replay. " + DESCRIPTION.removeprefix("SELECTED RUN · ")
 )
@@ -306,7 +306,7 @@ def _stage_panel(grid: dict[str, int]) -> dict[str, object]:
         "datasource": "BioETL Ops HTTP",
         "description": (
             "SELECTED RUN · Saved stage rows for the exact Run ID; "
-            "the table shows at most 12 stages. "
+            "the table shows at most 12 stages. Extract defaults to the Bronze count when stage counts are unavailable. "
             "SUCCESS with missing stage evidence stays INCOMPLETE. "
             "A recorded zero stays 0. An unknown count is empty, not 0. "
             "UNFINISHED means no terminal event. "

@@ -378,7 +378,7 @@ def test_explorer_row_navigation_fails_closed(damage: str) -> None:
         field = next(
             o
             for o in table["fieldConfig"]["overrides"]
-            if o["matcher"] == {"id": "byName", "options": "Overview"}
+            if o["matcher"] == {"id": "byName", "options": "Processing"}
         )
         prop = next(p for p in field["properties"] if p["id"] == "links")
         if damage == "missing_action":

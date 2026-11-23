@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from pydantic import SecretStr
 
 from bioetl.composition.factories.datasource.data_source_factory import (
     resolve_datasource_provider_registry as _resolve_provider_registry,
@@ -17,6 +18,9 @@ from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGu
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.health import (
     resolve_provider_resources,
+)
+from bioetl.infrastructure.adapters.semanticscholar.request_headers import (
+    normalize_semanticscholar_api_key,
 )
 from bioetl.infrastructure.config.source_config_loader import (
     SourceConfigNotFoundError,
@@ -247,8 +251,13 @@ class HttpClientFactory:
 
     @classmethod
     def _check_setting(cls, settings: Settings, setting_name: str) -> bool:
-        """Return ``True`` when the setting exists and is truthy."""
+        """Check credential presence using the provider's request-key policy."""
         value = getattr(settings, setting_name, None)
+        if setting_name == "semanticscholar_api_key":
+            api_key = (
+                value.get_secret_value() if isinstance(value, SecretStr) else value
+            )
+            return bool(normalize_semanticscholar_api_key(api_key or ""))
         return value is not None and bool(value)
 
     @staticmethod

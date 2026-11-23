@@ -115,12 +115,14 @@ def test_wide_recent_run_table_exposes_decision_fields_without_changing_data():
             visible.discard(override["matcher"].get("options"))
     required = {"Workflow", "Duration", "Replay Readiness", "Data Quality"}
     assert required <= visible, f"Wide catalog hides {required - visible}"
-    assert {"Pipeline", "Run ID", "Started", "Overview"} <= visible
+    assert {"Pipeline", "Run ID", "Started", "Processing"} <= visible
     assert adaptive["options"]["compactFields"] == [
         "Provider",
         "Pipeline",
         "Run ID",
-        "Overview",
+        "Workflow",
+        "Started",
+        "Processing",
     ]
     assert "in the table data inspector" not in adaptive["description"]
     for key in ("targets", "transformations"):

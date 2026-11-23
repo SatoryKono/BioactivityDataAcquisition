@@ -2,12 +2,20 @@
 
 from __future__ import annotations
 
-__all__ = ["build_semanticscholar_headers"]
+__all__ = ["build_semanticscholar_headers", "normalize_semanticscholar_api_key"]
 
 from bioetl.infrastructure.adapters.base import (
     BIOETL_USER_AGENT,
     build_json_accept_headers,
 )
+
+
+def normalize_semanticscholar_api_key(api_key: str) -> str:
+    """Trim a configured key and resolve ``your_*`` placeholders as anonymous."""
+    normalized = api_key.strip()
+    if normalized.lower().startswith("your_"):
+        return ""
+    return normalized
 
 
 def build_semanticscholar_headers(
@@ -30,6 +38,11 @@ def build_semanticscholar_headers(
     headers = build_json_accept_headers(BIOETL_USER_AGENT)
     if include_content_type:
         headers["Content-Type"] = "application/json"
-    if api_key and (not skip_placeholder_api_key or not api_key.startswith("your_")):
-        headers["x-api-key"] = api_key
+    request_key = (
+        normalize_semanticscholar_api_key(api_key)
+        if skip_placeholder_api_key
+        else api_key
+    )
+    if request_key:
+        headers["x-api-key"] = request_key
     return headers

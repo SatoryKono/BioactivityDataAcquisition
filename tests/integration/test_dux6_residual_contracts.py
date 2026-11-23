@@ -191,7 +191,7 @@ def test_pfill_12_browse_explains_artifact_backing_and_backend_failure() -> None
     assert '"pipeline_label": "VALID EMPTY"' in selector
     assert ": items.($merge([$, {" in selector
     handoffs = {
-        "Overview": ("Overview", "bioetl-overview-v2"),
+        "Processing": ("Overview", "bioetl-overview-v2"),
         "Saved Evidence": ("Saved Evidence", "bioetl-control-plane-v1"),
         "Data Quality": ("Data Quality", "bioetl-dq-v2"),
         "Replay Readiness": ("Replay Readiness", "bioetl-control-plane-v1"),

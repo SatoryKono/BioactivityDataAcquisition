@@ -466,7 +466,7 @@ def _ensure_stage_panel(by_id: dict[int, dict[str, Any]]) -> None:
         "title": "Inspect Selected Run Stages",
         "description": (
             "SELECTED RUN · Saved stage rows for the exact Run ID; "
-            "the table shows at most 12 stages. "
+            "the table shows at most 12 stages. Extract defaults to the Bronze count when stage counts are unavailable. "
             "SUCCESS with missing stage evidence stays INCOMPLETE. "
             "A recorded zero stays 0. An unknown count is empty, not 0. "
             "UNFINISHED means no terminal event. Prometheus does not change this table. "

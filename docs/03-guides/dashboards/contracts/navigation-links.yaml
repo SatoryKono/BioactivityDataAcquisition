@@ -431,7 +431,7 @@ navigation_surfaces:
     uid: bioetl-run-explorer-v1
     panel_id: 3010
     fields:
-      Overview: bioetl-overview-v2
+      Processing: bioetl-overview-v2
       Saved Evidence: bioetl-control-plane-v1
       Data Quality: bioetl-dq-v2
       Replay Readiness: bioetl-control-plane-v1

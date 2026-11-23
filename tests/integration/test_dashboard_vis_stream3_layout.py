@@ -142,7 +142,7 @@ def test_run_id_selector_and_recent_runs_do_not_label_uuid_as_count() -> None:
     assert len(rename) == 10
     assert "Count" not in rename.values()
     assert rename["run_label"] == "Run ID"
-    assert rename["status"] == "Overview"
+    assert rename["status"] == "Processing"
     assert rename["saved_evidence_status"] == "Saved Evidence"
     assert rename["replay_readiness_status"] == "Replay Readiness"
     assert "run_id" in organize["indexByName"]

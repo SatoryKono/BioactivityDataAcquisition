@@ -297,7 +297,7 @@ def test_run_explorer_flex_columns_omit_custom_width() -> None:
     assert widths["Run ID"] == 110
     assert min_widths["Run ID"] == 50
     assert widths["Started"] == 170
-    assert widths["Overview"] == min_widths["Overview"] == 80
+    assert widths["Processing"] == min_widths["Processing"] == 80
     visible_width = _visible_table_width(widths, min_widths, hidden)
     budget = (1366 // 2) * panel["gridPos"]["w"] // 24 - 40
     assert visible_width <= budget

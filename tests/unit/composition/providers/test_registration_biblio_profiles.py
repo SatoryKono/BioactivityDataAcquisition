@@ -30,6 +30,7 @@
 from __future__ import annotations
 
 import pytest
+from pydantic import SecretStr
 
 from types import SimpleNamespace
 from unittest.mock import MagicMock
@@ -149,4 +150,26 @@ def test_resolve_semanticscholar_request_profile_uses_empty_key_when_unconfigure
     )
 
     assert result.api_key == ""
+    assert result.batch_size == 100
+
+
+@pytest.mark.parametrize(
+    ("api_key", "expected_key"),
+    [
+        ("", ""),
+        ("   ", ""),
+        ("your_api_key_here", ""),
+        ("  your_api_key_here  ", ""),
+        ("YOUR_API_KEY_HERE", ""),
+        ("  configured-test-key  ", "configured-test-key"),
+    ],
+)
+def test_semanticscholar_profile_normalizes_request_key(
+    api_key: str, expected_key: str
+) -> None:
+    settings = SimpleNamespace(semanticscholar_api_key=SecretStr(api_key))
+
+    result = _resolve_semanticscholar_request_profile(settings, batch_size=100)
+
+    assert result.api_key == expected_key
     assert result.batch_size == 100

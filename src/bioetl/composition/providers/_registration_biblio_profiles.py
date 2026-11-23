@@ -7,6 +7,9 @@ from typing import TYPE_CHECKING
 
 from bioetl.composition.providers._config_helpers import _normalize_optional_override
 from bioetl.composition.providers._models import ProviderSettingsProtocol
+from bioetl.infrastructure.adapters.semanticscholar.request_headers import (
+    normalize_semanticscholar_api_key,
+)
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
@@ -112,7 +115,7 @@ def _resolve_semanticscholar_request_profile(
         else ""
     )
     return SemanticScholarRequestProfile(
-        api_key=api_key,
+        api_key=normalize_semanticscholar_api_key(api_key),
         batch_size=batch_size,
     )
 

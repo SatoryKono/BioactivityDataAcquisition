@@ -45,7 +45,7 @@ def enable_adaptive_catalog(dashboard: dict[str, Any]) -> None:
     panel["type"] = "bioetl-selectorshell-panel"
     panel["options"].update(
         viewMode="runs",
-        compactFields=["Provider", "Pipeline", _RUN_ID, "Overview"],
+        compactFields=["Provider", "Pipeline", _RUN_ID, "Workflow", "Started", "Processing"],
     )
     overrides = panel.get("fieldConfig", {}).get("overrides", [])
     run_id = next(
@@ -71,12 +71,12 @@ def enable_adaptive_catalog(dashboard: dict[str, Any]) -> None:
         _restore_catalog_field(override, actions)
     if "description" in panel:
         panel["description"] = panel["description"].replace(
-            "Compact view: Pipeline, Run ID, Started, Overview and Replay Readiness. "
+            "Compact view: Pipeline, Run ID, Started, Processing and Replay Readiness. "
             "Workflow, Provider, Duration, Saved Evidence and Data Quality remain "
             "in the table data inspector.",
-            "Wide table: Workflow, Pipeline, Run ID, Started, Duration, Overview, "
+            "Wide table: Workflow, Pipeline, Run ID, Started, Duration, Processing, "
             "Data Quality and Replay Readiness. Compact view: Provider, Pipeline, "
-            "Run ID and Overview. Details retains all fields.",
+            "Run ID, Workflow, Started and Processing. Details retains all fields.",
         )
 
 
@@ -461,8 +461,8 @@ def _project_current_time(dashboard: dict) -> None:
 def _adapt_replay(dashboard: dict) -> None:
     for panel in dashboard["panels"]:
         if panel["id"] == 9423:
-            # Keep all checks available through the existing pagination.
-            panel["gridPos"]["h"] = 11
+            # Use the space up to the evidence table for additional check rows.
+            panel["gridPos"]["h"] = 13
 
 
 def _adapt_dq(dashboard: dict) -> None:
@@ -475,7 +475,7 @@ def _adapt_dq(dashboard: dict) -> None:
             )
             panel["gridPos"]["h"] = 4
         elif panel["id"] == 9403:
-            panel["gridPos"].update(y=11, h=5)
+            panel["gridPos"].update(y=11, h=7)
 
 
 def _adapt_incident(dashboard: dict) -> None:
@@ -514,6 +514,7 @@ def _adapt_overview(dashboard: dict) -> None:
     bottom = domains["gridPos"]["y"] + domains["gridPos"]["h"]
     delta = max(0, 9 - domains["gridPos"]["h"])
     domains["gridPos"]["h"] += delta
+    panels[9300]["gridPos"]["h"] = domains["gridPos"]["h"]
     for panel in dashboard["panels"]:
         if panel is not domains and panel["gridPos"]["y"] >= bottom:
             _shift_panel(panel, delta)

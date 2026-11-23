@@ -21,7 +21,7 @@
       "run_ledger": true,
       "run_manifest": true
     },
-    "effective_config_hash": "sha256:5ab29a28ace6453da84f643893f8bb6efac01c8d2ccf1566f393580748cd1900",
+    "effective_config_hash": "sha256:4e1e3d9ebe6ba5d47657967147f2b38c07ca77bac10f213ead817508902b447b",
     "projection_profiles": [
       "batch",
       "http"
@@ -377,8 +377,8 @@
   "passport_schema_version": "1.0.0",
   "provenance": {
     "projector_version": "1.1.0",
-    "semantic_content_hash": "sha256:b82c8dc028211eb2d042294d97750fcf8828359d922b80da1168830c626625d2",
-    "source_revision": "sha256:d121ad18f9ead8402959b83430573ee846646e6f8844b67a2115772f5ca642e4"
+    "semantic_content_hash": "sha256:8dba39944e7aa33fde8529aafcccfe20a02bb7407300cce77594e660f3e52c76",
+    "source_revision": "sha256:523eb3f90c2c7bb3e11ae76986353ae798314dfc5251f4a7158a219a6adf808c"
   },
   "silver": {
     "column_projection": {

@@ -71,7 +71,7 @@ def test_selected_contract_identity_preserves_dq_and_legacy_modes(mode):
 
 
 def test_disabled_or_unrelated_config_has_no_classification_dependency():
-    config = load_pipeline_config("chembl_target")
+    config = _mode(load_pipeline_config("chembl_target"), "off")
     assert load_target_runtime_profile(config) is None
     assert build_target_classification_session(config, object()) is None
     assert target_classification_source_refs(config) == ()

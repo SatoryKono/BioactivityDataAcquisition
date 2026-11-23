@@ -1316,7 +1316,7 @@ def apply_dq(data: dict[str, Any]) -> None:
                     ),
                     "url": (
                         "/ops/observability/selected-run-status"
-                        "?pipeline=${selected_pipeline}&run_id=${selected_run_id}"
+                        "?pipeline=${selected_pipeline}&run_id=${selected_run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
                     ),
                     "url_options": {"method": "GET", "data": ""},
                     "uql": (
@@ -1357,7 +1357,7 @@ def apply_dq(data: dict[str, Any]) -> None:
         content=(
             "**Canonical identity:** [Open Review Run Identity on Overview]"
             f"({OV_IDENTITY})\n\n"
-            "DQ no longer duplicates identity tables (F-16)."
+            "Check the full Run ID and start time before comparing counts."
         ),
     )
     _replace_with_handoff(

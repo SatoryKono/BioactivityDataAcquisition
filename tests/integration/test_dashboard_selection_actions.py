@@ -150,8 +150,8 @@ def test_run_explorer_styles_processing_without_obsolete_columns() -> None:
         for o in panel["fieldConfig"]["overrides"]
     }
     assert "Status" not in props and "Severity" not in props
-    assert props["Overview"]["custom.cellOptions"]["type"] == "color-text"
-    mappings = props["Overview"]["mappings"][0]["options"]
+    assert props["Processing"]["custom.cellOptions"]["type"] == "color-text"
+    mappings = props["Processing"]["mappings"][0]["options"]
     assert mappings["failed"]["color"] == "#F2495C"
     assert mappings["unfinished"]["text"] == "unfinished"
     assert panel["fieldConfig"]["defaults"]["noValue"] != "OK"

@@ -700,7 +700,7 @@
         "type": "yesoreyeram-infinity-datasource",
         "uid": "bioetl-ops-http"
       },
-      "description": "SELECTED RUN · Overall verdict is the data quality assessment of this Run ID. Processing is the ETL outcome. Trust is the saved Trust verdict and does not authorize replay. Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is Source unavailable. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. Reason explains the saved assessment; missing archive evidence remains INCOMPLETE. Evidence completeness remains available in the saved report. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response.",
+      "description": "SELECTED RUN · Overall verdict summarizes the saved domain checks for this run. Processing is the ETL outcome. Trust is the saved Trust verdict and does not authorize replay. Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is Source unavailable. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. Reason explains the saved assessment; missing archive evidence remains INCOMPLETE. Evidence completeness remains available in the saved report. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response.",
       "fieldConfig": {
         "defaults": {
           "noValue": "UNKNOWN",
@@ -1029,7 +1029,7 @@
       "transparent": true,
       "options": {
         "mode": "html",
-        "content": "<div style=\"font-size:16px;line-height:1.5\"><strong>Canonical identity:</strong> <a href=\"/d/bioetl-overview-v2/3-run-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9300&${__url_time_range}\">Open Review Run Identity on Overview</a><br>DQ no longer duplicates identity tables (F-16).</div>"
+        "content": "<div style=\"font-size:16px;line-height:1.5\"><strong>Canonical identity:</strong> <a href=\"/d/bioetl-overview-v2/3-run-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9300&${__url_time_range}\">Open Review Run Identity on Overview</a><br>Check the full Run ID and start time before comparing counts.</div>"
       }
     },
     {
@@ -1559,7 +1559,7 @@
           "parser": "backend",
           "format": "table",
           "root_selector": "($f := $exists(quality_evidence.funnel) ? quality_evidence.funnel : []; $map(['01 bronze_records','02 silver_valid_records','03 silver_filtered_out_records','04 silver_quarantined_records','06 silver_deduplicated_records','07 gold_written_records','08 gold_excluded_by_contract_records','09 gold_quarantined_records','11 gold_deduplicated_records'], function($p) { ($layerName := $contains($p, 'bronze') ? 'bronze' : ($contains($p, 'silver') ? 'silver' : 'gold'); {'parameter': $p, 'count in': $f[stage_id = $layerName].records_in}) }))",
-          "url": "/ops/observability/selected-run-status?pipeline=${selected_pipeline}&run_id=${selected_run_id}",
+          "url": "/ops/observability/selected-run-status?pipeline=${selected_pipeline}&run_id=${selected_run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
           "url_options": {
             "method": "GET",
             "data": ""
@@ -1654,7 +1654,7 @@
             "type": "datasource",
             "uid": "-- Dashboard --"
           },
-          "description": "SELECTED RUN · Saved stage rows for the exact Run ID; the table shows at most 12 stages. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table. Request failure is Source unavailable. Removal counters are per-stage saved funnel removals; untracked stages stay UNKNOWN. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is Source unavailable.",
+          "description": "SELECTED RUN · Saved stage rows for the exact Run ID; the table shows at most 12 stages. Extract defaults to the Bronze count when stage counts are unavailable. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table. Request failure is Source unavailable. Removal counters are per-stage saved funnel removals; untracked stages stay UNKNOWN. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is Source unavailable.",
           "options": {
             "showHeader": true,
             "cellHeight": "sm",

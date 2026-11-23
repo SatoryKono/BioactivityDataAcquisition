@@ -75,3 +75,26 @@ def test_build_semanticscholar_headers_keeps_placeholder_when_not_skipping() -> 
     )
 
     assert headers["x-api-key"] == "your_api_key_here"
+
+
+@pytest.mark.parametrize(
+    ("api_key", "expected_key"),
+    [
+        ("", None),
+        ("   ", None),
+        ("your_api_key_here", None),
+        ("  your_api_key_here  ", None),
+        ("YOUR_API_KEY_HERE", None),
+        ("  configured-test-key  ", "configured-test-key"),
+    ],
+)
+def test_build_headers_normalizes_configured_key(
+    api_key: str, expected_key: str | None
+) -> None:
+    headers = build_semanticscholar_headers(
+        api_key,
+        include_content_type=True,
+        skip_placeholder_api_key=True,
+    )
+
+    assert headers.get("x-api-key") == expected_key

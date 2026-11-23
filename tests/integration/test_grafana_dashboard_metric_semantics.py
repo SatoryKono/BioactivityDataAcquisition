@@ -147,7 +147,7 @@ def _assert_processed_records_target_contract(processed: dict[str, object]) -> N
     ).removesuffix('"')
     assert (
         targets[1]["url"]
-        == "/ops/observability/selected-run-status?pipeline=${selected_pipeline}&run_id=${selected_run_id}"
+        == "/ops/observability/selected-run-status?pipeline=${selected_pipeline}&run_id=${selected_run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}"
     )
     assert "quality_evidence.funnel" in targets[1]["uql"]
     assert "records_in" in targets[1]["uql"]

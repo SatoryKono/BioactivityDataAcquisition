@@ -57,7 +57,7 @@ _COLUMNS = {
     "run_label": (_RUN_ID_LABEL, 110, 50),
     "started_at": ("Started", 170, 50),
     "duration_display": ("Duration", 70, 50),
-    "status": ("Overview", 80, 80),
+    "status": ("Processing", 80, 80),
     "saved_evidence_status": ("Saved Evidence", None, 80),
     "data_quality_status": (_DATA_QUALITY, None, 80),
     "replay_readiness_status": (_REPLAY_READINESS, 125, 80),
@@ -205,7 +205,7 @@ def _compact_recent_run_columns(panel: dict, overrides: list[dict]) -> None:
         actions.extend(deepcopy(links))
         links.clear()
     panel["description"] += (
-        " Compact view: Pipeline, Run ID, Started, Overview and Replay Readiness. "
+        " Compact view: Pipeline, Run ID, Started, Processing and Replay Readiness. "
         "Workflow, Provider, Duration, Saved Evidence and Data Quality remain in "
         "the table data inspector. Their handoff actions are also in the Run ID menu."
     )
@@ -237,7 +237,7 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
         "var-workflow=.*&amp;var-pipeline=.*&amp;var-run_type=.*"
         '&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}">'
         "<strong>Reset filters</strong></a><br>"
-        "Last 20 launches · independent of the time range"
+        "Last 20 pipeline runs · independent of the time range"
         "</div>"
     )
     panel = panels[3010]
@@ -255,7 +255,7 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
     panel["options"].setdefault("footer", {})["enablePagination"] = False
     panel["description"] = (
         "GLOBAL · BROWSE the launch catalog filtered by Workflow/Pipeline/Run Type. "
-        "Last 20 launches, newest Started first, independent of the time range. "
+        "Last 20 pipeline runs, newest Started first, independent of the time range. "
         "All twenty rows fit the wide table without pagination or internal scrolling; "
         "scroll the page to see the complete catalog. "
         "Workflow and Pipeline open passports. Run ID opens the persisted Report. "
@@ -263,7 +263,7 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
         "pipeline is retained for tooltips and every handoff. "
         "The full UUID is available in the cell tooltip "
         "and cell inspection without widening the column or wrapping the row. "
-        "Overview is processing status, not replay readiness. "
+        "Processing shows the saved execution status. "
         "Saved Evidence, Data Quality and Replay Readiness use exact-run verified evidence. "
         "N/A means unsupported/legacy assessment. INCOMPLETE means missing required evidence. "
         "IN PROGRESS requires an explicit assessment queue/running signal and is never inferred. "
@@ -352,7 +352,7 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
             "Provider Evidence",
             "/d/bioetl-overview-v2/3-run-overview?" + _CONTEXT + "&viewPanel=9480",
         ),
-        "Overview": (
+        "Processing": (
             "Run Overview",
             "/d/bioetl-overview-v2/3-run-overview?" + _CONTEXT,
         ),
@@ -414,7 +414,7 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
             )
         if name == "Pipeline":
             properties.append({"id": "custom.tooltip.field", "value": "pipeline"})
-        if name in {"Overview", "Saved Evidence", _DATA_QUALITY, _REPLAY_READINESS}:
+        if name in {"Processing", "Saved Evidence", _DATA_QUALITY, _REPLAY_READINESS}:
             properties.extend(
                 [
                     {

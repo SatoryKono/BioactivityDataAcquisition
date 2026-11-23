@@ -42,7 +42,7 @@ _SPECS = {
     "bioetl-run-explorer-v1.json": (
         1,
         "Understand Run Scope",
-        ("Last 20 launches", "independent of the time range", "Reset filters"),
+        ("Last 20 pipeline runs", "independent of the time range", "Reset filters"),
     ),
 }
 

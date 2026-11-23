@@ -7,7 +7,9 @@ pipeline:
   entity_type: target
   description: Extract biological targets from ChEMBL API
   target_classification:
-    mode: "off"
+    mode: enrich
+    snapshot_manifest: reports/local/iuphar-remediation-20261116/enrich-profile-candidate.json
+    snapshot_manifest_sha256: "19890adec664098ef0703020b62d016bb675474fdceb7ea2c94c38e838f6d67a"
   field_policy: {}
   business_primary_keys:
     - target_id

@@ -69,7 +69,7 @@ def test_ten_columns_keep_full_identity_for_handoffs():
         "Run ID",
         "Started",
         "Duration",
-        "Overview",
+        "Processing",
         "Saved Evidence",
         "Data Quality",
         "Replay Readiness",
@@ -85,7 +85,7 @@ def test_ten_columns_keep_full_identity_for_handoffs():
         "Data Quality": "Data Quality",
     }
     for column in (
-        "Overview",
+        "Processing",
         "Saved Evidence",
         "Data Quality",
         "Replay Readiness",
@@ -133,7 +133,7 @@ def test_compact_view_keeps_ten_data_fields_and_every_handoff():
         "Pipeline",
         "Run ID",
         "Started",
-        "Overview",
+        "Processing",
         "Replay Readiness",
     ]
     menu = overrides["Run ID"]["links"]

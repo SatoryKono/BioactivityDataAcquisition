@@ -24,8 +24,10 @@ no dedicated workflow or pipeline CLI flag.
 
 ## Impact
 
-The production configuration remains `mode: "off"`. The historical dictionary
-is an unqualified legacy source with unresolved classification disagreements.
+Read the active mode and pinned dependency from
+`configs/entities/chembl/target.yaml`. Supported modes are `off`, `shadow`, and
+`enrich`; `on` is not a valid mode. The historical dictionary is an unqualified
+legacy source with unresolved classification disagreements.
 Retrieving official export bytes and passing software tests does not approve a
 snapshot's coverage or reference cases. Require the actual acquisition,
 independent scope review, and executed acceptance artifacts below before
@@ -68,6 +70,7 @@ not promote production or enable generic dual writing.
 
 The canonical setting is under `pipeline` in
 [`configs/entities/chembl/target.yaml`](../../../configs/entities/chembl/target.yaml):
+the following example disables classification.
 
 ```yaml
 pipeline:
@@ -97,6 +100,13 @@ profile bytes. Calculate a file digest with:
 ```powershell
 (Get-FileHash -Algorithm SHA256 'PATH_TO_PROFILE_JSON').Hash.ToLowerInvariant()
 ```
+
+To add classification columns to new output tables, select `mode: enrich` with
+an admitted profile and executed reference acceptance. A fresh, isolated data
+directory does not require migration of existing tables. Reusing existing V30
+destinations requires the migration procedure below; a successful isolated run
+does not establish migration or production deployment. Preserve the snapshot's
+scope limitations and nullable results in exported data.
 
 The profile has this structure; all references are relative to its directory,
 must stay inside that directory, and bind exact bytes:

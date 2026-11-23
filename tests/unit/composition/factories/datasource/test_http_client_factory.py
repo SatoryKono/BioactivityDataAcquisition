@@ -33,6 +33,7 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
+from pydantic import SecretStr
 
 from bioetl.composition.factories.datasource.http_client import (
     HttpClientFactory,
@@ -371,7 +372,7 @@ class TestResolvedHttpConfig:
                 "semanticscholar",
                 "semanticscholar_api_key",
                 (0.01, 1),
-                (1.0, 5),
+                (1.0, 1),
             ),
             ("uniprot", "uniprot_api_key", (10.0, 20), (100.0, 200)),
         ],
@@ -393,6 +394,32 @@ class TestResolvedHttpConfig:
         with_key = HttpClientFactory._resolve_config(provider, settings)
         assert (with_key.rate, with_key.capacity) == authenticated
 
+    @pytest.mark.parametrize("wrap_secret", [False, True])
+    @pytest.mark.parametrize(
+        ("api_key", "expected_rate"),
+        [
+            (None, 0.01),
+            ("", 0.01),
+            ("   ", 0.01),
+            ("your_api_key_here", 0.01),
+            ("  your_api_key_here  ", 0.01),
+            ("YOUR_API_KEY_HERE", 0.01),
+            ("  configured-test-key  ", 1.0),
+        ],
+    )
+    def test_semanticscholar_rate_matches_usable_request_key(
+        self, api_key: str | None, expected_rate: float, wrap_secret: bool
+    ) -> None:
+        configured_key = (
+            SecretStr(api_key) if wrap_secret and api_key is not None else api_key
+        )
+        settings = SimpleNamespace(semanticscholar_api_key=configured_key)
+
+        config = HttpClientFactory._resolve_config("semanticscholar", settings)
+
+        assert config.rate == expected_rate
+        assert config.capacity == 1
+
     @pytest.mark.parametrize("authenticated", [False, True])
     @pytest.mark.parametrize("test_mode", [False, True])
     def test_semanticscholar_uses_configured_attempt_budget(
@@ -407,8 +434,8 @@ class TestResolvedHttpConfig:
         configured = load_source_config("semanticscholar")
         resolved = HttpClientFactory._resolve_config("semanticscholar", settings)
         retry = HttpClientFactory._build_retry_config(resolved, settings)
-        assert retry.max_attempts == configured.max_retries == 2
-        assert retry.effective_retry_budget() == 1
+        assert retry.max_attempts == configured.max_retries == 5
+        assert retry.effective_retry_budget() == 4
         if not authenticated:
             assert (resolved.rate, resolved.capacity) == (0.01, 1)
 

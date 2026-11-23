@@ -567,7 +567,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Start Incident Triage",
-        "content": "<div style=\"font-size:16px;line-height:1.2\">Rule triggered; cause not confirmed. Read the ranked suspect first. Fleet blockers and time-range charts are in Pipeline fleet and range on this page. PENDING has not fired. <a href=\"/d/bioetl-incident-v1/5-incident-workspace?viewPanel=22011&amp;${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Stage lag/backlog measurements</a>.</div>"
+        "content": "<div style=\"font-size:16px;line-height:1.2\">Rule triggered; cause not confirmed. Ranked suspects cover all pipelines. Check the Object before attributing a signal to this run. Fleet blockers and time-range charts are in Pipeline fleet and range on this page. PENDING has not fired. <a href=\"/d/bioetl-incident-v1/5-incident-workspace?viewPanel=22011&amp;${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\">Stage lag/backlog measurements</a>.</div>"
       },
       "links": [
         {
@@ -2987,7 +2987,7 @@
             "type": "yesoreyeram-infinity-datasource",
             "uid": "bioetl-ops-http"
           },
-          "description": "SELECTED RUN · Overall verdict is the data quality assessment of this Run ID. Processing is the ETL outcome. Trust is the saved Trust verdict and does not authorize replay. Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is Source unavailable. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response.",
+          "description": "SELECTED RUN · Overall verdict summarizes the saved domain checks for this run. Processing is the ETL outcome. Trust is the saved Trust verdict and does not authorize replay. Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is Source unavailable. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response.",
           "fieldConfig": {
             "defaults": {
               "noValue": "UNKNOWN",

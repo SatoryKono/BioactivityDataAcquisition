@@ -310,7 +310,7 @@ _RECOVERY_ACTION_HTML = (
     '<div style="padding:4px 10px;border-left:4px solid #6b7280;line-height:1.2;'
     'font-size:16px;white-space:normal;overflow-wrap:anywhere;max-width:96ch">'
     '${pipeline:text} | <code style="font:inherit;background:none;border:0;padding:0">${run_id}</code><br>'
-    "Blockers: <em>Review Exact Replay Checks</em>.</div>"
+    "<a href=\"/d/bioetl-control-plane-v1/2-replay-readiness?viewPanel=9423&amp;${workflow:queryparam}&amp;${pipeline:queryparam}&amp;${run_type:queryparam}&amp;${run_id:queryparam}&amp;${__url_time_range}\"><em>Review Exact Replay Checks</em></a>.</div>"
 )
 _RUN_EXPLORER_UID = "bioetl-run-explorer-v1"
 CHIP_BASE = (

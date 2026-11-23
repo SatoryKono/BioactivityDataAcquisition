@@ -755,3 +755,5 @@ _fail_*.txt
 !/docs/99-archive/prompts-2026-09/**
 !/reports/quality/external-resource-inventory.md
 /data/wf20261122-153743
+/data/semanticscholar-anonymous-20261123-072033
+/data/publication-pack-anonymous-20261123-072354

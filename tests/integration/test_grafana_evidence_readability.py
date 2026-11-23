@@ -239,7 +239,7 @@ def test_run_cell_inspection_and_links_use_full_identity():
     # Handoff actions retain their source metadata when copied into the menu.
     assert all("tooltip" not in link for link in links[:2])
     assert rules["Run ID"]["custom.tooltip.field"] == "run_id"
-    for field in ("Overview", "Replay Readiness"):
+    for field in ("Processing", "Replay Readiness"):
         assert all(
             "var-run_id=${__data.fields.run_id:percentencode}" in link["url"]
             for link in rules[field]["links"]

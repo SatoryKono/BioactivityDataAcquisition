@@ -715,7 +715,7 @@ def apply_overview_evidence_clocks(payload, panels):
     """Separate saved verdicts, current alerts and complete alert evidence."""
     panels[9604]["title"] = "Review Saved Run Verdict"
     panels[9604]["description"] += (
-        " This is the saved run assessment, not current fleet health or active alerts."
+        " A successful execution can have an ERROR verdict. Review Run Domains identifies the failed check."
     )
     place_overview_evidence(panels)
     _provider_card(panels)

@@ -313,7 +313,7 @@ def test_first_window_scope_banners_name_current_range_and_selected_run() -> Non
         "bioetl-dq-v2.json": ("SELECTED RUN", "TIME RANGE", "never proves this run"),
         "bioetl-incident-v1.json": ("CURRENT", "Run ID does not filter"),
         "bioetl-run-explorer-v1.json": (
-            "Last 20 launches",
+            "Last 20 pipeline runs",
             "independent of the time range",
         ),
         "bioetl-control-plane-v1.json": ("${run_id}", "Replay Checks"),

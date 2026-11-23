@@ -520,7 +520,7 @@ def test_dq_9406_description_names_verdict_columns() -> None:
     panels = _dq_panels_by_id()
     description = str(panels[9406].get("description") or "")
     assert description.startswith(
-        "SELECTED RUN · Overall verdict is the data quality assessment"
+        "SELECTED RUN · Overall verdict summarizes the saved domain checks"
     )
     assert "Processing is the ETL outcome" in description
     assert (
