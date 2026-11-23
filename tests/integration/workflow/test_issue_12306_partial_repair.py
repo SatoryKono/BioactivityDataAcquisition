@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from unittest.mock import Mock
 from uuid import UUID
 
 import pytest
@@ -13,9 +14,17 @@ from bioetl.application.services.workflow.control_plane.execution_service import
 )
 from bioetl.application.services.workflow.workflow_runner_service import (
     WorkflowTransformDestructiveCommit,
+    WorkflowRunnerService,
 )
+from bioetl.application.services.workflow.workflow_transform_service import (
+    WorkflowTransformService,
+)
+from bioetl.application.workflow.transforms import WorkflowTransformRegistry
 from bioetl.domain.types import RunID
 from bioetl.domain.workflow import TransformStepConfig, WorkflowConfig
+from bioetl.infrastructure.storage.run_report_store_adapter import (
+    FileRunReportStoreAdapter,
+)
 
 from tests.helpers.clock import FIXED_TEST_TIME
 from tests.unit.application.services.control_plane.test_workflow_execution_service import (
@@ -44,6 +53,85 @@ def _build_two_step_transform_config() -> WorkflowConfig:
             ),
         ),
     )
+
+
+@pytest.mark.asyncio
+async def test_forced_failure_resume_reuses_last_success_through_execution_service():
+    config = WorkflowConfig(
+        name="forced_failure_resume",
+        steps=(
+            TransformStepConfig(step_id="first", transform_name="normalize"),
+            TransformStepConfig(step_id="sibling", transform_name="normalize"),
+            TransformStepConfig(step_id="last", transform_name="finalize"),
+        ),
+    )
+    calls = []
+    fail = False
+    fail_last = True
+
+    def execute(spec, upstream):
+        calls.append(spec.step_id)
+        if fail:
+            raise RuntimeError("forced failure")
+        return {"fingerprint": spec.fingerprint}
+
+    def finalize(spec, upstream):
+        if fail_last:
+            raise RuntimeError("initial failure")
+        return {"fingerprint": spec.fingerprint}
+
+    registry = WorkflowTransformRegistry()
+    registry.register("normalize", execute)
+    registry.register("finalize", finalize)
+    metrics = Mock()
+    state_port = _InMemoryWorkflowStatePort()
+    service = WorkflowExecutionService(
+        workflow_runner=WorkflowRunnerService(
+            pipeline_runner=Mock(),
+            transform_service=WorkflowTransformService(
+                registry=registry, metrics=metrics
+            ),
+            metrics=metrics,
+            report_store=FileRunReportStoreAdapter(),
+        ),
+        manifest_service=WorkflowManifestService(
+            manifest_port=_InMemoryWorkflowManifestPort(),
+            created_at_factory=lambda: FIXED_TEST_TIME,
+            _manifest_id_factory=lambda: "manifest-forced-failure",
+        ),
+        workflow_ledger_port=_InMemoryWorkflowLedgerPort(),
+        workflow_ledger_factory=_create_workflow_ledger_service,
+        workflow_state_port=state_port,
+        workflow_lock_port=_FakeLockPort(),
+        now_factory=lambda: FIXED_TEST_TIME,
+        run_id_factory=lambda: RunID(UUID("00000000-0000-0000-0000-000000000005")),
+    )
+
+    assert (await service.run_workflow(config)).status == "failed"
+    saved = state_port.get_latest(config.name).completed_transform_fingerprints.copy()
+    assert calls == ["first", "sibling"]
+    fail = True
+    forced = await service.run_workflow(
+        config, resume_last=True, force_steps=("first",)
+    )
+    assert forced.status == "failed"
+    state = state_port.get_latest(config.name)
+    assert state.completed_transform_fingerprints == saved
+    assert {step.step_id: step.status for step in state.steps} == {
+        "first": "failed",
+        "sibling": "success",
+        "last": "failed",
+    }
+    assert calls == ["first", "sibling", "first"]
+    fail_last = False
+    resumed = await service.run_workflow(config, resume_last=True)
+    assert resumed.status == "success"
+    assert {step.step_id: step.status for step in resumed.steps} == {
+        "first": "skipped",
+        "sibling": "skipped",
+        "last": "success",
+    }
+    assert calls == ["first", "sibling", "first"]
 
 
 @pytest.mark.asyncio
