@@ -1207,26 +1207,26 @@
               "options": {
                 "filters": [
                   {
-                    "fieldName": "Value",
                     "config": {
                       "id": "greater",
                       "options": {
                         "value": 0
                       }
-                    }
+                    },
+                    "fieldName": "Value"
                   },
                   {
-                    "fieldName": "signal",
                     "config": {
                       "id": "equal",
                       "options": {
                         "value": "telemetry_gap"
                       }
-                    }
+                    },
+                    "fieldName": "signal"
                   }
                 ],
-                "type": "include",
-                "match": "any"
+                "match": "any",
+                "type": "include"
               }
             },
             {
@@ -1235,8 +1235,44 @@
                 "fields": {},
                 "sort": [
                   {
-                    "field": "Value",
-                    "desc": true
+                    "desc": false,
+                    "field": "domain"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "sortBy",
+              "options": {
+                "fields": {},
+                "sort": [
+                  {
+                    "desc": false,
+                    "field": "signal"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "sortBy",
+              "options": {
+                "fields": {},
+                "sort": [
+                  {
+                    "desc": false,
+                    "field": "object"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "sortBy",
+              "options": {
+                "fields": {},
+                "sort": [
+                  {
+                    "desc": true,
+                    "field": "Value"
                   }
                 ]
               }
@@ -1244,29 +1280,29 @@
             {
               "id": "calculateField",
               "options": {
-                "mode": "index",
-                "alias": "row_index"
+                "alias": "row_index",
+                "mode": "index"
               }
             },
             {
               "id": "calculateField",
               "options": {
-                "mode": "binary",
+                "alias": "Rank",
                 "binary": {
                   "left": "row_index",
                   "operator": "+",
                   "right": "1"
                 },
-                "alias": "Rank"
+                "mode": "binary"
               }
             },
             {
               "id": "extractFields",
               "options": {
-                "source": "signal",
                 "format": "regexp",
                 "regExp": "/(?<action_detail>.*)/",
-                "replace": false
+                "replace": false,
+                "source": "signal"
               }
             },
             {
@@ -1276,42 +1312,42 @@
                   "Time": true,
                   "Time 1": true,
                   "Time 2": true,
-                  "reason": true,
-                  "cause": true,
-                  "run_type": true,
-                  "severity": true,
-                  "action_target": true,
                   "__name__": true,
-                  "row_index": true,
+                  "action_dashboard_uid": false,
+                  "action_target": true,
+                  "cause": true,
                   "confidence": false,
-                  "object": false,
                   "job": true,
-                  "action_dashboard_uid": false
+                  "object": false,
+                  "reason": true,
+                  "row_index": true,
+                  "run_type": true,
+                  "severity": true
                 },
                 "indexByName": {
                   "Rank": 0,
                   "Value": 1,
-                  "confidence": 2,
-                  "freshness": 3,
-                  "pipeline": 4,
-                  "provider": 5,
-                  "signal": 6,
                   "action": 7,
                   "action_detail": 8,
+                  "confidence": 2,
                   "domain": 9,
-                  "object": 10
+                  "freshness": 3,
+                  "object": 10,
+                  "pipeline": 4,
+                  "provider": 5,
+                  "signal": 6
                 },
                 "renameByName": {
-                  "domain": "Domain",
-                  "signal": "Signal",
                   "Value": "Severity",
                   "action": "Action",
+                  "action_detail": "Details",
                   "confidence": "Confidence",
+                  "domain": "Domain",
+                  "freshness": "Event freshness",
                   "object": "Object",
                   "pipeline": "Pipeline",
                   "provider": "Provider",
-                  "action_detail": "Details",
-                  "freshness": "Event freshness"
+                  "signal": "Signal"
                 }
               }
             }
@@ -12120,26 +12156,26 @@
                   "options": {
                     "filters": [
                       {
-                        "fieldName": "Value",
                         "config": {
                           "id": "greater",
                           "options": {
                             "value": 0
                           }
-                        }
+                        },
+                        "fieldName": "Value"
                       },
                       {
-                        "fieldName": "signal",
                         "config": {
                           "id": "equal",
                           "options": {
                             "value": "telemetry_gap"
                           }
-                        }
+                        },
+                        "fieldName": "signal"
                       }
                     ],
-                    "type": "include",
-                    "match": "any"
+                    "match": "any",
+                    "type": "include"
                   }
                 },
                 {
@@ -12148,8 +12184,44 @@
                     "fields": {},
                     "sort": [
                       {
-                        "field": "Value",
-                        "desc": true
+                        "desc": false,
+                        "field": "domain"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "sortBy",
+                  "options": {
+                    "fields": {},
+                    "sort": [
+                      {
+                        "desc": false,
+                        "field": "signal"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "sortBy",
+                  "options": {
+                    "fields": {},
+                    "sort": [
+                      {
+                        "desc": false,
+                        "field": "object"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "sortBy",
+                  "options": {
+                    "fields": {},
+                    "sort": [
+                      {
+                        "desc": true,
+                        "field": "Value"
                       }
                     ]
                   }
@@ -12157,29 +12229,29 @@
                 {
                   "id": "calculateField",
                   "options": {
-                    "mode": "index",
-                    "alias": "row_index"
+                    "alias": "row_index",
+                    "mode": "index"
                   }
                 },
                 {
                   "id": "calculateField",
                   "options": {
-                    "mode": "binary",
+                    "alias": "Rank",
                     "binary": {
                       "left": "row_index",
                       "operator": "+",
                       "right": "1"
                     },
-                    "alias": "Rank"
+                    "mode": "binary"
                   }
                 },
                 {
                   "id": "extractFields",
                   "options": {
-                    "source": "signal",
                     "format": "regexp",
                     "regExp": "/(?<action_detail>.*)/",
-                    "replace": false
+                    "replace": false,
+                    "source": "signal"
                   }
                 },
                 {
@@ -12189,42 +12261,42 @@
                       "Time": true,
                       "Time 1": true,
                       "Time 2": true,
-                      "reason": true,
-                      "cause": true,
-                      "run_type": true,
-                      "severity": true,
-                      "action_target": true,
                       "__name__": true,
-                      "row_index": true,
+                      "action_dashboard_uid": false,
+                      "action_target": true,
+                      "cause": true,
                       "confidence": false,
-                      "object": false,
                       "job": true,
-                      "action_dashboard_uid": false
+                      "object": false,
+                      "reason": true,
+                      "row_index": true,
+                      "run_type": true,
+                      "severity": true
                     },
                     "indexByName": {
                       "Rank": 0,
                       "Value": 1,
-                      "confidence": 2,
-                      "freshness": 3,
-                      "pipeline": 4,
-                      "provider": 5,
-                      "signal": 6,
                       "action": 7,
                       "action_detail": 8,
+                      "confidence": 2,
                       "domain": 9,
-                      "object": 10
+                      "freshness": 3,
+                      "object": 10,
+                      "pipeline": 4,
+                      "provider": 5,
+                      "signal": 6
                     },
                     "renameByName": {
-                      "domain": "Domain",
-                      "signal": "Signal",
                       "Value": "Severity",
                       "action": "Action",
+                      "action_detail": "Details",
                       "confidence": "Confidence",
+                      "domain": "Domain",
+                      "freshness": "Event freshness",
                       "object": "Object",
                       "pipeline": "Pipeline",
                       "provider": "Provider",
-                      "action_detail": "Details",
-                      "freshness": "Event freshness"
+                      "signal": "Signal"
                     }
                   }
                 }

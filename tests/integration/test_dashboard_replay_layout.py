@@ -30,7 +30,10 @@ def test_replay_layout_preserves_checks_and_identity_scope():
     assert by_id[9423] in panels
     assert by_id[9423]["gridPos"]["y"] < by_id[9408]["gridPos"]["y"]
     assert "priority=" not in by_id[9408]["targets"][0]["url"]
-    assert "present ? 1 : 0" in by_id[9408]["targets"][0]["uql"]
+    anchors = by_id[9408]["targets"][0]
+    assert anchors["parser"] == "backend"
+    assert "uql" not in anchors
+    assert "present ? 1 : 0" in anchors["root_selector"]
     for panel in by_id.values():
         for target in panel.get("targets", []):
             if panel["id"] in {9422, 9423}:

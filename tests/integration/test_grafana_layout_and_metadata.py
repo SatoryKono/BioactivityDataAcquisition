@@ -589,7 +589,10 @@ def test_control_plane_bounded_failure_rows_preserve_unknown_evidence() -> None:
     target = panel["targets"][0]
     assert target.get("panelId") == 9418
     donor = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9418)
-    assert "replay_checks" in donor["targets"][0]["uql"]
+    donor_target = donor["targets"][0]
+    assert donor_target["parser"] == "backend"
+    assert "uql" not in donor_target
+    assert "replay_checks" in donor_target["root_selector"]
     assert "run_id=${run_id}" in donor["targets"][0]["url"]
     assert "/ops/observability/selected-run-status?" in donor["targets"][0]["url"]
     assert "QUERY ERROR" in panel["description"]

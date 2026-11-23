@@ -103,7 +103,7 @@ EXPLICIT_VALUE_MAPPING_STAT_PANELS: dict[tuple[str, str], JsonObject] = {
     ),
     (DASHBOARD_INCIDENT_V1, PANEL_MONITOR_RUNTIME_BLOCKERS): {
         "0": {"text": "0 blockers", "color": "gray"},
-        "1": {"text": "CRIT", "color": "red"},
+        "1": {"text": "1 blocker · CRIT", "color": "red"},
     },
 }
 FAIL_CLOSED_NO_ZERO_FALLBACK_PANELS = {
@@ -259,6 +259,20 @@ def _stat_background_color_mode_error(
     return f"{dashboard_path}: panel '{title}' must use options.colorMode=background"
 
 
+def _stat_blocker_range_is_critical(mappings: list[JsonObject]) -> bool:
+    ranges = [mapping for mapping in mappings if mapping.get("type") == "range"]
+    return _semantic_palette(ranges) == [
+        {
+            "type": "range",
+            "options": {
+                "from": 2,
+                "to": 2**53 - 1,
+                "result": {"text": "2+ blockers · CRIT", "color": "red"},
+            },
+        }
+    ]
+
+
 def _stat_value_mapping_error(
     dashboard_path: Path, title: str, mappings: list[JsonObject]
 ) -> str | None:
@@ -274,6 +288,11 @@ def _stat_value_mapping_error(
     if (
         value_mapping is not None
         and _semantic_palette(value_mapping.get("options")) == expected_value_mapping
+        and (
+            (dashboard_path.name, str(title))
+            != (DASHBOARD_INCIDENT_V1, PANEL_MONITOR_RUNTIME_BLOCKERS)
+            or _stat_blocker_range_is_critical(mappings)
+        )
     ):
         return None
     return (
