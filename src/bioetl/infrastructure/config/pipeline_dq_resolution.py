@@ -40,24 +40,7 @@ def field_validation_to_dict(
     fv: FieldValidationConfig,
 ) -> JsonDict:  # Any: dynamic YAML config values
     """Convert FieldValidationConfig to mergeable file-shape dict."""
-    result: JsonDict = {  # Any: dynamic YAML config values
-        "field": fv.field,
-        "type": fv.type,
-        "nullable": fv.nullable,
-    }
-    if fv.min is not None:
-        result["min"] = fv.min
-    if fv.max is not None:
-        result["max"] = fv.max
-    if fv.pattern:
-        result["pattern"] = fv.pattern
-    if fv.allowed:
-        result["allowed"] = list(fv.allowed)
-    if fv.validator:
-        result["validator"] = fv.validator
-    if fv.error_message:
-        result["error_message"] = fv.error_message
-    return result
+    return fv.model_dump(exclude_unset=True, mode="json")
 
 
 def cross_field_validation_to_dict(
@@ -120,9 +103,10 @@ def normalize_inline_dq_overrides(
         result["strict_validation"] = dq_overrides.strict_validation
     if "invalid_record_policy" in supplied:
         result["invalid_record_policy"] = dq_overrides.invalid_record_policy
-    report = dq_overrides.report.model_dump(exclude_unset=True)
-    if report:
-        result["report"] = report
+    if "report" in supplied:
+        result["report"] = dq_overrides.report.model_dump(
+            exclude_unset=True, mode="json"
+        )
 
     if dq_overrides.field_validations:
         result["entity_field_validations"] = [

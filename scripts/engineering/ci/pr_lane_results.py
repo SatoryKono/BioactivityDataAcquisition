@@ -597,14 +597,12 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "docs/03-guides/dq-configuration.md": (
         "tests/architecture/test_documentation_residual_keyword_guards.py",
         "tests/architecture/test_tech_debt_issue_6038_governance_taxonomy.py",
+        "tests/unit/infrastructure/config/test_dq_config_loader.py",
+        "tests/unit/infrastructure/config/test_pipeline_config_loader_extended.py",
     ),
     "docs/03-guides/metrics-monitoring.md": (
         "tests/architecture/test_observability_docs_drift.py",
         "tests/unit/infrastructure/observability/test_prometheus_metadata_contract.py",
-    ),
-    "docs/03-guides/dq-configuration.md": (
-        "tests/unit/infrastructure/config/test_dq_config_loader.py",
-        "tests/unit/infrastructure/config/test_pipeline_config_loader_extended.py",
     ),
     "docs/03-guides/workflows.md": (
         "tests/architecture/test_workflow_cli_running_boundaries.py",
