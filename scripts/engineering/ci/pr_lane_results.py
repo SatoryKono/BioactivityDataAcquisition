@@ -1392,7 +1392,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
     ),
     "configs/quality/external_resource_inventory_pr13311_rf003_review.json": (
-        "tests/architecture/test_external_resource_inventory_catalog.py",
+        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
         IUPHAR_COMPOSITE_FEATURES_RF003_TEST,
         IUPHAR_POST_JOIN_CLASSIFICATION_RF003_TEST,
     ),

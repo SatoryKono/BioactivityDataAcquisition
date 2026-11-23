@@ -264,7 +264,10 @@ def load_target_runtime_profile(
 
 
 def build_target_classification_session(
-    config: PipelineYamlConfig, settings: Settings
+    config: PipelineYamlConfig,
+    settings: Settings,
+    *,
+    pipeline_name: str = "chembl_target",
 ) -> TargetClassificationRunState | None:
     profile = load_target_runtime_profile(config)
     if profile is None:
@@ -282,6 +285,7 @@ def build_target_classification_session(
         rules_version=profile.rules_version,
         classification_schema_version=profile.classification_schema_version,
         matching_policy_version=profile.matching_policy_version,
+        pipeline_name=pipeline_name,
     )
     return TargetClassificationRunState(
         classifier=classifier,

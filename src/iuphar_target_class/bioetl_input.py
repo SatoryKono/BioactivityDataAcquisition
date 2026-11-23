@@ -27,6 +27,13 @@ def _text(value: object) -> str | None:
 def _tokens(value: object) -> tuple[str, ...]:
     if value is None:
         return ()
+    if isinstance(value, Mapping):
+        # UniProt FeatureExtractor keywords: {"id": "KW-0418", "name": "...", ...}
+        for key in ("id", "keyword", "accession"):
+            token = _text(value.get(key))
+            if token is not None:
+                return (token,)
+        return ()
     if isinstance(value, (list, tuple)):
         return tuple(part for item in value for part in _tokens(item))
     text = _text(value)

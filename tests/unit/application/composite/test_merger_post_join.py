@@ -37,6 +37,7 @@ import polars as pl
 import pytest
 
 from bioetl.application.composite.merger_post_join import (
+    MergePersistRequest,
     MergePostJoinContext,
     finalize_merged_dataframe,
     finalize_post_join_context,
@@ -166,18 +167,20 @@ class TestPersistAndBuildResult:
 
         result = await persist_and_build_result(
             host,
-            merged_df=df,
-            enrichers=enrichers,
-            records_merged=1,
-            records_from_seed=1,
-            records_enriched=0,
-            sources_used=["seed"],
-            cv_stats=None,
-            quarantine_payloads=[],
-            metadata_timestamp=metadata_timestamp,
-            run_id="run-1",
-            started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
-            started_monotonic=10.0,
+            MergePersistRequest(
+                merged_df=df,
+                enrichers=enrichers,
+                records_merged=1,
+                records_from_seed=1,
+                records_enriched=0,
+                sources_used=["seed"],
+                cv_stats=None,
+                quarantine_payloads=[],
+                metadata_timestamp=metadata_timestamp,
+                run_id="run-1",
+                started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
+                started_monotonic=10.0,
+            ),
         )
 
         host._write_outputs.assert_awaited_once()
@@ -200,18 +203,20 @@ class TestPersistAndBuildResult:
         ):
             await persist_and_build_result(
                 host,
-                merged_df=df,
-                enrichers=[],
-                records_merged=0,
-                records_from_seed=0,
-                records_enriched=0,
-                sources_used=[],
-                cv_stats=None,
-                quarantine_payloads=[],
-                metadata_timestamp=None,
-                run_id="run-1",
-                started_at=started_at,
-                started_monotonic=5.0,
+                MergePersistRequest(
+                    merged_df=df,
+                    enrichers=[],
+                    records_merged=0,
+                    records_from_seed=0,
+                    records_enriched=0,
+                    sources_used=[],
+                    cv_stats=None,
+                    quarantine_payloads=[],
+                    metadata_timestamp=None,
+                    run_id="run-1",
+                    started_at=started_at,
+                    started_monotonic=5.0,
+                ),
             )
 
         call_kwargs = host._build_merge_result.call_args[1]

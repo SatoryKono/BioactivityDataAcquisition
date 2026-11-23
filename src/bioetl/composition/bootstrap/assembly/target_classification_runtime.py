@@ -137,9 +137,7 @@ def resolve_composite_post_join_classification_session(
     """
     if composite_name != "composite_target":
         return None
-    from bioetl.infrastructure.config.pipeline_config_api import (  # noqa: PLC0415
-        load_pipeline_config,
-    )
+    from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
 
     loader = load_seed_config or load_pipeline_config
     seed_config = loader("chembl_target")  # type: ignore[operator]
@@ -148,5 +146,7 @@ def resolve_composite_post_join_classification_session(
     if not seed_config.target_classification.enabled:
         return None
     return build_target_classification_session(
-        seed_config, settings or get_settings()
+        seed_config,
+        settings or get_settings(),
+        pipeline_name="composite_target",
     )

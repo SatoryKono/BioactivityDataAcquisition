@@ -8,7 +8,8 @@ follow successful persistence.
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+from dataclasses import field as dataclass_field
 from datetime import datetime
 from typing import TYPE_CHECKING, Protocol
 
@@ -24,6 +25,9 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.ports import LoggerPort
 
+_COMPOSITE_PIPELINE_NAME = "composite_target"
+_COMPOSITE_WORKFLOW_ID = "composite_post_join"
+
 
 class _ClassificationHost(Protocol):
     _logger: LoggerPort
@@ -37,11 +41,29 @@ class PostJoinClassificationOutcome:
     merged_df: pl.DataFrame
     classified_rows: int = 0
     mode: str | None = None
-    _pending_indices: list[int] = field(default_factory=list)
+    _pending_indices: list[int] = dataclass_field(default_factory=list)
 
 
 def _row_mapping(row: Mapping[str, object]) -> dict[str, object]:
     return {str(key): value for key, value in row.items()}
+
+
+def _classification_context(
+    host: _ClassificationHost,
+    *,
+    run_id: str,
+    metadata_timestamp: datetime | None,
+) -> PipelineContext:
+    return PipelineContext.create(
+        run_id=run_id,  # type: ignore[arg-type]
+        run_type="composite",  # type: ignore[arg-type]
+        logger=host._logger,
+        started_at=metadata_timestamp,
+        source_batch_id="composite_merge",  # type: ignore[arg-type]
+        replay_timestamp_anchor=metadata_timestamp,
+        pipeline_name=_COMPOSITE_PIPELINE_NAME,
+        workflow_id=_COMPOSITE_WORKFLOW_ID,
+    )
 
 
 def apply_post_join_target_classification(
@@ -59,15 +81,8 @@ def apply_post_join_target_classification(
     if session is None or merged_df.is_empty():
         return PostJoinClassificationOutcome(merged_df=merged_df)
 
-    context = PipelineContext.create(
-        run_id=run_id,  # type: ignore[arg-type]
-        run_type="composite",  # type: ignore[arg-type]
-        logger=host._logger,
-        started_at=metadata_timestamp,
-        source_batch_id="composite_merge",  # type: ignore[arg-type]
-        replay_timestamp_anchor=metadata_timestamp,
-        pipeline_name="composite_target",
-        workflow_id="composite_post_join",
+    context = _classification_context(
+        host, run_id=run_id, metadata_timestamp=metadata_timestamp
     )
     records = merged_df.to_dicts()
     projections: list[dict[str, object]] = []
@@ -82,9 +97,9 @@ def apply_post_join_target_classification(
             continue
         projections.append(
             {
-                field: enriched.get(field)
-                for field in TARGET_CLASSIFICATION_FIELDS
-                if field in enriched
+                name: enriched.get(name)
+                for name in TARGET_CLASSIFICATION_FIELDS
+                if name in enriched
             }
         )
 
@@ -102,13 +117,15 @@ def apply_post_join_target_classification(
         )
 
     updates = {
-        field: [projection.get(field) for projection in projections]
-        for field in TARGET_CLASSIFICATION_FIELDS
-        if any(field in projection for projection in projections)
+        name: [projection.get(name) for projection in projections]
+        for name in TARGET_CLASSIFICATION_FIELDS
+        if any(name in projection for projection in projections)
     }
     result_df = merged_df
-    for field, values in updates.items():
-        result_df = result_df.with_columns(pl.Series(name=field, values=values))
+    for column_name, values in updates.items():
+        result_df = result_df.with_columns(
+            pl.Series(name=column_name, values=values)
+        )
 
     host._logger.info(
         "RF-003 post-join classification applied after dependency joins",
@@ -135,15 +152,8 @@ def publish_post_join_classification(
     session = getattr(host, "_target_classification_session", None)
     if session is None or not indices:
         return
-    context = PipelineContext.create(
-        run_id=run_id,  # type: ignore[arg-type]
-        run_type="composite",  # type: ignore[arg-type]
-        logger=host._logger,
-        started_at=metadata_timestamp,
-        source_batch_id="composite_merge",  # type: ignore[arg-type]
-        replay_timestamp_anchor=metadata_timestamp,
-        pipeline_name="composite_target",
-        workflow_id="composite_post_join",
+    context = _classification_context(
+        host, run_id=run_id, metadata_timestamp=metadata_timestamp
     )
     for index in indices:
         session.publish(context, index)
@@ -159,15 +169,8 @@ def finalize_post_join_classification(
     session = getattr(host, "_target_classification_session", None)
     if session is None:
         return
-    context = PipelineContext.create(
-        run_id=run_id,  # type: ignore[arg-type]
-        run_type="composite",  # type: ignore[arg-type]
-        logger=host._logger,
-        started_at=metadata_timestamp,
-        source_batch_id="composite_merge",  # type: ignore[arg-type]
-        replay_timestamp_anchor=metadata_timestamp,
-        pipeline_name="composite_target",
-        workflow_id="composite_post_join",
+    context = _classification_context(
+        host, run_id=run_id, metadata_timestamp=metadata_timestamp
     )
     session.finalize(context)
 
@@ -183,15 +186,8 @@ def discard_post_join_classification(
     session = getattr(host, "_target_classification_session", None)
     if session is None or not indices:
         return
-    context = PipelineContext.create(
-        run_id=run_id,  # type: ignore[arg-type]
-        run_type="composite",  # type: ignore[arg-type]
-        logger=host._logger,
-        started_at=metadata_timestamp,
-        source_batch_id="composite_merge",  # type: ignore[arg-type]
-        replay_timestamp_anchor=metadata_timestamp,
-        pipeline_name="composite_target",
-        workflow_id="composite_post_join",
+    context = _classification_context(
+        host, run_id=run_id, metadata_timestamp=metadata_timestamp
     )
     for index in indices:
         session.discard(context, index)

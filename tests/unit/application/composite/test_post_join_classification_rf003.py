@@ -16,6 +16,18 @@ from bioetl.application.composite.post_join_classification import (
     publish_post_join_classification,
 )
 from bioetl.domain.config.target_classification import TARGET_CLASSIFICATION_FIELDS
+from bioetl.domain.contracts.gold.composite_bioassay import (
+    CompositeTargetGoldSchema,
+    CompositeTargetGoldSchemaV31,
+)
+
+
+@pytest.mark.unit
+def test_enrich_gold_schema_v31_keeps_classification_fields() -> None:
+    baseline = set(CompositeTargetGoldSchema.to_schema().columns)
+    enrich = set(CompositeTargetGoldSchemaV31.to_schema().columns)
+    assert set(TARGET_CLASSIFICATION_FIELDS).issubset(enrich)
+    assert set(TARGET_CLASSIFICATION_FIELDS).isdisjoint(baseline)
 
 
 @pytest.mark.unit

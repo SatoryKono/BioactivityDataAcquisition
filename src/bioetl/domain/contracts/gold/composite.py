@@ -6,6 +6,7 @@ from bioetl.domain.contracts.gold.composite_bioassay import (
     CompositeActivityGoldSchema,
     CompositeAssayGoldSchema,
     CompositeTargetGoldSchema,
+    CompositeTargetGoldSchemaV31,
 )
 from bioetl.domain.contracts.gold.composite_molecule import CompositeMoleculeGoldSchema
 from bioetl.domain.contracts.gold.composite_publication import (
@@ -18,4 +19,5 @@ __all__ = [
     "CompositeMoleculeGoldSchema",
     "CompositePublicationGoldSchema",
     "CompositeTargetGoldSchema",
+    "CompositeTargetGoldSchemaV31",
 ]

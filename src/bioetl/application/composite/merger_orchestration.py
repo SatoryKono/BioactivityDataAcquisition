@@ -14,6 +14,7 @@ from bioetl.application.composite.helpers.merger_orchestration_types import (
     MergeWorkflowContext,
 )
 from bioetl.application.composite.merger_post_join import (
+    MergePersistRequest,
     finalize_post_join_context,
     persist_and_build_result,
 )
@@ -215,19 +216,23 @@ async def execute_merge_execution_core(
     )
     return await persist_and_build_result(
         host,
-        merged_df=post_join_context.merged_df,
-        enrichers=request.enrichers,
-        records_merged=post_join_context.records_merged,
-        records_from_seed=loaded.records_from_seed,
-        records_enriched=post_join_context.records_enriched,
-        sources_used=loaded.sources_used,
-        cv_stats=post_join_context.cv_stats,
-        quarantine_payloads=post_join_context.quarantine_payloads,
-        metadata_timestamp=request.metadata_timestamp,
-        run_id=request.run_id,
-        started_at=execution_context.started_at,
-        started_monotonic=execution_context.started_monotonic,
-        classification_pending_indices=post_join_context.classification_pending_indices,
+        MergePersistRequest(
+            merged_df=post_join_context.merged_df,
+            enrichers=request.enrichers,
+            records_merged=post_join_context.records_merged,
+            records_from_seed=loaded.records_from_seed,
+            records_enriched=post_join_context.records_enriched,
+            sources_used=loaded.sources_used,
+            cv_stats=post_join_context.cv_stats,
+            quarantine_payloads=post_join_context.quarantine_payloads,
+            metadata_timestamp=request.metadata_timestamp,
+            run_id=request.run_id,
+            started_at=execution_context.started_at,
+            started_monotonic=execution_context.started_monotonic,
+            classification_pending_indices=(
+                post_join_context.classification_pending_indices
+            ),
+        ),
     )
 
 

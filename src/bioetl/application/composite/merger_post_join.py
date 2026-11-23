@@ -40,6 +40,25 @@ class MergePostJoinContext:
     classification_pending_indices: tuple[int, ...] = ()
 
 
+@dataclass(frozen=True, slots=True)
+class MergePersistRequest:
+    """Bounded arguments for merge persistence and result assembly."""
+
+    merged_df: pl.DataFrame
+    enrichers: Sequence[EnricherConfig]
+    records_merged: int
+    records_from_seed: int
+    records_enriched: int
+    sources_used: list[str]
+    cv_stats: CrossValidationStats | None
+    quarantine_payloads: list[dict[str, object]]
+    metadata_timestamp: datetime | None
+    run_id: str
+    started_at: datetime
+    started_monotonic: float
+    classification_pending_indices: tuple[int, ...] = ()
+
+
 class MergePostJoinWorkflowContext(Protocol):
     """Subset of ``MergeService`` API required by post-join helpers."""
 
@@ -196,67 +215,54 @@ def finalize_post_join_context(
 
 async def persist_and_build_result(
     host: MergePostJoinWorkflowContext,
-    *,
-    merged_df: pl.DataFrame,
-    enrichers: Sequence[EnricherConfig],
-    records_merged: int,
-    records_from_seed: int,
-    records_enriched: int,
-    sources_used: list[str],
-    cv_stats: CrossValidationStats | None,
-    quarantine_payloads: list[dict[str, object]],
-    metadata_timestamp: datetime | None,
-    run_id: str,
-    started_at: datetime,
-    started_monotonic: float,
-    classification_pending_indices: Sequence[int] = (),
+    request: MergePersistRequest,
 ) -> MergeResult:
     """Persist merge outputs and build the domain ``MergeResult``."""
     try:
         await host._write_outputs(
-            merged_df,
-            metadata_timestamp=metadata_timestamp,
-            run_id=run_id,
-            sources_used=sources_used,
+            request.merged_df,
+            metadata_timestamp=request.metadata_timestamp,
+            run_id=request.run_id,
+            sources_used=request.sources_used,
         )
     except Exception:
         discard_post_join_classification(
             host,  # type: ignore[arg-type]
-            run_id=run_id,
-            metadata_timestamp=metadata_timestamp,
-            indices=classification_pending_indices,
+            run_id=request.run_id,
+            metadata_timestamp=request.metadata_timestamp,
+            indices=request.classification_pending_indices,
         )
         raise
     publish_post_join_classification(
         host,  # type: ignore[arg-type]
-        run_id=run_id,
-        metadata_timestamp=metadata_timestamp,
-        indices=classification_pending_indices,
+        run_id=request.run_id,
+        metadata_timestamp=request.metadata_timestamp,
+        indices=request.classification_pending_indices,
     )
     finalize_post_join_classification(
         host,  # type: ignore[arg-type]
-        run_id=run_id,
-        metadata_timestamp=metadata_timestamp,
+        run_id=request.run_id,
+        metadata_timestamp=request.metadata_timestamp,
     )
     _, duration = derive_completion_timestamp(
-        started_at=started_at,
-        started_monotonic=started_monotonic,
+        started_at=request.started_at,
+        started_monotonic=request.started_monotonic,
     )
 
     host._logger.info(
         "Merge completed",
-        records_merged=records_merged,
-        sources_used=sources_used,
+        records_merged=request.records_merged,
+        sources_used=request.sources_used,
         duration_seconds=duration,
     )
     return host._build_merge_result(
-        merged_df=merged_df,
-        enrichers=enrichers,
-        records_merged=records_merged,
-        records_from_seed=records_from_seed,
-        records_enriched=records_enriched,
-        sources_used=sources_used,
+        merged_df=request.merged_df,
+        enrichers=request.enrichers,
+        records_merged=request.records_merged,
+        records_from_seed=request.records_from_seed,
+        records_enriched=request.records_enriched,
+        sources_used=request.sources_used,
         duration_seconds=duration,
-        cv_stats=cv_stats,
-        quarantine_payloads=quarantine_payloads,
+        cv_stats=request.cv_stats,
+        quarantine_payloads=request.quarantine_payloads,
     )

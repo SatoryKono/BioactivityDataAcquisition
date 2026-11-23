@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 
@@ -9,9 +10,11 @@ from iuphar_target_class.bioetl_input import project_target_fields
 from iuphar_target_class.composite_features import (
     CONTRACT_VERSION,
     FEATURE_CONTRACT_VERSION,
+    WHITELIST_FIELDS,
     build_classification_business_data,
     feature_availability,
     feature_completeness,
+    feature_whitelist_bytes,
 )
 
 
@@ -23,8 +26,10 @@ def test_feature_contract_artifact_pins_whitelist() -> None:
     )
     assert payload["contract_version"] == CONTRACT_VERSION
     assert payload["surface"] == "composite_post_join"
+    assert tuple(payload["whitelist_fields"]) == WHITELIST_FIELDS
     assert "keywords" in payload["whitelist_fields"]
-    assert sidecar["sha256"]
+    expected = hashlib.sha256(feature_whitelist_bytes()).hexdigest()
+    assert sidecar["sha256"] == expected
     assert sidecar["contract_version"] == FEATURE_CONTRACT_VERSION
 
 
@@ -100,3 +105,44 @@ def test_idmapping_fills_primary_only_when_component_list_empty() -> None:
     )
     assert fields["uniprot"] == "P99999"
     assert fields["uniprot_equivalent"] == "P99999"
+
+
+def test_qualified_composite_columns_map_to_short_whitelist_keys() -> None:
+    """seed_priority retains chembl.target.* / uniprot.protein.* names."""
+    row = {
+        "chembl.target.target_id": "CHEMBL209",
+        "chembl.target.target_type": "SINGLE PROTEIN",
+        "chembl.target.taxonomy_id": "9606",
+        "chembl.target.organism": "Homo sapiens",
+        "chembl.target.component_accessions": "P00533",
+        "uniprot.protein.keywords": [
+            {"id": "KW-0418", "name": "Kinase", "category": "Molecular function"}
+        ],
+        "uniprot.idmapping.uniprot_accession": "P00533",
+        "target_protein_class_name_L1": "Enzyme",
+    }
+    business = build_classification_business_data(row)
+    assert business["target_id"] == "CHEMBL209"
+    assert business["target_type"] == "SINGLE PROTEIN"
+    assert business["component_accessions"] == "P00533"
+    assert business["uniprot_accession"] == "P00533"
+    assert business["predicted_l1"] == "Enzyme"
+    assert feature_availability(row)["keywords"] is True
+    projected = project_target_fields(business, "9606")
+    assert projected["keywords"] == "KW-0418"
+    assert projected["uniprot"] == "P00533"
+
+
+def test_uniprot_keyword_json_objects_extract_id() -> None:
+    fields = project_target_fields(
+        {
+            "target_id": "CHEMBL4",
+            "target_type": "SINGLE PROTEIN",
+            "keywords": [
+                {"id": "KW-0418", "name": "Kinase", "category": "Molecular function"},
+                {"id": "KW-0067", "name": "ATP-binding", "category": "Ligand"},
+            ],
+        },
+        "9606",
+    )
+    assert fields["keywords"] == "KW-0418|KW-0067"

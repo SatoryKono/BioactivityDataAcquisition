@@ -102,11 +102,13 @@ class LocalTargetClassificationEvidenceStore:
         rules_version: str | None = None,
         classification_schema_version: str | None = None,
         matching_policy_version: str | None = None,
+        pipeline_name: str = "chembl_target",
     ) -> None:
         if mode not in {"shadow", "enrich"}:
             raise ValueError("evidence store needs shadow or enrich mode")
         self._root = root.resolve()
         self._mode = mode
+        self._pipeline_name = pipeline_name
         self._snapshot_hash = require_sha256(snapshot_manifest_sha256)
         self._profile_hash = require_sha256(profile_sha256)
         self._versions = {
@@ -185,7 +187,7 @@ class LocalTargetClassificationEvidenceStore:
             manifest = {
                 "artifact": "bioetl_iuphar_pipeline_evidence",
                 "schema_version": 1,
-                "pipeline_name": "chembl_target",
+                "pipeline_name": self._pipeline_name,
                 "run_id": run_id,
                 "mode": self._mode,
                 "snapshot_manifest_sha256": self._snapshot_hash,

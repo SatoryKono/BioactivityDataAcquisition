@@ -235,3 +235,23 @@ class CompositeTargetGoldSchema(CompositeLookupLineageSchema):
         nullable=True,
         description="Version of the canonical L1 mapping used for aggregation.",
     )
+
+
+class CompositeTargetGoldSchemaV31(CompositeTargetGoldSchema):
+    """RF-003 enrich Gold: retain additive IUPHAR classification columns.
+
+    Used only when composite post-join classification runs in ``enrich`` mode.
+    ``off`` / ``shadow`` keep :class:`CompositeTargetGoldSchema` unchanged.
+    """
+
+    iuphar_target_id: Series[str] = pa.Field(nullable=True)
+    iuphar_class: Series[str] = pa.Field(nullable=True)
+    iuphar_match_status: Series[str] = pa.Field(nullable=True)
+    iuphar_annotation_status: Series[str] = pa.Field(nullable=True)
+    local_class: Series[str] = pa.Field(nullable=True)
+    effective_class: Series[str] = pa.Field(nullable=True)
+    effective_source: Series[str] = pa.Field(nullable=True)
+    decision_status: Series[str] = pa.Field(nullable=True)
+    target_class_profile_sha256: Series[str] = pa.Field(
+        nullable=True, str_matches=r"^[0-9a-f]{64}$"
+    )
