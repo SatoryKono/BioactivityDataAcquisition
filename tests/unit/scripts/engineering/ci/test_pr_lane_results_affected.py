@@ -41,6 +41,8 @@ def test_dq_guide_routes_to_configuration_tests() -> None:
     repo_root = Path(__file__).resolve().parents[5]
     changed = "docs/03-guides/dq-configuration.md"
     owners = {
+        "tests/architecture/test_documentation_residual_keyword_guards.py",
+        "tests/architecture/test_tech_debt_issue_6038_governance_taxonomy.py",
         "tests/unit/infrastructure/config/test_dq_config_loader.py",
         "tests/unit/infrastructure/config/test_pipeline_config_loader_extended.py",
     }
@@ -91,6 +93,10 @@ def test_zed_changes_keep_integration_portability_in_both_impact_paths(
         (
             "docs/01-requirements/DASHBOARD_REQUIREMENTS.md",
             "tests/integration/test_dashboard_first_window_noscroll.py",
+        ),
+        (
+            "docs/03-guides/dq-configuration.md",
+            "tests/architecture/test_documentation_residual_keyword_guards.py",
         ),
         (
             "docs/03-guides/metrics-monitoring.md",

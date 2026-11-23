@@ -226,6 +226,8 @@ ZED_WORKSPACE_CONFIG_TEST = (
 SCOPED_CHECKS_TEST = "tests/unit/scripts/repo/test_scoped_checks.py"
 HOOK_RECEIPTS_TEST = "tests/unit/scripts/repo/test_hook_receipts.py"
 IUPHAR_STAGE0_TEST = "tests/unit/iuphar_target_class/test_stage0_manifest.py"
+IUPHAR_SEMANTICS_RF001_TEST = "tests/unit/iuphar_target_class/test_semantics_rf001.py"
+IUPHAR_POLICY_TEST = "tests/unit/iuphar_target_class/test_policy.py"
 
 
 MEMORY_BASELINE_TEST_TARGETS: tuple[str, ...] = (
@@ -594,13 +596,15 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/architecture/test_requirements_traceability_catalog.py",
         "tests/architecture/test_documentation_audit_remediation.py",
     ),
+    "docs/03-guides/dq-configuration.md": (
+        "tests/architecture/test_documentation_residual_keyword_guards.py",
+        "tests/architecture/test_tech_debt_issue_6038_governance_taxonomy.py",
+        "tests/unit/infrastructure/config/test_dq_config_loader.py",
+        "tests/unit/infrastructure/config/test_pipeline_config_loader_extended.py",
+    ),
     "docs/03-guides/metrics-monitoring.md": (
         "tests/architecture/test_observability_docs_drift.py",
         "tests/unit/infrastructure/observability/test_prometheus_metadata_contract.py",
-    ),
-    "docs/03-guides/dq-configuration.md": (
-        "tests/unit/infrastructure/config/test_dq_config_loader.py",
-        "tests/unit/infrastructure/config/test_pipeline_config_loader_extended.py",
     ),
     "docs/03-guides/workflows.md": (
         "tests/architecture/test_workflow_cli_running_boundaries.py",
@@ -776,12 +780,26 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
     ),
     "src/iuphar_target_class/__init__.py": (IUPHAR_STAGE0_TEST,),
+    "src/iuphar_target_class/semantics.py": (
+        IUPHAR_SEMANTICS_RF001_TEST,
+        IUPHAR_POLICY_TEST,
+    ),
+    **dict.fromkeys(
+        (
+            "docs/04-reference/pipelines/chembl/04-target-spec.md",
+            "docs/04-reference/pipelines/chembl/16-iuphar-target-classification-semantics.md",
+        ),
+        (
+            IUPHAR_SEMANTICS_RF001_TEST,
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
+    ),
     **dict.fromkeys(
         (
             "src/iuphar_target_class/policy.py",
             "data/iuphar_target_class/policy/policy.json",
         ),
-        ("tests/unit/iuphar_target_class/test_policy.py",),
+        (IUPHAR_POLICY_TEST,),
     ),
     **dict.fromkeys(
         (
@@ -946,7 +964,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         ),
         (
             "tests/unit/iuphar_target_class/test_hierarchy.py",
-            "tests/unit/iuphar_target_class/test_policy.py",
+            IUPHAR_POLICY_TEST,
         ),
     ),
     "data/iuphar_target_class/delivery/example-input.csv": (
@@ -2312,6 +2330,7 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
     "data/iuphar_target_class/acceptance/": (
         "tests/unit/iuphar_target_class/test_acceptance.py",
     ),
+    "data/iuphar_target_class/rf001/": (IUPHAR_SEMANTICS_RF001_TEST,),
     **dict.fromkeys(
         (
             ".codex/agents/",

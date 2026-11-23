@@ -82,11 +82,11 @@ surface is active; do not assume a single universal value.
 | --- | --- | --- | --- |
 | Hierarchical quality config | `configs/base/quality.yaml`, `ThresholdsConfig` (`dq_config.py`) | `soft_fail=0.05`, `hard_fail=0.50` | Provider/entity `quality:` hierarchy and RULES default |
 | Contract-backed DQ loader fallback | `src/bioetl/infrastructure/config/dq_contract_config_loader.py` | `soft_fail=0.05`, `hard_fail=0.50` | When contract YAML omits explicit thresholds |
-| Inline pipeline DQ fallback | `src/bioetl/infrastructure/schemas/pipeline_config_common.py` | `soft_fail=0.05`, `hard_fail=0.20` | Used for direct conversion without hierarchy; explicitly supplied overrides take precedence |
+| Inline pipeline DQ override baseline | `src/bioetl/infrastructure/config/pipeline_dq_resolution.py` / `DQYamlConfig` | `soft_fail=0.05`, `hard_fail=0.20` | Pydantic defaults for unset fields; presence uses `model_fields_set` (explicit keys), not deviation from these defaults |
 | Silver DQ request shape | `src/bioetl/domain/ports/quality/silver_dq_request.py` | `soft_fail=0.05`, `hard_fail=0.20` | Request-shape default for Silver analyze |
 
 Hierarchical / RULES / contract-loader default hard-fail is **0.50 (50%)**.
-The **0.20** value is the Silver request / direct inline fallback only.
+The **0.20** value is the Silver request / pipeline-override baseline only.
 
 ### Hierarchical `quality:` default
 
@@ -100,8 +100,10 @@ thresholds:
 
 ### Silver / pipeline-override baseline
 
-When Silver DQ request fields or direct inline DQ conversion use code defaults
-without an explicit hard-fail, the baseline is:
+When Silver DQ request fields or inline `pipeline.dq_overrides` leave a
+threshold unset, Pydantic fills the model default. Explicit keys (including
+`0.05` / `0.20`) are treated as overrides via `model_fields_set`; detection no
+longer requires a value different from the baseline:
 
 ```text
 soft_fail = 0.05
@@ -111,10 +113,8 @@ hard_fail = 0.20
 Anchors:
 
 - `src/bioetl/infrastructure/config/pipeline_dq_resolution.py`
+- `src/bioetl/infrastructure/schemas/pipeline_config_common.py` (`DQYamlConfig`)
 - `src/bioetl/domain/ports/quality/silver_dq_request.py`
-
-For hierarchical loading, omitted inline settings leave the inherited values
-unchanged; explicitly supplied values, including defaults, override them.
 
 Contract-backed loader omitted thresholds resolve to **0.50** via
 `dq_contract_config_loader.py` (`hard_fail` resolve default).

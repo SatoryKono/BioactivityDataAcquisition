@@ -140,8 +140,8 @@ class DQYamlConfig(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    soft_fail_threshold: float = Field(default=0.05, ge=0, le=1)
-    hard_fail_threshold: float = Field(default=0.20, ge=0, le=1)
+    soft_fail_threshold: float = Field(default=0.05)
+    hard_fail_threshold: float = Field(default=0.20)
     strict_validation: bool = Field(
         default=False,
         description=(
@@ -168,8 +168,26 @@ class DQYamlConfig(BaseModel):
 
     @model_validator(mode="after")
     def validate_thresholds(self) -> DQYamlConfig:
-        """Validate that thresholds are between 0 and 1."""
-        if {"soft_fail_threshold", "hard_fail_threshold"} <= self.model_fields_set:
+        """Validate supplied thresholds; order only when both are explicit.
+
+        Partial inline overrides may set a single threshold that is valid only
+        after hierarchical merge. Bounds are checked for each supplied field;
+        soft/hard ordering is deferred until both thresholds appear in the
+        YAML payload (full post-merge validation remains in ``DQConfigFile`` /
+        domain conversion).
+        """
+        supplied = self.model_fields_set
+        soft_set = "soft_fail_threshold" in supplied
+        hard_set = "hard_fail_threshold" in supplied
+        if soft_set and not 0.0 <= self.soft_fail_threshold <= 1.0:
+            raise ValueError(
+                "soft_fail_threshold must be between 0.0 and 1.0 inclusive"
+            )
+        if hard_set and not 0.0 <= self.hard_fail_threshold <= 1.0:
+            raise ValueError(
+                "hard_fail_threshold must be between 0.0 and 1.0 inclusive"
+            )
+        if soft_set and hard_set:
             DomainDQConfig.validate_thresholds(
                 soft_fail_threshold=self.soft_fail_threshold,
                 hard_fail_threshold=self.hard_fail_threshold,

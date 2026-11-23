@@ -33,8 +33,7 @@ class DQConfigResolver(Protocol):
 
 def has_inline_dq_overrides(yaml_config: PipelineYamlConfig) -> bool:
     """Check if YAML config has meaningful inline DQ overrides."""
-    dq = yaml_config.dq_overrides
-    return bool(dq.model_fields_set)
+    return bool(normalize_inline_dq_overrides(yaml_config.dq_overrides))
 
 
 def field_validation_to_dict(
@@ -92,19 +91,19 @@ def normalize_inline_dq_overrides(
 ) -> JsonDict:  # Any: dynamic YAML config values
     """Convert inline Pydantic DQ overrides into mergeable file-shape dict."""
     result: JsonDict = {}  # Any: dynamic YAML config values
-    fields = dq_overrides.model_fields_set
-    thresholds: JsonDict = {}
-    if "soft_fail_threshold" in fields:
+    supplied = dq_overrides.model_fields_set
+    thresholds = {}
+    if "soft_fail_threshold" in supplied:
         thresholds["soft_fail"] = dq_overrides.soft_fail_threshold
-    if "hard_fail_threshold" in fields:
+    if "hard_fail_threshold" in supplied:
         thresholds["hard_fail"] = dq_overrides.hard_fail_threshold
     if thresholds:
         result["thresholds"] = thresholds
-    if "strict_validation" in fields:
+    if "strict_validation" in supplied:
         result["strict_validation"] = dq_overrides.strict_validation
-    if "invalid_record_policy" in fields:
+    if "invalid_record_policy" in supplied:
         result["invalid_record_policy"] = dq_overrides.invalid_record_policy
-    if "report" in fields:
+    if "report" in supplied:
         result["report"] = dq_overrides.report.model_dump(
             exclude_unset=True, mode="json"
         )
@@ -139,13 +138,15 @@ def resolve_pipeline_dq_config(
     entity = yaml_config.entity_type
     dq_config_file = getattr(yaml_config, "dq_config_file", None)
     inline_rules_present = has_inline_dq_overrides(yaml_config)
+    inline_overrides = (
+        normalize_inline_dq_overrides(yaml_config.dq_overrides)
+        if inline_rules_present
+        else None
+    )
 
-    if dq_config_file is not None or inline_rules_present:
-        inline_overrides = (
-            normalize_inline_dq_overrides(yaml_config.dq_overrides)
-            if inline_rules_present
-            else None
-        )
+    # Explicit dq_config_file must fail closed when the hierarchy is missing.
+    # Inline-only configs keep the legacy FileNotFoundError → to_domain fallback.
+    if dq_config_file is not None:
         return dq_loader.load(
             provider=provider,
             entity=entity,
@@ -156,7 +157,7 @@ def resolve_pipeline_dq_config(
         return dq_loader.load(
             provider=provider,
             entity=entity,
-            inline_overrides=None,
+            inline_overrides=inline_overrides,
         )
     except FileNotFoundError:
         return dq_overrides_to_domain(yaml_config)
