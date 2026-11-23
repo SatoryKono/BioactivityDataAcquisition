@@ -594,6 +594,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/architecture/test_observability_docs_drift.py",
         "tests/unit/infrastructure/observability/test_prometheus_metadata_contract.py",
     ),
+    "docs/03-guides/workflows.md": (
+        "tests/architecture/test_workflow_cli_running_boundaries.py",
+    ),
     **dict.fromkeys(
         (
             "docs/04-reference/pipelines/chembl/03-molecule-spec.md",
