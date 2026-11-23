@@ -279,9 +279,13 @@ def test_factory_pubchem_and_registry_helpers(monkeypatch: pytest.MonkeyPatch) -
         },
     )
     assert isinstance(DataSourceFactory.list_providers(), list)
+    from bioetl.infrastructure.config.source_config_loader import (
+        SourceConfigNotFoundError,
+    )
+
     monkeypatch.setattr(
         "bioetl.composition.factories.datasource.pubchem.load_source_config",
-        lambda _provider: (_ for _ in ()).throw(ValueError("missing")),
+        lambda _provider: (_ for _ in ()).throw(SourceConfigNotFoundError("missing")),
     )
     assert _resolve_rate_limit("missing") == (5.0, 10)
     assert _resolve_circuit_breaker("missing") == (5, 300)

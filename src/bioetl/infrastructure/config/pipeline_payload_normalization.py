@@ -17,6 +17,7 @@ from bioetl.infrastructure.config.pipeline_normalizers import (
     apply_pipeline_schema_normalization,
 )
 from bioetl.infrastructure.config.source_config_loader import (
+    SourceConfigNotFoundError,
     load_source_config_from_root,
 )
 from bioetl.infrastructure.config_loader_filtering import (
@@ -203,7 +204,7 @@ def load_source_section(
             provider,
             configs_root=configs_root,
         )
-    except ValueError:
+    except SourceConfigNotFoundError:
         return
 
     base_source = source_config.model_dump(exclude_none=True).get("source", {})

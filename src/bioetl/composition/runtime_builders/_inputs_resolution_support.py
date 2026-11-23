@@ -11,6 +11,7 @@ from bioetl.domain.config import RuntimeConfig
 from bioetl.domain.filtering.silver_filter_identity import (
     resolve_silver_filter_compatibility_mode,
 )
+from bioetl.infrastructure.config.source_config_loader import SourceConfigNotFoundError
 
 # These helper-only protocol imports remain type-checker dependencies.
 
@@ -152,7 +153,7 @@ def resolve_filter_batch_size_impl(
         source_cfg = cast(SimpleNamespace, source_loader(yaml_config.provider))
         batch_size = source_cfg.pagination.id_batch_size
         return batch_size if isinstance(batch_size, int) else None
-    except (ValueError, AttributeError):
+    except (SourceConfigNotFoundError, AttributeError):
         return None
 
 
