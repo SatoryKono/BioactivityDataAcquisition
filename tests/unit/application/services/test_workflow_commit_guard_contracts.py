@@ -77,6 +77,7 @@ def test_failed_pending_commit_keeps_repair_required_state(pending_commit):
 @pytest.mark.asyncio
 async def test_locked_resume_passes_restored_outputs_to_runner(monkeypatch):
     saved = {"extract": {"run_id": "saved-run"}}
+    fingerprints = {"normalize": "last-success"}
     monkeypatch.setattr(
         execution, "restore_selected_snapshot_outputs", lambda *args: saved
     )
@@ -102,7 +103,7 @@ async def test_locked_resume_passes_restored_outputs_to_runner(monkeypatch):
         recorder=recorder,
         prepared_manifest=manifest,
         completed_step_ids=frozenset({"extract"}),
-        completed_transform_fingerprints={},
+        completed_transform_fingerprints=fingerprints,
         config=config,
         resumed=True,
         repair_steps=(),
@@ -110,6 +111,10 @@ async def test_locked_resume_passes_restored_outputs_to_runner(monkeypatch):
         now_factory=lambda: NOW,
     )
     assert runner.run_workflow.await_args.kwargs["restored_step_outputs"] is saved
+    assert (
+        runner.run_workflow.await_args.kwargs["completed_transform_fingerprints"]
+        == fingerprints
+    )
     assert result.resumed and result.manifest_id == "manifest"
     finished.assert_called_once()
 
