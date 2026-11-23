@@ -781,6 +781,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "src/iuphar_target_class/semantics.py": (
         IUPHAR_SEMANTICS_RF001_TEST,
         IUPHAR_POLICY_TEST,
+        "tests/unit/iuphar_target_class/test_rf000_target_classification.py",
     ),
     **dict.fromkeys(
         (
@@ -892,7 +893,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         (
             "src/iuphar_target_class/enablement.py",
             "src/iuphar_target_class/qualification.py",
-            "src/iuphar_target_class/semantics.py",
         ),
         ("tests/unit/iuphar_target_class/test_rf000_target_classification.py",),
     ),

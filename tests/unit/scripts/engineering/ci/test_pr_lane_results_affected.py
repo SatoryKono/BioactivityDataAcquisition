@@ -616,10 +616,15 @@ def test_iuphar_w153_has_a_bounded_owner(tmp_path: Path) -> None:
 def test_iuphar_audit_modules_have_a_bounded_owner(tmp_path: Path) -> None:
     owner = tmp_path / "tests/unit/iuphar_target_class"
     owner.mkdir(parents=True)
-    (owner / "test_rf000_target_classification.py").write_text(
-        "def test_contract():\n    assert True\n",
-        encoding="utf-8",
-    )
+    for name in (
+        "test_policy.py",
+        "test_rf000_target_classification.py",
+        "test_semantics_rf001.py",
+    ):
+        (owner / name).write_text(
+            "def test_contract():\n    assert True\n",
+            encoding="utf-8",
+        )
     report = build_shadow_compare(
         [
             "src/iuphar_target_class/enablement.py",
@@ -629,7 +634,9 @@ def test_iuphar_audit_modules_have_a_bounded_owner(tmp_path: Path) -> None:
         repo_root=tmp_path,
     )
     assert report["selected"] == [
-        "tests/unit/iuphar_target_class/test_rf000_target_classification.py"
+        "tests/unit/iuphar_target_class/test_rf000_target_classification.py",
+        "tests/unit/iuphar_target_class/test_semantics_rf001.py",
+        "tests/unit/iuphar_target_class/test_policy.py",
     ]
     assert report["covers_full_suite"] is False
 
