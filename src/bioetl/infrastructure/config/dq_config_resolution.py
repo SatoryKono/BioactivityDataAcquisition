@@ -42,7 +42,7 @@ def merge_dq_config_hierarchy(
     relaxed_dq: bool,
 ) -> JsonDict:
     """Build merged DQ config from defaults -> provider -> entity -> inline."""
-    merged = load_defaults_layer()
+    merged = normalize_to_file_format(load_defaults_layer())
     if not merged:
         raise FileNotFoundError(
             "Required DQ defaults file not found in configs/base/quality.yaml. "
