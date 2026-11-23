@@ -14,8 +14,10 @@ pipeline:
   entity_type: target
   description: Extract biological targets from ChEMBL API
   target_classification:
-    # RF-001: off keeps V30 / schema 3.0.0. shadow|enrich require a paired
-    # profile envelope + sha256; enrich alone does not admit biological accuracy.
+    # RF-001 / RF-013: canonical mode stays "off" (keeps V30 / schema 3.0.0)
+    # until contour-report is READY and a maintenance-window migration promotes
+    # a separate enrich document. shadow|enrich require a paired profile
+    # envelope + sha256; enrich alone does not admit biological accuracy.
     mode: "off"
   field_policy: {}
   business_primary_keys:
