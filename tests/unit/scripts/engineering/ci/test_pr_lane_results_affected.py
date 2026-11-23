@@ -138,6 +138,16 @@ def test_nightly_shadow_changes_keep_both_archive_and_inventory_owners(
     assert report["covers_full_suite"] is False
 
 
+def test_deleted_cli_registry_snapshot_keeps_its_owning_test() -> None:
+    repo_root = Path(__file__).resolve().parents[5]
+    snapshot = "tests/unit/interfaces/cli/__snapshots__/test_registry_consistency.ambr"
+    owner = "tests/unit/interfaces/cli/test_registry_consistency.py"
+    assert affected_pytest_targets([snapshot], repo_root=repo_root) == [owner]
+    report = build_shadow_compare([snapshot], repo_root=repo_root)
+    assert report["selected"] == [owner]
+    assert report["covers_full_suite"] is False
+
+
 def test_nightly_historical_fixture_selects_its_owner_in_both_impact_paths() -> None:
     repo_root = Path(__file__).resolve().parents[5]
     fixture = "tests/unit/scripts/engineering/ci/fixtures/n1_historical_baseline.json"
@@ -488,6 +498,24 @@ def test_iuphar_shadow_paths_keep_explicit_owners(tmp_path: Path) -> None:
     ):
         with pytest.raises(ValueError, match="unmapped paths"):
             build_shadow_compare([unowned], repo_root=tmp_path)
+
+
+def test_workflow_runbook_selects_resume_and_archive_contracts(tmp_path: Path) -> None:
+    owners = {
+        "tests/unit/application/services/test_selected_snapshot_resume_contracts.py",
+        "tests/unit/application/services/test_workflow_child_archive_contract.py",
+    }
+    for owner in owners:
+        path = tmp_path / owner
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("def test_owner():\n    assert True\n", encoding="utf-8")
+
+    report = build_shadow_compare(
+        ["docs/05-operations/runbooks/workflow-control-plane.md"], repo_root=tmp_path
+    )
+
+    assert set(report["selected"]) == owners
+    assert report["covers_full_suite"] is False
 
 
 def test_iuphar_policy_paths_keep_the_policy_owner(tmp_path: Path) -> None:
