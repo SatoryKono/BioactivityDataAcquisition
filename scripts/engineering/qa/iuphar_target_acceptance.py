@@ -50,15 +50,16 @@ def main(argv: list[str] | None = None) -> int:
         args.pipeline_report,
         species_taxon_ids=profile.snapshot.species_taxon_ids,
     )
+    output_dir = args.output_dir.expanduser().resolve(strict=False)
     receipt = run_integration_acceptance(
         request,
         snapshot=profile.snapshot.snapshot,
-        output_dir=args.output_dir,
+        output_dir=output_dir,
     )
     try:
         publish_acceptance_reports(
-            args.output_dir,
-            root=args.output_dir,
+            output_dir,
+            root=output_dir,
             receipt=receipt,
             profile_sha256=args.profile_sha256,
             source_name=args.profile.name,
@@ -68,7 +69,7 @@ def main(argv: list[str] | None = None) -> int:
     except (OSError, ValueError) as error:
         print(f"verification reports not published: {error}", file=sys.stderr)
         return 2
-    print(f"{receipt['status']}: {args.output_dir / 'acceptance.json'}")
+    print(f"{receipt['status']}: {output_dir / 'acceptance.json'}")
     return 0 if receipt["status"] == "PASS" else 2
 
 

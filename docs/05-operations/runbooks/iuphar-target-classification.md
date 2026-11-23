@@ -133,9 +133,10 @@ Standard table export, including XLSX, writes the persisted table columns. It
 does not reconstruct kernel paths that were not stored on the row. An enrich
 table is required before those nine columns exist to export.
 
-Shadow, enrich, cohort export, acceptance, and migration read a pinned local
-snapshot. They do not call the Guide to Pharmacology API and do not require
-`GTP-API-Key`. The optional HTTP adapter omits that header when no key is
+Shadow, enrich, acceptance, and migration read a pinned local snapshot.
+Cohort export reads a frozen normalized ChEMBL target Silver file and does
+not require that snapshot. None of these steps call the Guide to Pharmacology
+API or require `GTP-API-Key`. The optional HTTP adapter omits that header when no key is
 configured. The stage-1 policy records `api_key_required` as a documentary
 note; it does not block stages 0–3. Do not add a key to the repository or to
 an `.env` file for this procedure.

@@ -32,6 +32,7 @@ CLASSIFICATION_CHECKS = (
 )
 PROOF_CHECKS = ("pipeline_integration",)
 _SHA256 = re.compile(r"[0-9a-f]{64}")
+_GIT_SHA = re.compile(r"[0-9a-f]{40}")
 _TEMP_PREFIX = ".iuphar-verification-"
 
 
@@ -124,12 +125,7 @@ def _proof_document(
     ci_status: str,
     ci_head_sha: str | None,
 ) -> dict[str, object]:
-    if ci_status == "PASS" and (
-        ci_head_sha is None or _SHA256.fullmatch(ci_head_sha) is None
-    ):
-        raise ValueError("CI PASS requires the head SHA that ran it")
-    if ci_head_sha is not None and _SHA256.fullmatch(ci_head_sha) is None:
-        raise ValueError("CI head SHA must be a lowercase SHA-256")
+    head_sha = _git_head_sha(ci_head_sha, required=ci_status == "PASS")
     return {
         "artifact": "bioetl_iuphar_proof_verification",
         "schema_version": 1,
@@ -137,7 +133,7 @@ def _proof_document(
         "acceptance_status": acceptance_status,
         "biological_accuracy_accepted": biological_accuracy_accepted,
         "checks": checks,
-        "ci": {"head_sha": ci_head_sha, "status": ci_status},
+        "ci": {"head_sha": head_sha, "status": ci_status},
     }
 
 
@@ -226,13 +222,28 @@ def _sha256(value: str, label: str) -> str:
     return value
 
 
+def _git_head_sha(value: str | None, *, required: bool) -> str | None:
+    """Accept a Git commit id. File digests stay on the SHA-256 bindings."""
+    if value is None:
+        if required:
+            raise ValueError("CI PASS requires the head SHA that ran it")
+        return None
+    if _GIT_SHA.fullmatch(value) is None:
+        raise ValueError("CI head SHA must be a 40-character Git commit id")
+    return value
+
+
 def _optional_sha(receipt: Mapping[str, object], key: str) -> str | None:
     value = receipt.get(key)
     if value is None:
         return None
     if not isinstance(value, str):
         raise ValueError(f"receipt {key} must be a SHA-256 or null")
-    return _sha256(value, key)
+    if _SHA256.fullmatch(value) is None:
+        if receipt.get("status") == "BLOCKED_INPUT":
+            return None
+        raise ValueError(f"{key} must be a lowercase SHA-256")
+    return value
 
 
 def _file_sha256(path: Path | None) -> str | None:
@@ -242,11 +253,12 @@ def _file_sha256(path: Path | None) -> str | None:
 
 
 def _contained(path: Path, root: Path) -> Path:
-    root_resolved = root.resolve()
-    parent = path.parent.resolve()
-    if path.name in {"", ".", ".."} or not parent.is_relative_to(root_resolved):
+    expanded = path.expanduser()
+    root_resolved = root.expanduser().resolve()
+    parent = expanded.parent.resolve()
+    if expanded.name in {"", ".", ".."} or not parent.is_relative_to(root_resolved):
         raise ValueError("verification path escapes its output root")
-    return parent / path.name
+    return parent / expanded.name
 
 
 def _entry(path: Path) -> bool:

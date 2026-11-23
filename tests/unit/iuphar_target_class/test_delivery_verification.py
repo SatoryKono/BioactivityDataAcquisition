@@ -188,3 +188,91 @@ def test_proof_file_hash_is_bound_without_marking_ci(tmp_path: Path) -> None:
     assert isinstance(digest, str) and len(digest) == 64
     assert document["ci"]["status"] == "NOT_RUN"
     assert document["bindings"]["pipeline_report_sha256"] is None
+
+
+def test_blocked_input_keeps_reports_when_label_hash_is_not_sha256(
+    tmp_path: Path,
+) -> None:
+    receipt = _receipt(expected_labels_sha256="abc")
+    output = _publish(tmp_path, receipt)
+    classification = _load(output, CLASSIFICATION_VERIFICATION)
+    assert classification["bindings"]["expected_labels_sha256"] is None
+    assert classification["bindings"]["snapshot_manifest_sha256"] == _SNAPSHOT
+    assert (output / M_PARITY_REPORT).is_file()
+    assert (output / PROOF_VERIFICATION).is_file()
+
+
+def test_successful_acceptance_still_requires_a_label_sha256(tmp_path: Path) -> None:
+    output = tmp_path / "acceptance"
+    output.mkdir()
+    with pytest.raises(ValueError, match="expected_labels_sha256"):
+        publish_acceptance_reports(
+            output,
+            root=output,
+            receipt=_receipt(status="PASS", expected_labels_sha256="abc"),
+            profile_sha256=_PROFILE,
+            source_name="profile.json",
+            pipeline_proof=None,
+            pipeline_report=None,
+        )
+    assert list(output.iterdir()) == []
+
+
+def test_ci_pass_records_a_git_commit_id(tmp_path: Path) -> None:
+    head = "73a6368fbe9ee8a2644bf780f33afd567889f6bd"
+    output = tmp_path / "acceptance"
+    output.mkdir()
+    publish_acceptance_reports(
+        output,
+        root=output,
+        receipt=_receipt(),
+        profile_sha256=_PROFILE,
+        source_name="profile.json",
+        pipeline_proof=None,
+        pipeline_report=None,
+        ci_status="PASS",
+        ci_head_sha=head,
+    )
+    proof = _load(output, PROOF_VERIFICATION)
+    assert proof["ci"] == {"head_sha": head, "status": "PASS"}
+
+
+def test_ci_head_rejects_a_file_digest(tmp_path: Path) -> None:
+    output = tmp_path / "acceptance"
+    output.mkdir()
+    with pytest.raises(ValueError, match="40-character Git commit id"):
+        publish_acceptance_reports(
+            output,
+            root=output,
+            receipt=_receipt(),
+            profile_sha256=_PROFILE,
+            source_name="profile.json",
+            pipeline_proof=None,
+            pipeline_report=None,
+            ci_status="PASS",
+            ci_head_sha=_PROFILE,
+        )
+    assert list(output.iterdir()) == []
+
+
+def test_tilde_output_is_expanded_before_publication(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    home = tmp_path / "home"
+    home.mkdir()
+    monkeypatch.setenv("HOME", str(home))
+    target = home / "acceptance-run"
+    target.mkdir()
+    publish_acceptance_reports(
+        Path("~/acceptance-run"),
+        root=Path("~/acceptance-run"),
+        receipt=_receipt(),
+        profile_sha256=_PROFILE,
+        source_name="profile.json",
+        pipeline_proof=None,
+        pipeline_report=None,
+    )
+    assert (target / CLASSIFICATION_VERIFICATION).is_file()
+    assert (target / M_PARITY_REPORT).is_file()
+    assert (target / PROOF_VERIFICATION).is_file()
+    assert not (Path.cwd() / "~").exists()
