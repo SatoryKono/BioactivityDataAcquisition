@@ -149,9 +149,16 @@ _STAGE0_FIELDS: tuple[str, ...] = (
     "local_candidates",
     "local_class",
     "local_status",
+    "iuphar_mapping_rule_id",
+    "iuphar_mapping_version",
+    "local_rule_ids",
     "local_subclasses",
     "match_status",
+    "normalization_version",
     "provenance",
+    "rules_version",
+    "schema_version",
+    "snapshot_id",
 )
 
 
@@ -162,9 +169,11 @@ def _same_classification(
 
     Missing historical values stay missing. They are not filled in from the
     Python row, and a shared top-level class does not hide another field.
+    JSON lists compare in canonical order, so a path permutation is not a change.
     """
     return _class(m_row) == _class(python_row) and all(
-        m_row.get(field) == python_row.get(field) for field in _STAGE0_FIELDS
+        _observe(m_row, field) == _observe(python_row, field)
+        for field in _STAGE0_FIELDS
     )
 
 
@@ -254,15 +263,22 @@ FIELD_GROUPS: dict[str, str] = {
     "iuphar_class": "class",
     "iuphar_class_candidates": "candidates",
     "iuphar_family_paths": "families_paths",
+    "iuphar_mapping_rule_id": "provenance",
+    "iuphar_mapping_version": "provenance",
     "iuphar_subclass": "subclasses",
     "iuphar_type_raw": "raw_type",
     "legacy_iuphar_class": "class",
     "local_candidates": "candidates",
     "local_class": "local_effective",
+    "local_rule_ids": "provenance",
     "local_status": "local_effective",
     "local_subclasses": "subclasses",
     "match_status": "local_effective",
+    "normalization_version": "provenance",
     "provenance": "provenance",
+    "rules_version": "provenance",
+    "schema_version": "provenance",
+    "snapshot_id": "provenance",
 }
 COMPARED_FIELDS: tuple[str, ...] = tuple(sorted(FIELD_GROUPS))
 PROOF_VERIFICATION_ARTIFACTS: frozenset[str] = frozenset(
@@ -288,6 +304,7 @@ _LIST_FIELDS = frozenset(
         "iuphar_class_candidates",
         "iuphar_family_paths",
         "local_candidates",
+        "local_rule_ids",
         "local_subclasses",
     }
 )
@@ -328,6 +345,18 @@ class DifferenceBasis:
 
 
 @dataclass(frozen=True, slots=True)
+class BasisSeal:
+    """Allowable differences fixed before result rows are compared.
+
+    ``basis_set_sha256`` covers the canonical basis list. A basis added or
+    edited after the seal does not match and cannot qualify a difference.
+    """
+
+    basis_set_sha256: str
+    bases: tuple[DifferenceBasis, ...]
+
+
+@dataclass(frozen=True, slots=True)
 class ParityInputs:
     """Separated M, Excel, new result, reference, and optional control run."""
 
@@ -336,7 +365,7 @@ class ParityInputs:
     saved_excel: tuple[Mapping[str, str], ...] | None = None
     independent_reference: tuple[Mapping[str, str], ...] | None = None
     control_run: tuple[Mapping[str, str], ...] | None = None
-    bases: tuple[DifferenceBasis, ...] = ()
+    basis_seal: BasisSeal | None = None
 
 
 @dataclass(slots=True)
@@ -394,6 +423,15 @@ def register_difference_basis(
     )
 
 
+def seal_difference_bases(bases: tuple[DifferenceBasis, ...]) -> BasisSeal:
+    """Seal a basis list. Later additions are rejected against this hash."""
+    verified = _verified_bases(bases)
+    digest = _sha256_bytes(
+        _canonical_json_bytes([_basis_document(basis) for basis in verified])
+    )
+    return BasisSeal(basis_set_sha256=digest, bases=verified)
+
+
 def recompute_m_copy(
     rows: tuple[Mapping[str, str], ...],
     transform: Callable[[tuple[dict[str, str], ...]], tuple[Mapping[str, str], ...]],
@@ -416,7 +454,7 @@ def recompute_m_copy(
 
 def build_m_parity_report(inputs: ParityInputs) -> dict[str, object]:
     """Build a deterministic parity document. Original rows stay untouched."""
-    bases = _verified_bases(inputs.bases)
+    bases = _bases_from_seal(inputs.basis_seal)
     comparisons = [
         _compare_named(
             "original_m",
@@ -431,6 +469,9 @@ def build_m_parity_report(inputs: ParityInputs) -> dict[str, object]:
     ordered = sorted(comparisons, key=lambda item: str(item["pair"]))
     return {
         "artifact": M_PARITY_REPORT_ARTIFACT,
+        "basis_set_sha256": None
+        if inputs.basis_seal is None
+        else inputs.basis_seal.basis_set_sha256,
         "bases": [_basis_document(basis) for basis in bases],
         "biological_accuracy": None,
         "biological_accuracy_accepted": False,
@@ -508,6 +549,19 @@ def _optional_comparisons(
             )
         )
     return comparisons
+
+
+def _bases_from_seal(seal: BasisSeal | None) -> tuple[DifferenceBasis, ...]:
+    if seal is None:
+        return ()
+    verified = _verified_bases(seal.bases)
+    digest = _sha256_bytes(
+        _canonical_json_bytes([_basis_document(basis) for basis in verified])
+    )
+    if digest != seal.basis_set_sha256:
+        message = "печать оснований не совпадает с каноническим перечнем"
+        raise ValueError(message)
+    return verified
 
 
 def _verified_bases(
@@ -629,7 +683,7 @@ def _classify_parity_key(
     right_group = grouped_right.get(key, ())
     target_id = _key_value(key, "target_id")
     input_row_id = _key_value(key, "input_row_id")
-    if len(left_group) == 1 and len(right_group) == 1:
+    if key and len(left_group) == 1 and len(right_group) == 1:
         return _compare_singleton(
             left_group[0],
             right_group[0],
@@ -732,7 +786,7 @@ def _irregular_key(
     old_value, new_value = _irregular_values(
         left_group, right_group, _label(key), duplicate
     )
-    basis = _select_basis(bases, pair, "identity", target_id)
+    basis = _identity_basis(bases, pair, target_id, left_group, right_group)
     disposition = "allowed" if basis is not None else "unexplained"
     difference = _difference_record(
         field="identity",
@@ -774,6 +828,24 @@ def _class_counts(left: Mapping[str, str], right: Mapping[str, str]) -> tuple[in
     if left_value == right_value:
         return 1, 0
     return 0, 1
+
+
+def _identity_basis(
+    bases: tuple[DifferenceBasis, ...],
+    pair: str,
+    target_id: str,
+    left_group: tuple[Mapping[str, str], ...],
+    right_group: tuple[Mapping[str, str], ...],
+) -> DifferenceBasis | None:
+    """A dedup basis covers a collapse to one surviving row, not a lost target."""
+    basis = _select_basis(bases, pair, "identity", target_id)
+    if basis is None:
+        return None
+    if basis.category != "nondeterministic_dedup_removed":
+        return basis
+    if len(left_group) > 1 and len(right_group) == 1:
+        return basis
+    return None
 
 
 def _select_basis(

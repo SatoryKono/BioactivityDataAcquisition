@@ -13,6 +13,7 @@ from iuphar_target_class.comparison import (
     FIELD_GROUPS,
     M_PARITY_REPORT_FILENAME,
     PROOF_VERIFICATION_ARTIFACTS,
+    BasisSeal,
     DifferenceBasis,
     ParityInputs,
     Stage0Reference,
@@ -20,6 +21,7 @@ from iuphar_target_class.comparison import (
     compare_stage0,
     register_difference_basis,
     recompute_m_copy,
+    seal_difference_bases,
     write_m_parity_report,
 )
 
@@ -260,6 +262,7 @@ _LIST_FIELDS = frozenset(
         "iuphar_class_candidates",
         "iuphar_family_paths",
         "local_candidates",
+        "local_rule_ids",
         "local_subclasses",
     }
 )
@@ -293,7 +296,9 @@ def _identity(**fields: str) -> dict[str, str]:
     return row
 
 
-def _basis(field: str, *, source_pair: str = "original_m:new_result") -> DifferenceBasis:
+def _basis(
+    field: str, *, source_pair: str = "original_m:new_result"
+) -> DifferenceBasis:
     return register_difference_basis(
         basis_id=f"basis-{field}",
         category="ec_fix",
@@ -326,9 +331,7 @@ def _differences(comparison: dict[str, object]) -> list[dict[str, object]]:
     return typed
 
 
-def _field_diff(
-    comparison: dict[str, object], field: str
-) -> dict[str, object] | None:
+def _field_diff(comparison: dict[str, object], field: str) -> dict[str, object] | None:
     matches = [item for item in _differences(comparison) if item["field"] == field]
     if not matches:
         return None
@@ -339,7 +342,9 @@ def _field_diff(
 def _availability(comparison: dict[str, object], field: str) -> dict[str, object]:
     rows = comparison["field_availability"]
     assert isinstance(rows, list)
-    found = next(item for item in rows if isinstance(item, dict) and item["field"] == field)
+    found = next(
+        item for item in rows if isinstance(item, dict) and item["field"] == field
+    )
     assert isinstance(found, dict)
     return found
 
@@ -348,13 +353,18 @@ def _report(
     historical: tuple[dict[str, str], ...],
     current: tuple[dict[str, str], ...],
     bases: tuple[DifferenceBasis, ...] = (),
+    *,
+    basis_seal: BasisSeal | None = None,
     **sources: tuple[dict[str, str], ...] | None,
 ) -> dict[str, object]:
+    seal = basis_seal
+    if seal is None and bases:
+        seal = seal_difference_bases(bases)
     return build_m_parity_report(
         ParityInputs(
             original_m=historical,
             new_result=current,
-            bases=bases,
+            basis_seal=seal,
             saved_excel=sources.get("saved_excel"),
             independent_reference=sources.get("independent_reference"),
             control_run=sources.get("control_run"),
@@ -362,10 +372,13 @@ def _report(
     )
 
 
-@pytest.mark.parametrize(("field", "old", "new"), [
-    ("iuphar_subclass", "Hydrolase", "Transferase"),
-    ("iuphar_family_paths", "Enzyme/Hydrolase", "Enzyme/Transferase"),
-])
+@pytest.mark.parametrize(
+    ("field", "old", "new"),
+    [
+        ("iuphar_subclass", "Hydrolase", "Transferase"),
+        ("iuphar_family_paths", "Enzyme/Hydrolase", "Enzyme/Transferase"),
+    ],
+)
 def test_same_class_different_subclass_or_path_is_detected(
     field: str, old: str, new: str
 ) -> None:
@@ -713,6 +726,108 @@ def test_duplicate_identity_is_not_silently_deduplicated() -> None:
     assert identity["disposition"] == "allowed"
     assert identity["basis_sha256"] == basis.basis_sha256
     assert _field_diff(allowed, "iuphar_subclass") is None
+    lost = _comparison(_report(historical, (), (basis,)), "original_m:new_result")
+    lost_identity = _field_diff(lost, "identity")
+    assert lost_identity is not None
+    assert lost_identity["disposition"] == "unexplained"
+    assert lost_identity["basis_id"] is None
+    assert lost["class_agreement_count"] == 0
+
+
+def test_rows_without_identity_are_not_a_class_match() -> None:
+    historical = {"iuphar_class": "Enzyme", "iuphar_subclass": "Hydrolase"}
+    current = {"iuphar_class": "Enzyme", "iuphar_subclass": "Hydrolase"}
+    comparison = _comparison(
+        _report((historical,), (current,)), "original_m:new_result"
+    )
+    assert comparison["class_agreement_count"] == 0
+    identity = _field_diff(comparison, "identity")
+    assert identity is not None
+    assert identity["disposition"] == "unexplained"
+    assert identity["target_id"] == ""
+
+
+def test_reordered_family_paths_are_not_a_stage0_residual() -> None:
+    historical = _identity(
+        iuphar_class="Enzyme",
+        iuphar_family_paths=json.dumps(
+            ["Enzyme/Transferase", "Enzyme/Hydrolase"], separators=(",", ":")
+        ),
+    )
+    reordered = _identity(
+        iuphar_class="Enzyme",
+        iuphar_family_paths=json.dumps(
+            ["Enzyme/Hydrolase", "Enzyme/Transferase"], separators=(",", ":")
+        ),
+    )
+    changed = _identity(
+        iuphar_class="Enzyme",
+        iuphar_family_paths=json.dumps(["Enzyme/Isomerase"], separators=(",", ":")),
+    )
+    same = compare_stage0(Stage0Reference("fixture", 1, (historical,)), (reordered,))
+    different = compare_stage0(Stage0Reference("fixture", 1, (historical,)), (changed,))
+    assert same.residual == ()
+    assert same.changes == ()
+    assert different.residual == ("input_row_id=1|target_id=T1",)
+
+
+@pytest.mark.parametrize(
+    "field",
+    ("iuphar_mapping_rule_id", "local_rule_ids", "rules_version", "snapshot_id"),
+)
+def test_same_class_different_rule_provenance_is_detected(field: str) -> None:
+    historical = _identity(iuphar_class="Enzyme", **{field: _old_value(field)})
+    current = _identity(iuphar_class="Enzyme", **{field: _new_value(field)})
+    stage0 = compare_stage0(Stage0Reference("fixture", 1, (historical,)), (current,))
+    assert stage0.residual == ("input_row_id=1|target_id=T1",)
+    difference = _field_diff(
+        _comparison(_report((historical,), (current,)), "original_m:new_result"),
+        field,
+    )
+    assert difference is not None
+    assert difference["group"] == "provenance"
+    assert difference["disposition"] == "unexplained"
+    comparison = _comparison(
+        _report((historical,), (current,)), "original_m:new_result"
+    )
+    assert comparison["class_agreement_count"] == 1
+    assert comparison["class_disagreement_count"] == 0
+
+
+def test_basis_added_after_the_seal_is_rejected() -> None:
+    historical = _identity(iuphar_class="Enzyme", iuphar_subclass="Hydrolase")
+    seal = seal_difference_bases(
+        (
+            register_difference_basis(
+                basis_id="sealed-ec",
+                category="ec_fix",
+                statement="EC-исправление зафиксировано до сравнения",
+                field="iuphar_subclass",
+                source_pair="original_m:new_result",
+                target_id="T1",
+            ),
+        )
+    )
+    current = _identity(iuphar_class="Enzyme", iuphar_subclass="Transferase")
+    extra = register_difference_basis(
+        basis_id="late-path",
+        category="dictionary_release",
+        statement="позднее основание не входит в печать",
+        field="iuphar_family_paths",
+        source_pair="original_m:new_result",
+        target_id="T1",
+    )
+    tampered = replace(seal, bases=(*seal.bases, extra))
+    with pytest.raises(ValueError, match="печать оснований"):
+        _report((historical,), (current,), basis_seal=tampered)
+    report = _report((historical,), (current,), basis_seal=seal)
+    assert report["basis_set_sha256"] == seal.basis_set_sha256
+    difference = _field_diff(
+        _comparison(report, "original_m:new_result"), "iuphar_subclass"
+    )
+    assert difference is not None
+    assert difference["disposition"] == "allowed"
+    assert difference["basis_id"] == "sealed-ec"
 
 
 def test_recompute_uses_a_copy_and_restores_originals() -> None:
@@ -758,24 +873,29 @@ def test_empty_historical_set_is_not_class_agreement(tmp_path: Path) -> None:
     assert destination.name == M_PARITY_REPORT_FILENAME
     assert destination.name not in PROOF_VERIFICATION_ARTIFACTS
     assert proof.read_text(encoding="utf-8") == "proof-original"
-    assert write_m_parity_report(report, tmp_path).read_bytes() == destination.read_bytes()
+    assert (
+        write_m_parity_report(report, tmp_path).read_bytes() == destination.read_bytes()
+    )
     with pytest.raises(ValueError, match="m-parity-report"):
         write_m_parity_report({"artifact": "stages_0_3_report"}, tmp_path)
 
 
-def test_fixed_1960_historical_rows_and_control_intersection_use_separate_bases() -> None:
+def test_fixed_1960_historical_rows_and_control_intersection_use_separate_bases() -> (
+    None
+):
     historical = _historical_1960()
+    seal = seal_difference_bases(_corpus_bases())
     current = _new_result(historical)
     control = _control_run(historical)
     before = tuple(dict(row) for row in historical)
-    bases = _corpus_bases()
-    forward = _report(historical, current, bases, control_run=control)
+    forward = _report(historical, current, basis_seal=seal, control_run=control)
     backward = _report(
         tuple(reversed(historical)),
         tuple(reversed(current)),
-        tuple(reversed(bases)),
+        basis_seal=seal,
         control_run=tuple(reversed(control)),
     )
+    assert forward["basis_set_sha256"] == seal.basis_set_sha256
     assert historical == before
     assert forward == backward
     sources = forward["sources"]
@@ -791,20 +911,22 @@ def test_fixed_1960_historical_rows_and_control_intersection_use_separate_bases(
     assert forward["biological_accuracy"] is None
     assert forward["class_agreement_is_biological_accuracy"] is False
     subclass = [
-        item
-        for item in _differences(pair)
-        if item["field"] == "iuphar_subclass"
+        item for item in _differences(pair) if item["field"] == "iuphar_subclass"
     ]
     allowed = [item for item in subclass if item["disposition"] == "allowed"]
     unexplained = [item for item in subclass if item["disposition"] == "unexplained"]
     assert [item["target_id"] for item in allowed] == ["T0000"]
     assert allowed[0]["basis_id"] == "t0000-ec-subclass"
-    assert len(unexplained) == len([index for index in range(1960) if index % 11 == 0]) - 1
+    assert (
+        len(unexplained) == len([index for index in range(1960) if index % 11 == 0]) - 1
+    )
     assert all(item["basis_sha256"] is None for item in unexplained)
     paths = [
         item for item in _differences(pair) if item["field"] == "iuphar_family_paths"
     ]
-    path_indexes = [index for index in range(1960) if index % 13 == 0 and index % 11 != 0]
+    path_indexes = [
+        index for index in range(1960) if index % 13 == 0 and index % 11 != 0
+    ]
     assert len(paths) == len(path_indexes)
     assert all(item["disposition"] == "unexplained" for item in paths)
     assert all(item["old_value"] != item["new_value"] for item in paths)
@@ -824,7 +946,8 @@ def test_fixed_1960_historical_rows_and_control_intersection_use_separate_bases(
     provenance = [
         item
         for item in _differences(pair)
-        if item["field"] == "provenance" and item["disposition"] == "historical_unavailable"
+        if item["field"] == "provenance"
+        and item["disposition"] == "historical_unavailable"
     ]
     assert len(provenance) == len([index for index in range(1960) if index % 5 == 0])
     assert all(item["old_value"] is None for item in provenance)
