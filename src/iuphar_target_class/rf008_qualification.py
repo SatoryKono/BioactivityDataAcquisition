@@ -45,6 +45,7 @@ NORMALIZATION_VERSION = "bioetl-iuphar-input-v1"
 CLASSIFICATION_SCHEMA_VERSION = "3.1.0"
 ISSUE = "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/13316"
 EPIC = "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/13308"
+_SINGLE_PROTEIN = "SINGLE PROTEIN"
 
 CONTROL_INPUTS = 1000
 AUDIT_MATCHED = 117
@@ -730,7 +731,7 @@ def _supported_taxon_case() -> dict[str, object]:
         {"source": "SPECIES_TAXON_IDS includes 9606 Homo sapiens"},
         {
             "organism": "Homo sapiens",
-            "target_type": "SINGLE PROTEIN",
+            "target_type": _SINGLE_PROTEIN,
             "taxonomy_id": "9606",
         },
         {"reason": None, "taxon": "9606"},
@@ -746,7 +747,7 @@ def _unsupported_taxon_case() -> dict[str, object]:
         {"source": "7227 is outside SPECIES_TAXON_IDS and is unsupported"},
         {
             "organism": "Drosophila melanogaster",
-            "target_type": "SINGLE PROTEIN",
+            "target_type": _SINGLE_PROTEIN,
             "taxonomy_id": "7227",
         },
         {"reason": "unsupported_taxon", "taxon": "7227"},
@@ -1153,7 +1154,7 @@ def _execute_projection(fixture: Mapping[str, object]) -> dict[str, object]:
         {
             "component_accessions": list(_sequence(fixture["component_accessions"])),
             "target_id": "CHEMBL1",
-            "target_type": "SINGLE PROTEIN",
+            "target_type": _SINGLE_PROTEIN,
             "target_xref_uniprot_ids": list(
                 _sequence(fixture["target_xref_uniprot_ids"])
             ),
