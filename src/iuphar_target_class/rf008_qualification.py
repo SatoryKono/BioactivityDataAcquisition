@@ -622,8 +622,7 @@ def _projection_case() -> dict[str, object]:
             "taxon": "9606",
         },
         {
-            "auxiliary_uniprot": ["Q99999"],
-            "primary_uniprot": ["P35372"],
+            "auxiliary_uniprot": "Q99999",
             "uniprot": "P35372",
         },
         previous_policy={"uniprot": "P35372|Q99999"},

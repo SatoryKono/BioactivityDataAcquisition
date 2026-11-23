@@ -147,15 +147,14 @@
     "intersection_matches": 374
   },
   "engineering_acceptance": {
-    "explained_previous_policy_count": 2,
+    "explained_previous_policy_count": 1,
     "independent_case_count": 37,
     "status": "PASS",
     "unexplained_error_count": 0,
-    "verified_expectation_count": 35
+    "verified_expectation_count": 36
   },
   "enrich_admitted": false,
   "explained_previous_policy_case_ids": [
-    "match-auxiliary-projection",
     "match-auxiliary-unknown-xref"
   ],
   "historical_acceptance_not_reused": {
@@ -172,7 +171,7 @@
   "issue": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/13316",
   "pins": {
     "classification_schema_version": "3.1.0",
-    "expectations_sha256": "4ad503802b86e3ffe33652bfb97c83f3c7584ea0882b569e048e20e37c52b589",
+    "expectations_sha256": "925de457a0d6905ccf3c8bc721b00a89a52a26d0210fe878f8617860ea0b6ca1",
     "normalization": {
       "normalization_sha256": "72f39b0e080f20ce484b81795a6d0aeffac091b4f7f8e54c68f99ef814fe3b26",
       "normalization_version": "bioetl-iuphar-input-v1",
@@ -1061,21 +1060,17 @@
       "case_id": "match-auxiliary-projection",
       "category": "auxiliary_anchor",
       "claim": "engineering_rule",
-      "disposition": "explained_previous_policy",
+      "disposition": "verified",
       "evidence": {
         "source": "component_accessions is the primary accession; target_xref_uniprot_ids is auxiliary. RF-002."
       },
       "expected": {
-        "auxiliary_uniprot": [
-          "Q99999"
-        ],
-        "primary_uniprot": [
-          "P35372"
-        ],
+        "auxiliary_uniprot": "Q99999",
         "uniprot": "P35372"
       },
       "observed": {
-        "uniprot": "P35372|Q99999"
+        "auxiliary_uniprot": "Q99999",
+        "uniprot": "P35372"
       }
     },
     {
