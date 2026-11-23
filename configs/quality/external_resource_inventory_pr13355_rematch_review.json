@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "0d86143e3b52b8e4fd3a92539b24aa2718bf3e09",
+  "source_ref": "b18d4736e7af11dec37b2117eda1c37975314832",
+  "source_reviews": {
+    "src/bioetl/infrastructure/config/contract_registry_loader.py": "Rematch after #13349 (#13355): blob relocated vs catalog pin; no new filesystem/network/process acquisition."
+  },
+  "expression_updates": {},
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": [],
+  "segment_updates": {},
+  "reference_moves": {},
+  "line_updates": {}
+}
