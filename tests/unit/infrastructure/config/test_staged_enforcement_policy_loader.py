@@ -32,6 +32,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+import yaml
 
 from bioetl.domain.behavior.staged_enforcement import (
     EnforcementStage,
@@ -82,3 +83,50 @@ def test_loader_matches_domain_default_thresholds() -> None:
         )
         for name, policy in engine.policies.items()
     }
+
+
+@pytest.mark.parametrize("reverse", [False, True])
+def test_duplicate_active_policies_are_rejected(tmp_path: Path, reverse: bool) -> None:
+    rows = [
+        {
+            "check_name": "example",
+            "current_stage": "hard_fail",
+            "failure_threshold": 0.2,
+            "warning_threshold": 0.1,
+        },
+        {
+            "check_name": "example",
+            "current_stage": "observe",
+            "failure_threshold": 0.9,
+            "warning_threshold": 0.1,
+        },
+    ]
+    if reverse:
+        rows.reverse()
+    path = tmp_path / "policies.yaml"
+    path.write_text(yaml.safe_dump({"policies": rows}), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="Duplicate.*example") as exc:
+        load_staged_enforcement_policies(path)
+    assert str(path) in str(exc.value)
+
+
+@pytest.mark.parametrize("excluded_first", [False, True])
+def test_excluded_duplicate_does_not_override_active_verdict(
+    tmp_path: Path, excluded_first: bool
+) -> None:
+    active = {
+        "check_name": "example",
+        "current_stage": "hard_fail",
+        "failure_threshold": 0.2,
+        "warning_threshold": 0.1,
+    }
+    excluded = {"check_name": "example", "domain_engine": False}
+    rows = [excluded, active] if excluded_first else [active, excluded]
+    path = tmp_path / "policies.yaml"
+    path.write_text(yaml.safe_dump({"policies": rows}), encoding="utf-8")
+
+    engine = StagedEnforcementEngine(load_staged_enforcement_policies(path))
+    assert (
+        engine.get_enforcement_verdict("example", 1, 2)[0] is EnforcementStage.HARD_FAIL
+    )
