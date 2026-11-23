@@ -37,6 +37,19 @@ def test_requirements_crosswalk_routes_to_traceability_guards() -> None:
     )
 
 
+def test_dq_guide_routes_to_configuration_tests() -> None:
+    repo_root = Path(__file__).resolve().parents[5]
+    changed = "docs/03-guides/dq-configuration.md"
+    owners = {
+        "tests/unit/infrastructure/config/test_dq_config_loader.py",
+        "tests/unit/infrastructure/config/test_pipeline_config_loader_extended.py",
+    }
+    assert owners <= set(affected_pytest_targets([changed], repo_root=repo_root))
+    assert owners <= set(
+        build_shadow_compare([changed], repo_root=repo_root)["selected"]
+    )
+
+
 @pytest.mark.parametrize(
     "changed",
     [
