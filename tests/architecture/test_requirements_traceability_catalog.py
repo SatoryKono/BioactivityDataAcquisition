@@ -18,7 +18,10 @@ aliases (REQ-ARCH family members past CSV 001-007, REQ-PERF-*, …).
 from __future__ import annotations
 
 import csv
+import os
 import re
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -201,3 +204,57 @@ def test_executable_surface_paths_exist() -> None:
         "crosswalk executable_surface cites paths missing from checkout:\n"
         + "\n".join(f"  {item}" for item in missing)
     )
+
+
+def _collect_selector(selector: str) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "pytest",
+            selector,
+            "--collect-only",
+            "--artifact-selection=all",
+            "--no-cov",
+            "-q",
+        ],
+        cwd=_ROOT,
+        env={**os.environ, "PYTEST_ADDOPTS": ""},
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+
+def test_named_pytest_selectors_resolve() -> None:
+    """Named pytest nodes in the crosswalk must actually collect."""
+    with _CSV.open(encoding="utf-8", newline="") as handle:
+        rows = list(csv.DictReader(handle))
+    selectors = [
+        (row["requirement_id"], match.group())
+        for row in rows
+        for match in re.finditer(
+            r"tests/[A-Za-z0-9_./-]+\.py(?:::[A-Za-z0-9_\[\].-]+)+",
+            " ".join(
+                (
+                    row.get("executable_surface") or "",
+                    row.get("verification_method") or "",
+                )
+            ),
+        )
+    ]
+    failures = []
+    for req_id, selector in selectors:
+        result = _collect_selector(selector)
+        if result.returncode:
+            failures.append(f"{req_id}: {selector}\n{result.stdout}{result.stderr}")
+    assert not failures, "unresolvable pytest selectors:\n" + "\n".join(failures)
+
+
+def test_selector_collection_rejects_missing_nodes() -> None:
+    """An existing file must not make a nonexistent test selector valid."""
+    result = _collect_selector(
+        "tests/architecture/test_domain_purity.py::test_nonexistent_selector"
+    )
+    assert result.returncode != 0
+    assert "not found" in result.stderr
