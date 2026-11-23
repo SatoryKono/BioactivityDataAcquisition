@@ -2027,7 +2027,7 @@
         "merged": true,
         "number": 13307
       },
-      "retrieved_at_utc": "2026-11-23T15:21:12Z",
+      "retrieved_at_utc": "2026-11-23T15:20:04Z",
       "retrieved_from": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/pulls/13307",
       "reviewed_source_commits": ["f58b891444349506820365bf8191e29132affd36"],
       "schema_version": 1,
@@ -2042,7 +2042,7 @@
         "merged": true,
         "number": 13340
       },
-      "retrieved_at_utc": "2026-11-23T15:21:12Z",
+      "retrieved_at_utc": "2026-11-23T15:20:04Z",
       "retrieved_from": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/pulls/13340",
       "reviewed_source_commits": ["2a902127d07296c72ca69963020a49a2dfd243c3"],
       "schema_version": 1,
