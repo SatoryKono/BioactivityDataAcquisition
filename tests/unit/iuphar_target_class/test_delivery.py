@@ -399,7 +399,7 @@ def test_batch_cli_writes_beside_the_example(tmp_path: Path) -> None:
     document = contract_document()
     assert document["mapping_version"] is None
     assert document["biological_accuracy_accepted"] is False
-    assert document["rules_version"] == "plan-v1-r8"
+    assert document["rules_version"] == "plan-v1-r9"
 
 
 def test_read_rows_opens_a_file_inside_root(tmp_path: Path) -> None:
