@@ -1,0 +1,8 @@
+{
+  "artifact": "iuphar_rf001_baseline_manifest_receipt",
+  "biological_accuracy_accepted": false,
+  "bytes": 20145,
+  "contract_version": "rf001-2026-11-23",
+  "path": "data/iuphar_target_class/rf001/baseline_manifest.json",
+  "sha256": "f7c1b1bac7fdd4385dac38eff37c45a6290809e93352dc32140ff4af6cce6a3a"
+}
