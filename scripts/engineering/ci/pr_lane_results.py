@@ -226,9 +226,7 @@ ZED_WORKSPACE_CONFIG_TEST = (
 SCOPED_CHECKS_TEST = "tests/unit/scripts/repo/test_scoped_checks.py"
 HOOK_RECEIPTS_TEST = "tests/unit/scripts/repo/test_hook_receipts.py"
 IUPHAR_STAGE0_TEST = "tests/unit/iuphar_target_class/test_stage0_manifest.py"
-IUPHAR_SEMANTICS_RF001_TEST = (
-    "tests/unit/iuphar_target_class/test_semantics_rf001.py"
-)
+IUPHAR_SEMANTICS_RF001_TEST = "tests/unit/iuphar_target_class/test_semantics_rf001.py"
 IUPHAR_POLICY_TEST = "tests/unit/iuphar_target_class/test_policy.py"
 
 
