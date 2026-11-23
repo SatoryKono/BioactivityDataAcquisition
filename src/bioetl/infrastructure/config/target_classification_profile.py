@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import pyarrow as pa
 
@@ -204,8 +204,8 @@ def _target_schemas(
         return (
             TargetV32,
             CHEMBL_TARGET_SCHEMA_V32,
-            TargetSchemaV32,
-            ChEMBLTargetGoldSchemaV32,
+            cast(type[TargetSchema], TargetSchemaV32),
+            cast(type[ChEMBLTargetGoldSchema], ChEMBLTargetGoldSchemaV32),
         )
     if table_contract == "3.1.0":
         return (
