@@ -38,6 +38,7 @@ from bioetl.infrastructure.validation.pandera_validator import (
 )
 from bioetl.application.services.target_runtime.classification import (
     TargetClassificationRunState,
+    equivalent_target_binding,
 )
 from bioetl.application.services.target_runtime.scope import (
     TARGET_CLASSIFICATION_DEPENDENCY_KEY,
@@ -297,32 +298,6 @@ def build_target_classification_session(
     )
 
 
-def _equivalent_target_binding(
-    stored: Mapping[str, object], binding: Mapping[str, object]
-) -> bool:
-    """Treat a missing table_contract and an explicit null as the same pin."""
-    return _normalize_target_binding(stored) == _normalize_target_binding(binding)
-
-
-def _normalize_target_binding(value: Mapping[str, object]) -> dict[str, object]:
-    rendered = dict(value)
-    config = rendered.get("target_config")
-    if not isinstance(config, dict):
-        return rendered
-    classification = config.get("target_classification")
-    if (
-        not isinstance(classification, dict)
-        or classification.get("table_contract") is not None
-    ):
-        return rendered
-    config = dict(config)
-    config["target_classification"] = {
-        key: item for key, item in classification.items() if key != "table_contract"
-    }
-    rendered["target_config"] = config
-    return rendered
-
-
 def preflight_workflow_target_dependencies(
     config: WorkflowConfig,
     launch_context: dict[str, object],
@@ -369,6 +344,6 @@ def preflight_workflow_target_dependencies(
                 "snapshot_id": profile.snapshot.snapshot.snapshot_id,
             }
         )
-    if isinstance(stored, Mapping) and not _equivalent_target_binding(stored, binding):
+    if isinstance(stored, Mapping) and not equivalent_target_binding(stored, binding):
         raise ValueError("stored target classification dependency identity changed")
     return {TARGET_CLASSIFICATION_DEPENDENCY_KEY: binding}

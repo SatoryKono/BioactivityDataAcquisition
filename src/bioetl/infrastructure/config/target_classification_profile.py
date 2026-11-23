@@ -23,6 +23,7 @@ from bioetl.domain.contracts.gold.chembl_target_classification import (
     TargetV31,
     TargetV32,
     target_v31_schema_hash,
+    target_v32_schema_hash,
 )
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.schemas.pipeline_contract_policy import (
@@ -258,4 +259,5 @@ __all__ = [
     "TargetClassificationSchemaProfile",
     "resolve_target_classification_profile",
     "target_v31_schema_hash",
+    "target_v32_schema_hash",
 ]

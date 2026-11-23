@@ -5,7 +5,11 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, cast
+
+if TYPE_CHECKING:
+    from openpyxl.workbook.workbook import Workbook
+    from pandas import DataFrame
 
 from bioetl.domain.ports import ExportFileFingerprint, ExportWriterPort
 from bioetl.infrastructure.export.csv_exporter_table_ops import spreadsheet_safe_table
@@ -143,7 +147,7 @@ def restore_xlsx_text(token: object, parts: tuple[str, ...]) -> str | None:
 
 
 def _xlsx_part_groups(
-    book: Any,
+    book: Workbook,
 ) -> dict[tuple[str, int, int], list[tuple[int, str]]]:
     grouped: dict[tuple[str, int, int], list[tuple[int, str]]] = {}
     if _XLSX_PARTS_SHEET not in book.sheetnames:
@@ -179,7 +183,7 @@ def restore_xlsx_long_text(path: Path) -> dict[str, list[list[object]]]:
     return restored
 
 
-def _write_xlsx_parts(book: Any, parts: list[tuple[object, ...]]) -> None:
+def _write_xlsx_parts(book: Workbook, parts: list[tuple[object, ...]]) -> None:
     sheet = book.create_sheet(_XLSX_PARTS_SHEET)
     header = (
         "sheet",
@@ -200,7 +204,7 @@ def _write_xlsx_parts(book: Any, parts: list[tuple[object, ...]]) -> None:
                 cell.data_type = "s"
 
 
-def _split_xlsx_cells(dataframe: Any) -> list[tuple[object, ...]]:
+def _split_xlsx_cells(dataframe: DataFrame) -> list[tuple[object, ...]]:
     """Replace overlong cells before pandas truncates them."""
     parts: list[tuple[object, ...]] = []
     for row_offset, row in enumerate(dataframe.itertuples(index=False)):
@@ -228,7 +232,7 @@ def _split_xlsx_cells(dataframe: Any) -> list[tuple[object, ...]]:
     return parts
 
 
-def _force_xlsx_shared_strings(book: Any) -> None:
+def _force_xlsx_shared_strings(book: Workbook) -> None:
     for sheet in book.worksheets:
         for row in sheet.iter_rows():
             for cell in row:

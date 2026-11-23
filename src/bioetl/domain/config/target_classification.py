@@ -32,19 +32,29 @@ def _require_paired_manifest(manifest: str | None, digest: str | None) -> None:
         raise ValueError("target classification manifest and hash must be paired")
 
 
-def _validate_table_contract(mode: str, table_contract: str | None) -> None:
-    if table_contract is None:
-        return
+def _reject_unknown_table_contract(table_contract: str) -> None:
     if table_contract not in _TABLE_CONTRACTS:
         raise ValueError("target table contract must be 3.0.0, 3.1.0 or 3.2.0")
-    if mode == "enrich" and table_contract == "3.0.0":
-        raise ValueError(
-            "enrich target classification cannot use the V30 table contract"
-        )
-    if mode != "enrich" and table_contract != "3.0.0":
+
+
+def _reject_mode_contract_pair(mode: str, table_contract: str) -> None:
+    if mode == "enrich":
+        if table_contract == "3.0.0":
+            raise ValueError(
+                "enrich target classification cannot use the V30 table contract"
+            )
+        return
+    if table_contract != "3.0.0":
         raise ValueError(
             "off/shadow target classification cannot select a V31/V32 table"
         )
+
+
+def _validate_table_contract(mode: str, table_contract: str | None) -> None:
+    if table_contract is None:
+        return
+    _reject_unknown_table_contract(table_contract)
+    _reject_mode_contract_pair(mode, table_contract)
 
 
 def _require_manifest_when_enabled(mode: str, manifest: str | None) -> None:

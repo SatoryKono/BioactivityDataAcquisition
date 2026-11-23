@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from bioetl.application.core.record_normalization_processor import (
     RecordNormalizationProcessor,
 )
 from bioetl.application.pipelines.chembl.target_transformer import TargetTransformer
-from bioetl.domain.context import PipelineContext
+
+if TYPE_CHECKING:
+    from bioetl.domain.context import PipelineContext
 from bioetl.domain.entities.chembl_target_classification import TargetV31, TargetV32
 from bioetl.domain.normalization.profiles.chembl_target_classification import (
     target_v31_normalization_profile,

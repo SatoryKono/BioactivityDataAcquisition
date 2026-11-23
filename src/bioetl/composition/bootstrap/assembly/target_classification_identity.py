@@ -15,9 +15,6 @@ from bioetl.composition.factories.pipeline.run_context_contract_identity import 
 from bioetl.composition.bootstrap.assembly.target_classification_runtime import (
     resolve_target_runtime_config,
 )
-from bioetl.domain.contracts.gold.chembl_target_classification import (
-    target_v32_schema_hash,
-)
 from bioetl.domain.context import PipelineRunContext
 from bioetl.domain.control_plane import RunInputSnapshotRef, RunManifest, RunSourceRef
 from bioetl.domain.control_plane.effective_config_artifact import ConfigSourceRef
@@ -32,6 +29,7 @@ from bioetl.infrastructure.config.pipeline_config_api import PipelineYamlConfig
 from bioetl.infrastructure.config.settings_api import Settings
 from bioetl.infrastructure.config.target_classification_profile import (
     target_v31_schema_hash,
+    target_v32_schema_hash,
 )
 
 

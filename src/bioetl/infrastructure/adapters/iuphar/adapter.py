@@ -2,18 +2,16 @@
 
 from __future__ import annotations
 
-import json
 from collections.abc import Mapping
-from dataclasses import asdict
 
-from bioetl.domain.config.target_classification import (
-    TARGET_CLASSIFICATION_DETAIL_FIELDS,
-)
 from bioetl.domain.entities.target_classification_boundary import (
     TargetClassificationArtifact,
     TargetClassificationBatch,
     TargetClassificationInput,
     TargetClassificationResult,
+)
+from bioetl.infrastructure.config.target_classification_profile import (
+    TARGET_CLASSIFICATION_DETAIL_FIELDS,
 )
 from iuphar_target_class.bioetl_input import (
     plain_target_value as _plain,
@@ -25,10 +23,11 @@ from iuphar_target_class.bioetl_input import (
     target_input_eligibility as _eligibility,
 )
 from iuphar_target_class.models import RawTargetRow, RunProvenance
-from iuphar_target_class.pipeline import BatchResult, RowResult, classify_batch
+from iuphar_target_class.pipeline import BatchResult, classify_batch
 from iuphar_target_class.pipeline_io import render_batch
 from iuphar_target_class.stage0.io import canonical_json_bytes
 
+from .detail_projection import detail_projection
 from .snapshot_loader import LoadedIupharProfile
 
 _FIELD_MAP = {
@@ -41,50 +40,6 @@ _FIELD_MAP = {
     "effective_source": "effective_source",
     "decision_status": "decision_status",
 }
-
-
-def _jsonable(value: object) -> object:
-    if isinstance(value, tuple):
-        return [_jsonable(item) for item in value]
-    if isinstance(value, dict):
-        return {str(key): _jsonable(item) for key, item in value.items()}
-    if hasattr(value, "__dataclass_fields__"):
-        return _jsonable(asdict(value))
-    return value
-
-
-def _cell_json(value: object) -> str:
-    """Compact canonical JSON for a table cell. Empty means computed empty."""
-    return json.dumps(
-        _jsonable(value), ensure_ascii=False, sort_keys=True, separators=(",", ":")
-    )
-
-
-def _detail_projection(output: RowResult) -> dict[str, str | None]:
-    """Project 3.2.0 detail. Null stays reserved for rows that were not computed."""
-    result = output.result
-    direct = output.direct
-    annotation = output.annotation
-    evidence = tuple(sorted({*result.match_evidence_ids, *result.local_evidence_ids}))
-    return {
-        "iuphar_type_raw": result.iuphar_type_raw,
-        "iuphar_annotation_capability": (
-            direct.annotation_capability if direct is not None else None
-        ),
-        "iuphar_family_ids": _cell_json(
-            annotation.family_ids if annotation is not None else ()
-        ),
-        "iuphar_subclasses": _cell_json(
-            direct.iuphar_subclasses if direct is not None else ()
-        ),
-        "iuphar_paths": _cell_json(direct.paths if direct is not None else ()),
-        "local_status": result.local_status,
-        "local_subclasses": _cell_json(result.local_subclasses),
-        "local_rule_ids": _cell_json(result.local_rule_ids),
-        "effective_subclasses": _cell_json(result.effective_subclasses),
-        "conflict_codes": _cell_json(result.conflict_codes),
-        "classification_evidence_ids": _cell_json(evidence),
-    }
 
 
 def _unclassified(
@@ -135,7 +90,7 @@ def _row_result(
     }
     projection["target_class_profile_sha256"] = profile_hash
     if schema_version == "3.2.0":
-        projection.update(_detail_projection(output))
+        projection.update(detail_projection(output))
     return TargetClassificationResult(
         output.result.input_row_id,
         projection,

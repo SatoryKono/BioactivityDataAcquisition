@@ -5,6 +5,9 @@ from __future__ import annotations
 import pyarrow as pa
 import pytest
 
+from bioetl.application.services.target_runtime.classification import (
+    equivalent_target_binding,
+)
 from bioetl.application.services.target_runtime.post_join_classification import (
     apply_post_join_classification,
     occurrence_id,
@@ -22,9 +25,6 @@ from bioetl.infrastructure.export.export_writer_adapter import (
     _write_xlsx_file,
     restore_xlsx_long_text,
     restore_xlsx_text,
-)
-from bioetl.composition.bootstrap.assembly.storage import (
-    _equivalent_target_binding,
 )
 from bioetl.infrastructure.storage.target_contract_transition import (
     assert_live_promotion_allowed,
@@ -277,5 +277,5 @@ def test_missing_table_contract_matches_an_explicit_null() -> None:
             "target_classification": {"mode": "enrich", "table_contract": None}
         }
     }
-    assert _equivalent_target_binding(stored, current)
-    assert not _equivalent_target_binding(stored, changed)
+    assert equivalent_target_binding(stored, current)
+    assert not equivalent_target_binding(stored, changed)

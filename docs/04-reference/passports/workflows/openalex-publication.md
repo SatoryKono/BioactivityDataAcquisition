@@ -5,7 +5,7 @@
 - Kind: `workflow`
 - Typed identity: `workflow:openalex_publication`
 - Schema: `1.0.0`
-- Source revision: `sha256:52e45484f1404e1d8e7ace7a05e1b1180e335baee3de88690d154ebcd847efea`
+- Source revision: `sha256:fcd31fc26dbe9161d95813ab30d2e00d16a3f6355c9f41083416f3cde23fbad0`
 
 ## Evidence
 
@@ -75,7 +75,7 @@
   "provenance": {
     "projector_version": "1.0.0",
     "semantic_content_hash": "sha256:c6cfeea4142f76d56aa6aa6ccd74c68a8251dbef0f3f07443e2817a7eba3cc79",
-    "source_revision": "sha256:52e45484f1404e1d8e7ace7a05e1b1180e335baee3de88690d154ebcd847efea"
+    "source_revision": "sha256:fcd31fc26dbe9161d95813ab30d2e00d16a3f6355c9f41083416f3cde23fbad0"
   },
   "source_references": [
     {
