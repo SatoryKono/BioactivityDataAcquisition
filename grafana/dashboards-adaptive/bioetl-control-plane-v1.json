@@ -689,7 +689,7 @@
         "type": "yesoreyeram-infinity-datasource",
         "uid": "bioetl-ops-http"
       },
-      "description": "SELECTED RUN · Identity anchors, missing first. Presence is not verification. SELECT RUN requests an explicit Run ID; UNKNOWN means the reply lacks required anchor evidence. QUERY ERROR means the source reported a query failure or Grafana could not complete the query; inspect the query for details. Exact Replay Checks determines readiness. Inspect a value to copy it in full.",
+      "description": "SELECTED RUN · Identity anchors, missing first. Presence is not verification. SELECT RUN requests an explicit Run ID; UNKNOWN means the reply lacks required anchor evidence. A valid empty response (no required anchors returned) is not verification. QUERY ERROR means the source reported a query failure or Grafana could not complete the query; inspect the query for details. Exact Replay Checks determines readiness. Inspect a value to copy it in full.",
       "fieldConfig": {
         "defaults": {
           "noValue": "No result · inspect this query",
