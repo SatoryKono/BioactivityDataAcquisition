@@ -75,7 +75,7 @@
   ],
   "fixture_kind": "synthetic",
   "fixture_row_count": 3,
-  "rules_version": "plan-v1-r9",
+  "rules_version": "plan-v1-r8",
   "stage0_selected_source_count": 0,
   "stages": [
     "0",

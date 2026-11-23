@@ -140,7 +140,7 @@
       "bytes": 3564,
       "group": "acceptance",
       "pin_policy": "immutable_hash_locked",
-      "sha256": "181ea9a7fd989cde1870179a6d48ec28da5032cc627c4fdf2f725f3c538457b7"
+      "sha256": "b5c88d82d45e5b679e68f23ec06d830b6f935ab2906c6f24d61f3440e54d2fe2"
     },
     "data/iuphar_target_class/acceptance/tc10/engineering-run-receipt.json": {
       "bytes": 1223,

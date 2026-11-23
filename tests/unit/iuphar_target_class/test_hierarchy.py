@@ -444,6 +444,7 @@ def test_synthetic_family_ids_stay_outside_official_paths() -> None:
         family_to_class={},
     )
     assert only_local.annotation_status == "not_available"
+    assert only_local.iuphar_class is None
     assert only_local.paths == ()
     assert (
         only_local.diagnostics[0].message
@@ -460,6 +461,7 @@ def test_synthetic_family_ids_stay_outside_official_paths() -> None:
     assert typed_local.annotation_status == "partial"
     assert typed_local.iuphar_class == "Receptor"
     assert typed_local.iuphar_subclass == "G protein-coupled receptors"
+    assert typed_local.proof == "type"
     assert typed_local.paths == ()
     assert typed_local.diagnostics[0].level == "error"
     assert (

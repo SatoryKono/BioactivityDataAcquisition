@@ -112,7 +112,11 @@ def assign_mapped_subclass(
     iuphar_class: str | None = None,
     family_to_class: Mapping[str, str] | None = None,
 ) -> str | None:
-    """Return a subclass only from the approved type/family dictionaries."""
+    """Return a subclass only from the approved type/family dictionaries.
+
+    Family fallback applies only when every family that maps to the sole
+    subclass shares the selected ``iuphar_class`` (when that class is set).
+    """
     mapped = {
         family_to_subclass[family_id]
         for family_id in family_ids
@@ -128,12 +132,11 @@ def assign_mapped_subclass(
     if iuphar_class is None or family_to_class is None:
         return subclass
     for family_id in family_ids:
-        if (
-            family_to_subclass.get(family_id) == subclass
-            and family_to_class.get(family_id) == iuphar_class
-        ):
-            return subclass
-    return None
+        if family_to_subclass.get(family_id) != subclass:
+            continue
+        if family_to_class.get(family_id) != iuphar_class:
+            return None
+    return subclass
 
 
 def validate_family_graph(
