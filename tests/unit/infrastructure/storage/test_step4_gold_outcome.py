@@ -103,6 +103,8 @@ async def test_physical_cancellation_drains_without_repeating_commit():
         await task
     assert task.cancelled()
     assert found.value.receipt.category == Category.COMMITTED_POSTWRITE_PENDING
+    assert found.value.diagnostic_error is None
+    assert isinstance(found.value.__cause__, asyncio.CancelledError)
     assert calls == ["started", "committed"]
 
 
@@ -309,11 +311,14 @@ async def test_self_cancelled_physical_task_has_unknown_outcome():
 async def test_outer_cancellation_with_failed_physical_drain_is_unknown():
     entered = asyncio.Event()
     release = asyncio.Event()
+    error = OSError("synthetic uncertain outcome")
+    calls = []
 
     async def physical():
+        calls.append(1)
         entered.set()
         await release.wait()
-        raise OSError("synthetic uncertain outcome")
+        raise error
 
     task = asyncio.create_task(
         await_physical_commit(physical, receipt_for("synthetic"))
@@ -326,6 +331,9 @@ async def test_outer_cancellation_with_failed_physical_drain_is_unknown():
         await task
     assert found.value.receipt.category == Category.UNKNOWN
     assert found.value.receipt.committed_targets == ()
+    assert found.value.diagnostic_error is error
+    assert isinstance(found.value.__cause__, asyncio.CancelledError)
+    assert calls == [1]
 
 
 @pytest.mark.asyncio
