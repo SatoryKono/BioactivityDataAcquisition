@@ -3,9 +3,9 @@
   "biological_accuracy_accepted": false,
   "files": {
     "cohort_partition.json": "9a9bfb127e0bff84d1b3c22cd6b13a8c605e6b730ceccad70801a7d2dbe4f790",
-    "independent_expectations.json": "024b3298afb00f6ea9531bad1994a37eb5c89901e60dd2c630b3307cd73f7043",
+    "independent_expectations.json": "027ef9b6fa4fee8f8df3d3fc3439f9bb65b52a7a407259e9feaf2aee1b7d6faf",
     "profile.json": "9ab15c754a6395deda21c57b96caf77446d1380ec05ff5788c3f91e5bf8929f1",
-    "qualification_receipt.json": "c02d7384319e052821fba3d03d498f01d2faae87cd5d53564577656ac1b8548f"
+    "qualification_receipt.json": "bf5b583e7f2ef1da06f962d557345fa473a3e35243610d37efa6c1701d362463"
   },
   "qualification_version": "rf008-2026-11-23"
 }

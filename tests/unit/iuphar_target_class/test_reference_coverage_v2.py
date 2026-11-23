@@ -66,6 +66,7 @@ def reference_inputs(tmp_path: Path):
         "3.1.0",
         "2026-11-16T00:00:00Z",
         "2026-11-16T00:01:00Z",
+        matching_policy_version="rf002-uniprot-roles-2026-11-23",
     )
     # The synthetic row carries EC 1.1.1.1, so the local catalog now supports
     # Enzyme beside the direct Receptor label and the decision stays in review.
@@ -100,6 +101,7 @@ def reference_inputs(tmp_path: Path):
         "normalization_version": provenance.normalization_version,
         "rules_version": provenance.rules_version,
         "classification_schema_version": provenance.schema_version,
+        "matching_policy_version": provenance.matching_policy_version,
         "taxonomy_scope": ["9606"],
         "scope_declaration": {
             "scope_id": "synthetic-contract-scope",

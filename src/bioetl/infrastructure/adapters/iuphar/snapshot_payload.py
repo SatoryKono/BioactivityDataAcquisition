@@ -75,6 +75,8 @@ def compile_snapshot_bundle(evidence: SourceEvidence) -> SnapshotBundle:
         ),
     }
     files[_SNAPSHOT_JSON] = canonical_json_bytes(snapshot)
+    from iuphar_target_class.identifier_roles import MATCHING_POLICY_VERSION
+
     profile = {
         "artifact": "bioetl_iuphar_profile",
         "schema_version": 2,
@@ -83,6 +85,7 @@ def compile_snapshot_bundle(evidence: SourceEvidence) -> SnapshotBundle:
         "normalization_version": "bioetl-iuphar-input-v1",
         "rules_version": LOCAL_CATALOG_VERSION,
         "classification_schema_version": "3.1.0",
+        "matching_policy_version": MATCHING_POLICY_VERSION,
     }
     files["profile.json"] = canonical_json_bytes(profile)
     return SnapshotBundle(
