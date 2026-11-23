@@ -5,11 +5,11 @@
 
 ## Summary
 
-- Scanned modules: `2651`
-- Internal import edges (raw): `8781`
+- Scanned modules: `2652`
+- Internal import edges (raw): `8792`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
-- Cross-layer module-group edges (total): `330`
+- Cross-layer module-group edges (total): `331`
 - Cross-layer module-group edges (top 55): `55`
 
 ## Layer Dependency Graph
@@ -28,8 +28,8 @@ flowchart LR
     composition -->|336 OK| domain
     composition -->|362 OK| infrastructure
     domain -->|1330 OK| domain
-    infrastructure -->|825 OK| domain
-    infrastructure -->|1397 OK| infrastructure
+    infrastructure -->|828 OK| domain
+    infrastructure -->|1405 OK| infrastructure
     interfaces -->|86 OK| application
     interfaces -->|64 OK| composition
     interfaces -->|100 OK| domain
@@ -47,8 +47,8 @@ flowchart LR
 | `composition`    | `domain`         |     336 | allowed |
 | `composition`    | `infrastructure` |     362 | allowed |
 | `domain`         | `domain`         |    1330 | allowed |
-| `infrastructure` | `domain`         |     825 | allowed |
-| `infrastructure` | `infrastructure` |    1397 | allowed |
+| `infrastructure` | `domain`         |     828 | allowed |
+| `infrastructure` | `infrastructure` |    1405 | allowed |
 | `interfaces`     | `application`    |      86 | allowed |
 | `interfaces`     | `composition`    |      64 | allowed |
 | `interfaces`     | `domain`         |     100 | allowed |
@@ -63,7 +63,7 @@ flowchart LR
 | `application.composite`        | `domain.composite`             |     116 |
 | `application.core`             | `domain.types`                 |     107 |
 | `application.services`         | `domain.types`                 |      89 |
-| `infrastructure.storage`       | `domain.types`                 |      83 |
+| `infrastructure.storage`       | `domain.types`                 |      84 |
 | `infrastructure.storage`       | `domain.ports`                 |      67 |
 | `application.services`         | `domain.ports`                 |      59 |
 | `application.pipelines`        | `domain.types`                 |      58 |

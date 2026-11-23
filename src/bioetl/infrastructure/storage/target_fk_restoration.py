@@ -394,11 +394,7 @@ def _require_preservation(
         added = set(written) - set(original)
         planned = _layer_rows(plan, layer)
         expected = (
-            {
-                key
-                for key, row in by_id(planned).items()
-                if row.get("_is_current", True)
-            }
+            {key for key, row in by_id(planned).items() if row.get("_is_current", True)}
             if planned
             else set()
         )

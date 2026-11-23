@@ -370,9 +370,7 @@ def _bound_source_row(
         raise ValueError("target recovery source row does not match the missing target")
     row["target_id"] = recovery.target_id
     if canonical_row_sha256(row) != canonical_row_sha256(declared):
-        raise ValueError(
-            f"target recovery {layer} row is not the verified source row"
-        )
+        raise ValueError(f"target recovery {layer} row is not the verified source row")
     return row
 
 

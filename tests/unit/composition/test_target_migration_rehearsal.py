@@ -467,7 +467,8 @@ def test_restored_assay_target_closes_migration_without_changing_assay(rehearsal
     promoted = promote_target_migration(paths, deployment=binding)
     assert promoted["phase"] == "promoted"
     promoted_ids = {
-        row["target_id"] for row in DeltaTable(paths.gold).to_pyarrow_table().to_pylist()
+        row["target_id"]
+        for row in DeltaTable(paths.gold).to_pyarrow_table().to_pylist()
     }
     assert promoted_ids == {"CHEMBL1", "CHEMBL2237"}
     assert _tree_hashes(paths.assay) == assay_gap
