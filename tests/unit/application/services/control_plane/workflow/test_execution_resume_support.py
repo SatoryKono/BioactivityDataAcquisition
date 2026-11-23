@@ -166,6 +166,26 @@ def test_validate_resume_state_requires_explicit_repair_or_force() -> None:
         )
 
 
+def test_selective_repair_rejects_failed_held_step_at_preflight() -> None:
+    state = _state()
+    with pytest.raises(RuntimeError, match="failed held steps: enrich"):
+        support.validate_resume_state(
+            latest_state=state,
+            workflow_name=state.workflow_name,
+            current_fingerprint=state.execution_fingerprint,
+            force_steps=(),
+            repair_steps=("seed",),
+        )
+
+    support.validate_resume_state(
+        latest_state=state,
+        workflow_name=state.workflow_name,
+        current_fingerprint=state.execution_fingerprint,
+        force_steps=(),
+        repair_steps=("enrich",),
+    )
+
+
 def test_validate_resume_state_accepts_skipped_steps() -> None:
     state = replace(
         _state(),

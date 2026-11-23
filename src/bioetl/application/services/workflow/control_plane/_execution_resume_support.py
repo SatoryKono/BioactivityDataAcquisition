@@ -87,6 +87,19 @@ def validate_resume_state(
     _validate_execution_fingerprint(latest_state, current_fingerprint)
     _validate_completion_status(latest_state, workflow_name)
     _validate_repair_requirements(latest_state, repair_steps, force_steps)
+    if repair_steps:
+        selected = {*repair_steps, *force_steps}
+        failed_held = [
+            step.step_id
+            for step in latest_state.steps
+            if step.step_id not in selected and step.status == "failed"
+        ]
+        if failed_held:
+            raise RuntimeError(
+                "Workflow selective repair cannot proceed with failed held steps: "
+                + ", ".join(failed_held)
+                + "; include them in --repair-steps or --force-steps"
+            )
 
 
 def _validate_workflow_name(
