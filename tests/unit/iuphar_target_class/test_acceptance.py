@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 import subprocess
 import sys
@@ -15,10 +16,12 @@ import pytest
 
 from iuphar_target_class.acceptance import (
     NOT_RUN_REASONS,
+    STAGES_0_3_LOCKED_RULES_VERSION,
     UNEXECUTED_REASONS,
     build_acceptance_report,
     run_volume_scenario,
     stages_0_3_document,
+    stages_0_3_live_report_name,
     volume_fixture_document,
     volume_fixture_rows,
 )
@@ -413,5 +416,13 @@ def test_volume_over_the_limit_fails() -> None:
 def test_committed_volume_artifacts_match_rebuild() -> None:
     fixture = _ACCEPTANCE / "volume_fixture.json"
     report = _ACCEPTANCE / "stages_0_3_report.json"
+    live = _ACCEPTANCE / stages_0_3_live_report_name()
     assert fixture.read_bytes() == canonical_json_bytes(volume_fixture_document())
-    assert report.read_bytes() == canonical_json_bytes(stages_0_3_document())
+    assert report.read_bytes() == canonical_json_bytes(
+        stages_0_3_document(rules_version=STAGES_0_3_LOCKED_RULES_VERSION)
+    )
+    assert live.read_bytes() == canonical_json_bytes(stages_0_3_document())
+    assert (
+        json.loads(report.read_text(encoding="utf-8"))["rules_version"]
+        == STAGES_0_3_LOCKED_RULES_VERSION
+    )

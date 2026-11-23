@@ -60,7 +60,7 @@ def _receipt(snapshot_hash: str) -> dict[str, object]:
         "run_id": "contract-run",
         "reviewer_reference": "synthetic-unit-test-expectations",
         "normalization_version": "bioetl-iuphar-input-v1",
-        "rules_version": "plan-v1-r8",
+        "rules_version": "plan-v1-r9",
         "classification_schema_version": "3.1.0",
     }
 
@@ -70,7 +70,7 @@ def _profile(
     *,
     accepted: bool = False,
     target_changes: dict[str, object] | None = None,
-    rules_version: str = "plan-v1-r8",
+    rules_version: str = "plan-v1-r9",
     schema_version: str = "3.1.0",
     **snapshot_changes: object,
 ):
@@ -294,8 +294,8 @@ def test_an_ec_input_does_not_replace_direct_iuphar(tmp_path):
     output = json.loads(
         next(a.payload for a in result.artifacts if a.name == "classification.json")
     )[0]
-    assert output["iuphar_subclass"] == "GPCR"
-    assert output["iuphar_subclasses"] == ["GPCR"]
+    assert output["iuphar_subclass"] == "G protein-coupled receptors"
+    assert output["iuphar_subclasses"] == ["G protein-coupled receptors"]
 
 
 def test_current_rule_catalog_records_the_enzyme_subclass(tmp_path):
@@ -314,8 +314,8 @@ def test_current_rule_catalog_records_the_enzyme_subclass(tmp_path):
     assert result.projection["effective_class"] == "Receptor"
     assert result.projection["local_class"] == "Enzyme"
     assert "Hydrolase" in str(result.projection["local_subclasses"])
-    assert result.projection["iuphar_subclasses"] == '["GPCR"]'
-    assert result.projection["effective_subclasses"] == '["GPCR"]'
+    assert result.projection["iuphar_subclasses"] == '["G protein-coupled receptors"]'
+    assert result.projection["effective_subclasses"] == '["G protein-coupled receptors"]'
 
 
 @pytest.mark.parametrize(

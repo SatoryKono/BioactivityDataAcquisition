@@ -25,6 +25,7 @@ from .gtopdb_2026_3_1 import (
     SQL_SHA256,
     TARGETS_CSV_SHA256,
     TARGETS_CSV_URL,
+    TYPE_SUBCLASS_PAIRS,
 )
 from .iuphar_mapping import approved_class_mappings
 from .semantics import semantics_document
@@ -37,10 +38,11 @@ WORKING_CLASSES: tuple[str, ...] = (
     "Transporter",
     "Other Protein Target",
 )
-PLAN_SOURCE = "план v1 r8 §2.1"
-PLAN_SECTION_5 = "план v1 r8 §5"
+PLAN_SOURCE = "план v1 r9 §2.1"
+PLAN_SECTION_5 = "план v1 r9 §5"
 DOCUMENTARY_STATUS = "подтверждено документально"
-PLAN_VERSION = "plan-v1-r8"
+# RF-005 (#13313): subclass dictionary + multi-parent path persistence.
+PLAN_VERSION = "plan-v1-r9"
 LOCAL_RULE_CATALOG_VERSION = "iuphar-local-rules-20261123"
 _EC_CLASS_OUTPUTS: tuple[tuple[int, str], ...] = (
     (1, "Oxidoreductase"),
@@ -517,14 +519,15 @@ def policy_document() -> dict[str, object]:
             "volume_test_seconds": VOLUME_TEST_SECONDS,
             "volume_test_time_status": VOLUME_TEST_TIME_STATUS,
         },
-        "plan": {"issued_on": "2026-11-10", "revision": "8", "version": "1"},
+        "plan": {"issued_on": "2026-11-23", "revision": "9", "version": "1"},
         "result_key": ["input_row_id", "snapshot_id"],
         "role_assignment": ROLE_ASSIGNMENT,
         "stage": "1",
         "stage_status": "recorded_without_biological_acceptance",
         "subclass_comparison": {
             "class_subclass_pairs": [],
-            "direct_vocabulary": [],
+            "comparison_pairs_status": UNSET,
+            "direct_vocabulary": sorted({label for _, label in TYPE_SUBCLASS_PAIRS}),
             "local_vocabulary": [],
             "rule": (
                 "совпадение; класс–подкласс; иначе несовместимость; "
@@ -533,6 +536,10 @@ def policy_document() -> dict[str, object]:
             ),
             "same_pairs": [],
             "status": UNSET,
+            "vocabulary_issue": (
+                "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/13313"
+            ),
+            "vocabulary_status": APPROVED,
         },
         "unknown_type_status": "unmapped_type",
         "working_classes": list(WORKING_CLASSES),
