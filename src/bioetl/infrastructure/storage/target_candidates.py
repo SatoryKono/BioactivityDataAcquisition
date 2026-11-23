@@ -322,6 +322,7 @@ def build_target_candidates(request: TargetCandidateBuildRequest) -> dict[str, o
         normalization_version=profile.normalization_version,
         rules_version=profile.rules_version,
         classification_schema_version=profile.classification_schema_version,
+        matching_policy_version=profile.matching_policy_version,
     )
     projections: dict[str, dict[str, str | None]] = {}
     new_silver: list[dict[str, object]] = []
