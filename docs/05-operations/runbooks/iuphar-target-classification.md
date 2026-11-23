@@ -121,7 +121,7 @@ must stay inside that directory, and bind exact bytes:
   "snapshot": {"path": "snapshot.json", "sha256": "SNAPSHOT_SHA256"},
   "acceptance": null,
   "normalization_version": "bioetl-iuphar-input-v1",
-  "rules_version": "plan-v1-r8",
+  "rules_version": "plan-v1-r9",
   "classification_schema_version": "3.1.0"
 }
 ```
@@ -137,7 +137,7 @@ coarse direct class with annotation status `partial`. RF-005 keeps that
 capability: subclasses and all intact `root_to_leaf` hierarchy paths are
 persisted from the approved dictionary and merged multi-parent family graph
 without claiming full direct-type coverage. See
-[`data/iuphar_target_class/rf005/coverage_matrix.json`](../../data/iuphar_target_class/rf005/coverage_matrix.json)
+[`data/iuphar_target_class/rf005/coverage_matrix.json`](../../../data/iuphar_target_class/rf005/coverage_matrix.json)
 and the path policy notes in
 [16-iuphar-target-classification-semantics.md](../../04-reference/pipelines/chembl/16-iuphar-target-classification-semantics.md).
 

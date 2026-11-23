@@ -31,6 +31,8 @@ _DUPLICATE = "повторяющийся идентификатор"
 _MISSING_FAMILY = "отсутствующая семья"
 _MULTI_PARENT = "множественные родители"
 _SYNTHETIC_MIXED = "синтетический идентификатор в официальном графе"
+_KIND_SYNTHETIC_LOCAL = "synthetic_local"
+_KIND_FAMILY = "family"
 
 _SYNTHETIC_PREFIXES = ("local:", "synthetic:", "legacy:")
 
@@ -78,8 +80,13 @@ def family_id_kind(family_id: str) -> str:
     lowered = family_id.casefold()
     for prefix in _SYNTHETIC_PREFIXES:
         if lowered.startswith(prefix):
-            return "synthetic_local"
-    return "family"
+            return _KIND_SYNTHETIC_LOCAL
+    return _KIND_FAMILY
+
+
+def is_synthetic_local_family_id(family_id: str) -> bool:
+    """True for ``local:`` / ``synthetic:`` / ``legacy:`` family identifiers."""
+    return family_id_kind(family_id) == _KIND_SYNTHETIC_LOCAL
 
 
 def partition_family_ids(
@@ -89,7 +96,7 @@ def partition_family_ids(
     official: list[str] = []
     other: list[str] = []
     for family_id in family_ids:
-        if family_id_kind(family_id) == "synthetic_local":
+        if is_synthetic_local_family_id(family_id):
             other.append(family_id)
         else:
             official.append(family_id)
@@ -372,10 +379,10 @@ def _index_nodes(
     """
     grouped: dict[str, list[FamilyNode]] = {}
     for node in nodes:
-        if family_id_kind(node.family_id) == "synthetic_local":
+        if is_synthetic_local_family_id(node.family_id):
             continue
         for parent_id in node.parent_ids:
-            if family_id_kind(parent_id) == "synthetic_local":
+            if is_synthetic_local_family_id(parent_id):
                 return _defect(_SYNTHETIC_MIXED)
         grouped.setdefault(node.family_id, []).append(node)
     indexed: dict[str, FamilyNode] = {}

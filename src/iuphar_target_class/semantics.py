@@ -27,7 +27,7 @@ BASE_MISSING_MARKERS: tuple[str, ...] = (
     "n/a",
     "",
 )
-RULES_VERSION = "plan-v1-r8"
+RULES_VERSION = "plan-v1-r9"
 
 RF001_CONTRACT_VERSION = "rf001-2026-11-23"
 RF001_ISSUE = "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/13309"
@@ -245,8 +245,8 @@ PATH_POLICY: Mapping[str, object] = MappingProxyType(
         "multiple_parents_allowed": True,
         "parent_merge_policy": (
             "RF-005: repeated family IDs with the same payload union parent sets; "
-            "conflicting payloads remain a graph defect; path order is "
-            "canonical root_to_leaf sort, independent of source-row order"
+            "conflicting payloads remain a graph defect; path order is canonical "
+            "sort by (family_id, root_to_leaf), independent of source-row order"
         ),
         "synthetic_id_policy": (
             "local:/synthetic:/legacy: chains stay outside the official numeric "

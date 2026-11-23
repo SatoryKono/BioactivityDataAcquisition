@@ -73,6 +73,7 @@
     "targets_csv_url": "https://www.guidetopharmacology.org/DATA/targets_and_families.csv"
   },
   "rf001_contract": "rf001-2026-11-23",
+  "rules_version": "plan-v1-r9",
   "schema_version": 1,
   "source_unavailable_policy": "Unrepresented targets retain source_unavailable until global completeness is independently proven; not_found stays distinct.",
   "species_taxon_ids": [

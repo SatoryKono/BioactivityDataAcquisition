@@ -21,7 +21,7 @@ from .gtopdb_2026_3_1 import FAMILY_ROWS
 from .hierarchy import (
     FamilyNode,
     HierarchyResult,
-    family_id_kind,
+    is_synthetic_local_family_id,
     normalize_provider_class,
 )
 from .iuphar_mapping import approved_class_mappings, approved_subclass_mappings
@@ -343,7 +343,7 @@ def _ancestor_records(
         if key in seen:
             continue
         seen.add(key)
-        if family_id_kind(key) == "synthetic_local":
+        if is_synthetic_local_family_id(key):
             continue
         nodes = ctx.families.get(key, ())
         records.extend(nodes)
@@ -636,6 +636,10 @@ def _resolution_input(
         iuphar_class=direct_class,
         local_class=local.local_class,
         iuphar_subclass=subclass,
+        # family_only / partial reads confirmed_subclasses, not iuphar_subclass.
+        confirmed_subclasses=(subclass,)
+        if subclass and annotation_status == "partial"
+        else (),
         local_subclasses=local.local_subclasses,
         partial_basis=_partial_basis(direct, annotation_status),
         target_kind=row.target_kind or "protein",

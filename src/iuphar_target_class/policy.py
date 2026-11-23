@@ -37,10 +37,11 @@ WORKING_CLASSES: tuple[str, ...] = (
     "Transporter",
     "Other Protein Target",
 )
-PLAN_SOURCE = "план v1 r8 §2.1"
-PLAN_SECTION_5 = "план v1 r8 §5"
+PLAN_SOURCE = "план v1 r9 §2.1"
+PLAN_SECTION_5 = "план v1 r9 §5"
 DOCUMENTARY_STATUS = "подтверждено документально"
-PLAN_VERSION = "plan-v1-r8"
+# RF-005 (#13313): subclass dictionary + multi-parent path persistence.
+PLAN_VERSION = "plan-v1-r9"
 BASE_MISSING_MARKERS: tuple[str, ...] = (
     "#n/a",
     "N/A",
@@ -453,7 +454,7 @@ def policy_document() -> dict[str, object]:
             "volume_test_seconds": VOLUME_TEST_SECONDS,
             "volume_test_time_status": VOLUME_TEST_TIME_STATUS,
         },
-        "plan": {"issued_on": "2026-11-10", "revision": "8", "version": "1"},
+        "plan": {"issued_on": "2026-11-23", "revision": "9", "version": "1"},
         "result_key": ["input_row_id", "snapshot_id"],
         "role_assignment": ROLE_ASSIGNMENT,
         "stage": "1",

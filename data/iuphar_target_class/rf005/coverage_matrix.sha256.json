@@ -1,6 +1,6 @@
 {
   "artifact": "iuphar_rf005_coverage_matrix_receipt",
-  "bytes": 3256,
+  "bytes": 3289,
   "path": "data/iuphar_target_class/rf005/coverage_matrix.json",
-  "sha256": "d2489cc399176d90ee5e1d57e0505ea8180124317bd3805dcc454877553a9b06"
+  "sha256": "ea62de455e810da40e9c81777640da77e131a2e188f5299615820aaa5eaf0d5f"
 }
