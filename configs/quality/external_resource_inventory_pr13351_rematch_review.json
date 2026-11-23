@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "source_reviews": {
+    "src/bioetl/infrastructure/config/config_ci_contract.py": "Rematch after #13349 (#13351): source blob relocated vs catalog pin; no new filesystem/network/process acquisition sites beyond existing census."
+  },
+  "expression_updates": {},
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": [],
+  "segment_updates": {},
+  "reference_moves": {},
+  "line_updates": {},
+  "catalog_ref": "0d86143e3b52b8e4fd3a92539b24aa2718bf3e09",
+  "source_ref": "949bd7ecfee07742c2f8ec3d30d10556507c363c"
+}
