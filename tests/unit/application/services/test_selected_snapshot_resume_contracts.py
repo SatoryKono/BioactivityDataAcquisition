@@ -223,3 +223,64 @@ async def test_resume_skipped_child_retains_saved_identity_without_execution(
         "saved-manifest",
     )
     pipeline.run.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_restored_producer_reaches_workflow_report(tmp_path):
+    import json
+
+    from bioetl.infrastructure.storage.run_report_store_adapter import (
+        FileRunReportStoreAdapter,
+    )
+
+    report = tmp_path / "child.json"
+    report.write_text(
+        json.dumps(
+            {
+                "reasons_top_n": [{"code": "invalid", "count": 4}],
+                "layers": {"gold_excluded_by_contract": 4},
+            }
+        )
+    )
+    details = _details()
+    details["producer_result"]["run_report_json_path"] = str(report)
+    step = WorkflowStepConfig("extract", "chembl_assay")
+    restored = resume._restore_producer(step, details)
+    archive = Mock()
+    pipeline = Mock(run=AsyncMock(), logger=None, archive_control_plane=archive)
+    service = WorkflowRunnerService(
+        pipeline, Mock(), Mock(), FileRunReportStoreAdapter(), report_root=tmp_path
+    )
+    result = await service.run_workflow(
+        WorkflowConfig("workflow", (step,)),
+        resumed=True,
+        completed_step_ids=frozenset({"extract"}),
+        restored_step_outputs={"extract": restored},
+        workflow_run_id="workflow-run",
+    )
+    assert result.steps[0].payload is restored
+    assert result.steps[0].child_run_id == "run"
+    from bioetl.application.services.workflow.workflow_runner_reports import (
+        _execution_rows_from_result,
+    )
+
+    row = _execution_rows_from_result(
+        result, plan_steps=[], store=FileRunReportStoreAdapter()
+    )[0]
+    assert row["pipeline_report_ref"] == str(report)
+    assert row["top_reasons"] == [{"code": "invalid", "count": 4}]
+    assert row["gold_excluded_by_contract"] == 4
+    pipeline.run.assert_not_awaited()
+    archive.assert_not_called()
+
+    for contents in (None, "not json"):
+        if contents is None:
+            report.unlink()
+        else:
+            report.write_text(contents)
+        row = _execution_rows_from_result(
+            result, plan_steps=[], store=FileRunReportStoreAdapter()
+        )[0]
+        assert row["pipeline_report_ref"] == str(report)
+        assert row["top_reasons"] == ()
+        assert row["gold_excluded_by_contract"] is None

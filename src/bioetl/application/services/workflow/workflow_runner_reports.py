@@ -39,8 +39,10 @@ def archive_workflow_children(
         return
     for step in result.steps:
         definition = config.get_step(step.step_id)
-        if not isinstance(step.payload, RunResult) or not isinstance(
-            definition, WorkflowStepConfig
+        if (
+            step.status != "success"
+            or not isinstance(step.payload, RunResult)
+            or not isinstance(definition, WorkflowStepConfig)
         ):
             continue
         options = run_options_from_config(
