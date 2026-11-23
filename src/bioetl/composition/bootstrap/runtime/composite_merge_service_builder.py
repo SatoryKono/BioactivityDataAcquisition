@@ -10,6 +10,9 @@ from bioetl.application.composite.runtime_wiring_api import (
     MergeCollaboratorGroup,
     MergeService,
 )
+from bioetl.composition.bootstrap.assembly.target_classification_runtime import (
+    build_composite_target_classification_stage,
+)
 from bioetl.composition.bootstrap.runtime.composite_merge_dependency_builder import (
     build_merge_dependencies,
 )
@@ -91,7 +94,7 @@ def build_composite_merge_service(
         normalization_policies=normalization_policies,
         system_columns_to_drop=system_columns_to_drop,
     )
-    return MergeService(
+    service = MergeService(
         merge_config=config.merge,
         storage=storage,
         logger=logger,
@@ -112,6 +115,10 @@ def build_composite_merge_service(
             join_planner=merge_dependencies.join_planner,
         ),
     )
+    service.bind_post_join_target_classification(
+        build_composite_target_classification_stage(config)
+    )
+    return service
 
 
 __all__ = ["build_composite_merge_service"]

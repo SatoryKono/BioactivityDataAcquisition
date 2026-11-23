@@ -5,6 +5,7 @@ from __future__ import annotations
 from bioetl.application.pipelines.chembl.target_protein_classification_summary import (
     MULTIFUNCTIONAL_TARGET_NAME,
     TARGET_PROTEIN_CLASSIFICATION_PIPELINE,
+    agreed_chembl_release,
     empty_target_protein_classification_summary,
     summarize_target_protein_classification_dependency,
     summarize_target_protein_classification_rows,
@@ -13,6 +14,7 @@ from bioetl.application.pipelines.chembl.target_protein_classification_summary i
 __all__ = [
     "MULTIFUNCTIONAL_TARGET_NAME",
     "TARGET_PROTEIN_CLASSIFICATION_PIPELINE",
+    "agreed_chembl_release",
     "empty_target_protein_classification_summary",
     "summarize_target_protein_classification_dependency",
     "summarize_target_protein_classification_rows",

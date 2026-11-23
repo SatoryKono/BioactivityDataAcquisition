@@ -9,6 +9,9 @@ from bioetl.application.core.wiring.registry import (
     TargetTransformer,
 )
 from bioetl.application.core.wiring.transformer import BaseTransformer
+from bioetl.application.composite.target_classification_stage import (
+    CompositeTargetClassificationStage,
+)
 from bioetl.application.services.target_runtime.scope import (
     get_target_classification_dependency,
 )
@@ -17,7 +20,10 @@ from bioetl.composition.bootstrap.assembly.storage import (
     hydrate_target_runtime_config,
     load_target_runtime_profile,
 )
-from bioetl.composition.runtime_builders.config_access import get_settings
+from bioetl.composition.runtime_builders.config_access import (
+    get_settings,
+    load_pipeline_config,
+)
 from bioetl.domain.ports import ContractPolicyProtocol
 from bioetl.infrastructure.config.settings_api import Settings
 from bioetl.infrastructure.config.target_classification_profile import (
@@ -103,6 +109,21 @@ def select_target_transformer(
         target_profile.pandera_silver_schema,
         target_profile,
     )
+
+
+def build_composite_target_classification_stage(
+    config: object,
+) -> CompositeTargetClassificationStage | None:
+    """Wire post-join classification only for an enabled composite target."""
+    if getattr(config, "name", None) != "composite_target":
+        return None
+    yaml_config = load_pipeline_config("chembl_target")
+    if yaml_config.target_classification.mode == "off":
+        return None
+    session = build_target_classification_session(yaml_config, get_settings())
+    if session is None:
+        return None
+    return CompositeTargetClassificationStage(session)
 
 
 def configure_target_transformer(

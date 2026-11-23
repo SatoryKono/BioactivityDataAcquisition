@@ -212,6 +212,8 @@ async def execute_merge_execution_core(
         sources_used=loaded.sources_used,
         dependency_results=request.dependency_results,
         enricher_dfs=loaded.enricher_dfs,
+        dependency_dfs=loaded.dependency_dfs,
+        classification_started_at=execution_context.started_at,
     )
     return await persist_and_build_result(
         host,

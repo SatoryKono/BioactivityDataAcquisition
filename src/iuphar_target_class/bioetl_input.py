@@ -92,7 +92,7 @@ def project_target_fields(
             )
         )
     )
-    return {
+    projected = {
         "target_chembl_id": _text(data.get("target_id")),
         # ChEMBL identity is never passed as the kernel's explicit IUPHAR ID.
         "target_id": _text(data.get("iuphar_target_id")),
@@ -108,6 +108,10 @@ def project_target_fields(
             "utf-8"
         ),
     }
+    keyword_ids = "|".join(_tokens(data.get("controlled_keyword_ids"))) or None
+    if keyword_ids is not None:
+        projected["keywords"] = keyword_ids
+    return projected
 
 
 def target_input_eligibility(
