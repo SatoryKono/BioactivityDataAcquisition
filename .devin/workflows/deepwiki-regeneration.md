@@ -27,9 +27,12 @@ Regenerate DeepWiki when:
 ### Phase 1: Preparation
 
 1. **Backup current wiki files**
+   Use a named branch other than `main`. The index must be empty or contain
+   only `.devin/wiki*.json` files directly under `.devin`; foreign staged
+   paths and detached HEAD are rejected before Git is modified. Review the
+   wiki changes before opting in. The backup is a no-op if nothing changed.
    ```bash
-   git add .devin/wiki-*.json
-   git commit -m "backup: wiki files before DeepWiki regeneration - issue #<number>"
+   python scripts/ai/update_deepwiki.py --backup
    ```
 
 2. **Audit canonical sources**
