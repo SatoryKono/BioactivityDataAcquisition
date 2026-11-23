@@ -124,7 +124,9 @@ def test_capability_matrix_prefers_composite_after_joins() -> None:
     assert composite["full_features_available"] is True
     assert standalone["full_features_available"] is False
     assert "uniprot_protein" in composite["available_after_dependency_joins"]
-    assert "uniprot_protein annotations/keywords" in standalone["unavailable_until_joins"]
+    assert (
+        "uniprot_protein annotations/keywords" in standalone["unavailable_until_joins"]
+    )
 
 
 def test_path_missing_marker_and_other_policies() -> None:
@@ -133,9 +135,10 @@ def test_path_missing_marker_and_other_policies() -> None:
     assert PATH_POLICY["multiple_parents_allowed"] is True
     assert list(MISSING_MARKER_POLICY["base_markers"]) == list(BASE_MISSING_MARKERS)
     assert MISSING_MARKER_POLICY["version"] is None
-    assert "unmapped_type or name/path text containing 'Other'" in LEGACY_OTHER_POLICY[
-        "forbidden_when"
-    ]
+    assert (
+        "unmapped_type or name/path text containing 'Other'"
+        in LEGACY_OTHER_POLICY["forbidden_when"]
+    )
     assert WORKING_CLASSES == tuple(semantics_document()["working_classes"])
     assert "Other Protein Target" in WORKING_CLASSES
 
@@ -154,7 +157,9 @@ def test_baseline_manifest_hashes_and_receipt() -> None:
     assert manifest["upstream_iuphar"]["annotation_capability"] == "family_only"
     assert (
         manifest["audit_2026_11_23_control_counts"]["matched"]
-        != manifest["audit_2026_11_23_control_counts"]["counterfactual_matched_not_accuracy"]
+        != manifest["audit_2026_11_23_control_counts"][
+            "counterfactual_matched_not_accuracy"
+        ]
     )
     # Only immutable stage-0 / acceptance bytes are hash-locked.
     pinned = manifest["pinned_artifacts"]
@@ -168,7 +173,10 @@ def test_baseline_manifest_hashes_and_receipt() -> None:
     # Live configs/docs/source stay listed but not CI-hash-locked.
     mutable = manifest["mutable_surfaces"]
     assert "configs/entities/chembl/target.yaml" in mutable
-    assert "docs/04-reference/pipelines/chembl/16-iuphar-target-classification-semantics.md" in mutable
+    assert (
+        "docs/04-reference/pipelines/chembl/16-iuphar-target-classification-semantics.md"
+        in mutable
+    )
     for relative, meta in mutable.items():
         assert (REPO / relative).is_file(), relative
         assert meta["pin_policy"] in {"not_hash_locked", "versioned_separately"}

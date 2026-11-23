@@ -772,6 +772,20 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         GITHUB_ACTIONS_RUNTIME_POLICY_TEST,
     ),
     "src/iuphar_target_class/__init__.py": (IUPHAR_STAGE0_TEST,),
+    "src/iuphar_target_class/semantics.py": (
+        "tests/unit/iuphar_target_class/test_semantics_rf001.py",
+        "tests/unit/iuphar_target_class/test_policy.py",
+    ),
+    **dict.fromkeys(
+        (
+            "docs/04-reference/pipelines/chembl/04-target-spec.md",
+            "docs/04-reference/pipelines/chembl/16-iuphar-target-classification-semantics.md",
+        ),
+        (
+            "tests/unit/iuphar_target_class/test_semantics_rf001.py",
+            *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        ),
+    ),
     **dict.fromkeys(
         (
             "src/iuphar_target_class/policy.py",
@@ -2300,6 +2314,9 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
     "data/iuphar_target_class/stage0/": (IUPHAR_STAGE0_TEST,),
     "data/iuphar_target_class/acceptance/": (
         "tests/unit/iuphar_target_class/test_acceptance.py",
+    ),
+    "data/iuphar_target_class/rf001/": (
+        "tests/unit/iuphar_target_class/test_semantics_rf001.py",
     ),
     **dict.fromkeys(
         (
