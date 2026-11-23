@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "d6ed8edbbb1d5699e773d5e6e0d3078ca0d16215",
+  "source_ref": "5d25b57fe218c688a8f7bcbcfa6ab0a877ffd50b",
+  "source_reviews": {
+    "src/bioetl/application/services/run_reports/workflow_observations.py": "Skipped resume rows with AlreadyCompletedOnResume are not re-observed. No new file, network, or process acquisition.",
+    "src/bioetl/application/services/workflow/workflow_runner_reports.py": "Child archives are written only for successful steps. The existing archive path is unchanged.",
+    "src/bioetl/application/services/workflow/workflow_runner_transitions.py": "A restored RunResult is copied onto the completed step before the mapping fallback. No new resource identity."
+  },
+  "expression_updates": {},
+  "segment_updates": {},
+  "line_updates": {},
+  "reference_moves": [],
+  "retired_references": [],
+  "exclusion_moves": [],
+  "resource_updates": {},
+  "additional_bindings": {},
+  "additional_creation_sites": {},
+  "new_resources": [],
+  "new_exclusions": []
+}
