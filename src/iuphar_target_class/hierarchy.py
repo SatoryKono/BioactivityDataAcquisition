@@ -650,29 +650,57 @@ def _bind_root_distance(
     stacked: set[str] = set()
     best: dict[str, int] = {}
     while frames:
-        frame = frames[-1]
-        node_id = str(frame[0])
-        cursor = int(frame[1])
-        if node_id in distances:
-            frames.pop()
-            continue
-        parents = nodes[node_id].parent_ids
-        if cursor == 0 and node_id not in stacked:
-            stacked.add(node_id)
-            best[node_id] = 0
-        if cursor < len(parents):
-            defect = _follow_parent(
-                frames, frame, parents[cursor], node_id, distances, stacked, best
-            )
-            if defect is not None:
-                return defect
-            continue
-        distance = best[node_id]
-        if distance > max_depth:
-            return _defect(_LIMIT)
-        distances[node_id] = distance
-        stacked.remove(node_id)
+        defect = _advance_distance_frame(
+            nodes, frames, stacked, best, distances, max_depth=max_depth
+        )
+        if defect is not None:
+            return defect
+    return None
+
+
+def _advance_distance_frame(
+    nodes: dict[str, FamilyNode],
+    frames: list[list[int | str]],
+    stacked: set[str],
+    best: dict[str, int],
+    distances: dict[str, int],
+    *,
+    max_depth: int,
+) -> Diagnostic | None:
+    frame = frames[-1]
+    node_id = str(frame[0])
+    cursor = int(frame[1])
+    if node_id in distances:
         frames.pop()
+        return None
+    parents = nodes[node_id].parent_ids
+    if cursor == 0 and node_id not in stacked:
+        stacked.add(node_id)
+        best[node_id] = 0
+    if cursor < len(parents):
+        return _follow_parent(
+            frames, frame, parents[cursor], node_id, distances, stacked, best
+        )
+    return _store_root_distance(
+        node_id, best, distances, stacked, frames, max_depth=max_depth
+    )
+
+
+def _store_root_distance(
+    node_id: str,
+    best: dict[str, int],
+    distances: dict[str, int],
+    stacked: set[str],
+    frames: list[list[int | str]],
+    *,
+    max_depth: int,
+) -> Diagnostic | None:
+    distance = best[node_id]
+    if distance > max_depth:
+        return _defect(_LIMIT)
+    distances[node_id] = distance
+    stacked.remove(node_id)
+    frames.pop()
     return None
 
 
