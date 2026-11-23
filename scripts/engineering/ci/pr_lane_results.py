@@ -891,6 +891,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "src/iuphar_target_class/hierarchy.py": (
         "tests/unit/iuphar_target_class/test_hierarchy.py",
     ),
+    "src/iuphar_target_class/rf008_qualification.py": (
+        "tests/unit/iuphar_target_class/test_rf008_qualification.py",
+    ),
     **dict.fromkeys(
         (
             "src/iuphar_target_class/pipeline.py",
@@ -2331,6 +2334,9 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
     "data/iuphar_target_class/acceptance/": (
         "tests/unit/iuphar_target_class/test_acceptance.py",
     ),
+    "data/iuphar_target_class/acceptance/rf008/": (
+        "tests/unit/iuphar_target_class/test_rf008_qualification.py",
+    ),
     "data/iuphar_target_class/rf001/": (IUPHAR_SEMANTICS_RF001_TEST,),
     **dict.fromkeys(
         (
@@ -2369,6 +2375,9 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
             CURSOR_SKILL_SYNC_TEST,
             "tests/unit/repo_backed/scripts/test_check_skills_mirror.py",
         ),
+    ),
+    ".devin/workflows/deepwiki-regeneration.md": (
+        "tests/unit/scripts/ai/test_update_deepwiki.py",
     ),
     # Canonical Cursor/Windsurf rule docs → sync contract (alwaysApply / globs).
     "docs/00-project/ai/rules/": (SYNC_CURSOR_RULES_TEST,),

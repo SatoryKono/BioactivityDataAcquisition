@@ -1,0 +1,11 @@
+{
+  "artifact": "bioetl_iuphar_rf008_material_pins",
+  "biological_accuracy_accepted": false,
+  "files": {
+    "cohort_partition.json": "9a9bfb127e0bff84d1b3c22cd6b13a8c605e6b730ceccad70801a7d2dbe4f790",
+    "independent_expectations.json": "4ad503802b86e3ffe33652bfb97c83f3c7584ea0882b569e048e20e37c52b589",
+    "profile.json": "67598dc8b09ffa7515ed16cd9b20e210a112f7c727560371d9d81ab94f78e745",
+    "qualification_receipt.json": "53d0fb7a1bfd92094509b737aed86ea38b3893b5c435f3b19974253b925ff812"
+  },
+  "qualification_version": "rf008-2026-11-23"
+}
