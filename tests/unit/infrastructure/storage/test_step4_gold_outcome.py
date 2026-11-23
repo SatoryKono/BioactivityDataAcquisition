@@ -468,30 +468,37 @@ async def test_precommit_validation_preserves_error_classification(contract_erro
         ("9.8.7", "after_prepare", "9.8.7"),
     ],
 )
-async def test_merged_cancellation_receipt_identifies_request(
-    monkeypatch, version, stage, expected
-):
-    from bioetl.infrastructure.storage.gold import io_execution, io_preparation
+async def test_merged_cancellation_receipt_identifies_request(version, stage, expected):
+    from pandera.polars import Column, DataFrameSchema
 
-    schema = SimpleNamespace(metadata={"contract_version": version})
-    request = SimpleNamespace(table_name="synthetic", schema=schema)
-    prepared = SimpleNamespace(request=request)
-    prepare = AsyncMock(
-        side_effect=asyncio.CancelledError() if stage == "prepare" else None,
-        return_value=prepared,
+    from bioetl.infrastructure.storage.gold.io_mixin import (
+        _GoldWriterMergedDispatchMixin,
     )
-    complete = AsyncMock(side_effect=asyncio.CancelledError())
-    monkeypatch.setattr(io_preparation, "_prepare_gold_merged_write", prepare)
-    monkeypatch.setattr(io_preparation, "_log_prepared_gold_merged_write", MagicMock())
-    monkeypatch.setattr(io_execution, "_complete_gold_merged_write", complete)
+
+    class Host(_GoldWriterMergedDispatchMixin):
+        def __init__(self):
+            self.logger = MagicMock()
+            self.csv_exporter = None
+            self._validate_schema_strict = MagicMock()
+            self._validate_records_against_schema = AsyncMock(
+                side_effect=asyncio.CancelledError() if stage == "prepare" else None
+            )
+            self._resolve_table_path = MagicMock(return_value="synthetic")
+            self._run_in_executor = AsyncMock()
+
+    host = Host()
+    if stage == "after_prepare":
+        host.logger.info.side_effect = asyncio.CancelledError()
+    schema = DataFrameSchema(
+        {"id": Column(int)}, strict=True, metadata={"contract_version": version}
+    )
 
     with pytest.raises(GoldWriteCancelled) as found:
-        await io_execution._execute_gold_merged_write(writer(), request)
+        await host.write_gold_merged("synthetic", [{"id": 1}], schema=schema)
     assert found.value.receipt.contract_version == expected
     assert found.value.receipt.category == Category.NOT_COMMITTED
     assert found.value.receipt.committed_targets == ()
-    if stage == "prepare":
-        complete.assert_not_awaited()
+    host._run_in_executor.assert_not_awaited()
 
 
 @pytest.mark.asyncio
