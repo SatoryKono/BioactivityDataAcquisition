@@ -8,6 +8,9 @@ import httpx
 import pytest
 from deltalake import DeltaTable
 
+# This module owns the fixture even when wrappers disable plugin autoload.
+from respx.plugin import respx_mock as respx_mock
+
 from bioetl.composition.bootstrap import bootstrap_pipeline_runner
 from .conftest import create_test_context
 
@@ -23,12 +26,13 @@ from .conftest import create_test_context
 )
 async def test_classification_upstream_materializes_gold(
     e2e_data_dir: Path,
-    respx_mock,
+    request: pytest.FixtureRequest,
     entity,
     resource,
     collection,
 ):
     """Exercise extraction, transforms and physical Gold writes with real fixtures."""
+    respx_mock = request.getfixturevalue("respx_mock")
     fixture = (
         Path("tests/fixtures/bronze/chembl") / entity / "sample_ci_2026-04-29.jsonl"
     )
