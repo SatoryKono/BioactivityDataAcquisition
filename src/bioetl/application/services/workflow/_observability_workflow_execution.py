@@ -167,8 +167,8 @@ async def inspect_checkpoint_workflow(
             if checkpoint is not None and checkpoint.run_id != str(manifest.run_id):
                 raise ValueError("checkpoint and manifest run identity do not match")
     resolved_run_id = run_id or (checkpoint.run_id if checkpoint is not None else None)
-    if manifest_id is not None and run_manifest_service is not None:
-        resolved_run_id = str(run_manifest.manifest.run_id) if run_manifest else None
+    if run_manifest is not None:
+        resolved_run_id = str(run_manifest.manifest.run_id)
 
     if resolved_run_id is None:
         audit = AuditInspectionResult(

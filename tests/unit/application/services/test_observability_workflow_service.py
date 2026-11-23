@@ -545,6 +545,16 @@ async def test_manifest_checkpoint_diagnostics_rejects_unbound_context() -> None
     assert result.checkpoint is None
     audits.inspect_run.assert_not_awaited()
 
+    checkpoints.get_checkpoint_for_manifest_id.return_value = CheckpointInfo(
+        pipeline_name="chembl_activity", run_id="run-123", metadata={}
+    )
+    audits.inspect_run.return_value = AuditInspectionResult(query={}, entries=())
+    result = await service.inspect_checkpoint_workflow(
+        "chembl_activity", manifest_id="manifest-1"
+    )
+    assert result.run_manifest is None
+    audits.inspect_run.assert_awaited_once_with("run-123", limit=100)
+
 
 @pytest.mark.asyncio
 async def test_checkpoint_workflow_returns_empty_audit_without_run_context() -> None:
