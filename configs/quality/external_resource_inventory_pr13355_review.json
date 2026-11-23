@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "catalog_ref": "b830306911f5189a71b165476797ec2a2b9b86b0",
-  "source_ref": "6e2be52b5d16bc69977dfe0df46486aa70bddfa5",
+  "catalog_ref": "17f95f46d4b4e4c8270f1120aad2ec0cefcbcec0",
+  "source_ref": "1d1249a5a789362529e6fc1985807cbca6ed355c",
   "source_reviews": {
     "src/bioetl/infrastructure/config/contract_registry_loader.py": "Docstring/timeout messaging clarifies that Future.result timeout classifies slow network reads while shutdown still awaits the worker. Existing yaml.safe_load/path.read_text and ThreadPoolExecutor ownership retained with line drift only; lifecycle unchanged. No new runtime qualification."
   },
