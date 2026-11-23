@@ -41,7 +41,8 @@ ______________________________________________________________________
   or dated directory). This is a local filesystem copy; ADR-010 does not
   require S3/Redis/Docker.
 - Annual rehearsal: [Game Day](game-day.md). There is no `bioetl rollback`
-  command; rebuild uses `bioetl run --pipeline <name> --run-type rebuild --yes`.
+  command. A rebuild without `--use-cached-bronze` reads the live provider;
+  use the cached-input procedure below to recompute from saved Bronze.
 
 ## Procedure
 
@@ -66,11 +67,25 @@ ______________________________________________________________________
      VACUUM policy: [vacuum-procedures.md](vacuum-procedures.md).
   1. **Full Rebuild from Bronze**: The supported write-path recovery is rebuild
      from Bronze. Time-travel reads do not mutate Silver/Gold.
+     - Preserve a separate backup of the affected data before deleting or
+       rebuilding it. Identify an intact, complete Bronze snapshot for the
+       pipeline and recovery point; verify its path and included dates. Keep
+       the source snapshot separate from rebuild destinations.
      - Delete the corrupted data from the Silver/Gold tables.
-     - Run the pipeline with the `--run-type rebuild` flag. This will re-process all data from Bronze.
+     - Select that snapshot explicitly. The path must exist and refer to the
+       pipeline's provider/entity directory, directly containing dated batch
+       directories (not the common Bronze root). The
+       date filters the input to that day, so choose it only when that day's
+       data covers the intended recovery scope. For input spanning other dates,
+       omit the date filter after verifying the snapshot contains exactly the
+       intended inputs; do not repeat destructive rebuilds per date.
      ```bash
-     bioetl run --pipeline <pipeline-name> --run-type rebuild --yes
+     bioetl run --pipeline <pipeline-name> --run-type rebuild --yes --use-cached-bronze --cached-bronze-path <bronze-snapshot-path> --cached-bronze-date <YYYY-MM-DD>
      ```
+     This recomputes from cached Bronze, not the live provider. Omitting
+     `--use-cached-bronze` selects the live provider instead; it does not
+     restore the saved snapshot and may yield different data. Cached
+     recomputation is not strict exact replay.
 
 ### Scenario 2: Bronze Data Loss or Corruption
 
@@ -88,7 +103,7 @@ ______________________________________________________________________
 - **Symptom**: A pipeline was interrupted, but the checkpoint file was lost or corrupted. The pipeline warns about a "Stale checkpoint" on restart.
 - **Cause**: Local checkpoint write failure, race condition, or manual error.
 - **Recovery Steps**:
-  1. **Option A (Safest)**: Delete the checkpoint and re-process from the beginning.
+  1. **Option A (Safest)**: Delete the checkpoint and re-process from the beginning using the live provider.
      ```bash
      # Delete the checkpoint file for the affected pipeline
      rm data/output/checkpoints/{pipeline-name}.json

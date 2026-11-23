@@ -44,27 +44,45 @@ ______________________________________________________________________
 
 1. Pick one RULES §5.5.1 scenario: Silver/Gold corruption, lost checkpoint, or
    lost host/volume.
-1. Name the backup source, restore destination, and the exact
-   `bioetl run --pipeline <name> --run-type rebuild --yes` command you would
-   run after restore.
+1. Name the backup source, isolated restore destination, and exact command
+   for the chosen scenario. For Bronze recovery, identify the verified
+   provider/entity snapshot directory and date (or full date range) and use
+   the cached-input rebuild command below. For a lost checkpoint, follow
+   Data Recovery Scenario 3, Option A: reset the checkpoint and rebuild
+   using the live provider, not the cached-input command below.
 1. Record the expected RPO (24h) and RTO (4h) in the drill log.
 
 ### 2. Restore rehearsal (required at least annually)
 
 1. Copy or snapshot the backup into an **isolated** data root (never overwrite
    the only copy of production-like local data).
+1. Set `BIOETL_DATA_DIR` in the rehearsal process to the absolute isolated
+   data root and verify resolved output paths before running any rebuild;
+   keep the snapshot source and original data outside those destinations.
+1. For Bronze recovery, verify the selected snapshot is intact and covers the
+   intended pipeline and recovery point; keep it separate from rebuild
+   destinations. For checkpoint reset, use the live-provider procedure.
 1. Follow [Data Recovery](data-recovery.md) for the chosen scenario.
 1. Start the timer at first restore command; stop when Silver/Gold are readable
    and `bioetl run-manifest show <run-id>` (or the rebuilt run) is inspectable.
 1. Pass if elapsed time < 4h and row counts / content hashes match the backup
    point for a sampled table.
 
-### 3. Commands that exist
+### 3. Bronze recovery commands
+
+After setting `BIOETL_DATA_DIR` to the isolated data root as above:
 
 ```bash
-bioetl run --pipeline <pipeline-name> --run-type rebuild --yes
+bioetl run --pipeline <pipeline-name> --run-type rebuild --yes --use-cached-bronze --cached-bronze-path <bronze-snapshot-path> --cached-bronze-date <YYYY-MM-DD>
 bioetl run-manifest show <run-id|manifest-id>
 ```
+
+The snapshot path must be the provider/entity directory directly containing
+dated batch directories, not the common Bronze root. The date filters input
+to one day; omit it only when the verified snapshot
+contains the intended multi-day input. Without `--use-cached-bronze`, rebuild
+uses the live provider, not the saved snapshot. Cached recomputation is not
+strict exact replay.
 
 Do not invent `bioetl rollback`. Do not use Spark `RESTORE TABLE`.
 
