@@ -32,6 +32,7 @@ from .matching import (
     Candidate,
     CatalogTarget,
     MatchQuery,
+    _required_uniprot_ids,
     collect_candidates,
     validate_identity,
 )
@@ -184,12 +185,15 @@ def _annotation(
 
 
 def _species_match(
-    row: ValidatedInput, match: MatchResult, snapshot: IndexedSnapshot
+    row: ValidatedInput,
+    match: MatchResult,
+    snapshot: IndexedSnapshot,
+    query: MatchQuery,
 ) -> tuple[MatchResult, ProviderAnnotation | None]:
     key = match.matched_target_id
     if key is None or not snapshot.species_annotations or row.taxon is not None:
         return match, _annotation(snapshot, key or "", row.taxon)
-    taxa = _variant_taxa(row, snapshot, key)
+    taxa = _variant_taxa(snapshot, key, _required_uniprot_ids(query))
     if len(taxa) == 1:
         return match, _annotation(snapshot, key, next(iter(taxa)))
     return replace(
@@ -208,14 +212,18 @@ def _species_match(
 
 
 def _variant_taxa(
-    row: ValidatedInput, snapshot: IndexedSnapshot, key: str
+    snapshot: IndexedSnapshot, key: str, anchors: tuple[str, ...]
 ) -> set[str | None]:
+    """Species of one target, limited to the same UniProt anchors as matching.
+
+    An empty anchor list does not filter. Proven equivalents are anchors on
+    the role-separated policy, so a unique equivalent can select the species
+    when the projected primary accession list is empty.
+    """
     variants = [item for item in snapshot.catalog if item.target_id == key]
-    if row.uniprot_accessions:
+    if anchors:
         variants = [
-            item
-            for item in variants
-            if set(item.uniprot_ids).intersection(row.uniprot_accessions)
+            item for item in variants if set(item.uniprot_ids).intersection(anchors)
         ]
     return {item.species for item in variants}
 
@@ -479,7 +487,6 @@ def _match_query(row: ValidatedInput) -> MatchQuery:
         message = f"unknown matching policy: {policy}"
         raise ValueError(message)
     payload = row.raw_fields.get("source_business_data")
-    roles = uniprot_roles_from_business_json(payload)
     if policy != MATCHING_POLICY_ROLE_SEPARATED_V2:
         # Keep every original xref. Role partition drops a xref that is also
         # a proven equivalent, and that must not become a silent match.
@@ -496,6 +503,7 @@ def _match_query(row: ValidatedInput) -> MatchQuery:
             row.synonyms,
         )
     scope = "complex" if row.target_kind == "complex" else None
+    roles = uniprot_roles_from_business_json(payload)
     if roles is None:
         return MatchQuery(
             row.target_id,
@@ -551,7 +559,7 @@ def classify_target(
     match = _scope_match(row, match, snapshot)
     hits = _publication_hits(query, subset, hits, match)
     match = _match_complex_target(row, match, snapshot)
-    match, annotation = _species_match(row, match, snapshot)
+    match, annotation = _species_match(row, match, snapshot, query)
     if (
         match.match_status == "matched"
         and annotation is not None

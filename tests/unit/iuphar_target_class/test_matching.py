@@ -1067,3 +1067,132 @@ def test_strict_anchor_keeps_a_xref_that_is_also_an_equivalent() -> None:
     )
     assert kept.rows[0].result.match_status == "matched"
     assert kept.rows[0].result.matched_target_id == "1"
+
+
+def test_strict_batch_ignores_a_broken_proven_equivalent() -> None:
+    """A strict row must not parse proven equivalents before its early return."""
+    import json
+
+    from iuphar_target_class.pipeline import IndexedSnapshot, classify_batch
+
+    broken = project_target_fields(
+        {
+            "target_id": "CHEMBL1",
+            "component_accessions": "P35372",
+            "proven_uniprot_equivalents": "[broken",
+        },
+        "9606",
+    )
+    healthy = project_target_fields(
+        {"target_id": "CHEMBL2", "component_accessions": "P99999"},
+        "9606",
+    )
+    snapshot = IndexedSnapshot.build(
+        snapshot_id="fixture",
+        mapping_version="fixture",
+        complete=True,
+        catalog=(
+            _target("1", uniprot="P35372", species="9606"),
+            _target("2", uniprot="P99999", species="9606"),
+        ),
+        annotations={},
+        family_nodes=(),
+        type_to_class={},
+        family_to_class={},
+    )
+    batch = classify_batch(
+        (
+            RawTargetRow("row-broken", broken, "protein"),
+            RawTargetRow("row-healthy", healthy, "protein"),
+        ),
+        snapshot=snapshot,
+        provenance=RunProvenance("fixture", "n", "r", "s", "t", "t"),
+        run_id="run-strict-broken",
+    )
+    by_id = {row.result.input_row_id: row.result for row in batch.rows}
+    assert by_id["row-broken"].match_status == "matched"
+    assert by_id["row-broken"].matched_target_id == "1"
+    assert by_id["row-healthy"].matched_target_id == "2"
+    stored = json.loads(broken["source_business_data"] or "{}")
+    assert stored["proven_uniprot_equivalents"] == "[broken"
+    with pytest.raises(json.JSONDecodeError):
+        classify_batch(
+            (RawTargetRow("row-v2", broken, "protein"),),
+            snapshot=snapshot,
+            provenance=RunProvenance(
+                "fixture",
+                "n",
+                "r",
+                "s",
+                "t",
+                "t",
+                MATCHING_POLICY_ROLE_SEPARATED_V2,
+            ),
+            run_id="run-v2-broken",
+        )
+
+
+def test_equivalent_anchor_selects_the_species_variant() -> None:
+    """An equivalent id selects the species when the primary accession is empty."""
+    import hashlib
+    import json
+
+    from iuphar_target_class.models import ProviderAnnotation
+    from iuphar_target_class.pipeline import IndexedSnapshot, classify_batch
+
+    def annotation(taxon: str, kind: str) -> ProviderAnnotation:
+        raw = json.dumps({"id": "1", "taxon": taxon, "type": kind})
+        return ProviderAnnotation(
+            "1",
+            kind,
+            (),
+            hashlib.sha256(raw.encode()).hexdigest(),
+            taxon,
+            raw,
+        )
+
+    def snapshot(mouse_uniprot: str) -> IndexedSnapshot:
+        return IndexedSnapshot.build(
+            snapshot_id="fixture",
+            mapping_version="fixture",
+            complete=True,
+            catalog=(
+                _target("1", uniprot="P0HUMAN", species="9606"),
+                _target("1", uniprot=mouse_uniprot, species="10090"),
+            ),
+            annotations={},
+            family_nodes=(),
+            type_to_class={"gpcr": "Receptor", "enzyme": "Enzyme"},
+            family_to_class={},
+            species_annotations={
+                ("1", "9606"): annotation("9606", "gpcr"),
+                ("1", "10090"): annotation("10090", "enzyme"),
+            },
+        )
+
+    fields = project_target_fields(
+        {"proven_uniprot_equivalents": "P0HUMAN"},
+        None,
+        projection_policy=UNIPROT_PROJECTION_POLICY_V2,
+    )
+    assert fields["uniprot"] is None
+    provenance = RunProvenance(
+        "fixture", "n", "r", "s", "t", "t", MATCHING_POLICY_ROLE_SEPARATED_V2
+    )
+    unique = classify_batch(
+        (RawTargetRow("row-human", fields, "protein"),),
+        snapshot=snapshot("P0MOUSE"),
+        provenance=provenance,
+        run_id="run-equivalent-species",
+    )
+    assert unique.rows[0].result.match_status == "matched"
+    assert unique.rows[0].result.matched_target_id == "1"
+    assert unique.rows[0].result.iuphar_class == "Receptor"
+    shared = classify_batch(
+        (RawTargetRow("row-shared", fields, "protein"),),
+        snapshot=snapshot("P0HUMAN"),
+        provenance=provenance,
+        run_id="run-equivalent-both-species",
+    )
+    assert shared.rows[0].result.match_status == "insufficient_input"
+    assert shared.rows[0].result.matched_target_id is None
