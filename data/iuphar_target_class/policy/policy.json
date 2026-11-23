@@ -1215,7 +1215,7 @@
       },
       "effective_source": {
         "layer": "effective",
-        "meaning": "Provenance of effective_class: iuphar, local_rule, or none"
+        "meaning": "Provenance of effective_class; live tokens are iuphar_normalized, local_rule, or none (resolution maps takes=iuphar → iuphar_normalized)"
       },
       "iuphar_annotation_status": {
         "layer": "iuphar_reference",

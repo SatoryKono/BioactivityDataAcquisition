@@ -35,7 +35,7 @@ Canonical machine sources:
 | `target_type` | ChEMBL object | Provider object type (`SINGLE PROTEIN`, …). Never an IUPHAR class. |
 | `iuphar_*` | Reference / direct | Snapshot identity and approved type/family mapping outputs. |
 | `local_*` | Local rules | EC / annotation / prediction rules. Must not be copied into `iuphar_*`. |
-| `effective_*`, `decision_status` | Final + provenance | Resolution-table outcome and its source (`iuphar`, `local_rule`, `none`). |
+| `effective_*`, `decision_status` | Final + provenance | Resolution-table outcome and its source (`iuphar_normalized`, `local_rule`, `none`). |
 | `legacy_iuphar_class` | Legacy comparison | Historical M/Excel value for comparison only. |
 
 Nine additive V31 business columns (enrich only): see

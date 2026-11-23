@@ -84,6 +84,10 @@ def test_field_layers_separate_chembl_iuphar_local_effective() -> None:
     ):
         assert FIELD_LAYERS[name]["layer"] == "effective"
         assert name in TARGET_CLASSIFICATION_FIELDS
+    meaning = FIELD_LAYERS["effective_source"]["meaning"]
+    assert "iuphar_normalized" in meaning
+    assert "local_rule" in meaning
+    assert "none" in meaning
 
 
 def test_source_unavailable_stays_distinct_from_not_found() -> None:

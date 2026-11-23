@@ -94,7 +94,11 @@ FIELD_LAYERS: Mapping[str, Mapping[str, str]] = MappingProxyType(
         "effective_source": MappingProxyType(
             {
                 "layer": "effective",
-                "meaning": "Provenance of effective_class: iuphar, local_rule, or none",
+                "meaning": (
+                    "Provenance of effective_class; live tokens are "
+                    "iuphar_normalized, local_rule, or none "
+                    "(resolution maps takes=iuphar → iuphar_normalized)"
+                ),
             }
         ),
         "decision_status": MappingProxyType(
