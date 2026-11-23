@@ -955,8 +955,7 @@ _NO_RUNS_LABEL = "NO RUNS"
 SELECTOR_ROWS = (
     "$exists(items) and $count(items) = 0 ? "
     f'[{{"text":"{_NO_RUNS_LABEL}","value":"-"}}] : '
-    '[$map(items, function($item) { $merge([$item, {"text": '
-    '$replace($item.text, " [STALE catalog]", "")}]) })]'
+    "[$map(items, function($item) { $item })]"
 )
 
 

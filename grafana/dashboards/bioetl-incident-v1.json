@@ -38,11 +38,11 @@
           "value": "$__all"
         },
         "datasource": {
-          "type": "yesoreyeram-infinity-datasource",
-          "uid": "bioetl-ops-http"
+          "type": "prometheus",
+          "uid": "prometheus"
         },
-        "definition": "/ops/control-plane/filter-options?dimension=workflow&response_shape=options&allow_stale=1",
-        "description": "Workflow values come from the shared control-plane run catalog. All includes every workflow. A [STALE catalog] label identifies an option served from a stale catalog snapshot; it does not describe source-data freshness.",
+        "definition": "label_values(bioetl_workflow_universe, workflow)",
+        "description": "Workflow names from Prometheus include expected workflows before the first saved run. This selector scopes the current-status panels.",
         "hide": 0,
         "includeAll": true,
         "label": "Workflow",
@@ -50,32 +50,8 @@
         "name": "workflow",
         "options": [],
         "query": {
-          "queryType": "infinity",
-          "refId": "variable",
-          "infinityQuery": {
-            "format": "table",
-            "parser": "backend",
-            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO RUNS\",\"value\":\"-\"}] : [$map(items, function($item) { $item })]",
-            "type": "json",
-            "source": "url",
-            "url_options": {
-              "data": "",
-              "method": "GET"
-            },
-            "url": "/ops/control-plane/filter-options?dimension=workflow&response_shape=options&allow_stale=1",
-            "columns": [
-              {
-                "selector": "text",
-                "text": "__text",
-                "type": "string"
-              },
-              {
-                "selector": "value",
-                "text": "__value",
-                "type": "string"
-              }
-            ]
-          }
+          "query": "label_values(bioetl_workflow_universe, workflow)",
+          "refId": "StandardVariableQuery"
         },
         "refresh": 1,
         "regex": "",
@@ -6646,7 +6622,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Estimated increase in processed records by Stage for the selected Pipeline and Run Type over each query rate window. Counter resets are handled; estimates may be fractional. Windows may overlap; do not sum plotted points as a range total. See panel 241 for the selected-range increase and Run Explorer for exact-run counts. Panel 241 excludes stages matching \"none.*\"; its total is not a direct cross-check of the sum of panel 240. Run ID does not filter Prometheus. An empty chart is missing or unavailable telemetry, not zero.",
+          "description": "TIME RANGE · Maximum observed processed-record counter sample in each interval, by Stage for the selected Pipeline and Run Type. This series shows the scraped snapshots, which can repeat across CLI runs. Overlapping points and values from panel 241 cannot be added to derive a run total. Panel 241 also excludes stages matching none.*. For exact counts, inspect the saved run in Run Explorer. Run ID does not filter this query.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -6770,7 +6746,7 @@
           },
           "targets": [
             {
-              "expr": "sum by(stage) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[$__rate_interval]))",
+              "expr": "sum by(stage) (max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[$__interval]))",
               "legendFormat": "{{stage}}",
               "refId": "A",
               "datasource": {
