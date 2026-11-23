@@ -5,11 +5,11 @@
 
 ## Summary
 
-- Scanned modules: `2651`
-- Internal import edges (raw): `8781`
+- Scanned modules: `2653`
+- Internal import edges (raw): `8789`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
-- Cross-layer module-group edges (total): `330`
+- Cross-layer module-group edges (total): `333`
 - Cross-layer module-group edges (top 55): `55`
 
 ## Layer Dependency Graph
@@ -22,14 +22,14 @@ flowchart LR
     composition[composition]
     interfaces[interfaces]
     application -->|1686 OK| application
-    application -->|1156 OK| domain
+    application -->|1157 OK| domain
     composition -->|254 OK| application
     composition -->|688 OK| composition
-    composition -->|336 OK| domain
+    composition -->|337 OK| domain
     composition -->|362 OK| infrastructure
     domain -->|1330 OK| domain
-    infrastructure -->|825 OK| domain
-    infrastructure -->|1397 OK| infrastructure
+    infrastructure -->|828 OK| domain
+    infrastructure -->|1400 OK| infrastructure
     interfaces -->|86 OK| application
     interfaces -->|64 OK| composition
     interfaces -->|100 OK| domain
@@ -41,14 +41,14 @@ flowchart LR
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
 | `application`    | `application`    |    1686 | allowed |
-| `application`    | `domain`         |    1156 | allowed |
+| `application`    | `domain`         |    1157 | allowed |
 | `composition`    | `application`    |     254 | allowed |
 | `composition`    | `composition`    |     688 | allowed |
-| `composition`    | `domain`         |     336 | allowed |
+| `composition`    | `domain`         |     337 | allowed |
 | `composition`    | `infrastructure` |     362 | allowed |
 | `domain`         | `domain`         |    1330 | allowed |
-| `infrastructure` | `domain`         |     825 | allowed |
-| `infrastructure` | `infrastructure` |    1397 | allowed |
+| `infrastructure` | `domain`         |     828 | allowed |
+| `infrastructure` | `infrastructure` |    1400 | allowed |
 | `interfaces`     | `application`    |      86 | allowed |
 | `interfaces`     | `composition`    |      64 | allowed |
 | `interfaces`     | `domain`         |     100 | allowed |
