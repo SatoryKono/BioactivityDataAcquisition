@@ -447,6 +447,27 @@ def test_explicit_subclass_reaches_the_row_and_an_unrelated_cycle_blocks_it():
     assert row.result.effective_source == "iuphar_normalized"
     assert row.result.effective_subclasses == ("Kinase",)
     assert "contract_error" not in row.result.conflict_codes
+    mutable = {"family": "Kinase"}
+    replaced = replace(classified, family_to_subclass=mutable)
+    mutable["family"] = "Other"
+    assert replaced.family_to_subclass["family"] == "Kinase"
+    blank_map = pipeline.IndexedSnapshot.build(
+        snapshot_id=base.snapshot_id,
+        mapping_version=base.mapping_version,
+        complete=base.complete,
+        catalog=base.catalog,
+        annotations=dict(base.annotations),
+        family_nodes=base.families["family"],
+        type_to_class=dict(base.type_to_class),
+        family_to_class=dict(base.family_to_class),
+        family_to_subclass={"family": " "},
+    )
+    blank_row = _run(
+        RawTargetRow("row-blank", {"target_id": "1", "organism": "Human"}, "protein"),
+        snapshot=blank_map,
+    ).rows[0]
+    assert blank_row.result.iuphar_subclass is None
+    assert blank_row.result.effective_subclasses == ()
     assert row.direct is not None
     assert row.direct.subclass_origin == "subclass_dictionary"
     assert row.direct.annotation_capability == "family_only"

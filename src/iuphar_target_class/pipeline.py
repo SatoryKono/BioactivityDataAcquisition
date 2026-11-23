@@ -22,6 +22,7 @@ from .hierarchy import (
     FamilyNode,
     HierarchyResult,
     admit_family_graph,
+    hierarchy_for_graph_defect,
     normalize_provider_class,
 )
 from .iuphar_mapping import approved_class_mappings
@@ -46,7 +47,7 @@ from .models import (
     ValidatedInput,
 )
 from .normalization import isolated_invalid_result, validate_input
-from .policy import local_rules, validate_rules
+from .policy import GRAPH_MAX_VISITED_NODES, local_rules, validate_rules
 from .resolution import ResolutionInput, select_effective_class
 
 
@@ -70,6 +71,25 @@ class IndexedSnapshot:
     )
     admission_complete: bool | None = None
     family_to_subclass: Mapping[str, str] = field(default_factory=dict)
+    graph_defect: Diagnostic | None = None
+
+    def __post_init__(self) -> None:
+        """Copy every mapping so a later edit of the caller's dict is ignored."""
+        object.__setattr__(self, "lookup", _frozen_lookup(self.lookup))
+        object.__setattr__(self, "annotations", _frozen_annotations(self.annotations))
+        object.__setattr__(self, "families", _frozen_families(self.families))
+        object.__setattr__(self, "type_to_class", _frozen_strings(self.type_to_class))
+        object.__setattr__(
+            self, "family_to_class", _frozen_strings(self.family_to_class)
+        )
+        object.__setattr__(
+            self,
+            "species_annotations",
+            _frozen_species(self.species_annotations),
+        )
+        object.__setattr__(
+            self, "family_to_subclass", _frozen_strings(self.family_to_subclass)
+        )
 
     @classmethod
     def from_approved_gtopdb(
@@ -96,8 +116,7 @@ class IndexedSnapshot:
             FamilyNode(str(family), tuple(map(str, parents)), source_type)
             for family, source_type, parents in FAMILY_ROWS
         )
-        _require_admitted_family_graph(nodes)
-        return cls.build(
+        snapshot = cls.build(
             snapshot_id=snapshot_id,
             mapping_version=release,
             complete=complete,
@@ -111,6 +130,12 @@ class IndexedSnapshot:
             admission_complete=admission_complete,
             family_to_subclass=family_to_subclass,
         )
+        if snapshot.graph_defect is not None:
+            raise ValueError(
+                "approved family graph is not admitted: "
+                + snapshot.graph_defect.message
+            )
+        return snapshot
 
     @classmethod
     def build(
@@ -134,6 +159,8 @@ class IndexedSnapshot:
         _validate_provider_payloads(annotations)
         scoped = dict(species_annotations or {})
         _validate_species_payloads(scoped)
+        admission = admit_family_graph(family_nodes, ())
+        defect = None if admission.admitted else admission.diagnostics[0]
         return cls(
             snapshot_id,
             mapping_version,
@@ -149,7 +176,36 @@ class IndexedSnapshot:
             MappingProxyType(scoped),
             admission_complete,
             MappingProxyType(dict(family_to_subclass or {})),
+            defect,
         )
+
+
+def _frozen_lookup(
+    mapping: Mapping[tuple[str, str], tuple[int, ...]],
+) -> Mapping[tuple[str, str], tuple[int, ...]]:
+    return MappingProxyType({key: tuple(value) for key, value in mapping.items()})
+
+
+def _frozen_families(
+    mapping: Mapping[str, tuple[FamilyNode, ...]],
+) -> Mapping[str, tuple[FamilyNode, ...]]:
+    return MappingProxyType({key: tuple(value) for key, value in mapping.items()})
+
+
+def _frozen_strings(mapping: Mapping[str, str]) -> Mapping[str, str]:
+    return MappingProxyType(dict(mapping))
+
+
+def _frozen_annotations(
+    mapping: Mapping[str, ProviderAnnotation],
+) -> Mapping[str, ProviderAnnotation]:
+    return MappingProxyType(dict(mapping))
+
+
+def _frozen_species(
+    mapping: Mapping[tuple[str, str], ProviderAnnotation],
+) -> Mapping[tuple[str, str], ProviderAnnotation]:
+    return MappingProxyType(dict(mapping))
 
 
 def _snapshot_indexes(
@@ -334,25 +390,21 @@ def _conflict_catalog(
     return tuple(row for row in ctx.catalog if row.target_id in ids)
 
 
-def _require_admitted_family_graph(nodes: tuple[FamilyNode, ...]) -> None:
-    """Block an approved snapshot whose family graph fails structural admission.
-
-    No family id is requested here. The visit budget belongs to one
-    classification walk. Every supplied node is still checked for a cycle,
-    a missing parent, and root distance.
-    """
-    admission = admit_family_graph(nodes, ())
-    if admission.admitted:
-        return
-    detail = "; ".join(item.message for item in admission.diagnostics)
-    raise ValueError(f"approved family graph is not admitted: {detail}")
-
-
-def _snapshot_family_nodes(ctx: IndexedSnapshot) -> tuple[FamilyNode, ...]:
-    """Return every stored family row, including branches no target requests."""
+def _ancestor_records(
+    ctx: IndexedSnapshot, ids: tuple[str, ...]
+) -> tuple[FamilyNode, ...]:
+    """Collect requested families and their parents within the visit budget."""
+    seen: set[str] = set()
+    pending = list(ids)
     records: list[FamilyNode] = []
-    for family_id in sorted(ctx.families):
-        records.extend(ctx.families[family_id])
+    while pending and len(seen) <= GRAPH_MAX_VISITED_NODES:
+        key = pending.pop()
+        if key in seen:
+            continue
+        seen.add(key)
+        nodes = ctx.families.get(key, ())
+        records.extend(nodes)
+        pending.extend(parent for node in nodes for parent in node.parent_ids)
     return tuple(records)
 
 
@@ -362,10 +414,17 @@ def _direct(
 ) -> HierarchyResult | None:
     if annotation is None:
         return None
+    type_name = annotation.type_raw.strip().lower() if annotation.type_raw else None
+    if ctx.graph_defect is not None:
+        return hierarchy_for_graph_defect(
+            ctx.graph_defect,
+            type_name=type_name,
+            type_to_class=ctx.type_to_class,
+        )
     return normalize_provider_class(
-        type_name=annotation.type_raw.strip().lower() if annotation.type_raw else None,
+        type_name=type_name,
         family_ids=annotation.family_ids,
-        nodes=_snapshot_family_nodes(ctx),
+        nodes=_ancestor_records(ctx, annotation.family_ids),
         type_to_class=ctx.type_to_class,
         family_to_class=ctx.family_to_class,
         family_to_subclass=ctx.family_to_subclass,

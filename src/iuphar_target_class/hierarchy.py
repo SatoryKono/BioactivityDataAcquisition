@@ -329,6 +329,22 @@ def normalize_approved_provider_class(
     )
 
 
+def hierarchy_for_graph_defect(
+    defect: Diagnostic,
+    *,
+    type_name: str | None,
+    type_to_class: Mapping[str, str],
+) -> HierarchyResult:
+    """Keep a type class when the snapshot graph was already rejected."""
+    return _graph_error_result(
+        defect,
+        type_name=type_name,
+        type_to_class=type_to_class,
+        name=None,
+        path_text=None,
+    )
+
+
 def normalize_provider_class(
     *,
     type_name: str | None,
@@ -734,9 +750,14 @@ def _field_origins(proof: str | None, status: str) -> tuple[str | None, str | No
 def _subclass_from(
     family_ids: tuple[str, ...], mapping: Mapping[str, str]
 ) -> tuple[str | None, tuple[str, ...], str | None]:
-    values = tuple(
-        mapping[family_id] for family_id in sorted(family_ids) if family_id in mapping
-    )
+    labels: list[str] = []
+    for family_id in sorted(family_ids):
+        if family_id not in mapping:
+            continue
+        label = mapping[family_id].strip()
+        if label:
+            labels.append(label)
+    values = tuple(labels)
     distinct = tuple(sorted(set(values)))
     if len(distinct) == 1:
         return distinct[0], values, "subclass_dictionary"

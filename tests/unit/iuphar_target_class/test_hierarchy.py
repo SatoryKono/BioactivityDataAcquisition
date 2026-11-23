@@ -423,6 +423,37 @@ def test_subclass_dictionary_stays_partial_and_does_not_read_path_text() -> None
     )
     assert unnamed.iuphar_subclass is None
     assert unnamed.subclass_origin is None
+    blank = normalize_provider_class(
+        type_name="gpcr",
+        family_ids=("leaf",),
+        nodes=nodes,
+        type_to_class={"gpcr": "Receptor"},
+        family_to_class={"leaf": "Enzyme"},
+        family_to_subclass={"leaf": "  ", "root": ""},
+    )
+    assert blank.annotation_status == "available"
+    assert blank.iuphar_subclass is None
+    assert blank.iuphar_subclass_candidates == ()
+    partial_blank = normalize_provider_class(
+        type_name=None,
+        family_ids=("leaf",),
+        nodes=nodes,
+        type_to_class={},
+        family_to_class={"leaf": "Enzyme"},
+        family_to_subclass={"leaf": ""},
+    )
+    assert partial_blank.annotation_status == "partial"
+    assert partial_blank.iuphar_subclass is None
+    kept = normalize_provider_class(
+        type_name="gpcr",
+        family_ids=("leaf",),
+        nodes=nodes,
+        type_to_class={"gpcr": "Receptor"},
+        family_to_class={"leaf": "Enzyme"},
+        family_to_subclass={"leaf": " Kinase ", "root": " "},
+    )
+    assert kept.annotation_status == "available"
+    assert kept.iuphar_subclass == "Kinase"
     typed = normalize_provider_class(
         type_name="gpcr",
         family_ids=("leaf",),
