@@ -80,6 +80,10 @@ def test_zed_changes_keep_integration_portability_in_both_impact_paths(
             "tests/integration/test_dashboard_first_window_noscroll.py",
         ),
         (
+            "docs/03-guides/dq-configuration.md",
+            "tests/architecture/test_documentation_residual_keyword_guards.py",
+        ),
+        (
             "docs/03-guides/metrics-monitoring.md",
             "tests/architecture/test_observability_docs_drift.py",
         ),
@@ -1803,6 +1807,14 @@ def test_shadow_compare_routes_codex_launchers_and_guidance(changed_file: str) -
         ),
         (
             "configs/quality/external_resource_inventory_pr13324_gold_writer_review.json",
+            {
+                "tests/architecture/test_external_resource_inventory_catalog.py",
+                "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+            },
+            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
+        ),
+        (
+            "configs/quality/external_resource_inventory_pr13328_workflow_resume_review.json",
             {
                 "tests/architecture/test_external_resource_inventory_catalog.py",
                 "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
