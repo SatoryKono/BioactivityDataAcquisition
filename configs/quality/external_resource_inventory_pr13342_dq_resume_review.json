@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "358691b693bfc2b9e516ac63ff0a7af7e92436c2",
+  "source_ref": "358691b693bfc2b9e516ac63ff0a7af7e92436c2",
+  "source_reviews": {
+    "src/bioetl/application/serialization/snapshot_serialization.py": "Inline DQ replay keeps exclude_unset on snapshot dumps. No acquisition site or ownership change.",
+    "src/bioetl/application/services/run_reports/workflow_observations.py": "Resume skips AlreadyCompletedOnResume children. The existing store.write_text exclusion moves from line 105 to 107. The store.read_text exclusion stays at line 34.",
+    "src/bioetl/application/services/workflow/workflow_runner_reports.py": "Archive only successful child results. The existing store.read_text exclusion moves from line 118 to 120.",
+    "src/bioetl/application/services/workflow/workflow_runner_transitions.py": "Resume keeps the restored RunResult payload and child identity. No acquisition site or ownership change.",
+    "src/bioetl/infrastructure/config/pipeline_dq_resolution.py": "Explicit inline DQ settings stay in the resolved config. No acquisition site or ownership change."
+  },
+  "line_updates": {
+    "src/bioetl/application/services/run_reports/workflow_observations.py": {
+      "105": 107
+    },
+    "src/bioetl/application/services/workflow/workflow_runner_reports.py": {
+      "118": 120
+    }
+  }
+}
