@@ -8,7 +8,7 @@ from bioetl.domain.config import DQConfig
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.schemas.dq_config import DQConfigFile
 
-from ._dq_config_normalization import normalize_threshold_aliases
+from ._dq_config_normalization import normalize_threshold_aliases, normalize_to_file_format
 
 __all__ = [
     "build_dq_cache_key",
@@ -41,7 +41,7 @@ def merge_dq_config_hierarchy(
     relaxed_dq: bool,
 ) -> JsonDict:
     """Build merged DQ config from defaults -> provider -> entity -> inline."""
-    merged = load_defaults_layer()
+    merged = normalize_to_file_format(load_defaults_layer())
     if not merged:
         raise FileNotFoundError(
             "Required DQ defaults file not found in configs/base/quality.yaml. "
