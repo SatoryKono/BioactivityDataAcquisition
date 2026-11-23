@@ -18,6 +18,7 @@ _HIERARCHY_LEVELS: Final = (1, 2, 3, 4, 5)
 
 
 def text_value(value: object) -> str | None:
+    """Return a stripped string, or none for a blank or non-string value."""
     if not isinstance(value, str):
         return None
     text = value.strip()
@@ -25,11 +26,13 @@ def text_value(value: object) -> str | None:
 
 
 def put_value(business: JsonDict, key: str, value: object) -> None:
+    """Store a present whitelist value."""
     if value is not None:
         business[key] = value
 
 
 def sha256_text(value: object) -> str | None:
+    """Return a lowercase SHA-256 hex digest."""
     text = text_value(value)
     if text is None or _SHA256.fullmatch(text) is None:
         return None
@@ -39,6 +42,7 @@ def sha256_text(value: object) -> str | None:
 def first_present(
     row: Mapping[str, object], columns: Sequence[str]
 ) -> tuple[str | None, object]:
+    """Return the first populated column and its value."""
     for column in columns:
         if column not in row:
             continue
@@ -52,11 +56,13 @@ def first_present(
 def first_text(
     row: Mapping[str, object], columns: Sequence[str]
 ) -> tuple[str | None, str | None]:
+    """Return the first populated text column."""
     column, value = first_present(row, columns)
     return column, text_value(value)
 
 
 def controlled_keyword_ids(value: object) -> tuple[str, ...]:
+    """Keep keyword tokens that match the controlled-id pattern."""
     found: list[str] = []
     for item in _json_items(value):
         raw = item.get("id") if isinstance(item, dict) else item
@@ -69,6 +75,7 @@ def controlled_keyword_ids(value: object) -> tuple[str, ...]:
 
 
 def keyword_status(value: object, keyword_ids: tuple[str, ...]) -> str:
+    """Classify keywords as present, absent, or uncontrolled."""
     if keyword_ids:
         return "present"
     if value is None:
@@ -77,6 +84,7 @@ def keyword_status(value: object, keyword_ids: tuple[str, ...]) -> str:
 
 
 def hierarchy_levels(row: Mapping[str, object]) -> list[dict[str, object]]:
+    """Read present protein-classification levels without equating M columns."""
     return [
         entry
         for level in _HIERARCHY_LEVELS
@@ -87,6 +95,7 @@ def hierarchy_levels(row: Mapping[str, object]) -> list[dict[str, object]]:
 def source_hashes(
     frames: Mapping[str, pl.DataFrame] | None,
 ) -> dict[tuple[str, str], str]:
+    """Index dependency content hashes by pipeline and business key."""
     if not frames:
         return {}
     index: dict[tuple[str, str], str] = {}

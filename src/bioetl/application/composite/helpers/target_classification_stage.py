@@ -22,37 +22,12 @@ from bioetl.application.composite.helpers.target_classification_values import (
 from bioetl.application.services.target_runtime.classification import (
     TargetClassificationRunState,
 )
-from bioetl.domain.entities.enriched_target_features import (
+from bioetl.domain.behavior.identity_service import generate_content_hash
+from bioetl.domain.composite.enriched_target_features import (
     COMPOSITE_CLASSIFICATION_OWNER,
     composite_classification_run_id,
 )
-from bioetl.domain.transformations.hashing import generate_content_hash
 from bioetl.domain.types import JsonDict
-
-
-def schema_column_names(schema: object) -> frozenset[str] | None:
-    current = schema
-    to_schema = getattr(current, "to_schema", None)
-    if callable(to_schema):
-        current = to_schema()
-    columns = getattr(current, "columns", None)
-    if isinstance(columns, dict):
-        return frozenset(str(name) for name in columns)
-    return None
-
-
-def project_gold_classification_frame(df: pl.DataFrame, schema: object) -> pl.DataFrame:
-    names = schema_column_names(schema)
-    if names is None:
-        return df
-    hidden = [
-        column
-        for column in FRAME_FIELDS
-        if column not in names and column in df.columns
-    ]
-    if not hidden:
-        return df
-    return df.drop(hidden)
 
 
 class CompositeTargetClassification:
@@ -70,6 +45,7 @@ class CompositeTargetClassification:
         started_at: datetime | None,
         dependency_frames: Mapping[str, pl.DataFrame] | None = None,
     ) -> pl.DataFrame:
+        """Classify joined rows and keep the evidence detached."""
         self._decisions = {}
         if not _has_targets(df):
             return df
@@ -84,11 +60,13 @@ class CompositeTargetClassification:
         return _write_columns(df, updates)
 
     def seal_decision(self, df: pl.DataFrame) -> pl.DataFrame:
+        """Rewrite the decision after seed coalesce, including explicit nulls."""
         if not _can_seal(df, self._decisions):
             return df
         return _write_columns(df, _sealed_columns(df, self._decisions, _fields(self)))
 
     def refresh_content_hash(self, df: pl.DataFrame) -> pl.DataFrame:
+        """Bind the surviving classification fields into ``content_hash``."""
         if df.is_empty() or "target_classification_owner" not in df.columns:
             return df
         return df.with_columns(
@@ -100,9 +78,11 @@ class CompositeTargetClassification:
         )
 
     def commit(self, run_id: str) -> None:
+        """Publish evidence after the merge write has succeeded."""
         self._session.commit_detached(composite_classification_run_id(run_id))
 
     def abandon(self, run_id: str) -> None:
+        """Drop unpublished evidence when persistence fails."""
         self._session.abandon_detached(composite_classification_run_id(run_id))
 
 
@@ -114,6 +94,7 @@ def apply_joined_classification(
     started_at: datetime | None,
     dependency_frames: Mapping[str, pl.DataFrame] | None,
 ) -> pl.DataFrame:
+    """Classify, and drop detached evidence when classification itself fails."""
     if stage is None:
         return df
     applied = False
@@ -136,6 +117,7 @@ async def commit_joined_classification(
     run_id: str,
     write: Callable[[], Awaitable[None]],
 ) -> None:
+    """Commit evidence only after ``write`` returns."""
     committed = False
     try:
         await write()
@@ -241,6 +223,4 @@ __all__ = [
     "CompositeTargetClassification",
     "apply_joined_classification",
     "commit_joined_classification",
-    "project_gold_classification_frame",
-    "schema_column_names",
 ]

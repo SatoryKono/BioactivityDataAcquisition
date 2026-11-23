@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Protocol, cast
 
-from bioetl.application.composite.helpers.target_classification_stage import (
+from bioetl.application.composite.helpers.target_classification_features import (
     project_gold_classification_frame,
 )
 from bioetl.application.services.run_reports.observations import observe_gold_write

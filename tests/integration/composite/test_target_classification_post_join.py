@@ -19,9 +19,11 @@ from bioetl.application.composite.helpers.merger_post_join_persist import (
 from bioetl.application.composite.merger_post_join import (
     finalize_post_join_context,
 )
+from bioetl.application.composite.helpers.target_classification_features import (
+    project_gold_classification_frame,
+)
 from bioetl.application.composite.helpers.target_classification_stage import (
     CompositeTargetClassification,
-    project_gold_classification_frame,
 )
 from bioetl.application.pipelines.chembl.target_protein_classification_summary import (
     agreed_chembl_release,
@@ -31,7 +33,7 @@ from bioetl.application.services.target_runtime.classification import (
 )
 from bioetl.domain.config.target_classification import TARGET_CLASSIFICATION_FIELDS
 from bioetl.domain.composite import MergeConfig
-from bioetl.domain.entities.enriched_target_features import (
+from bioetl.domain.composite.enriched_target_features import (
     COMPOSITE_CLASSIFICATION_OWNER,
     hierarchy_fields_are_equivalent,
 )

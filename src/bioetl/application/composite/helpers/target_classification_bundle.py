@@ -16,7 +16,7 @@ from bioetl.application.composite.helpers.target_classification_values import (
 from bioetl.application.composite.target_protein_classification_summary import (
     agreed_chembl_release,
 )
-from bioetl.domain.entities.enriched_target_features import (
+from bioetl.domain.composite.enriched_target_features import (
     OPTIONAL_ENRICHED_FEATURES,
     hierarchy_mapping_records,
 )
@@ -57,6 +57,7 @@ def feature_bundle(
     row: Mapping[str, object],
     hashes: Mapping[tuple[str, str], str],
 ) -> dict[str, object]:
+    """Build the whitelist, its origins, and the completeness flag."""
     _target_column, target_id = first_text(row, TARGET_ID_COLUMNS)
     accession_column, accession = first_text(row, _ACCESSION_COLUMNS)
     ec_column, ec_value = first_present(row, _EC_COLUMNS)

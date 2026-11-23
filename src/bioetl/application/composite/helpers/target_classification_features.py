@@ -6,6 +6,8 @@ import json
 from collections.abc import Mapping
 from typing import Final, cast
 
+import polars as pl
+
 from bioetl.application.composite.helpers.target_classification_bundle import (
     TARGET_ID_COLUMNS,
     feature_bundle,
@@ -16,10 +18,10 @@ from bioetl.application.composite.helpers.target_classification_values import (
 from bioetl.application.services.target_runtime.classification import (
     TargetClassificationRunState,
 )
-from bioetl.domain.config.target_classification import TARGET_CLASSIFICATION_FIELDS
-from bioetl.domain.entities.enriched_target_features import (
+from bioetl.domain.composite.enriched_target_features import (
     COMPOSITE_CLASSIFICATION_BATCH_ID,
     COMPOSITE_CLASSIFICATION_OWNER,
+    TARGET_CLASSIFICATION_FIELDS,
     composite_classification_row_id,
 )
 from bioetl.domain.types import JsonDict
@@ -34,6 +36,33 @@ FRAME_FIELDS: Final = (*TARGET_CLASSIFICATION_FIELDS, *METADATA_FIELDS)
 HASH_FIELDS: Final = ("target_id", *FRAME_FIELDS)
 
 
+def schema_column_names(schema: object) -> frozenset[str] | None:
+    """Return Pandera column names when the object exposes them."""
+    current = schema
+    to_schema = getattr(current, "to_schema", None)
+    if callable(to_schema):
+        current = to_schema()
+    columns = getattr(current, "columns", None)
+    if isinstance(columns, dict):
+        return frozenset(str(name) for name in columns)
+    return None
+
+
+def project_gold_classification_frame(df: pl.DataFrame, schema: object) -> pl.DataFrame:
+    """Drop classification columns that a strict Gold schema does not declare."""
+    names = schema_column_names(schema)
+    if names is None:
+        return df
+    hidden = [
+        column
+        for column in FRAME_FIELDS
+        if column not in names and column in df.columns
+    ]
+    if not hidden:
+        return df
+    return df.drop(hidden)
+
+
 def project_row(
     row: Mapping[str, object],
     *,
@@ -43,6 +72,7 @@ def project_row(
     started_at: str,
     seen: set[str],
 ) -> dict[str, str | None]:
+    """Project one joined row and classify it when a target id is present."""
     features = feature_bundle(row, source_hashes_index)
     business = cast(JsonDict, features["business"])
     absent = cast(tuple[str, ...], features["absent"])
@@ -55,6 +85,7 @@ def project_row(
 
 
 def empty_output(completeness: str, absent: tuple[str, ...]) -> dict[str, str | None]:
+    """Return owner metadata and null classification fields."""
     output: dict[str, str | None] = dict.fromkeys(FRAME_FIELDS)
     output["target_classification_owner"] = COMPOSITE_CLASSIFICATION_OWNER
     output["target_classification_completeness"] = completeness
@@ -97,5 +128,7 @@ __all__ = [
     "METADATA_FIELDS",
     "TARGET_ID_COLUMNS",
     "empty_output",
+    "project_gold_classification_frame",
     "project_row",
+    "schema_column_names",
 ]
