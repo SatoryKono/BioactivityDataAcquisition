@@ -245,6 +245,15 @@ composite:
       - organism
       - taxonomy_id
       - species_group_flag
+      - iuphar_target_id
+      - iuphar_class
+      - iuphar_match_status
+      - iuphar_annotation_status
+      - local_class
+      - effective_class
+      - effective_source
+      - decision_status
+      - target_class_profile_sha256
       provider_order: [chembl]
       # === Descriptive metadata ===
     - name: descriptors
