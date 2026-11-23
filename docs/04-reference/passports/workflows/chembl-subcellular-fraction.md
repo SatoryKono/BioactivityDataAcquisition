@@ -5,7 +5,7 @@
 - Kind: `workflow`
 - Typed identity: `workflow:chembl_subcellular_fraction`
 - Schema: `1.0.0`
-- Source revision: `sha256:015aaa7c915c8d5f622151e997a7abda55186d049bc275bd97e0c562167d1761`
+- Source revision: `sha256:3761d93c62734a237a94044a05a12db096cb630f1dfe045942202f65c8961d37`
 
 ## Evidence
 
@@ -75,7 +75,7 @@
   "provenance": {
     "projector_version": "1.0.0",
     "semantic_content_hash": "sha256:0bf1bb4dbe175d830e7ab1b8e7d6e51a5af7178aa195e2d47b51919af1999b26",
-    "source_revision": "sha256:015aaa7c915c8d5f622151e997a7abda55186d049bc275bd97e0c562167d1761"
+    "source_revision": "sha256:3761d93c62734a237a94044a05a12db096cb630f1dfe045942202f65c8961d37"
   },
   "source_references": [
     {
