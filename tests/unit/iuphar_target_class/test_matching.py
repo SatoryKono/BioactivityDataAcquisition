@@ -14,7 +14,10 @@ from iuphar_target_class.matching import (
     resolve_match,
     select_uniprot_accessions,
 )
-from iuphar_target_class.rf008_qualification import evaluate_categories
+from iuphar_target_class.rf008_qualification import (
+    _execute_projection,
+    evaluate_categories,
+)
 from iuphar_target_class.models import MatchResult
 
 pytestmark = pytest.mark.unit
@@ -372,8 +375,38 @@ def test_rf008_anchor_cases_keep_an_evidence_disposition() -> None:
     named = by_id["match-name-only"]
     assert auxiliary["disposition"] == "explained_previous_policy"
     assert auxiliary["evidence"]
+    projection = by_id["match-auxiliary-projection"]
+    assert projection["disposition"] == "explained_previous_policy"
+    assert projection["observed"] == {"uniprot": "P35372|Q99999"}
     assert conflict["disposition"] == "verified"
     assert named["observed"] == {
         "match_status": "ambiguous",
         "matched_target_id": None,
+    }
+
+
+def test_rf008_projection_forwards_separated_uniprot_fields(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def _separated(_data: object, _taxon: str) -> dict[str, object]:
+        return {
+            "auxiliary_uniprot": ["Q99999"],
+            "primary_uniprot": ["P35372"],
+            "uniprot": "P35372",
+        }
+
+    monkeypatch.setattr(
+        "iuphar_target_class.rf008_qualification.project_target_fields",
+        _separated,
+    )
+    assert _execute_projection(
+        {
+            "component_accessions": ["P35372"],
+            "target_xref_uniprot_ids": ["Q99999"],
+            "taxon": "9606",
+        }
+    ) == {
+        "auxiliary_uniprot": ["Q99999"],
+        "primary_uniprot": ["P35372"],
+        "uniprot": "P35372",
     }

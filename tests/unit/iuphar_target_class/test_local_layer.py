@@ -8,7 +8,12 @@ import pytest
 
 from iuphar_target_class.local_layer import Prediction, apply_local
 from iuphar_target_class.normalization import parse_ec_numbers
-from iuphar_target_class.policy import PLAN_SOURCE, PLAN_VERSION, RuleRecord
+from iuphar_target_class.policy import (
+    PLAN_SOURCE,
+    PLAN_VERSION,
+    RuleRecord,
+    policy_document,
+)
 from iuphar_target_class.rf008_qualification import evaluate_categories
 
 pytestmark = pytest.mark.unit
@@ -281,3 +286,9 @@ def test_rf008_ec_tf_and_missing_markers_follow_the_source_tables() -> None:
     assert by_id["local-ec-7"]["observed"]["rule_marks_direct_layer"] is False
     assert by_id["local-ec-7"]["observed"]["ec_categories"] == ["Translocases"]
     assert by_id["local-ec-7"]["observed"]["local_class"] is None
+    parameters = policy_document()["parameters"]
+    assert isinstance(parameters, dict)
+    markers = by_id["local-missing-markers"]["observed"]
+    assert isinstance(markers, dict)
+    assert markers["version"] == parameters["missing_markers_version"]
+    assert markers["version_status"] == parameters["missing_markers_version_status"]
