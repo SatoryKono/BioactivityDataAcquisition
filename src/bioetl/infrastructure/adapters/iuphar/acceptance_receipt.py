@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from pathlib import Path
 
-from iuphar_target_class.policy import PLAN_VERSION
+from iuphar_target_class.policy import LOCAL_CATALOG_VERSION
 
 from ._manifest import checked_document, header, referenced_path, require_sha256, text
 from .snapshot_loader import load_snapshot_manifest
@@ -41,7 +41,11 @@ def validate_acceptance_receipt(
             "classification_schema_version",
         )
     )
-    if versions != (NORMALIZATION_VERSION, PLAN_VERSION, CLASSIFICATION_SCHEMA_VERSION):
+    if versions != (
+        NORMALIZATION_VERSION,
+        LOCAL_CATALOG_VERSION,
+        CLASSIFICATION_SCHEMA_VERSION,
+    ):
         raise ValueError("acceptance versions differ from the executing adapter")
     _executed_checks(document.get("checks"))
     _bound_acceptance_outputs(document)
@@ -118,7 +122,11 @@ def load_profile(
         text(document, "rules_version"),
         text(document, "classification_schema_version"),
     )
-    if versions != (NORMALIZATION_VERSION, PLAN_VERSION, CLASSIFICATION_SCHEMA_VERSION):
+    if versions != (
+        NORMALIZATION_VERSION,
+        LOCAL_CATALOG_VERSION,
+        CLASSIFICATION_SCHEMA_VERSION,
+    ):
         raise ValueError("IUPHAR profile versions differ from the executing adapter")
     return LoadedIupharProfile(
         snapshot,

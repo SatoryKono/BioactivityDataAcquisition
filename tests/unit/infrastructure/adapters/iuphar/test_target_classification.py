@@ -59,7 +59,7 @@ def _receipt(snapshot_hash: str) -> dict[str, object]:
         "run_id": "contract-run",
         "reviewer_reference": "synthetic-unit-test-expectations",
         "normalization_version": "bioetl-iuphar-input-v1",
-        "rules_version": "plan-v1-r8",
+        "rules_version": "local-rules-2026.11.23",
         "classification_schema_version": "3.1.0",
     }
 
@@ -131,7 +131,7 @@ def _profile(
         "snapshot": snapshot_ref,
         "acceptance": acceptance,
         "normalization_version": "bioetl-iuphar-input-v1",
-        "rules_version": "plan-v1-r8",
+        "rules_version": "local-rules-2026.11.23",
         "classification_schema_version": "3.1.0",
     }
     ref = _write(tmp_path, "profile.json", profile)
@@ -209,6 +209,13 @@ def test_valid_reference_receipt_admits_enrich_contract_fixture(tmp_path):
 def test_receipt_from_another_execution_version_cannot_admit_enrich(field):
     receipt = _receipt("a" * 64)
     receipt[field] = "unreviewed-version"
+    with pytest.raises(ValueError, match="acceptance versions"):
+        validate_acceptance_receipt(receipt, snapshot_manifest_sha256="a" * 64)
+
+
+def test_previous_plan_rules_version_cannot_admit_the_new_catalog():
+    receipt = _receipt("a" * 64)
+    receipt["rules_version"] = "plan-v1-r8"
     with pytest.raises(ValueError, match="acceptance versions"):
         validate_acceptance_receipt(receipt, snapshot_manifest_sha256="a" * 64)
 

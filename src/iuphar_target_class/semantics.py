@@ -27,7 +27,9 @@ BASE_MISSING_MARKERS: tuple[str, ...] = (
     "n/a",
     "",
 )
-RULES_VERSION = "plan-v1-r8"
+# Executing profile pin. ``plan-v1-r8`` is the previous baseline and stays on
+# historical runs. This literal must match ``policy.LOCAL_CATALOG_VERSION``.
+RULES_VERSION = "local-rules-2026.11.23"
 
 RF001_CONTRACT_VERSION = "rf001-2026-11-23"
 RF001_ISSUE = "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/13309"

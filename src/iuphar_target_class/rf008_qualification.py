@@ -31,7 +31,7 @@ from .matching import CatalogTarget, MatchQuery, resolve_match
 from .normalization import normalize_missing, parse_ec_numbers
 from .policy import (
     BASE_MISSING_MARKERS,
-    PLAN_VERSION,
+    LOCAL_CATALOG_VERSION,
     UNSET,
     WORKING_CLASSES,
     all_rules,
@@ -958,7 +958,7 @@ def _rules_pin() -> dict[str, object]:
     body = canonical_json_bytes(payload)
     return {
         "rules_sha256": sha256_bytes(body),
-        "rules_version": PLAN_VERSION,
+        "rules_version": LOCAL_CATALOG_VERSION,
         "working_classes": list(WORKING_CLASSES),
     }
 

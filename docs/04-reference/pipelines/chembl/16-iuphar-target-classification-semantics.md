@@ -86,7 +86,7 @@ enrich. Matched counts are not biological accuracy.
 
 | Surface | Current baseline | Change rule |
 | --- | --- | --- |
-| `rules_version` | `plan-v1-r8` | New rules → new version; do not rewrite historical runs |
+| `rules_version` | `local-rules-2026.11.23` | New rules → new version; `plan-v1-r8` stays on historical runs |
 | `normalization_version` | unset | Approving missing markers publishes a new version |
 | `classification_schema_version` (profile) | `3.1.0` when shadow/enrich enabled | Adapter field; not the same as table contract |
 | table / business contract | off/shadow → V30 / `3.0.0`; enrich → V31 / `3.1.0` | Nine additive columns only after enrich admission |

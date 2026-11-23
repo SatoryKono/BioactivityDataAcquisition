@@ -1467,7 +1467,7 @@
       "immutability": "Originals, historical results, and stage-0 copies are preserved; recomputes are separate runs with new digests",
       "normalization_version": "Missing-marker or identifier normalization changes publish a new normalization_version; current approved value is unset",
       "profile_envelope": "snapshot_manifest points at the profile envelope; digest is SHA-256 of exact profile bytes; acceptance and biological_accuracy_accepted stay false unless independently proven",
-      "rules_version": "New or edited local/direct rules publish a new rules_version; current baseline is plan-v1-r8",
+      "rules_version": "New or edited local/direct rules publish a new rules_version; current baseline is local-rules-2026.11.23",
       "table_contract": "Business-row / Gold hash scope: off and shadow keep chembl_target_v3.0 (TargetClassificationConfig.contract_version 3.0.0); enrich alone advances to chembl_target_v3.1 / 3.1.0 and the nine additive columns"
     },
     "source_unavailable_vs_not_found": {

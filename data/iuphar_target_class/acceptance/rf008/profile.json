@@ -19,7 +19,7 @@
   },
   "rules": {
     "rules_sha256": "f878b33d705cbc4bf5b581f05ca786c31a7c62f1e7560a2d8f2e970b99aff735",
-    "rules_version": "plan-v1-r8",
+    "rules_version": "local-rules-2026.11.23",
     "working_classes": [
       "Receptor",
       "Ion Channel",
