@@ -1318,6 +1318,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
         EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
     ),
+    "configs/quality/external_resource_inventory_pr13324_gold_writer_review.json": (
+        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
+        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
+    ),
     "scripts/engineering/README.md": (
         SCRIPTS_INVENTORY_MANIFEST_TEST,
         "tests/architecture/test_scripts_inventory_discovery.py",
@@ -2195,6 +2199,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "docs/reports/ci/stage0_closure.json": (STAGE0_EVIDENCE_TEST,),
     "docs/reports/ci/stage0_closure_report.md": (STAGE0_EVIDENCE_TEST,),
     "reports/mypy_eval.json": (STAGE0_EVIDENCE_TEST,),
+    "tests/unit/interfaces/cli/__snapshots__/test_registry_consistency.ambr": (
+        "tests/unit/interfaces/cli/test_registry_consistency.py",
+    ),
     "tests/snapshots/pipeline_configs.json": (
         "tests/architecture/test_config_golden_master.py",
     ),
