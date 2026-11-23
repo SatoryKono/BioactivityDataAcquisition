@@ -223,6 +223,12 @@ isolated synthetic critical-run fixture, a tampered history checkpoint produced
 `checkpoint_checksum_valid: false` while the dossier still reported
 `operational_success: true`. Do not interpret that success value as proof of
 checkpoint integrity; inspect the checkpoint-validation result separately.
+The two views can select different checkpoint occurrences: for a selected run,
+checkpoint validation tries manifest-indexed history first and then run history,
+whereas the dossier tries run history first and then the mutable pointer. Check
+the validation `evidence_source` and reconcile the selected occurrence before
+applying its verdict to a dossier checkpoint; a matching run ID alone is not
+proof that both views inspected the same envelope.
 Missing checkpoints and checkpoints from a different run are classified as
 degraded by the dossier and block critical operational success.
 
