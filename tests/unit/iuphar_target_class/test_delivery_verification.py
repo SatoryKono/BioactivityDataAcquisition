@@ -261,6 +261,7 @@ def test_tilde_output_is_expanded_before_publication(
     home = tmp_path / "home"
     home.mkdir()
     monkeypatch.setenv("HOME", str(home))
+    monkeypatch.setenv("USERPROFILE", str(home))
     target = home / "acceptance-run"
     target.mkdir()
     publish_acceptance_reports(
