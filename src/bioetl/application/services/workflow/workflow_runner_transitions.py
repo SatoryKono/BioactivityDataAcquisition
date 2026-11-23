@@ -7,6 +7,7 @@ from dataclasses import dataclass, replace
 from datetime import datetime
 from typing import TYPE_CHECKING
 
+from bioetl.application.services.execution.pipeline_runner_models import RunResult
 from bioetl.application.services.execution.workflow_runner_step_execution import (
     TransformStepRuntimeOptions,
     execute_pipeline_step,
@@ -135,7 +136,14 @@ async def resolve_workflow_step_transition(
             context_labels=context.workflow_context_labels,
         )
         restored = state.step_outputs.get(step.step_id)
-        if isinstance(restored, Mapping):
+        if isinstance(restored, RunResult):
+            completed = replace(
+                completed,
+                payload=restored,
+                child_run_id=restored.run_id,
+                child_manifest_id=restored.manifest_id,
+            )
+        elif isinstance(restored, Mapping):
             run_id = restored.get("run_id")
             child_manifest = restored.get("manifest_id")
             completed = replace(

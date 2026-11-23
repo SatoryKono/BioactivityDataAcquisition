@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "ab85fb30ebcfb378330cc6c67addeee9054d110c",
+  "source_ref": "ab85fb30ebcfb378330cc6c67addeee9054d110c",
+  "source_reviews": {
+    "src/bioetl/application/services/run_reports/workflow_observations.py": "Skip AlreadyCompletedOnResume children in finalize_workflow_children so resume does not rewrite archived child reports. Existing injected store.read_text/store.write_text exclusions retained with write_text line drift 105\u2192107 only; ownership and lifecycle unchanged. No new runtime qualification.",
+    "src/bioetl/application/services/workflow/workflow_runner_reports.py": "Archive only successful RunResult children; skip non-success resume payloads. Existing injected store.read_text exclusion retained with line drift 118\u2192120 only. No new runtime qualification.",
+    "src/bioetl/application/services/workflow/workflow_runner_transitions.py": "On resume, preserve restored RunResult payload and child run/manifest identity. No acquisition call sites in this file; no external resource ownership or lifecycle change."
+  },
+  "expression_updates": {},
+  "segment_updates": {},
+  "line_updates": {
+    "src/bioetl/application/services/run_reports/workflow_observations.py": {
+      "105": 107
+    },
+    "src/bioetl/application/services/workflow/workflow_runner_reports.py": {
+      "118": 120
+    }
+  },
+  "reference_moves": [],
+  "exclusion_moves": [],
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": []
+}
