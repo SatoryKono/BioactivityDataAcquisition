@@ -227,13 +227,11 @@ def test_pre_rf002_receipt_format_is_rejected_for_new_matching():
     assert "matching_policy_version" in receipt
     del receipt["matching_policy_version"]
     # Prior enrich receipts carried these three pins only.
-    assert set(
-        (
-            "normalization_version",
-            "rules_version",
-            "classification_schema_version",
-        )
-    ).issubset(receipt)
+    assert {
+        "normalization_version",
+        "rules_version",
+        "classification_schema_version",
+    }.issubset(receipt)
     with pytest.raises(ValueError, match="acceptance versions"):
         validate_acceptance_receipt(receipt, snapshot_manifest_sha256="a" * 64)
 
