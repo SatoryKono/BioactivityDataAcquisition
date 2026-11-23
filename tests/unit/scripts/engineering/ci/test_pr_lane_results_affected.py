@@ -138,6 +138,16 @@ def test_nightly_shadow_changes_keep_both_archive_and_inventory_owners(
     assert report["covers_full_suite"] is False
 
 
+def test_deleted_cli_registry_snapshot_keeps_its_owning_test() -> None:
+    repo_root = Path(__file__).resolve().parents[5]
+    snapshot = "tests/unit/interfaces/cli/__snapshots__/test_registry_consistency.ambr"
+    owner = "tests/unit/interfaces/cli/test_registry_consistency.py"
+    assert affected_pytest_targets([snapshot], repo_root=repo_root) == [owner]
+    report = build_shadow_compare([snapshot], repo_root=repo_root)
+    assert report["selected"] == [owner]
+    assert report["covers_full_suite"] is False
+
+
 def test_nightly_historical_fixture_selects_its_owner_in_both_impact_paths() -> None:
     repo_root = Path(__file__).resolve().parents[5]
     fixture = "tests/unit/scripts/engineering/ci/fixtures/n1_historical_baseline.json"

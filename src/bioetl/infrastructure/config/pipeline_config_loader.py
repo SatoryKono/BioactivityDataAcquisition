@@ -120,9 +120,12 @@ class PipelineConfigLoader:
     _conditional_validation_to_dict = staticmethod(conditional_validation_to_dict)
 
     def clear_cache(self) -> None:
-        """Clear all caches (DQ and filter loader caches).
+        """Clear this facade's DQ and filter loader caches only.
 
-        Call after modifying config files during development/testing.
+        Shared pipeline and base-config caches are not cleared. After changing
+        pipeline or base YAML, also call
+        ``pipeline_config_api.load_pipeline_config.cache_clear()``; it clears
+        both shared caches for all config roots, not only this facade's root.
         """
         self._dq_loader.clear_cache()
         self._filter_loader.clear_cache()
