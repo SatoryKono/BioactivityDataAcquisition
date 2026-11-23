@@ -306,6 +306,50 @@ def test_supported_local_stays_out_of_the_dictionary_layer() -> None:
     assert "source_unavailable" not in conflict.codes
 
 
+def test_unapproved_local_other_does_not_fill_a_dictionary_gap() -> None:
+    cases = (
+        ("not_found", "not_found", "confirmed_not_found", LEGACY_OTHER, False),
+        ("not_found", "not_found", "confirmed_not_found", CANONICAL_OTHER, False),
+        (
+            "source_unavailable",
+            "source_unavailable",
+            "source_unavailable",
+            LEGACY_OTHER,
+            False,
+        ),
+        (
+            "source_unavailable",
+            "source_unavailable",
+            "source_unavailable",
+            CANONICAL_OTHER,
+            True,
+        ),
+    )
+    for source_state, completeness, code, label, approved in cases:
+        decision = decide(
+            BoundaryObservation(
+                case_id=f"{source_state}-{label}-{approved}",
+                source_state=source_state,
+                local_class=label,
+                local_status="supported",
+                approved_other_mapping=approved,
+                legacy_field=False,
+            )
+        )
+        assert decision.effective_class is None
+        assert decision.effective_source is None
+        assert decision.iuphar_class is None
+        assert decision.local_class == label
+        assert decision.completeness == completeness
+        assert decision.decision_status == "unresolved"
+        if approved:
+            assert decision.rule_id in {"confirmed_not_found", "source_unavailable"}
+            assert "false_other" not in decision.codes
+        else:
+            assert decision.rule_id == "false_other"
+            assert decision.codes == ("false_other", code)
+
+
 def test_dropped_parents_outrank_an_admissible_other() -> None:
     decision = decide(
         BoundaryObservation(

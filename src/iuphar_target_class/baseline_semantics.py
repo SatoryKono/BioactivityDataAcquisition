@@ -672,10 +672,44 @@ def _supported_local(observation: BoundaryObservation) -> bool:
     return observation.local_status == "supported" and bool(observation.local_class)
 
 
+def _publishable_local_class(observation: BoundaryObservation) -> bool:
+    """A supported local class may fill a gap only when it is not an Other label."""
+    return _supported_local(observation) and observation.local_class not in OTHER_LABELS
+
+
+def _unapproved_local_other(
+    observation: BoundaryObservation, *, completeness: str, code: str
+) -> BoundaryDecision | None:
+    """Keep a dictionary gap from publishing an unapproved Other via local rules."""
+    label = observation.local_class
+    if label not in OTHER_LABELS or not _supported_local(observation):
+        return None
+    approved = observation.approved_other_mapping and not (
+        label == LEGACY_OTHER and not observation.legacy_field
+    )
+    if approved:
+        return None
+    return _decision(
+        observation,
+        rule_id="false_other",
+        decision_status="unresolved",
+        effective_class=None,
+        effective_source=None,
+        iuphar_class=None,
+        completeness=completeness,
+        codes=("false_other", code),
+    )
+
+
 def _source_unavailable(observation: BoundaryObservation) -> BoundaryDecision | None:
     if observation.source_state != "source_unavailable":
         return None
-    if _supported_local(observation):
+    rejected = _unapproved_local_other(
+        observation, completeness="source_unavailable", code="source_unavailable"
+    )
+    if rejected is not None:
+        return rejected
+    if _publishable_local_class(observation):
         return _decision(
             observation,
             rule_id="source_unavailable_supported_local",
@@ -712,7 +746,12 @@ def _confirmed_not_found(observation: BoundaryObservation) -> BoundaryDecision |
             completeness="not_found",
             codes=("confirmed_not_found",),
         )
-    if _supported_local(observation):
+    rejected = _unapproved_local_other(
+        observation, completeness="not_found", code="confirmed_not_found"
+    )
+    if rejected is not None:
+        return rejected
+    if _publishable_local_class(observation):
         return _decision(
             observation,
             rule_id="confirmed_not_found_supported_local",
