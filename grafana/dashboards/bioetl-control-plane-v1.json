@@ -689,7 +689,7 @@
         "type": "yesoreyeram-infinity-datasource",
         "uid": "bioetl-ops-http"
       },
-      "description": "SELECTED RUN · Identity anchors, missing first. Presence is not verification. SELECT RUN requests an explicit Run ID; UNKNOWN means the reply lacks required anchor evidence. A valid empty response (no required anchors returned) is not verification. QUERY ERROR means the source reported a query failure or Grafana could not complete the query; inspect the query for details. Exact Replay Checks determines readiness. Inspect a value to copy it in full.",
+      "description": "SELECTED RUN · Identity anchors, missing first. Presence is not verification. SELECT RUN requests an explicit Run ID; UNKNOWN means the reply lacks required anchor evidence. A valid empty response (no required anchors returned) is not verification. QUERY ERROR means the source reported a query failure or Grafana could not complete the query; inspect the query for details. Exact Replay Checks determines readiness. Inspect a value to copy it in full. Exact Run ID selects evidence; the Workflow filter only narrows the run catalog. Catalog freshness does not establish evidence freshness.",
       "fieldConfig": {
         "defaults": {
           "noValue": "No result · inspect this query",
@@ -787,7 +787,7 @@
           "root_selector": "($requested := \"${run_id:percentencode}\"; $listed := $type(rows) = 'array' ? rows : []; $state := function($status, $value, $why){[{'label':'Run selection','priority':'—','present':false,'status':$status,'value_full':$value,'why':$why}]}; (status in ['scope_resolve_timeout','evidence_build_timeout','QUERY ERROR'] or summary.overall_status = 'QUERY ERROR') ? $state('QUERY ERROR','Exact-run evidence unavailable','The source reported a scope or evidence query error.') : (($requested in ['', '-', 'All', '$__all', '%24__all', '__all', '*', '%2A'] or summary.overall_status = 'SELECT RUN') ? $state('SELECT RUN','Choose a Run ID','No exact-run evidence has been requested.') : ($count($listed) > 0 ? [$listed^(present ? 1 : 0, priority, name)] : $state('UNKNOWN','No anchor evidence returned','A successful response with no required anchors is not verification.'))))",
           "source": "url",
           "type": "json",
-          "url": "/ops/control-plane/identity-evidence?workflow=${workflow:csv}&pipeline=${pipeline:csv}&run_type=${run_type:csv}&run_id=${run_id}&allow_stale=1&view=anchors",
+          "url": "/ops/control-plane/identity-evidence?pipeline=${pipeline:csv}&run_type=${run_type:csv}&run_id=${run_id}&view=anchors",
           "url_options": {
             "data": "",
             "method": "GET"
@@ -841,7 +841,7 @@
       "links": [
         {
           "title": "Full identity report",
-          "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/control-plane/identity-evidence?pipeline=${pipeline:percentencode}&run_type=${run_type:percentencode}&run_id=${run_id:percentencode}&workflow=${workflow:csv}&allow_stale=1&view=copy_values",
+          "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/control-plane/identity-evidence?pipeline=${pipeline:percentencode}&run_type=${run_type:percentencode}&run_id=${run_id:percentencode}&view=copy_values",
           "targetBlank": true
         },
         {
@@ -3031,7 +3031,7 @@
             "type": "yesoreyeram-infinity-datasource",
             "uid": "bioetl-ops-http"
           },
-          "description": "SELECTED RUN · This run's runtime anchors compared with its checkpoint. MISMATCH is critical. MISSING or PARTIAL is a warning. No row is not a pass. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR. A blank grid is not used: N/A means no Run ID is selected, NO RECORDS means this run recorded no checkpoint anchors, NO DATA means the comparison payload is missing or the request timed out.",
+          "description": "SELECTED RUN · This run's runtime anchors compared with its checkpoint. MISMATCH is critical. MISSING or PARTIAL is a warning. No row is not a pass. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR. A blank grid is not used: N/A means no Run ID is selected, NO RECORDS means this run recorded no checkpoint anchors, NO DATA means the comparison payload is missing or the request timed out. Exact Run ID selects evidence; the Workflow filter only narrows the run catalog. Catalog freshness does not establish evidence freshness.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -3567,7 +3567,7 @@
               "root_selector": "($listed := $type(rows) = 'array' ? rows : []; $hasRun := $exists(selected_run_id) and selected_run_id != null and selected_run_id != '' and selected_run_id != '-' and selected_run_id != 'All'; $timeout := $exists(status) and (status = 'scope_resolve_timeout' or status = 'evidence_build_timeout'); $msg := $exists(message) and message != ''; $state := function($status, $current){({'anchor': '—', 'status': $status, 'current_value_full': $current, 'checkpoint_value_full': '—'})}; $timeout or $msg ? ($count($listed) > 0 ? $listed : [$state('NO DATA', $msg ? message : 'NO DATA — checkpoint comparison request timed out')]) : ($not($hasRun) ? [$state('N/A', 'N/A — no Run ID selected')] : (($exists(checkpoint_compare) and checkpoint_compare.status = 'MISSING') ? $append($listed, [$state('NO RECORDS', 'NO RECORDS — checkpoint anchors were not recorded for this run')]) : ($count($listed) > 0 ? $listed : [$state('NO DATA', 'NO DATA — checkpoint comparison returned no rows')]))))",
               "source": "url",
               "type": "json",
-              "url": "/ops/control-plane/identity-evidence?workflow=${workflow:csv}&pipeline=${pipeline:csv}&run_type=${run_type:csv}&run_id=${run_id}&allow_stale=1&view=checkpoint_compare",
+              "url": "/ops/control-plane/identity-evidence?pipeline=${pipeline:csv}&run_type=${run_type:csv}&run_id=${run_id}&view=checkpoint_compare",
               "url_options": {
                 "data": "",
                 "method": "GET"

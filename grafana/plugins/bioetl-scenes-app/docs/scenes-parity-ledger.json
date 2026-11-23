@@ -20,9 +20,9 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "34882b415bfcdd1397ca666001d296b5cd1b74b2248f145307e1654851a5a7c7",
+    "bioetl-control-plane-v1": "5541aa1660cbd994ffac5ada98bc45ca3af440d2200736097438b9abc80500a4",
     "bioetl-dq-v2": "ede31b2375e896f1d6cdd93019d465e04a258aa8069170d550e29be98d3446cc",
-    "bioetl-incident-v1": "6e840b6193912d5017fbd6dee9809d053eead5dfa952d33848b7c5b71322721c",
+    "bioetl-incident-v1": "b81f2f069dafd7e65b6d3c9c028baba3b2035638dabe849fcd210433c9722a91",
     "bioetl-overview-v2": "025d4ca4ce92539ebd1f51841e271d672f96183db6c542af59f5fa85b401894f",
     "bioetl-run-explorer-v1": "5589d2b3debe6741db84537130c69fbfcf248d23437b98621b4e42489d6be9b1"
   },
@@ -109,7 +109,7 @@
         "datasource_type": "yesoreyeram-infinity-datasource",
         "datasource_uid": "bioetl-ops-http",
         "expressions": [
-          "/ops/control-plane/identity-evidence?workflow=${workflow:csv}&pipeline=${pipeline:csv}&run_type=${run_type:csv}&run_id=${run_id}&allow_stale=1&view=anchors"
+          "/ops/control-plane/identity-evidence?pipeline=${pipeline:csv}&run_type=${run_type:csv}&run_id=${run_id}&view=anchors"
         ],
         "target_count": 1
       }
@@ -223,7 +223,7 @@
         "datasource_type": "yesoreyeram-infinity-datasource",
         "datasource_uid": "bioetl-ops-http",
         "expressions": [
-          "/ops/control-plane/identity-evidence?workflow=${workflow:csv}&pipeline=${pipeline:csv}&run_type=${run_type:csv}&run_id=${run_id}&allow_stale=1&view=checkpoint_compare"
+          "/ops/control-plane/identity-evidence?pipeline=${pipeline:csv}&run_type=${run_type:csv}&run_id=${run_id}&view=checkpoint_compare"
         ],
         "target_count": 1
       }
