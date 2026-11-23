@@ -2223,6 +2223,14 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "docs/reports/generated/documentation-cleanup-inventory.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TESTS
     ),
+    "docs/reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.csv": (
+        "tests/unit/repo_backed/scripts/test_generate_pipeline_normalization_field_matrix.py",
+        "tests/architecture/test_reproducibility_docs_contract_drift.py",
+    ),
+    "docs/reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.md": (
+        "tests/unit/repo_backed/scripts/test_generate_pipeline_normalization_field_matrix.py",
+        "tests/architecture/test_reproducibility_docs_contract_drift.py",
+    ),
     "reports/quality/flaky-test-burndown-review.json": FLAKY_BURNDOWN_REVIEW_TESTS,
     "reports/quality/test-governance-current.json": TEST_GOVERNANCE_ARTIFACT_TESTS,
     "scripts/ai/agent_tools/README.md": (
