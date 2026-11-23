@@ -488,16 +488,25 @@ restore with the rollback command above. Do not switch the mode to `"off"`
 instead of restoring the tables.
 
 Write the evidence JSON outside the committed tree. Point the command at the
-actual discrepancy report, independent expectations, enrich table, repeat
-table, XLSX, Silver, Gold, and assay inputs. The command recomputes hashes,
-status distributions, XLSX round-trip, historical columns, assay FK closure,
-and the canonical config digest. It does not promote or edit configuration.
+actual discrepancy report, independent expectations, shadow table, enrich
+table, repeat table, XLSX, Silver, Gold, and assay inputs. `--shadow-table`
+is the shadow cohort; `--table` is only the isolated enrich cohort. The
+command recomputes hashes, status distributions, XLSX round-trip, historical
+columns, current assay FK closure, and the canonical config digest. A file is
+identified by its byte SHA-256. A Delta directory is identified by the SHA-256
+of its current business-field projection, and a pinned hash is not accepted
+when that identity was not measured. Current rows are those with missing or
+true `_is_current`; closed versions do not close an assay FK. Live readback
+compares each current Gold target with the current Silver row of the same id,
+not with the `--limit 1000` smoke table. The command does not promote, edit
+configuration, or replace an existing report path.
 
 ```powershell
 .\.venv-win\Scripts\python.exe -m scripts.ops target-classification-migration contour-report `
   --evidence 'PATH_TO_CONTOUR_EVIDENCE_JSON' `
   --discrepancy-report 'PATH_TO_DISCREPANCY_REPORT' `
   --expectations 'PATH_TO_INDEPENDENT_EXPECTATIONS' `
+  --shadow-table 'PATH_TO_SHADOW_TABLE' `
   --table 'PATH_TO_ENRICH_TABLE' `
   --repeat-table 'PATH_TO_REPEAT_ENRICH_TABLE' `
   --xlsx 'PATH_TO_STANDARD_XLSX' `
@@ -510,13 +519,102 @@ and the canonical config digest. It does not promote or edit configuration.
 
 On Linux or WSL, use the prepared interpreter from the repository root. The
 evidence document uses `schema_version`
-`bioetl_iuphar_main_contour_evidence_v1` and explicit objects `shadow`,
-`isolated_enrich`, `composite_enrich`, `migration`, `live`, `biological`,
-`local`, and `ci`. `local` and `ci` stay `NOT_RUN` until their own evidence
-hash or 40-character commit SHA is supplied. Composite acceptance stays
-`BLOCKED` while the composite Gold contract omits the nine classification
-fields, even when both column groups already list them. Keep the report with
-the occurrence; do not commit it.
+`bioetl_iuphar_main_contour_evidence_v1`. Every key below is required; a
+not-run phase still uses these objects. `local` and `ci` stay `NOT_RUN` until
+their own evidence hash or 40-character commit SHA is supplied. Composite
+acceptance stays `BLOCKED` while the composite Gold contract omits the nine
+classification fields, even when both column groups already list them. Keep
+the report with the occurrence; do not commit it.
+
+```json
+{
+  "schema_version": "bioetl_iuphar_main_contour_evidence_v1",
+  "shadow": {
+    "executed": false,
+    "run_id": null,
+    "separate_directory": false,
+    "contract_version": null,
+    "business_rows_unchanged": false,
+    "profile_sha256": null,
+    "config_sha256": null,
+    "cohort_sha256": null,
+    "discrepancy_report_sha256": null,
+    "independent_expectations_sha256": null,
+    "row_count": 0,
+    "status_counts": {
+      "iuphar_match_status": {},
+      "local_class": {},
+      "effective_class": {},
+      "decision_status": {}
+    },
+    "source_completeness": "not_recorded"
+  },
+  "isolated_enrich": {
+    "executed": false,
+    "separate_directory": false,
+    "limit": null,
+    "full_table_proof": false,
+    "silver_contract": null,
+    "gold_contract": null,
+    "profile_sha256": null,
+    "config_sha256": null,
+    "evidence_manifest_sha256": null,
+    "persisted_silver_sha256": null,
+    "persisted_gold_sha256": null,
+    "repeat": {
+      "same_inputs": false,
+      "same_versions": false,
+      "classification_sha256": null,
+      "repeat_classification_sha256": null
+    },
+    "xlsx": {
+      "table_sha256": null,
+      "xlsx_sha256": null,
+      "historical_columns": []
+    }
+  },
+  "composite_enrich": {
+    "executed": false,
+    "separate_directory": false,
+    "agreed_cohort_sha256": null,
+    "same_cohort_as_shadow": false,
+    "classification_columns_present": false
+  },
+  "migration": {
+    "rehearsal_rollback": "NOT_RUN",
+    "fk_unresolved": null,
+    "writers_quiesced": false,
+    "promoted": false,
+    "source_identity_matches": false,
+    "effective_config_sha256": null,
+    "effective_profile_sha256": null,
+    "physical_contract": null,
+    "backup_retained": false,
+    "full_cohort": false
+  },
+  "live": {
+    "readback": false,
+    "next_run_executed": false,
+    "next_run_id": null,
+    "tables_match_promoted": false,
+    "classification_reproduced": false,
+    "observed_profile_sha256": null,
+    "observed_config_sha256": null
+  },
+  "biological": {
+    "biological_accuracy_accepted": false,
+    "matched_count": null,
+    "matched_count_used_as_qualification": false,
+    "scientific_status": null,
+    "rf008_receipt_status": "NOT_RUN",
+    "rf008_receipt_sha256": null,
+    "independent_reference_sha256": null,
+    "reviewer_reference": null
+  },
+  "local": {"status": "NOT_RUN", "evidence_sha256": null},
+  "ci": {"status": "NOT_RUN", "commit_sha": null}
+}
+```
 
 ## Verification
 

@@ -12,14 +12,18 @@ from openpyxl import Workbook
 from bioetl.domain.config.target_classification import TARGET_CLASSIFICATION_FIELDS
 from scripts.ops.target_classification_contour import (
     PHYSICAL_CONTRACT,
+    ContourEvidenceError,
     ContourObservations,
     apply_measurements,
     classification_sha256,
     evaluate_main_contour,
     file_sha256,
     inspect_repository,
+    logical_projection_sha256,
     parse_evidence,
     status_distributions,
+    unresolved_assay_targets,
+    write_contour_report,
 )
 from scripts.ops.target_classification_migration import main
 
@@ -291,6 +295,7 @@ def _ready_case(tmp_path: Path) -> tuple[dict[str, object], ContourObservations]
         parsed,
         discrepancy_report=discrepancy,
         expectations=expectations,
+        shadow_table=table,
         table=table,
         repeat_table=repeat,
         xlsx=workbook,
@@ -348,7 +353,7 @@ def test_ready_report_does_not_treat_matched_count_as_biological_acceptance(
         "ambiguous": 1,
         "matched": 1,
     }
-    assert report["distribution_source"] == "table"
+    assert report["distribution_source"] == "shadow_table"
 
 
 def test_shadow_pass_does_not_pass_enrich(tmp_path: Path) -> None:
@@ -508,6 +513,141 @@ def test_contour_report_cli_rejects_invalid_evidence(tmp_path: Path) -> None:
             ]
         )
     assert caught.value.code == 2
+
+
+def test_closed_gold_version_does_not_close_a_current_assay_fk() -> None:
+    current_assay = [{"target_id": "CHEMBL1", "_is_current": True}]
+    closed_gold = [{"target_id": "CHEMBL1", "_is_current": False}]
+    current_gold = [{"target_id": "CHEMBL1", "_is_current": True}]
+    closed_assay = [{"target_id": "CHEMBL9", "_is_current": False}]
+
+    assert unresolved_assay_targets(current_assay, closed_gold) == 1
+    assert unresolved_assay_targets(current_assay, current_gold) == 0
+    assert unresolved_assay_targets(closed_assay, current_gold) == 0
+    assert unresolved_assay_targets([{"target_id": "CHEMBL1"}], current_gold) == 0
+
+
+def test_shadow_counts_are_not_taken_from_the_enrich_table(tmp_path: Path) -> None:
+    evidence, observations = _ready_case(tmp_path)
+    shorter = tmp_path / "smoke.csv"
+    _write_csv(shorter, (_ROWS[0],))
+    measured = apply_measurements(
+        observations,
+        evidence,
+        shadow_table=tmp_path / "enrich.csv",
+        table=shorter,
+        repeat_table=shorter,
+    )
+    report = evaluate_main_contour(evidence, measured)
+
+    assert _phase(report, "shadow") == "PASS"
+    assert report["distributions"]["iuphar_match_status"] == {
+        "ambiguous": 1,
+        "matched": 1,
+    }
+    assert _phase(report, "isolated_enrich") == "FAIL"
+
+
+def test_directory_identity_is_measured_for_silver(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    evidence, observations = _ready_case(tmp_path)
+    directory = tmp_path / "silver-delta"
+    directory.mkdir()
+    monkeypatch.setattr(
+        "scripts.ops.target_classification_contour.load_table",
+        lambda _path: list(_ROWS),
+    )
+    measured = apply_measurements(observations, evidence, silver=directory)
+    assert measured.silver_sha256 == logical_projection_sha256(list(_ROWS))
+    report = evaluate_main_contour(evidence, measured)
+    assert "silver_hash_conflict" in report["phases"]["isolated_enrich"]["reasons"]
+
+
+def test_live_matches_current_silver_rather_than_the_smoke_table(
+    tmp_path: Path,
+) -> None:
+    evidence, observations = _ready_case(tmp_path)
+    migration = dict(evidence["migration"])
+    migration["promoted"] = True
+    evidence["migration"] = migration
+    evidence["live"] = {
+        "readback": True,
+        "next_run_executed": True,
+        "next_run_id": "next-run",
+        "tables_match_promoted": True,
+        "classification_reproduced": True,
+        "observed_profile_sha256": _PROFILE,
+        "observed_config_sha256": _CONFIG,
+    }
+    observations = replace(
+        observations,
+        canonical_mode="enrich",
+        canonical_config_sha256=_CONFIG,
+        live_projection_match=True,
+    )
+    report = evaluate_main_contour(evidence, observations)
+
+    assert _phase(report, "live") == "PASS"
+    assert report["promotion_decision"] == "LIVE_ACCEPTED"
+
+
+def test_ci_failure_after_promotion_requires_rollback(tmp_path: Path) -> None:
+    evidence, observations = _ready_case(tmp_path)
+    migration = dict(evidence["migration"])
+    migration["promoted"] = True
+    evidence["migration"] = migration
+    evidence["ci"] = {"status": "FAIL", "commit_sha": _COMMIT}
+    evidence["live"] = {
+        "readback": True,
+        "next_run_executed": True,
+        "next_run_id": "next-run",
+        "tables_match_promoted": True,
+        "classification_reproduced": True,
+        "observed_profile_sha256": _PROFILE,
+        "observed_config_sha256": _CONFIG,
+    }
+    report = evaluate_main_contour(
+        evidence,
+        replace(
+            observations,
+            canonical_mode="enrich",
+            canonical_config_sha256=_CONFIG,
+        ),
+    )
+
+    assert report["promotion_decision"] == "ROLLBACK_REQUIRED"
+    assert "ci" in report["promotion_reasons"]
+
+
+def test_not_run_ci_after_promotion_does_not_request_rollback(tmp_path: Path) -> None:
+    evidence, observations = _ready_case(tmp_path)
+    migration = dict(evidence["migration"])
+    migration["promoted"] = True
+    evidence["migration"] = migration
+    evidence["ci"] = {"status": "NOT_RUN", "commit_sha": None}
+    report = evaluate_main_contour(
+        evidence,
+        replace(observations, canonical_mode="enrich", canonical_config_sha256=_CONFIG),
+    )
+
+    assert report["rollback_required"] is False
+    assert report["promotion_decision"] == "BLOCKED"
+
+
+def test_report_refuses_to_replace_an_existing_file(tmp_path: Path) -> None:
+    output = tmp_path / "contour-report.json"
+    write_contour_report({"artifact": "bioetl_iuphar_main_contour_report"}, output)
+    with pytest.raises(ContourEvidenceError, match="refusing to replace"):
+        write_contour_report({"artifact": "bioetl_iuphar_main_contour_report"}, output)
+    assert json.loads(output.read_text(encoding="utf-8"))["artifact"] == (
+        "bioetl_iuphar_main_contour_report"
+    )
+
+
+def test_relative_path_escape_is_rejected() -> None:
+    with pytest.raises(ValueError, match="refusing path outside"):
+        file_sha256(Path("../outside-the-repository"))
 
 
 def test_smoke_limit_cannot_claim_full_table_proof(tmp_path: Path) -> None:

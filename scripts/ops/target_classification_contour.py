@@ -20,6 +20,7 @@ import yaml
 
 from bioetl.domain.config.target_classification import TARGET_CLASSIFICATION_FIELDS
 from bioetl.infrastructure.storage.atomic import atomic_write_text
+from scripts.engineering.common.repo_paths import confined_io_path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 EVIDENCE_SCHEMA = "bioetl_iuphar_main_contour_evidence_v1"
@@ -77,7 +78,7 @@ class ContourObservations:
     composite_contract_properties: frozenset[str]
     discrepancy_report_sha256: str | None = None
     expectations_sha256: str | None = None
-    distribution_rows: tuple[dict[str, object], ...] | None = None
+    shadow_rows: tuple[dict[str, object], ...] | None = None
     xlsx_status: str = "NOT_RUN"
     xlsx_table_sha256: str | None = None
     xlsx_file_sha256: str | None = None
@@ -87,14 +88,19 @@ class ContourObservations:
     fk_unresolved: int | None = None
     silver_sha256: str | None = None
     gold_sha256: str | None = None
-    table_classification_sha256: str | None = None
-    gold_classification_sha256: str | None = None
+    live_projection_match: bool | None = None
+
+
+def _confine(path: Path) -> Path:
+    """Rebuild a CLI path before any read or write."""
+    return confined_io_path(path, allow_external_absolute=True)
 
 
 def file_sha256(path: Path) -> str:
     """Return the SHA-256 of exact file bytes."""
+    safe = _confine(path)
     digest = hashlib.sha256()
-    with path.open("rb") as handle:
+    with safe.open("rb") as handle:  # NOSONAR - confined_io_path
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
@@ -131,19 +137,61 @@ def status_distributions(
     return distributions
 
 
+def _is_current_row(row: dict[str, object]) -> bool:
+    """Match migration closure: a missing flag is current, False is closed."""
+    return row.get("_is_current", True) is not False
+
+
+def _current_rows(rows: list[dict[str, object]]) -> list[dict[str, object]]:
+    return [row for row in rows if _is_current_row(row)]
+
+
+def logical_projection_sha256(rows: list[dict[str, object]]) -> str:
+    """Hash current business fields, excluding technical ``_`` metadata."""
+    projected: list[dict[str, str | None]] = []
+    current = _current_rows(rows)
+    ordered = sorted(
+        current,
+        key=lambda item: (
+            str(item.get("target_id") or ""),
+            str(item.get("_version") or ""),
+        ),
+    )
+    for row in ordered:
+        projected.append(
+            {
+                str(key): _norm_cell(value)
+                for key, value in row.items()
+                if not str(key).startswith("_")
+            }
+        )
+    payload = json.dumps(
+        projected, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+    )
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def table_identity_sha256(path: Path, rows: list[dict[str, object]]) -> str:
+    """Byte-hash a file, or hash the current logical projection of a directory."""
+    safe = _confine(path)
+    if safe.is_file():  # NOSONAR - confined_io_path
+        return file_sha256(safe)
+    return logical_projection_sha256(rows)
+
+
 def unresolved_assay_targets(
     assay_rows: list[dict[str, object]],
     gold_rows: list[dict[str, object]],
 ) -> int:
-    """Count distinct non-null assay target ids absent from Gold."""
+    """Count current assay target ids absent from current Gold rows."""
     gold_ids = {
         str(row.get("target_id"))
-        for row in gold_rows
+        for row in _current_rows(gold_rows)
         if _norm_cell(row.get("target_id")) is not None
     }
     missing = {
         str(row.get("target_id"))
-        for row in assay_rows
+        for row in _current_rows(assay_rows)
         if _norm_cell(row.get("target_id")) is not None
         and str(row.get("target_id")) not in gold_ids
     }
@@ -152,25 +200,30 @@ def unresolved_assay_targets(
 
 def load_table(path: Path) -> list[dict[str, object]]:
     """Load a CSV, JSON row list, or Delta directory."""
-    suffix = path.suffix.lower()
+    safe = _confine(path)
+    suffix = safe.suffix.lower()
     if suffix == ".csv":
-        with path.open(encoding="utf-8-sig", newline="") as handle:
+        with safe.open(
+            encoding="utf-8-sig", newline=""
+        ) as handle:  # NOSONAR - confined_io_path
             return [dict(row) for row in csv.DictReader(handle)]
     if suffix == ".json":
-        payload = json.loads(path.read_text(encoding="utf-8"))
+        payload = json.loads(
+            safe.read_text(encoding="utf-8")
+        )  # NOSONAR - confined_io_path
         if not isinstance(payload, list):
-            raise ContourEvidenceError(f"{path} must contain a JSON list of rows")
+            raise ContourEvidenceError(f"{safe} must contain a JSON list of rows")
         rows: list[dict[str, object]] = []
         for item in payload:
             if not isinstance(item, dict):
-                raise ContourEvidenceError(f"{path} rows must be objects")
+                raise ContourEvidenceError(f"{safe} rows must be objects")
             rows.append(cast(dict[str, object], item))
         return rows
-    if path.is_dir():
+    if safe.is_dir():  # NOSONAR - confined_io_path
         from bioetl.infrastructure.storage.target_migration_row_ops import read_delta
 
-        return read_delta(path)
-    raise ContourEvidenceError(f"unsupported table path: {path}")
+        return read_delta(safe)
+    raise ContourEvidenceError(f"unsupported table path: {safe}")
 
 
 def compare_xlsx_round_trip(
@@ -273,9 +326,14 @@ def evaluate_main_contour(
 
 
 def write_contour_report(report: dict[str, object], output: Path) -> None:
-    """Publish the report atomically with stable key order."""
+    """Publish a new report atomically. An existing path is left unchanged."""
+    safe = _confine(output)
+    if safe.exists():  # NOSONAR - confined_io_path
+        raise ContourEvidenceError(
+            f"refusing to replace existing contour report: {safe}"
+        )
     payload = json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
-    atomic_write_text(output, payload)
+    atomic_write_text(safe, payload)  # NOSONAR - confined_io_path
 
 
 def apply_measurements(
@@ -284,6 +342,7 @@ def apply_measurements(
     *,
     discrepancy_report: Path | None = None,
     expectations: Path | None = None,
+    shadow_table: Path | None = None,
     table: Path | None = None,
     repeat_table: Path | None = None,
     xlsx: Path | None = None,
@@ -291,38 +350,46 @@ def apply_measurements(
     gold: Path | None = None,
     assay: Path | None = None,
 ) -> ContourObservations:
-    """Fill observations from files. Directory tables are read, not byte-hashed."""
+    """Fill observations from confined files and current Delta rows."""
     updates: dict[str, object] = {}
     if discrepancy_report is not None:
         updates["discrepancy_report_sha256"] = file_sha256(discrepancy_report)
     if expectations is not None:
         updates["expectations_sha256"] = file_sha256(expectations)
+    shadow_rows = load_table(shadow_table) if shadow_table is not None else None
+    if shadow_rows is not None:
+        updates["shadow_rows"] = tuple(_current_rows(shadow_rows))
     table_rows = load_table(table) if table is not None else None
-    if table_rows is not None:
-        updates["distribution_rows"] = tuple(table_rows)
-        updates["table_classification_sha256"] = classification_sha256(table_rows)
-        if table.is_file():
-            updates["xlsx_table_sha256"] = file_sha256(table)
     repeat_rows = load_table(repeat_table) if repeat_table is not None else None
     if table_rows is not None:
-        updates["repeat_classification_sha256"] = classification_sha256(table_rows)
+        updates["repeat_classification_sha256"] = classification_sha256(
+            _current_rows(table_rows)
+        )
+        updates["xlsx_table_sha256"] = table_identity_sha256(table, table_rows)
     if repeat_rows is not None:
-        updates["repeat_other_sha256"] = classification_sha256(repeat_rows)
+        updates["repeat_other_sha256"] = classification_sha256(
+            _current_rows(repeat_rows)
+        )
     if xlsx is not None and table_rows is not None:
         enrich = cast(dict[str, object], evidence["isolated_enrich"])
         xlsx_claim = cast(dict[str, object], enrich["xlsx"])
         historical = cast(tuple[str, ...], xlsx_claim["historical_columns"])
-        status, preserved = compare_xlsx_round_trip(table_rows, xlsx, historical)
+        status, preserved = compare_xlsx_round_trip(
+            _current_rows(table_rows), xlsx, historical
+        )
         updates["xlsx_status"] = status
         updates["historical_preserved"] = preserved
         updates["xlsx_file_sha256"] = file_sha256(xlsx)
+    silver_rows = load_table(silver) if silver is not None else None
     gold_rows = load_table(gold) if gold is not None else None
-    if gold_rows is not None:
-        updates["gold_classification_sha256"] = classification_sha256(gold_rows)
-        if gold.is_file():
-            updates["gold_sha256"] = file_sha256(gold)
-    if silver is not None and silver.is_file():
-        updates["silver_sha256"] = file_sha256(silver)
+    if silver_rows is not None and silver is not None:
+        updates["silver_sha256"] = table_identity_sha256(silver, silver_rows)
+    if gold_rows is not None and gold is not None:
+        updates["gold_sha256"] = table_identity_sha256(gold, gold_rows)
+    if silver_rows is not None and gold_rows is not None:
+        updates["live_projection_match"] = _current_projections_match(
+            silver_rows, gold_rows
+        )
     if assay is not None and gold_rows is not None:
         updates["fk_unresolved"] = unresolved_assay_targets(
             load_table(assay), gold_rows
@@ -414,16 +481,18 @@ def _evaluate_enrich(
         if not _pinned(enrich[key]):
             reasons.append(code)
     reasons.extend(
-        _optional_conflict(
+        _measured_identity(
             observations.silver_sha256,
             enrich["persisted_silver_sha256"],
+            "silver_identity_not_measured",
             "silver_hash_conflict",
         )
     )
     reasons.extend(
-        _optional_conflict(
+        _measured_identity(
             observations.gold_sha256,
             enrich["persisted_gold_sha256"],
+            "gold_identity_not_measured",
             "gold_hash_conflict",
         )
     )
@@ -593,15 +662,9 @@ def _evaluate_live(
         live["observed_config_sha256"] != observations.canonical_config_sha256
     ):
         reasons.append("live_config_mismatch")
-    if (
-        observations.table_classification_sha256 is None
-        or observations.gold_classification_sha256 is None
-    ):
+    if observations.live_projection_match is None:
         reasons.append("classification_readback_missing")
-    elif (
-        observations.table_classification_sha256
-        != observations.gold_classification_sha256
-    ):
+    elif observations.live_projection_match is not True:
         reasons.append("classification_not_reproduced")
     if live["classification_reproduced"] is not True:
         reasons.append("classification_reproduced_not_attested")
@@ -684,8 +747,19 @@ def _decide(
     bio_ok = biological["status"] == "PASS" or biological["rf008_admitted"] is True
     axes_ok = local["status"] == "PASS" and ci["status"] == "PASS"
     failed = [name for name in _PHASE_NAMES[:4] if phases[name]["status"] != "PASS"]
-    if promoted and (failed or phases["live"]["status"] == "FAIL" or not bio_ok):
-        return "ROLLBACK_REQUIRED", ["criteria_violated_after_promotion", *failed], True
+    axis_failures = [
+        name
+        for name, phase in (("local", local), ("ci", ci))
+        if phase["status"] == "FAIL"
+    ]
+    if promoted and (
+        failed or phases["live"]["status"] == "FAIL" or not bio_ok or axis_failures
+    ):
+        return (
+            "ROLLBACK_REQUIRED",
+            ["criteria_violated_after_promotion", *failed, *axis_failures],
+            True,
+        )
     if (
         technical
         and bio_ok
@@ -726,8 +800,8 @@ def _distributions(
     document: dict[str, object],
     observations: ContourObservations,
 ) -> tuple[dict[str, dict[str, int]], str]:
-    if observations.distribution_rows is not None:
-        return status_distributions(observations.distribution_rows), "table"
+    if observations.shadow_rows is not None:
+        return status_distributions(observations.shadow_rows), "shadow_table"
     shadow = cast(dict[str, object], document["shadow"])
     if shadow["executed"] is True:
         return cast(dict[str, dict[str, int]], shadow["status_counts"]), "evidence"
@@ -745,11 +819,11 @@ def _distribution_reasons(
         if sum(counts[field].values()) != row_count:
             reasons.append("status_count_row_mismatch")
             break
-    if observations.distribution_rows is None:
+    if observations.shadow_rows is None:
         return reasons
-    if len(observations.distribution_rows) != row_count:
+    if len(observations.shadow_rows) != row_count:
         reasons.append("row_count_conflict")
-    observed = status_distributions(observations.distribution_rows)
+    observed = status_distributions(observations.shadow_rows)
     if observed != counts:
         reasons.append("status_count_conflict")
     return reasons
@@ -763,10 +837,44 @@ def _hash_pair(observed: str | None, attested: object, label: str) -> list[str]:
     return []
 
 
-def _optional_conflict(observed: str | None, attested: object, code: str) -> list[str]:
-    if observed is not None and attested is not None and observed != attested:
-        return [code]
+def _measured_identity(
+    observed: str | None,
+    attested: object,
+    missing_code: str,
+    conflict_code: str,
+) -> list[str]:
+    if not _pinned(observed):
+        return [missing_code]
+    if attested is not None and attested != observed:
+        return [conflict_code]
     return []
+
+
+def _current_projections_match(
+    silver_rows: list[dict[str, object]],
+    gold_rows: list[dict[str, object]],
+) -> bool:
+    """Current Gold classification must match the current Silver row of the same id."""
+    silver = {
+        str(row.get("target_id")): row
+        for row in _current_rows(silver_rows)
+        if _norm_cell(row.get("target_id")) is not None
+    }
+    gold_current = [
+        row
+        for row in _current_rows(gold_rows)
+        if _norm_cell(row.get("target_id")) is not None
+    ]
+    if not gold_current:
+        return False
+    for row in gold_current:
+        source = silver.get(str(row.get("target_id")))
+        if source is None:
+            return False
+        for field in TARGET_CLASSIFICATION_FIELDS:
+            if _norm_cell(source.get(field)) != _norm_cell(row.get(field)):
+                return False
+    return True
 
 
 def _rf008_admitted(claim: dict[str, object]) -> bool:
@@ -1111,7 +1219,8 @@ def _column_groups(document: dict[str, object], path: Path) -> list[object]:
 
 
 def _contract_properties(path: Path) -> frozenset[str]:
-    payload = json.loads(path.read_text(encoding="utf-8"))
+    safe = _confine(path)
+    payload = json.loads(safe.read_text(encoding="utf-8"))  # NOSONAR - confined_io_path
     if not isinstance(payload, dict):
         raise ContourEvidenceError(f"{path} must be a JSON object")
     properties = cast(dict[str, object], payload).get("properties")
@@ -1121,14 +1230,20 @@ def _contract_properties(path: Path) -> frozenset[str]:
 
 
 def _yaml_mapping(path: Path) -> dict[str, object]:
-    loaded = yaml.safe_load(path.read_text(encoding="utf-8"))
-    return _mapping(loaded, str(path))
+    safe = _confine(path)
+    loaded = yaml.safe_load(
+        safe.read_text(encoding="utf-8")
+    )  # NOSONAR - confined_io_path
+    return _mapping(loaded, str(safe))
 
 
 def _read_xlsx_rows(path: Path) -> list[dict[str, object]]:
     from openpyxl import load_workbook
 
-    workbook = load_workbook(path, read_only=True, data_only=True)
+    safe = _confine(path)
+    workbook = load_workbook(
+        safe, read_only=True, data_only=True
+    )  # NOSONAR - confined_io_path
     try:
         worksheet = workbook.worksheets[0]
         iterator = worksheet.iter_rows(values_only=True)

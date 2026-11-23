@@ -58,6 +58,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--repo-root", type=Path)
     parser.add_argument("--discrepancy-report", type=Path)
     parser.add_argument("--expectations", type=Path)
+    parser.add_argument("--shadow-table", type=Path)
     parser.add_argument("--table", type=Path)
     parser.add_argument("--repeat-table", type=Path)
     parser.add_argument("--xlsx", type=Path)
@@ -141,13 +142,17 @@ def _contour_report(parser: argparse.ArgumentParser, args: argparse.Namespace) -
     if args.evidence is None or args.output is None:
         parser.error("contour-report requires --evidence and --output")
     try:
-        payload = json.loads(args.evidence.read_text(encoding="utf-8"))
+        evidence_path = confined_io_path(args.evidence, allow_external_absolute=True)
+        payload = json.loads(
+            evidence_path.read_text(encoding="utf-8")
+        )  # NOSONAR - confined_io_path
         evidence = parse_evidence(payload)
         observations = apply_measurements(
             inspect_repository(args.repo_root or REPO_ROOT),
             evidence,
             discrepancy_report=args.discrepancy_report,
             expectations=args.expectations,
+            shadow_table=args.shadow_table,
             table=args.table,
             repeat_table=args.repeat_table,
             xlsx=args.xlsx,
@@ -156,9 +161,18 @@ def _contour_report(parser: argparse.ArgumentParser, args: argparse.Namespace) -
             assay=args.assay,
         )
         report = evaluate_main_contour(evidence, observations)
-    except (OSError, UnicodeError, json.JSONDecodeError, ContourEvidenceError) as exc:
+        write_contour_report(
+            report,
+            confined_io_path(args.output, allow_external_absolute=True),
+        )
+    except (
+        OSError,
+        UnicodeError,
+        json.JSONDecodeError,
+        ContourEvidenceError,
+        ValueError,
+    ) as exc:
         parser.exit(2, f"{exc}\n")
-    write_contour_report(report, args.output)
     decision = str(report["promotion_decision"])
     print(
         json.dumps(
