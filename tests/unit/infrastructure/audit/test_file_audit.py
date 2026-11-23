@@ -178,9 +178,59 @@ class TestAuditEntry:
         assert "run_id" in result
 
     def test_audit_entry_is_frozen(self, sample_entry: AuditEntry) -> None:
-        """Test AuditEntry is immutable."""
+        """Test AuditEntry field bindings are frozen."""
         with pytest.raises(AttributeError):
             sample_entry.records_count = 200  # type: ignore[misc]
+
+    @pytest.mark.asyncio
+    async def test_metadata_reference_and_persisted_snapshot(
+        self, tmp_path: Path, noop_logger: NoOpLogger, run_id: RunID
+    ) -> None:
+        """Live metadata is shared, but completed file writes are independent."""
+        tags = ["initial"]
+        metadata = {"batch_id": "before", "nested": {"tags": tags}}
+        entry = AuditEntry(
+            run_id=run_id,
+            timestamp=datetime(2024, 1, 15, tzinfo=UTC),
+            layer=AuditLayer.SILVER,
+            table_name="synthetic.table",
+            operation=AuditOperation.WRITE,
+            records_count=1,
+            metadata=metadata,
+        )
+        adapter = FileAuditAdapter(tmp_path / "audit", noop_logger)
+        metadata["batch_id"] = "at-write"
+        tags.append("before-write")
+        view = entry.to_dict()
+        assert view is not entry.to_dict()
+        assert view["metadata"] is metadata
+        await adapter.log_write(entry)
+        audit_file = tmp_path / "audit" / "audit_2024-01-15.jsonl"
+        written = audit_file.read_bytes()
+
+        metadata["batch_id"] = "after-write"
+        tags.append("after-write")
+        view["metadata"]["from-view"] = True
+        assert entry.metadata["batch_id"] == "after-write"
+        assert entry.metadata["nested"]["tags"] == [
+            "initial",
+            "before-write",
+            "after-write",
+        ]
+        assert entry.metadata["from-view"] is True
+        assert audit_file.read_bytes() == written
+        assert json.loads(written)["metadata"] == {
+            "batch_id": "at-write",
+            "nested": {"tags": ["initial", "before-write"]},
+        }
+        for field, value in (
+            ("run_id", run_id),
+            ("timestamp", entry.timestamp),
+            ("records_count", 2),
+            ("table_name", "other"),
+        ):
+            with pytest.raises(AttributeError):
+                setattr(entry, field, value)
 
 
 @pytest.mark.unit

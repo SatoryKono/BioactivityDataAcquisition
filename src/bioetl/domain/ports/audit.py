@@ -59,10 +59,15 @@ class AuditLayer(StrEnum):
 
 @dataclass(frozen=True, slots=True)
 class AuditEntry:
-    """Immutable audit log entry for write operations.
+    """Audit log entry with frozen field bindings for write operations.
 
     Captures the "who, what, when, where" for each write operation
     to ensure full traceability across the data pipeline.
+
+    Metadata is shared by reference, not captured or copied: mutations to the
+    supplied mapping or its nested values remain visible on this entry and
+    through ``to_dict()``. Callers must avoid mutation until an adapter has
+    serialized the entry if they need the original values persisted.
 
     Attributes:
         run_id: Pipeline run identifier for correlation.
@@ -84,6 +89,10 @@ class AuditEntry:
 
     def to_dict(self) -> JsonDict:  # Any: serialized repr mixes str/int/list
         """Convert entry to dictionary for serialization.
+
+        The outer dictionary is new; its metadata is the same mutable mapping
+        held by the entry, including any nested mutable values. Serialization
+        support depends on the adapter's serializer.
 
         Returns:
             Dictionary representation suitable for JSON serialization.
