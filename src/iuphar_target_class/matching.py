@@ -565,9 +565,10 @@ def _attach_auxiliary_diagnostics(
                 )
             )
             continue
-        if (
-            result.matched_target_id is not None
-            and result.matched_target_id not in hits
+        # RF-002: warn when any catalog hit differs from the primary decision,
+        # even if the matched target is also among the hits.
+        if result.matched_target_id is not None and any(
+            target_id != result.matched_target_id for target_id in hits
         ):
             extras.append(
                 Diagnostic(

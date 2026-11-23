@@ -194,6 +194,51 @@ def test_auxiliary_divergence_is_not_identity_conflict() -> None:
     assert AUXILIARY_DIVERGENCE in {item.code for item in result.diagnostics}
 
 
+def test_auxiliary_divergence_when_hits_include_matched_and_other() -> None:
+    """hits=('1','2') with matched='1' still emits auxiliary_uniprot_divergence."""
+    catalog = (
+        CatalogTarget(
+            target_id="1",
+            uniprot_ids=("P11111", "QSHARED"),
+            gene_symbol=None,
+            gene_id=None,
+            species="human",
+            names=(),
+            synonyms=(),
+        ),
+        CatalogTarget(
+            target_id="2",
+            uniprot_ids=("QSHARED",),
+            gene_symbol=None,
+            gene_id=None,
+            species="human",
+            names=(),
+            synonyms=(),
+        ),
+    )
+    result = resolve_match(
+        MatchQuery(
+            target_id=None,
+            uniprot_ids=("P11111",),
+            gene_symbol=None,
+            gene_id=None,
+            organism="human",
+            name=None,
+            synonyms=(),
+            auxiliary_uniprot_ids=("QSHARED",),
+        ),
+        catalog,
+        snapshot_complete=True,
+    )
+    assert result.match_status == "matched"
+    assert result.matched_target_id == "1"
+    assert AUXILIARY_DIVERGENCE in {item.code for item in result.diagnostics}
+    assert any(
+        item.code == AUXILIARY_DIVERGENCE and item.message.endswith(":QSHARED")
+        for item in result.diagnostics
+    )
+
+
 def test_name_only_still_ambiguous() -> None:
     catalog = (_target("1", uniprot="P11111"),)
     catalog = (replace(catalog[0], names=("Mu opioid receptor",), uniprot_ids=()),)
