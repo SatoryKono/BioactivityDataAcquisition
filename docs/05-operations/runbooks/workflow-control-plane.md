@@ -79,6 +79,13 @@ Interpretation:
 - failed or incomplete steps are retried;
 - semantic workflow identity is checked by execution fingerprint.
 
+Selected-snapshot producer receipts restore a `RunResult` object, including its
+child report path when present. Workflow report projection reads that object
+attribute and loads child reasons and exclusion counts only when the report is
+readable. Generic completion mappings carry identity and snapshot information,
+not a child report path; report-bearing mappings are not a supported producer
+contract. A missing or malformed child report contributes no invented details.
+
 ### 4. Destructive ambiguity recovery
 
 If `repair_required=true`, do not use plain `--resume-last`.
