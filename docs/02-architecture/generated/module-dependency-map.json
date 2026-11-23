@@ -1,12 +1,12 @@
 {
   "summary": {
     "scanned_modules": 2651,
-    "total_internal_imports": 8781,
+    "total_internal_imports": 8783,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 330,
     "violations": 0,
-    "source_fingerprint": "9c33a46a0935b22163a6183dcbbbb80f7cee4cde16ee11efea9c0dcf02a117ac"
+    "source_fingerprint": "23d84dc25ed741679cf1c56aa757684500bb3daace93e1d8ef0d43c201b6f958"
   },
   "layer_edges": [
     {
@@ -48,13 +48,13 @@
     {
       "source": "domain",
       "target": "domain",
-      "imports": 1330,
+      "imports": 1331,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "domain",
-      "imports": 825,
+      "imports": 826,
       "allowed": true
     },
     {
@@ -152,7 +152,7 @@
     {
       "source": "infrastructure.storage",
       "target": "domain.value_objects",
-      "imports": 43
+      "imports": 44
     },
     {
       "source": "composition.runtime_builders",
