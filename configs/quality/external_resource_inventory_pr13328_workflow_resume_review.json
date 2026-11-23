@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "catalog_ref": "d6f0f1bc4ff3601e99f2ec9d5c2967c94e412b84",
-  "source_ref": "d6f0f1bc4ff3601e99f2ec9d5c2967c94e412b84",
+  "catalog_ref": "ab85fb30ebcfb378330cc6c67addeee9054d110c",
+  "source_ref": "ab85fb30ebcfb378330cc6c67addeee9054d110c",
   "source_reviews": {
     "src/bioetl/application/services/run_reports/workflow_observations.py": "Skip AlreadyCompletedOnResume children in finalize_workflow_children so resume does not rewrite archived child reports. Existing injected store.read_text/store.write_text exclusions retained with write_text line drift 105\u2192107 only; ownership and lifecycle unchanged. No new runtime qualification.",
     "src/bioetl/application/services/workflow/workflow_runner_reports.py": "Archive only successful RunResult children; skip non-success resume payloads. Existing injected store.read_text exclusion retained with line drift 118\u2192120 only. No new runtime qualification.",
