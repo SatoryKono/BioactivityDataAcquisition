@@ -133,7 +133,13 @@ columns. The builder retains the public ID and derives separately checked
 species variants; it does not choose the first record or collapse taxa.
 This export provides `annotation_capability: family_only`. The builder does
 not manufacture a direct target type, and an available family can yield a
-coarse direct class with annotation status `partial`.
+coarse direct class with annotation status `partial`. RF-005 keeps that
+capability: subclasses and all intact `root_to_leaf` hierarchy paths are
+persisted from the approved dictionary and merged multi-parent family graph
+without claiming full direct-type coverage. See
+[`data/iuphar_target_class/rf005/coverage_matrix.json`](../../data/iuphar_target_class/rf005/coverage_matrix.json)
+and the path policy notes in
+[16-iuphar-target-classification-semantics.md](../../04-reference/pipelines/chembl/16-iuphar-target-classification-semantics.md).
 
 Supply a pinned `bioetl_iuphar_acquisition` receipt containing the release,
 timezone-bearing retrieval time, source format, and every raw artifact's

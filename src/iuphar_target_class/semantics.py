@@ -243,6 +243,15 @@ PATH_POLICY: Mapping[str, object] = MappingProxyType(
         "legacy_text_field": "leaf_to_root",
         "legacy_text_usage": "migration/comparison only; never used to choose a class",
         "multiple_parents_allowed": True,
+        "parent_merge_policy": (
+            "RF-005: repeated family IDs with the same payload union parent sets; "
+            "conflicting payloads remain a graph defect; path order is "
+            "canonical root_to_leaf sort, independent of source-row order"
+        ),
+        "synthetic_id_policy": (
+            "local:/synthetic:/legacy: chains stay outside the official numeric "
+            "family graph and never become parents of official family IDs"
+        ),
         "graph_defect_policy": (
             "cycle, missing parent, depth/visited limits, or truncated walk "
             "do not invent a class from a cut path"
@@ -250,6 +259,10 @@ PATH_POLICY: Mapping[str, object] = MappingProxyType(
         "table_distinct_policy": (
             "Power Query Table.Distinct / unordered collapse is not an identity "
             "decision; ambiguous multi-parent or multi-candidate rows stay ambiguous"
+        ),
+        "subclass_policy": (
+            "iuphar_subclass comes only from the approved type/family dictionary; "
+            "it does not elevate annotation_capability above family_only"
         ),
     }
 )

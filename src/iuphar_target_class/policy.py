@@ -24,6 +24,7 @@ from .gtopdb_2026_3_1 import (
     SQL_SHA256,
     TARGETS_CSV_SHA256,
     TARGETS_CSV_URL,
+    TYPE_SUBCLASS_PAIRS,
 )
 from .iuphar_mapping import approved_class_mappings
 from .semantics import semantics_document
@@ -459,7 +460,8 @@ def policy_document() -> dict[str, object]:
         "stage_status": "recorded_without_biological_acceptance",
         "subclass_comparison": {
             "class_subclass_pairs": [],
-            "direct_vocabulary": [],
+            "comparison_pairs_status": UNSET,
+            "direct_vocabulary": sorted({label for _, label in TYPE_SUBCLASS_PAIRS}),
             "local_vocabulary": [],
             "rule": (
                 "совпадение; класс–подкласс; иначе несовместимость; "
@@ -468,6 +470,10 @@ def policy_document() -> dict[str, object]:
             ),
             "same_pairs": [],
             "status": UNSET,
+            "vocabulary_issue": (
+                "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/13313"
+            ),
+            "vocabulary_status": APPROVED,
         },
         "unknown_type_status": "unmapped_type",
         "working_classes": list(WORKING_CLASSES),
