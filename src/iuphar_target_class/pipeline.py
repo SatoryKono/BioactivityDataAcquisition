@@ -41,7 +41,12 @@ from .models import (
     ValidatedInput,
 )
 from .normalization import isolated_invalid_result, validate_input
-from .policy import GRAPH_MAX_VISITED_NODES, local_rules, validate_rules
+from .policy import (
+    GRAPH_MAX_VISITED_NODES,
+    classification_local_rules,
+    local_rules,
+    validate_rules,
+)
 from .resolution import ResolutionInput, select_effective_class
 
 
@@ -425,6 +430,7 @@ def classify_target(
         row.taxon,
         row.name,
         row.synonyms,
+        row.auxiliary_uniprot_ids,
     )
     subset = _shortlist(query, snapshot)
     hits = collect_candidates(query, subset)
@@ -491,6 +497,7 @@ def _publication_hits(
         organism=None,
         name=query.name,
         synonyms=query.synonyms,
+        auxiliary_uniprot_ids=query.auxiliary_uniprot_ids,
     )
     unfiltered = collect_candidates(unfiltered_query, catalog)
     conflict = {
@@ -613,6 +620,9 @@ def _resolution_input(
         iuphar_class=direct_class,
         local_class=local.local_class,
         local_subclasses=local.local_subclasses,
+        local_vocabulary=frozenset(
+            rule.output for rule in classification_local_rules() if rule.parent_class
+        ),
         partial_basis=_partial_basis(direct, annotation_status),
         target_kind=row.target_kind or "protein",
         complex_direct_match=match.matched_target_id in snapshot.complex_ids,
@@ -635,7 +645,7 @@ def _complete(
 ) -> RowResult:
     local = apply_local(
         row.ec_numbers,
-        rules=local_rules(),
+        rules=classification_local_rules(),
         keyword_ids=row.keywords,
         free_text=row.name,
         organism=row.taxon,
@@ -807,6 +817,7 @@ def classify_batch(
     if snapshot.snapshot_id != provenance.snapshot_id or not run_id.strip():
         raise ValueError("missing run ID or mismatched snapshot provenance")
     validate_rules(local_rules())
+    validate_rules(classification_local_rules())
     identities = [row.input_row_id for row in rows]
     if len(identities) != len(set(identities)):
         raise ValueError("duplicate input row identities")

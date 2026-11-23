@@ -96,12 +96,32 @@ def assert_candidate_cohort_closure(
         key[0] for key, row in by_id(gold_rows).items() if row.get("_is_current", True)
     }
     if not assay_targets.issubset(current_target_ids):
-        raise ValueError("baseline assay/target foreign-key closure failed")
+        missing = sorted(str(item) for item in assay_targets - current_target_ids)
+        raise ValueError(
+            "baseline assay/target foreign-key closure failed: " + ",".join(missing)
+        )
+
+
+_ABSENCE_REASONS = frozenset(
+    {"limited_sample", "incomplete_load", "selection_filter", "contract_mismatch"}
+)
+
+
+def reject_unverified_fk_addition(record: Mapping[str, object]) -> None:
+    """Refuse a placeholder or an unresolved contract row. Nothing is written."""
+    if record.get("placeholder") or not record.get("source_sha256"):
+        raise ValueError("unverified target addition")
+    reason = record.get("absence_reason")
+    if reason not in _ABSENCE_REASONS:
+        raise ValueError("target absence reason is not recorded")
+    if reason == "contract_mismatch" and record.get("contract_decision") != "resolved":
+        raise ValueError("unresolved target contract mismatch")
 
 
 __all__ = [
     "assert_candidate_cohort_closure",
     "assert_classification_projection",
+    "reject_unverified_fk_addition",
     "verify_candidate_hashes",
     "verify_source_classifications",
 ]

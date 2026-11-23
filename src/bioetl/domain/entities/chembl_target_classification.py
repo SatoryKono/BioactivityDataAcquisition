@@ -22,4 +22,21 @@ class TargetV31(Target):
     target_class_profile_sha256: str | None = None
 
 
-__all__ = ["TargetV31"]
+@dataclass(frozen=True, kw_only=True)
+class TargetV32(TargetV31):
+    """Additive 3.2.0 entity. Physical migration of the main tables is separate."""
+
+    iuphar_type_raw: str | None = None
+    iuphar_annotation_capability: str | None = None
+    iuphar_family_ids: str | None = None
+    iuphar_subclasses: str | None = None
+    iuphar_paths: str | None = None
+    local_status: str | None = None
+    local_subclasses: str | None = None
+    local_rule_ids: str | None = None
+    effective_subclasses: str | None = None
+    conflict_codes: str | None = None
+    classification_evidence_ids: str | None = None
+
+
+__all__ = ["TargetV31", "TargetV32"]

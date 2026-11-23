@@ -2,15 +2,18 @@
 
 from __future__ import annotations
 
-from bioetl.domain.config.target_classification import TARGET_CLASSIFICATION_FIELDS
+from bioetl.domain.config.target_classification import (
+    TARGET_CLASSIFICATION_DETAIL_FIELDS,
+    TARGET_CLASSIFICATION_FIELDS,
+)
 from bioetl.domain.normalization.profiles.base import FieldRule, NormalizationProfile
 from bioetl.domain.normalization.profiles.chembl_target import CHEMBL_TARGET_PROFILE
 from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_passthrough,
 )
-from bioetl.domain.schemas.chembl.target import TargetSchemaV31
+from bioetl.domain.schemas.chembl.target import TargetSchemaV31, TargetSchemaV32
 
-__all__ = ["target_v31_normalization_profile"]
+__all__ = ["target_v31_normalization_profile", "target_v32_normalization_profile"]
 
 
 def target_v31_normalization_profile() -> NormalizationProfile:
@@ -41,3 +44,30 @@ def target_v31_normalization_profile() -> NormalizationProfile:
     )
     profile.assert_covers_schema(tuple(TargetSchemaV31.to_schema().columns))
     return profile
+
+
+def target_v32_normalization_profile() -> NormalizationProfile:
+    """Extend the V31 hash scope with canonical 3.2.0 detail fields."""
+    profile = target_v31_normalization_profile()
+    rules = dict(profile.field_rules)
+    rules.update(
+        {
+            name: FieldRule(
+                field_name=name,
+                normalizer=normalize_profile_passthrough,
+                include_in_hash=True,
+                notes="Preserve canonical JSON classification detail verbatim.",
+            )
+            for name in TARGET_CLASSIFICATION_DETAIL_FIELDS
+        }
+    )
+    extended = NormalizationProfile(
+        profile_name=profile.profile_name,
+        field_rules=rules,
+        profile_version=profile.profile_version,
+        meta_fields=profile.meta_fields,
+        field_aliases=profile.field_aliases,
+        description=profile.description,
+    )
+    extended.assert_covers_schema(tuple(TargetSchemaV32.to_schema().columns))
+    return extended

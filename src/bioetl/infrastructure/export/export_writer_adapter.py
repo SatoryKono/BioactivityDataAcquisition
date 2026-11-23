@@ -105,6 +105,94 @@ def _write_delimited_file(
     return output_path
 
 
+_XLSX_CELL_LIMIT = 32767
+_XLSX_PART_SIZE = 32000
+_XLSX_PARTS_SHEET = "bioetl_xlsx_parts"
+_XLSX_PART_TOKEN = "bioetl-xlsx-part:{digest}:{part_count}"
+
+
+def split_xlsx_text(value: str) -> tuple[str, tuple[str, ...]] | None:
+    """Split one over-long cell. Shorter values stay untouched."""
+    if len(value) <= _XLSX_CELL_LIMIT:
+        return None
+    import hashlib
+
+    digest = hashlib.sha256(value.encode("utf-8")).hexdigest()
+    parts = tuple(
+        value[index : index + _XLSX_PART_SIZE]
+        for index in range(0, len(value), _XLSX_PART_SIZE)
+    )
+    return _XLSX_PART_TOKEN.format(digest=digest, part_count=len(parts)), parts
+
+
+def restore_xlsx_text(token: object, parts: tuple[str, ...]) -> str | None:
+    """Restore a split cell only when the part digest matches the token."""
+    import hashlib
+    import re
+
+    if not isinstance(token, str):
+        return None
+    matched = re.fullmatch(r"bioetl-xlsx-part:([0-9a-f]{64}):(\d+)", token)
+    if matched is None or int(matched.group(2)) != len(parts) or not parts:
+        return None
+    restored = "".join(parts)
+    digest = hashlib.sha256(restored.encode("utf-8")).hexdigest()
+    if digest != matched.group(1):
+        return None
+    return restored
+
+
+def restore_xlsx_long_text(path: Path) -> dict[str, list[list[object]]]:
+    """Read a workbook and concatenate verified long-text parts."""
+    import openpyxl
+
+    book = openpyxl.load_workbook(path)
+    grouped: dict[tuple[str, int, int], list[tuple[int, str]]] = {}
+    manifest = book[_XLSX_PARTS_SHEET] if _XLSX_PARTS_SHEET in book.sheetnames else None
+    if manifest is not None:
+        for row in manifest.iter_rows(min_row=2, values_only=True):
+            sheet, row_number, column, part_index, _digest, _count, value = row
+            grouped.setdefault((str(sheet), int(row_number), int(column)), []).append(
+                (int(part_index), str(value))
+            )
+    restored: dict[str, list[list[object]]] = {}
+    for sheet in book.worksheets:
+        if sheet.title == _XLSX_PARTS_SHEET:
+            continue
+        rows: list[list[object]] = []
+        for cells in sheet.iter_rows():
+            values: list[object] = []
+            for cell in cells:
+                key = (sheet.title, cell.row, cell.column)
+                ordered = tuple(value for _index, value in sorted(grouped.get(key, [])))
+                replacement = restore_xlsx_text(cell.value, ordered)
+                values.append(cell.value if replacement is None else replacement)
+            rows.append(values)
+        restored[sheet.title] = rows
+    return restored
+
+
+def _write_xlsx_parts(book: Any, parts: list[tuple[object, ...]]) -> None:
+    sheet = book.create_sheet(_XLSX_PARTS_SHEET)
+    header = (
+        "sheet",
+        "row",
+        "column",
+        "part_index",
+        "sha256",
+        "part_count",
+        "value",
+    )
+    for column, name in enumerate(header, start=1):
+        cell = sheet.cell(1, column, name)
+        cell.data_type = "s"
+    for row_number, record in enumerate(parts, start=2):
+        for column, value in enumerate(record, start=1):
+            cell = sheet.cell(row_number, column, value)
+            if isinstance(value, str):
+                cell.data_type = "s"
+
+
 def _write_xlsx_file(
     table: Any,  # Any: Arrow table duck-type for pandas/xlsx export
     output_path: Path,
@@ -122,7 +210,33 @@ def _write_xlsx_file(
             if not writer.book.worksheets:
                 writer.book.create_sheet("Sheet1")
             try:
-                dataframe.to_excel(writer, index=False)
+                parts: list[tuple[object, ...]] = []
+                sheet_name = "Sheet1"
+                for row_offset, row in enumerate(dataframe.itertuples(index=False)):
+                    for column_offset, value in enumerate(row):
+                        if not isinstance(value, str):
+                            continue
+                        split = split_xlsx_text(value)
+                        if split is None:
+                            continue
+                        token, chunks = split
+                        dataframe.iat[row_offset, column_offset] = token
+                        digest = token.split(":")[1]
+                        for index, chunk in enumerate(chunks):
+                            parts.append(
+                                (
+                                    sheet_name,
+                                    row_offset + 2,
+                                    column_offset + 1,
+                                    index,
+                                    digest,
+                                    len(chunks),
+                                    chunk,
+                                )
+                            )
+                dataframe.to_excel(writer, index=False, sheet_name=sheet_name)
+                if parts:
+                    _write_xlsx_parts(writer.book, parts)
             finally:
                 # ExcelWriter saves on exceptional exit too: sanitize partial output.
                 for sheet in writer.book.worksheets:

@@ -49,16 +49,14 @@ def test_list_tables_returns_discovered_delta_tables(
     tmp_path: Path,
 ) -> None:
     base_path = tmp_path / "silver"
-    (base_path / "chembl" / "default" / "chembl.activity" / "_delta_log").mkdir(
-        parents=True
-    )
+    (base_path / "chembl" / "activity" / "_delta_log").mkdir(parents=True)
 
     tables = adapter.list_tables(base_path=base_path, layer="silver")
 
     assert tables == [
         (
             "chembl.activity",
-            str(base_path / "chembl" / "default" / "chembl.activity"),
+            str(base_path / "chembl" / "activity"),
         )
     ]
 
@@ -74,7 +72,7 @@ def test_resolve_table_path_returns_matching_table(
     adapter: ExportCatalogAdapter,
     tmp_path: Path,
 ) -> None:
-    table_path = tmp_path / "gold" / "chembl" / "default" / "chembl.activity"
+    table_path = tmp_path / "gold" / "chembl" / "activity"
     (table_path / "_delta_log").mkdir(parents=True)
 
     resolved = adapter.resolve_table_path(

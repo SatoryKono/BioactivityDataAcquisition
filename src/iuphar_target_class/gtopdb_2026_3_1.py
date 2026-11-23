@@ -27,6 +27,17 @@ TARGETS_CSV_SHA256 = "9e91ae4eed1e147f0c5b01dd2e0645c2d57edb39442114d3128c70232b
 SPECIES_TAXON_IDS = (9606, 10090, 10116)
 _ION_CHANNEL_CLASS = "Ion Channel"
 
+# family_only: the pinned public closure is not certified as complete annotation.
+ANNOTATION_CAPABILITY = "family_only"
+EXPLICIT_TYPE_SUBCLASSES: tuple[tuple[str, str], ...] = (
+    ("catalytic_receptor", "Catalytic receptor"),
+    ("gpcr", "GPCR"),
+    ("lgic", "Ligand-gated ion channel"),
+    ("nhr", "Nuclear hormone receptor"),
+    ("other_ic", "Other ion channel"),
+    ("vgic", "Voltage-gated ion channel"),
+)
+
 TYPE_CLASS_PAIRS: tuple[tuple[str, str], ...] = (
     ("catalytic_receptor", "Receptor"),
     ("enzyme", "Enzyme"),

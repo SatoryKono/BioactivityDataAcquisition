@@ -4,7 +4,10 @@ from __future__ import annotations
 
 import pyarrow as pa
 
-from bioetl.domain.config.target_classification import TARGET_CLASSIFICATION_FIELDS
+from bioetl.domain.config.target_classification import (
+    TARGET_CLASSIFICATION_DETAIL_FIELDS,
+    TARGET_CLASSIFICATION_FIELDS,
+)
 from bioetl.infrastructure.schemas.silver_chembl_core import CHEMBL_TARGET_SCHEMA
 
 
@@ -30,4 +33,23 @@ def _target_v31_schema() -> pa.Schema:
 
 CHEMBL_TARGET_SCHEMA_V31 = _target_v31_schema()
 
-__all__ = ["CHEMBL_TARGET_SCHEMA_V31"]
+
+def _target_v32_schema() -> pa.Schema:
+    fields = list(CHEMBL_TARGET_SCHEMA_V31)
+    anchor = TARGET_CLASSIFICATION_FIELDS[-1]
+    insert_at = next(
+        index for index, column in enumerate(fields) if column.name == anchor
+    )
+    extra = [
+        pa.field(name, pa.string(), nullable=True)
+        for name in TARGET_CLASSIFICATION_DETAIL_FIELDS
+    ]
+    return pa.schema(
+        [*fields[: insert_at + 1], *extra, *fields[insert_at + 1 :]],
+        metadata=CHEMBL_TARGET_SCHEMA_V31.metadata,
+    )
+
+
+CHEMBL_TARGET_SCHEMA_V32 = _target_v32_schema()
+
+__all__ = ["CHEMBL_TARGET_SCHEMA_V31", "CHEMBL_TARGET_SCHEMA_V32"]

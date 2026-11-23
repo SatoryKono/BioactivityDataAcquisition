@@ -7,6 +7,7 @@ plan parameters stay null. EC, L1, and L2 rules stay on the local layer.
 
 from __future__ import annotations
 
+import hashlib
 from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
@@ -36,6 +37,16 @@ PLAN_SOURCE = "план v1 r8 §2.1"
 PLAN_SECTION_5 = "план v1 r8 §5"
 DOCUMENTARY_STATUS = "подтверждено документально"
 PLAN_VERSION = "plan-v1-r8"
+LOCAL_RULE_CATALOG_VERSION = "iuphar-local-rules-20261123"
+_EC_CLASS_OUTPUTS: tuple[tuple[int, str], ...] = (
+    (1, "Oxidoreductase"),
+    (2, "Transferase"),
+    (3, "Hydrolase"),
+    (4, "Lyase"),
+    (5, "Isomerase"),
+    (6, "Ligase"),
+    (7, "Translocase"),
+)
 BASE_MISSING_MARKERS: tuple[str, ...] = (
     "#n/a",
     "N/A",
@@ -76,6 +87,8 @@ class RuleRecord:
     version: str
     limits: str
     marks_direct_layer: bool
+    parent_class: str | None = None
+    priority: int = 0
 
 
 @dataclass(frozen=True, slots=True)
@@ -162,6 +175,58 @@ def local_rules() -> tuple[RuleRecord, ...]:
 def all_rules() -> tuple[RuleRecord, ...]:
     """Dictionary rules followed by local rules."""
     return class_rules() + local_rules()
+
+
+def classification_local_rules() -> tuple[RuleRecord, ...]:
+    """Connected EC rules. EC 7 stays a Translocase and is not a Transporter.
+
+    Subclass labels are local outputs. They are not IUPHAR identifiers, and
+    several EC numbers do not become Multifunctional or the first row.
+    """
+    rules = tuple(
+        RuleRecord(
+            rule_id=f"ec-class:{number}",
+            family="ec_class",
+            input_conditions=f"ec_category={number}",
+            output=name,
+            justification_source=(
+                "IUBMB enzyme nomenclature; EC 7 does not assign Transporter"
+            ),
+            version=LOCAL_RULE_CATALOG_VERSION,
+            limits=(
+                "local subclass of Enzyme; equal priorities do not break ties; "
+                "not an official IUPHAR class or identifier"
+            ),
+            marks_direct_layer=False,
+            parent_class="Enzyme",
+            priority=0,
+        )
+        for number, name in _EC_CLASS_OUTPUTS
+    )
+    validate_rules(rules)
+    return rules
+
+
+def local_rule_catalog_sha256(
+    rules: tuple[RuleRecord, ...] | None = None,
+) -> str:
+    """Hash the connected catalog. Rule order does not change the digest."""
+    selected = classification_local_rules() if rules is None else rules
+    payload = tuple(
+        sorted(
+            (
+                rule.rule_id,
+                rule.family,
+                rule.input_conditions,
+                rule.output,
+                rule.parent_class,
+                rule.priority,
+                rule.version,
+            )
+            for rule in selected
+        )
+    )
+    return hashlib.sha256(canonical_json_bytes(payload)).hexdigest()
 
 
 def validate_rules(rules: tuple[RuleRecord, ...]) -> None:

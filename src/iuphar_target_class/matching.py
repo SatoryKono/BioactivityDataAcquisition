@@ -21,6 +21,8 @@ METHOD_ORDER = (
     EXACT_NAME,
     EXACT_SYNONYM,
 )
+MATCHING_POLICY_VERSION = "iuphar-matching-v2"
+STRICT_ANCHOR_FIELDS = ("target_id", "uniprot_ids", "gene_id", "gene_symbol")
 
 
 @dataclass(frozen=True, slots=True)
@@ -47,6 +49,7 @@ class MatchQuery:
     organism: str | None
     name: str | None
     synonyms: tuple[str, ...]
+    auxiliary_uniprot_ids: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -282,24 +285,123 @@ def _decide(
         and set(everyone) == {agreed}
         and _matches_requested_species(query, catalog, agreed)
     ):
-        return _result(
-            "matched",
-            agreed,
-            (agreed,),
-            _methods(candidates, {agreed}),
-            (),
+        return _apply_auxiliary(
+            query,
+            catalog,
+            _result(
+                "matched",
+                agreed,
+                (agreed,),
+                _methods(candidates, {agreed}),
+                (),
+            ),
         )
     if everyone:
-        return _result(
-            "ambiguous",
-            None,
-            everyone,
-            _methods(candidates, set(everyone)),
-            ("ambiguous_match",),
+        return _apply_auxiliary(
+            query,
+            catalog,
+            _result(
+                "ambiguous",
+                None,
+                everyone,
+                _methods(candidates, set(everyone)),
+                ("ambiguous_match",),
+            ),
         )
     if not snapshot_complete:
-        return _result("source_unavailable", None, (), (), ("source_unavailable",))
-    return _result("not_found", None, (), (), ())
+        decided = _result("source_unavailable", None, (), (), ("source_unavailable",))
+    else:
+        decided = _result("not_found", None, (), (), ())
+    return _apply_auxiliary(query, catalog, decided)
+
+
+def _apply_auxiliary(
+    query: MatchQuery,
+    catalog: tuple[CatalogTarget, ...],
+    result: MatchResult,
+) -> MatchResult:
+    """Record auxiliary UniProt xrefs without making them required anchors.
+
+    A missing auxiliary accession is diagnostic. A same-species hit on a
+    different target than a reliable identifier is an identity conflict.
+    Auxiliary accessions never confirm a match by themselves, and their order
+    does not change the decision.
+    """
+    if not query.auxiliary_uniprot_ids:
+        return result
+    extra: list[Diagnostic] = []
+    conflict_ids: set[str] = set()
+    reliable = (
+        {result.matched_target_id}
+        if result.match_status == "matched" and result.matched_target_id
+        else set()
+    )
+    for accession in sorted(set(query.auxiliary_uniprot_ids)):
+        hits = [item for item in catalog if accession in item.uniprot_ids]
+        if not hits:
+            extra.append(
+                Diagnostic(
+                    "auxiliary_uniprot_unknown",
+                    "info",
+                    "auxiliary UniProt cross-reference is not in the snapshot",
+                )
+            )
+            continue
+        same_species = [
+            item
+            for item in hits
+            if query.organism is None or item.species == query.organism
+        ]
+        same_ids = {item.target_id for item in same_species}
+        if not same_species:
+            extra.append(
+                Diagnostic(
+                    "auxiliary_uniprot_species_gap",
+                    "warning",
+                    "auxiliary UniProt cross-reference is outside the requested species",
+                )
+            )
+            continue
+        if reliable and same_ids.isdisjoint(reliable):
+            conflict_ids.update(same_ids)
+            conflict_ids.update(reliable)
+            continue
+        if not reliable:
+            extra.append(
+                Diagnostic(
+                    "auxiliary_uniprot_not_identity",
+                    "info",
+                    "auxiliary UniProt cross-reference does not confirm identity",
+                )
+            )
+            continue
+        extra.append(
+            Diagnostic(
+                "auxiliary_uniprot_observed",
+                "info",
+                "auxiliary UniProt cross-reference agrees with the required anchor",
+            )
+        )
+    if conflict_ids:
+        return _result(
+            "identity_conflict",
+            None,
+            tuple(sorted(conflict_ids)),
+            (UNIPROT,),
+            ("identity_conflict",),
+        )
+    if not extra:
+        return result
+    return enforce_match_invariant(
+        MatchResult(
+            match_status=result.match_status,
+            matched_target_id=result.matched_target_id,
+            candidate_target_ids=result.candidate_target_ids,
+            match_method=result.match_method,
+            match_evidence_ids=result.match_evidence_ids,
+            diagnostics=result.diagnostics + tuple(extra),
+        )
+    )
 
 
 def _identity_conflict(

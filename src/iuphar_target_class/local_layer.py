@@ -45,11 +45,27 @@ def validate_local_config(rules: tuple[RuleRecord, ...]) -> None:
     """Reject a broken rule before any row is processed."""
     validate_rules(rules)
     for rule in rules:
+        conditions = rule.input_conditions.casefold()
+        output = rule.output.casefold()
         if (
-            rule.family in {"ec_class", "annotation"}
-            and rule.output not in WORKING_CLASSES
-        ):
+            "zinc finger" in conditions or "transcription factor" in conditions
+        ) and "nuclear hormone" in output:
+            message = (
+                f"rule {rule.rule_id} must not assign a nuclear hormone receptor "
+                "from a zinc finger or transcription-factor tag"
+            )
+            raise ValueError(message)
+        if rule.family == "annotation" and rule.output not in WORKING_CLASSES:
             message = f"rule {rule.rule_id} output is outside the class dictionary"
+            raise ValueError(message)
+        if rule.family == "ec_class" and rule.output not in WORKING_CLASSES:
+            if rule.parent_class not in WORKING_CLASSES:
+                message = (
+                    f"rule {rule.rule_id} subclass requires a working-class parent"
+                )
+                raise ValueError(message)
+        if rule.output == "Multifunctional":
+            message = f"rule {rule.rule_id} must not assign Multifunctional"
             raise ValueError(message)
 
 
@@ -205,7 +221,8 @@ def apply_local(
     ``infer_from_ec`` retains the original numbers and confirmed levels for
     callers that need that projection; pipeline persistence is a separate step.
     """
-    _reject_unknown_subclass_parents(subclass_of or {})
+    hierarchy = _subclass_map(rules, subclass_of or {})
+    _reject_unknown_subclass_parents(hierarchy)
     validate_local_config(rules)
     ec = infer_from_ec(numbers, rules, organism=organism)
     keywords, text_candidates, text_diagnostics = infer_from_annotations(
@@ -222,7 +239,7 @@ def apply_local(
         support,
         text_candidates + prediction_candidates,
         ec.diagnostics + text_diagnostics + prediction_diagnostics,
-        subclass_of or {},
+        hierarchy,
     )
 
 
@@ -257,13 +274,46 @@ def _assemble(
     return LocalInference(
         local_status=status,
         local_class=local_class,
-        local_subclasses=(),
+        local_subclasses=_local_subclasses(classes, resolved, subclass_of),
         local_rule_ids=tuple(sorted({item.rule_id for item in support})),
         local_evidence_ids=tuple(sorted({item.evidence_id for item in support})),
         ec_categories=ec.ec_categories,
         multiple_ec_categories=ec.multiple_ec_categories,
         local_candidates=tuple(sorted(set(candidates) | set(extra))),
         diagnostics=diagnostics,
+    )
+
+
+def _subclass_map(
+    rules: tuple[RuleRecord, ...], explicit: Mapping[str, str]
+) -> dict[str, str]:
+    """Parent links come from the rule catalog. Explicit links must agree."""
+    derived = {
+        rule.output: rule.parent_class
+        for rule in rules
+        if rule.parent_class and rule.output != rule.parent_class
+    }
+    for name, parent in explicit.items():
+        current = derived.get(name)
+        if current is not None and current != parent:
+            message = f"subclass parent for {name} disagrees with the rule catalog"
+            raise ValueError(message)
+        derived[name] = parent
+    return derived
+
+
+def _local_subclasses(
+    classes: tuple[str, ...],
+    resolved: str | None,
+    subclass_of: Mapping[str, str],
+) -> tuple[str, ...]:
+    """Keep every subclass. A conflict does not collapse to the first label."""
+    if resolved is None:
+        return tuple(name for name in classes if name not in WORKING_CLASSES)
+    return tuple(
+        name
+        for name in classes
+        if name != resolved and subclass_of.get(name, name) == resolved
     )
 
 

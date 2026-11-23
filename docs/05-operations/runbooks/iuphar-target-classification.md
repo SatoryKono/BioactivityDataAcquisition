@@ -540,3 +540,19 @@ acceptance evidence are available and reviewed.
 - [Full persisted-cohort candidate builder](../../../src/bioetl/infrastructure/storage/target_candidates.py)
 - [Deployment configuration binding](../../../src/bioetl/composition/bootstrap/runtime/composite_runtime_management_bundle.py)
 - [Physical migration CLI](../../../scripts/ops/target_classification_migration.py)
+
+## Audit remediation 2026-11-23
+
+`iuphar_*`, `local_*` and `effective_*` keep separate roles. `target_type` remains the ChEMBL value. `source_unavailable` is not the same status as `not_found`. Standalone classification sees identifiers only. Full UniProt and protein features are available only after composite dependency joins, and only when a caller attaches the post-join classifier. The default merge does not attach it.
+
+Primary accessions come from `component_accessions`. `target_xref_uniprot_ids` are auxiliary and do not enter the required exact channel. Unknown auxiliary accessions stay diagnostic. A component accession does not prove a complex.
+
+Connected local rules use catalog version `iuphar-local-rules-20261123`. EC 7 is Translocase under Enzyme. It is not Transporter. The pinned snapshot capability remains `family_only`. Paths are stored root to leaf. A `family_only` snapshot is not upgraded to full annotation.
+
+Table contract `3.2.0` adds nullable detail columns to the nine V31 fields. Arrays are canonical JSON text. Null means the value was not computed. Default enrich stays on `3.1.0`. `off` and `shadow` cannot select `3.1.0` or `3.2.0`. Production `configs/entities/chembl/target.yaml` stays `mode: "off"`.
+
+Standard XLSX export splits a string longer than 32767 characters into `bioetl_xlsx_parts` and writes a `bioetl-xlsx-part` token. Restore concatenates the parts only when their SHA-256 matches the token. Shorter text, including text that merely resembles a token, is left as written.
+
+Assay to target closure reports the missing target ids. A placeholder or a row without `source_sha256` is refused. `contract_mismatch` stays a blocker until `contract_decision` is `resolved`. The 37 missing Gold targets are not invented.
+
+Live promotion of contract `3.2.0` is refused unless rehearsal rollback, FK closure, explicit biological acceptance and `live_promotion` are all true. This runbook does not set biological acceptance. Shadow is available. Enrich stays on an isolated catalog. A missing CI SHA is `NOT_RUN`. Class-match counts, including the diagnostic 633 and 374 figures, are not biological accuracy. No IUPHAR API key is required for the offline classifier.

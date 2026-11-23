@@ -23,14 +23,7 @@ class ExportCatalogAdapter(ExportCatalogPort):
         if not base_path_obj.exists():
             return []
 
-        tables: list[tuple[str, str]] = []
-        for provider_dir in base_path_obj.iterdir():
-            if not provider_dir.is_dir():
-                continue
-            tables.extend(
-                self._list_provider_tables(provider_dir=provider_dir, layer=layer)
-            )
-        return tables
+        return [(name, str(path)) for name, path in _delta_tables(base_path_obj)]
 
     def resolve_table_path(
         self,
@@ -39,36 +32,31 @@ class ExportCatalogAdapter(ExportCatalogPort):
         table_name: str,
         layer: str,
     ) -> str:
-        """Resolve one table path for the requested layer."""
+        """Resolve one table path for the requested layer.
+
+        A dotted table name is the Delta directory chain under the layer root.
+        ``chembl.activity`` is ``<base>/chembl/activity``, not an extra nested
+        directory whose name repeats the dotted identifier.
+        """
         base_path_obj = Path(base_path)
         if not base_path_obj.exists():
             raise FileNotFoundError(f"Layer path not found: {base_path}")
 
-        for provider_dir in base_path_obj.iterdir():
-            if not provider_dir.is_dir():
-                continue
-            for entity_dir in provider_dir.iterdir():
-                if not entity_dir.is_dir():
-                    continue
-                table_dir = entity_dir / table_name
-                if table_dir.exists() and (table_dir / "_delta_log").exists():
-                    return str(table_dir.resolve())
+        for name, table_dir in _delta_tables(base_path_obj):
+            if name == table_name:
+                return str(table_dir.resolve())
 
         raise FileNotFoundError(
             f"Table '{table_name}' not found in {layer} layer at {base_path}"
         )
 
-    def _list_provider_tables(
-        self,
-        *,
-        provider_dir: Path,
-        layer: str,
-    ) -> list[tuple[str, str]]:
-        tables: list[tuple[str, str]] = []
-        for entity_dir in provider_dir.iterdir():
-            if not entity_dir.is_dir():
-                continue
-            for table_dir in entity_dir.iterdir():
-                if table_dir.is_dir() and (table_dir / "_delta_log").exists():
-                    tables.append((table_dir.name, str(table_dir)))
-        return tables
+
+def _delta_tables(base: Path) -> list[tuple[str, Path]]:
+    """Name each Delta table by its path relative to the layer root."""
+    found: list[tuple[str, Path]] = []
+    for log in sorted(base.rglob("_delta_log")):
+        if not log.is_dir():
+            continue
+        table = log.parent
+        found.append((".".join(table.relative_to(base).parts), table))
+    return found

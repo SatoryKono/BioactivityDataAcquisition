@@ -204,7 +204,7 @@ def test_enrich_selects_one_consistent_additive_contract_without_mutating_input(
 
 def test_enrich_cannot_fall_back_to_an_unscoped_hash_policy() -> None:
     config = _config("enrich").model_copy(update={"content_hash_policy": None})
-    with pytest.raises(ValueError, match="explicit V30/V31"):
+    with pytest.raises(ValueError, match="explicit V30, V31 or V32"):
         resolve_target_classification_profile(config)
 
 

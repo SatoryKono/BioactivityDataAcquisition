@@ -17,11 +17,16 @@ _SOURCE_TAXA = {
 }
 
 
+_MISSING_MARKERS = frozenset({"n/a", "#n/a"})
+
+
 def _text(value: object) -> str | None:
     if not isinstance(value, str):
         return None
     text = value.strip()
-    return None if not text or text == "unknown" else text
+    if not text or text.casefold() in {"unknown", *_MISSING_MARKERS}:
+        return None
+    return text
 
 
 def _tokens(value: object) -> tuple[str, ...]:
@@ -76,14 +81,22 @@ def plain_target_value(value: object) -> object:
 def project_target_fields(
     data: Mapping[str, object], taxon: str | None
 ) -> dict[str, str | None]:
-    accessions = tuple(
+    """Project primary component accessions separately from auxiliary xrefs.
+
+    ``uniprot`` carries component accessions. Those are required anchors for a
+    single protein and still do not prove a complex. ``auxiliary_uniprot``
+    keeps every other UniProt cross-reference for evidence. An unknown
+    auxiliary accession must not become an empty required exact channel.
+    """
+    primary = tuple(dict.fromkeys(_tokens(data.get("component_accessions"))))
+    auxiliary = tuple(
         dict.fromkeys(
-            (
-                *_tokens(data.get("component_accessions")),
-                *_tokens(data.get("target_xref_uniprot_ids")),
-            )
+            token
+            for token in _tokens(data.get("target_xref_uniprot_ids"))
+            if token not in primary
         )
     )
+    accessions = primary
     synonyms = tuple(
         dict.fromkeys(
             (
@@ -97,6 +110,7 @@ def project_target_fields(
         # ChEMBL identity is never passed as the kernel's explicit IUPHAR ID.
         "target_id": _text(data.get("iuphar_target_id")),
         "uniprot": "|".join(accessions) or None,
+        "auxiliary_uniprot": "|".join(auxiliary) or None,
         "organism": taxon,
         "source_organism": _text(data.get("organism")),
         "name": _text(data.get("pref_name")),

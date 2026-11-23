@@ -7,7 +7,9 @@ from dataclasses import dataclass
 from typing import Literal
 
 TargetClassificationMode = Literal["off", "shadow", "enrich"]
+TargetTableContract = Literal["3.0.0", "3.1.0", "3.2.0"]
 _TARGET_CLASSIFICATION_MODES = frozenset({"off", "shadow", "enrich"})
+_TABLE_CONTRACTS = frozenset({"3.0.0", "3.1.0", "3.2.0"})
 
 
 def _validate_target_classification_mode(mode: str) -> None:
@@ -28,6 +30,21 @@ def _require_nonblank_manifest(manifest: str | None) -> None:
 def _require_paired_manifest(manifest: str | None, digest: str | None) -> None:
     if (manifest is not None) != (digest is not None):
         raise ValueError("target classification manifest and hash must be paired")
+
+
+def _validate_table_contract(mode: str, table_contract: str | None) -> None:
+    if table_contract is None:
+        return
+    if table_contract not in _TABLE_CONTRACTS:
+        raise ValueError("target table contract must be 3.0.0, 3.1.0 or 3.2.0")
+    if mode == "enrich" and table_contract == "3.0.0":
+        raise ValueError(
+            "enrich target classification cannot use the V30 table contract"
+        )
+    if mode != "enrich" and table_contract != "3.0.0":
+        raise ValueError(
+            "off/shadow target classification cannot select a V31/V32 table"
+        )
 
 
 def _require_manifest_when_enabled(mode: str, manifest: str | None) -> None:
@@ -57,6 +74,20 @@ TARGET_CLASSIFICATION_FIELDS: tuple[str, ...] = (
     "decision_status",
     "target_class_profile_sha256",
 )
+# Additive 3.2.0 detail. Arrays are canonical JSON text; null means not computed.
+TARGET_CLASSIFICATION_DETAIL_FIELDS: tuple[str, ...] = (
+    "iuphar_type_raw",
+    "iuphar_annotation_capability",
+    "iuphar_family_ids",
+    "iuphar_subclasses",
+    "iuphar_paths",
+    "local_status",
+    "local_subclasses",
+    "local_rule_ids",
+    "effective_subclasses",
+    "conflict_codes",
+    "classification_evidence_ids",
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -70,9 +101,11 @@ class TargetClassificationConfig:
     mode: TargetClassificationMode = "off"
     snapshot_manifest: str | None = None
     snapshot_manifest_sha256: str | None = None
+    table_contract: TargetTableContract | None = None
 
     def __post_init__(self) -> None:
         _validate_target_classification_mode(self.mode)
+        _validate_table_contract(self.mode, self.table_contract)
         _validate_target_classification_manifest(
             self.mode,
             self.snapshot_manifest,
@@ -85,11 +118,15 @@ class TargetClassificationConfig:
 
     @property
     def contract_version(self) -> str:
+        if self.table_contract is not None:
+            return self.table_contract
         return "3.1.0" if self.mode == "enrich" else "3.0.0"
 
 
 __all__ = [
+    "TARGET_CLASSIFICATION_DETAIL_FIELDS",
     "TARGET_CLASSIFICATION_FIELDS",
     "TargetClassificationConfig",
     "TargetClassificationMode",
+    "TargetTableContract",
 ]

@@ -10,7 +10,11 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from functools import cache
 
-from .gtopdb_2026_3_1 import FAMILY_ROWS
+from .gtopdb_2026_3_1 import (
+    ANNOTATION_CAPABILITY,
+    EXPLICIT_TYPE_SUBCLASSES,
+    FAMILY_ROWS,
+)
 from .iuphar_mapping import approved_class_mappings
 from .models import Diagnostic
 from .policy import (
@@ -53,7 +57,9 @@ class HierarchyResult:
     annotation_status: str
     iuphar_class: str | None
     iuphar_subclass: str | None
+    iuphar_subclasses: tuple[str, ...]
     iuphar_class_candidates: tuple[str, ...]
+    annotation_capability: str
     proof: str | None
     source: str | None
     paths: tuple[FamilyPath, ...]
@@ -141,6 +147,7 @@ def normalize_approved_provider_class(
         nodes=_pinned_family_graph(),
         type_to_class=types,
         family_to_class=families,
+        type_to_subclass=dict(EXPLICIT_TYPE_SUBCLASSES),
     )
 
 
@@ -153,6 +160,7 @@ def normalize_provider_class(
     family_to_class: Mapping[str, str],
     name: str | None = None,
     path_text: str | None = None,
+    type_to_subclass: Mapping[str, str] | None = None,
     max_depth: int = GRAPH_MAX_DEPTH,
     max_visited_nodes: int = GRAPH_MAX_VISITED_NODES,
     multiple_parents_allowed: bool = True,
@@ -206,11 +214,20 @@ def normalize_provider_class(
             path_text=path_text,
         )
     source = "iuphar_normalized" if assigned.iuphar_class else None
+    subclasses = _subclasses(
+        assigned.status,
+        type_name,
+        family_ids,
+        nodes,
+        type_to_subclass or {},
+    )
     return HierarchyResult(
         annotation_status=assigned.status,
         iuphar_class=assigned.iuphar_class,
-        iuphar_subclass=None,
+        iuphar_subclass=subclasses[0] if len(subclasses) == 1 else None,
+        iuphar_subclasses=subclasses,
         iuphar_class_candidates=assigned.candidates,
+        annotation_capability=ANNOTATION_CAPABILITY,
         proof=proof,
         source=source,
         paths=built,
@@ -241,7 +258,9 @@ def _graph_error_result(
         annotation_status="partial" if mapped else "not_available",
         iuphar_class=mapped,
         iuphar_subclass=None,
+        iuphar_subclasses=(),
         iuphar_class_candidates=(mapped,) if mapped else (),
+        annotation_capability=ANNOTATION_CAPABILITY,
         proof="type" if mapped else None,
         source="iuphar_normalized" if mapped else None,
         paths=(),
@@ -258,15 +277,44 @@ def _index_nodes(
         grouped.setdefault(node.family_id, []).append(node)
     indexed: dict[str, FamilyNode] = {}
     for family_id in sorted(grouped):
-        signatures = {
-            (item.payload, tuple(sorted(set(item.parent_ids))))
-            for item in grouped[family_id]
-        }
-        if len(signatures) > 1:
+        payloads = {item.payload for item in grouped[family_id]}
+        if len(payloads) > 1:
             return _defect(_DUPLICATE)
-        payload, parents = next(iter(signatures))
-        indexed[family_id] = FamilyNode(family_id, parents, payload)
+        parents = tuple(
+            sorted(
+                {
+                    parent
+                    for item in grouped[family_id]
+                    for parent in item.parent_ids
+                    if parent
+                }
+            )
+        )
+        indexed[family_id] = FamilyNode(family_id, parents, next(iter(payloads)))
     return indexed
+
+
+def _subclasses(
+    status: str,
+    type_name: str | None,
+    family_ids: tuple[str, ...],
+    nodes: tuple[FamilyNode, ...],
+    type_to_subclass: Mapping[str, str],
+) -> tuple[str, ...]:
+    """Use the explicit type dictionary. Disagreement keeps every label."""
+    if status in {"conflicting", "unmapped_type", "not_available"}:
+        return ()
+    found: set[str] = set()
+    if type_name and type_name in type_to_subclass:
+        found.add(type_to_subclass[type_name])
+    indexed = _index_nodes(nodes)
+    if isinstance(indexed, Diagnostic):
+        return tuple(sorted(found))
+    for family_id in family_ids:
+        node = indexed.get(family_id)
+        if node is not None and node.payload in type_to_subclass:
+            found.add(type_to_subclass[node.payload])
+    return tuple(sorted(found))
 
 
 def _walk_ancestors(

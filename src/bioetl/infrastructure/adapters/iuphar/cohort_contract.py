@@ -37,6 +37,7 @@ _COLUMNS = (
     "target_chembl_id",
     "target_id",
     "uniprot",
+    "auxiliary_uniprot",
     "organism",
     "name",
     "source_organism",

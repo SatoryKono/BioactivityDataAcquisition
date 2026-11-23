@@ -270,10 +270,35 @@ class ChEMBLTargetGoldSchemaV31(ChEMBLTargetGoldSchema):
     )
 
 
+class ChEMBLTargetGoldSchemaV32(ChEMBLTargetGoldSchemaV31):
+    """Persist subclass, path and evidence detail without removing V31 columns."""
+
+    iuphar_type_raw: Series[str] = pa.Field(nullable=True)
+    iuphar_annotation_capability: Series[str] = pa.Field(nullable=True)
+    iuphar_family_ids: Series[str] = pa.Field(nullable=True)
+    iuphar_subclasses: Series[str] = pa.Field(nullable=True)
+    iuphar_paths: Series[str] = pa.Field(nullable=True)
+    local_status: Series[str] = pa.Field(nullable=True)
+    local_subclasses: Series[str] = pa.Field(nullable=True)
+    local_rule_ids: Series[str] = pa.Field(nullable=True)
+    effective_subclasses: Series[str] = pa.Field(nullable=True)
+    conflict_codes: Series[str] = pa.Field(nullable=True)
+    classification_evidence_ids: Series[str] = pa.Field(nullable=True)
+
+
 def target_v31_schema_hash() -> str:
     """Bind manifested identity to the actual canonical V31 schema model."""
     render_schema = cast(
         "Callable[[], JsonDict]", ChEMBLTargetGoldSchemaV31.to_json_schema
+    )
+    canonical = canonical_json_dumps(render_schema())
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def target_v32_schema_hash() -> str:
+    """Bind manifested identity to the actual canonical V32 schema model."""
+    render_schema = cast(
+        "Callable[[], JsonDict]", ChEMBLTargetGoldSchemaV32.to_json_schema
     )
     canonical = canonical_json_dumps(render_schema())
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
@@ -284,7 +309,9 @@ __all__ = [
     "ChEMBLTargetComponentGoldSchema",
     "ChEMBLTargetGoldSchema",
     "ChEMBLTargetGoldSchemaV31",
+    "ChEMBLTargetGoldSchemaV32",
     "ChEMBLTargetProteinClassificationGoldSchema",
     "ChEMBLTissueGoldSchema",
     "target_v31_schema_hash",
+    "target_v32_schema_hash",
 ]

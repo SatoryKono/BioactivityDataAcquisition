@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **IUPHAR target classification 3.2.0:** primary UniProt accessions stay separate from auxiliary xrefs; EC 1–7 local rules are versioned and hashed; family paths keep every parent and an explicit subclass dictionary; the additive target contract carries subclass, path and evidence fields. Contract `3.2.0` is opt-in. Default enrich remains `3.1.0`. Main tables are not migrated, and biological acceptance stays false.
+
 - **Run identifier resolution:** `resolve=unique` on control-plane identity scope
   returns a catalog UUID only when workflow / pipeline / run_type match exactly
   one run. Zero matches are `unique_scope_not_found`. Several matches are

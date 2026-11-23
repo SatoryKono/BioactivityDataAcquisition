@@ -266,6 +266,11 @@ def promote_target_migration(
             tuple(state["legacy_include_fields"]),
             workspace=paths.workspace,
         )
+        from bioetl.infrastructure.storage.target_contract_transition import (
+            assert_live_promotion_allowed,
+        )
+
+        assert_live_promotion_allowed(state)
         if _tree_hashes(checked["assay"]) != state["assay_hashes"]:
             raise ValueError("assay reference cohort changed since preparation")
         state["phase"] = "promoting"

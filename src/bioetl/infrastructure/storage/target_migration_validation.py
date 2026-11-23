@@ -11,7 +11,10 @@ import psutil
 import yaml
 from pandera.pandas import DataFrameModel, DataFrameSchema
 
-from bioetl.domain.config.target_classification import TARGET_CLASSIFICATION_FIELDS
+from bioetl.domain.config.target_classification import (
+    TARGET_CLASSIFICATION_DETAIL_FIELDS,
+    TARGET_CLASSIFICATION_FIELDS,
+)
 from bioetl.domain.normalization.profiles.chembl_target import CHEMBL_TARGET_PROFILE
 from bioetl.infrastructure.adapters.iuphar.acceptance_receipt import load_profile
 from bioetl.infrastructure.adapters.iuphar.snapshot_loader import LoadedIupharProfile
@@ -213,6 +216,16 @@ def _frozen_v31_hash_fields(
     return tuple(dict.fromkeys((*legacy_include_fields, *TARGET_CLASSIFICATION_FIELDS)))
 
 
+def _candidate_table_contract(paths: dict[str, Path]) -> str:
+    """Missing candidate YAML keeps the admitted 3.1.0 checker."""
+    path = paths.get("candidate_config")
+    if path is None:
+        return "3.1.0"
+    config = yaml.safe_load(path.read_text(encoding="utf-8"))
+    classification = config["pipeline"]["target_classification"]
+    return str(classification.get("table_contract", "3.1.0"))
+
+
 def validate_target_candidate(
     paths: dict[str, Path],
     legacy_include_fields: tuple[str, ...],
@@ -220,18 +233,29 @@ def validate_target_candidate(
     workspace: Path | None = None,
 ) -> dict[str, object]:
     """Validate admission, strict candidate schemas and both entire cohorts."""
-    from bioetl.domain.schemas.chembl.target import TargetSchemaV31
+    from bioetl.domain.schemas.chembl.target import TargetSchemaV31, TargetSchemaV32
     from bioetl.infrastructure.config.target_classification_profile import (
         ChEMBLTargetGoldSchemaV31,
+        ChEMBLTargetGoldSchemaV32,
     )
 
     profile = _load_candidate_profile(paths, workspace=workspace)
+    contract = _candidate_table_contract(paths)
     v31_include_fields = _frozen_v31_hash_fields(paths, legacy_include_fields)
+    include_fields = v31_include_fields
+    silver_schema: type[DataFrameModel] = TargetSchemaV31
+    gold_schema: type[DataFrameModel] = ChEMBLTargetGoldSchemaV31
+    if contract == "3.2.0":
+        silver_schema = TargetSchemaV32
+        gold_schema = ChEMBLTargetGoldSchemaV32
+        include_fields = tuple(
+            dict.fromkeys((*v31_include_fields, *TARGET_CLASSIFICATION_DETAIL_FIELDS))
+        )
     result: dict[str, object] = {}
     layers = {}
     for name, schema in (
-        ("silver", TargetSchemaV31),
-        ("gold", ChEMBLTargetGoldSchemaV31),
+        ("silver", silver_schema),
+        ("gold", gold_schema),
     ):
         result[name], layers[name] = _validate_candidate_layer(
             name,
@@ -239,7 +263,7 @@ def validate_target_candidate(
             paths,
             profile.profile_sha256,
             legacy_include_fields,
-            v31_include_fields,
+            include_fields,
         )
     _verify_source_classifications(layers, profile)
     _assert_candidate_cohort_closure(paths, layers["gold"])

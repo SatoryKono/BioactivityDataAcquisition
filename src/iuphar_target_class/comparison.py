@@ -121,6 +121,20 @@ def _classify_key(
     _record_difference(label, python_row, changes, residual)
 
 
+_DETAIL_FIELDS = (
+    "iuphar_subclass",
+    "iuphar_subclasses",
+    "iuphar_paths",
+    "iuphar_type_raw",
+    "iuphar_annotation_capability",
+    "local_subclasses",
+    "local_rule_ids",
+    "effective_subclasses",
+    "conflict_codes",
+    "candidate_target_ids",
+)
+
+
 def _same_classification(
     m_row: Mapping[str, str], python_row: Mapping[str, str]
 ) -> bool:
@@ -134,8 +148,12 @@ def _same_classification(
         "local_status",
         "iuphar_annotation_status",
     )
+    shared_details = tuple(
+        field for field in _DETAIL_FIELDS if field in m_row and field in python_row
+    )
     return _class(m_row) == _class(python_row) and all(
-        m_row.get(field) == python_row.get(field) for field in classification_fields
+        m_row.get(field) == python_row.get(field)
+        for field in (*classification_fields, *shared_details)
     )
 
 
@@ -183,6 +201,57 @@ def _class(row: Mapping[str, str]) -> str:
 
 def _label(key: tuple[tuple[str, str], ...]) -> str:
     return "|".join(f"{name}={value}" for name, value in key) or "<missing identity>"
+
+
+def build_m_parity_report(
+    reference: Stage0Reference,
+    python_rows: tuple[Mapping[str, str], ...],
+    *,
+    allowed: tuple[Mapping[str, str], ...] = (),
+) -> dict[str, object]:
+    """Write the parity artifact. A free-text note does not explain a difference.
+
+    ``allowed`` rows need ``target_id``, ``field``, ``category`` and
+    ``basis_sha256``. Class agreement is not a biological-accuracy metric.
+    """
+    report = compare_stage0(reference, python_rows)
+    qualified = []
+    unexplained = list(report.residual)
+    allowed_index = {
+        (item["target_id"], item["field"], item["category"], item["basis_sha256"])
+        for item in allowed
+        if item.get("basis_sha256")
+    }
+    for label, sign, explanation in report.changes:
+        basis = ""
+        field = ""
+        target_id = ""
+        for row in python_rows:
+            if _label(_group((row,)).popitem()[0]) == label:
+                basis = row.get("basis_sha256", "")
+                field = row.get("changed_field", "")
+                target_id = row.get("target_id", row.get("input_row_id", ""))
+                break
+        key = (target_id, field, sign, basis)
+        if key in allowed_index and explanation:
+            qualified.append(
+                {
+                    "target_id": target_id,
+                    "field": field,
+                    "category": sign,
+                    "basis_sha256": basis,
+                }
+            )
+        else:
+            unexplained.append(label)
+    return {
+        "artifact": "m-parity-report",
+        "biological_accuracy_metric": False,
+        "measured": report.measured,
+        "qualified_changes": qualified,
+        "unexplained": sorted(set(unexplained)),
+        "matched_class_count_is_not_accuracy": True,
+    }
 
 
 def _metrics(rows: tuple[Mapping[str, str], ...]) -> dict[str, int]:

@@ -19,6 +19,7 @@ from bioetl.domain.schemas.constants import (
 __all__ = [
     "TargetSchema",
     "TargetSchemaV31",
+    "TargetSchemaV32",
 ]
 
 
@@ -216,3 +217,19 @@ class TargetSchemaV31(TargetSchema):
     target_class_profile_sha256: Series[str] = pa.Field(
         nullable=True, str_matches=r"^[0-9a-f]{64}$"
     )
+
+
+class TargetSchemaV32(TargetSchemaV31):
+    """Additive 3.2.0 detail. The nine V31 columns stay nullable and unchanged."""
+
+    iuphar_type_raw: Series[str] = pa.Field(nullable=True)
+    iuphar_annotation_capability: Series[str] = pa.Field(nullable=True)
+    iuphar_family_ids: Series[str] = pa.Field(nullable=True)
+    iuphar_subclasses: Series[str] = pa.Field(nullable=True)
+    iuphar_paths: Series[str] = pa.Field(nullable=True)
+    local_status: Series[str] = pa.Field(nullable=True)
+    local_subclasses: Series[str] = pa.Field(nullable=True)
+    local_rule_ids: Series[str] = pa.Field(nullable=True)
+    effective_subclasses: Series[str] = pa.Field(nullable=True)
+    conflict_codes: Series[str] = pa.Field(nullable=True)
+    classification_evidence_ids: Series[str] = pa.Field(nullable=True)

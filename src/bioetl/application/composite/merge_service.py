@@ -111,6 +111,9 @@ class MergeService(
         cross_validator = runtime.pop("cross_validator", None)
         gold_schema = runtime.pop("gold_schema", None)
         clock = runtime.pop("clock", None)
+        self.target_post_join_classifier = runtime.pop(
+            "target_post_join_classifier", None
+        )
         self._execution_hook: (
             Callable[
                 [

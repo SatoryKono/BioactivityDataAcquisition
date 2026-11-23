@@ -149,7 +149,7 @@ def test_same_payload_with_different_parents_is_order_independent() -> None:
             type_to_class={},
             family_to_class={"leaf": "Enzyme"},
         )
-        assert result.diagnostics[0].message == "повторяющийся идентификатор"
+        assert result.diagnostics[0].message == "отсутствующий родитель"
         assert result.iuphar_class is None
         assert result.paths == ()
 
@@ -304,7 +304,9 @@ def test_approved_real_release_classifies_gpcr_and_distinguishes_grouping() -> N
     )
     assert gpcr.annotation_status == "available"
     assert gpcr.iuphar_class == "Receptor"
-    assert gpcr.iuphar_subclass is None
+    assert gpcr.iuphar_subclass == "GPCR"
+    assert gpcr.iuphar_subclasses == ("GPCR",)
+    assert gpcr.annotation_capability == "family_only"
     assert gpcr.family_evidence == (("1", "Receptor"),)
     assert gpcr.paths and all("694" in path.root_to_leaf for path in gpcr.paths)
     fallback = normalize_approved_provider_class(
