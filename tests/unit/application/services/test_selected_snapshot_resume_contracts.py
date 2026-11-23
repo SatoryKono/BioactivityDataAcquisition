@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock
 
@@ -223,3 +224,77 @@ async def test_resume_skipped_child_retains_saved_identity_without_execution(
         "saved-manifest",
     )
     pipeline.run.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("report_state", ["valid", "missing", "malformed"])
+async def test_restored_producer_reaches_workflow_report(tmp_path, report_state):
+    import json
+
+    from bioetl.application.services.run_reports.snapshots import publish_snapshot
+    from bioetl.infrastructure.storage.run_report_store_adapter import (
+        FileRunReportStoreAdapter,
+    )
+
+    report = tmp_path / "pipeline" / "chembl_assay" / "run" / "pipeline-run-report.json"
+    report.parent.mkdir(parents=True)
+    contents = "not json"
+    if report_state == "valid":
+        payload = {
+            "schema_version": "pipeline_run_report_v2",
+            "identity": {
+                "pipeline_name": "chembl_assay",
+                "run_id": "run",
+                "manifest_id": "manifest",
+                "workflow_run_id": "workflow-run",
+            },
+            "reasons_top_n": [{"reason_code": "invalid", "count": 4}],
+            "layers": {"gold_excluded_by_contract": 4},
+        }
+        contents = json.dumps(
+            publish_snapshot(payload, report, store=FileRunReportStoreAdapter())
+        )
+    if report_state != "missing":
+        report.write_text(contents)
+    details = _details()
+    details["producer_result"]["run_report_json_path"] = str(report)
+    step = WorkflowStepConfig("extract", "chembl_assay")
+    restored = resume._restore_producer(step, details)
+    archive = Mock()
+    pipeline = Mock(run=AsyncMock(), logger=None, archive_control_plane=archive)
+    service = WorkflowRunnerService(
+        pipeline, Mock(), Mock(), FileRunReportStoreAdapter(), report_root=tmp_path
+    )
+    result = await service.run_workflow(
+        WorkflowConfig("workflow", (step,)),
+        resumed=True,
+        completed_step_ids=frozenset({"extract"}),
+        restored_step_outputs={"extract": restored},
+        workflow_run_id="workflow-run",
+    )
+    assert result.steps[0].payload is restored
+    assert result.steps[0].child_run_id == "run"
+    assert result.run_report_error is None
+    assert result.run_report_json_path is not None
+    saved = json.loads(Path(result.run_report_json_path).read_text())
+    assert saved["execution"][0]["pipeline_report_ref"] == str(report)
+    from bioetl.application.services.workflow.workflow_runner_reports import (
+        _execution_rows_from_result,
+    )
+
+    row = _execution_rows_from_result(
+        result, plan_steps=[], store=FileRunReportStoreAdapter()
+    )[0]
+    assert row["pipeline_report_ref"] == str(report)
+    if report_state == "valid":
+        assert row["top_reasons"] == [{"reason_code": "invalid", "count": 4}]
+        assert row["gold_excluded_by_contract"] == 4
+        assert saved["execution"][0]["top_reasons"][0]["reason_code"] == "invalid"
+        assert saved["execution"][0]["gold_excluded_by_contract"] == 4
+    else:
+        assert row["top_reasons"] == ()
+        assert row["gold_excluded_by_contract"] is None
+    if report_state != "missing":
+        assert report.read_text() == contents
+    pipeline.run.assert_not_awaited()
+    archive.assert_not_called()
