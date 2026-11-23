@@ -88,16 +88,18 @@ enrich. Matched counts are not biological accuracy.
 | --- | --- | --- |
 | `rules_version` | `plan-v1-r8` | New rules → new version; do not rewrite historical runs |
 | `normalization_version` | unset | Approving missing markers publishes a new version |
-| schema / table | 3.0.0 / V30; enrich → 3.1.0 / V31 | Profile envelope + SHA-256 required when enabled |
+| `classification_schema_version` (profile) | `3.1.0` when shadow/enrich enabled | Adapter field; not the same as table contract |
+| table / business contract | off/shadow → V30 / `3.0.0`; enrich → V31 / `3.1.0` | Nine additive columns only after enrich admission |
 | originals | stage-0 + acceptance artifacts | Preserve; recompute as a separate run |
 
 ## Baseline manifest
 
-Hashes for M table, stage-0 materials, configs, policy/rules, acceptance, and
-upstream GtoPdb 2026.3.1 pins are recorded in
-[`data/iuphar_target_class/rf001/baseline_manifest.json`](../../../../data/iuphar_target_class/rf001/baseline_manifest.json).
-Excel/M caches outside the repository stay `not_pinned`. Audit control counts
-from epic #13308 are observations only.
+[`data/iuphar_target_class/rf001/baseline_manifest.json`](../../../../data/iuphar_target_class/rf001/baseline_manifest.json)
+pins **immutable** stage-0 / acceptance / upstream hashes under
+`pinned_artifacts`. Live configs, docs, and source contracts are listed under
+`mutable_surfaces` (path + role only) so comment-level edits do not invalidate
+the RF-001 baseline. Excel/M caches outside the repository stay `not_pinned`.
+Audit control counts from epic #13308 are observations only.
 
 ## Audit counterexamples (manual)
 

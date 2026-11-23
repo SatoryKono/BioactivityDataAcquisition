@@ -141,7 +141,9 @@ def test_baseline_manifest_hashes_and_receipt() -> None:
     assert hashlib.sha256(payload).hexdigest() == receipt["sha256"]
     manifest = json.loads(payload.decode("utf-8"))
     assert manifest["artifact"] == "iuphar_rf001_baseline_manifest"
+    assert manifest["schema_version"] == 2
     assert manifest["biological_accuracy_accepted"] is False
+    assert manifest["immutability"]["hash_lock_scope"] == "pinned_artifacts_only"
     assert manifest["m_code"]["status"] == "не установлено"
     assert manifest["m_code"]["excel_cache_confirms_fresh_recalc"] is False
     assert manifest["upstream_iuphar"]["annotation_capability"] == "family_only"
@@ -149,13 +151,52 @@ def test_baseline_manifest_hashes_and_receipt() -> None:
         manifest["audit_2026_11_23_control_counts"]["matched"]
         != manifest["audit_2026_11_23_control_counts"]["counterfactual_matched_not_accuracy"]
     )
-    for relative, meta in manifest["artifacts"].items():
+    # Only immutable stage-0 / acceptance bytes are hash-locked.
+    pinned = manifest["pinned_artifacts"]
+    assert pinned
+    for relative, meta in pinned.items():
         path = REPO / relative
         assert path.is_file(), relative
+        assert meta["pin_policy"] == "immutable_hash_locked"
         digest = hashlib.sha256(path.read_bytes()).hexdigest()
         assert digest == meta["sha256"], relative
+    # Live configs/docs/source stay listed but not CI-hash-locked.
+    mutable = manifest["mutable_surfaces"]
+    assert "configs/entities/chembl/target.yaml" in mutable
+    assert "docs/04-reference/pipelines/chembl/16-iuphar-target-classification-semantics.md" in mutable
+    for relative, meta in mutable.items():
+        assert (REPO / relative).is_file(), relative
+        assert meta["pin_policy"] in {"not_hash_locked", "versioned_separately"}
     assert DOC.is_file()
     assert "source_unavailable" in DOC.read_text(encoding="utf-8")
+
+
+def test_profile_schema_version_is_not_conflated_with_table_contract() -> None:
+    rules = semantics_document()["profile_change_rules"]
+    assert isinstance(rules, dict)
+    schema_rule = str(rules["classification_schema_version"])
+    table_rule = str(rules["table_contract"])
+    assert "3.1.0" in schema_rule
+    assert "shadow and enrich" in schema_rule or "shadow" in schema_rule
+    assert "chembl_target_v3.0" in table_rule and "chembl_target_v3.1" in table_rule
+    assert "3.0.0" in table_rule
+    assert TargetClassificationConfig().contract_version == "3.0.0"
+    assert (
+        TargetClassificationConfig(
+            mode="shadow",
+            snapshot_manifest="snapshot.json",
+            snapshot_manifest_sha256="a" * 64,
+        ).contract_version
+        == "3.0.0"
+    )
+    assert (
+        TargetClassificationConfig(
+            mode="enrich",
+            snapshot_manifest="snapshot.json",
+            snapshot_manifest_sha256="a" * 64,
+        ).contract_version
+        == "3.1.0"
+    )
 
 
 def test_semantics_document_is_canonical_json_stable() -> None:

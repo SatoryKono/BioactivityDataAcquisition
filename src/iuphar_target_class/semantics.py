@@ -293,12 +293,17 @@ PROFILE_CHANGE_RULES: Mapping[str, str] = MappingProxyType(
             "normalization_version; current approved value is unset"
         ),
         "classification_schema_version": (
-            f"off/shadow keep {CLASSIFICATION_SCHEMA_V30}; enrich uses "
-            f"{CLASSIFICATION_SCHEMA_V31} and the nine additive V31 columns"
+            f"Profile envelope field for enabled modes (shadow and enrich): "
+            f"{CLASSIFICATION_SCHEMA_V31}. Distinct from the table/business "
+            f"contract; the adapter rejects a profile that is not "
+            f"{CLASSIFICATION_SCHEMA_V31}"
         ),
         "table_contract": (
-            f"{TABLE_CONTRACT_V30} for unchanged business hash scope; "
-            f"{TABLE_CONTRACT_V31} only after enrich admission"
+            f"Business-row / Gold hash scope: off and shadow keep "
+            f"{TABLE_CONTRACT_V30} (TargetClassificationConfig.contract_version "
+            f"{CLASSIFICATION_SCHEMA_V30}); enrich alone advances to "
+            f"{TABLE_CONTRACT_V31} / {CLASSIFICATION_SCHEMA_V31} and the nine "
+            "additive columns"
         ),
         "profile_envelope": (
             "snapshot_manifest points at the profile envelope; digest is SHA-256 of "
