@@ -1,12 +1,13 @@
 {
   "schema_version": 1,
-  "catalog_ref": "525c1d76319b6bb5e83db3010977e038356c6b3c",
-  "source_ref": "01decda5ecb19a6e6e931ba6f3accb256471981a",
+  "catalog_ref": "b830306911f5189a71b165476797ec2a2b9b86b0",
+  "source_ref": "a00ffa8cc031c161d605d445ef5a644c988fca9e",
   "source_reviews": {
-    "src/bioetl/application/services/workflow/_observability_workflow_execution.py": "Reviewed manifest-selected diagnostics and identity checks; no external resource acquisition, ownership, or lifecycle changes."
+    "src/bioetl/application/services/workflow/_observability_workflow_execution.py": "Observability workflow execution change reviewed after #13361 rematch; existing external-resource ownership and lifecycle unchanged. No new runtime qualification."
   },
   "expression_updates": {},
   "segment_updates": {},
+  "line_updates": {},
   "reference_moves": [],
   "exclusion_moves": [],
   "resource_updates": {},
