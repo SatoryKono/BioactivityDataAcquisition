@@ -18,8 +18,13 @@ from .evidence import (
     require_class_chain,
 )
 from .gtopdb_2026_3_1 import FAMILY_ROWS
-from .hierarchy import FamilyNode, HierarchyResult, normalize_provider_class
-from .iuphar_mapping import approved_class_mappings
+from .hierarchy import (
+    FamilyNode,
+    HierarchyResult,
+    is_synthetic_local_family_id,
+    normalize_provider_class,
+)
+from .iuphar_mapping import approved_class_mappings, approved_subclass_mappings
 from .local_layer import Prediction, apply_local
 from .matching import (
     METHOD_ORDER,
@@ -64,6 +69,8 @@ class IndexedSnapshot:
         default_factory=dict
     )
     admission_complete: bool | None = None
+    type_to_subclass: Mapping[str, str] = field(default_factory=dict)
+    family_to_subclass: Mapping[str, str] = field(default_factory=dict)
 
     @classmethod
     def from_approved_gtopdb(
@@ -80,6 +87,7 @@ class IndexedSnapshot:
     ) -> IndexedSnapshot:
         """Bind a frozen provider snapshot to the exact approved release."""
         types, families = approved_class_mappings(release)
+        type_sub, family_sub = approved_subclass_mappings(release)
         nodes = tuple(
             FamilyNode(str(family), tuple(map(str, parents)), source_type)
             for family, source_type, parents in FAMILY_ROWS
@@ -93,6 +101,8 @@ class IndexedSnapshot:
             family_nodes=nodes,
             type_to_class=types,
             family_to_class=families,
+            type_to_subclass=type_sub,
+            family_to_subclass=family_sub,
             complex_ids=complex_ids,
             species_annotations=species_annotations,
             admission_complete=admission_complete,
@@ -110,6 +120,8 @@ class IndexedSnapshot:
         family_nodes: tuple[FamilyNode, ...],
         type_to_class: Mapping[str, str],
         family_to_class: Mapping[str, str],
+        type_to_subclass: Mapping[str, str] | None = None,
+        family_to_subclass: Mapping[str, str] | None = None,
         complex_ids: frozenset[str] = frozenset(),
         species_annotations: Mapping[tuple[str, str], ProviderAnnotation] | None = None,
         admission_complete: bool | None = None,
@@ -133,6 +145,8 @@ class IndexedSnapshot:
             complex_ids,
             MappingProxyType(scoped),
             admission_complete,
+            MappingProxyType(dict(type_to_subclass or {})),
+            MappingProxyType(dict(family_to_subclass or {})),
         )
 
 
@@ -361,6 +375,8 @@ def _ancestor_records(
         if key in seen:
             continue
         seen.add(key)
+        if is_synthetic_local_family_id(key):
+            continue
         nodes = ctx.families.get(key, ())
         records.extend(nodes)
         pending.extend(parent for node in nodes for parent in node.parent_ids)
@@ -379,6 +395,8 @@ def _direct(
         nodes=_ancestor_records(ctx, annotation.family_ids),
         type_to_class=ctx.type_to_class,
         family_to_class=ctx.family_to_class,
+        type_to_subclass=ctx.type_to_subclass,
+        family_to_subclass=ctx.family_to_subclass,
     )
 
 
@@ -659,12 +677,22 @@ def _resolution_input(
     direct_class: str | None,
 ) -> ResolutionInput:
     """Project frozen classification inputs without changing fallback rules."""
+    subclass = direct.iuphar_subclass if direct else None
+    # Family-only subclass labels must be allowed even when type→subclass is empty.
+    direct_vocabulary = frozenset(snapshot.type_to_subclass.values()) | frozenset(
+        snapshot.family_to_subclass.values()
+    )
     return ResolutionInput(
         match_status=match.match_status or "contract_error",
         iuphar_annotation_status=annotation_status,
         local_status=local.local_status or "not_supported",
         iuphar_class=direct_class,
         local_class=local.local_class,
+        iuphar_subclass=subclass,
+        # family_only / partial reads confirmed_subclasses, not iuphar_subclass.
+        confirmed_subclasses=(subclass,)
+        if subclass and annotation_status == "partial"
+        else (),
         local_subclasses=local.local_subclasses,
         partial_basis=_partial_basis(direct, annotation_status),
         target_kind=row.target_kind or "protein",
@@ -674,6 +702,7 @@ def _resolution_input(
         raw_type=annotation.type_raw if annotation else None,
         matched_target_id=match.matched_target_id,
         candidate_target_ids=candidate_ids,
+        direct_vocabulary=direct_vocabulary,
     )
 
 

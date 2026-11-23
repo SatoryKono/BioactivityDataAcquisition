@@ -62,7 +62,7 @@ def reference_inputs(tmp_path: Path):
     provenance = RunProvenance(
         "synthetic-snapshot",
         "bioetl-iuphar-input-v1",
-        "plan-v1-r8",
+        "plan-v1-r9",
         "3.1.0",
         "2026-11-16T00:00:00Z",
         "2026-11-16T00:01:00Z",

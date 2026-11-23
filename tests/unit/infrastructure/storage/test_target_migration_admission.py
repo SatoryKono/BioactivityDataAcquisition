@@ -288,7 +288,7 @@ def _synthetic_profile(tmp_path: Path) -> LoadedIupharProfile:
         (tmp_path / "profile.json").as_uri(),
         "c" * 64,
         "bioetl-iuphar-input-v1",
-        "plan-v1-r8",
+        "plan-v1-r9",
         "3.1.0",
         MATCHING_POLICY_VERSION,
     )

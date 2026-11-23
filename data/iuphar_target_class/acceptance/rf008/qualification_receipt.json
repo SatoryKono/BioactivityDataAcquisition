@@ -176,10 +176,10 @@
       "version_status": "не утверждено"
     },
     "partition_sha256": "9a9bfb127e0bff84d1b3c22cd6b13a8c605e6b730ceccad70801a7d2dbe4f790",
-    "profile_sha256": "67598dc8b09ffa7515ed16cd9b20e210a112f7c727560371d9d81ab94f78e745",
+    "profile_sha256": "30b3438ed6ea6611d11a9d781173d3e4309bf3c0a4cbc9001ebd385686fd726a",
     "rules": {
-      "rules_sha256": "3a718d39fd2b58b634c9bccbf66ad3203c87ccaf6556b35f0e78240061c66fc3",
-      "rules_version": "plan-v1-r8",
+      "rules_sha256": "ff627e7e47887e26b49e57684aab5c004a9a6d3723646b61fb8e045008cb6447",
+      "rules_version": "plan-v1-r9",
       "working_classes": [
         "Receptor",
         "Ion Channel",

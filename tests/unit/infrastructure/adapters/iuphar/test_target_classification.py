@@ -59,7 +59,7 @@ def _receipt(snapshot_hash: str) -> dict[str, object]:
         "run_id": "contract-run",
         "reviewer_reference": "synthetic-unit-test-expectations",
         "normalization_version": "bioetl-iuphar-input-v1",
-        "rules_version": "plan-v1-r8",
+        "rules_version": "plan-v1-r9",
         "classification_schema_version": "3.1.0",
         "matching_policy_version": "rf002-uniprot-roles-2026-11-23",
     }
@@ -132,7 +132,7 @@ def _profile(
         "snapshot": snapshot_ref,
         "acceptance": acceptance,
         "normalization_version": "bioetl-iuphar-input-v1",
-        "rules_version": "plan-v1-r8",
+        "rules_version": "plan-v1-r9",
         "classification_schema_version": "3.1.0",
         "matching_policy_version": "rf002-uniprot-roles-2026-11-23",
     }

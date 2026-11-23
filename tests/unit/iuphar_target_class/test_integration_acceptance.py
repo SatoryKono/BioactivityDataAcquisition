@@ -246,7 +246,7 @@ def acceptance_inputs(tmp_path):
     provenance = RunProvenance(
         "synthetic-fixture",
         "bioetl-iuphar-input-v1",
-        "plan-v1-r8",
+        "plan-v1-r9",
         "3.1.0",
         "frozen",
         "frozen",

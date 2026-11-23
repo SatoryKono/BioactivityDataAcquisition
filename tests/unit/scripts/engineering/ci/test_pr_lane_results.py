@@ -1016,6 +1016,21 @@ def test_shadow_compare_routes_rf002_identifier_roles_contract(path: str) -> Non
     assert selection["covers_full_suite"] is False
 
 
+@pytest.mark.parametrize(
+    "path",
+    [
+        "data/iuphar_target_class/rf005/coverage_matrix.json",
+        "data/iuphar_target_class/rf005/coverage_matrix.sha256.json",
+    ],
+)
+def test_shadow_compare_routes_rf005_coverage_matrix(path: str) -> None:
+    """RF-005 coverage matrix pins keep an explicit Class-lane shadow route."""
+    repo_root = Path(__file__).resolve().parents[5]
+    selection = build_shadow_compare([path], repo_root=repo_root)
+    assert "tests/unit/iuphar_target_class/test_hierarchy.py" in selection["selected"]
+    assert selection["covers_full_suite"] is False
+
+
 def test_shadow_compare_routes_uv_resolver_to_wrapper_contracts() -> None:
     repo_root = Path(__file__).resolve().parents[5]
     selection = build_shadow_compare(
