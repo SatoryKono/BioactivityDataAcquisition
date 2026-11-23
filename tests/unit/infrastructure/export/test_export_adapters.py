@@ -526,22 +526,18 @@ def test_export_catalog_adapter_lists_and_resolves_delta_tables(tmp_path: Path) 
             base_path=base, table_name="activities", layer="silver"
         )
 
-    table_dir = base / "chembl" / "activity" / "activities"
+    table_dir = base / "chembl" / "activity"
     (table_dir / "_delta_log").mkdir(parents=True)
-    (base / "chembl" / "activity" / "not_delta").mkdir()
-    (base / "chembl" / "activity" / "not_a_directory").write_text(
-        "not a table",
-        encoding="utf-8",
-    )
+    (base / "chembl" / "staging" / "not_delta").mkdir(parents=True)
     (base / "chembl" / "not_an_entity").write_text("not an entity", encoding="utf-8")
     (base / "README.txt").write_text("not a provider", encoding="utf-8")
 
     assert adapter.list_tables(base_path=base, layer="silver") == [
-        ("activities", str(table_dir))
+        ("chembl.activity", str(table_dir.resolve()))
     ]
     assert adapter.resolve_table_path(
         base_path=base,
-        table_name="activities",
+        table_name="chembl.activity",
         layer="silver",
     ) == str(table_dir.resolve())
     with pytest.raises(FileNotFoundError, match="Table 'missing' not found"):
