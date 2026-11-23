@@ -578,7 +578,7 @@ class _CoalescedPrecommit:
     }
 
     REVISIONS: ClassVar[dict[str, str]] = {
-        "https://github.com/astral-sh/ruff-pre-commit": "v0.17.4",
+        "https://github.com/astral-sh/ruff-pre-commit": "v0.17.5",
         "https://github.com/pre-commit/pre-commit-hooks": "v6.0.0",
     }
 
