@@ -2,31 +2,30 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
+from pathlib import Path
+
 import pytest
 
-from iuphar_target_class.gtopdb_2026_3_1 import (
-    ARCHIVE_SHA256,
-    SQL_SHA256,
-    TARGETS_CSV_SHA256,
-)
 from iuphar_target_class.hierarchy import (
-    CoverageExclusion,
     FamilyNode,
-    SpeciesVariant,
-    admit_approved_release,
-    admit_family_graph,
+    assign_mapped_subclass,
     build_family_paths,
-    coverage_matrix,
     normalize_approved_provider_class,
     normalize_provider_class,
-    official_material_provenance,
-    qualified_absence,
     validate_family_graph,
 )
 from iuphar_target_class.policy import GRAPH_MAX_DEPTH, GRAPH_MAX_VISITED_NODES
 from iuphar_target_class.rf008_qualification import evaluate_categories
 
 pytestmark = pytest.mark.unit
+
+REPO = Path(__file__).resolve().parents[3]
+RF005_MATRIX = REPO / "data" / "iuphar_target_class" / "rf005" / "coverage_matrix.json"
+RF005_RECEIPT = (
+    REPO / "data" / "iuphar_target_class" / "rf005" / "coverage_matrix.sha256.json"
+)
 
 
 def _chain(edges: int) -> tuple[FamilyNode, ...]:
@@ -146,51 +145,55 @@ def test_duplicate_family_payloads_are_rejected() -> None:
         max_visited_nodes=GRAPH_MAX_VISITED_NODES,
     )
     assert defect is not None
-    assert defect.message == "противоречивая запись"
+    assert defect.message == "повторяющийся идентификатор"
 
 
-def test_same_payload_with_different_parents_is_order_independent() -> None:
-    orders = (
-        (
-            FamilyNode("leaf", ("right",), "same"),
-            FamilyNode("leaf", ("left",), "same"),
-        ),
-        (
-            FamilyNode("leaf", ("left",), "same"),
-            FamilyNode("leaf", ("right",), "same"),
-        ),
+def test_same_payload_with_different_parents_merges_order_independently() -> None:
+    """RF-005: union parent sets by family ID; do not keep only the first row."""
+    left = (
+        FamilyNode("leaf", ("a",), "enzyme"),
+        FamilyNode("leaf", ("b",), "enzyme"),
+        FamilyNode("a", (), "grouping"),
+        FamilyNode("b", (), "grouping"),
     )
-    parents = (
-        FamilyNode("left", (), "left"),
-        FamilyNode("right", (), "right"),
+    right = (
+        FamilyNode("leaf", ("b",), "enzyme"),
+        FamilyNode("leaf", ("a",), "enzyme"),
+        FamilyNode("b", (), "grouping"),
+        FamilyNode("a", (), "grouping"),
     )
-    paths = [("left", "leaf"), ("right", "leaf")]
-    for rows in orders:
+    expected = [("a", "leaf"), ("b", "leaf")]
+    for nodes in (left, right):
         result = normalize_provider_class(
-            type_name=None,
-            family_ids=("leaf",),
-            nodes=(*rows, *parents),
-            type_to_class={},
-            family_to_class={"leaf": "Enzyme"},
-        )
-        assert result.diagnostics == ()
-        assert result.iuphar_class == "Enzyme"
-        assert [item.root_to_leaf for item in result.paths] == paths
-    missing_orders = (
-        (FamilyNode("leaf", (), "same"), FamilyNode("leaf", ("gone",), "same")),
-        (FamilyNode("leaf", ("gone",), "same"), FamilyNode("leaf", (), "same")),
-    )
-    for nodes in missing_orders:
-        blocked = normalize_provider_class(
             type_name=None,
             family_ids=("leaf",),
             nodes=nodes,
             type_to_class={},
             family_to_class={"leaf": "Enzyme"},
+            family_to_subclass={"leaf": "Enzymes"},
         )
-        assert blocked.diagnostics[0].message == "отсутствующий родитель"
-        assert blocked.iuphar_class is None
-        assert blocked.paths == ()
+        assert result.diagnostics == ()
+        assert result.iuphar_class == "Enzyme"
+        assert result.iuphar_subclass == "Enzymes"
+        assert [item.root_to_leaf for item in result.paths] == expected
+
+
+def test_conflicting_payloads_for_same_family_still_fail() -> None:
+    result = normalize_provider_class(
+        type_name=None,
+        family_ids=("leaf",),
+        nodes=(
+            FamilyNode("leaf", ("a",), "enzyme"),
+            FamilyNode("leaf", ("b",), "transporter"),
+            FamilyNode("a", (), "grouping"),
+            FamilyNode("b", (), "grouping"),
+        ),
+        type_to_class={},
+        family_to_class={"leaf": "Enzyme"},
+    )
+    assert result.diagnostics[0].message == "повторяющийся идентификатор"
+    assert result.iuphar_class is None
+    assert result.paths == ()
 
 
 def test_public_path_builder_rejects_a_cycle_and_a_missing_parent() -> None:
@@ -265,6 +268,25 @@ def test_depth_limit_and_one_past_it() -> None:
     assert past.iuphar_class is None
     assert past.annotation_status == "not_available"
     assert past.paths == ()
+
+
+def test_unrequested_deep_branch_blocks_admission_in_either_id_order() -> None:
+    deep = _chain(GRAPH_MAX_DEPTH + 1)
+    shallow = (FamilyNode("ok", (), "ok"),)
+    forward = validate_family_graph(
+        (*deep, *shallow),
+        ("ok",),
+        max_depth=GRAPH_MAX_DEPTH,
+        max_visited_nodes=10_000,
+    )
+    reverse = validate_family_graph(
+        (*tuple(reversed(deep)), *shallow),
+        ("ok",),
+        max_depth=GRAPH_MAX_DEPTH,
+        max_visited_nodes=10_000,
+    )
+    assert forward is not None and reverse is not None
+    assert forward.message == reverse.message == "превышение лимита"
 
 
 def test_visited_node_limit_and_one_past_it() -> None:
@@ -343,7 +365,7 @@ def test_approved_real_release_classifies_gpcr_and_distinguishes_grouping() -> N
     )
     assert gpcr.annotation_status == "available"
     assert gpcr.iuphar_class == "Receptor"
-    assert gpcr.iuphar_subclass is None
+    assert gpcr.iuphar_subclass == "G protein-coupled receptors"
     assert gpcr.family_evidence == (("1", "Receptor"),)
     assert gpcr.paths and all("694" in path.root_to_leaf for path in gpcr.paths)
     fallback = normalize_approved_provider_class(
@@ -355,6 +377,7 @@ def test_approved_real_release_classifies_gpcr_and_distinguishes_grouping() -> N
     assert fallback.proof == "отображение семейства"
     assert fallback.source == "iuphar_normalized"
     assert fallback.iuphar_class == "Receptor"
+    assert fallback.iuphar_subclass == "G protein-coupled receptors"
     group = normalize_approved_provider_class(
         release="2026.3.1",
         type_name="grouping",
@@ -362,7 +385,147 @@ def test_approved_real_release_classifies_gpcr_and_distinguishes_grouping() -> N
     )
     assert group.annotation_status == "unmapped_type"
     assert group.iuphar_class is None
+    assert group.iuphar_subclass is None
     assert group.family_evidence == ()
+
+
+def test_approved_multi_parent_family_keeps_every_path() -> None:
+    result = normalize_approved_provider_class(
+        release="2026.3.1",
+        type_name=None,
+        family_ids=("254",),
+    )
+    assert result.annotation_status == "partial"
+    assert result.iuphar_class == "Enzyme"
+    assert result.iuphar_subclass == "Enzymes"
+    paths = [item.root_to_leaf for item in result.paths]
+    assert paths == sorted(paths)
+    assert len(paths) == 2
+    assert all(path[-1] == "254" for path in paths)
+    assert {"239", "865"} == {path[-2] for path in paths}
+
+
+def test_family_subclass_fallback_requires_matching_family_class() -> None:
+    """Family subclass is kept only when its family class matches iuphar_class."""
+    compatible = assign_mapped_subclass(
+        type_name="enzyme",
+        family_ids=("900",),
+        type_to_subclass={},
+        family_to_subclass={"900": "Enzymes"},
+        iuphar_class="Enzyme",
+        family_to_class={"900": "Enzyme"},
+    )
+    assert compatible == "Enzymes"
+    mismatched = assign_mapped_subclass(
+        type_name="enzyme",
+        family_ids=("1",),
+        type_to_subclass={},
+        family_to_subclass={"1": "G protein-coupled receptors"},
+        iuphar_class="Enzyme",
+        family_to_class={"1": "Receptor"},
+    )
+    assert mismatched is None
+    via_normalize = normalize_provider_class(
+        type_name="enzyme",
+        family_ids=("1",),
+        nodes=(FamilyNode("1", (), "gpcr"),),
+        type_to_class={"enzyme": "Enzyme"},
+        family_to_class={"1": "Receptor"},
+        type_to_subclass={},
+        family_to_subclass={"1": "G protein-coupled receptors"},
+    )
+    assert via_normalize.iuphar_class == "Enzyme"
+    assert via_normalize.iuphar_subclass is None
+
+
+def test_synthetic_family_ids_stay_outside_official_paths() -> None:
+    mixed = normalize_provider_class(
+        type_name="gpcr",
+        family_ids=("1", "local:x"),
+        nodes=(FamilyNode("1", (), "gpcr"),),
+        type_to_class={"gpcr": "Receptor"},
+        family_to_class={"1": "Receptor"},
+        type_to_subclass={"gpcr": "G protein-coupled receptors"},
+        family_to_subclass={"1": "G protein-coupled receptors"},
+    )
+    assert mixed.iuphar_class == "Receptor"
+    assert mixed.iuphar_subclass == "G protein-coupled receptors"
+    assert [item.root_to_leaf for item in mixed.paths] == [("1",)]
+    assert (
+        mixed.diagnostics[0].message
+        == "синтетический идентификатор в официальном графе"
+    )
+    only_local = normalize_provider_class(
+        type_name=None,
+        family_ids=("local:x",),
+        nodes=(),
+        type_to_class={},
+        family_to_class={},
+    )
+    assert only_local.annotation_status == "not_available"
+    assert only_local.iuphar_class is None
+    assert only_local.paths == ()
+    assert (
+        only_local.diagnostics[0].message
+        == "синтетический идентификатор в официальном графе"
+    )
+    typed_local = normalize_provider_class(
+        type_name="gpcr",
+        family_ids=("local:x",),
+        nodes=(),
+        type_to_class={"gpcr": "Receptor"},
+        family_to_class={},
+        type_to_subclass={"gpcr": "G protein-coupled receptors"},
+    )
+    assert typed_local.annotation_status == "partial"
+    assert typed_local.iuphar_class == "Receptor"
+    assert typed_local.iuphar_subclass == "G protein-coupled receptors"
+    assert typed_local.proof == "type"
+    assert typed_local.paths == ()
+    assert typed_local.diagnostics[0].level == "error"
+    assert (
+        typed_local.diagnostics[0].message
+        == "синтетический идентификатор в официальном графе"
+    )
+
+
+def test_local_nodes_dropped_before_official_graph_validation() -> None:
+    """Codex P2: local records in nodes must not reject an intact official walk."""
+    result = normalize_provider_class(
+        type_name=None,
+        family_ids=("1", "local:x"),
+        nodes=(
+            FamilyNode("1", (), "enzyme"),
+            FamilyNode("local:x", ("1",), "enzyme"),
+        ),
+        type_to_class={},
+        family_to_class={"1": "Enzyme"},
+        family_to_subclass={"1": "Enzymes"},
+    )
+    assert result.annotation_status == "partial"
+    assert result.iuphar_class == "Enzyme"
+    assert result.iuphar_subclass == "Enzymes"
+    assert [item.root_to_leaf for item in result.paths] == [("1",)]
+    assert result.diagnostics[0].level == "warning"
+    assert (
+        result.diagnostics[0].message
+        == "синтетический идентификатор в официальном графе"
+    )
+    broken = normalize_provider_class(
+        type_name=None,
+        family_ids=("1",),
+        nodes=(FamilyNode("1", ("local:x",), "enzyme"),),
+        type_to_class={},
+        family_to_class={"1": "Enzyme"},
+    )
+    assert broken.annotation_status == "not_available"
+    assert broken.iuphar_class is None
+    assert broken.paths == ()
+    assert broken.diagnostics[0].level == "error"
+    assert (
+        broken.diagnostics[0].message
+        == "синтетический идентификатор в официальном графе"
+    )
 
 
 def test_approved_mapping_is_rejected_for_a_different_release() -> None:
@@ -388,321 +551,20 @@ def test_conflicting_family_evidence_is_not_hidden_by_a_known_type() -> None:
     assert conflict.family_evidence == (("1", "Receptor"), ("2", "Ion Channel"))
 
 
-def test_subclass_dictionary_stays_partial_and_does_not_read_path_text() -> None:
-    nodes = (
-        FamilyNode("leaf", ("root",), "leaf"),
-        FamilyNode("root", (), "root"),
+def test_rf005_coverage_matrix_keeps_family_only_and_receipt() -> None:
+    payload = RF005_MATRIX.read_bytes()
+    receipt = json.loads(RF005_RECEIPT.read_text(encoding="utf-8"))
+    assert hashlib.sha256(payload).hexdigest() == receipt["sha256"]
+    document = json.loads(payload.decode("utf-8"))
+    assert document["artifact"] == "iuphar_rf005_coverage_matrix"
+    assert document["annotation_capability"] == "family_only"
+    assert document["biological_accuracy_accepted"] is False
+    assert "source_unavailable" in document["source_unavailable_policy"]
+    assert document["family_graph"]["multi_parent_rows"] >= 1
+    assert (
+        "G protein-coupled receptors"
+        in document["object_types"]["approved_type_to_subclass"].values()
     )
-    mapped = normalize_provider_class(
-        type_name=None,
-        family_ids=("leaf",),
-        nodes=nodes,
-        type_to_class={},
-        family_to_class={"leaf": "Enzyme"},
-        family_to_subclass={"leaf": "Kinase", "root": "Ignored"},
-        name="kinase",
-        path_text="Kinase / foo",
-    )
-    assert mapped.annotation_status == "partial"
-    assert mapped.iuphar_class == "Enzyme"
-    assert mapped.iuphar_subclass == "Kinase"
-    assert mapped.iuphar_subclass_candidates == ("Kinase",)
-    assert mapped.type_origin is None
-    assert mapped.class_origin == "family_mapping"
-    assert mapped.subclass_origin == "subclass_dictionary"
-    assert mapped.annotation_capability == "family_only"
-    assert mapped.absence_status == "source_unavailable"
-    assert mapped.proof == "отображение семейства"
-    unnamed = normalize_provider_class(
-        type_name=None,
-        family_ids=("leaf",),
-        nodes=nodes,
-        type_to_class={},
-        family_to_class={"leaf": "Enzyme"},
-        name="kinase",
-        path_text="Kinase / foo",
-    )
-    assert unnamed.iuphar_subclass is None
-    assert unnamed.subclass_origin is None
-    blank = normalize_provider_class(
-        type_name="gpcr",
-        family_ids=("leaf",),
-        nodes=nodes,
-        type_to_class={"gpcr": "Receptor"},
-        family_to_class={"leaf": "Enzyme"},
-        family_to_subclass={"leaf": "  ", "root": ""},
-    )
-    assert blank.annotation_status == "available"
-    assert blank.iuphar_subclass is None
-    assert blank.iuphar_subclass_candidates == ()
-    partial_blank = normalize_provider_class(
-        type_name=None,
-        family_ids=("leaf",),
-        nodes=nodes,
-        type_to_class={},
-        family_to_class={"leaf": "Enzyme"},
-        family_to_subclass={"leaf": ""},
-    )
-    assert partial_blank.annotation_status == "partial"
-    assert partial_blank.iuphar_subclass is None
-    kept = normalize_provider_class(
-        type_name="gpcr",
-        family_ids=("leaf",),
-        nodes=nodes,
-        type_to_class={"gpcr": "Receptor"},
-        family_to_class={"leaf": "Enzyme"},
-        family_to_subclass={"leaf": " Kinase ", "root": " "},
-    )
-    assert kept.annotation_status == "available"
-    assert kept.iuphar_subclass == "Kinase"
-    typed = normalize_provider_class(
-        type_name="gpcr",
-        family_ids=("leaf",),
-        nodes=nodes,
-        type_to_class={"gpcr": "Receptor"},
-        family_to_class={"leaf": "Receptor"},
-        family_to_subclass={"leaf": "Kinase"},
-    )
-    assert typed.annotation_status == "available"
-    assert typed.iuphar_class == "Receptor"
-    assert typed.iuphar_subclass == "Kinase"
-    assert typed.type_origin == "type_mapping"
-    assert typed.class_origin == "type_mapping"
-    assert typed.subclass_origin == "subclass_dictionary"
-    assert typed.annotation_capability == "family_only"
-
-
-def test_disagreeing_subclasses_do_not_drop_the_agreed_class() -> None:
-    result = normalize_provider_class(
-        type_name=None,
-        family_ids=("1", "2"),
-        nodes=(FamilyNode("1", (), "one"), FamilyNode("2", (), "two")),
-        type_to_class={},
-        family_to_class={"1": "Enzyme", "2": "Enzyme"},
-        family_to_subclass={"1": "Kinase", "2": "Protease"},
-    )
-    assert result.annotation_status == "partial"
-    assert result.iuphar_class == "Enzyme"
-    assert result.iuphar_subclass is None
-    assert result.iuphar_subclass_candidates == ("Kinase", "Protease")
-    assert result.class_origin == "family_mapping"
-    assert result.subclass_origin == "subclass_dictionary"
-    assert result.annotation_capability == "family_only"
-
-
-def test_legacy_and_local_ids_stay_outside_official_paths() -> None:
-    nodes = (
-        FamilyNode("leaf", ("local:1", "root"), "leaf"),
-        FamilyNode("root", (), "root"),
-        FamilyNode("local:1", ("legacy:9",), "synth"),
-        FamilyNode("legacy:9", (), "old"),
-    )
-    result = normalize_provider_class(
-        type_name=None,
-        family_ids=("leaf", "local:1"),
-        nodes=nodes,
-        type_to_class={},
-        family_to_class={"leaf": "Enzyme", "local:1": "Ion Channel"},
-        family_to_subclass={"local:1": "Secret", "leaf": "Kinase"},
-    )
-    assert result.diagnostics == ()
-    assert result.iuphar_class == "Enzyme"
-    assert result.iuphar_subclass == "Kinase"
-    assert result.family_evidence == (("leaf", "Enzyme"),)
-    assert [item.root_to_leaf for item in result.paths] == [("root", "leaf")]
-    assert ("leaf", "local:1", "synthetic_local") in result.detached_edges
-    assert ("local:1", "legacy:9", "legacy") in result.detached_edges
-    assert result.separated_ids == (("local:1", "synthetic_local"),)
-    assert result.annotation_capability == "family_only"
-
-
-def test_cycle_or_missing_parent_blocks_snapshot_admission() -> None:
-    cycle_nodes = (
-        FamilyNode("ok", (), "ok"),
-        FamilyNode("a", ("b",), "a"),
-        FamilyNode("b", ("a",), "b"),
-    )
-    cycle = admit_family_graph(cycle_nodes, ("ok",))
-    assert cycle.admitted is False
-    assert cycle.diagnostics[0].message == "цикл"
-    assert cycle.annotation_capability == "family_only"
-    assert cycle.absence_status == "source_unavailable"
-    missing = admit_family_graph((FamilyNode("a", ("gone",), "a"),), ("a",))
-    assert missing.admitted is False
-    assert missing.diagnostics[0].message == "отсутствующий родитель"
-    legacy_cycle = (
-        FamilyNode("leaf", (), "leaf"),
-        FamilyNode("legacy:a", ("legacy:b",), "a"),
-        FamilyNode("legacy:b", ("legacy:a",), "b"),
-    )
-    blocked = normalize_provider_class(
-        type_name=None,
-        family_ids=("leaf",),
-        nodes=legacy_cycle,
-        type_to_class={},
-        family_to_class={"leaf": "Enzyme"},
-    )
-    assert blocked.diagnostics[0].message == "цикл"
-    assert blocked.iuphar_class is None
-    assert blocked.iuphar_subclass is None
-
-
-def test_cut_path_does_not_keep_a_dictionary_subclass() -> None:
-    result = normalize_provider_class(
-        type_name=None,
-        family_ids=("leaf",),
-        nodes=(FamilyNode("leaf", ("gone",), "leaf"),),
-        type_to_class={},
-        family_to_class={"leaf": "Enzyme"},
-        family_to_subclass={"leaf": "Kinase"},
-    )
-    assert result.diagnostics[0].message == "отсутствующий родитель"
-    assert result.iuphar_subclass is None
-    assert result.subclass_origin is None
-    assert result.annotation_capability == "family_only"
-
-
-def test_species_rows_keep_taxa_and_ambiguous_uniprot() -> None:
-    provenance = official_material_provenance("2026.3.1")
-    exclusions = (CoverageExclusion("3", "10090", "нет видовой аннотации"),)
-    first = (
-        SpeciesVariant("2", "9606", ("P2", "P1"), "enzyme", "full"),
-        SpeciesVariant("1", "10116", ("P1",), "gpcr", "family_only"),
-        SpeciesVariant("1", "9606", ("P1",), "gpcr", "family_only"),
-        SpeciesVariant("1", "9606", ("P1",), "gpcr", "family_only"),
-    )
-    matrix_a = coverage_matrix(
-        first, exclusions, release="2026.3.1", provenance=provenance
-    )
-    matrix_b = coverage_matrix(
-        tuple(reversed(first)),
-        exclusions,
-        release="2026.3.1",
-        provenance=tuple(reversed(provenance)),
-        completeness_qualified=True,
-    )
-    assert matrix_a == matrix_b
-    assert [f"{item.target_id}:{item.taxon_id}" for item in matrix_a.variants] == [
-        "1:10116",
-        "1:9606",
-        "2:9606",
-    ]
-    assert matrix_a.variants[2].uniprot_ids == ("P1", "P2")
-    assert {item.annotation for item in matrix_a.variants} == {"family_only"}
-    assert matrix_a.annotation_capability == "family_only"
-    assert matrix_a.absence_status == "source_unavailable"
-    assert matrix_a.ambiguous_uniprot == (("P1", ("1", "2")),)
-    assert matrix_a.exclusions[0].reason == "нет видовой аннотации"
-    assert ("targets_csv_sha256", TARGETS_CSV_SHA256) in matrix_a.provenance
-    assert matrix_a.counts == (
-        ("10116", "gpcr", "family_only", 1),
-        ("9606", "enzyme", "family_only", 1),
-        ("9606", "gpcr", "family_only", 1),
-    )
-
-
-def test_family_only_absence_is_not_a_qualified_not_found() -> None:
-    assert qualified_absence("family_only", completeness_qualified=True) == (
-        "source_unavailable"
-    )
-    assert qualified_absence("complete", completeness_qualified=False) == (
-        "source_unavailable"
-    )
-    assert qualified_absence("complete", completeness_qualified=True) == "not_found"
-
-
-def test_approved_release_keeps_both_paths_and_pinned_hashes() -> None:
-    provenance = dict(official_material_provenance("2026.3.1"))
-    assert provenance["targets_csv_sha256"] == TARGETS_CSV_SHA256
-    assert provenance["archive_sha256"] == ARCHIVE_SHA256
-    assert provenance["sql_sha256"] == SQL_SHA256
-    admission = admit_approved_release("2026.3.1", ("953",))
-    assert admission.admitted is True
-    assert admission.diagnostics == ()
-    assert admission.annotation_capability == "family_only"
-    assert admission.absence_status == "source_unavailable"
-    mapped = normalize_approved_provider_class(
-        release="2026.3.1",
-        type_name=None,
-        family_ids=("953",),
-        family_to_subclass={"953": "Catalytic"},
-    )
-    assert [item.root_to_leaf for item in mapped.paths] == [
-        ("688", "862", "953"),
-        ("864", "954", "953"),
-    ]
-    assert mapped.annotation_status == "partial"
-    assert mapped.iuphar_class == "Receptor"
-    assert mapped.iuphar_subclass == "Catalytic"
-    assert mapped.class_origin == "family_mapping"
-    assert mapped.subclass_origin == "subclass_dictionary"
-    assert mapped.annotation_capability == "family_only"
-    assert mapped.absence_status == "source_unavailable"
-
-
-def _numbered_chain(
-    length: int, *, root_id_first: bool
-) -> tuple[tuple[FamilyNode, ...], str]:
-    labels = [f"{index:02d}" for index in range(length)]
-    ordered = labels if root_id_first else list(reversed(labels))
-    nodes = tuple(
-        FamilyNode(
-            family_id,
-            () if index == 0 else (ordered[index - 1],),
-            family_id,
-        )
-        for index, family_id in enumerate(ordered)
-    )
-    return nodes, ordered[0]
-
-
-@pytest.mark.parametrize("root_id_first", [True, False])
-def test_unrequested_deep_branch_blocks_admission_in_either_id_order(
-    root_id_first: bool,
-) -> None:
-    nodes, root = _numbered_chain(10, root_id_first=root_id_first)
-    blocked = admit_family_graph(
-        nodes,
-        (root,),
-        max_depth=8,
-        max_visited_nodes=10_000,
-    )
-    assert blocked.admitted is False
-    assert blocked.diagnostics[0].message == "превышение лимита"
-    assert blocked.annotation_capability == "family_only"
-    allowed_nodes, allowed_root = _numbered_chain(9, root_id_first=root_id_first)
-    allowed = admit_family_graph(
-        allowed_nodes,
-        (allowed_root,),
-        max_depth=8,
-        max_visited_nodes=10_000,
-    )
-    assert allowed.admitted is True
-    assert allowed.diagnostics == ()
-
-
-def test_unrelated_request_blocks_a_deeper_chain_in_either_naming() -> None:
-    forward = (
-        FamilyNode("a", (), "root"),
-        FamilyNode("b", ("a",), "mid"),
-        FamilyNode("c", ("b",), "leaf"),
-        FamilyNode("ok", (), "other"),
-    )
-    reverse = (
-        FamilyNode("c", (), "root"),
-        FamilyNode("b", ("c",), "mid"),
-        FamilyNode("a", ("b",), "leaf"),
-        FamilyNode("ok", (), "other"),
-    )
-    for nodes in (forward, reverse):
-        blocked = admit_family_graph(
-            nodes,
-            ("ok",),
-            max_depth=1,
-            max_visited_nodes=10_000,
-        )
-        assert blocked.admitted is False
-        assert blocked.diagnostics[0].message == "превышение лимита"
 
 
 def test_rf008_direct_class_and_graph_defects_follow_the_dictionary() -> None:

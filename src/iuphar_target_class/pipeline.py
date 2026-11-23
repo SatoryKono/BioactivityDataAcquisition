@@ -21,12 +21,13 @@ from .gtopdb_2026_3_1 import FAMILY_ROWS
 from .hierarchy import (
     FamilyNode,
     HierarchyResult,
-    _allowed_subclass_vocabulary,
-    admit_family_graph,
+    allowed_subclass_vocabulary,
     hierarchy_for_graph_defect,
+    is_synthetic_local_family_id,
     normalize_provider_class,
+    validate_family_graph,
 )
-from .iuphar_mapping import approved_class_mappings
+from .iuphar_mapping import approved_class_mappings, approved_subclass_mappings
 from .local_layer import Prediction, apply_local
 from .matching import (
     METHOD_ORDER,
@@ -48,7 +49,12 @@ from .models import (
     ValidatedInput,
 )
 from .normalization import isolated_invalid_result, validate_input
-from .policy import GRAPH_MAX_VISITED_NODES, local_rules, validate_rules
+from .policy import (
+    GRAPH_MAX_DEPTH,
+    GRAPH_MAX_VISITED_NODES,
+    local_rules,
+    validate_rules,
+)
 from .resolution import ResolutionInput, select_effective_class
 
 
@@ -71,6 +77,7 @@ class IndexedSnapshot:
         default_factory=dict
     )
     admission_complete: bool | None = None
+    type_to_subclass: Mapping[str, str] = field(default_factory=dict)
     family_to_subclass: Mapping[str, str] = field(default_factory=dict)
     graph_defect: Diagnostic | None = None
 
@@ -84,9 +91,10 @@ class IndexedSnapshot:
             self, "family_to_class", _frozen_strings(self.family_to_class)
         )
         object.__setattr__(
-            self,
-            "species_annotations",
-            _frozen_species(self.species_annotations),
+            self, "species_annotations", _frozen_species(self.species_annotations)
+        )
+        object.__setattr__(
+            self, "type_to_subclass", _frozen_strings(self.type_to_subclass)
         )
         object.__setattr__(
             self, "family_to_subclass", _frozen_strings(self.family_to_subclass)
@@ -104,7 +112,6 @@ class IndexedSnapshot:
         complex_ids: frozenset[str] = frozenset(),
         species_annotations: Mapping[tuple[str, str], ProviderAnnotation] | None = None,
         admission_complete: bool | None = None,
-        family_to_subclass: Mapping[str, str] | None = None,
     ) -> IndexedSnapshot:
         """Bind a frozen provider snapshot to the exact approved release.
 
@@ -113,6 +120,7 @@ class IndexedSnapshot:
         the snapshot, including a branch that no requested target uses.
         """
         types, families = approved_class_mappings(release)
+        type_sub, family_sub = approved_subclass_mappings(release)
         nodes = tuple(
             FamilyNode(str(family), tuple(map(str, parents)), source_type)
             for family, source_type, parents in FAMILY_ROWS
@@ -126,10 +134,11 @@ class IndexedSnapshot:
             family_nodes=nodes,
             type_to_class=types,
             family_to_class=families,
+            type_to_subclass=type_sub,
+            family_to_subclass=family_sub,
             complex_ids=complex_ids,
             species_annotations=species_annotations,
             admission_complete=admission_complete,
-            family_to_subclass=family_to_subclass,
         )
         if snapshot.graph_defect is not None:
             raise ValueError(
@@ -150,18 +159,23 @@ class IndexedSnapshot:
         family_nodes: tuple[FamilyNode, ...],
         type_to_class: Mapping[str, str],
         family_to_class: Mapping[str, str],
+        type_to_subclass: Mapping[str, str] | None = None,
+        family_to_subclass: Mapping[str, str] | None = None,
         complex_ids: frozenset[str] = frozenset(),
         species_annotations: Mapping[tuple[str, str], ProviderAnnotation] | None = None,
         admission_complete: bool | None = None,
-        family_to_subclass: Mapping[str, str] | None = None,
     ) -> IndexedSnapshot:
         """Index all channels once and verify recorded provider payload hashes."""
         lookup, families = _snapshot_indexes(catalog, family_nodes)
         _validate_provider_payloads(annotations)
         scoped = dict(species_annotations or {})
         _validate_species_payloads(scoped)
-        admission = admit_family_graph(family_nodes, ())
-        defect = None if admission.admitted else admission.diagnostics[0]
+        admission = validate_family_graph(
+            family_nodes,
+            (),
+            max_depth=GRAPH_MAX_DEPTH,
+            max_visited_nodes=GRAPH_MAX_VISITED_NODES,
+        )
         return cls(
             snapshot_id,
             mapping_version,
@@ -176,8 +190,9 @@ class IndexedSnapshot:
             complex_ids,
             MappingProxyType(scoped),
             admission_complete,
+            MappingProxyType(dict(type_to_subclass or {})),
             MappingProxyType(dict(family_to_subclass or {})),
-            defect,
+            admission,
         )
 
 
@@ -394,7 +409,6 @@ def _conflict_catalog(
 def _ancestor_records(
     ctx: IndexedSnapshot, ids: tuple[str, ...]
 ) -> tuple[FamilyNode, ...]:
-    """Collect requested families and their parents within the visit budget."""
     seen: set[str] = set()
     pending = list(ids)
     records: list[FamilyNode] = []
@@ -403,6 +417,8 @@ def _ancestor_records(
         if key in seen:
             continue
         seen.add(key)
+        if is_synthetic_local_family_id(key):
+            continue
         nodes = ctx.families.get(key, ())
         records.extend(nodes)
         pending.extend(parent for node in nodes for parent in node.parent_ids)
@@ -421,6 +437,7 @@ def _direct(
             ctx.graph_defect,
             type_name=type_name,
             type_to_class=ctx.type_to_class,
+            type_to_subclass=ctx.type_to_subclass,
         )
     return normalize_provider_class(
         type_name=type_name,
@@ -428,6 +445,7 @@ def _direct(
         nodes=_ancestor_records(ctx, annotation.family_ids),
         type_to_class=ctx.type_to_class,
         family_to_class=ctx.family_to_class,
+        type_to_subclass=ctx.type_to_subclass,
         family_to_subclass=ctx.family_to_subclass,
     )
 
@@ -652,25 +670,6 @@ def _bound_diagnostics(
     return tuple(result)
 
 
-def _resolved_subclasses(
-    direct: HierarchyResult | None,
-    annotation_status: str | None,
-    family_to_subclass: Mapping[str, str],
-) -> tuple[str | None, tuple[str, ...], frozenset[str]]:
-    """Split one explicit subclass the way resolution reads each status.
-
-    A partial annotation uses ``confirmed_subclasses``. Any other status uses
-    ``iuphar_subclass``. Allowed labels are the dictionary values after the
-    same trim used at extraction, so a padded label is not a contract defect.
-    """
-    allowed = _allowed_subclass_vocabulary(family_to_subclass)
-    subclass = None if direct is None else direct.iuphar_subclass
-    if annotation_status == "partial":
-        confirmed = () if subclass is None else (subclass,)
-        return None, confirmed, allowed
-    return subclass, (), allowed
-
-
 def _partial_basis(
     direct: HierarchyResult | None, annotation_status: str | None
 ) -> Literal["type", "family_mapping"] | None:
@@ -707,8 +706,10 @@ def _resolution_input(
     direct_class: str | None,
 ) -> ResolutionInput:
     """Project frozen classification inputs without changing fallback rules."""
-    subclass, confirmed, vocabulary = _resolved_subclasses(
-        direct, annotation_status, snapshot.family_to_subclass
+    subclass = direct.iuphar_subclass if direct else None
+    # Family-only subclass labels must be allowed even when type→subclass is empty.
+    direct_vocabulary = allowed_subclass_vocabulary(
+        snapshot.type_to_subclass, snapshot.family_to_subclass
     )
     return ResolutionInput(
         match_status=match.match_status or "contract_error",
@@ -717,9 +718,11 @@ def _resolution_input(
         iuphar_class=direct_class,
         local_class=local.local_class,
         iuphar_subclass=subclass,
+        # family_only / partial reads confirmed_subclasses, not iuphar_subclass.
+        confirmed_subclasses=(subclass,)
+        if subclass and annotation_status == "partial"
+        else (),
         local_subclasses=local.local_subclasses,
-        confirmed_subclasses=confirmed,
-        direct_vocabulary=vocabulary,
         partial_basis=_partial_basis(direct, annotation_status),
         target_kind=row.target_kind or "protein",
         complex_direct_match=match.matched_target_id in snapshot.complex_ids,
@@ -728,6 +731,7 @@ def _resolution_input(
         raw_type=annotation.type_raw if annotation else None,
         matched_target_id=match.matched_target_id,
         candidate_target_ids=candidate_ids,
+        direct_vocabulary=direct_vocabulary,
     )
 
 

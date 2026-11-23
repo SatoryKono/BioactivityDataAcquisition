@@ -246,7 +246,7 @@ def acceptance_inputs(tmp_path):
     provenance = RunProvenance(
         "synthetic-fixture",
         "bioetl-iuphar-input-v1",
-        "plan-v1-r8",
+        "plan-v1-r9",
         "3.1.0",
         "frozen",
         "frozen",
@@ -398,6 +398,9 @@ def test_reference_mismatch_is_fail_not_an_invented_pass(tmp_path, acceptance_in
     )
     assert report["status"] == "FAIL"
     assert report["reference_cases_accepted"] is False
+    assert report["checks"]["reference_cases"] == "FAIL"
+    assert report["checks"]["evidence_integrity"] == "NOT_RUN"
+    assert report["checks"]["semantic_determinism"] == "NOT_RUN"
 
 
 def test_missing_real_pipeline_proof_blocks_acceptance(tmp_path, acceptance_inputs):
