@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "catalog_ref": "b830306911f5189a71b165476797ec2a2b9b86b0",
-  "source_ref": "b668d17d41767958c001663c059e8dba162bdf56",
+  "catalog_ref": "17f95f46d4b4e4c8270f1120aad2ec0cefcbcec0",
+  "source_ref": "0ed2c1484dea9293789ac422fad145bf58114484",
   "source_reviews": {
     "src/bioetl/application/services/workflow/control_plane/_execution_resume_support.py": "Selective repair preflight rejects failed held steps outside --repair-steps/--force-steps. Existing workflow_state_port.save facade exclusion retained with line drift 213\u2192226 only; ownership and lifecycle unchanged. No new runtime qualification."
   },
