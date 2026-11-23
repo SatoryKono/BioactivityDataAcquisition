@@ -39,6 +39,20 @@ TYPE_CLASS_PAIRS: tuple[tuple[str, str], ...] = (
     ("vgic", _ION_CHANNEL_CLASS),
 )
 
+# Explicit type → subclass labels (RF-005). Distinct from WORKING_CLASSES.
+# Values follow Guide to Pharmacology top-level family names for the type.
+TYPE_SUBCLASS_PAIRS: tuple[tuple[str, str], ...] = (
+    ("catalytic_receptor", "Catalytic receptors"),
+    ("enzyme", "Enzymes"),
+    ("gpcr", "G protein-coupled receptors"),
+    ("lgic", "Ligand-gated ion channels"),
+    ("nhr", "Nuclear hormone receptors"),
+    ("other_ic", "Other ion channels"),
+    ("other_protein", "Other protein targets"),
+    ("transporter", "Transporters"),
+    ("vgic", "Voltage-gated ion channels"),
+)
+
 # Each row is (source family ID, its own source type, immediate parent IDs).
 FAMILY_ROWS: tuple[tuple[int, str, tuple[int, ...]], ...] = (
     (1, "gpcr", (694,)),
