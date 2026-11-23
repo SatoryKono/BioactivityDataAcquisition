@@ -1,0 +1,41 @@
+{
+  "acceptance": null,
+  "admitted_for_enrich": false,
+  "artifact": "bioetl_iuphar_rf008_profile_candidate",
+  "biological_accuracy_accepted": false,
+  "classification_schema_version": "3.1.0",
+  "issue": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/13316",
+  "normalization": {
+    "normalization_sha256": "72f39b0e080f20ce484b81795a6d0aeffac091b4f7f8e54c68f99ef814fe3b26",
+    "normalization_version": "bioetl-iuphar-input-v1",
+    "version_status": "не утверждено"
+  },
+  "offline_reproducible": true,
+  "qualification_version": "rf008-2026-11-23",
+  "retained_profile": {
+    "acceptance": null,
+    "mode": "off",
+    "why": "New materials are not qualified, so the last profile stays off."
+  },
+  "rules": {
+    "rules_sha256": "ff627e7e47887e26b49e57684aab5c004a9a6d3723646b61fb8e045008cb6447",
+    "rules_version": "plan-v1-r9",
+    "working_classes": [
+      "Receptor",
+      "Ion Channel",
+      "Enzyme",
+      "Transporter",
+      "Other Protein Target"
+    ]
+  },
+  "schema_version": 2,
+  "snapshot": {
+    "admitted": false,
+    "annotation_capability": "family_only",
+    "archive_sha256": "225dd1d3928012d8d0f2f3e79445f6e32d9d284222a212e15a09e56c60da0874",
+    "completeness_certified": false,
+    "gtopdb_release": "2026.3.1",
+    "sql_sha256": "5a50518bd2f8ce512ef270fe7ebd4937e7af8debb9db389ce1a8f15fad8c2b0d",
+    "targets_csv_sha256": "9e91ae4eed1e147f0c5b01dd2e0645c2d57edb39442114d3128c70232b0d39fb"
+  }
+}
