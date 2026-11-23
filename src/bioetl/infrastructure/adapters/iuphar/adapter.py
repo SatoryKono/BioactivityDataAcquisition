@@ -55,8 +55,7 @@ def _detail_projection(row: object | None, *, computed: bool) -> dict[str, str |
             local_rule_ids=(),
             effective_subclasses=(),
             conflict_codes=(),
-            match_evidence_ids=(),
-            local_evidence_ids=(),
+            evidence_ids=((), ()),
         )
     typed = row if isinstance(row, RowResult) else None
     if typed is None:
@@ -82,8 +81,7 @@ def _detail_projection(row: object | None, *, computed: bool) -> dict[str, str |
         local_rule_ids=result.local_rule_ids,
         effective_subclasses=result.effective_subclasses,
         conflict_codes=result.conflict_codes,
-        match_evidence_ids=result.match_evidence_ids,
-        local_evidence_ids=result.local_evidence_ids,
+        evidence_ids=(result.match_evidence_ids, result.local_evidence_ids),
     )
 
 

@@ -194,8 +194,7 @@ def project_classification_detail(
     local_rule_ids: Iterable[object],
     effective_subclasses: Iterable[object],
     conflict_codes: Iterable[object],
-    match_evidence_ids: Iterable[object],
-    local_evidence_ids: Iterable[object],
+    evidence_ids: tuple[Iterable[object], Iterable[object]],
 ) -> dict[str, str | None]:
     """Project one row onto the persisted 3.2.0 detail columns."""
     from bioetl.domain.config.target_classification import (
@@ -225,9 +224,7 @@ def project_classification_detail(
         "local_rule_ids": canonical_string_set(local_rule_ids),
         "effective_subclasses": canonical_string_set(effective_subclasses),
         "conflict_codes": canonical_string_set(conflict_codes),
-        "classification_evidence_refs": canonical_evidence_refs(
-            match_evidence_ids, local_evidence_ids
-        ),
+        "classification_evidence_refs": canonical_evidence_refs(*evidence_ids),
     }
 
 

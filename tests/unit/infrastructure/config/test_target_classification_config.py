@@ -381,9 +381,10 @@ def _detail(**overrides: object) -> dict[str, str | None]:
         "local_rule_ids": ("rule-b", "rule-a"),
         "effective_subclasses": ("eff-b", "eff-a"),
         "conflict_codes": ("conflict-b", "conflict-a"),
-        "match_evidence_ids": ("match-b", "match-a"),
-        "local_evidence_ids": ("local-ev-b", "local-ev-a"),
     }
+    match_ids = overrides.pop("match_evidence_ids", ("match-b", "match-a"))
+    local_ids = overrides.pop("local_evidence_ids", ("local-ev-b", "local-ev-a"))
+    payload["evidence_ids"] = (match_ids, local_ids)
     payload.update(overrides)
     return project_classification_detail(**payload)  # type: ignore[arg-type]
 
@@ -456,8 +457,7 @@ def test_unavailable_match_is_not_recorded_as_unannotated() -> None:
         local_rule_ids=(),
         effective_subclasses=(),
         conflict_codes=(),
-        match_evidence_ids=(),
-        local_evidence_ids=(),
+        evidence_ids=((), ()),
     )
     assert detail["iuphar_source_completeness"] == "source_unavailable"
 
@@ -537,8 +537,7 @@ def test_v32_projection_is_stable_under_permutation_and_distinguishes_null() -> 
         local_rule_ids=(),
         effective_subclasses=(),
         conflict_codes=(),
-        match_evidence_ids=(),
-        local_evidence_ids=(),
+        evidence_ids=((), ()),
     )
     assert all(value is None for value in absent.values())
     binding = resolve_target_classification_profile(_config("enrich", "3.2.0"))
