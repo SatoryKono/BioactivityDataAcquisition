@@ -1414,7 +1414,7 @@
       ],
       "thresholds": [
         {
-          "color": "green",
+          "color": "text",
           "value": null
         },
         {
@@ -1449,7 +1449,7 @@
       ],
       "thresholds": [
         {
-          "color": "green",
+          "color": "text",
           "value": null
         },
         {
@@ -1550,7 +1550,7 @@
       ],
       "thresholds": [
         {
-          "color": "green",
+          "color": "text",
           "value": null
         },
         {

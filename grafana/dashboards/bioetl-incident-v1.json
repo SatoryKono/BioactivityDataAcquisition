@@ -729,10 +729,10 @@
         {
           "id": "extractFields",
           "options": {
+            "source": "signal",
             "format": "regexp",
             "regExp": "/(?<action_detail>.*)/",
-            "replace": false,
-            "source": "signal"
+            "replace": false
           }
         },
         {
@@ -743,7 +743,6 @@
               "Time 1": true,
               "Time 2": true,
               "__name__": true,
-              "action_dashboard_uid": false,
               "action_target": true,
               "cause": true,
               "confidence": false,
@@ -752,20 +751,21 @@
               "reason": true,
               "row_index": true,
               "run_type": true,
-              "severity": true
+              "severity": true,
+              "action_dashboard_uid": false
             },
             "indexByName": {
               "Rank": 0,
               "Value": 1,
-              "action": 7,
-              "action_detail": 8,
               "confidence": 2,
-              "domain": 9,
               "freshness": 3,
-              "object": 10,
               "pipeline": 4,
               "provider": 5,
-              "signal": 6
+              "signal": 6,
+              "action": 7,
+              "action_detail": 8,
+              "domain": 9,
+              "object": 10
             },
             "renameByName": {
               "Value": "Severity",
@@ -7553,7 +7553,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -9147,7 +9147,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -9448,7 +9448,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -11605,15 +11605,15 @@
                 "indexByName": {
                   "Rank": 0,
                   "Value": 1,
-                  "action": 7,
-                  "action_detail": 8,
                   "confidence": 2,
-                  "domain": 9,
                   "freshness": 3,
-                  "object": 10,
                   "pipeline": 4,
                   "provider": 5,
-                  "signal": 6
+                  "signal": 6,
+                  "action": 7,
+                  "action_detail": 8,
+                  "domain": 9,
+                  "object": 10
                 },
                 "renameByName": {
                   "Value": "Severity",
