@@ -125,8 +125,16 @@ Resume never derives its window from a later successful execution.
 On resume:
 
 - successful steps are skipped by default;
-- failed steps are retried;
+- failed steps are retried unless a matching previously successful transform
+  fingerprint remains available;
 - `running` without terminal confirmation is normalized to `incomplete`.
+
+A failed forced non-destructive transform does not invalidate its last
+successful fingerprint. A subsequent selector-free resume reuses that result
+when the fingerprint still matches, even though the latest attempt failed.
+An untouched successful step retains its own evidence. Force and repair
+selectors bypass the selected fingerprints for that attempt; destructive
+commit ambiguity and repair guards still apply before any cache reuse.
 
 ### Destructive ambiguity
 
