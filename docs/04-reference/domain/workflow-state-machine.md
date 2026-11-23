@@ -122,6 +122,11 @@ Canonical interpretation:
   operator intent.
 - `--repair-steps ...` declares bounded repair/reconciliation intent.
 - `--force-steps ...` declares explicit destructive re-execution intent.
+- With `--repair-steps`, preflight rejects the repair if a failed step is
+  held outside both selectors, even when it is independent of the selected
+  steps. Select that step for repair or forced re-execution as well. This
+  restriction does not apply to a force-only selector; selected-snapshot
+  producer evidence and pin validation still apply independently.
 
 ## Operator Command Matrix
 
