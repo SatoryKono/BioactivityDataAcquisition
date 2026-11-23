@@ -1,10 +1,9 @@
 {
   "schema_version": 1,
-  "catalog_ref": "985f3455ad0d194fc73d10808d3caae4536f82a4",
-  "source_ref": "687e444e8a5561bea42f0021dc6b2db97e94a8ce",
+  "catalog_ref": "525c1d76319b6bb5e83db3010977e038356c6b3c",
+  "source_ref": "01decda5ecb19a6e6e931ba6f3accb256471981a",
   "source_reviews": {
-    "src/bioetl/application/services/workflow/_observability_workflow_execution.py": "Reviewed manifest-selected diagnostics and identity checks; no external resource acquisition, ownership, or lifecycle changes.",
-    "src/bioetl/domain/config/target_classification.py": "Reviewed main's vocabulary and configuration additions; no resource acquisition or lifecycle changes."
+    "src/bioetl/application/services/workflow/_observability_workflow_execution.py": "Reviewed manifest-selected diagnostics and identity checks; no external resource acquisition, ownership, or lifecycle changes."
   },
   "expression_updates": {},
   "segment_updates": {},
