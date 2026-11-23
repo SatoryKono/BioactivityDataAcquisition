@@ -8,9 +8,8 @@ from __future__ import annotations
 
 __all__ = ["PipelineDebugService"]
 
-from copy import deepcopy
 from dataclasses import dataclass, field, replace
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.domain.ports import (
     BreakpointHit,
@@ -27,32 +26,35 @@ class DebugAbortError(Exception):
     """Raised when user aborts pipeline from a debug breakpoint."""
 
 
-def _retain_opaque(value: object, memo: dict[int, object], seen: set[int]) -> None:
-    """Keep non-container objects by reference when copying supported containers."""
-    if id(value) in seen:
-        return
-    seen.add(id(value))
-    if type(value) is dict and isinstance(value, dict):
-        for key, item in value.items():
-            _retain_opaque(key, memo, seen)
-            _retain_opaque(item, memo, seen)
-    elif type(value) is list and isinstance(value, list):
-        for item in value:
-            _retain_opaque(item, memo, seen)
-    else:
-        memo[id(value)] = value
+def _copy_containers[T](value: T, memo: dict[int, object]) -> T:
+    """Copy built-in dicts and lists; retain opaque payloads by reference."""
+    if type(value) not in (dict, list):
+        return value
+    value_id = id(value)
+    if value_id in memo:
+        return cast(T, memo[value_id])
+    if isinstance(value, dict):
+        original_dict = cast(dict[object, object], value)
+        result_dict: dict[object, object] = {}
+        memo[value_id] = result_dict
+        result_dict.update(
+            (key, _copy_containers(item, memo)) for key, item in original_dict.items()
+        )
+        return cast(T, result_dict)
+    original_list = cast(list[object], value)
+    result_list: list[object] = []
+    memo[value_id] = result_list
+    result_list.extend(_copy_containers(item, memo) for item in original_list)
+    return cast(T, result_list)
 
 
 def _copy_snapshot(snapshot: PipelineSnapshot) -> PipelineSnapshot:
     memo: dict[int, object] = {}
-    seen: set[int] = set()
-    for value in (snapshot.dq_issues, snapshot.sample_records, snapshot.metadata):
-        _retain_opaque(value, memo, seen)
     return replace(
         snapshot,
-        dq_issues=deepcopy(snapshot.dq_issues, memo),
-        sample_records=deepcopy(snapshot.sample_records, memo),
-        metadata=deepcopy(snapshot.metadata, memo),
+        dq_issues=_copy_containers(snapshot.dq_issues, memo),
+        sample_records=_copy_containers(snapshot.sample_records, memo),
+        metadata=_copy_containers(snapshot.metadata, memo),
     )
 
 
