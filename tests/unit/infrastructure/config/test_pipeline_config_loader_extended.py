@@ -48,6 +48,10 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.domain.config import DQConfig
+from bioetl.infrastructure.config.pipeline_config_api import (
+    load_pipeline_config,
+    load_pipeline_config_from_root,
+)
 import bioetl.infrastructure.config.pipeline_config_loader as pipeline_config_loader_module
 from bioetl.infrastructure.config.pipeline_config_loader import PipelineConfigLoader
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
@@ -175,7 +179,23 @@ class TestFieldValidationToDict:
         result = loader._field_validation_to_dict(fv)
         assert result["field"] == "compound_id"
         assert result["type"] == "not_null"
-        assert "nullable" in result
+        # Unset defaults (nullable, severity, ...) stay omitted so hierarchy merge
+        # does not overwrite inherited values with Pydantic defaults.
+        assert "nullable" not in result
+
+    def test_preserves_explicit_severity_and_max_length(self) -> None:
+        """Explicit severity / max_length survive exclude_unset dumping."""
+        loader = self._make_loader()
+        fv = self._make_fv(
+            type="max_length",
+            max_length=12,
+            severity="warn",
+            severity_enricher="warn",
+        )
+        result = loader._field_validation_to_dict(fv)
+        assert result["max_length"] == 12
+        assert result["severity"] == "warn"
+        assert result["severity_enricher"] == "warn"
 
     def test_includes_min_max_when_set(self) -> None:
         """min/max included in dict when set."""
@@ -428,14 +448,40 @@ class TestNormalizeInlineDqOverrides:
         result = loader._normalize_inline_dq_overrides(yaml_config.dq_overrides)
         assert result["thresholds"] == {"soft_fail": 0.03, "hard_fail": 0.15}
 
-    def test_report_section_included(self) -> None:
-        """Report config section is always included."""
+    def test_unsupplied_report_is_omitted(self) -> None:
+        """Unspecified settings do not override hierarchy values."""
         loader = self._make_loader()
         yaml_config = PipelineYamlConfig.model_validate(_base_pipeline_dict())
         result = loader._normalize_inline_dq_overrides(yaml_config.dq_overrides)
-        assert "report" in result
-        assert "enabled" in result["report"]
-        assert "format" in result["report"]
+        assert result == {}
+
+    @pytest.mark.parametrize(
+        ("overrides", "expected"),
+        [
+            ({"soft_fail_threshold": 0.05}, {"thresholds": {"soft_fail": 0.05}}),
+            ({"hard_fail_threshold": 0.2}, {"thresholds": {"hard_fail": 0.2}}),
+            ({"strict_validation": False}, {"strict_validation": False}),
+            (
+                {"invalid_record_policy": "quarantine"},
+                {"invalid_record_policy": "quarantine"},
+            ),
+            ({"report": {"enabled": True}}, {"report": {"enabled": True}}),
+            ({"report": {"format": "json"}}, {"report": {"format": "json"}}),
+            (
+                {"report": {"include_sample_failures": True}},
+                {"report": {"include_sample_failures": True}},
+            ),
+            ({"report": {"sample_size": 10}}, {"report": {"sample_size": 10}}),
+            ({"report": {"output_path": None}}, {"report": {"output_path": None}}),
+        ],
+    )
+    def test_explicit_defaults_remain_overrides(self, overrides, expected) -> None:
+        loader = self._make_loader()
+        config = PipelineYamlConfig.model_validate(
+            {**_base_pipeline_dict(), "dq_overrides": overrides}
+        )
+        assert loader._has_inline_dq_overrides(config)
+        assert loader._normalize_inline_dq_overrides(config.dq_overrides) == expected
 
     def test_field_validations_normalized(self) -> None:
         """field_validations are included when present."""
@@ -454,6 +500,7 @@ class TestNormalizeInlineDqOverrides:
         result = loader._normalize_inline_dq_overrides(yaml_config.dq_overrides)
         assert "entity_field_validations" in result
         assert len(result["entity_field_validations"]) == 2
+        assert set(result) == {"entity_field_validations"}
 
     def test_cross_field_validations_normalized(self) -> None:
         """cross_field_validations are included when present."""
@@ -541,6 +588,59 @@ class TestResolveDqConfigFallback:
 @pytest.mark.unit
 class TestClearCache:
     """Tests for PipelineConfigLoader.clear_cache()."""
+
+    def test_local_and_canonical_cache_scope(self, tmp_path: Path) -> None:
+        """Local clear retains shared caches; canonical clear refreshes every root."""
+        roots = [tmp_path / "first", tmp_path / "second"]
+        for root in roots:
+            (root / "base").mkdir(parents=True)
+            (root / "entities" / "test").mkdir(parents=True)
+            (root / "base" / "pipeline.yaml").write_text("batch_size: 111\n")
+            (root / "entities" / "test" / "item.yaml").write_text(
+                "pipeline:\n  pipeline_name: test_item\n  provider: test\n"
+                "  entity_type: item\n  business_primary_keys: [id]\n"
+                "  silver_table: silver.test\n"
+            )
+        dq_loader = MagicMock()
+        filter_loader = MagicMock()
+        loader = PipelineConfigLoader(
+            roots[0], dq_loader=dq_loader, filter_loader=filter_loader
+        )
+        load_pipeline_config.cache_clear()
+        try:
+            assert loader.load_pipeline_config("test_item").batch_size == 111
+            for root in roots:
+                assert (
+                    load_pipeline_config_from_root(
+                        "test_item", configs_root=root
+                    ).batch_size
+                    == 111
+                )
+                (root / "base" / "pipeline.yaml").write_text("batch_size: 222\n")
+            loader.clear_cache()
+            loader.clear_cache()
+            assert dq_loader.clear_cache.call_count == 2
+            assert filter_loader.clear_cache.call_count == 2
+            assert loader.load_pipeline_config("test_item").batch_size == 111
+            for root in roots:
+                assert (
+                    load_pipeline_config_from_root(
+                        "test_item", configs_root=root
+                    ).batch_size
+                    == 111
+                )
+            load_pipeline_config.cache_clear()
+            load_pipeline_config.cache_clear()
+            assert loader.load_pipeline_config("test_item").batch_size == 222
+            for root in roots:
+                assert (
+                    load_pipeline_config_from_root(
+                        "test_item", configs_root=root
+                    ).batch_size
+                    == 222
+                )
+        finally:
+            load_pipeline_config.cache_clear()
 
     def test_clear_cache_delegates_to_dq_loader(self) -> None:
         """clear_cache() calls clear_cache on dq_loader."""

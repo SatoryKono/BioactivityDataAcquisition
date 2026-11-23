@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import math
 from typing import Protocol
 
 from bioetl.domain.config import DQConfig as DomainDQConfig
@@ -32,49 +31,16 @@ class DQConfigResolver(Protocol):
         ...
 
 
-_DEFAULT_SOFT_FAIL_THRESHOLD = 0.05
-_DEFAULT_HARD_FAIL_THRESHOLD = 0.20
-
-
 def has_inline_dq_overrides(yaml_config: PipelineYamlConfig) -> bool:
     """Check if YAML config has meaningful inline DQ overrides."""
-    dq = yaml_config.dq_overrides
-    has_validations = bool(
-        dq.field_validations or dq.cross_field_validations or dq.conditional_validations
-    )
-    has_custom_thresholds = not (
-        math.isclose(
-            dq.soft_fail_threshold, _DEFAULT_SOFT_FAIL_THRESHOLD, abs_tol=1e-12
-        )
-        and math.isclose(
-            dq.hard_fail_threshold, _DEFAULT_HARD_FAIL_THRESHOLD, abs_tol=1e-12
-        )
-    )
-    return has_validations or has_custom_thresholds
+    return bool(normalize_inline_dq_overrides(yaml_config.dq_overrides))
 
 
 def field_validation_to_dict(
     fv: FieldValidationConfig,
 ) -> JsonDict:  # Any: dynamic YAML config values
     """Convert FieldValidationConfig to mergeable file-shape dict."""
-    result: JsonDict = {  # Any: dynamic YAML config values
-        "field": fv.field,
-        "type": fv.type,
-        "nullable": fv.nullable,
-    }
-    if fv.min is not None:
-        result["min"] = fv.min
-    if fv.max is not None:
-        result["max"] = fv.max
-    if fv.pattern:
-        result["pattern"] = fv.pattern
-    if fv.allowed:
-        result["allowed"] = list(fv.allowed)
-    if fv.validator:
-        result["validator"] = fv.validator
-    if fv.error_message:
-        result["error_message"] = fv.error_message
-    return result
+    return fv.model_dump(exclude_unset=True, mode="json")
 
 
 def cross_field_validation_to_dict(
@@ -120,25 +86,36 @@ def conditional_validation_to_dict(
     return result
 
 
+def _normalize_inline_dq_settings(
+    dq_overrides: InlineDQConfig,
+) -> JsonDict:
+    """Keep only explicitly supplied scalar and report settings."""
+    result: JsonDict = {}
+    supplied = dq_overrides.model_fields_set
+    thresholds: JsonDict = {}
+    for source, target in (
+        ("soft_fail_threshold", "soft_fail"),
+        ("hard_fail_threshold", "hard_fail"),
+    ):
+        if source in supplied:
+            thresholds[target] = getattr(dq_overrides, source)
+    if thresholds:
+        result["thresholds"] = thresholds
+    for field in ("strict_validation", "invalid_record_policy"):
+        if field in supplied:
+            result[field] = getattr(dq_overrides, field)
+    if "report" in supplied:
+        report = dq_overrides.report.model_dump(exclude_unset=True, by_alias=True)
+        if report:
+            result["report"] = report
+    return result
+
+
 def normalize_inline_dq_overrides(
     dq_overrides: InlineDQConfig,
 ) -> JsonDict:  # Any: dynamic YAML config values
     """Convert inline Pydantic DQ overrides into mergeable file-shape dict."""
-    result: JsonDict = {}  # Any: dynamic YAML config values
-    result["thresholds"] = {
-        "soft_fail": dq_overrides.soft_fail_threshold,
-        "hard_fail": dq_overrides.hard_fail_threshold,
-    }
-    result["strict_validation"] = dq_overrides.strict_validation
-    result["invalid_record_policy"] = dq_overrides.invalid_record_policy
-    result["report"] = {
-        "enabled": dq_overrides.report.enabled,
-        "format": dq_overrides.report.format,
-        "include_sample_failures": dq_overrides.report.include_sample_failures,
-        "sample_size": dq_overrides.report.sample_size,
-        "output_path": dq_overrides.report.output_path,
-    }
-
+    result = _normalize_inline_dq_settings(dq_overrides)
     if dq_overrides.field_validations:
         result["entity_field_validations"] = [
             field_validation_to_dict(fv) for fv in dq_overrides.field_validations

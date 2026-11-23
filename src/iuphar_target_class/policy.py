@@ -3,6 +3,9 @@
 Direct class mappings, graph limits and the HTTP adapter configuration were
 recorded on 2026-11-15. Biological accuracy is not yet accepted. Unapproved
 plan parameters stay null. EC, L1, and L2 rules stay on the local layer.
+
+RF-001 (#13309) embeds the field-layer / status / capability semantics contract
+without changing biological acceptance or rewriting historical artifacts.
 """
 
 from __future__ import annotations
@@ -21,8 +24,10 @@ from .gtopdb_2026_3_1 import (
     SQL_SHA256,
     TARGETS_CSV_SHA256,
     TARGETS_CSV_URL,
+    TYPE_SUBCLASS_PAIRS,
 )
 from .iuphar_mapping import approved_class_mappings
+from .semantics import semantics_document
 from .stage0.io import atomic_write_bytes, canonical_json_bytes
 
 WORKING_CLASSES: tuple[str, ...] = (
@@ -32,10 +37,11 @@ WORKING_CLASSES: tuple[str, ...] = (
     "Transporter",
     "Other Protein Target",
 )
-PLAN_SOURCE = "план v1 r8 §2.1"
-PLAN_SECTION_5 = "план v1 r8 §5"
+PLAN_SOURCE = "план v1 r9 §2.1"
+PLAN_SECTION_5 = "план v1 r9 §5"
 DOCUMENTARY_STATUS = "подтверждено документально"
-PLAN_VERSION = "plan-v1-r8"
+# RF-005 (#13313): subclass dictionary + multi-parent path persistence.
+PLAN_VERSION = "plan-v1-r9"
 BASE_MISSING_MARKERS: tuple[str, ...] = (
     "#n/a",
     "N/A",
@@ -383,6 +389,7 @@ def policy_document() -> dict[str, object]:
         "biological_accuracy_accepted": False,
         "class_dictionary": [_rule_payload(rule) for rule in class_rules()],
         "direct_mappings": direct_mapping_document(),
+        "rf001_semantics": semantics_document(),
         "gold_cases": {
             "cases": [],
             "checker": "Cursor",
@@ -447,14 +454,15 @@ def policy_document() -> dict[str, object]:
             "volume_test_seconds": VOLUME_TEST_SECONDS,
             "volume_test_time_status": VOLUME_TEST_TIME_STATUS,
         },
-        "plan": {"issued_on": "2026-11-10", "revision": "8", "version": "1"},
+        "plan": {"issued_on": "2026-11-23", "revision": "9", "version": "1"},
         "result_key": ["input_row_id", "snapshot_id"],
         "role_assignment": ROLE_ASSIGNMENT,
         "stage": "1",
         "stage_status": "recorded_without_biological_acceptance",
         "subclass_comparison": {
             "class_subclass_pairs": [],
-            "direct_vocabulary": [],
+            "comparison_pairs_status": UNSET,
+            "direct_vocabulary": sorted({label for _, label in TYPE_SUBCLASS_PAIRS}),
             "local_vocabulary": [],
             "rule": (
                 "совпадение; класс–подкласс; иначе несовместимость; "
@@ -463,6 +471,10 @@ def policy_document() -> dict[str, object]:
             ),
             "same_pairs": [],
             "status": UNSET,
+            "vocabulary_issue": (
+                "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/13313"
+            ),
+            "vocabulary_status": APPROVED,
         },
         "unknown_type_status": "unmapped_type",
         "working_classes": list(WORKING_CLASSES),

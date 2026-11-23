@@ -6,6 +6,9 @@ from collections.abc import Callable
 
 from bioetl.domain.config import DQConfig
 from bioetl.domain.types import JsonDict
+from bioetl.infrastructure.config._dq_config_normalization import (
+    normalize_to_file_format,
+)
 from bioetl.infrastructure.schemas.dq_config import DQConfigFile
 
 __all__ = [
@@ -39,20 +42,24 @@ def merge_dq_config_hierarchy(
     relaxed_dq: bool,
 ) -> JsonDict:
     """Build merged DQ config from defaults -> provider -> entity -> inline."""
-    merged = load_defaults_layer()
+    merged = normalize_to_file_format(load_defaults_layer())
     if not merged:
         raise FileNotFoundError(
             "Required DQ defaults file not found in configs/base/quality.yaml. "
             "Create defaults in this location."
         )
 
+    # Normalize each layer before merge so flat soft_fail_threshold /
+    # hard_fail_threshold keys cannot overwrite nested thresholds from a
+    # later layer after a single post-merge normalization pass.
+    merged = normalize_to_file_format(merged)
     for layer in (
         load_provider_layer(provider),
         load_entity_layer(provider, entity),
         inline_overrides or {},
     ):
         if layer:
-            merged = deep_merge(merged, layer)
+            merged = deep_merge(merged, normalize_to_file_format(layer))
 
     if relaxed_dq:
         merged = deep_merge(

@@ -41317,7 +41317,7 @@
       "generator": null,
       "github_issue_number": null,
       "github_issue_url": null,
-      "inbound_links": 1,
+      "inbound_links": 2,
       "lifecycle": null,
       "outbound_links": 0,
       "owner": "BioETL Team",
@@ -46637,9 +46637,9 @@
       "generator": null,
       "github_issue_number": null,
       "github_issue_url": null,
-      "inbound_links": 2,
+      "inbound_links": 3,
       "lifecycle": null,
-      "outbound_links": 6,
+      "outbound_links": 7,
       "owner": "BioETL Team",
       "path": "docs/04-reference/pipelines/chembl/04-target-spec.md",
       "recommended_action": "keep",
@@ -46950,6 +46950,34 @@
       "outbound_links": 6,
       "owner": "BioETL Team",
       "path": "docs/04-reference/pipelines/chembl/15-tissue-spec.md",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "04-reference",
+      "status": "Active",
+      "surface_family": "active",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": "published",
+      "declared_status": "active",
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "current",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 3,
+      "lifecycle": null,
+      "outbound_links": 6,
+      "owner": "BioETL Team",
+      "path": "docs/04-reference/pipelines/chembl/16-iuphar-target-classification-semantics.md",
       "recommended_action": "keep",
       "root_doc_kind": null,
       "section": "04-reference",
@@ -50865,9 +50893,9 @@
       "generator": null,
       "github_issue_number": null,
       "github_issue_url": null,
-      "inbound_links": 2,
+      "inbound_links": 3,
       "lifecycle": null,
-      "outbound_links": 17,
+      "outbound_links": 20,
       "owner": "BioETL Team",
       "path": "docs/05-operations/runbooks/iuphar-target-classification.md",
       "recommended_action": "keep",
@@ -118693,7 +118721,7 @@
     "by_recommended_action": {
       "archive-after-migration": 434,
       "generate-automatically": 1071,
-      "keep": 2703
+      "keep": 2704
     },
     "by_section": {
       ".github": 6,
@@ -118702,7 +118730,7 @@
       "02-architecture": 1002,
       "03-data-model": 2,
       "03-guides": 128,
-      "04-reference": 335,
+      "04-reference": 336,
       "05-engineering": 3,
       "05-operations": 103,
       "99-archive": 1554,
@@ -118722,21 +118750,21 @@
       "security": 2
     },
     "by_status": {
-      "Active": 778,
+      "Active": 779,
       "Archived": 1554,
       "Canonical": 77,
       "Generated": 1071,
       "Working": 728
     },
     "by_surface_family": {
-      "active": 778,
+      "active": 779,
       "archive": 1554,
       "canonical": 77,
       "generated": 1071,
       "working": 728
     },
     "by_tracking_state": {
-      "tracked": 4208
+      "tracked": 4209
     },
     "docs_reports_local_count": 84,
     "duplicate_group_count": 80,
@@ -118749,8 +118777,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 4208,
+    "total_doc_like": 4209,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 4208
+    "total_doc_like_tracked": 4209
   }
 }

@@ -80,6 +80,10 @@ def test_zed_changes_keep_integration_portability_in_both_impact_paths(
             "tests/integration/test_dashboard_first_window_noscroll.py",
         ),
         (
+            "docs/03-guides/dq-configuration.md",
+            "tests/architecture/test_documentation_residual_keyword_guards.py",
+        ),
+        (
             "docs/03-guides/metrics-monitoring.md",
             "tests/architecture/test_observability_docs_drift.py",
         ),
@@ -135,6 +139,16 @@ def test_nightly_shadow_changes_keep_both_archive_and_inventory_owners(
     assert owners <= set(affected_pytest_targets([changed], repo_root=repo_root))
     report = build_shadow_compare([changed], repo_root=repo_root)
     assert owners <= set(report["selected"])
+    assert report["covers_full_suite"] is False
+
+
+def test_deleted_cli_registry_snapshot_keeps_its_owning_test() -> None:
+    repo_root = Path(__file__).resolve().parents[5]
+    snapshot = "tests/unit/interfaces/cli/__snapshots__/test_registry_consistency.ambr"
+    owner = "tests/unit/interfaces/cli/test_registry_consistency.py"
+    assert affected_pytest_targets([snapshot], repo_root=repo_root) == [owner]
+    report = build_shadow_compare([snapshot], repo_root=repo_root)
+    assert report["selected"] == [owner]
     assert report["covers_full_suite"] is False
 
 
@@ -488,6 +502,24 @@ def test_iuphar_shadow_paths_keep_explicit_owners(tmp_path: Path) -> None:
     ):
         with pytest.raises(ValueError, match="unmapped paths"):
             build_shadow_compare([unowned], repo_root=tmp_path)
+
+
+def test_workflow_runbook_selects_resume_and_archive_contracts(tmp_path: Path) -> None:
+    owners = {
+        "tests/unit/application/services/test_selected_snapshot_resume_contracts.py",
+        "tests/unit/application/services/test_workflow_child_archive_contract.py",
+    }
+    for owner in owners:
+        path = tmp_path / owner
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("def test_owner():\n    assert True\n", encoding="utf-8")
+
+    report = build_shadow_compare(
+        ["docs/05-operations/runbooks/workflow-control-plane.md"], repo_root=tmp_path
+    )
+
+    assert set(report["selected"]) == owners
+    assert report["covers_full_suite"] is False
 
 
 def test_iuphar_policy_paths_keep_the_policy_owner(tmp_path: Path) -> None:
@@ -1774,7 +1806,31 @@ def test_shadow_compare_routes_codex_launchers_and_guidance(changed_file: str) -
             "configs/quality/external_resource_inventory_pr0_unreviewed.json",
         ),
         (
+            "configs/quality/external_resource_inventory_pr13329_review.json",
+            {
+                "tests/architecture/test_external_resource_inventory_catalog.py",
+                "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+            },
+            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
+        ),
+        (
             "configs/quality/external_resource_inventory_pr13324_gold_writer_review.json",
+            {
+                "tests/architecture/test_external_resource_inventory_catalog.py",
+                "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+            },
+            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
+        ),
+        (
+            "configs/quality/external_resource_inventory_pr13328_workflow_resume_review.json",
+            {
+                "tests/architecture/test_external_resource_inventory_catalog.py",
+                "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+            },
+            "configs/quality/external_resource_inventory_pr0_unreviewed.json",
+        ),
+        (
+            "configs/quality/external_resource_inventory_pr13328_review.json",
             {
                 "tests/architecture/test_external_resource_inventory_catalog.py",
                 "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
