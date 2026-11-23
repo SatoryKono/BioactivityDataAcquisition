@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "72e42509ca522c4679f51a8e135e96848cc352d6",
+  "source_ref": "96f5cab8d5b538627ea39d56b8d1d7ab17a817b8",
+  "source_reviews": {
+    "src/bioetl/infrastructure/config/contract_registry_loader.py": "Clarified timeout classification and error messages. Existing local and network read acquisitions and ThreadPoolExecutor lifecycle remain unchanged; no new runtime qualification."
+  },
+  "expression_updates": {},
+  "segment_updates": {},
+  "line_updates": {},
+  "reference_moves": [],
+  "exclusion_moves": [],
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": []
+}
