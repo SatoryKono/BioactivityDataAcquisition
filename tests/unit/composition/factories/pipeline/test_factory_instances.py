@@ -40,6 +40,10 @@ from bioetl.composition.factories.pipeline.factory_method_helpers import (
     build_create_pipeline_with_services_request,
 )
 from bioetl.domain.types import RunType
+from bioetl.infrastructure.schemas.pipeline_config_common import (
+    DQReportYamlConfig,
+    DQYamlConfig,
+)
 
 _STARTED_AT = datetime(2026, 4, 24, 12, 0, tzinfo=UTC)
 
@@ -87,15 +91,19 @@ def _make_services() -> MagicMock:
 def _make_pipeline_config() -> MagicMock:
     config = MagicMock()
     config.source = {"api": {"rate_limit": 10.0}}
-    config.dq_overrides.soft_fail_threshold = 0.05
-    config.dq_overrides.hard_fail_threshold = 0.20
-    config.dq_overrides.invalid_record_policy = "quarantine"
-    config.dq_overrides.report.format = "json"
-    config.dq_overrides.report.output_path = "reports/dq"
-    config.dq_overrides.report.enabled = True
-    config.dq_overrides.field_validations = []
-    config.dq_overrides.cross_field_validations = []
-    config.dq_overrides.conditional_validations = []
+    config.provider = "chembl"
+    config.entity_type = "activity"
+    config.dq_config_file = None
+    config.dq_overrides = DQYamlConfig(
+        soft_fail_threshold=0.05,
+        hard_fail_threshold=0.20,
+        invalid_record_policy="quarantine",
+        report=DQReportYamlConfig(
+            enabled=True,
+            format="json",
+            output_path="reports/dq",
+        ),
+    )
     return config
 
 
