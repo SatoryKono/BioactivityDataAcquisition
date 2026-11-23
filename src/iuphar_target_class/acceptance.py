@@ -13,6 +13,9 @@ from .policy import PLAN_VERSION, policy_document
 from .stage0.io import atomic_write_bytes, canonical_json_bytes
 from .w153 import INTEGRATION_REASON
 
+# RF-001 immutable_hash_locked acceptance report; live PLAN_VERSION publishes elsewhere.
+STAGES_0_3_LOCKED_RULES_VERSION = "plan-v1-r8"
+
 NOT_RUN_REASONS: dict[str, str] = {
     "api_smoke": "сохранённых ответов API нет",
     "gold_cases": "эталонные случаи не подтверждены",
@@ -171,8 +174,13 @@ def run_volume_scenario(
     return VolumeResult("PASS", len(rows), elapsed, limit_seconds, "")
 
 
-def stages_0_3_document() -> dict[str, object]:
-    """Report for stages 0–3. Unrun checks stay NOT_RUN."""
+def stages_0_3_document(*, rules_version: str | None = None) -> dict[str, object]:
+    """Report for stages 0–3. Unrun checks stay NOT_RUN.
+
+    ``rules_version`` defaults to live ``PLAN_VERSION``. The RF-001 locked
+    artifact uses ``STAGES_0_3_LOCKED_RULES_VERSION`` so historical bytes stay
+    immutable when the plan pin advances.
+    """
     parameters = policy_document()["parameters"]
     if not isinstance(parameters, dict):
         message = "policy parameters are missing"
@@ -189,13 +197,14 @@ def stages_0_3_document() -> dict[str, object]:
         "synthetic_volume_smoke": volume.status,
     }
     report = build_acceptance_report(executed)
+    version = PLAN_VERSION if rules_version is None else rules_version
     return {
         "artifact": "stages_0_3_acceptance",
         "biological_accuracy_accepted": False,
         "checks": report["checks"],
         "fixture_kind": "synthetic",
         "fixture_row_count": volume.row_count,
-        "rules_version": report["rules_version"],
+        "rules_version": version,
         "stage0_selected_source_count": 0,
         "stages": ["0", "1", "2", "3"],
         "statement": report["statement"],
@@ -236,8 +245,13 @@ def stages_0_3_document() -> dict[str, object]:
     }
 
 
+def stages_0_3_live_report_name() -> str:
+    """Filename for the live PLAN_VERSION stages 0–3 acceptance run."""
+    return f"stages_0_3_report.{PLAN_VERSION}.json"
+
+
 def publish_volume_artifacts(root: Path) -> None:
-    """Write the fixture and the stages 0–3 report atomically inside ``root``."""
+    """Write the fixture, locked RF-001 report, and live plan report."""
     output = root / "data" / "iuphar_target_class" / "acceptance"
     atomic_write_bytes(
         output / "volume_fixture.json",
@@ -246,6 +260,13 @@ def publish_volume_artifacts(root: Path) -> None:
     )
     atomic_write_bytes(
         output / "stages_0_3_report.json",
+        canonical_json_bytes(
+            stages_0_3_document(rules_version=STAGES_0_3_LOCKED_RULES_VERSION)
+        ),
+        root=root,
+    )
+    atomic_write_bytes(
+        output / stages_0_3_live_report_name(),
         canonical_json_bytes(stages_0_3_document()),
         root=root,
     )

@@ -1,0 +1,84 @@
+{
+  "annotation_capability": "family_only",
+  "annotation_capability_note": "RF-005 persists subclasses and hierarchy paths without elevating family_only to a full direct-type annotation capability.",
+  "artifact": "iuphar_rf005_coverage_matrix",
+  "biological_accuracy_accepted": false,
+  "epic": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/13308",
+  "family_graph": {
+    "multi_parent_rows": 11,
+    "official_family_rows": 870,
+    "parent_merge": "same payload unions parents; conflicting payloads fail",
+    "synthetic_id_prefixes": [
+      "local:",
+      "synthetic:",
+      "legacy:"
+    ],
+    "type_counts": {
+      "catalytic_receptor": 44,
+      "enzyme": 356,
+      "gpcr": 81,
+      "grouping": 126,
+      "lgic": 10,
+      "nhr": 19,
+      "other_ic": 11,
+      "other_protein": 102,
+      "transporter": 110,
+      "vgic": 11
+    },
+    "unique_family_ids": 870
+  },
+  "inclusion_exclusion": {
+    "excluded_or_segregated": "local:/synthetic:/legacy: chains; grouping-only nodes as type mappings; unreviewed biological accuracy claims.",
+    "included": "Public numeric GtoPdb family IDs from the pinned 2026.3.1 closure; Human/Rat/Mouse species variants retained separately; ambiguous UniProt correspondences are not collapsed to the first row."
+  },
+  "issue": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/13313",
+  "object_types": {
+    "approved_type_to_class": {
+      "catalytic_receptor": "Receptor",
+      "enzyme": "Enzyme",
+      "gpcr": "Receptor",
+      "lgic": "Ion Channel",
+      "nhr": "Receptor",
+      "other_ic": "Ion Channel",
+      "other_protein": "Other Protein Target",
+      "transporter": "Transporter",
+      "vgic": "Ion Channel"
+    },
+    "approved_type_to_subclass": {
+      "catalytic_receptor": "Catalytic receptors",
+      "enzyme": "Enzymes",
+      "gpcr": "G protein-coupled receptors",
+      "lgic": "Ligand-gated ion channels",
+      "nhr": "Nuclear hormone receptors",
+      "other_ic": "Other ion channels",
+      "other_protein": "Other protein targets",
+      "transporter": "Transporters",
+      "vgic": "Voltage-gated ion channels"
+    },
+    "grouping_is_graph_only": true
+  },
+  "persistence": {
+    "path_direction": "root_to_leaf",
+    "paths_field": "iuphar_family_paths (classification.json via pipeline_io)",
+    "subclass_field": "iuphar_subclass",
+    "subclass_source": "approved TYPE_SUBCLASS_PAIRS / family_to_subclass",
+    "table_contract_note": "V31 column projection of paths/subclasses is RF-006"
+  },
+  "release": {
+    "archive_sha256": "225dd1d3928012d8d0f2f3e79445f6e32d9d284222a212e15a09e56c60da0874",
+    "provider_release": "2026.3.1",
+    "release_date": "2026-10-12",
+    "sql_sha256": "5a50518bd2f8ce512ef270fe7ebd4937e7af8debb9db389ce1a8f15fad8c2b0d",
+    "targets_csv_sha256": "9e91ae4eed1e147f0c5b01dd2e0645c2d57edb39442114d3128c70232b0d39fb",
+    "targets_csv_url": "https://www.guidetopharmacology.org/DATA/targets_and_families.csv"
+  },
+  "rf001_contract": "rf001-2026-11-23",
+  "rules_version": "plan-v1-r9",
+  "schema_version": 1,
+  "source_unavailable_policy": "Unrepresented targets retain source_unavailable until global completeness is independently proven; not_found stays distinct.",
+  "species_taxon_ids": [
+    9606,
+    10090,
+    10116
+  ]
+}
