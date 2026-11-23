@@ -306,6 +306,7 @@ def _check_report(
         "normalization_version",
         "rules_version",
         "classification_schema_version",
+        "matching_policy_version",
         "row_count",
     )
     require_values(facts, {key: proof[key] for key in keys})

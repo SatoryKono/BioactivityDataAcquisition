@@ -30,6 +30,7 @@ class TargetClassificationRunState:
     normalization_version: str
     rules_version: str
     classification_schema_version: str
+    matching_policy_version: str
     _pending: dict[tuple[str, str, int], TargetClassificationResult] = field(
         default_factory=dict, init=False
     )
@@ -90,6 +91,7 @@ class TargetClassificationRunState:
                 "normalization_version": self.normalization_version,
                 "rules_version": self.rules_version,
                 "classification_schema_version": self.classification_schema_version,
+                "matching_policy_version": self.matching_policy_version,
                 "row_count": len(expected),
                 "evidence_manifest_uri": reference.uri,
                 "evidence_manifest_sha256": reference.sha256,
