@@ -500,6 +500,24 @@ def test_iuphar_shadow_paths_keep_explicit_owners(tmp_path: Path) -> None:
             build_shadow_compare([unowned], repo_root=tmp_path)
 
 
+def test_workflow_runbook_selects_resume_and_archive_contracts(tmp_path: Path) -> None:
+    owners = {
+        "tests/unit/application/services/test_selected_snapshot_resume_contracts.py",
+        "tests/unit/application/services/test_workflow_child_archive_contract.py",
+    }
+    for owner in owners:
+        path = tmp_path / owner
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("def test_owner():\n    assert True\n", encoding="utf-8")
+
+    report = build_shadow_compare(
+        ["docs/05-operations/runbooks/workflow-control-plane.md"], repo_root=tmp_path
+    )
+
+    assert set(report["selected"]) == owners
+    assert report["covers_full_suite"] is False
+
+
 def test_iuphar_policy_paths_keep_the_policy_owner(tmp_path: Path) -> None:
     owner = tmp_path / "tests/unit/iuphar_target_class/test_policy.py"
     owner.parent.mkdir(parents=True)
