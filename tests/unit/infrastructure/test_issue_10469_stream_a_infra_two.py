@@ -570,14 +570,13 @@ def test_export_writer_tsv_xlsx_and_csv_io(
     assert tsv_path.exists()
     assert tsv_path.suffix == ".tsv"
 
-    class _Frame:
-        def to_excel(self, *_args: object, **_kwargs: object) -> None:
+    import sys
+
+    class _MissingOpenpyxl:
+        def __getattr__(self, _name: str) -> object:
             raise ImportError("openpyxl missing")
 
-    monkeypatch.setattr(
-        "bioetl.domain.serialization.flatten_arrow_table_for_export",
-        lambda _table: SimpleNamespace(to_pandas=lambda: _Frame()),
-    )
+    monkeypatch.setitem(sys.modules, "openpyxl", _MissingOpenpyxl())
     with pytest.raises(ImportError, match="openpyxl is required"):
         adapter.write_export(
             table=table,

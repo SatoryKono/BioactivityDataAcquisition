@@ -958,6 +958,11 @@ bioetl export chembl.activity
 
 # Экспорт в Excel
 bioetl export chembl.activity --format xlsx
+```
+
+Текст длиннее 32767 символов в XLSX режется на части. Первая часть остаётся в исходной колонке, следующие называются `<колонка>__bioetl_part_0002` и далее. Лист `_bioetl_export_manifest` (`xlsx-text-parts-v1`) хранит карту частей, пустые строки, числовые типы и связь с run, профилем и версией таблицы. Чтение только исходной колонки не возвращает хвост длинного значения.
+
+```bash
 
 # С ограничением строк и колонок
 bioetl export chembl.activity --limit 10000 --columns id,name,value
