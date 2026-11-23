@@ -106,6 +106,70 @@ def test_two_trusted_primary_ids_still_conflict() -> None:
     assert UNKNOWN_AUXILIARY in codes
 
 
+def test_pipeline_shortlist_reports_auxiliary_divergence_not_unknown() -> None:
+    """Indexed shortlist without the auxiliary target must still diagnose divergence."""
+    from iuphar_target_class.matching import collect_candidates, validate_identity
+    from iuphar_target_class.pipeline import (
+        IndexedSnapshot,
+        _auxiliary_diagnostic_catalog,
+        _conflict_catalog,
+        _shortlist,
+    )
+
+    catalog = (
+        _target("1", uniprot="P11111", species="Human"),
+        _target("2", uniprot="Q88888", species="Human"),
+    )
+    snapshot = IndexedSnapshot.build(
+        snapshot_id="fixture",
+        mapping_version="fixture-release",
+        complete=True,
+        catalog=catalog,
+        annotations={},
+        family_nodes=(),
+        type_to_class={},
+        family_to_class={},
+    )
+    query = MatchQuery(
+        None,
+        ("P11111",),
+        None,
+        None,
+        "Human",
+        None,
+        (),
+        auxiliary_uniprot_ids=("Q88888",),
+    )
+    subset = _shortlist(query, snapshot)
+    identity = _conflict_catalog(subset, snapshot)
+    assert {row.target_id for row in identity} == {"1"}
+    auxiliary = _auxiliary_diagnostic_catalog(query, identity, snapshot)
+    assert {row.target_id for row in auxiliary} == {"1", "2"}
+    # Identity-only catalog falsely treats the absent auxiliary hit as unknown.
+    shortlisted = validate_identity(
+        query,
+        identity,
+        collect_candidates(query, subset),
+        snapshot_complete=True,
+    )
+    assert shortlisted.match_status == "matched"
+    assert "unknown_auxiliary_uniprot" in {
+        item.code for item in shortlisted.diagnostics
+    }
+    fixed = validate_identity(
+        query,
+        identity,
+        collect_candidates(query, subset),
+        snapshot_complete=True,
+        auxiliary_catalog=auxiliary,
+    )
+    assert fixed.match_status == "matched"
+    assert fixed.matched_target_id == "1"
+    codes = {item.code for item in fixed.diagnostics}
+    assert "auxiliary_uniprot_divergence" in codes
+    assert "unknown_auxiliary_uniprot" not in codes
+
+
 def test_auxiliary_divergence_is_not_identity_conflict() -> None:
     catalog = (
         _target("1", uniprot="P11111"),

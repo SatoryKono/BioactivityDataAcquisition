@@ -61,6 +61,7 @@ def _receipt(snapshot_hash: str) -> dict[str, object]:
         "normalization_version": "bioetl-iuphar-input-v1",
         "rules_version": "plan-v1-r8",
         "classification_schema_version": "3.1.0",
+        "matching_policy_version": "rf002-uniprot-roles-2026-11-23",
     }
 
 
@@ -133,6 +134,7 @@ def _profile(
         "normalization_version": "bioetl-iuphar-input-v1",
         "rules_version": "plan-v1-r8",
         "classification_schema_version": "3.1.0",
+        "matching_policy_version": "rf002-uniprot-roles-2026-11-23",
     }
     ref = _write(tmp_path, "profile.json", profile)
     return load_profile(
@@ -204,13 +206,51 @@ def test_valid_reference_receipt_admits_enrich_contract_fixture(tmp_path):
 
 
 @pytest.mark.parametrize(
-    "field", ["normalization_version", "rules_version", "classification_schema_version"]
+    "field",
+    [
+        "normalization_version",
+        "rules_version",
+        "classification_schema_version",
+        "matching_policy_version",
+    ],
 )
 def test_receipt_from_another_execution_version_cannot_admit_enrich(field):
     receipt = _receipt("a" * 64)
     receipt[field] = "unreviewed-version"
     with pytest.raises(ValueError, match="acceptance versions"):
         validate_acceptance_receipt(receipt, snapshot_manifest_sha256="a" * 64)
+
+
+def test_pre_rf002_receipt_format_is_rejected_for_new_matching():
+    """Real prior receipt shape (schema 2, no matching_policy_version) cannot admit."""
+    receipt = _receipt("a" * 64)
+    assert "matching_policy_version" in receipt
+    del receipt["matching_policy_version"]
+    # Prior enrich receipts carried these three pins only.
+    assert set(
+        (
+            "normalization_version",
+            "rules_version",
+            "classification_schema_version",
+        )
+    ).issubset(receipt)
+    with pytest.raises(ValueError, match="acceptance versions"):
+        validate_acceptance_receipt(receipt, snapshot_manifest_sha256="a" * 64)
+
+
+def test_pre_rf002_profile_format_is_rejected_for_new_matching(tmp_path):
+    from bioetl.infrastructure.adapters.iuphar._manifest import sha256
+    from iuphar_target_class.stage0.io import canonical_json_bytes
+
+    profile = _profile(tmp_path)
+    path = _profile_path(profile)
+    document = json.loads(path.read_bytes())
+    del document["matching_policy_version"]
+    path.write_bytes(canonical_json_bytes(document))
+    with pytest.raises(
+        ValueError, match="matching_policy_version|IUPHAR profile versions"
+    ):
+        load_profile(path, sha256(path.read_bytes()), require_acceptance=False)
 
 
 def test_complete_version_unverified_snapshot_is_not_publishable(tmp_path):

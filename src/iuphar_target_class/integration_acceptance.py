@@ -263,6 +263,7 @@ def run_integration_acceptance(
         "normalization_version": request.provenance.normalization_version,
         "rules_version": request.provenance.rules_version,
         "classification_schema_version": request.provenance.schema_version,
+        "matching_policy_version": request.provenance.matching_policy_version,
     }
     try:
         _execute_acceptance(request, snapshot, output_dir, clock, receipt, checks)

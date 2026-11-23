@@ -43,6 +43,8 @@ class RunProvenance:
     schema_version: str | None
     retrieved_at: str
     run_started_at: str
+    # RF-002 matching pin; None only for pre-binding kernel fixtures.
+    matching_policy_version: str | None = None
 
 
 @dataclass(frozen=True, slots=True)

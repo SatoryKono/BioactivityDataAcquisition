@@ -220,6 +220,7 @@ def synthetic_reference_receipt(
         "normalization_version": "bioetl-iuphar-input-v1",
         "rules_version": "plan-v1-r8",
         "classification_schema_version": "3.1.0",
+        "matching_policy_version": "rf002-uniprot-roles-2026-11-23",
         "scope_declaration": scope,
         "scientific_status": "bounded_reference_cases_only",
         "reference_coverage": {

@@ -58,8 +58,19 @@ also records each accession under `primary_uniprot` /
 
 - `matching_policy_version`: `rf002-uniprot-roles-2026-11-23`
 - `legacy_matching_policy_version`: `pre-rf002-merged-uniprot-anchors`
-- A profile recorded under the legacy merge of component + xref into one
-  mandatory `uniprot` channel does **not** qualify the new policy.
-  Independent admission is RF-008.
+- Profile envelopes and acceptance receipts **must** carry
+  `matching_policy_version` equal to the executing adapter pin. A pre-RF-002
+  receipt/profile (three version pins only, or a legacy matching token) is
+  rejected at `load_profile` / `validate_acceptance_receipt`. Result provenance
+  records the same pin. Independent biological admission remains RF-008.
 
 `biological_accuracy_accepted` stays `false`.
+
+## Legacy kernel CSV (out of scope for RF-002 re-split)
+
+`read_bioetl_target_kernel_csv_v1` still accepts exports that only have
+`uniprot` (required subset). Values in that column are treated as **primary**
+anchors. Replaying an old merged-anchor CSV does **not** reconstruct
+`uniprot_xref` / `uniprot_equivalent`; that replay cannot qualify RF-002 role
+separation. Fresh cohort export writes the three columns. Historical CSV
+re-qualification is RF-008.

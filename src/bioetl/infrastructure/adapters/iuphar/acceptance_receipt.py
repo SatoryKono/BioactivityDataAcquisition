@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from pathlib import Path
 
+from iuphar_target_class.identifier_roles import MATCHING_POLICY_VERSION
 from iuphar_target_class.policy import PLAN_VERSION
 
 from ._manifest import checked_document, header, referenced_path, require_sha256, text
@@ -16,6 +17,19 @@ from .snapshot_models import (
     REQUIRED_ACCEPTANCE_CHECKS,
     LoadedIupharProfile,
     LoadedIupharSnapshot,
+)
+
+_ADAPTER_VERSIONS = (
+    NORMALIZATION_VERSION,
+    PLAN_VERSION,
+    CLASSIFICATION_SCHEMA_VERSION,
+    MATCHING_POLICY_VERSION,
+)
+_VERSION_KEYS = (
+    "normalization_version",
+    "rules_version",
+    "classification_schema_version",
+    "matching_policy_version",
 )
 
 
@@ -33,15 +47,8 @@ def validate_acceptance_receipt(
         raise ValueError("acceptance belongs to a different IUPHAR snapshot")
     if document.get("reference_cases_accepted") is not True:
         raise ValueError("independent IUPHAR reference cases are not accepted")
-    versions = tuple(
-        document.get(key)
-        for key in (
-            "normalization_version",
-            "rules_version",
-            "classification_schema_version",
-        )
-    )
-    if versions != (NORMALIZATION_VERSION, PLAN_VERSION, CLASSIFICATION_SCHEMA_VERSION):
+    versions = tuple(document.get(key) for key in _VERSION_KEYS)
+    if versions != _ADAPTER_VERSIONS:
         raise ValueError("acceptance versions differ from the executing adapter")
     _executed_checks(document.get("checks"))
     _bound_acceptance_outputs(document)
@@ -113,12 +120,8 @@ def load_profile(
     acceptance_hash = _load_acceptance(
         document, path.parent, snapshot, require_acceptance
     )
-    versions = (
-        text(document, "normalization_version"),
-        text(document, "rules_version"),
-        text(document, "classification_schema_version"),
-    )
-    if versions != (NORMALIZATION_VERSION, PLAN_VERSION, CLASSIFICATION_SCHEMA_VERSION):
+    versions = tuple(text(document, key) for key in _VERSION_KEYS)
+    if versions != _ADAPTER_VERSIONS:
         raise ValueError("IUPHAR profile versions differ from the executing adapter")
     return LoadedIupharProfile(
         snapshot,

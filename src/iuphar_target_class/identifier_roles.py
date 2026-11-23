@@ -107,8 +107,11 @@ def identifier_roles_document() -> dict[str, object]:
         "legacy_matching_policy_version": LEGACY_MATCHING_POLICY_VERSION,
         "matching_policy_version": MATCHING_POLICY_VERSION,
         "profile_qualification": (
-            "A profile recorded under legacy_matching_policy_version does not "
-            "qualify MATCHING_POLICY_VERSION; RF-008 performs independent admission"
+            "Profile envelopes and acceptance receipts must pin "
+            "matching_policy_version to MATCHING_POLICY_VERSION. A pre-RF-002 "
+            "receipt/profile (missing pin or legacy_matching_policy_version) is "
+            "rejected by load_profile / validate_acceptance_receipt. RF-008 "
+            "performs independent biological admission"
         ),
         "strict_primary_api": True,
     }

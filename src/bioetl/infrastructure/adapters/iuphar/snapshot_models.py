@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import dataclass
 
+from iuphar_target_class.identifier_roles import MATCHING_POLICY_VERSION
 from iuphar_target_class.pipeline import IndexedSnapshot
 from iuphar_target_class.snapshot import Completeness
 
@@ -29,6 +30,7 @@ OUTPUT_NAMES = frozenset(
 )
 NORMALIZATION_VERSION = "bioetl-iuphar-input-v1"
 CLASSIFICATION_SCHEMA_VERSION = "3.1.0"
+# MATCHING_POLICY_VERSION is imported from identifier_roles (RF-002 pin).
 
 
 @dataclass(frozen=True, slots=True)
@@ -51,3 +53,4 @@ class LoadedIupharProfile:
     normalization_version: str
     rules_version: str
     classification_schema_version: str
+    matching_policy_version: str

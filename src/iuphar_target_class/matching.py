@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 from dataclasses import dataclass, replace
+from typing import cast
 
 from .models import Diagnostic, MatchResult
 
@@ -194,6 +195,7 @@ def validate_identity(
     candidates: tuple[Candidate, ...],
     *,
     snapshot_complete: bool,
+    auxiliary_catalog: tuple[CatalogTarget, ...] | None = None,
 ) -> MatchResult:
     """Turn the full candidate list into one match status.
 
@@ -204,11 +206,15 @@ def validate_identity(
         Primary ``uniprot_ids`` remain strict; ``auxiliary_uniprot_ids`` only
         contribute RF-002 diagnostics (see ``identifier_roles``).
     catalog : tuple[CatalogTarget, ...]
-        Targets from the same snapshot used to collect candidates.
+        Targets used for primary identity channels (may be a shortlist).
     candidates : tuple[Candidate, ...]
         Complete channel hits from ``collect_candidates``.
     snapshot_complete : bool
         Whether all required snapshot sources are present.
+    auxiliary_catalog : tuple[CatalogTarget, ...] | None
+        Optional broader catalog for auxiliary-xref diagnostics only. Defaults
+        to ``catalog``. Must include auxiliary UniProt hits that are absent
+        from a primary shortlist so divergence is not misreported as unknown.
 
     Returns
     -------
@@ -218,7 +224,11 @@ def validate_identity(
         no query-channel hits; it does not assert biological absence.
     """
     result = _decide(query, catalog, candidates, snapshot_complete=snapshot_complete)
-    return _attach_auxiliary_diagnostics(query, catalog, result)
+    return _attach_auxiliary_diagnostics(
+        query,
+        catalog if auxiliary_catalog is None else auxiliary_catalog,
+        result,
+    )
 
 
 def resolve_match(
@@ -568,4 +578,6 @@ def _attach_auxiliary_diagnostics(
             )
     if not extras:
         return result
-    return replace(result, diagnostics=(*result.diagnostics, *extras))
+    return cast(
+        MatchResult, replace(result, diagnostics=(*result.diagnostics, *extras))
+    )
