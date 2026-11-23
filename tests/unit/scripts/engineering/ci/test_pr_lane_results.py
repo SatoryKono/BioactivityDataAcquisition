@@ -975,6 +975,27 @@ def test_shadow_compare_routes_molecule_eligibility_contract(path: str) -> None:
     assert selection["covers_full_suite"] is False
 
 
+@pytest.mark.parametrize(
+    "path",
+    [
+        "data/iuphar_target_class/rf001/baseline_manifest.json",
+        "data/iuphar_target_class/rf001/baseline_manifest.sha256.json",
+        "docs/04-reference/pipelines/chembl/04-target-spec.md",
+        "docs/04-reference/pipelines/chembl/16-iuphar-target-classification-semantics.md",
+        "src/iuphar_target_class/semantics.py",
+    ],
+)
+def test_shadow_compare_routes_rf001_semantics_contract(path: str) -> None:
+    """RF-001 semantics surfaces keep an explicit Class-lane shadow route."""
+    repo_root = Path(__file__).resolve().parents[5]
+    selection = build_shadow_compare([path], repo_root=repo_root)
+    assert (
+        "tests/unit/iuphar_target_class/test_semantics_rf001.py"
+        in selection["selected"]
+    )
+    assert selection["covers_full_suite"] is False
+
+
 def test_shadow_compare_routes_uv_resolver_to_wrapper_contracts() -> None:
     repo_root = Path(__file__).resolve().parents[5]
     selection = build_shadow_compare(
