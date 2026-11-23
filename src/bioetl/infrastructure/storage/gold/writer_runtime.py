@@ -15,7 +15,7 @@ def _resolve_runtime_services(
     *,
     runtime_services: GoldWriterRuntimeServices | None,
 ) -> GoldWriterRuntimeServices:
-    """Return grouped Gold runtime services, building defaults when omitted."""
+    """Resolve Gold runtime services; enabled metadata requires a coordinator."""
     services = runtime_services or build_gold_writer_runtime_services(
         csv_exporter=None,
         tracing=None,
