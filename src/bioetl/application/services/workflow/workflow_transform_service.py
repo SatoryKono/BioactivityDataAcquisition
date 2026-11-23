@@ -199,7 +199,7 @@ def _invoke_transform_executor(
 ) -> object | Awaitable[object]:
     executor_signature = signature(executor)
     context_parameter = executor_signature.parameters.get("runtime_context")
-    candidates = []
+    candidates: list[tuple[tuple[object, ...], dict[str, object]]] = []
     if (
         context_parameter is not None
         and context_parameter.kind == Parameter.KEYWORD_ONLY
@@ -207,7 +207,7 @@ def _invoke_transform_executor(
         candidates.append(
             ((spec, upstream_outputs), {"runtime_context": runtime_context})
         )
-    positional_candidates = [
+    positional_candidates: list[tuple[tuple[object, ...], dict[str, object]]] = [
         ((spec, upstream_outputs, runtime_context), {}),
         ((spec, upstream_outputs), {}),
     ]
