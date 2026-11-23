@@ -102,7 +102,7 @@
     {
       "availability": "present",
       "baseline_sha256": "d248a9fe2806c186d3af7243ac3e1ce08b9fb24abd1c90fc2345e5696a1f5437",
-      "delta": "content_changed_by_rf001",
+      "delta": "matches_baseline",
       "fresh_recalculation": false,
       "material_id": "composite_config",
       "note": "Composite target. Полные признаки появляются после dependency joins.",
@@ -110,7 +110,7 @@
       "role": "configuration",
       "semantics_bound": false,
       "version_id": null,
-      "worktree_sha256": "283dfc99edf5b2b0f753f419645fd5a9a5790543a7716f763e259e37b2d0a3fe"
+      "worktree_sha256": "d248a9fe2806c186d3af7243ac3e1ce08b9fb24abd1c90fc2345e5696a1f5437"
     },
     {
       "availability": "present",
@@ -154,7 +154,7 @@
     {
       "availability": "present",
       "baseline_sha256": "c0041796d7f35f5d9aedcd6878448934eb1eb38bf5ac2d45cf0c97b15d756eba",
-      "delta": "content_changed_by_rf001",
+      "delta": "matches_baseline",
       "fresh_recalculation": false,
       "material_id": "entity_config",
       "note": "Зафиксированный mode off, контракт 3.0.0, таблицы V30.",
@@ -162,7 +162,7 @@
       "role": "configuration",
       "semantics_bound": false,
       "version_id": null,
-      "worktree_sha256": "dd2a4cb1ac997f763d69323411b6d0b6a02d07b5adee23de54d5ae561d8641b5"
+      "worktree_sha256": "c0041796d7f35f5d9aedcd6878448934eb1eb38bf5ac2d45cf0c97b15d756eba"
     },
     {
       "availability": "present",
@@ -229,7 +229,7 @@
       "role": "rf001_contract",
       "semantics_bound": false,
       "version_id": null,
-      "worktree_sha256": "c6a59f410aba0fb72e0cf862ad75c887c0f1ff04217ccfc44b705925f8071505"
+      "worktree_sha256": "ff2bfbcf6f8e8147ab6595c09a2bafdd5edb354e6474d0af22d4e47345fa4e95"
     },
     {
       "availability": "present",

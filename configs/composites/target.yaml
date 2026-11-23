@@ -83,11 +83,6 @@ composite:
   # ---------------------------------------------------------------------------
   # Dependency Pipelines (sequential, pre-populate Silver)
   # ---------------------------------------------------------------------------
-  # RF-001 (#13309): UniProt protein features and the protein-class hierarchy
-  # exist only after the joins below. Standalone chembl_target cannot claim
-  # them. A dependency that did not run is source_unavailable for its
-  # features; a completed dependency with no row is not_found for that join.
-  # Local inference must not be written into iuphar_* fields.
   # Dependencies run after seed but before enrichers to populate Silver tables.
   # They execute as full standalone pipelines (API -> Bronze -> Silver).
   #

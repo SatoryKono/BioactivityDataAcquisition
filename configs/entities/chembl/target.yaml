@@ -7,10 +7,6 @@ pipeline:
   entity_type: target
   description: Extract biological targets from ChEMBL API
   target_classification:
-    # RF-001 (#13309): committed mode is off, so canonical target tables stay
-    # V30 / contract 3.0.0. enrich is a separate pinned profile and does not
-    # migrate those tables. target_type stays the ChEMBL object type.
-    # iuphar_* / local_* / effective_* : src/iuphar_target_class/baseline_semantics.py
     mode: "off"
   field_policy: {}
   business_primary_keys:

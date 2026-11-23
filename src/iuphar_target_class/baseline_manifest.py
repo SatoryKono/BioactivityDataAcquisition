@@ -30,7 +30,9 @@ from .gtopdb_2026_3_1 import (
 from .stage0.io import atomic_write_bytes, canonical_json_bytes, sha256_bytes
 
 MANIFEST_RELATIVE_PATH = "data/iuphar_target_class/baseline/rf001/manifest.json"
-BASELINE_REVISION = "e01ca762a3ffc5f2a4bd4ea89f17fa807e49b9e2"
+BASELINE_REVISION = (
+    "e01ca762a3ffc5f2a4bd4ea89f17fa807e49b9e2"  # pragma: allowlist secret
+)
 INCOMPLETE_HISTORY = "baseline revision is not in this checkout"
 _SHA256_WIDTH = 64
 _REVISION_PATTERN = r"[0-9a-f]{40}"

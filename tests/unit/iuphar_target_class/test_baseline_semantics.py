@@ -341,7 +341,7 @@ def test_manifest_hashes_and_required_roles_hold() -> None:
         for row in materials
         if row["delta"] == "content_changed_by_rf001"
     }
-    assert changed == {"composite_config", "entity_config", "rules_source"}
+    assert changed == {"rules_source"}
     introduced = {
         row["material_id"] for row in materials if row["delta"] == "absent_on_baseline"
     }
