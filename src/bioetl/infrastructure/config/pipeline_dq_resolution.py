@@ -40,24 +40,7 @@ def field_validation_to_dict(
     fv: FieldValidationConfig,
 ) -> JsonDict:  # Any: dynamic YAML config values
     """Convert FieldValidationConfig to mergeable file-shape dict."""
-    result: JsonDict = {  # Any: dynamic YAML config values
-        "field": fv.field,
-        "type": fv.type,
-        "nullable": fv.nullable,
-    }
-    if fv.min is not None:
-        result["min"] = fv.min
-    if fv.max is not None:
-        result["max"] = fv.max
-    if fv.pattern:
-        result["pattern"] = fv.pattern
-    if fv.allowed:
-        result["allowed"] = list(fv.allowed)
-    if fv.validator:
-        result["validator"] = fv.validator
-    if fv.error_message:
-        result["error_message"] = fv.error_message
-    return result
+    return fv.model_dump(exclude_unset=True, mode="json")
 
 
 def cross_field_validation_to_dict(
