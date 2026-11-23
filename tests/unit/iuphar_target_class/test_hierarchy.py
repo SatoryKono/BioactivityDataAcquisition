@@ -10,6 +10,7 @@ import pytest
 
 from iuphar_target_class.hierarchy import (
     FamilyNode,
+    assign_mapped_subclass,
     build_family_paths,
     normalize_approved_provider_class,
     normalize_provider_class,
@@ -385,6 +386,39 @@ def test_approved_multi_parent_family_keeps_every_path() -> None:
     assert {"239", "865"} == {path[-2] for path in paths}
 
 
+def test_family_subclass_fallback_requires_matching_family_class() -> None:
+    """Family subclass is kept only when its family class matches iuphar_class."""
+    compatible = assign_mapped_subclass(
+        type_name="enzyme",
+        family_ids=("900",),
+        type_to_subclass={},
+        family_to_subclass={"900": "Enzymes"},
+        iuphar_class="Enzyme",
+        family_to_class={"900": "Enzyme"},
+    )
+    assert compatible == "Enzymes"
+    mismatched = assign_mapped_subclass(
+        type_name="enzyme",
+        family_ids=("1",),
+        type_to_subclass={},
+        family_to_subclass={"1": "G protein-coupled receptors"},
+        iuphar_class="Enzyme",
+        family_to_class={"1": "Receptor"},
+    )
+    assert mismatched is None
+    via_normalize = normalize_provider_class(
+        type_name="enzyme",
+        family_ids=("1",),
+        nodes=(FamilyNode("1", (), "gpcr"),),
+        type_to_class={"enzyme": "Enzyme"},
+        family_to_class={"1": "Receptor"},
+        type_to_subclass={},
+        family_to_subclass={"1": "G protein-coupled receptors"},
+    )
+    assert via_normalize.iuphar_class == "Enzyme"
+    assert via_normalize.iuphar_subclass is None
+
+
 def test_synthetic_family_ids_stay_outside_official_paths() -> None:
     mixed = normalize_provider_class(
         type_name="gpcr",
@@ -413,6 +447,23 @@ def test_synthetic_family_ids_stay_outside_official_paths() -> None:
     assert only_local.paths == ()
     assert (
         only_local.diagnostics[0].message
+        == "синтетический идентификатор в официальном графе"
+    )
+    typed_local = normalize_provider_class(
+        type_name="gpcr",
+        family_ids=("local:x",),
+        nodes=(),
+        type_to_class={"gpcr": "Receptor"},
+        family_to_class={},
+        type_to_subclass={"gpcr": "G protein-coupled receptors"},
+    )
+    assert typed_local.annotation_status == "partial"
+    assert typed_local.iuphar_class == "Receptor"
+    assert typed_local.iuphar_subclass == "G protein-coupled receptors"
+    assert typed_local.paths == ()
+    assert typed_local.diagnostics[0].level == "error"
+    assert (
+        typed_local.diagnostics[0].message
         == "синтетический идентификатор в официальном графе"
     )
 

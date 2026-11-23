@@ -109,6 +109,8 @@ def assign_mapped_subclass(
     family_ids: tuple[str, ...],
     type_to_subclass: Mapping[str, str],
     family_to_subclass: Mapping[str, str],
+    iuphar_class: str | None = None,
+    family_to_class: Mapping[str, str] | None = None,
 ) -> str | None:
     """Return a subclass only from the approved type/family dictionaries."""
     mapped = {
@@ -120,8 +122,17 @@ def assign_mapped_subclass(
         return None
     if type_name and type_name in type_to_subclass:
         return type_to_subclass[type_name]
-    if len(mapped) == 1:
-        return next(iter(mapped))
+    if len(mapped) != 1:
+        return None
+    subclass = next(iter(mapped))
+    if iuphar_class is None or family_to_class is None:
+        return subclass
+    for family_id in family_ids:
+        if (
+            family_to_subclass.get(family_id) == subclass
+            and family_to_class.get(family_id) == iuphar_class
+        ):
+            return subclass
     return None
 
 
@@ -231,22 +242,17 @@ def normalize_provider_class(
     subclass_types = type_to_subclass or {}
     subclass_families = family_to_subclass or {}
     if other_ids and not official_ids:
-        return HierarchyResult(
-            annotation_status="not_available",
-            iuphar_class=None,
-            iuphar_subclass=None,
-            iuphar_class_candidates=(),
-            proof=None,
-            source=None,
-            paths=(),
-            family_evidence=(),
-            diagnostics=(
-                Diagnostic(
-                    code="graph_error",
-                    level="error",
-                    message=_SYNTHETIC_MIXED,
-                ),
+        return _graph_error_result(
+            Diagnostic(
+                code="graph_error",
+                level="error",
+                message=_SYNTHETIC_MIXED,
             ),
+            type_name=type_name,
+            type_to_class=type_to_class,
+            type_to_subclass=subclass_types,
+            name=name,
+            path_text=path_text,
         )
     defect = validate_family_graph(
         nodes,
@@ -302,6 +308,8 @@ def normalize_provider_class(
         family_ids=official_ids,
         type_to_subclass=subclass_types,
         family_to_subclass=subclass_families,
+        iuphar_class=assigned.iuphar_class,
+        family_to_class=family_to_class,
     )
     source = "iuphar_normalized" if assigned.iuphar_class else None
     extras: list[Diagnostic] = []
