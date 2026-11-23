@@ -207,12 +207,13 @@ def _invoke_transform_executor(
         candidates.append(
             ((spec, upstream_outputs), {"runtime_context": runtime_context})
         )
-    candidates.extend(
-        [
-            ((spec, upstream_outputs, runtime_context), {}),
-            ((spec, upstream_outputs), {}),
-        ]
-    )
+    positional_candidates = [
+        ((spec, upstream_outputs, runtime_context), {}),
+        ((spec, upstream_outputs), {}),
+    ]
+    if len(executor_signature.parameters) < 3:
+        positional_candidates.reverse()
+    candidates.extend(positional_candidates)
     for args, kwargs in candidates:
         try:
             executor_signature.bind(*args, **kwargs)

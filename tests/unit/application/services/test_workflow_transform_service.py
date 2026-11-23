@@ -346,7 +346,7 @@ async def test_transform_step_passes_artifact_context_and_skip_avoids_sink() -> 
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    "shape", ["two", "three", "keyword", "unsupported", "body_error"]
+    "shape", ["two", "three", "keyword", "variadic", "unsupported", "body_error"]
 )
 async def test_transform_executor_signature_contract(shape: str) -> None:
     calls: list[object] = []
@@ -363,6 +363,10 @@ async def test_transform_executor_signature_contract(shape: str) -> None:
         spec: object, upstream: object, *, runtime_context: object = None
     ) -> object:
         calls.append((spec, upstream, runtime_context))
+        return "ok"
+
+    def variadic(spec: object, *args: object) -> object:
+        calls.append((spec, *args))
         return "ok"
 
     def unsupported(spec: object, upstream: object, *, required: object) -> object:
@@ -399,6 +403,8 @@ async def test_transform_executor_signature_contract(shape: str) -> None:
         assert result.output == "ok"
         assert len(calls) == 1
         assert calls[0][1] == {"input": 42}
+        if shape == "variadic":
+            assert len(calls[0]) == 2
         if shape in ("three", "keyword"):
             assert calls[0][2].dry_run is True
             assert calls[0][2].workflow_name == "example"
