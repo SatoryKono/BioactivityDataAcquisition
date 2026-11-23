@@ -31,6 +31,9 @@ SHADOW_CONTRACT = "3.0.0"
 SMOKE_LIMIT = 1000
 _SHA256 = 64
 _COMMIT_SHA = 40
+_TARGET_YAML = "target.yaml"
+_ENRICH_REPEAT = "isolated_enrich.repeat"
+_ENRICH_XLSX = "isolated_enrich.xlsx"
 _RUN_STATUSES = frozenset({"PASS", "FAIL", "NOT_RUN"})
 _SOURCE_COMPLETENESS = frozenset(
     {"admission_complete", "complete", "incomplete", "not_recorded"}
@@ -259,9 +262,9 @@ def compare_xlsx_round_trip(
 
 def inspect_repository(root: Path = REPO_ROOT) -> ContourObservations:
     """Read canonical mode, composite column groups, and the gold contract."""
-    config_path = root / "configs" / "entities" / "chembl" / "target.yaml"
-    composite_path = root / "configs" / "composites" / "target.yaml"
-    entity_path = root / "configs" / "entities" / "composite" / "target.yaml"
+    config_path = root / "configs" / "entities" / "chembl" / _TARGET_YAML
+    composite_path = root / "configs" / "composites" / _TARGET_YAML
+    entity_path = root / "configs" / "entities" / "composite" / _TARGET_YAML
     contract_path = (
         root
         / "docs"
@@ -347,6 +350,87 @@ def write_contour_report(report: dict[str, object], output: Path) -> None:
     atomic_write_text(safe, payload)  # NOSONAR - confined_io_path
 
 
+def _record_hash(updates: dict[str, object], key: str, path: Path | None) -> None:
+    if path is not None:
+        updates[key] = file_sha256(path)
+
+
+def _record_shadow(updates: dict[str, object], path: Path | None) -> None:
+    if path is None:
+        return
+    updates["shadow_rows"] = tuple(_current_rows(load_table(path)))
+
+
+def _record_enrich_table(
+    updates: dict[str, object],
+    table: Path | None,
+    repeat_table: Path | None,
+) -> list[dict[str, object]] | None:
+    table_rows = load_table(table) if table is not None else None
+    repeat_rows = load_table(repeat_table) if repeat_table is not None else None
+    if table_rows is not None and table is not None:
+        updates["table_profile_values"] = _profile_values(table_rows)
+        updates["repeat_classification_sha256"] = classification_sha256(
+            _current_rows(table_rows)
+        )
+        updates["xlsx_table_sha256"] = table_identity_sha256(table, table_rows)
+    if repeat_rows is not None:
+        updates["repeat_other_sha256"] = classification_sha256(
+            _current_rows(repeat_rows)
+        )
+    return table_rows
+
+
+def _record_xlsx(
+    updates: dict[str, object],
+    evidence: dict[str, object],
+    table_rows: list[dict[str, object]] | None,
+    xlsx: Path | None,
+) -> None:
+    if xlsx is None or table_rows is None:
+        return
+    enrich = cast(dict[str, object], evidence["isolated_enrich"])
+    xlsx_claim = cast(dict[str, object], enrich["xlsx"])
+    historical = cast(tuple[str, ...], xlsx_claim["historical_columns"])
+    status, preserved = compare_xlsx_round_trip(
+        _current_rows(table_rows), xlsx, historical
+    )
+    updates["xlsx_status"] = status
+    updates["historical_preserved"] = preserved
+    updates["xlsx_file_sha256"] = file_sha256(xlsx)
+
+
+def _record_persisted(
+    updates: dict[str, object],
+    silver: Path | None,
+    gold: Path | None,
+) -> list[dict[str, object]] | None:
+    silver_rows = load_table(silver) if silver is not None else None
+    gold_rows = load_table(gold) if gold is not None else None
+    if silver_rows is not None and silver is not None:
+        updates["silver_sha256"] = table_identity_sha256(silver, silver_rows)
+        updates["silver_profile_values"] = _profile_values(silver_rows)
+    if gold_rows is not None and gold is not None:
+        updates["gold_sha256"] = table_identity_sha256(gold, gold_rows)
+        updates["gold_profile_values"] = _profile_values(gold_rows)
+    if silver_rows is not None and gold_rows is not None:
+        updates["live_projection_match"] = _current_projections_match(
+            silver_rows, gold_rows
+        )
+    return gold_rows
+
+
+def _record_fk(
+    updates: dict[str, object],
+    assay: Path | None,
+    gold_rows: list[dict[str, object]] | None,
+) -> None:
+    if assay is not None and gold_rows is not None:
+        updates["fk_unresolved"] = unresolved_assay_targets(
+            load_table(assay), gold_rows
+        )
+
+
 def apply_measurements(
     observations: ContourObservations,
     evidence: dict[str, object],
@@ -363,52 +447,14 @@ def apply_measurements(
 ) -> ContourObservations:
     """Fill observations from confined files and current Delta rows."""
     updates: dict[str, object] = {}
-    if discrepancy_report is not None:
-        updates["discrepancy_report_sha256"] = file_sha256(discrepancy_report)
-    if expectations is not None:
-        updates["expectations_sha256"] = file_sha256(expectations)
-    shadow_rows = load_table(shadow_table) if shadow_table is not None else None
-    if shadow_rows is not None:
-        updates["shadow_rows"] = tuple(_current_rows(shadow_rows))
-    table_rows = load_table(table) if table is not None else None
-    repeat_rows = load_table(repeat_table) if repeat_table is not None else None
-    if table_rows is not None:
-        updates["table_profile_values"] = _profile_values(table_rows)
-        updates["repeat_classification_sha256"] = classification_sha256(
-            _current_rows(table_rows)
-        )
-        updates["xlsx_table_sha256"] = table_identity_sha256(table, table_rows)
-    if repeat_rows is not None:
-        updates["repeat_other_sha256"] = classification_sha256(
-            _current_rows(repeat_rows)
-        )
-    if xlsx is not None and table_rows is not None:
-        enrich = cast(dict[str, object], evidence["isolated_enrich"])
-        xlsx_claim = cast(dict[str, object], enrich["xlsx"])
-        historical = cast(tuple[str, ...], xlsx_claim["historical_columns"])
-        status, preserved = compare_xlsx_round_trip(
-            _current_rows(table_rows), xlsx, historical
-        )
-        updates["xlsx_status"] = status
-        updates["historical_preserved"] = preserved
-        updates["xlsx_file_sha256"] = file_sha256(xlsx)
-    silver_rows = load_table(silver) if silver is not None else None
-    gold_rows = load_table(gold) if gold is not None else None
-    if silver_rows is not None and silver is not None:
-        updates["silver_sha256"] = table_identity_sha256(silver, silver_rows)
-        updates["silver_profile_values"] = _profile_values(silver_rows)
-    if gold_rows is not None and gold is not None:
-        updates["gold_sha256"] = table_identity_sha256(gold, gold_rows)
-        updates["gold_profile_values"] = _profile_values(gold_rows)
-    if silver_rows is not None and gold_rows is not None:
-        updates["live_projection_match"] = _current_projections_match(
-            silver_rows, gold_rows
-        )
-    if assay is not None and gold_rows is not None:
-        updates["fk_unresolved"] = unresolved_assay_targets(
-            load_table(assay), gold_rows
-        )
-    return replace(observations, **updates)
+    _record_hash(updates, "discrepancy_report_sha256", discrepancy_report)
+    _record_hash(updates, "expectations_sha256", expectations)
+    _record_shadow(updates, shadow_table)
+    table_rows = _record_enrich_table(updates, table, repeat_table)
+    _record_xlsx(updates, evidence, table_rows, xlsx)
+    gold_rows = _record_persisted(updates, silver, gold)
+    _record_fk(updates, assay, gold_rows)
+    return cast(ContourObservations, replace(observations, **updates))
 
 
 def parse_evidence(evidence: object) -> dict[str, object]:
@@ -466,6 +512,91 @@ def _evaluate_shadow(
     return _phase("FAIL" if reasons else "PASS", reasons)
 
 
+def _unpinned_reasons(
+    section: dict[str, object], pairs: tuple[tuple[str, str], ...]
+) -> list[str]:
+    return [code for key, code in pairs if not _pinned(section[key])]
+
+
+def _enrich_profile_reasons(
+    observations: ContourObservations, profile: object
+) -> list[str]:
+    reasons: list[str] = []
+    cohorts = (
+        (
+            observations.table_profile_values,
+            "enrich_profile_rows_not_measured",
+            "enrich_profile_row_mismatch",
+        ),
+        (
+            observations.silver_profile_values,
+            "silver_profile_rows_not_measured",
+            "silver_profile_row_mismatch",
+        ),
+        (
+            observations.gold_profile_values,
+            "gold_profile_rows_not_measured",
+            "gold_profile_row_mismatch",
+        ),
+    )
+    for observed, missing_code, mismatch_code in cohorts:
+        reasons.extend(
+            _profile_row_reasons(observed, profile, missing_code, mismatch_code)
+        )
+    return reasons
+
+
+def _enrich_repeat_reasons(
+    observations: ContourObservations, enrich: dict[str, object]
+) -> list[str]:
+    reasons: list[str] = []
+    repeat = cast(dict[str, object], enrich["repeat"])
+    if repeat["same_inputs"] is not True or repeat["same_versions"] is not True:
+        reasons.append("repeat_inputs_or_versions_differ")
+    reasons.extend(
+        _hash_pair(
+            observations.repeat_classification_sha256,
+            repeat["classification_sha256"],
+            "repeat_classification",
+        )
+    )
+    reasons.extend(
+        _hash_pair(
+            observations.repeat_other_sha256,
+            repeat["repeat_classification_sha256"],
+            "repeat_other",
+        )
+    )
+    observed = observations.repeat_classification_sha256
+    other = observations.repeat_other_sha256
+    if observed is not None and other is not None and observed != other:
+        reasons.append("repeat_classification_mismatch")
+    return reasons
+
+
+def _enrich_xlsx_reasons(
+    observations: ContourObservations, enrich: dict[str, object]
+) -> list[str]:
+    reasons: list[str] = []
+    xlsx = cast(dict[str, object], enrich["xlsx"])
+    if observations.xlsx_status == "NOT_RUN":
+        reasons.append("xlsx_not_read")
+    elif observations.xlsx_status != "PASS":
+        reasons.append("xlsx_round_trip_failed")
+    if observations.historical_preserved is not True:
+        reasons.append("historical_values_not_preserved")
+    reasons.extend(
+        _hash_pair(observations.xlsx_table_sha256, xlsx["table_sha256"], "xlsx_table")
+    )
+    reasons.extend(
+        _hash_pair(observations.xlsx_file_sha256, xlsx["xlsx_sha256"], "xlsx_file")
+    )
+    historical = cast(tuple[str, ...], xlsx["historical_columns"])
+    if not historical:
+        reasons.append("historical_columns_missing")
+    return reasons
+
+
 def _evaluate_enrich(
     document: dict[str, object],
     observations: ContourObservations,
@@ -485,37 +616,19 @@ def _evaluate_enrich(
         or enrich["gold_contract"] != ENRICH_CONTRACT
     ):
         reasons.append("contract_version_mismatch")
-    for key, code in (
-        ("profile_sha256", "profile_unpinned"),
-        ("config_sha256", "config_unpinned"),
-        ("evidence_manifest_sha256", "evidence_manifest_unpinned"),
-        ("persisted_silver_sha256", "silver_unpinned"),
-        ("persisted_gold_sha256", "gold_unpinned"),
-    ):
-        if not _pinned(enrich[key]):
-            reasons.append(code)
-    for observed, missing_code, mismatch_code in (
-        (
-            observations.table_profile_values,
-            "enrich_profile_rows_not_measured",
-            "enrich_profile_row_mismatch",
-        ),
-        (
-            observations.silver_profile_values,
-            "silver_profile_rows_not_measured",
-            "silver_profile_row_mismatch",
-        ),
-        (
-            observations.gold_profile_values,
-            "gold_profile_rows_not_measured",
-            "gold_profile_row_mismatch",
-        ),
-    ):
-        reasons.extend(
-            _profile_row_reasons(
-                observed, enrich["profile_sha256"], missing_code, mismatch_code
-            )
+    reasons.extend(
+        _unpinned_reasons(
+            enrich,
+            (
+                ("profile_sha256", "profile_unpinned"),
+                ("config_sha256", "config_unpinned"),
+                ("evidence_manifest_sha256", "evidence_manifest_unpinned"),
+                ("persisted_silver_sha256", "silver_unpinned"),
+                ("persisted_gold_sha256", "gold_unpinned"),
+            ),
         )
+    )
+    reasons.extend(_enrich_profile_reasons(observations, enrich["profile_sha256"]))
     reasons.extend(
         _measured_identity(
             observations.silver_sha256,
@@ -532,85 +645,50 @@ def _evaluate_enrich(
             "gold_hash_conflict",
         )
     )
-    repeat = cast(dict[str, object], enrich["repeat"])
-    if repeat["same_inputs"] is not True or repeat["same_versions"] is not True:
-        reasons.append("repeat_inputs_or_versions_differ")
-    reasons.extend(
-        _hash_pair(
-            observations.repeat_classification_sha256,
-            repeat["classification_sha256"],
-            "repeat_classification",
-        )
-    )
-    reasons.extend(
-        _hash_pair(
-            observations.repeat_other_sha256,
-            repeat["repeat_classification_sha256"],
-            "repeat_other",
-        )
-    )
-    if (
-        observations.repeat_classification_sha256 is not None
-        and observations.repeat_other_sha256 is not None
-        and observations.repeat_classification_sha256
-        != observations.repeat_other_sha256
-    ):
-        reasons.append("repeat_classification_mismatch")
-    xlsx = cast(dict[str, object], enrich["xlsx"])
-    if observations.xlsx_status == "NOT_RUN":
-        reasons.append("xlsx_not_read")
-    elif observations.xlsx_status != "PASS":
-        reasons.append("xlsx_round_trip_failed")
-    if observations.historical_preserved is not True:
-        reasons.append("historical_values_not_preserved")
-    reasons.extend(
-        _hash_pair(observations.xlsx_table_sha256, xlsx["table_sha256"], "xlsx_table")
-    )
-    reasons.extend(
-        _hash_pair(observations.xlsx_file_sha256, xlsx["xlsx_sha256"], "xlsx_file")
-    )
-    historical = cast(tuple[str, ...], xlsx["historical_columns"])
-    if not historical:
-        reasons.append("historical_columns_missing")
+    reasons.extend(_enrich_repeat_reasons(observations, enrich))
+    reasons.extend(_enrich_xlsx_reasons(observations, enrich))
     return _phase("FAIL" if reasons else "PASS", _unique(reasons))
 
 
-def _evaluate_composite(
-    document: dict[str, object],
-    observations: ContourObservations,
-) -> dict[str, object]:
-    composite = cast(dict[str, object], document["composite_enrich"])
-    shadow = cast(dict[str, object], document["shadow"])
-    missing_contract = [
-        field
-        for field in TARGET_CLASSIFICATION_FIELDS
-        if field not in observations.composite_contract_properties
-    ]
-    missing_groups = [
+def _absent_fields(present: frozenset[str] | tuple[str, ...]) -> list[str]:
+    return [field for field in TARGET_CLASSIFICATION_FIELDS if field not in present]
+
+
+def _group_gaps(observations: ContourObservations) -> list[str]:
+    return [
         field
         for field in TARGET_CLASSIFICATION_FIELDS
         if field not in observations.composite_classification_fields
         or field not in observations.entity_classification_fields
     ]
-    if missing_contract or missing_groups:
-        reasons = []
-        if missing_contract:
-            reasons.append("composite_contract_missing_fields")
-        if missing_groups:
-            reasons.append("column_group_missing_fields")
-        if (
-            observations.composite_classification_fields
-            != observations.entity_classification_fields
-        ):
-            reasons.append("column_group_drift")
-        return _phase("BLOCKED", reasons)
-    if (
+
+
+def _composite_structure(
+    observations: ContourObservations,
+) -> dict[str, object] | None:
+    missing_contract = _absent_fields(observations.composite_contract_properties)
+    missing_groups = _group_gaps(observations)
+    drifted = (
         observations.composite_classification_fields
         != observations.entity_classification_fields
-    ):
-        return _phase("FAIL", ["column_group_drift"])
-    if composite["executed"] is not True:
-        return _phase("NOT_RUN", ["not_executed"])
+    )
+    if not missing_contract and not missing_groups:
+        if drifted:
+            return _phase("FAIL", ["column_group_drift"])
+        return None
+    reasons: list[str] = []
+    if missing_contract:
+        reasons.append("composite_contract_missing_fields")
+    if missing_groups:
+        reasons.append("column_group_missing_fields")
+    if drifted:
+        reasons.append("column_group_drift")
+    return _phase("BLOCKED", reasons)
+
+
+def _composite_run_reasons(
+    composite: dict[str, object], shadow: dict[str, object]
+) -> list[str]:
     reasons: list[str] = []
     if composite["separate_directory"] is not True:
         reasons.append("directory_not_separate")
@@ -622,17 +700,27 @@ def _evaluate_composite(
         composite["agreed_cohort_sha256"] != shadow["cohort_sha256"]
     ):
         reasons.append("cohort_hash_mismatch")
-    return _phase("FAIL" if reasons else "PASS", reasons)
+    return reasons
 
 
-def _evaluate_migration(
+def _evaluate_composite(
     document: dict[str, object],
     observations: ContourObservations,
 ) -> dict[str, object]:
-    migration = cast(dict[str, object], document["migration"])
-    enrich = cast(dict[str, object], document["isolated_enrich"])
-    if _migration_not_started(migration, observations):
+    blocked = _composite_structure(observations)
+    if blocked is not None:
+        return blocked
+    composite = cast(dict[str, object], document["composite_enrich"])
+    if composite["executed"] is not True:
         return _phase("NOT_RUN", ["not_executed"])
+    shadow = cast(dict[str, object], document["shadow"])
+    reasons = _composite_run_reasons(composite, shadow)
+    return _phase("FAIL" if reasons else "PASS", reasons)
+
+
+def _migration_closure_reasons(
+    migration: dict[str, object], observations: ContourObservations
+) -> list[str]:
     reasons: list[str] = []
     if migration["rehearsal_rollback"] != "PASS":
         reasons.append("rehearsal_rollback_not_passed")
@@ -653,23 +741,52 @@ def _evaluate_migration(
         reasons.append("physical_contract_mismatch")
     if migration["source_identity_matches"] is not True:
         reasons.append("source_identity_mismatch")
+    return reasons
+
+
+def _migration_identity_reasons(
+    migration: dict[str, object],
+    enrich: dict[str, object],
+    observations: ContourObservations,
+) -> list[str]:
+    reasons: list[str] = []
     if not _pinned(migration["effective_profile_sha256"]) or (
         migration["effective_profile_sha256"] != enrich["profile_sha256"]
     ):
         reasons.append("profile_hash_mismatch")
     if not _pinned(migration["effective_config_sha256"]):
         reasons.append("effective_config_unpinned")
-    promoted = migration["promoted"] is True
-    if promoted:
+    reasons.extend(_promotion_config_reasons(migration, observations))
+    return reasons
+
+
+def _promotion_config_reasons(
+    migration: dict[str, object], observations: ContourObservations
+) -> list[str]:
+    reasons: list[str] = []
+    if migration["promoted"] is True:
         if observations.canonical_mode != "enrich":
             reasons.append("promoted_config_not_enrich")
         if migration["effective_config_sha256"] != observations.canonical_config_sha256:
             reasons.append("promoted_config_hash_mismatch")
-    else:
-        if observations.canonical_mode != "off":
-            reasons.append("premature_canonical_activation")
-        if migration["effective_config_sha256"] == observations.canonical_config_sha256:
-            reasons.append("candidate_config_not_separate")
+        return reasons
+    if observations.canonical_mode != "off":
+        reasons.append("premature_canonical_activation")
+    if migration["effective_config_sha256"] == observations.canonical_config_sha256:
+        reasons.append("candidate_config_not_separate")
+    return reasons
+
+
+def _evaluate_migration(
+    document: dict[str, object],
+    observations: ContourObservations,
+) -> dict[str, object]:
+    migration = cast(dict[str, object], document["migration"])
+    enrich = cast(dict[str, object], document["isolated_enrich"])
+    if _migration_not_started(migration, observations):
+        return _phase("NOT_RUN", ["not_executed"])
+    reasons = _migration_closure_reasons(migration, observations)
+    reasons.extend(_migration_identity_reasons(migration, enrich, observations))
     return _phase("FAIL" if reasons else "PASS", _unique(reasons))
 
 
@@ -707,6 +824,23 @@ def _evaluate_live(
     return _phase("FAIL" if reasons else "PASS", _unique(reasons))
 
 
+def _accepted_biology(claim: dict[str, object], *, admitted: bool) -> dict[str, object]:
+    reasons: list[str] = []
+    if claim["scientific_status"] == "bounded_reference_cases_only":
+        reasons.append("bounded_reference_is_not_biological_acceptance")
+    if not _text(claim["reviewer_reference"]):
+        reasons.append("biological_reviewer_missing")
+    if not _pinned(claim["independent_reference_sha256"]):
+        reasons.append("biological_reference_unpinned")
+    if claim["rf008_receipt_status"] != "PASS" or not _pinned(
+        claim["rf008_receipt_sha256"]
+    ):
+        reasons.append("rf008_receipt_missing")
+    if reasons:
+        return _biological("FAIL", reasons, admitted=False)
+    return _biological("PASS", ["independent_biological_review"], admitted=admitted)
+
+
 def _evaluate_biological(document: dict[str, object]) -> dict[str, object]:
     claim = cast(dict[str, object], document["biological"])
     admitted = _rf008_admitted(claim)
@@ -715,20 +849,7 @@ def _evaluate_biological(document: dict[str, object]) -> dict[str, object]:
             "FAIL", ["matched_count_used_as_qualification"], admitted=False
         )
     if claim["biological_accuracy_accepted"] is True:
-        reasons: list[str] = []
-        if claim["scientific_status"] == "bounded_reference_cases_only":
-            reasons.append("bounded_reference_is_not_biological_acceptance")
-        if not _text(claim["reviewer_reference"]):
-            reasons.append("biological_reviewer_missing")
-        if not _pinned(claim["independent_reference_sha256"]):
-            reasons.append("biological_reference_unpinned")
-        if claim["rf008_receipt_status"] != "PASS" or not _pinned(
-            claim["rf008_receipt_sha256"]
-        ):
-            reasons.append("rf008_receipt_missing")
-        if reasons:
-            return _biological("FAIL", reasons, admitted=False)
-        return _biological("PASS", ["independent_biological_review"], admitted=admitted)
+        return _accepted_biology(claim, admitted=admitted)
     if claim["rf008_receipt_status"] == "FAIL":
         return _biological("FAIL", ["rf008_receipt_failed"], admitted=False)
     if admitted:
@@ -769,6 +890,91 @@ def _evaluate_ci(document: dict[str, object]) -> dict[str, object]:
     return _phase("PASS", [])
 
 
+def _axis_failures(local: dict[str, object], ci: dict[str, object]) -> list[str]:
+    return [
+        name
+        for name, phase in (("local", local), ("ci", ci))
+        if phase["status"] == "FAIL"
+    ]
+
+
+def _needs_rollback(
+    *,
+    promoted: bool,
+    failed: list[str],
+    live_status: object,
+    bio_ok: bool,
+    axis_failures: list[str],
+) -> bool:
+    return promoted and (
+        bool(failed) or live_status == "FAIL" or not bio_ok or bool(axis_failures)
+    )
+
+
+def _is_ready(
+    *,
+    technical: bool,
+    bio_ok: bool,
+    axes_ok: bool,
+    promoted: bool,
+    mode: str,
+    live_status: object,
+) -> bool:
+    return (
+        technical
+        and bio_ok
+        and axes_ok
+        and not promoted
+        and mode == "off"
+        and live_status == "NOT_RUN"
+    )
+
+
+def _is_live_accepted(
+    *,
+    technical: bool,
+    bio_ok: bool,
+    axes_ok: bool,
+    promoted: bool,
+    mode: str,
+    live_status: object,
+) -> bool:
+    return (
+        technical
+        and bio_ok
+        and axes_ok
+        and promoted
+        and mode == "enrich"
+        and live_status == "PASS"
+    )
+
+
+def _blocked_reasons(
+    *,
+    failed: list[str],
+    bio_ok: bool,
+    local: dict[str, object],
+    ci: dict[str, object],
+    promoted: bool,
+    mode: str,
+    live_status: object,
+) -> list[str]:
+    reasons = [f"{name}_not_passed" for name in failed]
+    if not bio_ok:
+        reasons.append("biological_gate_not_passed")
+    if local["status"] != "PASS":
+        reasons.append("local_not_passed")
+    if ci["status"] != "PASS":
+        reasons.append("ci_not_passed")
+    if not promoted and mode != "off":
+        reasons.append("premature_canonical_activation")
+    if not promoted and live_status != "NOT_RUN":
+        reasons.append("live_before_promotion")
+    if promoted and live_status != "PASS":
+        reasons.append("live_not_passed")
+    return reasons or ["promotion_criteria_incomplete"]
+
+
 def _decide(
     document: dict[str, object],
     observations: ContourObservations,
@@ -783,53 +989,51 @@ def _decide(
     bio_ok = biological["status"] == "PASS" or biological["rf008_admitted"] is True
     axes_ok = local["status"] == "PASS" and ci["status"] == "PASS"
     failed = [name for name in _PHASE_NAMES[:4] if phases[name]["status"] != "PASS"]
-    axis_failures = [
-        name
-        for name, phase in (("local", local), ("ci", ci))
-        if phase["status"] == "FAIL"
-    ]
-    if promoted and (
-        failed or phases["live"]["status"] == "FAIL" or not bio_ok or axis_failures
+    axis_failures = _axis_failures(local, ci)
+    live_status = phases["live"]["status"]
+    if _needs_rollback(
+        promoted=promoted,
+        failed=failed,
+        live_status=live_status,
+        bio_ok=bio_ok,
+        axis_failures=axis_failures,
     ):
         return (
             "ROLLBACK_REQUIRED",
             ["criteria_violated_after_promotion", *failed, *axis_failures],
             True,
         )
-    if (
-        technical
-        and bio_ok
-        and axes_ok
-        and not promoted
-        and observations.canonical_mode == "off"
-        and phases["live"]["status"] == "NOT_RUN"
+    if _is_ready(
+        technical=technical,
+        bio_ok=bio_ok,
+        axes_ok=axes_ok,
+        promoted=promoted,
+        mode=observations.canonical_mode,
+        live_status=live_status,
     ):
         return "READY", ["technical_gates_passed"], False
-    if (
-        technical
-        and bio_ok
-        and axes_ok
-        and promoted
-        and observations.canonical_mode == "enrich"
-        and phases["live"]["status"] == "PASS"
+    if _is_live_accepted(
+        technical=technical,
+        bio_ok=bio_ok,
+        axes_ok=axes_ok,
+        promoted=promoted,
+        mode=observations.canonical_mode,
+        live_status=live_status,
     ):
         return "LIVE_ACCEPTED", ["live_readback_passed"], False
-    reasons: list[str] = []
-    for name in failed:
-        reasons.append(f"{name}_not_passed")
-    if not bio_ok:
-        reasons.append("biological_gate_not_passed")
-    if local["status"] != "PASS":
-        reasons.append("local_not_passed")
-    if ci["status"] != "PASS":
-        reasons.append("ci_not_passed")
-    if not promoted and observations.canonical_mode != "off":
-        reasons.append("premature_canonical_activation")
-    if not promoted and phases["live"]["status"] != "NOT_RUN":
-        reasons.append("live_before_promotion")
-    if promoted and phases["live"]["status"] != "PASS":
-        reasons.append("live_not_passed")
-    return "BLOCKED", reasons or ["promotion_criteria_incomplete"], False
+    return (
+        "BLOCKED",
+        _blocked_reasons(
+            failed=failed,
+            bio_ok=bio_ok,
+            local=local,
+            ci=ci,
+            promoted=promoted,
+            mode=observations.canonical_mode,
+            live_status=live_status,
+        ),
+        False,
+    )
 
 
 def _distributions(
@@ -1045,7 +1249,7 @@ def _parse_enrich(value: object) -> dict[str, object]:
         _optional_sha(enrich, key, "isolated_enrich")
     repeat = _section(
         enrich["repeat"],
-        "isolated_enrich.repeat",
+        _ENRICH_REPEAT,
         {
             "same_inputs",
             "same_versions",
@@ -1053,19 +1257,19 @@ def _parse_enrich(value: object) -> dict[str, object]:
             "repeat_classification_sha256",
         },
     )
-    _bool_field(repeat, "same_inputs", "isolated_enrich.repeat")
-    _bool_field(repeat, "same_versions", "isolated_enrich.repeat")
-    _optional_sha(repeat, "classification_sha256", "isolated_enrich.repeat")
-    _optional_sha(repeat, "repeat_classification_sha256", "isolated_enrich.repeat")
+    _bool_field(repeat, "same_inputs", _ENRICH_REPEAT)
+    _bool_field(repeat, "same_versions", _ENRICH_REPEAT)
+    _optional_sha(repeat, "classification_sha256", _ENRICH_REPEAT)
+    _optional_sha(repeat, "repeat_classification_sha256", _ENRICH_REPEAT)
     xlsx = _section(
         enrich["xlsx"],
-        "isolated_enrich.xlsx",
+        _ENRICH_XLSX,
         {"table_sha256", "xlsx_sha256", "historical_columns"},
     )
-    _optional_sha(xlsx, "table_sha256", "isolated_enrich.xlsx")
-    _optional_sha(xlsx, "xlsx_sha256", "isolated_enrich.xlsx")
+    _optional_sha(xlsx, "table_sha256", _ENRICH_XLSX)
+    _optional_sha(xlsx, "xlsx_sha256", _ENRICH_XLSX)
     xlsx["historical_columns"] = _string_tuple(
-        xlsx["historical_columns"], "isolated_enrich.xlsx.historical_columns"
+        xlsx["historical_columns"], f"{_ENRICH_XLSX}.historical_columns"
     )
     enrich["repeat"] = repeat
     enrich["xlsx"] = xlsx
