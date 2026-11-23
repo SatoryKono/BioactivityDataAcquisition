@@ -1,4 +1,15 @@
-"""Immutable, opt-in configuration for offline IUPHAR target classification."""
+"""Immutable, opt-in configuration for offline IUPHAR target classification.
+
+RF-001 (#13309) field-layer contract (semantics only; no biological admission):
+
+* ``target_type`` remains the ChEMBL object type and is never an IUPHAR class.
+* ``iuphar_*`` columns are reference/direct-layer outputs from the pinned snapshot.
+* ``local_*`` columns are local-rule outputs and must not be copied into ``iuphar_*``.
+* ``effective_*`` / ``decision_status`` are the final resolution plus provenance.
+* ``source_unavailable`` and confirmed ``not_found`` stay distinct match statuses.
+
+Canonical vocabulary: ``iuphar_target_class.semantics``.
+"""
 
 from __future__ import annotations
 
@@ -10,6 +21,21 @@ TargetClassificationMode = Literal["off", "shadow", "enrich"]
 TargetTableContract = Literal["3.0.0", "3.1.0", "3.2.0"]
 _TARGET_CLASSIFICATION_MODES = frozenset({"off", "shadow", "enrich"})
 _TABLE_CONTRACTS = frozenset({"3.0.0", "3.1.0", "3.2.0"})
+
+# RF-001 baseline identity for the additive V31 column set and profile rules.
+RF001_SEMANTICS_CONTRACT = "rf001-2026-11-23"
+FIELD_LAYER_BY_NAME: dict[str, str] = {
+    "target_type": "chembl_object",
+    "iuphar_target_id": "iuphar_reference",
+    "iuphar_class": "iuphar_reference",
+    "iuphar_match_status": "iuphar_reference",
+    "iuphar_annotation_status": "iuphar_reference",
+    "local_class": "local_rules",
+    "effective_class": "effective",
+    "effective_source": "effective",
+    "decision_status": "effective",
+    "target_class_profile_sha256": "effective",
+}
 
 
 def _validate_target_classification_mode(mode: str) -> None:
@@ -132,8 +158,15 @@ class TargetClassificationConfig:
             return self.table_contract
         return "3.1.0" if self.mode == "enrich" else "3.0.0"
 
+    @property
+    def semantics_contract_version(self) -> str:
+        """RF-001 vocabulary identity; independent of enrich admission."""
+        return RF001_SEMANTICS_CONTRACT
+
 
 __all__ = [
+    "FIELD_LAYER_BY_NAME",
+    "RF001_SEMANTICS_CONTRACT",
     "TARGET_CLASSIFICATION_DETAIL_FIELDS",
     "TARGET_CLASSIFICATION_FIELDS",
     "TargetClassificationConfig",
