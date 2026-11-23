@@ -170,14 +170,10 @@ def test_failed_xlsx_write_preserves_error_and_keeps_partial_cells_inert(
         raise ValueError("synthetic write failure")
 
     monkeypatch.setattr(pd.DataFrame, "to_excel", fail_after_write)
+    from bioetl.infrastructure.export.export_writer_adapter import _write_duck_xlsx
+
     with pytest.raises(ValueError, match="synthetic write failure"):
-        ExportWriterAdapter().write_export(
-            table=pa.table({"title": ["=1+1"]}),
-            table_name="audit",
-            layer="silver",
-            fmt="xlsx",
-            output_dir=str(tmp_path),
-        )
+        _write_duck_xlsx(pa.table({"title": ["=1+1"]}), tmp_path / "silver_audit.xlsx")
     book = load_workbook(tmp_path / "silver_audit.xlsx", data_only=False)
     assert book.active["A1"].data_type == "s"
     book.close()
