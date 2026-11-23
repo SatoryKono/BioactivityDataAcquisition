@@ -665,10 +665,20 @@ def test_control_plane_failure_ratio_thresholds_match_descriptions() -> None:
             .get("steps", [])
         )
         assert steps == [
-            {"color": "green", "value": None},
+            {"color": "text", "value": None},
             {"color": "orange", "value": 1},
             {"color": "red", "value": 2},
         ]
+        value_mapping = next(
+            item["options"]
+            for item in panel["fieldConfig"]["defaults"]["mappings"]
+            if item["type"] == "value"
+        )
+        assert value_mapping == {
+            "0": {"text": "OK", "color": "green"},
+            "1": {"text": "WARN", "color": "orange"},
+            "2": {"text": "CRIT", "color": "red"},
+        }
 
 
 def test_dashboard_default_time_and_refresh_policy_by_uid_class() -> None:
