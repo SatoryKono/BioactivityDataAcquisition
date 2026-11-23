@@ -139,6 +139,36 @@ class TestPipelineDebugService:
         assert service.snapshots[2] == snapshot3
 
     @pytest.mark.unit
+    def test_history_detaches_supported_containers_at_capture_and_read(self):
+        """History retains captured values despite caller and reader mutation."""
+        port = MagicMock()
+        service = PipelineDebugService(debug_port=port, logger=MagicMock())
+        opaque = object()
+        issues = {"missing": 1}
+        records = [{"nested": [1, {"value": 2}]}]
+        metadata = {"tags": ["original"], "opaque": opaque}
+        captured = service.capture_snapshot(
+            "FETCH", dq_issues=issues, sample_records=records, metadata=metadata
+        )
+        service.capture_snapshot("EMPTY", dq_issues={}, sample_records=[], metadata={})
+
+        issues["missing"] = 9
+        records[0]["nested"][1]["value"] = 9
+        metadata["tags"].append("changed")
+        captured.dq_issues["new"] = 3
+        view = service.snapshots
+        assert view[0].dq_issues == {"missing": 1}
+        assert view[0].sample_records == [{"nested": [1, {"value": 2}]}]
+        assert view[0].metadata == {"tags": ["original"], "opaque": opaque}
+        view[0].sample_records[0]["nested"].append(3)
+        view.clear()
+        latest = service.get_latest_snapshot()
+        assert latest is not None
+        latest.metadata["changed"] = True
+        assert service.snapshots[1].metadata == {}
+        assert service.snapshots[0].sample_records == [{"nested": [1, {"value": 2}]}]
+
+    @pytest.mark.unit
     def test_check_breakpoint_disabled(self):
         """Test that disabled breakpoints return CONTINUE."""
         mock_debug_port = MagicMock()
