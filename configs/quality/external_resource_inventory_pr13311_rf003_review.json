@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "d7c713c87f46959994e3e8f4334e8da8350cf12e",
+  "source_ref": "ff15fe45f11d7aac9bebb5aeb43ddd56eba96891",
+  "source_reviews": {
+    "src/bioetl/application/composite/merge_service.py": "RF-003 (#13311): optional Composition-bound classification session attribute on MergeService. No new filesystem/network/process acquisition.",
+    "src/bioetl/application/composite/merger_orchestration.py": "RF-003 (#13311): pass post-join classification pending indices into persist. No new acquisition sites.",
+    "src/bioetl/application/composite/merger_post_join.py": "RF-003 (#13311): invoke post-join classification after conflicts; publish/finalize after write, discard on failure. Pure orchestration; no acquisition calls.",
+    "src/bioetl/application/composite/post_join_classification.py": "RF-003 (#13311): whitelist projection and TargetClassificationRunState enrich/publish/finalize for composite merge. Pure in-memory; no acquisition calls.",
+    "src/bioetl/composition/bootstrap/assembly/target_classification_runtime.py": "RF-003 (#13311): resolve composite post-join classification session from chembl_target config. Reuses existing session builder; no new acquisition sites.",
+    "src/bioetl/composition/bootstrap/runtime/composite_merge_service_builder.py": "RF-003 (#13311): accept optional target_classification_session for MergeService. Wiring only; no acquisition calls.",
+    "src/bioetl/composition/factories/services/composite_support_services_factory.py": "RF-003 (#13311): Composition injects post-join classification session into composite_target merger. No new acquisition sites."
+  },
+  "expression_updates": {},
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": [],
+  "segment_updates": {},
+  "reference_moves": []
+}
