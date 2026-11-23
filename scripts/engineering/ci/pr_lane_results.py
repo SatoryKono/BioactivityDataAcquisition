@@ -2203,6 +2203,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "docs/reports/ci/stage0_closure.json": (STAGE0_EVIDENCE_TEST,),
     "docs/reports/ci/stage0_closure_report.md": (STAGE0_EVIDENCE_TEST,),
     "reports/mypy_eval.json": (STAGE0_EVIDENCE_TEST,),
+    "tests/unit/interfaces/cli/__snapshots__/test_registry_consistency.ambr": (
+        "tests/unit/interfaces/cli/test_registry_consistency.py",
+    ),
     "tests/snapshots/pipeline_configs.json": (
         "tests/architecture/test_config_golden_master.py",
     ),
