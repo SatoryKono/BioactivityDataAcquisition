@@ -47,6 +47,11 @@ def _business_without_classification(
     }
 
 
+def candidate_input_row_id(target_id: str) -> str:
+    """Use the same row identity the candidate builder stored."""
+    return "candidate:" + target_id
+
+
 def verify_source_classifications(
     layers: Mapping[str, list[dict[str, object]]], profile: LoadedIupharProfile
 ) -> None:
@@ -57,10 +62,10 @@ def verify_source_classifications(
     """
     adapter = IupharTargetClassificationAdapter(profile)
     projections: dict[str, Mapping[str, str | None]] = {}
-    for (target_id, version), row in by_id(layers["silver"]).items():
+    for (target_id, _version), row in by_id(layers["silver"]).items():
         result = adapter.classify_record(
             _business_without_classification(row),
-            input_row_id=f"migration:silver:{target_id}:{version}",
+            input_row_id=candidate_input_row_id(target_id),
             run_id="migration-validation",
             run_started_at="1970-01-01T00:00:00+00:00",
         )
@@ -133,6 +138,7 @@ def reject_unverified_fk_addition(record: Mapping[str, object]) -> None:
 __all__ = [
     "assert_candidate_cohort_closure",
     "assert_classification_projection",
+    "candidate_input_row_id",
     "reject_unverified_fk_addition",
     "verify_candidate_hashes",
     "verify_source_classifications",

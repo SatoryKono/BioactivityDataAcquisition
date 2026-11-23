@@ -50,6 +50,10 @@ from .policy import (
 )
 from .resolution import ResolutionInput, select_effective_class
 
+_DIRECT_SUBCLASS_VOCABULARY = frozenset(
+    label for _type_name, label in EXPLICIT_TYPE_SUBCLASSES
+)
+
 
 @dataclass(frozen=True, slots=True)
 class IndexedSnapshot:
@@ -627,16 +631,20 @@ def _resolution_input(
     direct_class: str | None,
 ) -> ResolutionInput:
     """Project frozen classification inputs without changing fallback rules."""
+    subclasses = direct.iuphar_subclasses if direct is not None else ()
     return ResolutionInput(
         match_status=match.match_status or "contract_error",
         iuphar_annotation_status=annotation_status,
         local_status=local.local_status or "not_supported",
         iuphar_class=direct_class,
+        iuphar_subclass=direct.iuphar_subclass if direct is not None else None,
         local_class=local.local_class,
         local_subclasses=local.local_subclasses,
+        confirmed_subclasses=(subclasses if annotation_status == "partial" else ()),
         local_vocabulary=frozenset(
             rule.output for rule in classification_local_rules() if rule.parent_class
         ),
+        direct_vocabulary=_DIRECT_SUBCLASS_VOCABULARY,
         partial_basis=_partial_basis(direct, annotation_status),
         target_kind=row.target_kind or "protein",
         complex_direct_match=match.matched_target_id in snapshot.complex_ids,

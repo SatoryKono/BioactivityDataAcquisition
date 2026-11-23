@@ -109,6 +109,7 @@ def test_current_rule_catalog_keeps_the_direct_iuphar_class():
     result = batch.rows[0].result
     assert result.iuphar_class == "Receptor"
     assert result.iuphar_subclass == "GPCR"
+    assert result.effective_subclasses == ("GPCR",)
     assert result.local_class == "Enzyme"
     assert result.effective_class == "Receptor"
 

@@ -216,6 +216,40 @@ def test_receipt_from_another_execution_version_cannot_admit_enrich(field):
         validate_acceptance_receipt(receipt, snapshot_manifest_sha256="a" * 64)
 
 
+def test_receipt_cannot_admit_a_different_profile_version(tmp_path):
+    profile = _profile(tmp_path, accepted=True)
+    path = _profile_path(profile)
+    document = json.loads(path.read_bytes())
+    document["rules_version"] = LOCAL_RULE_CATALOG_VERSION
+    document["classification_schema_version"] = "3.2.0"
+    rewritten = _write(path.parent, "shifted-profile.json", document)
+    with pytest.raises(ValueError, match="selected IUPHAR profile"):
+        load_profile(path.parent / rewritten["path"], rewritten["sha256"])
+
+
+def test_candidate_reclassification_uses_the_stored_row_identity(tmp_path):
+    from bioetl.infrastructure.storage.target_migration_classification_checks import (
+        verify_source_classifications,
+    )
+
+    profile = _profile(
+        tmp_path,
+        target_changes={"type": "gpcr"},
+        required_target_types=["gpcr"],
+        rules_version=LOCAL_RULE_CATALOG_VERSION,
+        schema_version="3.2.0",
+    )
+    business = _business(target_ec_numbers="3.4.21.1")
+    result = IupharTargetClassificationAdapter(profile).classify_record(
+        business,
+        input_row_id="candidate:CHEMBL1",
+        run_id="run-a",
+        run_started_at="2026-11-16T00:01:00Z",
+    )
+    row = {**business, **result.projection, "target_id": "CHEMBL1"}
+    verify_source_classifications({"silver": [row], "gold": [row]}, profile)
+
+
 def test_complete_version_unverified_snapshot_is_not_publishable(tmp_path):
     profile = _profile(
         tmp_path,
@@ -281,6 +315,7 @@ def test_current_rule_catalog_records_the_enzyme_subclass(tmp_path):
     assert result.projection["local_class"] == "Enzyme"
     assert "Hydrolase" in str(result.projection["local_subclasses"])
     assert result.projection["iuphar_subclasses"] == '["GPCR"]'
+    assert result.projection["effective_subclasses"] == '["GPCR"]'
 
 
 @pytest.mark.parametrize(

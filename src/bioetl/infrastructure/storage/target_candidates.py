@@ -34,6 +34,9 @@ from bioetl.infrastructure.storage.target_deployment_binding import (
 from bioetl.infrastructure.storage.target_migration_classification_checks import (
     assert_candidate_cohort_closure as _assert_candidate_cohort_closure,
 )
+from bioetl.infrastructure.storage.target_migration_classification_checks import (
+    candidate_input_row_id,
+)
 from bioetl.infrastructure.storage.target_migration_row_ops import (
     business_fields as _business,
 )
@@ -277,7 +280,7 @@ def build_target_candidates(request: TargetCandidateBuildRequest) -> dict[str, o
         identity = str(row["target_id"])
         result = adapter.classify_record(
             _business(row),
-            input_row_id="candidate:" + identity,
+            input_row_id=candidate_input_row_id(identity),
             run_id=request.run_id,
             run_started_at=request.run_started_at,
         )
