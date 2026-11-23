@@ -1,3 +1,10 @@
+# RF-001 (#13309) semantics baseline for standalone chembl_target:
+# - target_type = ChEMBL object type (partition/filter); never an IUPHAR class.
+# - target_classification mode stays "off" on the shared production writers.
+# - Full UniProt/protein-class features arrive only after composite dependency joins;
+#   early standalone classification cannot claim those capabilities.
+# - Vocabulary: src/iuphar_target_class/semantics.py (rf001-2026-11-23).
+# - Baseline hashes: data/iuphar_target_class/rf001/baseline_manifest.json
 version: 1.0.0
 provider: chembl
 entity: target
@@ -7,6 +14,8 @@ pipeline:
   entity_type: target
   description: Extract biological targets from ChEMBL API
   target_classification:
+    # RF-001: off keeps V30 / schema 3.0.0. shadow|enrich require a paired
+    # profile envelope + sha256; enrich alone does not admit biological accuracy.
     mode: "off"
   field_policy: {}
   business_primary_keys:
@@ -35,6 +44,7 @@ schema:
     - name: business
       fields:
         - target_id
+        # ChEMBL object type. Distinct from iuphar_*/local_*/effective_* layers.
         - target_type
         - pref_name
         - taxonomy_id

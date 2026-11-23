@@ -15,6 +15,19 @@ ______________________________________________________________________
 
 # IUPHAR Target Classification
 
+## Semantics baseline (RF-001)
+
+Before changing rules or admitting enrich, use the RF-001 contract:
+
+- Semantics: [`16-iuphar-target-classification-semantics.md`](../../04-reference/pipelines/chembl/16-iuphar-target-classification-semantics.md)
+- Machine vocabulary: `src/iuphar_target_class/semantics.py`
+- Baseline hashes: `data/iuphar_target_class/rf001/baseline_manifest.json`
+
+`target_type` stays the ChEMBL object type; `iuphar_*`, `local_*`, and
+`effective_*` remain separate layers. `source_unavailable` is not
+`not_found`. `biological_accuracy_accepted` stays false unless proven.
+Matched counts are not biological accuracy.
+
 ## Trigger
 
 Use this runbook to validate an offline IUPHAR classification dependency,

@@ -23,9 +23,17 @@
 # - uniprot_protein uses uniprot_accession from idmapping Silver table
 #   via key_source field (chained dependency)
 #
+# RF-001 (#13309) capability note:
+# - Enriched composite_target is priority-1 for full classification features.
+# - UniProt annotations, primary accession from idmapping, and L1-L5 protein-class
+#   summary are available only after the dependency joins above.
+# - Seed chembl_target alone remains partial-input for IUPHAR classification.
+# - Semantics contract: src/iuphar_target_class/semantics.py (rf001-2026-11-23).
+# - Baseline manifest: data/iuphar_target_class/rf001/baseline_manifest.json
+#
 # Version: 1.3.0
 # Reference: ADR-026 Composite Pipeline Pattern
-# Last Updated: 2026-06-01
+# Last Updated: 2026-11-23
 #
 # =============================================================================
 
