@@ -1,9 +1,17 @@
-"""Collect IUPHAR candidates. This component does not use HTTP."""
+"""Collect IUPHAR candidates. This component does not use HTTP.
+
+``iuphar-matching-strict-anchors-v1`` treats every supplied UniProt id as a
+required exact anchor. ``iuphar-matching-role-separated-v2`` keeps that rule
+for primary accessions and proven equivalents. Auxiliary UniProt
+cross-references stay in the result as diagnostics. Exact name and synonym
+channels are evidence only and cannot confirm identity. A component accession
+does not prove a complex or a family.
+"""
 
 from __future__ import annotations
 
 from collections.abc import Iterable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from .models import Diagnostic, MatchResult
 
@@ -21,6 +29,17 @@ METHOD_ORDER = (
     EXACT_NAME,
     EXACT_SYNONYM,
 )
+# Name and synonym hits are evidence. They never confirm identity alone.
+TEXT_CHANNEL_EVIDENCE_ROLE = "evidence_only"
+MATCHING_POLICY_STRICT_ANCHORS_V1 = "iuphar-matching-strict-anchors-v1"
+MATCHING_POLICY_ROLE_SEPARATED_V2 = "iuphar-matching-role-separated-v2"
+_KNOWN_POLICIES = frozenset(
+    {MATCHING_POLICY_STRICT_ANCHORS_V1, MATCHING_POLICY_ROLE_SEPARATED_V2}
+)
+_OBJECT_SCOPES = frozenset({None, "protein", "complex", "family"})
+_COMPONENT_SCOPES = frozenset({"complex", "family"})
+# Empty until a reviewed normalization profile explicitly names role-separated matching.
+_QUALIFIED_MATCHING_PROFILES: frozenset[tuple[str, str, str, str]] = frozenset()
 
 
 @dataclass(frozen=True, slots=True)
@@ -47,6 +66,10 @@ class MatchQuery:
     organism: str | None
     name: str | None
     synonyms: tuple[str, ...]
+    auxiliary_uniprot_ids: tuple[str, ...] = ()
+    equivalent_uniprot_ids: tuple[str, ...] = ()
+    matching_policy: str = MATCHING_POLICY_STRICT_ANCHORS_V1
+    object_scope: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -63,6 +86,88 @@ class Candidate:
 
     target_id: str
     match_method: str
+
+
+def profile_qualifies_matching_policy(
+    *,
+    profile_name: str,
+    profile_version: str,
+    profile_hash: str,
+    matching_policy: str,
+) -> bool:
+    """Return whether a normalization profile explicitly qualifies a policy.
+
+    Historical ChEMBL target profiles predate role-separated matching. Their
+    name, version, and hash do not qualify ``MATCHING_POLICY_ROLE_SEPARATED_V2``.
+    """
+    if matching_policy != MATCHING_POLICY_ROLE_SEPARATED_V2:
+        return False
+    binding = (profile_name, profile_version, profile_hash, matching_policy)
+    return binding in _QUALIFIED_MATCHING_PROFILES
+
+
+def explain_policy_change(previous: MatchResult, current: MatchResult) -> str:
+    """Explain one old-policy result against the role-separated result.
+
+    Parameters
+    ----------
+    previous : MatchResult
+        Decision under strict merged anchors.
+    current : MatchResult
+        Decision under role-separated UniProt roles.
+
+    Returns
+    -------
+    str
+        A stable explanation code. Unknown auxiliary links may add a match;
+        they never explain a new conflict or a lost reliable match.
+    """
+    same_target = previous.matched_target_id == current.matched_target_id
+    if previous.match_status == current.match_status == "matched" and same_target:
+        return "unchanged_reliable_primary"
+    current_codes = {item.code for item in current.diagnostics}
+    unknown_auxiliary = (
+        previous.match_status == "ambiguous"
+        and current.match_status == "matched"
+        and "auxiliary_uniprot_unresolved" in current_codes
+        and "identity_conflict" not in current_codes
+    )
+    if unknown_auxiliary:
+        return "unknown_auxiliary_uniprot_is_not_a_required_anchor"
+    if previous.match_status == current.match_status == "ambiguous":
+        return "remaining_ambiguous_channel"
+    if previous.match_status == current.match_status and same_target:
+        return f"unchanged_{previous.match_status}"
+    return "unexpected_policy_delta"
+
+
+def describe_ambiguous_channels(query: MatchQuery, result: MatchResult) -> str:
+    """Name the channel pattern that keeps a role-separated row ambiguous.
+
+    Text channels stay evidence. A single resolved primary accession with an
+    extra text hit, a shared accession, or a missing required anchor does not
+    become a match.
+    """
+    if result.match_status != "ambiguous":
+        message = "ambiguous channel description requires ambiguous status"
+        raise ValueError(message)
+    methods = set(result.match_method)
+    text = methods & {EXACT_NAME, EXACT_SYNONYM}
+    if UNIPROT in methods and text and len(result.candidate_target_ids) > 1:
+        return "primary_and_other_name"
+    if methods == {EXACT_NAME}:
+        return "exact_name"
+    if methods == {EXACT_SYNONYM}:
+        return "exact_synonym"
+    if methods == {UNIPROT} and len(result.candidate_target_ids) > 1:
+        return "shared_primary"
+    if (
+        methods == {UNIPROT}
+        and len(result.candidate_target_ids) == 1
+        and len(_required_uniprot_ids(query)) > 1
+    ):
+        return "partial_required_anchor"
+    return "unclassified"
 
 
 def select_uniprot_accessions(
@@ -104,6 +209,7 @@ def collect_candidates(
         All channel hits in canonical order. Text hits identify the provider
         field that matched and cannot confirm identity on their own.
     """
+    _check_query(query)
     found = (
         *_identifier_candidates(query, catalog),
         *_gene_candidates(query, catalog),
@@ -135,8 +241,9 @@ def _identifier_candidates(
             for target in catalog
             if target.target_id == query.target_id
         )
-    if query.uniprot_ids:
-        wanted = set(query.uniprot_ids)
+    required_uniprot = _required_uniprot_ids(query)
+    if required_uniprot:
+        wanted = set(required_uniprot)
         found.extend(
             Candidate(target.target_id, UNIPROT)
             for target in _species_targets(query, catalog)
@@ -206,8 +313,12 @@ def validate_identity(
         Conservative identity decision retaining all candidate ids. With no
         searchable query fields, ``not_found`` on a complete snapshot means
         no query-channel hits; it does not assert biological absence.
+        Role-separated policy keeps auxiliary UniProt links out of required
+        exact channels. A component accession does not prove a complex or family.
     """
-    return _decide(query, catalog, candidates, snapshot_complete=snapshot_complete)
+    _check_query(query)
+    decided = _decide(query, catalog, candidates, snapshot_complete=snapshot_complete)
+    return _apply_role_policy(query, catalog, decided)
 
 
 def resolve_match(
@@ -326,7 +437,7 @@ def _variant_species_conflict(
     if query.organism is None:
         return None
     variants = _multiple_species_ids(catalog)
-    for accession in query.uniprot_ids:
+    for accession in _required_uniprot_ids(query):
         hits = _wrong_species_hits(query, catalog, accession)
         if any(item.target_id in variants for item in hits):
             return _result(
@@ -361,11 +472,12 @@ def _explicit_species_gap(
     if query.organism is not None or query.target_id is None:
         return False
     variants = [item for item in catalog if item.target_id == query.target_id]
-    if query.uniprot_ids:
+    required_uniprot = _required_uniprot_ids(query)
+    if required_uniprot:
         variants = [
             item
             for item in variants
-            if set(item.uniprot_ids).intersection(query.uniprot_ids)
+            if set(item.uniprot_ids).intersection(required_uniprot)
         ]
     return len({item.species for item in variants}) > 1
 
@@ -411,7 +523,9 @@ def _uniprot_ids(
     catalog: tuple[CatalogTarget, ...],
 ) -> tuple[tuple[str, ...], bool]:
     hits = tuple(
-        target for target in catalog if set(target.uniprot_ids) & set(query.uniprot_ids)
+        target
+        for target in catalog
+        if set(target.uniprot_ids) & set(_required_uniprot_ids(query))
     )
     selected = _species_targets(query, hits)
     species_gap = (
@@ -460,7 +574,8 @@ def _exact_channels(
     if query.target_id is not None:
         channels.append((EXPLICIT, _ids_of(candidates, EXPLICIT)))
     targets = catalog if unfiltered else _species_targets(query, catalog)
-    for identifier in query.uniprot_ids:
+    # Text channels stay evidence-only and are intentionally absent here.
+    for identifier in _required_uniprot_ids(query):
         hits = _ids(
             target.target_id for target in targets if identifier in target.uniprot_ids
         )
@@ -513,5 +628,151 @@ def _result(
             match_method=method,
             match_evidence_ids=(),
             diagnostics=diagnostics,
+        )
+    )
+
+
+def _check_query(query: MatchQuery) -> None:
+    """Reject an unknown policy or object scope before any candidate is kept."""
+    if query.matching_policy not in _KNOWN_POLICIES:
+        message = f"unknown matching policy: {query.matching_policy}"
+        raise ValueError(message)
+    if query.object_scope not in _OBJECT_SCOPES:
+        message = f"unknown object scope: {query.object_scope}"
+        raise ValueError(message)
+
+
+def _required_uniprot_ids(query: MatchQuery) -> tuple[str, ...]:
+    """UniProt anchors that must agree. Auxiliary cross-references are excluded.
+
+    Strict policy keeps every supplied accession required. Role-separated policy
+    adds proven equivalents and leaves auxiliary cross-references diagnostic.
+    Input order is preserved; matching itself is order-independent.
+    """
+    if query.matching_policy != MATCHING_POLICY_ROLE_SEPARATED_V2:
+        return query.uniprot_ids
+    return tuple(dict.fromkeys((*query.uniprot_ids, *query.equivalent_uniprot_ids)))
+
+
+def _apply_role_policy(
+    query: MatchQuery,
+    catalog: tuple[CatalogTarget, ...],
+    result: MatchResult,
+) -> MatchResult:
+    """Record auxiliary evidence and refuse component-only complex identity."""
+    return _apply_object_scope(query, _apply_auxiliary(query, catalog, result))
+
+
+def _apply_auxiliary(
+    query: MatchQuery,
+    catalog: tuple[CatalogTarget, ...],
+    result: MatchResult,
+) -> MatchResult:
+    if query.matching_policy != MATCHING_POLICY_ROLE_SEPARATED_V2:
+        return result
+    notes, disagree, extra_ids = _auxiliary_findings(query, catalog, result)
+    if not notes:
+        return result
+    status = result.match_status
+    matched = result.matched_target_id
+    candidates = result.candidate_target_ids
+    diagnostics = result.diagnostics
+    if extra_ids:
+        candidates = _ids((*candidates, *extra_ids))
+    if disagree and status in {"matched", "not_found", "source_unavailable"}:
+        status = "ambiguous"
+        matched = None
+        if not any(item.code == "ambiguous_match" for item in diagnostics):
+            diagnostics = (
+                *diagnostics,
+                Diagnostic("ambiguous_match", "warning", "ambiguous_match"),
+            )
+    return enforce_match_invariant(
+        replace(
+            result,
+            match_status=status,
+            matched_target_id=matched,
+            candidate_target_ids=candidates,
+            diagnostics=(*diagnostics, *notes),
+        )
+    )
+
+
+def _auxiliary_findings(
+    query: MatchQuery,
+    catalog: tuple[CatalogTarget, ...],
+    result: MatchResult,
+) -> tuple[tuple[Diagnostic, ...], bool, tuple[str, ...]]:
+    notes: list[Diagnostic] = []
+    extra: list[str] = []
+    disagree = False
+    agreed = result.matched_target_id
+    for accession in tuple(sorted(set(query.auxiliary_uniprot_ids))):
+        species_hits = [
+            item
+            for item in _species_targets(query, catalog)
+            if accession in item.uniprot_ids
+        ]
+        any_hits = [item for item in catalog if accession in item.uniprot_ids]
+        species_ids = _ids(item.target_id for item in species_hits)
+        if not species_ids and any_hits and query.organism is not None:
+            notes.append(
+                Diagnostic(
+                    "auxiliary_uniprot_outside_species",
+                    "warning",
+                    f"auxiliary UniProt {accession} has no in-species anchor",
+                )
+            )
+            continue
+        if not species_ids:
+            notes.append(
+                Diagnostic(
+                    "auxiliary_uniprot_unresolved",
+                    "warning",
+                    f"auxiliary UniProt {accession} is not a required anchor",
+                )
+            )
+            continue
+        if agreed is not None and species_ids == (agreed,):
+            notes.append(
+                Diagnostic(
+                    "auxiliary_uniprot_corroborated",
+                    "warning",
+                    f"auxiliary UniProt {accession} corroborates {agreed}",
+                )
+            )
+            continue
+        disagree = True
+        extra.extend(species_ids)
+        notes.append(
+            Diagnostic(
+                "auxiliary_uniprot_disagreement",
+                "warning",
+                f"auxiliary UniProt {accession} does not confirm the object",
+            )
+        )
+    return tuple(notes), disagree, _ids(extra)
+
+
+def _apply_object_scope(query: MatchQuery, result: MatchResult) -> MatchResult:
+    """A subunit accession is not the identity of a complex or family."""
+    if query.object_scope not in _COMPONENT_SCOPES:
+        return result
+    if result.match_status != "matched" or EXPLICIT in result.match_method:
+        return result
+    return enforce_match_invariant(
+        replace(
+            result,
+            match_status="ambiguous",
+            matched_target_id=None,
+            diagnostics=(
+                *result.diagnostics,
+                Diagnostic("ambiguous_match", "warning", "ambiguous_match"),
+                Diagnostic(
+                    "component_accession_not_object_identity",
+                    "warning",
+                    "a component accession does not prove complex or family identity",
+                ),
+            ),
         )
     )

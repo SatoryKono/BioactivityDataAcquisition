@@ -6,8 +6,18 @@ import json
 import math
 import re
 from collections.abc import Mapping
+from dataclasses import dataclass
 
 from iuphar_target_class.stage0.io import canonical_json_bytes
+
+# v1 merged component accessions and UniProt xrefs into one required anchor.
+UNIPROT_PROJECTION_POLICY_V1 = "iuphar-uniprot-merged-anchors-v1"
+UNIPROT_PROJECTION_POLICY_V2 = "iuphar-uniprot-role-projection-v2"
+_UNIPROT_ROLE_KEYS = (
+    "component_accessions",
+    "target_xref_uniprot_ids",
+    "proven_uniprot_equivalents",
+)
 
 _TAXONOMY_ERROR = "taxonomy_id must be a positive integer"
 _SOURCE_TAXA = {
@@ -73,17 +83,84 @@ def plain_target_value(value: object) -> object:
     return value
 
 
+@dataclass(frozen=True, slots=True)
+class UniprotIdentifierRoles:
+    """Primary anchors, proven equivalents, and auxiliary cross-references.
+
+    ``component_accessions`` are the primary UniProt identifiers of a single
+    protein. On a complex or family the same accession names a component and
+    does not prove the whole object. Proven equivalents are reliable anchors.
+    ``target_xref_uniprot_ids`` stay auxiliary: an unknown xref is diagnostic,
+    and every original accession is retained in ``evidence_ids``. Anchor order
+    is not significant for the role sets; ``primary_ids`` keep first-seen order
+    so the projected ``uniprot`` string stays stable for a given payload.
+    """
+
+    primary_ids: tuple[str, ...]
+    equivalent_ids: tuple[str, ...]
+    auxiliary_ids: tuple[str, ...]
+    evidence_ids: tuple[str, ...]
+    projection_policy: str = UNIPROT_PROJECTION_POLICY_V2
+
+
+def _ordered(values: tuple[str, ...]) -> tuple[str, ...]:
+    return tuple(dict.fromkeys(values))
+
+
+def partition_uniprot_roles(data: Mapping[str, object]) -> UniprotIdentifierRoles:
+    """Split UniProt links into required anchors and auxiliary evidence.
+
+    Parameters
+    ----------
+    data : Mapping[str, object]
+        Business payload. ``proven_uniprot_equivalents`` is optional.
+
+    Returns
+    -------
+    UniprotIdentifierRoles
+        Primary component accessions, declared equivalents, and xref-only ids.
+        A value present as a primary accession is not repeated as auxiliary.
+    """
+    primary = _ordered(_tokens(data.get("component_accessions")))
+    declared = _ordered(_tokens(data.get("proven_uniprot_equivalents")))
+    xref = _ordered(_tokens(data.get("target_xref_uniprot_ids")))
+    primary_ids = set(primary)
+    equivalent = tuple(item for item in declared if item not in primary_ids)
+    excluded = primary_ids | set(equivalent)
+    auxiliary = tuple(item for item in xref if item not in excluded)
+    evidence = tuple(sorted({*primary, *declared, *xref}))
+    return UniprotIdentifierRoles(primary, equivalent, auxiliary, evidence)
+
+
+def uniprot_roles_from_business_json(payload: object) -> UniprotIdentifierRoles | None:
+    """Read role fields from stored business JSON, or skip historical rows.
+
+    Kernel rows that only carry a merged ``uniprot`` string stay on the strict
+    anchor API. A payload qualifies only when it still has the source fields.
+    """
+    if not isinstance(payload, str) or not payload.startswith("{"):
+        return None
+    try:
+        loaded = json.loads(payload)
+    except json.JSONDecodeError:
+        return None
+    if not isinstance(loaded, Mapping):
+        return None
+    if not any(key in loaded for key in _UNIPROT_ROLE_KEYS):
+        return None
+    return partition_uniprot_roles(loaded)
+
+
 def project_target_fields(
     data: Mapping[str, object], taxon: str | None
 ) -> dict[str, str | None]:
-    accessions = tuple(
-        dict.fromkeys(
-            (
-                *_tokens(data.get("component_accessions")),
-                *_tokens(data.get("target_xref_uniprot_ids")),
-            )
-        )
-    )
+    """Project classifier fields. ``uniprot`` is the primary accession list.
+
+    Policy ``iuphar-uniprot-role-projection-v2`` no longer appends
+    ``target_xref_uniprot_ids`` to the required anchor. Those values remain in
+    ``source_business_data`` and in :func:`partition_uniprot_roles`.
+    """
+    accessions = partition_uniprot_roles(data).primary_ids
     synonyms = tuple(
         dict.fromkeys(
             (
@@ -136,4 +213,13 @@ def _taxonomy_name_ineligibility(taxon: str | None, organism: object) -> str | N
     return None
 
 
-__all__ = ["plain_target_value", "project_target_fields", "target_input_eligibility"]
+__all__ = [
+    "UNIPROT_PROJECTION_POLICY_V1",
+    "UNIPROT_PROJECTION_POLICY_V2",
+    "UniprotIdentifierRoles",
+    "partition_uniprot_roles",
+    "plain_target_value",
+    "project_target_fields",
+    "target_input_eligibility",
+    "uniprot_roles_from_business_json",
+]

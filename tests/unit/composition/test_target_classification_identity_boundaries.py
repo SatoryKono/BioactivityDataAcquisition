@@ -29,6 +29,10 @@ from bioetl.domain.normalization.profiles.chembl_target_classification import (
 from bioetl.infrastructure.config.contract_identity_resolution import (
     resolve_contract_identity,
 )
+from iuphar_target_class.matching import (
+    MATCHING_POLICY_ROLE_SEPARATED_V2,
+    profile_qualifies_matching_policy,
+)
 from tests.helpers.iuphar_snapshot import synthetic_snapshot_bundle
 
 pytestmark = pytest.mark.unit
@@ -109,3 +113,29 @@ def test_relative_profile_uses_actual_configs_parent_and_checks_frozen_bytes(
     (root / "profile.json").write_bytes(b"{}")
     with pytest.raises(ValueError, match="digest mismatch"):
         load_target_runtime_profile(config)
+
+
+def test_historical_profile_does_not_qualify_role_separated_matching():
+    identity = target_v31_normalization_profile().identity
+    assert (
+        profile_qualifies_matching_policy(
+            profile_name=identity.profile_name,
+            profile_version=identity.profile_version,
+            profile_hash=identity.profile_hash,
+            matching_policy=MATCHING_POLICY_ROLE_SEPARATED_V2,
+        )
+        is False
+    )
+    config = _mode(load_pipeline_config("chembl_target"), "enrich")
+    original = resolve_contract_identity(
+        provider="chembl", entity="target", strict=True
+    )
+    selected = apply_target_contract_identity(config, original)
+    assert selected.normalization_profile_hash == identity.profile_hash
+    assert selected.normalization_profile_version == identity.profile_version
+    assert MATCHING_POLICY_ROLE_SEPARATED_V2 not in {
+        selected.contract_version,
+        selected.normalization_profile_version,
+        selected.normalization_profile_hash,
+        selected.normalization_profile_ref,
+    }

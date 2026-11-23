@@ -10,6 +10,7 @@ from dataclasses import dataclass, field, replace
 from types import MappingProxyType
 from typing import Literal
 
+from .bioetl_input import uniprot_roles_from_business_json
 from .evidence import (
     ContractDefect,
     EvidenceDraft,
@@ -22,6 +23,7 @@ from .hierarchy import FamilyNode, HierarchyResult, normalize_provider_class
 from .iuphar_mapping import approved_class_mappings
 from .local_layer import Prediction, apply_local
 from .matching import (
+    MATCHING_POLICY_ROLE_SEPARATED_V2,
     METHOD_ORDER,
     Candidate,
     CatalogTarget,
@@ -301,7 +303,14 @@ def _shortlist(query: MatchQuery, ctx: IndexedSnapshot) -> tuple[CatalogTarget, 
         ("gene_id", query.gene_id),
         ("gene_symbol", query.gene_symbol),
         ("text", query.name),
-        *(("uniprot", value) for value in query.uniprot_ids),
+        *(
+            ("uniprot", value)
+            for value in (
+                *query.uniprot_ids,
+                *query.equivalent_uniprot_ids,
+                *query.auxiliary_uniprot_ids,
+            )
+        ),
         *(("text", value) for value in query.synonyms),
     )
     indexes = {i for k, v in keys if v is not None for i in ctx.lookup.get((k, v), ())}
@@ -398,7 +407,67 @@ def _evidence(
         )
         for ref in local.local_evidence_ids
     )
+    draft.extend(_retained_uniprot_drafts(row))
     return build_evidence_table(tuple(draft), run_id=run_id)
+
+
+def _retained_uniprot_drafts(row: ValidatedInput) -> tuple[EvidenceDraft, ...]:
+    """Keep every original UniProt link once auxiliary or equivalent ids exist.
+
+    Primary-only rows already expose their anchor through the match channel.
+    Rows with a separated xref must not drop that xref from the evidence table.
+    """
+    roles = uniprot_roles_from_business_json(row.raw_fields.get("source_business_data"))
+    if roles is None or not (roles.auxiliary_ids or roles.equivalent_ids):
+        return ()
+    grouped = (
+        ("primary", roles.primary_ids),
+        ("equivalent", roles.equivalent_ids),
+        ("auxiliary", roles.auxiliary_ids),
+    )
+    return tuple(
+        EvidenceDraft(
+            row.input_row_id,
+            "match",
+            accession,
+            f"uniprot_role={role}",
+            "match",
+        )
+        for role, values in grouped
+        for accession in values
+    )
+
+
+def _match_query(row: ValidatedInput) -> MatchQuery:
+    """Use role-separated anchors when the business payload still has them.
+
+    Historical kernel rows that only stored a merged ``uniprot`` string keep
+    the strict anchor API. Component accessions do not become required anchors
+    for a complex; that guard stays in ``_match_complex_target``.
+    """
+    roles = uniprot_roles_from_business_json(row.raw_fields.get("source_business_data"))
+    if roles is None:
+        return MatchQuery(
+            row.target_id,
+            row.uniprot_accessions,
+            row.gene_symbol,
+            row.gene_id,
+            row.taxon,
+            row.name,
+            row.synonyms,
+        )
+    return MatchQuery(
+        row.target_id,
+        roles.primary_ids,
+        row.gene_symbol,
+        row.gene_id,
+        row.taxon,
+        row.name,
+        row.synonyms,
+        roles.auxiliary_ids,
+        roles.equivalent_ids,
+        MATCHING_POLICY_ROLE_SEPARATED_V2,
+    )
 
 
 def classify_target(
@@ -417,15 +486,7 @@ def classify_target(
             build_evidence_table((), run_id=run_id),
             (),
         )
-    query = MatchQuery(
-        row.target_id,
-        row.uniprot_accessions,
-        row.gene_symbol,
-        row.gene_id,
-        row.taxon,
-        row.name,
-        row.synonyms,
-    )
+    query = _match_query(row)
     subset = _shortlist(query, snapshot)
     hits = collect_candidates(query, subset)
     match = validate_identity(
@@ -483,15 +544,7 @@ def _publication_hits(
     """Expose the conflicting exact channels without confirming cross-species hits."""
     if match.match_status != "identity_conflict":
         return hits
-    unfiltered_query = MatchQuery(
-        target_id=query.target_id,
-        uniprot_ids=query.uniprot_ids,
-        gene_symbol=query.gene_symbol,
-        gene_id=query.gene_id,
-        organism=None,
-        name=query.name,
-        synonyms=query.synonyms,
-    )
+    unfiltered_query = replace(query, organism=None)
     unfiltered = collect_candidates(unfiltered_query, catalog)
     conflict = {
         hit
