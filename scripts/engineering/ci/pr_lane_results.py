@@ -931,6 +931,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/architecture/test_doc_crossref_integrity.py",
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
+    "docs/05-operations/runbooks/checkpoint-debugging.md": (
+        "tests/unit/application/services/test_observability_workflow_service.py",
+    ),
     "docs/05-operations/runbooks/iuphar-target-classification.md": (
         "tests/architecture/test_doc_crossref_integrity.py",
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
