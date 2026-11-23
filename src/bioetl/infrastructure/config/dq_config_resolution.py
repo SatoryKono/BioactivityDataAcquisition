@@ -8,7 +8,10 @@ from bioetl.domain.config import DQConfig
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.schemas.dq_config import DQConfigFile
 
-from ._dq_config_normalization import normalize_threshold_aliases, normalize_to_file_format
+from ._dq_config_normalization import (
+    normalize_threshold_aliases,
+    normalize_to_file_format,
+)
 
 __all__ = [
     "build_dq_cache_key",
