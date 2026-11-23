@@ -55,14 +55,11 @@ def apply_post_join_classification(
 ) -> pl.DataFrame:
     """Append classifier columns after conflict resolution has finished."""
     projected = [
-        dict(
-            classifier(
-                project_enriched_features(row)["features"],
-                run_id,
-                index,
-            )
-        )
+        dict(classifier(features, run_id, index))
         for index, row in enumerate(frame.iter_rows(named=True))
+        if isinstance(
+            features := project_enriched_features(row)["features"], Mapping
+        )
     ]
     if not projected:
         return frame

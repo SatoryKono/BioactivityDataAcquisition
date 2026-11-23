@@ -286,5 +286,7 @@ __all__ = [
     "ChEMBLTargetGoldSchemaV31",
     "ChEMBLTargetProteinClassificationGoldSchema",
     "ChEMBLTissueGoldSchema",
+    "Series",
+    "pa",
     "target_v31_schema_hash",
 ]

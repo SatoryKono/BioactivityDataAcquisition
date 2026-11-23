@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-from dataclasses import asdict
 
 from iuphar_target_class.pipeline import RowResult
 
@@ -13,8 +12,9 @@ def _jsonable(value: object) -> object:
         return [_jsonable(item) for item in value]
     if isinstance(value, dict):
         return {str(key): _jsonable(item) for key, item in value.items()}
-    if hasattr(value, "__dataclass_fields__"):
-        return _jsonable(asdict(value))
+    fields = getattr(value, "__dataclass_fields__", None)
+    if isinstance(fields, dict):
+        return {str(name): _jsonable(getattr(value, str(name))) for name in fields}
     return value
 
 

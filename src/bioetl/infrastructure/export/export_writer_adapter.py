@@ -170,6 +170,12 @@ def restore_xlsx_text(token: object, parts: tuple[str, ...]) -> str | None:
     return restored
 
 
+def _xlsx_int(value: object) -> int | None:
+    if type(value) is int:
+        return value
+    return None
+
+
 def _xlsx_part_groups(
     book: Workbook,
 ) -> dict[tuple[str, int, int], list[tuple[int, str]]]:
@@ -178,8 +184,13 @@ def _xlsx_part_groups(
         return grouped
     for row in book[_XLSX_PARTS_SHEET].iter_rows(min_row=2, values_only=True):
         sheet, row_number, column, part_index, _digest, _count, value = row
-        grouped.setdefault((str(sheet), int(row_number), int(column)), []).append(
-            (int(part_index), str(value))
+        row_index = _xlsx_int(row_number)
+        column_index = _xlsx_int(column)
+        part = _xlsx_int(part_index)
+        if row_index is None or column_index is None or part is None:
+            continue
+        grouped.setdefault((str(sheet), row_index, column_index), []).append(
+            (part, str(value))
         )
     return grouped
 
@@ -198,7 +209,11 @@ def restore_xlsx_long_text(path: Path) -> dict[str, list[list[object]]]:
         for cells in sheet.iter_rows():
             values: list[object] = []
             for cell in cells:
-                key = (sheet.title, cell.row, cell.column)
+                row_index = cell.row
+                column_index = cell.column
+                if row_index is None or column_index is None:
+                    continue
+                key = (sheet.title, row_index, column_index)
                 ordered = tuple(value for _index, value in sorted(grouped.get(key, [])))
                 replacement = restore_xlsx_text(cell.value, ordered)
                 values.append(cell.value if replacement is None else replacement)
