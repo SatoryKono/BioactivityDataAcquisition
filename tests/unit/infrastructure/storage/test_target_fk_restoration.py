@@ -11,6 +11,7 @@ import pytest
 from deltalake import write_deltalake
 
 from bioetl.infrastructure.storage.target_fk_restoration import (
+    load_published_restoration,
     publish_target_fk_restoration,
 )
 from bioetl.infrastructure.storage.target_migration_classification_checks import (
@@ -114,6 +115,35 @@ def test_incomplete_load_uses_persisted_silver_and_adds_gold_only(tmp_path: Path
         ).read_bytes()
         == manifest.read_bytes()
     )
+
+
+def test_incomplete_load_reload_keeps_verified_source_silver(tmp_path: Path):
+    persisted = _row("CHEMBL2605", layer="silver", pref_name="Adenosine receptor")
+    restored = _row("CHEMBL2605", layer="gold", pref_name="Adenosine receptor")
+    _write_tables(
+        tmp_path,
+        {
+            "silver": [_row("CHEMBL1", layer="silver"), persisted],
+            "gold": [_row("CHEMBL1", layer="gold")],
+            "assay": [{"target_id": "CHEMBL1"}, {"target_id": "CHEMBL2605"}],
+        },
+    )
+    manifest = _publish(
+        tmp_path, (_recovery(tmp_path, "CHEMBL2605", restored, persisted),)
+    )
+    finding = orjson.loads(manifest.read_bytes())["findings"][0]
+    assert finding["layers"] == ["gold"]
+    assert "silver" not in finding["row_sha256"]
+    published = load_published_restoration(
+        manifest,
+        workspace=tmp_path,
+        silver=tmp_path / "silver",
+        gold=tmp_path / "gold",
+        assay=tmp_path / "assay",
+        config=CONFIG,
+    )
+    assert published.additions["silver"] == ()
+    assert [row["target_id"] for row in published.additions["gold"]] == ["CHEMBL2605"]
 
 
 def test_supplied_silver_cannot_override_persisted_silver(tmp_path: Path):

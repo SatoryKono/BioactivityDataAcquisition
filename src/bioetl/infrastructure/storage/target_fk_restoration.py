@@ -37,6 +37,7 @@ from bioetl.infrastructure.storage.target_fk_restoration_plan import (
     GoldRowFilter,
     TargetFKRestorationPlan,
     TargetRecoveryInput,
+    _source_payload,
     canonical_row_sha256,
     plan_target_fk_restoration,
 )
@@ -354,11 +355,18 @@ def _recoveries_from_document(
             raise ValueError(ASSAY_TARGET_CLOSURE_ERROR)
         target_id = str(item["target_id"])
         source = workspace / str(item["source_path"])
-        silver_row = (
-            additions["silver"].get(target_id)
-            if "silver" in item.get("layers", [])
-            else None
-        )
+        gold_row = additions["gold"][target_id]
+        layers = item.get("layers", [])
+        if isinstance(layers, list) and "silver" in layers:
+            silver_row = additions["silver"].get(target_id)
+        else:
+            silver_row = _pinned_source_silver(
+                target_id,
+                str(item["source_path"]),
+                source,
+                str(item["source_sha256"]),
+                gold_row,
+            )
         recoveries.append(
             TargetRecoveryInput(
                 target_id,
@@ -367,10 +375,38 @@ def _recoveries_from_document(
                 source,
                 str(item["source_sha256"]),
                 silver_row,
-                additions["gold"][target_id],
+                gold_row,
             )
         )
     return tuple(recoveries)
+
+
+def _pinned_source_silver(
+    target_id: str,
+    source_path: str,
+    source: Path,
+    digest: str,
+    gold_row: Mapping[str, object],
+) -> dict[str, object] | None:
+    """Keep a source Silver row that was verified but not added to the candidate."""
+    stored = _source_payload(
+        TargetRecoveryInput(
+            target_id,
+            "verified_pipeline_output",
+            source_path,
+            source,
+            digest,
+            None,
+            gold_row,
+        )
+    ).get("silver")
+    if stored is None:
+        return None
+    if not isinstance(stored, dict):
+        raise ValueError(
+            "target recovery source does not contain the restored silver row"
+        )
+    return dict(stored)
 
 
 def _read_live(silver: Path, gold: Path, assay: Path) -> _LiveTables:
