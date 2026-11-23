@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "catalog_ref": "0d86143e3b52b8e4fd3a92539b24aa2718bf3e09",
-  "source_ref": "6b4071a97091b5cde5e9fb90227fcf36c7b82ca8",
+  "catalog_ref": "a9bb5f70900e9d4122618b2737b4ed976d207f9d",
+  "source_ref": "ac1e3daca9f20146782e98068bfc7aa2bb141a7f",
   "source_reviews": {
     "src/bioetl/infrastructure/storage/target_classification_guard.py": "Rematch after #13349 (#13342): blob relocated vs catalog pin; no new acquisition sites.",
     "src/bioetl/infrastructure/storage/target_classification_migration.py": "Rematch after #13349 (#13342): blob relocated vs catalog pin; no new acquisition sites.",
