@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "catalog_ref": "667cdf13ac3978320a000d3c616645217498f8a1",
-  "source_ref": "667cdf13ac3978320a000d3c616645217498f8a1",
+  "catalog_ref": "da62460319a520e3c524a1292916eb92a8cda680",
+  "source_ref": "da62460319a520e3c524a1292916eb92a8cda680",
   "source_reviews": {
     "src/bioetl/infrastructure/storage/target_candidates.py": "Line drift from the restoration manifest parameter. Existing DeltaTable, write_deltalake, open, read_bytes and iterdir sites keep the same expressions and ownership.",
     "src/bioetl/infrastructure/storage/target_classification_migration.py": "Line drift from backing up the restoration manifest. Existing lock, copy, read_bytes, write_bytes, open and rglob sites keep the same expressions and ownership.",
