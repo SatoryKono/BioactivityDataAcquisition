@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import math
 from typing import Protocol
 
 from bioetl.domain.config import DQConfig as DomainDQConfig
@@ -32,25 +31,9 @@ class DQConfigResolver(Protocol):
         ...
 
 
-_DEFAULT_SOFT_FAIL_THRESHOLD = 0.05
-_DEFAULT_HARD_FAIL_THRESHOLD = 0.20
-
-
 def has_inline_dq_overrides(yaml_config: PipelineYamlConfig) -> bool:
     """Check if YAML config has meaningful inline DQ overrides."""
-    dq = yaml_config.dq_overrides
-    has_validations = bool(
-        dq.field_validations or dq.cross_field_validations or dq.conditional_validations
-    )
-    has_custom_thresholds = not (
-        math.isclose(
-            dq.soft_fail_threshold, _DEFAULT_SOFT_FAIL_THRESHOLD, abs_tol=1e-12
-        )
-        and math.isclose(
-            dq.hard_fail_threshold, _DEFAULT_HARD_FAIL_THRESHOLD, abs_tol=1e-12
-        )
-    )
-    return has_validations or has_custom_thresholds
+    return bool(normalize_inline_dq_overrides(yaml_config.dq_overrides))
 
 
 def field_validation_to_dict(
@@ -125,19 +108,21 @@ def normalize_inline_dq_overrides(
 ) -> JsonDict:  # Any: dynamic YAML config values
     """Convert inline Pydantic DQ overrides into mergeable file-shape dict."""
     result: JsonDict = {}  # Any: dynamic YAML config values
-    result["thresholds"] = {
-        "soft_fail": dq_overrides.soft_fail_threshold,
-        "hard_fail": dq_overrides.hard_fail_threshold,
-    }
-    result["strict_validation"] = dq_overrides.strict_validation
-    result["invalid_record_policy"] = dq_overrides.invalid_record_policy
-    result["report"] = {
-        "enabled": dq_overrides.report.enabled,
-        "format": dq_overrides.report.format,
-        "include_sample_failures": dq_overrides.report.include_sample_failures,
-        "sample_size": dq_overrides.report.sample_size,
-        "output_path": dq_overrides.report.output_path,
-    }
+    supplied = dq_overrides.model_fields_set
+    thresholds = {}
+    if "soft_fail_threshold" in supplied:
+        thresholds["soft_fail"] = dq_overrides.soft_fail_threshold
+    if "hard_fail_threshold" in supplied:
+        thresholds["hard_fail"] = dq_overrides.hard_fail_threshold
+    if thresholds:
+        result["thresholds"] = thresholds
+    if "strict_validation" in supplied:
+        result["strict_validation"] = dq_overrides.strict_validation
+    if "invalid_record_policy" in supplied:
+        result["invalid_record_policy"] = dq_overrides.invalid_record_policy
+    report = dq_overrides.report.model_dump(exclude_unset=True)
+    if report:
+        result["report"] = report
 
     if dq_overrides.field_validations:
         result["entity_field_validations"] = [
@@ -169,13 +154,15 @@ def resolve_pipeline_dq_config(
     entity = yaml_config.entity_type
     dq_config_file = getattr(yaml_config, "dq_config_file", None)
     inline_rules_present = has_inline_dq_overrides(yaml_config)
+    inline_overrides = (
+        normalize_inline_dq_overrides(yaml_config.dq_overrides)
+        if inline_rules_present
+        else None
+    )
 
-    if dq_config_file is not None or inline_rules_present:
-        inline_overrides = (
-            normalize_inline_dq_overrides(yaml_config.dq_overrides)
-            if inline_rules_present
-            else None
-        )
+    # Explicit dq_config_file must fail closed when the hierarchy is missing.
+    # Inline-only configs keep the legacy FileNotFoundError → to_domain fallback.
+    if dq_config_file is not None:
         return dq_loader.load(
             provider=provider,
             entity=entity,
@@ -186,7 +173,7 @@ def resolve_pipeline_dq_config(
         return dq_loader.load(
             provider=provider,
             entity=entity,
-            inline_overrides=None,
+            inline_overrides=inline_overrides,
         )
     except FileNotFoundError:
         return dq_overrides_to_domain(yaml_config)

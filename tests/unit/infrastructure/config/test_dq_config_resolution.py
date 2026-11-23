@@ -51,6 +51,19 @@ def test_build_dq_cache_key_includes_relaxed_flag() -> None:
     )
 
 
+def _threshold_deep_merge(
+    base: dict[str, Any], override: dict[str, Any]
+) -> dict[str, Any]:
+    return {
+        **base,
+        **override,
+        "thresholds": {
+            **base.get("thresholds", {}),
+            **override.get("thresholds", {}),
+        },
+    }
+
+
 @pytest.mark.unit
 def test_merge_dq_config_hierarchy_applies_relaxed_thresholds_last() -> None:
     merged = merge_dq_config_hierarchy(
@@ -62,19 +75,33 @@ def test_merge_dq_config_hierarchy_applies_relaxed_thresholds_last() -> None:
         },
         load_provider_layer=lambda _provider: {"thresholds": {"hard_fail": 0.15}},
         load_entity_layer=lambda _provider, _entity: {},
-        deep_merge=lambda base, override: {
-            **base,
-            **override,
-            "thresholds": {
-                **base.get("thresholds", {}),
-                **override.get("thresholds", {}),
-            },
-        },
+        deep_merge=_threshold_deep_merge,
         relaxed_dq=True,
     )
 
     assert merged["thresholds"]["soft_fail"] == pytest.approx(0.99)
     assert merged["thresholds"]["hard_fail"] == pytest.approx(1.0)
+
+
+@pytest.mark.unit
+def test_merge_dq_config_hierarchy_normalizes_flat_base_before_inline() -> None:
+    """Flat base thresholds must not overwrite nested inline hard_fail after merge."""
+    merged = merge_dq_config_hierarchy(
+        "chembl",
+        "activity",
+        inline_overrides={"thresholds": {"hard_fail": 0.2}},
+        load_defaults_layer=lambda: {
+            "soft_fail_threshold": 0.1,
+            "hard_fail_threshold": 0.4,
+        },
+        load_provider_layer=lambda _provider: {},
+        load_entity_layer=lambda _provider, _entity: {},
+        deep_merge=_threshold_deep_merge,
+        relaxed_dq=False,
+    )
+
+    assert merged["thresholds"]["soft_fail"] == pytest.approx(0.1)
+    assert merged["thresholds"]["hard_fail"] == pytest.approx(0.2)
 
 
 @pytest.mark.unit
