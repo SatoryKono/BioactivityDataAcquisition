@@ -1795,6 +1795,7 @@ def test_shadow_compare_routes_codex_launchers_and_guidance(changed_file: str) -
                 "configs/quality/external_resource_inventory_pr13266_review.json",
                 "configs/quality/external_resource_inventory_pr13281_review.json",
                 "configs/quality/external_resource_inventory_pr13324_gold_writer_review.json",
+                "configs/quality/external_resource_inventory_pr13329_review.json",
                 "configs/quality/external_resource_inventory_pr13328_workflow_resume_review.json",
                 "configs/quality/external_resource_inventory_pr13328_review.json",
                 "configs/quality/external_resource_inventory_pr13339_review.json",
