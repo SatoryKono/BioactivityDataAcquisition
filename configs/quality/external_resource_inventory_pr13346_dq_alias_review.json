@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "72e42509ca522c4679f51a8e135e96848cc352d6",
+  "source_ref": "1d9b11ebe7c8d48bdb4b246eeeb9b1a2455c32a1",
+  "source_reviews": {
+    "src/bioetl/infrastructure/config/_dq_config_normalization.py": "Normalize threshold aliases per layer and compare equivalent numeric representations. No external resource acquisition, ownership, or lifecycle change.",
+    "src/bioetl/infrastructure/config/dq_config_resolution.py": "Normalize each DQ layer before merging. Existing configuration loaders and their resource lifecycles are unchanged."
+  },
+  "expression_updates": {},
+  "segment_updates": {},
+  "line_updates": {},
+  "reference_moves": [],
+  "exclusion_moves": [],
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": []
+}
