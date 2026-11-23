@@ -136,6 +136,7 @@ def _classify_key(
 _STAGE0_FIELDS: tuple[str, ...] = (
     "candidate_target_ids",
     "capability",
+    "conflict_codes",
     "decision_status",
     "effective_class",
     "effective_source",
@@ -256,6 +257,7 @@ PARITY_BASIS_CATEGORIES: tuple[str, ...] = (
 FIELD_GROUPS: dict[str, str] = {
     "candidate_target_ids": "candidates",
     "capability": "capability",
+    "conflict_codes": "local_effective",
     "decision_status": "local_effective",
     "effective_class": "local_effective",
     "effective_source": "local_effective",
@@ -303,6 +305,7 @@ PROOF_VERIFICATION_ARTIFACTS: frozenset[str] = frozenset(
 _LIST_FIELDS = frozenset(
     {
         "candidate_target_ids",
+        "conflict_codes",
         "effective_subclasses",
         "family_ids",
         "iuphar_class_candidates",
@@ -926,11 +929,32 @@ def _canonical_field_value(field: str, value: str) -> str:
         loaded = json.loads(value)
     except json.JSONDecodeError:
         return value
-    if not isinstance(loaded, list) or any(
-        not isinstance(item, str) for item in loaded
-    ):
+    if not isinstance(loaded, list):
         return value
-    return json.dumps(sorted(loaded), ensure_ascii=False, separators=(",", ":"))
+    if all(isinstance(item, str) for item in loaded):
+        return json.dumps(sorted(loaded), ensure_ascii=False, separators=(",", ":"))
+    if field == "iuphar_family_paths" and all(
+        isinstance(item, dict) for item in loaded
+    ):
+        return _canonical_family_paths(loaded)
+    return value
+
+
+def _canonical_family_paths(loaded: list[object]) -> str:
+    """Sort path records and object keys. Node order inside ``root_to_leaf`` stays."""
+    records = [_family_path_record(item) for item in loaded if isinstance(item, dict)]
+    records.sort(key=_family_path_sort_key)
+    return json.dumps(
+        records, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+    )
+
+
+def _family_path_record(item: dict[object, object]) -> dict[str, object]:
+    return {str(key): item[key] for key in sorted(item, key=str)}
+
+
+def _family_path_sort_key(record: Mapping[str, object]) -> str:
+    return json.dumps(record, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
 
 
 def _note_availability(

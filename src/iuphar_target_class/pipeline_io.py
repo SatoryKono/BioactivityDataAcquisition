@@ -401,6 +401,7 @@ _PARITY_SCALAR_FIELDS = (
 )
 _PARITY_SEQUENCE_FIELDS = (
     "candidate_target_ids",
+    "conflict_codes",
     "effective_subclasses",
     "family_ids",
     "iuphar_class_candidates",

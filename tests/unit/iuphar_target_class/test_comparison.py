@@ -257,6 +257,7 @@ def test_absent_historical_decision_is_not_invented_as_unchanged() -> None:
 _LIST_FIELDS = frozenset(
     {
         "candidate_target_ids",
+        "conflict_codes",
         "effective_subclasses",
         "family_ids",
         "iuphar_class_candidates",
@@ -748,6 +749,132 @@ def test_rows_without_identity_are_not_a_class_match() -> None:
     assert identity is not None
     assert identity["disposition"] == "unexplained"
     assert identity["target_id"] == ""
+
+
+def test_structured_family_paths_ignore_key_and_record_order() -> None:
+    historical = _identity(
+        iuphar_class="Enzyme",
+        iuphar_family_paths=json.dumps(
+            [
+                {
+                    "family_id": "b",
+                    "leaf_to_root": "b",
+                    "root_to_leaf": ["root", "b"],
+                },
+                {
+                    "root_to_leaf": ["root", "a"],
+                    "family_id": "a",
+                    "leaf_to_root": "a",
+                },
+            ]
+        ),
+    )
+    current = _identity(
+        iuphar_class="Enzyme",
+        iuphar_family_paths=json.dumps(
+            [
+                {
+                    "leaf_to_root": "a",
+                    "root_to_leaf": ["root", "a"],
+                    "family_id": "a",
+                },
+                {
+                    "family_id": "b",
+                    "root_to_leaf": ["root", "b"],
+                    "leaf_to_root": "b",
+                },
+            ],
+            indent=2,
+        ),
+    )
+    stage0 = compare_stage0(Stage0Reference("fixture", 1, (historical,)), (current,))
+    assert stage0.residual == ()
+    assert stage0.changes == ()
+    comparison = _comparison(
+        _report((historical,), (current,)), "original_m:new_result"
+    )
+    assert _field_diff(comparison, "iuphar_family_paths") is None
+    assert comparison["semantic_mismatch_count"] == 0
+
+
+def test_family_path_node_order_is_a_difference() -> None:
+    historical = _identity(
+        iuphar_class="Enzyme",
+        iuphar_family_paths=json.dumps(
+            [
+                {
+                    "family_id": "a",
+                    "leaf_to_root": "a",
+                    "root_to_leaf": ["root", "a"],
+                }
+            ],
+            separators=(",", ":"),
+        ),
+    )
+    current = _identity(
+        iuphar_class="Enzyme",
+        iuphar_family_paths=json.dumps(
+            [
+                {
+                    "root_to_leaf": ["a", "root"],
+                    "leaf_to_root": "a",
+                    "family_id": "a",
+                }
+            ]
+        ),
+    )
+    stage0 = compare_stage0(Stage0Reference("fixture", 1, (historical,)), (current,))
+    assert stage0.residual == ("input_row_id=1|target_id=T1",)
+    difference = _field_diff(
+        _comparison(_report((historical,), (current,)), "original_m:new_result"),
+        "iuphar_family_paths",
+    )
+    assert difference is not None
+    assert difference["disposition"] == "unexplained"
+    assert difference["old_value"] == (
+        '[{"family_id":"a","leaf_to_root":"a","root_to_leaf":["root","a"]}]'
+    )
+    assert difference["new_value"] == (
+        '[{"family_id":"a","leaf_to_root":"a","root_to_leaf":["a","root"]}]'
+    )
+
+
+def test_conflict_codes_change_is_detected() -> None:
+    historical = _identity(
+        iuphar_class="Enzyme",
+        decision_status="requires_review",
+        conflict_codes=json.dumps(["beta", "alpha"], separators=(",", ":")),
+    )
+    reordered = _identity(
+        iuphar_class="Enzyme",
+        decision_status="requires_review",
+        conflict_codes=json.dumps(["alpha", "beta"], separators=(",", ":")),
+    )
+    changed = _identity(
+        iuphar_class="Enzyme",
+        decision_status="requires_review",
+        conflict_codes=json.dumps(["gamma"], separators=(",", ":")),
+    )
+    same = compare_stage0(Stage0Reference("fixture", 1, (historical,)), (reordered,))
+    different = compare_stage0(Stage0Reference("fixture", 1, (historical,)), (changed,))
+    assert same.residual == ()
+    assert different.residual == ("input_row_id=1|target_id=T1",)
+    same_report = _comparison(
+        _report((historical,), (reordered,)), "original_m:new_result"
+    )
+    changed_report = _comparison(
+        _report((historical,), (changed,)), "original_m:new_result"
+    )
+    assert _field_diff(same_report, "conflict_codes") is None
+    assert same_report["semantic_mismatch_count"] == 0
+    difference = _field_diff(changed_report, "conflict_codes")
+    assert difference is not None
+    assert difference["group"] == "local_effective"
+    assert difference["disposition"] == "unexplained"
+    assert difference["old_value"] == '["alpha","beta"]'
+    assert difference["new_value"] == '["gamma"]'
+    assert _field_diff(changed_report, "decision_status") is None
+    assert _field_diff(changed_report, "iuphar_class") is None
 
 
 def test_reordered_family_paths_are_not_a_stage0_residual() -> None:

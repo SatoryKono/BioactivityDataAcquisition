@@ -372,6 +372,17 @@ def test_csv_pipeline_writes_parity_outside_the_proof_package(tmp_path):
                     "iuphar_class": "Enzyme",
                     "iuphar_subclass": "Hydrolase",
                     "iuphar_family_ids": '["other"]',
+                    "iuphar_family_paths": json.dumps(
+                        [
+                            {
+                                "root_to_leaf": ["family"],
+                                "leaf_to_root": "family",
+                                "family_id": "family",
+                            }
+                        ],
+                        indent=2,
+                    ),
+                    "conflict_codes": '["review"]',
                     "matched_target_id": "9",
                 },
             ),
@@ -399,6 +410,10 @@ def test_csv_pipeline_writes_parity_outside_the_proof_package(tmp_path):
     assert fields["iuphar_subclass"]["disposition"] == "new_unavailable"
     assert fields["iuphar_family_ids"]["old_value"] == '["other"]'
     assert fields["iuphar_family_ids"]["new_value"] == '["family"]'
+    assert "iuphar_family_paths" not in fields
+    assert fields["conflict_codes"]["old_value"] == '["review"]'
+    assert fields["conflict_codes"]["new_value"] == "[]"
+    assert fields["conflict_codes"]["disposition"] == "unexplained"
     assert fields["matched_target_id"]["old_value"] == "9"
     assert fields["matched_target_id"]["new_value"] == "1"
     assert pair["class_agreement_count"] == 0
