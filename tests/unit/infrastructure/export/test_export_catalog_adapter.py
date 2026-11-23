@@ -106,9 +106,7 @@ def test_resolve_table_path_uses_target_contract_without_extra_level(
             table_name="chembl.target",
             layer="gold",
         )
-    assert adapter.list_tables(base_path=decoy_root, layer="gold") == [
-        ("chembl.target.chembl.target", str(decoy.resolve()))
-    ]
+    assert adapter.list_tables(base_path=decoy_root, layer="gold") == []
 
 
 def test_resolve_table_path_raises_for_missing_base(

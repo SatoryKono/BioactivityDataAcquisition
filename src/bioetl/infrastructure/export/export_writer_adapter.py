@@ -149,7 +149,11 @@ def restore_xlsx_table(path: str) -> pa.Table:
         and len(rows) != expected_rows
     ):
         raise ValueError("xlsx row count does not match the export manifest")
-    return _table_from_rows(rows, source_columns)
+    return _table_from_rows(
+        rows,
+        source_columns,
+        _optional_string_list(manifest.get("column_types")),
+    )
 
 
 def _write_delimited_file(
@@ -195,9 +199,16 @@ def _write_arrow_xlsx(
     table_name: str,
     layer: str,
 ) -> Path:
-    """Write an Arrow table with canonical structured values and text parts."""
+    """Write an Arrow table with canonical structured values and text parts.
+
+    Text longer than 32767 characters is split. The first part keeps the
+    source column name. Later parts use ``<column>__bioetl_part_0002`` and
+    the following numbers. ``restore_xlsx_table`` joins them. Reading only
+    the source column keeps the first part.
+    """
     if table.num_rows > _XLSX_MAX_ROWS - 1:
         raise ValueError("XLSX export exceeds 1048576 rows")
+    table = _dedupe_columns(table)
     canonical = _canonicalize_structured_columns(table)
     expanded, part_columns = _expand_long_text(canonical)
     manifest = _export_manifest(
@@ -396,6 +407,7 @@ def _export_manifest(
         "layer": layer,
         "max_cell_chars": _XLSX_MAX_CELL_CHARS,
         "part_columns": part_columns,
+        "column_types": [_stored_type_name(field.type) for field in table.schema],
         "row_count": table.num_rows,
         "schema_version": XLSX_TEXT_PARTS_VERSION,
         "source_columns": list(table.column_names),
@@ -403,16 +415,46 @@ def _export_manifest(
     }
 
 
+def _dedupe_columns(table: pa.Table) -> pa.Table:
+    """Keep the first occurrence of each column name.
+
+    XLSX headers and the text-part manifest are name-keyed. A repeated
+    projection such as ``target_id,target_id`` cannot be restored by name.
+    """
+    seen: set[str] = set()
+    indexes: list[int] = []
+    for index, name in enumerate(table.column_names):
+        if name in seen:
+            continue
+        seen.add(name)
+        indexes.append(index)
+    if len(indexes) == table.num_columns:
+        return table
+    return table.select(indexes)
+
+
+def _stored_type_name(data_type: pa.DataType) -> str:
+    """Return the Arrow type name written into the workbook."""
+    logical = _value_type(data_type)
+    if pa.types.is_boolean(logical) or pa.types.is_integer(logical):
+        return str(logical)
+    if pa.types.is_floating(logical):
+        return str(logical)
+    if _is_text_type(logical):
+        return str(logical)
+    return "large_string"
+
+
 def _empty_string_index(table: pa.Table) -> dict[str, list[int]]:
     """Record empty strings, which OOXML reads back as blank cells."""
     found: dict[str, list[int]] = {}
-    for name in table.column_names:
-        logical = _value_type(table.schema.field(name).type)
+    for index, name in enumerate(table.column_names):
+        logical = _value_type(table.schema.field(index).type)
         if not _is_text_type(logical):
             continue
         rows = [
-            index
-            for index, value in enumerate(table.column(name).to_pylist())
+            row_index
+            for row_index, value in enumerate(table.column(index).to_pylist())
             if value == ""
         ]
         if rows:
@@ -458,10 +500,16 @@ def _write_table_sheet(worksheet: Any, table: pa.Table) -> None:
     headers = list(table.column_names)
     for column_index, header in enumerate(headers, start=1):
         _write_text(worksheet, 1, column_index, header)
-    columns = [table.column(name).to_pylist() for name in headers]
+    columns = [table.column(index).to_pylist() for index in range(table.num_columns)]
     for row_offset, values in enumerate(zip(*columns, strict=True), start=2):
+        wrote = False
         for column_index, value in enumerate(values, start=1):
-            _write_value(worksheet, row_offset, column_index, value)
+            wrote = _write_value(worksheet, row_offset, column_index, value) or wrote
+        if not wrote:
+            # openpyxl omits a cell whose value is None, so a trailing all-null
+            # row disappears on load. An empty string is stored and reads back
+            # as None, which is the null we want unless empty_strings says "".
+            _write_text(worksheet, row_offset, 1, "")
 
 
 def _write_manifest_sheet(workbook: Any, manifest: dict[str, object]) -> None:
@@ -479,19 +527,20 @@ def _write_manifest_sheet(workbook: Any, manifest: dict[str, object]) -> None:
         _write_text(sheet, offset, 1, chunk)
 
 
-def _write_value(worksheet: Any, row: int, column: int, value: object) -> None:
+def _write_value(worksheet: Any, row: int, column: int, value: object) -> bool:
     if value is None:
-        return
+        return False
     if isinstance(value, bool):
         worksheet.cell(row, column, value)
-        return
+        return True
     if isinstance(value, int):
         worksheet.cell(row, column, value)
-        return
+        return True
     if isinstance(value, float):
         worksheet.cell(row, column, value)
-        return
+        return True
     _write_text(worksheet, row, column, value if isinstance(value, str) else str(value))
+    return True
 
 
 def _write_text(worksheet: Any, row: int, column: int, value: str) -> None:
@@ -618,17 +667,39 @@ def _join_parts(record: dict[str, object], parts: list[str]) -> str | None:
     return "".join(text)
 
 
-def _table_from_rows(rows: list[dict[str, object]], columns: list[str]) -> pa.Table:
+def _table_from_rows(
+    rows: list[dict[str, object]],
+    columns: list[str],
+    column_types: list[str] | None,
+) -> pa.Table:
+    if column_types is not None and len(column_types) != len(columns):
+        raise ValueError("xlsx manifest column_types length does not match columns")
     if not rows:
+        types = column_types or ["large_string"] * len(columns)
         return pa.table(
-            {name: pa.array([], type=pa.large_string()) for name in columns}
+            {
+                name: pa.array([], type=_export_type(type_name))
+                for name, type_name in zip(columns, types, strict=True)
+            }
         )
-    arrays = [_typed_array([row.get(name) for row in rows]) for name in columns]
+    arrays = [
+        _typed_array(
+            [row.get(name) for row in rows],
+            None if column_types is None else column_types[index],
+        )
+        for index, name in enumerate(columns)
+    ]
     return pa.Table.from_arrays(arrays, names=columns)
 
 
-def _typed_array(values: list[object]) -> pa.Array:
+def _typed_array(values: list[object], type_name: str | None) -> pa.Array:
+    if type_name is not None:
+        return _array_for_declared_type(values, _export_type(type_name))
     present = [value for value in values if value is not None]
+    if _is_number_column(present):
+        if any(isinstance(value, float) for value in present):
+            return pa.array(_as_floats(values), type=pa.float64())
+        return pa.array(values, type=pa.int64())
     if not present or all(isinstance(value, str) for value in present):
         return pa.array(
             [None if value is None else str(value) for value in values],
@@ -636,14 +707,74 @@ def _typed_array(values: list[object]) -> pa.Array:
         )
     if all(isinstance(value, bool) for value in present):
         return pa.array(values, type=pa.bool_())
-    if all(isinstance(value, int) and not isinstance(value, bool) for value in present):
-        return pa.array(values, type=pa.int64())
-    if all(isinstance(value, float) for value in present):
-        return pa.array(values, type=pa.float64())
     return pa.array(
         [None if value is None else str(value) for value in values],
         type=pa.large_string(),
     )
+
+
+def _array_for_declared_type(values: list[object], data_type: pa.DataType) -> pa.Array:
+    if pa.types.is_floating(data_type):
+        return pa.array(_as_floats(values), type=data_type)
+    if pa.types.is_integer(data_type):
+        return pa.array(_as_ints(values), type=data_type)
+    if pa.types.is_boolean(data_type):
+        return pa.array(values, type=data_type)
+    if _is_text_type(data_type):
+        return pa.array(
+            [None if value is None else str(value) for value in values],
+            type=data_type,
+        )
+    return pa.array(
+        [None if value is None else str(value) for value in values],
+        type=pa.large_string(),
+    )
+
+
+def _is_number_column(values: list[object]) -> bool:
+    return bool(values) and all(
+        isinstance(value, (int, float)) and not isinstance(value, bool)
+        for value in values
+    )
+
+
+def _as_floats(values: list[object]) -> list[float | None]:
+    converted: list[float | None] = []
+    for value in values:
+        if value is None:
+            converted.append(None)
+            continue
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise ValueError("xlsx numeric value is not a number")
+        converted.append(float(value))
+    return converted
+
+
+def _as_ints(values: list[object]) -> list[int | None]:
+    converted: list[int | None] = []
+    for value in values:
+        if value is None:
+            converted.append(None)
+            continue
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise ValueError("xlsx integer value is not an integer")
+        if isinstance(value, float) and not value.is_integer():
+            raise ValueError("xlsx integer value has a fractional part")
+        converted.append(int(value))
+    return converted
+
+
+def _export_type(type_name: str) -> pa.DataType:
+    try:
+        return pa.type_for_alias(type_name)
+    except (ValueError, pa.ArrowInvalid):
+        return pa.large_string()
+
+
+def _optional_string_list(value: object) -> list[str] | None:
+    if value is None:
+        return None
+    return _require_string_list(value, "column_types")
 
 
 def _require_string_list(value: object, label: str) -> list[str]:

@@ -233,6 +233,56 @@ def test_xlsx_round_trip_restores_long_text_classification_and_arrays(
         assert restored.column(field).to_pylist() == columns[field]
 
 
+def test_xlsx_round_trip_keeps_null_rows_numbers_and_first_duplicate(
+    tmp_path: Path,
+) -> None:
+    from bioetl.infrastructure.export.export_writer_adapter import restore_xlsx_table
+
+    table = pa.Table.from_arrays(
+        [
+            pa.array(["CHEMBL1", None, "CHEMBL3", None]),
+            pa.array([9606, None, None, None], type=pa.int64()),
+            pa.array([5.0, None, 5.5, None], type=pa.float64()),
+            pa.array([None, None, None, None], type=pa.string()),
+            pa.array(["dropped", "also", "gone", "too"]),
+        ],
+        schema=pa.schema(
+            [
+                pa.field("target_id", pa.string()),
+                pa.field("organism_id", pa.int64()),
+                pa.field("score", pa.float64()),
+                pa.field("blank", pa.string()),
+                pa.field("target_id", pa.string()),
+            ]
+        ),
+    )
+
+    output = Path(
+        ExportWriterAdapter().write_export(
+            table=table,
+            table_name="chembl.target",
+            layer="gold",
+            fmt="xlsx",
+            output_dir=str(tmp_path / "exports"),
+        )
+    )
+    restored = restore_xlsx_table(str(output))
+
+    assert restored.num_rows == 4
+    assert restored.column_names == ["target_id", "organism_id", "score", "blank"]
+    assert restored.column("target_id").to_pylist() == [
+        "CHEMBL1",
+        None,
+        "CHEMBL3",
+        None,
+    ]
+    assert restored.column("organism_id").to_pylist() == [9606, None, None, None]
+    assert restored.schema.field("organism_id").type == pa.int64()
+    assert restored.schema.field("score").type == pa.float64()
+    assert restored.column("score").to_pylist() == [5.0, None, 5.5, None]
+    assert restored.column("blank").to_pylist() == [None, None, None, None]
+
+
 def test_xlsx_text_part_name_collision_is_rejected(tmp_path: Path) -> None:
     table = pa.table(
         {

@@ -21,7 +21,8 @@ def _discover_delta_tables(base_path: Path) -> list[tuple[str, Path]]:
     ``resolve_delta_table_path`` maps ``chembl.target`` to ``chembl/target``.
     The directory that contains ``_delta_log`` is the table. An extra child
     named after the dotted table is not part of the contract, and directories
-    inside a table are not separate tables.
+    inside a table are not separate tables. A directory is listed only when
+    its dotted name resolves back to that same directory.
     """
     discovered: list[tuple[str, Path]] = []
     for directory, dirnames, _filenames in base_path.walk(top_down=True):
@@ -29,7 +30,18 @@ def _discover_delta_tables(base_path: Path) -> list[tuple[str, Path]]:
         if directory == base_path or not _is_delta_table(directory):
             continue
         relative = directory.relative_to(base_path)
-        discovered.append((".".join(relative.parts), directory))
+        name = ".".join(relative.parts)
+        contract = Path(
+            resolve_delta_table_path(
+                base_path=str(base_path),
+                table_name=name,
+                flat_structure=False,
+            )
+        )
+        if contract.resolve() != directory.resolve():
+            dirnames[:] = []
+            continue
+        discovered.append((name, directory))
         dirnames[:] = []
     discovered.sort(key=lambda item: item[0])
     return discovered
