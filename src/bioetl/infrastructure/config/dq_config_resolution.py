@@ -49,6 +49,10 @@ def merge_dq_config_hierarchy(
             "Create defaults in this location."
         )
 
+    # Normalize each layer before merge so flat soft_fail_threshold /
+    # hard_fail_threshold keys cannot overwrite nested thresholds from a
+    # later layer after a single post-merge normalization pass.
+    merged = normalize_to_file_format(merged)
     for layer in (
         load_provider_layer(provider),
         load_entity_layer(provider, entity),

@@ -93,6 +93,10 @@ def test_zed_changes_keep_integration_portability_in_both_impact_paths(
             "tests/integration/test_dashboard_first_window_noscroll.py",
         ),
         (
+            "docs/03-guides/dq-configuration.md",
+            "tests/architecture/test_documentation_residual_keyword_guards.py",
+        ),
+        (
             "docs/03-guides/metrics-monitoring.md",
             "tests/architecture/test_observability_docs_drift.py",
         ),
