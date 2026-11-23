@@ -245,7 +245,7 @@ def test_broken_rule_blocks_processing() -> None:
         apply_local((), rules=(broken,), keyword_ids=("KW-1",))
 
 
-@pytest.mark.parametrize("family", ["ec_class", "annotation"])
+@pytest.mark.parametrize("family", ["ec_class", "annotation", "free_text"])
 def test_local_rule_families_cannot_claim_a_direct_layer(family: str) -> None:
     rule = replace(
         _rule("local", family, "keyword_id=KW-1", "Enzyme"),
@@ -310,11 +310,16 @@ def test_catalog_uses_the_fixed_ec_names_and_rejects_bad_outputs() -> None:
     assert "nuclear hormone receptor" not in outputs
     assert "transporter" not in outputs
     forbidden = _rule("bad-ec7", "ec_class", "ec_category=7", "Transporter")
+    enzyme = _rule("bad-ec7-enzyme", "ec_class", "ec_category=7", "Enzyme")
     broad = _rule("bad-nhr", "annotation", "keyword_id=KW-0863", "Receptor")
+    plain_text = _rule("free-text", "free_text", "свободный текст", "кандидат")
     with pytest.raises(ValueError, match="EC 7"):
         validate_rules((forbidden,))
+    with pytest.raises(ValueError, match="EC 7"):
+        validate_rules((enzyme,))
     with pytest.raises(ValueError, match="zinc finger"):
         validate_rules((broad,))
+    validate_rules((plain_text,))
 
 
 @pytest.mark.parametrize("number", range(1, 7))
@@ -481,7 +486,7 @@ def test_prediction_rules_use_evidence_and_keep_ties() -> None:
     )
     alone = apply_local((), rules=rules, predictions=independent)
     assert alone.local_class == "Receptor"
-    assert "chembl-class-table" in alone.local_evidence_ids
+    assert "L1:chembl-class-table" in alone.local_evidence_ids
     assert "predicted-l1-l2-independent" in alone.local_rule_ids
     conflict = apply_local(
         parse_ec_numbers("2.7.1.1"), rules=rules, predictions=independent
@@ -494,6 +499,53 @@ def test_prediction_rules_use_evidence_and_keep_ties() -> None:
     assert conflict == conflict_again
     assert conflict.local_status == "conflicting"
     assert conflict.local_class is None
+    explicit = predictions_from_row(
+        predicted_l1="Receptor",
+        predicted_l2=None,
+        raw_fields={"predicted_l1_relation": "iuphar"},
+    )
+    explicit_result = apply_local((), rules=rules, predictions=explicit)
+    assert explicit_result.local_class is None
+    assert "predicted-l1-l2-iuphar-derived" in explicit_result.local_rule_ids
+    assert "predicted-l1-l2-unknown" not in explicit_result.local_rule_ids
+    shared = predictions_from_row(
+        predicted_l1="Receptor",
+        predicted_l2="Enzyme",
+        raw_fields={
+            "predicted_l1_provenance": "same-token",
+            "predicted_l1_relation": "independent",
+            "predicted_l2_provenance": "same-token",
+            "predicted_l2_relation": "iuphar",
+        },
+    )
+    shared_bound = dict(
+        apply_local((), rules=rules, predictions=shared).local_rules_by_evidence
+    )
+    assert shared_bound["L1:same-token"] == (
+        "predicted-l1-l2-independent",
+        "prediction:L1",
+    )
+    assert shared_bound["L2:same-token"] == ("predicted-l1-l2-iuphar-derived",)
+
+
+def test_same_rule_id_in_another_family_does_not_bind_the_prediction() -> None:
+    decoy = replace(
+        _rule(
+            "predicted-l1-l2-independent",
+            "annotation",
+            "keyword_id=KW-R",
+            "Enzyme",
+        ),
+        priority=1,
+    )
+    result = apply_local(
+        (),
+        rules=(decoy,),
+        predictions=(Prediction("L1", "Receptor", True, False, "L1:table"),),
+    )
+    assert result.local_class == "Receptor"
+    assert result.local_rule_ids == ("prediction:L1",)
+    assert dict(result.local_rules_by_evidence) == {"L1:table": ("prediction:L1",)}
 
 
 def test_free_text_and_rejected_nhr_rule_do_not_assign_a_class() -> None:
@@ -726,7 +778,7 @@ def test_pipeline_reads_prediction_evidence_instead_of_constants() -> None:
     assert derived.local.local_class != "Receptor"
     assert independent.local is not None
     assert independent.local.local_class == "Receptor"
-    assert "chembl-class-table" in independent.local.local_evidence_ids
+    assert "L1:chembl-class-table" in independent.local.local_evidence_ids
     assert any(
         "catalog_sha256=" in record.content for record in independent.evidence.records
     )

@@ -21,6 +21,10 @@ _EXCLUDED_NHR_TEXT = ("zinc finger", "transcription factor", "nuclear hormone re
 _INDEPENDENT_RULE = "predicted-l1-l2-independent"
 _DERIVED_RULE = "predicted-l1-l2-iuphar-derived"
 _UNKNOWN_RULE = "predicted-l1-l2-unknown"
+_L1_L2_FAMILY = "l1_l2"
+_INDEPENDENT_OUTPUT = "predicted working class"
+_DERIVED_OUTPUT = "dependent_not_confirmation"
+_UNKNOWN_OUTPUT = "candidate_only"
 _PROVENANCE_TOKEN = re.compile(r"[A-Za-z0-9_.:-]{1,128}\Z")
 
 
@@ -195,6 +199,25 @@ def collect_prediction_candidates(
     diagnostics: list[Diagnostic] = []
     observations: list[tuple[str, str]] = []
     for prediction in predictions:
+        if prediction.derived_from_iuphar:
+            diagnostics.append(
+                Diagnostic(
+                    "dependent_prediction",
+                    "warning",
+                    f"{prediction.layer} is derived from the IUPHAR result",
+                    evidence_id=prediction.evidence_id,
+                )
+            )
+            observations.extend(
+                _named_observations(
+                    rules,
+                    _DERIVED_RULE,
+                    prediction.evidence_id,
+                    family=_L1_L2_FAMILY,
+                    output=_DERIVED_OUTPUT,
+                )
+            )
+            continue
         if not prediction.provenance_known:
             candidates.append("candidate_only")
             diagnostics.append(
@@ -206,20 +229,13 @@ def collect_prediction_candidates(
                 )
             )
             observations.extend(
-                _named_observations(rules, _UNKNOWN_RULE, prediction.evidence_id)
-            )
-            continue
-        if prediction.derived_from_iuphar:
-            diagnostics.append(
-                Diagnostic(
-                    "dependent_prediction",
-                    "warning",
-                    f"{prediction.layer} is derived from the IUPHAR result",
-                    evidence_id=prediction.evidence_id,
+                _named_observations(
+                    rules,
+                    _UNKNOWN_RULE,
+                    prediction.evidence_id,
+                    family=_L1_L2_FAMILY,
+                    output=_UNKNOWN_OUTPUT,
                 )
-            )
-            observations.extend(
-                _named_observations(rules, _DERIVED_RULE, prediction.evidence_id)
             )
             continue
         if prediction.predicted_class == "Other Protein Target":
@@ -235,7 +251,13 @@ def collect_prediction_candidates(
             )
             continue
         if prediction.predicted_class in WORKING_CLASSES:
-            priority = _rule_priority(rules, _INDEPENDENT_RULE, CLASS_PRIORITY)
+            matched = _matching_rule(
+                rules,
+                _INDEPENDENT_RULE,
+                family=_L1_L2_FAMILY,
+                output=_INDEPENDENT_OUTPUT,
+            )
+            priority = matched.priority if matched is not None else CLASS_PRIORITY
             support.append(
                 _Support(
                     str(prediction.predicted_class),
@@ -244,16 +266,15 @@ def collect_prediction_candidates(
                     priority,
                 )
             )
-            support.extend(
-                _Support(
-                    str(prediction.predicted_class),
-                    rule.rule_id,
-                    prediction.evidence_id,
-                    rule.priority,
+            if matched is not None:
+                support.append(
+                    _Support(
+                        str(prediction.predicted_class),
+                        matched.rule_id,
+                        prediction.evidence_id,
+                        matched.priority,
+                    )
                 )
-                for rule in rules
-                if rule.rule_id == _INDEPENDENT_RULE
-            )
     return tuple(support), tuple(candidates), tuple(diagnostics), tuple(observations)
 
 
@@ -431,18 +452,31 @@ def _level_key(level: str) -> tuple[int, ...]:
 
 
 def _named_observations(
-    rules: tuple[RuleRecord, ...], rule_id: str, evidence_id: str
+    rules: tuple[RuleRecord, ...],
+    rule_id: str,
+    evidence_id: str,
+    *,
+    family: str,
+    output: str,
 ) -> tuple[tuple[str, str], ...]:
-    return tuple(
-        (rule.rule_id, evidence_id) for rule in rules if rule.rule_id == rule_id
-    )
+    matched = _matching_rule(rules, rule_id, family=family, output=output)
+    if matched is None:
+        return ()
+    return ((matched.rule_id, evidence_id),)
 
 
-def _rule_priority(rules: tuple[RuleRecord, ...], rule_id: str, default: int) -> int:
+def _matching_rule(
+    rules: tuple[RuleRecord, ...],
+    rule_id: str,
+    *,
+    family: str,
+    output: str,
+) -> RuleRecord | None:
+    """Bind a catalog id only when family and outcome also match."""
     for rule in rules:
-        if rule.rule_id == rule_id:
-            return rule.priority
-    return default
+        if rule.rule_id == rule_id and rule.family == family and rule.output == output:
+            return rule
+    return None
 
 
 def predictions_from_row(
@@ -466,11 +500,12 @@ def _prediction_from_evidence(
     prefix = "predicted_" + layer.casefold()
     provenance = _provenance_token(raw_fields.get(prefix + "_provenance"))
     relation = normalize_missing(raw_fields.get(prefix + "_relation"))
+    evidence_id = f"{layer}:{provenance}" if provenance else layer
+    if relation == "iuphar":
+        return Prediction(layer, value, provenance is not None, True, evidence_id)
     if provenance and relation == "independent":
-        return Prediction(layer, value, True, False, provenance)
-    if provenance and relation == "iuphar":
-        return Prediction(layer, value, True, True, provenance)
-    return Prediction(layer, value, False, False, layer)
+        return Prediction(layer, value, True, False, evidence_id)
+    return Prediction(layer, value, False, False, evidence_id)
 
 
 def _provenance_token(value: str | None) -> str | None:

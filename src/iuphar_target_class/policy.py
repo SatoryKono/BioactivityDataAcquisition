@@ -334,7 +334,9 @@ _REQUIRED_RULE_FIELDS = (
     "version",
     "limits",
 )
-_LOCAL_FAMILIES = frozenset({"ec", "ec_class", "annotation", "l1_l2", "l2", "rejected"})
+_LOCAL_FAMILIES = frozenset(
+    {"ec", "ec_class", "annotation", "l1_l2", "l2", "free_text", "rejected"}
+)
 
 
 def validate_rules(rules: tuple[RuleRecord, ...]) -> None:
@@ -384,12 +386,11 @@ def _reject_forbidden_output(rule: RuleRecord) -> None:
 
 
 def _reject_ec7_transporter(rule: RuleRecord) -> None:
-    if (
-        rule.family == "ec_class"
-        and rule.input_conditions == "ec_category=7"
-        and rule.output == "Transporter"
-    ):
-        message = f"rule {rule.rule_id} must not map EC 7 to Transporter"
+    if rule.family == "ec_class" and rule.input_conditions == "ec_category=7":
+        message = (
+            f"rule {rule.rule_id} must not map EC 7 to a working class; "
+            "EC 7 stays the Translocases observation"
+        )
         raise ValueError(message)
 
 

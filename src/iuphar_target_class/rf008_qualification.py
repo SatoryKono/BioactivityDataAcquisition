@@ -950,6 +950,7 @@ def _rules_pin() -> dict[str, object]:
             "limits": rule.limits,
             "marks_direct_layer": rule.marks_direct_layer,
             "output": rule.output,
+            "priority": rule.priority,
             "rule_id": rule.rule_id,
             "version": rule.version,
         }

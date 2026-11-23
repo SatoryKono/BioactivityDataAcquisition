@@ -4,8 +4,8 @@
   "files": {
     "cohort_partition.json": "9a9bfb127e0bff84d1b3c22cd6b13a8c605e6b730ceccad70801a7d2dbe4f790",
     "independent_expectations.json": "024b3298afb00f6ea9531bad1994a37eb5c89901e60dd2c630b3307cd73f7043",
-    "profile.json": "7a6d6ab0c87f6311e71a8ed52d1b672dcc6411b233edb59a3286e867cce6334f",
-    "qualification_receipt.json": "25dd5c4de99328c5315dbdc5e6a88a97382757d38da83ca7b1aafe55b66df8c4"
+    "profile.json": "77d752cf7e436ba0150f8cbd52d6974a7d2cf07fcd31411b1e8890e51036a910",
+    "qualification_receipt.json": "8d18b6277d2a225f8a84e076822492442bb0badc9707501f648361b97a0d35bc"
   },
   "qualification_version": "rf008-2026-11-23"
 }
