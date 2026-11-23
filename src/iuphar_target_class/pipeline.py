@@ -10,10 +10,6 @@ from dataclasses import dataclass, field, replace
 from types import MappingProxyType
 from typing import Literal
 
-from .bioetl_input import (
-    strict_anchors_from_business_json,
-    uniprot_roles_from_business_json,
-)
 from .evidence import (
     ContractDefect,
     EvidenceDraft,
@@ -31,13 +27,10 @@ from .hierarchy import (
 from .iuphar_mapping import approved_class_mappings, approved_subclass_mappings
 from .local_layer import Prediction, apply_local
 from .matching import (
-    MATCHING_POLICY_ROLE_SEPARATED_V2,
-    MATCHING_POLICY_STRICT_ANCHORS_V1,
     METHOD_ORDER,
     Candidate,
     CatalogTarget,
     MatchQuery,
-    _required_uniprot_ids,
     collect_candidates,
     validate_identity,
 )
@@ -199,15 +192,12 @@ def _annotation(
 
 
 def _species_match(
-    row: ValidatedInput,
-    match: MatchResult,
-    snapshot: IndexedSnapshot,
-    query: MatchQuery,
+    row: ValidatedInput, match: MatchResult, snapshot: IndexedSnapshot
 ) -> tuple[MatchResult, ProviderAnnotation | None]:
     key = match.matched_target_id
     if key is None or not snapshot.species_annotations or row.taxon is not None:
         return match, _annotation(snapshot, key or "", row.taxon)
-    taxa = _variant_taxa(snapshot, key, _required_uniprot_ids(query))
+    taxa = _variant_taxa(row, snapshot, key)
     if len(taxa) == 1:
         return match, _annotation(snapshot, key, next(iter(taxa)))
     return replace(
@@ -226,18 +216,14 @@ def _species_match(
 
 
 def _variant_taxa(
-    snapshot: IndexedSnapshot, key: str, anchors: tuple[str, ...]
+    row: ValidatedInput, snapshot: IndexedSnapshot, key: str
 ) -> set[str | None]:
-    """Species of one target, limited to the same UniProt anchors as matching.
-
-    An empty anchor list does not filter. Proven equivalents are anchors on
-    the role-separated policy, so a unique equivalent can select the species
-    when the projected primary accession list is empty.
-    """
     variants = [item for item in snapshot.catalog if item.target_id == key]
-    if anchors:
+    if row.uniprot_accessions:
         variants = [
-            item for item in variants if set(item.uniprot_ids).intersection(anchors)
+            item
+            for item in variants
+            if set(item.uniprot_ids).intersection(row.uniprot_accessions)
         ]
     return {item.species for item in variants}
 
@@ -329,14 +315,7 @@ def _shortlist(query: MatchQuery, ctx: IndexedSnapshot) -> tuple[CatalogTarget, 
         ("gene_id", query.gene_id),
         ("gene_symbol", query.gene_symbol),
         ("text", query.name),
-        *(
-            ("uniprot", value)
-            for value in (
-                *query.uniprot_ids,
-                *query.equivalent_uniprot_ids,
-                *query.auxiliary_uniprot_ids,
-            )
-        ),
+        *(("uniprot", value) for value in query.uniprot_ids),
         *(("text", value) for value in query.synonyms),
     )
     indexes = {i for k, v in keys if v is not None for i in ctx.lookup.get((k, v), ())}
@@ -351,6 +330,38 @@ def _conflict_catalog(
     if not ids:
         return shortlist
     return tuple(row for row in ctx.catalog if row.target_id in ids)
+
+
+def _auxiliary_diagnostic_catalog(
+    query: MatchQuery,
+    identity_catalog: tuple[CatalogTarget, ...],
+    ctx: IndexedSnapshot,
+) -> tuple[CatalogTarget, ...]:
+    """Resolve auxiliary UniProt rows without admitting them to identity channels.
+
+    RF-002: primary shortlist omits auxiliary xrefs on purpose. Diagnostics still
+    need those catalog rows so a same-species hit becomes
+    ``auxiliary_uniprot_divergence`` rather than a false
+    ``unknown_auxiliary_uniprot``.
+    """
+    if not query.auxiliary_uniprot_ids:
+        return identity_catalog
+    indexes = {
+        index
+        for accession in query.auxiliary_uniprot_ids
+        for index in ctx.lookup.get(("uniprot", accession), ())
+    }
+    if not indexes:
+        return identity_catalog
+    seen = {row.target_id for row in identity_catalog}
+    extras = tuple(
+        ctx.catalog[index]
+        for index in sorted(indexes)
+        if ctx.catalog[index].target_id not in seen
+    )
+    if not extras:
+        return identity_catalog
+    return (*identity_catalog, *extras)
 
 
 def _ancestor_records(
@@ -407,6 +418,21 @@ def _evidence(
         )
         for hit in hits
     ]
+    for role, values in (
+        ("primary_uniprot", row.uniprot_accessions),
+        ("equivalent_uniprot", row.equivalent_uniprot_accessions),
+        ("auxiliary_uniprot", row.auxiliary_uniprot_accessions),
+    ):
+        for accession in values:
+            draft.append(
+                EvidenceDraft(
+                    row.input_row_id,
+                    "match",
+                    role,
+                    accession,
+                    "match",
+                )
+            )
     if annotation is not None and match.matched_target_id and annotation.raw_payload:
         draft.append(
             EvidenceDraft(
@@ -437,116 +463,7 @@ def _evidence(
         )
         for ref in local.local_evidence_ids
     )
-    draft.extend(_retained_uniprot_drafts(row))
     return build_evidence_table(tuple(draft), run_id=run_id)
-
-
-def _retained_uniprot_drafts(row: ValidatedInput) -> tuple[EvidenceDraft, ...]:
-    """Keep every original UniProt link once auxiliary or equivalent ids exist.
-
-    Primary-only rows already expose their anchor through the match channel.
-    Rows with a separated xref must not drop that xref from the evidence table.
-    Strict-anchor runs keep the historical evidence table.
-    """
-    if row.provenance.matching_policy != MATCHING_POLICY_ROLE_SEPARATED_V2:
-        return ()
-    roles = uniprot_roles_from_business_json(row.raw_fields.get("source_business_data"))
-    if roles is None or not (roles.auxiliary_ids or roles.equivalent_ids):
-        return ()
-    grouped = (
-        ("primary", roles.primary_ids),
-        ("equivalent", roles.equivalent_ids),
-        ("auxiliary", roles.auxiliary_ids),
-    )
-    return tuple(
-        EvidenceDraft(
-            row.input_row_id,
-            "match",
-            _evidence_source_id(accession),
-            _uniprot_role_content(role, accession),
-            "match",
-        )
-        for role, values in grouped
-        for accession in values
-    )
-
-
-def _evidence_source_id(accession: str) -> str:
-    """Evidence ids reject the separator. Keep a stable digest for those values."""
-    if (
-        accession
-        and "/" not in accession
-        and "\n" not in accession
-        and "\r" not in accession
-    ):
-        return accession
-    return hashlib.sha256(accession.encode("utf-8")).hexdigest()
-
-
-def _uniprot_role_content(role: str, accession: str) -> str:
-    if _evidence_source_id(accession) == accession:
-        return f"uniprot_role={role}"
-    return f"uniprot_role={role}:{accession}"
-
-
-def _match_query(row: ValidatedInput) -> MatchQuery:
-    """Apply the policy recorded on the run, not the presence of role fields.
-
-    A historical profile stays on strict anchors: component accessions and
-    auxiliary xrefs are one required channel. Role-separated matching runs
-    only when that profile was explicitly qualified. A complex row then passes
-    ``object_scope`` so a component accession cannot confirm the complex.
-    """
-    policy = row.provenance.matching_policy
-    if policy not in (
-        MATCHING_POLICY_STRICT_ANCHORS_V1,
-        MATCHING_POLICY_ROLE_SEPARATED_V2,
-    ):
-        message = f"unknown matching policy: {policy}"
-        raise ValueError(message)
-    payload = row.raw_fields.get("source_business_data")
-    if policy != MATCHING_POLICY_ROLE_SEPARATED_V2:
-        # Keep every original xref. Role partition drops a xref that is also
-        # a proven equivalent, and that must not become a silent match.
-        accessions = strict_anchors_from_business_json(payload)
-        if accessions is None:
-            accessions = row.uniprot_accessions
-        return MatchQuery(
-            row.target_id,
-            accessions,
-            row.gene_symbol,
-            row.gene_id,
-            row.taxon,
-            row.name,
-            row.synonyms,
-        )
-    scope = "complex" if row.target_kind == "complex" else None
-    roles = uniprot_roles_from_business_json(payload)
-    if roles is None:
-        return MatchQuery(
-            row.target_id,
-            row.uniprot_accessions,
-            row.gene_symbol,
-            row.gene_id,
-            row.taxon,
-            row.name,
-            row.synonyms,
-            matching_policy=policy,
-            object_scope=scope,
-        )
-    return MatchQuery(
-        row.target_id,
-        roles.primary_ids,
-        row.gene_symbol,
-        row.gene_id,
-        row.taxon,
-        row.name,
-        row.synonyms,
-        roles.auxiliary_ids,
-        roles.equivalent_ids,
-        policy,
-        scope,
-    )
 
 
 def classify_target(
@@ -565,19 +482,32 @@ def classify_target(
             build_evidence_table((), run_id=run_id),
             (),
         )
-    query = _match_query(row)
+    query = MatchQuery(
+        row.target_id,
+        row.uniprot_accessions,
+        row.gene_symbol,
+        row.gene_id,
+        row.taxon,
+        row.name,
+        row.synonyms,
+        auxiliary_uniprot_ids=row.auxiliary_uniprot_accessions,
+    )
     subset = _shortlist(query, snapshot)
     hits = collect_candidates(query, subset)
+    identity_catalog = _conflict_catalog(subset, snapshot)
     match = validate_identity(
         query,
-        _conflict_catalog(subset, snapshot),
+        identity_catalog,
         hits,
         snapshot_complete=snapshot.complete,
+        auxiliary_catalog=_auxiliary_diagnostic_catalog(
+            query, identity_catalog, snapshot
+        ),
     )
     match = _scope_match(row, match, snapshot)
     hits = _publication_hits(query, subset, hits, match)
     match = _match_complex_target(row, match, snapshot)
-    match, annotation = _species_match(row, match, snapshot, query)
+    match, annotation = _species_match(row, match, snapshot)
     if (
         match.match_status == "matched"
         and annotation is not None
@@ -624,17 +554,14 @@ def _publication_hits(
     if match.match_status != "identity_conflict":
         return hits
     unfiltered_query = MatchQuery(
-        query.target_id,
-        query.uniprot_ids,
-        query.gene_symbol,
-        query.gene_id,
-        None,
-        query.name,
-        query.synonyms,
-        query.auxiliary_uniprot_ids,
-        query.equivalent_uniprot_ids,
-        query.matching_policy,
-        query.object_scope,
+        target_id=query.target_id,
+        uniprot_ids=query.uniprot_ids,
+        gene_symbol=query.gene_symbol,
+        gene_id=query.gene_id,
+        organism=None,
+        name=query.name,
+        synonyms=query.synonyms,
+        auxiliary_uniprot_ids=query.auxiliary_uniprot_ids,
     )
     unfiltered = collect_candidates(unfiltered_query, catalog)
     conflict = {

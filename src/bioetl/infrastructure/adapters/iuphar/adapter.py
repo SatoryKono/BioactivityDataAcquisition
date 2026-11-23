@@ -120,13 +120,7 @@ def _adapt_inputs(
         else:
             eligible.append(
                 RawTargetRow(
-                    row.input_row_id,
-                    _raw_fields(
-                        row.business_data,
-                        taxon,
-                        projection_policy=profile.uniprot_projection_policy,
-                    ),
-                    "protein",
+                    row.input_row_id, _raw_fields(row.business_data, taxon), "protein"
                 )
             )
     return eligible, results
@@ -203,7 +197,7 @@ class IupharTargetClassificationAdapter:
                 profile.classification_schema_version,
                 profile.snapshot.retrieved_at,
                 run_started_at,
-                profile.matching_policy,
+                matching_policy_version=profile.matching_policy_version,
             ),
             run_id=run_id,
         )

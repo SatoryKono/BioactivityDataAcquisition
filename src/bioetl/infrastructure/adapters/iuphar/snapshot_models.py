@@ -5,8 +5,6 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import dataclass
 
-from iuphar_target_class.bioetl_input import UNIPROT_PROJECTION_POLICY_V1
-from iuphar_target_class.matching import MATCHING_POLICY_STRICT_ANCHORS_V1
 from iuphar_target_class.pipeline import IndexedSnapshot
 from iuphar_target_class.snapshot import Completeness
 
@@ -53,5 +51,4 @@ class LoadedIupharProfile:
     normalization_version: str
     rules_version: str
     classification_schema_version: str
-    matching_policy: str = MATCHING_POLICY_STRICT_ANCHORS_V1
-    uniprot_projection_policy: str = UNIPROT_PROJECTION_POLICY_V1
+    matching_policy_version: str

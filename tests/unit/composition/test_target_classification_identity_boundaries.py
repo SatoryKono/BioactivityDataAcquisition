@@ -29,10 +29,12 @@ from bioetl.domain.normalization.profiles.chembl_target_classification import (
 from bioetl.infrastructure.config.contract_identity_resolution import (
     resolve_contract_identity,
 )
-from iuphar_target_class.matching import (
-    MATCHING_POLICY_ROLE_SEPARATED_V2,
-    profile_qualifies_matching_policy,
+from iuphar_target_class.bioetl_input import project_target_fields
+from iuphar_target_class.identifier_roles import (
+    LEGACY_MATCHING_POLICY_VERSION,
+    MATCHING_POLICY_VERSION,
 )
+from iuphar_target_class.matching import CatalogTarget, MatchQuery, resolve_match
 from tests.helpers.iuphar_snapshot import synthetic_snapshot_bundle
 
 pytestmark = pytest.mark.unit
@@ -115,50 +117,52 @@ def test_relative_profile_uses_actual_configs_parent_and_checks_frozen_bytes(
         load_target_runtime_profile(config)
 
 
-def test_historical_profile_does_not_qualify_role_separated_matching():
-    identity = target_v31_normalization_profile().identity
-    assert (
-        profile_qualifies_matching_policy(
-            profile_name=identity.profile_name,
-            profile_version=identity.profile_version,
-            profile_hash=identity.profile_hash,
-            matching_policy=MATCHING_POLICY_ROLE_SEPARATED_V2,
-        )
-        is False
+def test_rf002_projection_keeps_primary_and_auxiliary_roles_distinct() -> None:
+    """RF-002 (#13310): unknown xref must not merge into mandatory primary anchors."""
+    fields = project_target_fields(
+        {
+            "target_id": "CHEMBL1",
+            "component_accessions": '["P11111"]',
+            "target_xref_uniprot_ids": "Q99999",
+            "pref_name": "Example",
+        },
+        "9606",
     )
-    config = _mode(load_pipeline_config("chembl_target"), "enrich")
-    original = resolve_contract_identity(
-        provider="chembl", entity="target", strict=True
+    assert fields["uniprot"] == "P11111"
+    assert fields["uniprot_xref"] == "Q99999"
+    catalog = (
+        CatalogTarget(
+            "1",
+            ("P11111",),
+            None,
+            None,
+            "human",
+            (),
+            (),
+        ),
     )
-    selected = apply_target_contract_identity(config, original)
-    assert selected.normalization_profile_hash == identity.profile_hash
-    assert selected.normalization_profile_version == identity.profile_version
-    assert MATCHING_POLICY_ROLE_SEPARATED_V2 not in {
-        selected.contract_version,
-        selected.normalization_profile_version,
-        selected.normalization_profile_hash,
-        selected.normalization_profile_ref,
-    }
-
-
-def test_unqualified_profile_cannot_select_role_separated_matching(tmp_path):
-    import hashlib
-    import json
-
-    from bioetl.infrastructure.adapters.iuphar.acceptance_receipt import load_profile
-    from iuphar_target_class.bioetl_input import UNIPROT_PROJECTION_POLICY_V1
-    from iuphar_target_class.matching import MATCHING_POLICY_STRICT_ANCHORS_V1
-
-    root, bundle = synthetic_snapshot_bundle(tmp_path / "frozen")
-    loaded = load_profile(
-        root / "profile.json", bundle.profile_sha256, require_acceptance=False
+    matched = resolve_match(
+        MatchQuery(
+            None,
+            ("P11111",),
+            None,
+            None,
+            "human",
+            None,
+            (),
+            auxiliary_uniprot_ids=("Q99999",),
+        ),
+        catalog,
+        snapshot_complete=True,
     )
-    assert loaded.matching_policy == MATCHING_POLICY_STRICT_ANCHORS_V1
-    assert loaded.uniprot_projection_policy == UNIPROT_PROJECTION_POLICY_V1
-    document = json.loads((root / "profile.json").read_text(encoding="utf-8"))
-    document["matching_policy"] = MATCHING_POLICY_ROLE_SEPARATED_V2
-    payload = json.dumps(document).encode("utf-8")
-    (root / "profile.json").write_bytes(payload)
-    digest = hashlib.sha256(payload).hexdigest()
-    with pytest.raises(ValueError, match="does not qualify role-separated matching"):
-        load_profile(root / "profile.json", digest, require_acceptance=False)
+    conflict = resolve_match(
+        MatchQuery("1", ("P22222",), None, None, "human", None, ()),
+        (
+            CatalogTarget("1", ("P11111",), None, None, "human", (), ()),
+            CatalogTarget("2", ("P22222",), None, None, "human", (), ()),
+        ),
+        snapshot_complete=True,
+    )
+    assert matched.match_status == "matched"
+    assert conflict.match_status == "identity_conflict"
+    assert MATCHING_POLICY_VERSION != LEGACY_MATCHING_POLICY_VERSION

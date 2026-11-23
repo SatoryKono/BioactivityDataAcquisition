@@ -6,22 +6,8 @@ import json
 import math
 import re
 from collections.abc import Mapping
-from dataclasses import dataclass
 
-from iuphar_target_class.policy import BASE_MISSING_MARKERS
 from iuphar_target_class.stage0.io import canonical_json_bytes
-
-# v1 merged component accessions and UniProt xrefs into one required anchor.
-UNIPROT_PROJECTION_POLICY_V1 = "iuphar-uniprot-merged-anchors-v1"
-UNIPROT_PROJECTION_POLICY_V2 = "iuphar-uniprot-role-projection-v2"
-_UNIPROT_ROLE_KEYS = (
-    "component_accessions",
-    "target_xref_uniprot_ids",
-    "proven_uniprot_equivalents",
-)
-_MISSING_ROLE_TOKENS = frozenset(
-    marker.casefold() for marker in BASE_MISSING_MARKERS if marker
-)
 
 _TAXONOMY_ERROR = "taxonomy_id must be a positive integer"
 _SOURCE_TAXA = {
@@ -87,141 +73,22 @@ def plain_target_value(value: object) -> object:
     return value
 
 
-@dataclass(frozen=True, slots=True)
-class UniprotIdentifierRoles:
-    """Primary anchors, proven equivalents, and auxiliary cross-references.
-
-    ``component_accessions`` are the primary UniProt identifiers of a single
-    protein. On a complex or family the same accession names a component and
-    does not prove the whole object. Proven equivalents are reliable anchors.
-    ``target_xref_uniprot_ids`` stay auxiliary: an unknown xref is diagnostic,
-    and every original accession is retained in ``evidence_ids``. Anchor order
-    is not significant for the role sets; ``primary_ids`` keep first-seen order
-    so the projected ``uniprot`` string stays stable for a given payload.
-    """
-
-    primary_ids: tuple[str, ...]
-    equivalent_ids: tuple[str, ...]
-    auxiliary_ids: tuple[str, ...]
-    evidence_ids: tuple[str, ...]
-    projection_policy: str = UNIPROT_PROJECTION_POLICY_V2
-
-
-def _ordered(values: tuple[str, ...]) -> tuple[str, ...]:
-    return tuple(dict.fromkeys(values))
-
-
-def _role_tokens(value: object) -> tuple[str, ...]:
-    """Identifier tokens with the same missing markers as normalization removed."""
-    return tuple(
-        part for part in _tokens(value) if part.casefold() not in _MISSING_ROLE_TOKENS
-    )
-
-
-def partition_uniprot_roles(data: Mapping[str, object]) -> UniprotIdentifierRoles:
-    """Split UniProt links into required anchors and auxiliary evidence.
-
-    Parameters
-    ----------
-    data : Mapping[str, object]
-        Business payload. ``proven_uniprot_equivalents`` is optional.
-
-    Returns
-    -------
-    UniprotIdentifierRoles
-        Primary component accessions, declared equivalents, and xref-only ids.
-        A value present as a primary accession is not repeated as auxiliary.
-        ``N/A``, ``n/a`` and ``#n/a`` are missing markers, not anchors.
-    """
-    primary = _ordered(_role_tokens(data.get("component_accessions")))
-    declared = _ordered(_role_tokens(data.get("proven_uniprot_equivalents")))
-    xref = _ordered(_role_tokens(data.get("target_xref_uniprot_ids")))
-    primary_ids = set(primary)
-    equivalent = tuple(item for item in declared if item not in primary_ids)
-    excluded = primary_ids | set(equivalent)
-    auxiliary = tuple(item for item in xref if item not in excluded)
-    evidence = tuple(sorted({*primary, *declared, *xref}))
-    return UniprotIdentifierRoles(primary, equivalent, auxiliary, evidence)
-
-
-def strict_uniprot_anchors(data: Mapping[str, object]) -> tuple[str, ...]:
-    """Required anchors for the historical strict policy.
-
-    The list is every component accession plus every xref, in first-seen
-    order. A xref that is also a proven equivalent stays here.
-    ``partition_uniprot_roles`` removes that overlap from ``auxiliary_ids``;
-    strict matching must not drop it.
-    """
-    return _ordered(
-        (
-            *_role_tokens(data.get("component_accessions")),
-            *_role_tokens(data.get("target_xref_uniprot_ids")),
-        )
-    )
-
-
-def _business_role_payload(payload: object) -> Mapping[str, object] | None:
-    """Return business JSON when it still carries UniProt role fields."""
-    if not isinstance(payload, str) or not payload.startswith("{"):
-        return None
-    try:
-        loaded = json.loads(payload)
-    except json.JSONDecodeError:
-        return None
-    if not isinstance(loaded, Mapping):
-        return None
-    if not any(key in loaded for key in _UNIPROT_ROLE_KEYS):
-        return None
-    return loaded
-
-
-def strict_anchors_from_business_json(payload: object) -> tuple[str, ...] | None:
-    """Strict anchors from stored business JSON, or None for historical rows."""
-    loaded = _business_role_payload(payload)
-    if loaded is None:
-        return None
-    return strict_uniprot_anchors(loaded)
-
-
-def uniprot_roles_from_business_json(payload: object) -> UniprotIdentifierRoles | None:
-    """Read role fields from stored business JSON, or skip historical rows.
-
-    Kernel rows that only carry a merged ``uniprot`` string stay on the strict
-    anchor API. A payload qualifies only when it still has the source fields.
-    """
-    loaded = _business_role_payload(payload)
-    if loaded is None:
-        return None
-    return partition_uniprot_roles(loaded)
-
-
 def project_target_fields(
-    data: Mapping[str, object],
-    taxon: str | None,
-    *,
-    projection_policy: str = UNIPROT_PROJECTION_POLICY_V1,
+    data: Mapping[str, object], taxon: str | None
 ) -> dict[str, str | None]:
-    """Project classifier fields.
+    """Project ChEMBL target fields onto the offline classification kernel.
 
-    ``iuphar-uniprot-merged-anchors-v1`` keeps component accessions and UniProt
-    xrefs in one ``uniprot`` field. ``iuphar-uniprot-role-projection-v2``
-    projects primary accessions only. Original links stay in
-    ``source_business_data`` either way.
+    RF-002 (#13310): ``component_accessions`` are primary UniProt anchors;
+    ``target_xref_uniprot_ids`` are split into proven equivalents (overlap with
+    primary) and auxiliary xrefs. Only primary values fill ``uniprot`` so
+    unknown auxiliary tokens cannot open empty exact-channels. All original
+    business fields remain in ``source_business_data``.
     """
-    if projection_policy == UNIPROT_PROJECTION_POLICY_V2:
-        accessions = partition_uniprot_roles(data).primary_ids
-    elif projection_policy == UNIPROT_PROJECTION_POLICY_V1:
-        accessions = tuple(
-            dict.fromkeys(
-                (
-                    *_tokens(data.get("component_accessions")),
-                    *_tokens(data.get("target_xref_uniprot_ids")),
-                )
-            )
-        )
-    else:
-        message = f"unknown UniProt projection policy: {projection_policy}"
-        raise ValueError(message)
+    primary = tuple(dict.fromkeys(_tokens(data.get("component_accessions"))))
+    xref = tuple(dict.fromkeys(_tokens(data.get("target_xref_uniprot_ids"))))
+    primary_set = set(primary)
+    proven = tuple(item for item in xref if item in primary_set)
+    auxiliary = tuple(item for item in xref if item not in primary_set)
     synonyms = tuple(
         dict.fromkeys(
             (
@@ -234,7 +101,9 @@ def project_target_fields(
         "target_chembl_id": _text(data.get("target_id")),
         # ChEMBL identity is never passed as the kernel's explicit IUPHAR ID.
         "target_id": _text(data.get("iuphar_target_id")),
-        "uniprot": "|".join(accessions) or None,
+        "uniprot": "|".join(primary) or None,
+        "uniprot_equivalent": "|".join(proven) or None,
+        "uniprot_xref": "|".join(auxiliary) or None,
         "organism": taxon,
         "source_organism": _text(data.get("organism")),
         "name": _text(data.get("pref_name")),
@@ -274,15 +143,4 @@ def _taxonomy_name_ineligibility(taxon: str | None, organism: object) -> str | N
     return None
 
 
-__all__ = [
-    "UNIPROT_PROJECTION_POLICY_V1",
-    "UNIPROT_PROJECTION_POLICY_V2",
-    "UniprotIdentifierRoles",
-    "partition_uniprot_roles",
-    "plain_target_value",
-    "project_target_fields",
-    "strict_anchors_from_business_json",
-    "strict_uniprot_anchors",
-    "target_input_eligibility",
-    "uniprot_roles_from_business_json",
-]
+__all__ = ["plain_target_value", "project_target_fields", "target_input_eligibility"]
