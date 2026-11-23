@@ -21,6 +21,7 @@ from .gtopdb_2026_3_1 import FAMILY_ROWS
 from .hierarchy import (
     FamilyNode,
     HierarchyResult,
+    _allowed_subclass_vocabulary,
     admit_family_graph,
     hierarchy_for_graph_defect,
     normalize_provider_class,
@@ -659,10 +660,10 @@ def _resolved_subclasses(
     """Split one explicit subclass the way resolution reads each status.
 
     A partial annotation uses ``confirmed_subclasses``. Any other status uses
-    ``iuphar_subclass``. The dictionary values are the allowed vocabulary, so a
-    known subclass is not a contract defect.
+    ``iuphar_subclass``. Allowed labels are the dictionary values after the
+    same trim used at extraction, so a padded label is not a contract defect.
     """
-    allowed = frozenset(family_to_subclass.values())
+    allowed = _allowed_subclass_vocabulary(family_to_subclass)
     subclass = None if direct is None else direct.iuphar_subclass
     if annotation_status == "partial":
         confirmed = () if subclass is None else (subclass,)

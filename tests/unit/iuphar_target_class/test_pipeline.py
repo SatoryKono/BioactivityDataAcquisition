@@ -514,6 +514,52 @@ def test_explicit_subclass_reaches_the_row_and_an_unrelated_cycle_blocks_it():
     assert any(item.message == "цикл" for item in bad.result.diagnostics)
 
 
+def test_padded_subclass_label_stays_allowed_and_keeps_the_class():
+    base = _snapshot()
+    classified = pipeline.IndexedSnapshot.build(
+        snapshot_id=base.snapshot_id,
+        mapping_version=base.mapping_version,
+        complete=base.complete,
+        catalog=base.catalog,
+        annotations=dict(base.annotations),
+        family_nodes=base.families["family"],
+        type_to_class=dict(base.type_to_class),
+        family_to_class=dict(base.family_to_class),
+        family_to_subclass={"family": " Kinase "},
+    )
+    row = _run(
+        RawTargetRow("row-pad", {"target_id": "1", "organism": "Human"}, "protein"),
+        snapshot=classified,
+    ).rows[0]
+    assert row.result.iuphar_subclass == "Kinase"
+    assert row.result.effective_class == "Receptor"
+    assert row.result.effective_source == "iuphar_normalized"
+    assert row.result.effective_subclasses == ("Kinase",)
+    assert "contract_error" not in row.result.conflict_codes
+    partial = pipeline.IndexedSnapshot.build(
+        snapshot_id=base.snapshot_id,
+        mapping_version=base.mapping_version,
+        complete=base.complete,
+        catalog=base.catalog,
+        annotations=dict(base.annotations),
+        family_nodes=base.families["family"],
+        type_to_class={},
+        family_to_class={"family": "Receptor"},
+        family_to_subclass={"family": " Kinase ", "other": " "},
+    )
+    partial_row = _run(
+        RawTargetRow(
+            "row-pad-partial", {"target_id": "1", "organism": "Human"}, "protein"
+        ),
+        snapshot=partial,
+    ).rows[0]
+    assert partial_row.result.iuphar_annotation_status == "partial"
+    assert partial_row.result.iuphar_subclass == "Kinase"
+    assert partial_row.result.effective_subclasses == ("Kinase",)
+    assert partial_row.result.effective_source == "iuphar_normalized"
+    assert "contract_error" not in partial_row.result.conflict_codes
+
+
 def _stage0_fixture(tmp_path):
     names = (
         "content_checks.csv",

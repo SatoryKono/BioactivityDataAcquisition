@@ -747,6 +747,21 @@ def _field_origins(proof: str | None, status: str) -> tuple[str | None, str | No
     return None, None
 
 
+def _kept_subclass_label(value: str) -> str | None:
+    label = value.strip()
+    return label or None
+
+
+def _allowed_subclass_vocabulary(mapping: Mapping[str, str]) -> frozenset[str]:
+    """Return the trimmed labels resolution may accept from this dictionary."""
+    labels: set[str] = set()
+    for value in mapping.values():
+        label = _kept_subclass_label(value)
+        if label is not None:
+            labels.add(label)
+    return frozenset(labels)
+
+
 def _subclass_from(
     family_ids: tuple[str, ...], mapping: Mapping[str, str]
 ) -> tuple[str | None, tuple[str, ...], str | None]:
@@ -754,8 +769,8 @@ def _subclass_from(
     for family_id in sorted(family_ids):
         if family_id not in mapping:
             continue
-        label = mapping[family_id].strip()
-        if label:
+        label = _kept_subclass_label(mapping[family_id])
+        if label is not None:
             labels.append(label)
     values = tuple(labels)
     distinct = tuple(sorted(set(values)))
