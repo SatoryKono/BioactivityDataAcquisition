@@ -114,14 +114,18 @@ def assign_mapped_subclass(
 ) -> str | None:
     """Return a subclass only from the approved type/family dictionaries.
 
-    Family fallback applies only when every family that maps to the sole
-    subclass shares the selected ``iuphar_class`` (when that class is set).
+    A non-empty type label wins. A blank or whitespace type entry is ignored,
+    and the family fallback still applies. Family fallback applies only when
+    every family that maps to the sole subclass shares the selected
+    ``iuphar_class`` (when that class is set).
     """
     mapped = _subclass_labels(family_ids, family_to_subclass)
     if len(mapped) > 1:
         return None
     if type_name and type_name in type_to_subclass:
-        return _kept_subclass_label(type_to_subclass[type_name])
+        type_label = _kept_subclass_label(type_to_subclass[type_name])
+        if type_label is not None:
+            return type_label
     if len(mapped) != 1:
         return None
     subclass = next(iter(mapped))
