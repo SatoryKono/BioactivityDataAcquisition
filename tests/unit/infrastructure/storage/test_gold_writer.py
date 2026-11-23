@@ -1575,6 +1575,50 @@ class TestGoldWriterArrowConversion:
 class TestGoldWriterMergedValidation:
     """Tests for write_gold_merged schema validation (REQ-DATA-009)."""
 
+    @pytest.mark.parametrize("merged", [False, True])
+    @pytest.mark.parametrize("value", ["180.159", "not-a-number"])
+    async def test_pubchem_numeric_text_is_rejected_before_write(
+        self, tmp_path, noop_logger, merged, value
+    ):
+        """Coercion must not let unvalidated physical strings reach Delta."""
+        import json
+        from pathlib import Path
+
+        from bioetl.domain.contracts.gold.pubchem import PubChemCompoundGoldSchema
+        from bioetl.infrastructure.storage.gold.writer_schema_helpers import (
+            _project_records_for_gold_schema,
+        )
+
+        fixture = json.loads(
+            Path(
+                "tests/fixtures/golden/gold/pubchem_compound_dq_bundle_v1.json"
+            ).read_text(encoding="utf-8")
+        )
+        row = {
+            **fixture["rows"][0],
+            "content_hash": "a" * 64,
+            "molecular_weight": value,
+        }
+        records = _project_records_for_gold_schema(
+            [row], schema=PubChemCompoundGoldSchema
+        )
+        writer = _build_gold_writer(base_path=tmp_path, logger=noop_logger)
+        message = (
+            "contains string values"
+            if value == "180.159"
+            else "Schema validation failed"
+        )
+        with pytest.raises(ValueError, match=message):
+            if merged:
+                await writer.write_gold_merged(
+                    "pubchem_compound", records, schema=PubChemCompoundGoldSchema
+                )
+            else:
+                await writer.write_gold(
+                    "pubchem_compound", records, PubChemCompoundGoldSchema
+                )
+        assert not (tmp_path / "pubchem_compound").exists()
+
     @patch("bioetl.infrastructure.storage.gold_writer.write_deltalake")
     async def test_write_gold_merged_with_strict_schema_passes(
         self, mock_write_deltalake, gold_writer, strict_schema, valid_records

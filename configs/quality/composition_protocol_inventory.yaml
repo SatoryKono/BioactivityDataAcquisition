@@ -302,15 +302,15 @@ protocols:
   target_tier: domain
 - name: TransformCallback
   path: src/bioetl/domain/ports/pipeline_callbacks.py
-  line: 15
+  line: 14
   target_tier: domain
 - name: GoldFilterCallback
   path: src/bioetl/domain/ports/pipeline_callbacks.py
-  line: 29
+  line: 28
   target_tier: domain
 - name: GoldTransformCallback
   path: src/bioetl/domain/ports/pipeline_callbacks.py
-  line: 38
+  line: 37
   target_tier: domain
 - name: PaginationConfigLike
   path: src/bioetl/domain/ports/source_config.py

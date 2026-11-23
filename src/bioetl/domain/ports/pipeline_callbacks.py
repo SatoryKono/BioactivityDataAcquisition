@@ -6,9 +6,8 @@ from collections.abc import Awaitable
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
+    from bioetl.domain.context import PipelineContext
     from bioetl.domain.types import JsonDict
-
-    PipelineContext = object
 
 
 @runtime_checkable
