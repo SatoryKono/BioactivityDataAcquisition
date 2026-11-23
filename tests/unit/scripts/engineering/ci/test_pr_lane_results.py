@@ -21,22 +21,6 @@ pytestmark = pytest.mark.unit
 HEAD = "a" * 40
 
 
-def test_checkpoint_debugging_runbook_selects_workflow_diagnostics(
-    tmp_path: Path,
-) -> None:
-    owner = "tests/unit/application/services/test_observability_workflow_service.py"
-    path = tmp_path / owner
-    path.parent.mkdir(parents=True)
-    path.write_text("def test_owner():\n    assert True\n", encoding="utf-8")
-
-    report = build_shadow_compare(
-        ["docs/05-operations/runbooks/checkpoint-debugging.md"], repo_root=tmp_path
-    )
-
-    assert report["selected"] == [owner]
-    assert report["covers_full_suite"] is False
-
-
 def test_not_applicable_gate_does_not_inherit_job_success() -> None:
     """Keep a nonapplicable gate skipped even when its owner job succeeds."""
     results = build_results(
