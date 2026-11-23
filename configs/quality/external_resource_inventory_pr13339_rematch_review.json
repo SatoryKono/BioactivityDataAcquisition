@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "0d86143e3b52b8e4fd3a92539b24aa2718bf3e09",
+  "source_ref": "e824e130f9313789b8cc2fa66d301fbb215bd622",
+  "source_reviews": {
+    "src/bioetl/application/composite/helpers/merger_post_join_persist.py": "Rematch after #13349 (#13339): blob relocated vs catalog pin; no new acquisition sites.",
+    "src/bioetl/application/composite/helpers/target_classification_bundle.py": "Rematch after #13349 (#13339): blob relocated vs catalog pin; no new acquisition sites.",
+    "src/bioetl/application/composite/helpers/target_classification_features.py": "Rematch after #13349 (#13339): blob relocated vs catalog pin; no new acquisition sites.",
+    "src/bioetl/application/composite/helpers/target_classification_stage.py": "Rematch after #13349 (#13339): blob relocated vs catalog pin; no new acquisition sites.",
+    "src/bioetl/application/composite/helpers/target_classification_values.py": "Rematch after #13349 (#13339): blob relocated vs catalog pin; no new acquisition sites.",
+    "src/bioetl/application/composite/merge_service.py": "Rematch after #13349 (#13339): blob relocated vs catalog pin; no new acquisition sites.",
+    "src/bioetl/application/composite/merger_orchestration.py": "Rematch after #13349 (#13339): blob relocated vs catalog pin; no new acquisition sites.",
+    "src/bioetl/application/composite/merger_output_mixin.py": "Rematch after #13349 (#13339): blob relocated vs catalog pin; no new acquisition sites.",
+    "src/bioetl/application/composite/merger_post_join.py": "Rematch after #13349 (#13339): blob relocated vs catalog pin; no new acquisition sites.",
+    "src/bioetl/application/composite/target_protein_classification_summary.py": "Rematch after #13349 (#13339): blob relocated vs catalog pin; no new acquisition sites.",
+    "src/bioetl/application/pipelines/chembl/target_protein_classification_summary.py": "Rematch after #13349 (#13339): blob relocated vs catalog pin; no new acquisition sites.",
+    "src/bioetl/application/services/target_runtime/classification.py": "Rematch after #13349 (#13339): blob relocated vs catalog pin; no new acquisition sites.",
+    "src/bioetl/composition/bootstrap/assembly/target_classification_runtime.py": "Rematch after #13349 (#13339): blob relocated vs catalog pin; no new acquisition sites.",
+    "src/bioetl/composition/bootstrap/runtime/assay_replay.py": "Rematch after #13349 (#13339): blob relocated vs catalog pin; no new acquisition sites.",
+    "src/bioetl/composition/bootstrap/runtime/assay_replay_capture.py": "Rematch after #13349 (#13339): blob relocated vs catalog pin; no new acquisition sites.",
+    "src/bioetl/composition/bootstrap/runtime/composite_merge_service_builder.py": "Rematch after #13349 (#13339): blob relocated vs catalog pin; no new acquisition sites.",
+    "src/bioetl/domain/composite/enriched_target_features.py": "Rematch after #13349 (#13339): blob relocated vs catalog pin; no new acquisition sites."
+  },
+  "expression_updates": {},
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": [],
+  "segment_updates": {},
+  "reference_moves": {},
+  "line_updates": {}
+}
