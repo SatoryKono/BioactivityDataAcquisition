@@ -122,6 +122,15 @@ class DeepWikiUpdater:
             ):
                 print("FAIL backup: index contains non-wiki paths")
                 return False
+            unstaged = subprocess.run(
+                ["git", "diff", "--name-only", "--no-renames", "-z"],
+                cwd=self.repo_path,
+                check=True,
+                capture_output=True,
+            ).stdout.split(b"\0")
+            if (set(staged) - {b""}) & set(unstaged):
+                print("FAIL backup: staged wiki files have unstaged changes")
+                return False
             subprocess.run(
                 ["git", "add", ":(glob).devin/wiki*.json"],
                 cwd=self.repo_path,
@@ -145,7 +154,7 @@ class DeepWikiUpdater:
                     "git",
                     "commit",
                     "-m",
-                    "backup: wiki files before DeepWiki regeneration",
+                    "docs(deepwiki): back up wiki files before regeneration",
                 ],
                 cwd=self.repo_path,
                 check=True,
