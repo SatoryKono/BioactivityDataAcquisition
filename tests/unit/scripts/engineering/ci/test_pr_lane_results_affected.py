@@ -22,6 +22,21 @@ pytestmark = pytest.mark.unit
 HEAD = "a" * 40
 
 
+def test_requirements_crosswalk_routes_to_traceability_guards() -> None:
+    repo_root = Path(__file__).resolve().parents[5]
+    changed = (
+        "docs/01-requirements/traceability/requirements-traceability-crosswalk.csv"
+    )
+    owners = {
+        "tests/architecture/test_requirements_traceability_catalog.py",
+        "tests/architecture/test_documentation_audit_remediation.py",
+    }
+    assert owners <= set(affected_pytest_targets([changed], repo_root=repo_root))
+    assert owners <= set(
+        build_shadow_compare([changed], repo_root=repo_root)["selected"]
+    )
+
+
 @pytest.mark.parametrize(
     "changed",
     [

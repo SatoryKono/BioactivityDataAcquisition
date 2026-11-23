@@ -590,6 +590,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         DASHBOARD_OPERATOR_READABILITY_TEST,
         DASHBOARD_FIRST_WINDOW_NOSCROLL_TEST,
     ),
+    "docs/01-requirements/traceability/requirements-traceability-crosswalk.csv": (
+        "tests/architecture/test_requirements_traceability_catalog.py",
+        "tests/architecture/test_documentation_audit_remediation.py",
+    ),
     "docs/03-guides/metrics-monitoring.md": (
         "tests/architecture/test_observability_docs_drift.py",
         "tests/unit/infrastructure/observability/test_prometheus_metadata_contract.py",
