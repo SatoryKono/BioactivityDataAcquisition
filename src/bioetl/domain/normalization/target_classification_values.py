@@ -1,3 +1,5 @@
+"""Canonical persisted text for the IUPHAR target classification detail fields."""
+
 from __future__ import annotations
 
 import json
