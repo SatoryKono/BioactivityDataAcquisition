@@ -93,21 +93,68 @@ class DeepWikiUpdater:
         self.modules = list(MODULES)
 
     def backup_wiki_files(self) -> bool:
-        """Create git commit with current wiki files."""
+        """Back up wiki files on a non-main branch with a wiki-only index."""
         print("Backing up wiki files...")
         try:
+            branch = subprocess.run(
+                ["git", "branch", "--show-current"],
+                cwd=self.repo_path,
+                check=True,
+                capture_output=True,
+            ).stdout.strip()
+            if not branch or branch == b"main":
+                print("FAIL backup: checkout a non-main branch")
+                return False
+            staged = subprocess.run(
+                ["git", "diff", "--cached", "--name-only", "--no-renames", "-z"],
+                cwd=self.repo_path,
+                check=True,
+                capture_output=True,
+            ).stdout.split(b"\0")
+            if any(
+                path
+                and not (
+                    path.startswith(b".devin/wiki")
+                    and path.endswith(b".json")
+                    and b"/" not in path[len(b".devin/") :]
+                )
+                for path in staged
+            ):
+                print("FAIL backup: index contains non-wiki paths")
+                return False
+            unstaged = subprocess.run(
+                ["git", "diff", "--name-only", "--no-renames", "-z"],
+                cwd=self.repo_path,
+                check=True,
+                capture_output=True,
+            ).stdout.split(b"\0")
+            if (set(staged) - {b""}) & set(unstaged):
+                print("FAIL backup: staged wiki files have unstaged changes")
+                return False
             subprocess.run(
-                ["git", "add", ".devin/wiki*.json"],
+                ["git", "add", ":(glob).devin/wiki*.json"],
                 cwd=self.repo_path,
                 check=True,
                 capture_output=True,
             )
+            changes = subprocess.run(
+                ["git", "diff", "--cached", "--quiet"],
+                cwd=self.repo_path,
+                check=False,
+                capture_output=True,
+            )
+            if changes.returncode == 0:
+                print("OK no wiki changes to back up")
+                return True
+            if changes.returncode != 1:
+                print("FAIL backup: could not inspect index")
+                return False
             subprocess.run(
                 [
                     "git",
                     "commit",
                     "-m",
-                    "backup: wiki files before DeepWiki regeneration",
+                    "docs(deepwiki): back up wiki files before regeneration",
                 ],
                 cwd=self.repo_path,
                 check=True,
