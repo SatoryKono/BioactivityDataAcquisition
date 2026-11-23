@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "dff3e46f86b708eb27c6ffab1562de5bc2ecf7ff",
+  "source_ref": "bc7f98812c65f161bd34c989f83bc28bf8f4e71d",
+  "source_reviews": {
+    "src/bioetl/infrastructure/config/pipeline_config_loader.py": "Docstring of clear_cache now states that shared pipeline and base-config caches stay intact. No new file, network, or process acquisition."
+  },
+  "expression_updates": {},
+  "segment_updates": {},
+  "line_updates": {},
+  "reference_moves": [],
+  "retired_references": [],
+  "exclusion_moves": [],
+  "resource_updates": {},
+  "additional_bindings": {},
+  "additional_creation_sites": {},
+  "new_resources": [],
+  "new_exclusions": []
+}
