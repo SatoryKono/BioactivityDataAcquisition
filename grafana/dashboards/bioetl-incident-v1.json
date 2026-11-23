@@ -6646,7 +6646,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Maximum observed processed-record counter sample in each interval, by Stage for the selected Pipeline and Run Type. This series shows the scraped snapshots, which can repeat across CLI runs. Overlapping points and values from panel 241 cannot be added to derive a run total. Panel 241 also excludes stages matching none.*. For exact counts, inspect the saved run in Run Explorer. Run ID does not filter this query.",
+          "description": "TIME RANGE · Maximum observed processed-record counter sample in each interval, by Stage for the selected Pipeline and Run Type. This series shows the scraped snapshots, which can repeat across CLI runs. Overlapping points and values from panel 241 cannot be added to derive a run total. Panel 241 also excludes stages matching none.*. For exact counts, inspect the saved run in Run Explorer. Run ID does not filter this query. An empty chart means no matching samples or unavailable telemetry, not successful processing.",
           "fieldConfig": {
             "defaults": {
               "color": {
