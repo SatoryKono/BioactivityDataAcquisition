@@ -242,11 +242,7 @@ def resolve_completed_transform_fingerprints(
     force_steps: tuple[str, ...],
     repair_steps: tuple[str, ...],
 ) -> dict[str, str]:
-    """Filter last-success fingerprints for this attempt, not by last status.
-
-    A failed forced non-destructive attempt leaves its prior success reusable;
-    destructive ambiguity must be checked before these fingerprints are used.
-    """
+    """Filter committed transform fingerprints through force/repair selectors."""
     forced_or_repaired = {*force_steps, *repair_steps}
     return {
         step_id: fingerprint
