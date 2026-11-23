@@ -233,7 +233,23 @@ class TestFieldValidationToDict:
         result = loader._field_validation_to_dict(fv)
         assert result["field"] == "compound_id"
         assert result["type"] == "not_null"
-        assert "nullable" in result
+        # Unset defaults (nullable, severity, ...) stay omitted so hierarchy merge
+        # does not overwrite inherited values with Pydantic defaults.
+        assert "nullable" not in result
+
+    def test_preserves_explicit_severity_and_max_length(self) -> None:
+        """Explicit severity / max_length survive exclude_unset dumping."""
+        loader = self._make_loader()
+        fv = self._make_fv(
+            type="max_length",
+            max_length=12,
+            severity="warn",
+            severity_enricher="warn",
+        )
+        result = loader._field_validation_to_dict(fv)
+        assert result["max_length"] == 12
+        assert result["severity"] == "warn"
+        assert result["severity_enricher"] == "warn"
 
     def test_includes_min_max_when_set(self) -> None:
         """min/max included in dict when set."""
