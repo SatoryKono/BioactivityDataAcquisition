@@ -52,6 +52,7 @@ from bioetl.domain.types import (
     GoldSchemaVersionPolicy,
 )
 from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
+from bioetl.domain.ports.noop import NoOpMetadataWriter
 from bioetl.infrastructure.storage.gold.runtime_helpers import (
     GoldWriterRuntimeServices,
 )
@@ -202,11 +203,30 @@ class TestGoldWriterInit:
                 metrics=None,
                 audit=None,
                 metadata_writer=MagicMock(),
-                metadata_coordinator=None,
+                metadata_coordinator=MagicMock(),
                 lineage_store=None,
             ),
         )
         assert writer.csv_exporter is mock_exporter
+
+    def test_metadata_writer_without_coordinator_fails_at_construction(
+        self, noop_logger
+    ):
+        services = GoldWriterRuntimeServices(
+            csv_exporter=None,
+            tracing=None,
+            metrics=None,
+            audit=None,
+            metadata_writer=MagicMock(),
+            metadata_coordinator=None,
+            lineage_store=None,
+        )
+        with pytest.raises(
+            ValueError, match="metadata writer requires a metadata coordinator"
+        ):
+            _build_gold_writer(
+                base_path=GOLD_ROOT, logger=noop_logger, runtime_services=services
+            )
 
     def test_init_without_csv_exporter(self, noop_logger):
         """Test initialization without CSV exporter."""
@@ -260,7 +280,7 @@ class TestGoldWriterPipelineHelpers:
                 tracing=tracing,
                 metrics=None,
                 audit=None,
-                metadata_writer=None,
+                metadata_writer=NoOpMetadataWriter(),
                 metadata_coordinator=None,
                 lineage_store=None,
             ),
@@ -545,7 +565,7 @@ class TestGoldWriterDualWrite:
                 metrics=None,
                 audit=None,
                 metadata_writer=MagicMock(),
-                metadata_coordinator=None,
+                metadata_coordinator=MagicMock(),
                 lineage_store=None,
                 contract_rollout_policy=rollout_policy,
             ),
@@ -619,7 +639,7 @@ class TestGoldWriterDualWrite:
                 metrics=None,
                 audit=None,
                 metadata_writer=MagicMock(),
-                metadata_coordinator=None,
+                metadata_coordinator=MagicMock(),
                 lineage_store=None,
                 contract_rollout_policy=rollout_policy,
             ),
