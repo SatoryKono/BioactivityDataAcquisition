@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "9ab21e40188a9845e7ab4d29703d75463855654d",
+  "source_ref": "9ab21e40188a9845e7ab4d29703d75463855654d",
+  "source_reviews": {
+    "src/bioetl/infrastructure/adapters/iuphar/acceptance_receipt.py": "Compare the loaded acceptance version triple with the selected profile triple before the profile is admitted. No external resource acquisition, ownership, or lifecycle change.",
+    "src/bioetl/infrastructure/storage/target_candidates.py": "Reuse the shared candidate row identity when classifying a persisted row. Existing DeltaTable and write_deltalake acquisitions stay on the same calls; only source lines drift with the added import. No new runtime qualification.",
+    "src/bioetl/infrastructure/storage/target_migration_classification_checks.py": "Reclassify Silver with the candidate row identity instead of a migration-only identity. No external resource acquisition, ownership, or lifecycle change."
+  },
+  "expression_updates": {},
+  "segment_updates": {},
+  "line_updates": {},
+  "reference_moves": [],
+  "exclusion_moves": [],
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": []
+}
