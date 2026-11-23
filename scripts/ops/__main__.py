@@ -9,7 +9,7 @@ Stable commands:
     target-fk-repair    Build additive V30 candidates for missing target FKs
     iuphar-target-cohort Export canonical targets and assemble Stage 0 evidence
     target-classification-migration
-                       Prepare, promote, or restore paired target tables
+                       Prepare, promote, restore, or report target classification acceptance
     salt-rotate        Rotate PII hashing salt
     check-observability-ports
                        Compare published observability endpoints with container health

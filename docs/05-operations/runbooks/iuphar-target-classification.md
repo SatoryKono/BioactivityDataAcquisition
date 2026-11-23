@@ -9,7 +9,7 @@ Reviewers:
 - BioETL Team
   Priority: P2
   Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-  Last verified: '2026-11-16'
+  Last verified: '2026-11-23'
 
 ______________________________________________________________________
 
@@ -474,6 +474,50 @@ moving both candidates and the configuration into place. It journals each
 move, retains originals, and restores already moved pairs on an activation
 error. Keep the maintenance window open through verification.
 
+### Record main-contour acceptance
+
+Shadow, the isolated `--limit 1000` enrich, composite enrich, migration, and
+live readback are separate statuses. A passing smoke does not prove the full
+cohort. `biological_accuracy_accepted` stays false for a bounded RF-008
+reference; a matched count must not be recorded as biological qualification.
+The canonical entity document stays `mode: "off"` until `promotion_decision`
+is `READY` and `promote` then runs in a window with no writers. `LIVE_ACCEPTED`
+requires that promotion plus a readback of the next ordinary run. If a gate
+fails after promotion, the command exits 1 with `rollback_required: true`;
+restore with the rollback command above. Do not switch the mode to `"off"`
+instead of restoring the tables.
+
+Write the evidence JSON outside the committed tree. Point the command at the
+actual discrepancy report, independent expectations, enrich table, repeat
+table, XLSX, Silver, Gold, and assay inputs. The command recomputes hashes,
+status distributions, XLSX round-trip, historical columns, assay FK closure,
+and the canonical config digest. It does not promote or edit configuration.
+
+```powershell
+.\.venv-win\Scripts\python.exe -m scripts.ops target-classification-migration contour-report `
+  --evidence 'PATH_TO_CONTOUR_EVIDENCE_JSON' `
+  --discrepancy-report 'PATH_TO_DISCREPANCY_REPORT' `
+  --expectations 'PATH_TO_INDEPENDENT_EXPECTATIONS' `
+  --table 'PATH_TO_ENRICH_TABLE' `
+  --repeat-table 'PATH_TO_REPEAT_ENRICH_TABLE' `
+  --xlsx 'PATH_TO_STANDARD_XLSX' `
+  --silver 'PATH_TO_SILVER_TABLE' `
+  --gold 'PATH_TO_GOLD_TABLE' `
+  --assay 'PATH_TO_ASSAY_TABLE' `
+  --output 'NEW_CONTOUR_REPORT_JSON' `
+  --require-ready
+```
+
+On Linux or WSL, use the prepared interpreter from the repository root. The
+evidence document uses `schema_version`
+`bioetl_iuphar_main_contour_evidence_v1` and explicit objects `shadow`,
+`isolated_enrich`, `composite_enrich`, `migration`, `live`, `biological`,
+`local`, and `ci`. `local` and `ci` stay `NOT_RUN` until their own evidence
+hash or 40-character commit SHA is supplied. Composite acceptance stays
+`BLOCKED` while the composite Gold contract omits the nine classification
+fields, even when both column groups already list them. Keep the report with
+the occurrence; do not commit it.
+
 ## Verification
 
 - Confirm the selected configuration, contract version, actual schema hash,
@@ -482,6 +526,10 @@ error. Keep the maintenance window open through verification.
 - For shadow, verify unchanged V30 rows/hash scope plus complete separate
   evidence. For enrich, verify V31 on both tables, coherent profile values,
   completed evidence, full cohort preservation, and baseline FK closure.
+- Read `contour-report` phases and axes separately: `local`, `ci`,
+  `migration`, and `biological`. `promotion_decision` is not a biological
+  accuracy claim, and `matched_count` does not change
+  `biological_accuracy_accepted`.
 - Inspect all executed receipt checks, category dispositions, bounded scope,
   source digests, output hashes,
   and matching successful integration report. Retain unresolved disagreements

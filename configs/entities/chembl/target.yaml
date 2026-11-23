@@ -7,6 +7,8 @@ pipeline:
   entity_type: target
   description: Extract biological targets from ChEMBL API
   target_classification:
+    # Canonical deployment stays "off" until contour-report is READY and the
+    # maintenance-window migration promotes a separate enrich document.
     mode: "off"
   field_policy: {}
   business_primary_keys:
