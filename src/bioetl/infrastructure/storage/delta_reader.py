@@ -78,7 +78,7 @@ def _require_snapshot(
 
 
 def _materialize_scanner(
-    scanner: Any,
+    scanner: Any,  # Any: pyarrow scanner duck type without a stable Protocol
     opened: DeltaTable,
     limit: int | None,
 ) -> pa.Table:
