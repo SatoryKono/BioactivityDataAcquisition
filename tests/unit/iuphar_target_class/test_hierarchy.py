@@ -416,6 +416,45 @@ def test_synthetic_family_ids_stay_outside_official_paths() -> None:
     )
 
 
+def test_local_nodes_dropped_before_official_graph_validation() -> None:
+    """Codex P2: local records in nodes must not reject an intact official walk."""
+    result = normalize_provider_class(
+        type_name=None,
+        family_ids=("1", "local:x"),
+        nodes=(
+            FamilyNode("1", (), "enzyme"),
+            FamilyNode("local:x", ("1",), "enzyme"),
+        ),
+        type_to_class={},
+        family_to_class={"1": "Enzyme"},
+        family_to_subclass={"1": "Enzymes"},
+    )
+    assert result.annotation_status == "partial"
+    assert result.iuphar_class == "Enzyme"
+    assert result.iuphar_subclass == "Enzymes"
+    assert [item.root_to_leaf for item in result.paths] == [("1",)]
+    assert result.diagnostics[0].level == "warning"
+    assert (
+        result.diagnostics[0].message
+        == "синтетический идентификатор в официальном графе"
+    )
+    broken = normalize_provider_class(
+        type_name=None,
+        family_ids=("1",),
+        nodes=(FamilyNode("1", ("local:x",), "enzyme"),),
+        type_to_class={},
+        family_to_class={"1": "Enzyme"},
+    )
+    assert broken.annotation_status == "not_available"
+    assert broken.iuphar_class is None
+    assert broken.paths == ()
+    assert broken.diagnostics[0].level == "error"
+    assert (
+        broken.diagnostics[0].message
+        == "синтетический идентификатор в официальном графе"
+    )
+
+
 def test_approved_mapping_is_rejected_for_a_different_release() -> None:
     with pytest.raises(ValueError, match="does not match approved mapping"):
         normalize_approved_provider_class(

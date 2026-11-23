@@ -18,7 +18,12 @@ from .evidence import (
     require_class_chain,
 )
 from .gtopdb_2026_3_1 import FAMILY_ROWS
-from .hierarchy import FamilyNode, HierarchyResult, normalize_provider_class
+from .hierarchy import (
+    FamilyNode,
+    HierarchyResult,
+    family_id_kind,
+    normalize_provider_class,
+)
 from .iuphar_mapping import approved_class_mappings, approved_subclass_mappings
 from .local_layer import Prediction, apply_local
 from .matching import (
@@ -338,6 +343,8 @@ def _ancestor_records(
         if key in seen:
             continue
         seen.add(key)
+        if family_id_kind(key) == "synthetic_local":
+            continue
         nodes = ctx.families.get(key, ())
         records.extend(nodes)
         pending.extend(parent for node in nodes for parent in node.parent_ids)
@@ -618,7 +625,10 @@ def _resolution_input(
 ) -> ResolutionInput:
     """Project frozen classification inputs without changing fallback rules."""
     subclass = direct.iuphar_subclass if direct else None
-    direct_vocabulary = frozenset(snapshot.type_to_subclass.values())
+    # Family-only subclass labels must be allowed even when type→subclass is empty.
+    direct_vocabulary = frozenset(snapshot.type_to_subclass.values()) | frozenset(
+        snapshot.family_to_subclass.values()
+    )
     return ResolutionInput(
         match_status=match.match_status or "contract_error",
         iuphar_annotation_status=annotation_status,

@@ -365,11 +365,15 @@ def _graph_error_result(
 def _index_nodes(
     nodes: tuple[FamilyNode, ...],
 ) -> dict[str, FamilyNode] | Diagnostic:
-    """Index nodes; same payload merges parents, conflicting payloads fail."""
+    """Index nodes; same payload merges parents, conflicting payloads fail.
+
+    Synthetic/local records are dropped before the official walk. An official
+    node that points at a synthetic parent remains a graph defect.
+    """
     grouped: dict[str, list[FamilyNode]] = {}
     for node in nodes:
         if family_id_kind(node.family_id) == "synthetic_local":
-            return _defect(_SYNTHETIC_MIXED)
+            continue
         for parent_id in node.parent_ids:
             if family_id_kind(parent_id) == "synthetic_local":
                 return _defect(_SYNTHETIC_MIXED)
