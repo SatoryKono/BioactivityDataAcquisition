@@ -338,6 +338,15 @@ def _physical_columns(rows: Sequence[Mapping[str, object]]) -> set[str]:
     return columns
 
 
+def _physical_policy_id(contract: str, *, legacy: bool) -> str:
+    """Name the physical shape without nesting the contract choice."""
+    if legacy:
+        return _LEGACY_PHYSICAL_POLICY
+    if contract == "3.2.0":
+        return "target_v32_runtime_shape"
+    return "target_v31_runtime_shape"
+
+
 def _validate_physical_projection(
     layer: str,
     model: type[DataFrameModel],
@@ -377,12 +386,9 @@ def _validate_physical_projection(
     nullable_absences = _logical_nullable_absences(layer, previous, schema, frame)
     schema.validate(frame, lazy=True)
     return {
-        "policy_id": _LEGACY_PHYSICAL_POLICY
-        if any((omissions, storage, nullable_absences))
-        else (
-            "target_v32_runtime_shape"
-            if contract == "3.2.0"
-            else "target_v31_runtime_shape"
+        "policy_id": _physical_policy_id(
+            contract,
+            legacy=any((omissions, storage, nullable_absences)),
         ),
         "omitted_runtime_columns": omissions,
         "logical_nullable_absences": nullable_absences,
