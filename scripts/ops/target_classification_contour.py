@@ -118,6 +118,8 @@ class ContourObservations:
     table_profile_values: tuple[str | None, ...] | None = None
     silver_profile_values: tuple[str | None, ...] | None = None
     gold_profile_values: tuple[str | None, ...] | None = None
+    live_silver_profile_values: tuple[str | None, ...] | None = None
+    live_gold_profile_values: tuple[str | None, ...] | None = None
 
 
 def _confine(path: Path) -> Path:
@@ -468,6 +470,10 @@ def _record_live(
     """Compare the main-contour readback without replacing isolated hashes."""
     silver_rows = load_table(silver) if silver is not None else None
     gold_rows = load_table(gold) if gold is not None else None
+    if silver_rows is not None:
+        updates["live_silver_profile_values"] = _profile_values(silver_rows)
+    if gold_rows is not None:
+        updates["live_gold_profile_values"] = _profile_values(gold_rows)
     if silver_rows is None or gold_rows is None:
         return gold_rows
     duplicate = _has_duplicate_current_ids(silver_rows) or _has_duplicate_current_ids(
@@ -853,6 +859,29 @@ def _live_projection_reasons(observations: ContourObservations) -> list[str]:
     return []
 
 
+def _live_profile_reasons(
+    observations: ContourObservations, profile: object
+) -> list[str]:
+    """Every measured live row must carry the promoted profile digest.
+
+    Unmeasured live tables stay gated by ``live_projection_match`` so evidence
+    without ``--silver``/``--gold`` is unchanged; measured wrong profiles fail.
+    """
+    reasons: list[str] = []
+    cohorts = (
+        (observations.live_silver_profile_values, "live_silver_profile_row_mismatch"),
+        (observations.live_gold_profile_values, "live_gold_profile_row_mismatch"),
+    )
+    if not _pinned(profile):
+        return reasons
+    for observed, mismatch_code in cohorts:
+        if observed is None:
+            continue
+        if not observed or any(value != profile for value in observed):
+            reasons.append(mismatch_code)
+    return reasons
+
+
 def _evaluate_live(
     document: dict[str, object],
     observations: ContourObservations,
@@ -878,6 +907,9 @@ def _evaluate_live(
         live["observed_config_sha256"] != observations.canonical_config_sha256
     ):
         reasons.append("live_config_mismatch")
+    reasons.extend(
+        _live_profile_reasons(observations, migration["effective_profile_sha256"])
+    )
     reasons.extend(_live_projection_reasons(observations))
     if live["classification_reproduced"] is not True:
         reasons.append("classification_reproduced_not_attested")

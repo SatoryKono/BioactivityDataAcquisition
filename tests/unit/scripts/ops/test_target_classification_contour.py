@@ -868,6 +868,57 @@ def test_main_contour_readback_does_not_replace_isolated_hashes(
     assert report["promotion_decision"] == "LIVE_ACCEPTED"
 
 
+def test_live_readback_rejects_matching_but_wrong_row_profiles(
+    tmp_path: Path,
+) -> None:
+    """Live Silver/Gold may match each other yet disagree with the promoted digest."""
+    evidence, observations = _ready_case(tmp_path)
+    wrong = tuple(
+        {**row, "target_class_profile_sha256": _OTHER} for row in _ROWS
+    )
+    silver = tmp_path / "live-wrong-silver.csv"
+    gold = tmp_path / "live-wrong-gold.csv"
+    _write_csv(silver, wrong)
+    _write_csv(gold, wrong)
+    migration = dict(evidence["migration"])
+    migration["promoted"] = True
+    evidence["migration"] = migration
+    evidence["live"] = {
+        "readback": True,
+        "next_run_executed": True,
+        "next_run_id": "next-run",
+        "tables_match_promoted": True,
+        "classification_reproduced": True,
+        "observed_profile_sha256": _PROFILE,
+        "observed_config_sha256": _CONFIG,
+    }
+    measured = apply_measurements(
+        replace(
+            observations,
+            canonical_mode="enrich",
+            canonical_config_sha256=_CONFIG,
+        ),
+        evidence,
+        ContourMeasurementPaths(silver=silver, gold=gold),
+    )
+    report = evaluate_main_contour(evidence, measured)
+    phases = report["phases"]
+    assert isinstance(phases, dict)
+    live = phases["live"]
+    assert isinstance(live, dict)
+
+    assert measured.silver_profile_values == observations.silver_profile_values
+    assert measured.gold_profile_values == observations.gold_profile_values
+    assert measured.live_silver_profile_values == (_OTHER, _OTHER)
+    assert measured.live_gold_profile_values == (_OTHER, _OTHER)
+    assert measured.live_projection_match is True
+    assert _phase(report, "isolated_enrich") == "PASS"
+    assert _phase(report, "live") == "FAIL"
+    assert "live_silver_profile_row_mismatch" in live["reasons"]
+    assert "live_gold_profile_row_mismatch" in live["reasons"]
+    assert report["promotion_decision"] != "LIVE_ACCEPTED"
+
+
 def test_duplicate_current_target_id_blocks_live_acceptance(
     tmp_path: Path,
 ) -> None:
