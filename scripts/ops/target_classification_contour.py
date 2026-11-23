@@ -118,6 +118,8 @@ class ContourObservations:
     table_profile_values: tuple[str | None, ...] | None = None
     silver_profile_values: tuple[str | None, ...] | None = None
     gold_profile_values: tuple[str | None, ...] | None = None
+    live_silver_profile_values: tuple[str | None, ...] | None = None
+    live_gold_profile_values: tuple[str | None, ...] | None = None
 
 
 def _confine(path: Path) -> Path:
@@ -468,6 +470,10 @@ def _record_live(
     """Compare the main-contour readback without replacing isolated hashes."""
     silver_rows = load_table(silver) if silver is not None else None
     gold_rows = load_table(gold) if gold is not None else None
+    if silver_rows is not None:
+        updates["live_silver_profile_values"] = _profile_values(silver_rows)
+    if gold_rows is not None:
+        updates["live_gold_profile_values"] = _profile_values(gold_rows)
     if silver_rows is None or gold_rows is None:
         return gold_rows
     duplicate = _has_duplicate_current_ids(silver_rows) or _has_duplicate_current_ids(
@@ -843,6 +849,31 @@ def _evaluate_migration(
     return _phase("FAIL" if reasons else "PASS", _unique(reasons))
 
 
+def _live_profile_reasons(
+    observations: ContourObservations, migration: dict[str, object]
+) -> list[str]:
+    """Current main-contour rows must carry the promoted profile."""
+    profile = migration["effective_profile_sha256"]
+    reasons: list[str] = []
+    reasons.extend(
+        _profile_row_reasons(
+            observations.live_silver_profile_values,
+            profile,
+            "live_silver_profile_rows_not_measured",
+            "live_silver_profile_row_mismatch",
+        )
+    )
+    reasons.extend(
+        _profile_row_reasons(
+            observations.live_gold_profile_values,
+            profile,
+            "live_gold_profile_rows_not_measured",
+            "live_gold_profile_row_mismatch",
+        )
+    )
+    return reasons
+
+
 def _live_projection_reasons(observations: ContourObservations) -> list[str]:
     if observations.duplicate_current_target_ids is True:
         return ["duplicate_current_target_id"]
@@ -878,6 +909,7 @@ def _evaluate_live(
         live["observed_config_sha256"] != observations.canonical_config_sha256
     ):
         reasons.append("live_config_mismatch")
+    reasons.extend(_live_profile_reasons(observations, migration))
     reasons.extend(_live_projection_reasons(observations))
     if live["classification_reproduced"] is not True:
         reasons.append("classification_reproduced_not_attested")

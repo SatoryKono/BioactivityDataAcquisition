@@ -630,6 +630,9 @@ of its current business-field projection, and a pinned hash is not accepted
 when that identity was not measured. Every current enrich, Silver, and Gold
 row must carry the claimed `target_class_profile_sha256`; a digest that is
 only well formed does not confirm the classifier that wrote the rows. Current
+rows of `--silver` and `--gold` are checked against
+`migration.effective_profile_sha256`. Those live observations stay separate
+from the isolated `--limit 1000` profile values. Current
 rows are those with a missing or true `_is_current`. A CSV cell `False`,
 `false`, or `0` is closed before that check. Closed versions do not close an
 assay FK. Live readback compares each current Gold target with the current
