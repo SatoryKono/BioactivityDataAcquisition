@@ -82,7 +82,7 @@ surface is active; do not assume a single universal value.
 | --- | --- | --- | --- |
 | Hierarchical quality config | `configs/base/quality.yaml`, `ThresholdsConfig` (`dq_config.py`) | `soft_fail=0.05`, `hard_fail=0.50` | Provider/entity `quality:` hierarchy and RULES default |
 | Contract-backed DQ loader fallback | `src/bioetl/infrastructure/config/dq_contract_config_loader.py` | `soft_fail=0.05`, `hard_fail=0.50` | When contract YAML omits explicit thresholds |
-| Inline pipeline DQ override baseline | `src/bioetl/infrastructure/config/pipeline_dq_resolution.py` | `soft_fail=0.05`, `hard_fail=0.20` | Baseline for detecting whether `pipeline.dq_overrides` changed defaults |
+| Inline pipeline DQ override baseline | `src/bioetl/infrastructure/config/pipeline_dq_resolution.py` / `DQYamlConfig` | `soft_fail=0.05`, `hard_fail=0.20` | Pydantic defaults for unset fields; presence uses `model_fields_set` (explicit keys), not deviation from these defaults |
 | Silver DQ request shape | `src/bioetl/domain/ports/quality/silver_dq_request.py` | `soft_fail=0.05`, `hard_fail=0.20` | Request-shape default for Silver analyze |
 
 Hierarchical / RULES / contract-loader default hard-fail is **0.50 (50%)**.
@@ -100,8 +100,10 @@ thresholds:
 
 ### Silver / pipeline-override baseline
 
-When Silver DQ request fields or inline `pipeline.dq_overrides` normalization
-use code defaults without an explicit hard-fail, the baseline is:
+When Silver DQ request fields or inline `pipeline.dq_overrides` leave a
+threshold unset, Pydantic fills the model default. Explicit keys (including
+`0.05` / `0.20`) are treated as overrides via `model_fields_set`; detection no
+longer requires a value different from the baseline:
 
 ```text
 soft_fail = 0.05
@@ -111,6 +113,7 @@ hard_fail = 0.20
 Anchors:
 
 - `src/bioetl/infrastructure/config/pipeline_dq_resolution.py`
+- `src/bioetl/infrastructure/schemas/pipeline_config_common.py` (`DQYamlConfig`)
 - `src/bioetl/domain/ports/quality/silver_dq_request.py`
 
 Contract-backed loader omitted thresholds resolve to **0.50** via

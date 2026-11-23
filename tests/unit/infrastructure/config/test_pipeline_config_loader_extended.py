@@ -584,6 +584,51 @@ class TestResolveDqConfigFallback:
         result = loader.resolve_dq_config(yaml_config)
         assert isinstance(result, DQConfig)
 
+    def test_falls_back_when_inline_present_but_hierarchy_missing(self) -> None:
+        """Inline-only configs keep FileNotFoundError → to_domain fallback."""
+        dq_loader = _DummyDQLoader(raises=True)
+        loader = PipelineConfigLoader(
+            Path("configs"),
+            dq_loader=dq_loader,
+            filter_loader=_DummyFilterLoader(),
+        )
+        yaml_config = PipelineYamlConfig.model_validate(
+            {
+                **_base_pipeline_dict(),
+                "dq_overrides": {"report": {"enabled": False}},
+            }
+        )
+        result = loader.resolve_dq_config(yaml_config)
+        assert isinstance(result, DQConfig)
+        assert result.report.enabled is False
+
+
+@pytest.mark.unit
+def test_partial_soft_fail_compatible_with_inherited_hard_fail(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Single soft_fail above model default hard_fail still merges with hierarchy."""
+    loader = DQConfigLoader(tmp_path)
+    monkeypatch.setattr(
+        loader,
+        "_load_defaults_layer",
+        lambda: {
+            "thresholds": {"soft_fail": 0.05, "hard_fail": 0.40},
+            "strict_validation": False,
+            "invalid_record_policy": "skip",
+            "report": {"enabled": True, "format": "yaml", "sample_size": 3},
+        },
+    )
+    config = PipelineYamlConfig.model_validate(
+        {
+            **_base_pipeline_dict(),
+            "dq_overrides": {"soft_fail_threshold": 0.25},
+        }
+    )
+    actual = resolve_pipeline_dq_config(config, dq_loader=loader)
+    assert actual.soft_fail_threshold == pytest.approx(0.25)
+    assert actual.hard_fail_threshold == pytest.approx(0.40)
+
 
 # ---------------------------------------------------------------------------
 # clear_cache

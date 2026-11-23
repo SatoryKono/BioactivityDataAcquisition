@@ -154,13 +154,15 @@ def resolve_pipeline_dq_config(
     entity = yaml_config.entity_type
     dq_config_file = getattr(yaml_config, "dq_config_file", None)
     inline_rules_present = has_inline_dq_overrides(yaml_config)
+    inline_overrides = (
+        normalize_inline_dq_overrides(yaml_config.dq_overrides)
+        if inline_rules_present
+        else None
+    )
 
-    if dq_config_file is not None or inline_rules_present:
-        inline_overrides = (
-            normalize_inline_dq_overrides(yaml_config.dq_overrides)
-            if inline_rules_present
-            else None
-        )
+    # Explicit dq_config_file must fail closed when the hierarchy is missing.
+    # Inline-only configs keep the legacy FileNotFoundError → to_domain fallback.
+    if dq_config_file is not None:
         return dq_loader.load(
             provider=provider,
             entity=entity,
@@ -171,7 +173,7 @@ def resolve_pipeline_dq_config(
         return dq_loader.load(
             provider=provider,
             entity=entity,
-            inline_overrides=None,
+            inline_overrides=inline_overrides,
         )
     except FileNotFoundError:
         return dq_overrides_to_domain(yaml_config)
