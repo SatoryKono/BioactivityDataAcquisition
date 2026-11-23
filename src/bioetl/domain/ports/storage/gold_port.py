@@ -7,6 +7,7 @@ from typing import Any, Literal, Protocol, runtime_checkable
 
 from bioetl.domain.types import GoldRecord, RunID, ScdConfig
 from bioetl.domain.types.gold_contracts import GoldWriteReceipt
+from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
 __all__ = ["GoldStoragePort"]
 
@@ -30,9 +31,7 @@ class GoldStoragePort(Protocol):
         column_order: list[str] | None = None,
         ingestion_ts: datetime | None = None,
         run_id: RunID | None = None,
-        silver_refs: (
-            list[Any] | None  # Any: port contract allows heterogeneous list items
-        ) = None,  # Any: port contract allows heterogeneous list items
+        silver_refs: list[SilverWriteResult] | None = None,
     ) -> GoldWriteReceipt:
         """Write aggregated or validated records to the Gold layer.
 

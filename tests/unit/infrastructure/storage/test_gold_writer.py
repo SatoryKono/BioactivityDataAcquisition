@@ -136,6 +136,16 @@ def fixed_ingestion_ts():
 
 
 @pytest.mark.unit
+@pytest.mark.asyncio
+async def test_write_gold_rejects_invalid_silver_reference_before_write(gold_writer):
+    """Malformed lineage must fail before any Gold write can start."""
+    with pytest.raises(
+        TypeError, match="silver_refs must contain only SilverWriteResult"
+    ):
+        await gold_writer.write_gold("test", [], object(), silver_refs=[object()])
+
+
+@pytest.mark.unit
 class TestGoldWriterWriteModeEnum:
     """Tests for GoldWriteMode enum."""
 
