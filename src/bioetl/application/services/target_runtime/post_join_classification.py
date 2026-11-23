@@ -57,9 +57,7 @@ def apply_post_join_classification(
     projected = [
         dict(classifier(features, run_id, index))
         for index, row in enumerate(frame.iter_rows(named=True))
-        if isinstance(
-            features := project_enriched_features(row)["features"], Mapping
-        )
+        if isinstance(features := project_enriched_features(row)["features"], Mapping)
     ]
     if not projected:
         return frame
