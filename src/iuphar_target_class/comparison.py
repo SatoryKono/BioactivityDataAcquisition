@@ -373,6 +373,21 @@ class ParityInputs:
     basis_seal: BasisSeal | None = None
 
 
+@dataclass(frozen=True, slots=True)
+class ParityPublication:
+    """Historical rows and the seal fixed before a pipeline run.
+
+    The new result is the batch the pipeline just classified. This record does
+    not carry that batch, so the seal cannot be assembled from its output.
+    """
+
+    original_m: tuple[Mapping[str, str], ...]
+    basis_seal: BasisSeal
+    saved_excel: tuple[Mapping[str, str], ...] | None = None
+    independent_reference: tuple[Mapping[str, str], ...] | None = None
+    control_run: tuple[Mapping[str, str], ...] | None = None
+
+
 @dataclass(slots=True)
 class _Availability:
     historical_present: int = 0
