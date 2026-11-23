@@ -60,6 +60,9 @@ from uuid import UUID, uuid5
 from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
+
+# The E2E lane owns this fixture even when wrappers disable plugin autoload.
+from respx.plugin import respx_mock as respx_mock
 from tests.helpers.clock import FIXED_TEST_TIME
 from tests.helpers.vcr_config import (
     build_cassette_dir,
