@@ -109,6 +109,57 @@ def _load_gold_rows(base_path: Path, table_name: str) -> list[dict[str, object]]
 
 @pytest.mark.integration
 @pytest.mark.asyncio
+async def test_scd2_rejects_null_business_keys_before_dispatch(tmp_path: Path) -> None:
+    """Nullable schema fields cannot serve as null SCD2 key components."""
+    schema = DataFrameSchema(
+        {
+            "entity_id": Column(str, nullable=False),
+            "part": Column(float, nullable=True, coerce=True),
+            "content_hash": Column(str, nullable=False),
+        },
+        strict=True,
+    )
+    writer = GoldWriter(base_path=tmp_path / "gold", logger=NoOpLogger())
+    config = ScdConfig(business_key=("entity_id", "part"))
+    timestamp = datetime(2026, 11, 23, tzinfo=UTC)
+
+    async def write(part: float | None, content_hash: str) -> None:
+        await writer.write_gold(
+            table_name="test.record",
+            records=[{"entity_id": "one", "part": part, "content_hash": content_hash}],
+            schema=schema,
+            primary_keys=["entity_id"],
+            mode="scd2",
+            scd_config=config,
+            ingestion_ts=timestamp,
+        )
+
+    for part, content_hash in ((None, "a"), (float("nan"), "b")):
+        with pytest.raises(GoldWriteFailure, match="business key 'part'") as error:
+            await write(part, content_hash)
+        assert error.value.receipt.category == GoldWriteCategory.NOT_COMMITTED
+        assert not _versioned_table_path(tmp_path / "gold", "test.record").exists()
+
+    await write(1.0, "a")
+    table_path = _versioned_table_path(tmp_path / "gold", "test.record")
+    first_version = load_delta_table(str(table_path)).version()
+    for part, content_hash in ((None, "a"), (float("nan"), "b")):
+        with pytest.raises(GoldWriteFailure, match="business key 'part'") as error:
+            await write(part, content_hash)
+        assert error.value.receipt.category == GoldWriteCategory.NOT_COMMITTED
+        assert load_delta_table(str(table_path)).version() == first_version
+    await write(1.0, "a")
+    assert load_delta_table(str(table_path)).version() == first_version
+    await write(1.0, "b")
+    rows = _load_delta_rows(table_path)
+    assert len(rows) == 2
+    assert sorted(row["version"] for row in rows) == [1, 2]
+    assert [row["content_hash"] for row in rows if row["is_current"]] == ["b"]
+    assert load_delta_table(str(table_path)).version() == first_version + 1
+
+
+@pytest.mark.integration
+@pytest.mark.asyncio
 # Cold deltalake/pyarrow bring-up on Windows regularly exceeds 2 minutes for
 # dual-write of two versioned tables; keep a generous bound for local GDrive hosts.
 @pytest.mark.timeout(300)
