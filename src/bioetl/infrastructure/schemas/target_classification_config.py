@@ -75,8 +75,12 @@ class TargetClassificationYamlConfig(BaseModel):
     ) -> object:
         """Keep an unset contract out of dumps so older configs stay identical."""
         payload = handler(self)
-        if isinstance(payload, dict) and payload.get("table_contract") is None:
-            payload.pop("table_contract")
+        if (
+            isinstance(payload, dict)
+            and "table_contract" in payload
+            and payload["table_contract"] is None
+        ):
+            del payload["table_contract"]
         return payload
 
     def to_domain(self) -> TargetClassificationConfig:

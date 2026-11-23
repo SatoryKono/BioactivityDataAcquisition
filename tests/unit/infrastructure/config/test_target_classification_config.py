@@ -76,6 +76,20 @@ def _config(mode: str = "off") -> PipelineYamlConfig:
     )
 
 
+def test_unset_table_contract_survives_exclude_none_dump() -> None:
+    config = TargetClassificationYamlConfig()
+    assert "table_contract" not in config.model_dump()
+    assert "table_contract" not in config.model_dump(exclude_none=True)
+    assert "table_contract" not in config.model_dump(exclude_unset=True)
+    pinned = TargetClassificationYamlConfig(
+        mode="enrich",
+        snapshot_manifest="snapshot.json",
+        snapshot_manifest_sha256="a" * 64,
+        table_contract="3.1.0",
+    )
+    assert pinned.model_dump(exclude_none=True)["table_contract"] == "3.1.0"
+
+
 @pytest.mark.parametrize(
     "payload",
     [
