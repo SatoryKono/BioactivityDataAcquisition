@@ -208,6 +208,38 @@ Examples:
   `corrupted_checkpoint_payload` means evidence is incomplete or corrupt and
   must not be collapsed into a normal cache miss.
 
+### Checkpoint integrity and dossier evidence boundary
+
+The local checkpoint adapter verifies a persisted envelope's checksum when it
+loads it. It returns `checkpoint_checksum_valid: true` or `false` in metadata;
+for a legacy envelope without a digest the field is absent. A malformed stored
+run UUID raises `ValueError` before a checkpoint is returned. The separate
+checkpoint-validation evidence reports a checksum mismatch as `ERROR` and an
+absent checksum verdict as `UNKNOWN`.
+
+The workflow dossier currently carries the adapter's checksum verdict in the
+checkpoint metadata but does not use it to classify degraded evidence. In an
+isolated synthetic critical-run fixture, a tampered history checkpoint produced
+`checkpoint_checksum_valid: false` while the dossier still reported
+`operational_success: true`. Do not interpret that success value as proof of
+checkpoint integrity; inspect the checkpoint-validation result separately.
+The two views can select different checkpoint occurrences: for a selected run,
+checkpoint validation tries manifest-indexed history first and then run history,
+whereas the dossier tries run history first and then the mutable pointer. Check
+the validation `evidence_source` and reconcile the selected occurrence before
+applying its verdict to a dossier checkpoint; a matching run ID alone is not
+proof that both views inspected the same envelope.
+Missing checkpoints and checkpoints from a different run are classified as
+degraded by the dossier and block critical operational success.
+
+The compatibility view recognises the metadata status values `corrupt`,
+`corrupted`, and `corrupted_checkpoint_payload`, but the local adapter's
+checksum and UUID paths do not produce those statuses. Their presence in the
+compatibility projection alone does not establish a supported corruption status
+producer or a shared dossier contract. The owning invariant and production
+corruption-to-dossier path remain unqualified (issue #13282); do not treat this
+observation as a confirmed production defect or use a status-only workaround.
+
 ### Reference: resume anchor validation
 
 Composite checkpoint resume validation is implemented in
