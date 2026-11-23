@@ -257,7 +257,11 @@ def test_family_paths_count_only_when_both_rows_carry_them() -> None:
     shared = {"iuphar_class": "Enzyme", "iuphar_family_paths": '[["Enzyme"]]'}
     other = {"iuphar_class": "Enzyme", "iuphar_family_paths": '[["Receptor"]]'}
     missing = {"iuphar_class": "Enzyme"}
+    contract_name = {"iuphar_class": "Enzyme", "iuphar_paths": '[["Receptor"]]'}
+    same_contract_name = {"iuphar_class": "Enzyme", "iuphar_paths": '[["Enzyme"]]'}
     assert not _same_classification(shared, other)
+    assert not _same_classification(shared, contract_name)
+    assert _same_classification(shared, same_contract_name)
     assert _same_classification(shared, missing)
 
 

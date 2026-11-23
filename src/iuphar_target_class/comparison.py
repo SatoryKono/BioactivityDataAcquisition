@@ -124,8 +124,6 @@ def _classify_key(
 _DETAIL_FIELDS = (
     "iuphar_subclass",
     "iuphar_subclasses",
-    "iuphar_paths",
-    "iuphar_family_paths",
     "iuphar_type_raw",
     "iuphar_annotation_capability",
     "local_subclasses",
@@ -134,6 +132,9 @@ _DETAIL_FIELDS = (
     "conflict_codes",
     "candidate_target_ids",
 )
+# The table contract stores paths as iuphar_paths. The classification artifact
+# stores the same value as iuphar_family_paths. Either name is that one field.
+_PATH_FIELDS = ("iuphar_paths", "iuphar_family_paths")
 
 
 _CLASSIFICATION_FIELDS = (
@@ -155,6 +156,14 @@ def _shared_fields(
     )
 
 
+def _path_value(row: Mapping[str, str]) -> str | None:
+    """Return the stored path list. A missing name is not an empty path."""
+    for name in _PATH_FIELDS:
+        if name in row:
+            return row[name]
+    return None
+
+
 def _differing_fields(
     m_row: Mapping[str, str], python_row: Mapping[str, str]
 ) -> tuple[str, ...]:
@@ -165,6 +174,14 @@ def _differing_fields(
     for field in (*_CLASSIFICATION_FIELDS, *_shared_fields(m_row, python_row)):
         if m_row.get(field) != python_row.get(field):
             names.append(field)
+    reference_paths = _path_value(m_row)
+    python_paths = _path_value(python_row)
+    if (
+        reference_paths is not None
+        and python_paths is not None
+        and reference_paths != python_paths
+    ):
+        names.append("iuphar_paths")
     return tuple(sorted(set(names)))
 
 

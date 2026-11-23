@@ -42,6 +42,9 @@ from bioetl.application.composite.merger_post_join import (
     finalize_post_join_context,
     persist_and_build_result,
 )
+from bioetl.application.services.target_runtime.post_join_classification import (
+    attach_post_join_target_classifier,
+)
 from bioetl.domain.composite.config import EnricherConfig
 from bioetl.domain.composite.result import EnrichmentResult, EnrichmentStatus
 
@@ -70,6 +73,7 @@ def _make_host() -> MagicMock:
     host._apply_field_mappings = MagicMock(side_effect=lambda df: df)
     host._add_lineage = MagicMock(side_effect=lambda df, **kw: df)
     host._drop_excluded_fields = MagicMock(side_effect=lambda df: df)
+    host.target_post_join_classifier = None
     host._count_enriched_records = MagicMock(return_value=1)
     host._write_outputs = AsyncMock()
     host._build_merge_result = MagicMock()
@@ -121,6 +125,37 @@ class TestFinalizeMergedDataframe:
         host._drop_excluded_fields.assert_called_once()
         host._order_service.order_columns.assert_called_once()
         assert isinstance(result, pl.DataFrame)
+
+    def test_attached_classifier_runs_after_final_ordering(self) -> None:
+        host = _make_host()
+        observed: dict[str, bool] = {}
+
+        def classify(frame: pl.DataFrame, run_id: str) -> pl.DataFrame:
+            observed["after_conflicts"] = (
+                host._conflict_resolver.resolve_conflicts.called
+            )
+            observed["after_order"] = host._order_service.order_columns.called
+            return frame.with_columns(pl.lit(run_id).alias("effective_class"))
+
+        attach_post_join_target_classifier(host, classify)
+        result = finalize_merged_dataframe(
+            host,
+            merged_df=pl.DataFrame(
+                {"seed_priority": ["old"], "target_ec_numbers": ["1.1.1.1"]}
+            ),
+            enrichers=[_enricher_config("e1")],
+            enrichment_results={"e1": _enrichment_result("e1")},
+            effective_seed_pipeline="seed_target",
+            run_id="run-1",
+            metadata_timestamp=None,
+            sources_used=["seed"],
+            dependency_results=None,
+            enricher_dfs={"e1": pl.DataFrame()},
+        )
+
+        assert observed == {"after_conflicts": True, "after_order": True}
+        assert result["effective_class"].to_list() == ["run-1"]
+        assert result["seed_priority"].to_list() == ["old"]
 
 
 @pytest.mark.unit
