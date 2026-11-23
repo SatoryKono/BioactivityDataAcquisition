@@ -228,6 +228,7 @@ HOOK_RECEIPTS_TEST = "tests/unit/scripts/repo/test_hook_receipts.py"
 IUPHAR_STAGE0_TEST = "tests/unit/iuphar_target_class/test_stage0_manifest.py"
 IUPHAR_SEMANTICS_RF001_TEST = "tests/unit/iuphar_target_class/test_semantics_rf001.py"
 IUPHAR_POLICY_TEST = "tests/unit/iuphar_target_class/test_policy.py"
+IUPHAR_HIERARCHY_TEST = "tests/unit/iuphar_target_class/test_hierarchy.py"
 
 
 MEMORY_BASELINE_TEST_TARGETS: tuple[str, ...] = (
@@ -890,9 +891,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "src/iuphar_target_class/acceptance.py": (
         "tests/unit/iuphar_target_class/test_acceptance.py",
     ),
-    "src/iuphar_target_class/hierarchy.py": (
-        "tests/unit/iuphar_target_class/test_hierarchy.py",
-    ),
+    "src/iuphar_target_class/hierarchy.py": (IUPHAR_HIERARCHY_TEST,),
     "src/iuphar_target_class/rf008_qualification.py": (
         "tests/unit/iuphar_target_class/test_rf008_qualification.py",
     ),
@@ -969,7 +968,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "src/iuphar_target_class/iuphar_mapping.py",
         ),
         (
-            "tests/unit/iuphar_target_class/test_hierarchy.py",
+            IUPHAR_HIERARCHY_TEST,
             IUPHAR_POLICY_TEST,
         ),
     ),
@@ -2356,6 +2355,7 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
         "tests/unit/iuphar_target_class/test_rf008_qualification.py",
     ),
     "data/iuphar_target_class/rf001/": (IUPHAR_SEMANTICS_RF001_TEST,),
+    "data/iuphar_target_class/rf005/": (IUPHAR_HIERARCHY_TEST,),
     **dict.fromkeys(
         (
             ".codex/agents/",
