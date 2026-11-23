@@ -670,7 +670,9 @@ def _apply_auxiliary(
 ) -> MatchResult:
     if query.matching_policy != MATCHING_POLICY_ROLE_SEPARATED_V2:
         return result
-    notes, disagree, extra_ids = _auxiliary_findings(query, catalog, result)
+    notes, disagree, extra_ids, species_conflict = _auxiliary_findings(
+        query, catalog, result
+    )
     if not notes:
         return result
     status = result.match_status
@@ -681,8 +683,17 @@ def _apply_auxiliary(
         candidates = _ids((*candidates, *extra_ids))
     # Only a confirmed reliable match can be withdrawn. An auxiliary hit must
     # not turn source_unavailable or not_found into ambiguous: those statuses
-    # still carry the incomplete-snapshot and absence decisions.
-    if disagree and status == "matched":
+    # still carry the incomplete-snapshot and absence decisions. A known xref
+    # that exists only in another species remains a species-guard conflict.
+    if species_conflict and status == "matched":
+        status = "identity_conflict"
+        matched = None
+        if not any(item.code == "identity_conflict" for item in diagnostics):
+            diagnostics = (
+                *diagnostics,
+                Diagnostic("identity_conflict", "warning", "identity_conflict"),
+            )
+    elif disagree and status == "matched":
         status = "ambiguous"
         matched = None
         if not any(item.code == "ambiguous_match" for item in diagnostics):
@@ -706,10 +717,11 @@ def _auxiliary_findings(
     query: MatchQuery,
     catalog: tuple[CatalogTarget, ...],
     result: MatchResult,
-) -> tuple[tuple[Diagnostic, ...], bool, tuple[str, ...]]:
+) -> tuple[tuple[Diagnostic, ...], bool, tuple[str, ...], bool]:
     notes: list[Diagnostic] = []
     extra: list[str] = []
     disagree = False
+    species_conflict = False
     agreed = result.matched_target_id
     for accession in tuple(sorted(set(query.auxiliary_uniprot_ids))):
         species_hits = [
@@ -727,6 +739,9 @@ def _auxiliary_findings(
                     f"auxiliary UniProt {accession} has no in-species anchor",
                 )
             )
+            if result.match_status == "matched":
+                species_conflict = True
+                extra.extend(item.target_id for item in any_hits)
             continue
         if not species_ids:
             notes.append(
@@ -755,7 +770,7 @@ def _auxiliary_findings(
                 f"auxiliary UniProt {accession} does not confirm the object",
             )
         )
-    return tuple(notes), disagree, _ids(extra)
+    return tuple(notes), disagree, _ids(extra), species_conflict
 
 
 def _apply_object_scope(query: MatchQuery, result: MatchResult) -> MatchResult:

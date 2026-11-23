@@ -43,6 +43,8 @@ class RunProvenance:
     schema_version: str | None
     retrieved_at: str
     run_started_at: str
+    # Historical runs keep strict anchors. Role-separated matching is explicit.
+    matching_policy: str = "iuphar-matching-strict-anchors-v1"
 
 
 @dataclass(frozen=True, slots=True)

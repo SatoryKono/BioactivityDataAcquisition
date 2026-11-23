@@ -24,6 +24,7 @@ from .iuphar_mapping import approved_class_mappings
 from .local_layer import Prediction, apply_local
 from .matching import (
     MATCHING_POLICY_ROLE_SEPARATED_V2,
+    MATCHING_POLICY_STRICT_ANCHORS_V1,
     METHOD_ORDER,
     Candidate,
     CatalogTarget,
@@ -416,7 +417,10 @@ def _retained_uniprot_drafts(row: ValidatedInput) -> tuple[EvidenceDraft, ...]:
 
     Primary-only rows already expose their anchor through the match channel.
     Rows with a separated xref must not drop that xref from the evidence table.
+    Strict-anchor runs keep the historical evidence table.
     """
+    if row.provenance.matching_policy != MATCHING_POLICY_ROLE_SEPARATED_V2:
+        return ()
     roles = uniprot_roles_from_business_json(row.raw_fields.get("source_business_data"))
     if roles is None or not (roles.auxiliary_ids or roles.equivalent_ids):
         return ()
@@ -457,14 +461,37 @@ def _uniprot_role_content(role: str, accession: str) -> str:
 
 
 def _match_query(row: ValidatedInput) -> MatchQuery:
-    """Use role-separated anchors when the business payload still has them.
+    """Apply the policy recorded on the run, not the presence of role fields.
 
-    Historical kernel rows that only stored a merged ``uniprot`` string keep
-    the strict anchor API. A complex row passes ``object_scope`` so a component
-    accession cannot confirm the complex by itself.
+    A historical profile stays on strict anchors: component accessions and
+    auxiliary xrefs are one required channel. Role-separated matching runs
+    only when that profile was explicitly qualified. A complex row then passes
+    ``object_scope`` so a component accession cannot confirm the complex.
     """
-    scope = "complex" if row.target_kind == "complex" else None
+    policy = row.provenance.matching_policy
+    if policy not in (
+        MATCHING_POLICY_STRICT_ANCHORS_V1,
+        MATCHING_POLICY_ROLE_SEPARATED_V2,
+    ):
+        message = f"unknown matching policy: {policy}"
+        raise ValueError(message)
     roles = uniprot_roles_from_business_json(row.raw_fields.get("source_business_data"))
+    if policy != MATCHING_POLICY_ROLE_SEPARATED_V2:
+        accessions = row.uniprot_accessions
+        if roles is not None:
+            accessions = tuple(
+                dict.fromkeys((*roles.primary_ids, *roles.auxiliary_ids))
+            )
+        return MatchQuery(
+            row.target_id,
+            accessions,
+            row.gene_symbol,
+            row.gene_id,
+            row.taxon,
+            row.name,
+            row.synonyms,
+        )
+    scope = "complex" if row.target_kind == "complex" else None
     if roles is None:
         return MatchQuery(
             row.target_id,
@@ -474,6 +501,7 @@ def _match_query(row: ValidatedInput) -> MatchQuery:
             row.taxon,
             row.name,
             row.synonyms,
+            matching_policy=policy,
             object_scope=scope,
         )
     return MatchQuery(
@@ -486,7 +514,7 @@ def _match_query(row: ValidatedInput) -> MatchQuery:
         row.synonyms,
         roles.auxiliary_ids,
         roles.equivalent_ids,
-        MATCHING_POLICY_ROLE_SEPARATED_V2,
+        policy,
         scope,
     )
 

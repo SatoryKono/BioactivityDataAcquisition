@@ -164,15 +164,32 @@ def uniprot_roles_from_business_json(payload: object) -> UniprotIdentifierRoles 
 
 
 def project_target_fields(
-    data: Mapping[str, object], taxon: str | None
+    data: Mapping[str, object],
+    taxon: str | None,
+    *,
+    projection_policy: str = UNIPROT_PROJECTION_POLICY_V1,
 ) -> dict[str, str | None]:
-    """Project classifier fields. ``uniprot`` is the primary accession list.
+    """Project classifier fields.
 
-    Policy ``iuphar-uniprot-role-projection-v2`` no longer appends
-    ``target_xref_uniprot_ids`` to the required anchor. Those values remain in
-    ``source_business_data`` and in :func:`partition_uniprot_roles`.
+    ``iuphar-uniprot-merged-anchors-v1`` keeps component accessions and UniProt
+    xrefs in one ``uniprot`` field. ``iuphar-uniprot-role-projection-v2``
+    projects primary accessions only. Original links stay in
+    ``source_business_data`` either way.
     """
-    accessions = partition_uniprot_roles(data).primary_ids
+    if projection_policy == UNIPROT_PROJECTION_POLICY_V2:
+        accessions = partition_uniprot_roles(data).primary_ids
+    elif projection_policy == UNIPROT_PROJECTION_POLICY_V1:
+        accessions = tuple(
+            dict.fromkeys(
+                (
+                    *_tokens(data.get("component_accessions")),
+                    *_tokens(data.get("target_xref_uniprot_ids")),
+                )
+            )
+        )
+    else:
+        message = f"unknown UniProt projection policy: {projection_policy}"
+        raise ValueError(message)
     synonyms = tuple(
         dict.fromkeys(
             (

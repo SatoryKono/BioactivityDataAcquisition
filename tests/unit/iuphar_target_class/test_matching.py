@@ -8,6 +8,7 @@ from dataclasses import dataclass, replace
 import pytest
 
 from iuphar_target_class.bioetl_input import (
+    UNIPROT_PROJECTION_POLICY_V2,
     partition_uniprot_roles,
     project_target_fields,
     target_input_eligibility,
@@ -399,7 +400,11 @@ def test_projection_keeps_primary_aux_and_equivalent_roles() -> None:
         "proven_uniprot_equivalents": "E33333|P22222",
         "pref_name": "Example",
     }
-    projected = project_target_fields(payload, "9606")
+    projected = project_target_fields(
+        payload, "9606", projection_policy=UNIPROT_PROJECTION_POLICY_V2
+    )
+    legacy = project_target_fields(payload, "9606")
+    assert legacy["uniprot"] == "P22222|P11111|Q99999|AUX2"
     roles = partition_uniprot_roles(payload)
     assert projected["uniprot"] == "P22222|P11111"
     assert roles.primary_ids == ("P22222", "P11111")
@@ -771,7 +776,9 @@ def test_runtime_projection_records_unknown_auxiliary_without_false_ambiguity() 
         "proven_uniprot_equivalents": "E35372",
         "pref_name": "mu opioid receptor",
     }
-    fields = project_target_fields(payload, "9606")
+    fields = project_target_fields(
+        payload, "9606", projection_policy=UNIPROT_PROJECTION_POLICY_V2
+    )
     assert fields["uniprot"] == "P35372"
     snapshot = IndexedSnapshot.build(
         snapshot_id="fixture",
@@ -789,7 +796,9 @@ def test_runtime_projection_records_unknown_auxiliary_without_false_ambiguity() 
     batch = classify_batch(
         (RawTargetRow("row-1", fields, "protein"),),
         snapshot=snapshot,
-        provenance=RunProvenance("fixture", "n", "r", "s", "t", "t"),
+        provenance=RunProvenance(
+            "fixture", "n", "r", "s", "t", "t", MATCHING_POLICY_ROLE_SEPARATED_V2
+        ),
         run_id="run-1",
     )
     result = batch.rows[0].result
@@ -809,11 +818,14 @@ def test_runtime_projection_records_unknown_auxiliary_without_false_ambiguity() 
             "pref_name": "mu opioid receptor",
         },
         "9606",
+        projection_policy=UNIPROT_PROJECTION_POLICY_V2,
     )
     unknown = classify_batch(
         (RawTargetRow("row-2", unknown_fields, "protein"),),
         snapshot=snapshot,
-        provenance=RunProvenance("fixture", "n", "r", "s", "t", "t"),
+        provenance=RunProvenance(
+            "fixture", "n", "r", "s", "t", "t", MATCHING_POLICY_ROLE_SEPARATED_V2
+        ),
         run_id="run-2",
     )
     unknown_result = unknown.rows[0].result
@@ -847,6 +859,7 @@ def test_missing_markers_and_slash_xrefs_do_not_abort_the_batch() -> None:
             "pref_name": "mu opioid receptor",
         },
         "9606",
+        projection_policy=UNIPROT_PROJECTION_POLICY_V2,
     )
     assert partition_uniprot_roles(
         {
@@ -867,7 +880,9 @@ def test_missing_markers_and_slash_xrefs_do_not_abort_the_batch() -> None:
     batch = classify_batch(
         (RawTargetRow("row-slash", fields, "protein"),),
         snapshot=snapshot,
-        provenance=RunProvenance("fixture", "n", "r", "s", "t", "t"),
+        provenance=RunProvenance(
+            "fixture", "n", "r", "s", "t", "t", MATCHING_POLICY_ROLE_SEPARATED_V2
+        ),
         run_id="run-slash",
     )
     result = batch.rows[0].result
@@ -900,7 +915,7 @@ def test_auxiliary_hit_keeps_source_unavailable_on_an_incomplete_snapshot() -> N
     assert "1" in result.candidate_target_ids
 
 
-def test_auxiliary_outside_species_does_not_conflict_with_the_primary() -> None:
+def test_known_auxiliary_outside_species_conflicts_with_the_primary() -> None:
     result = resolve_match(
         _role_query(
             policy=MATCHING_POLICY_ROLE_SEPARATED_V2,
@@ -914,11 +929,13 @@ def test_auxiliary_outside_species_does_not_conflict_with_the_primary() -> None:
         ),
         snapshot_complete=True,
     )
-    assert result.match_status == "matched"
-    assert result.matched_target_id == "1"
-    assert tuple(item.code for item in result.diagnostics) == (
+    assert result.match_status == "identity_conflict"
+    assert result.matched_target_id is None
+    assert "2" in result.candidate_target_ids
+    assert {item.code for item in result.diagnostics} >= {
         "auxiliary_uniprot_outside_species",
-    )
+        "identity_conflict",
+    }
 
 
 def test_complex_row_is_not_confirmed_by_a_component_accession() -> None:
@@ -932,6 +949,7 @@ def test_complex_row_is_not_confirmed_by_a_component_accession() -> None:
             "pref_name": "complex",
         },
         "9606",
+        projection_policy=UNIPROT_PROJECTION_POLICY_V2,
     )
     snapshot = IndexedSnapshot.build(
         snapshot_id="fixture",
@@ -947,12 +965,51 @@ def test_complex_row_is_not_confirmed_by_a_component_accession() -> None:
     batch = classify_batch(
         (RawTargetRow("row-complex", fields, "complex"),),
         snapshot=snapshot,
-        provenance=RunProvenance("fixture", "n", "r", "s", "t", "t"),
+        provenance=RunProvenance(
+            "fixture", "n", "r", "s", "t", "t", MATCHING_POLICY_ROLE_SEPARATED_V2
+        ),
         run_id="run-complex",
     )
     result = batch.rows[0].result
     assert result.match_status == "ambiguous"
     assert result.matched_target_id is None
     assert "component_accession_not_object_identity" in {
+        item.code for item in result.diagnostics
+    }
+
+
+def test_unqualified_run_keeps_unknown_auxiliary_as_a_required_anchor() -> None:
+    from iuphar_target_class.pipeline import IndexedSnapshot, classify_batch
+
+    fields = project_target_fields(
+        {
+            "target_id": "CHEMBL5",
+            "component_accessions": '["P35372"]',
+            "target_xref_uniprot_ids": "Q99999",
+            "pref_name": "mu opioid receptor",
+        },
+        "9606",
+    )
+    assert fields["uniprot"] == "P35372|Q99999"
+    snapshot = IndexedSnapshot.build(
+        snapshot_id="fixture",
+        mapping_version="fixture",
+        complete=True,
+        catalog=(_target("1", uniprot="P35372", species="9606"),),
+        annotations={},
+        family_nodes=(),
+        type_to_class={},
+        family_to_class={},
+    )
+    batch = classify_batch(
+        (RawTargetRow("row-legacy", fields, "protein"),),
+        snapshot=snapshot,
+        provenance=RunProvenance("fixture", "n", "r", "s", "t", "t"),
+        run_id="run-legacy",
+    )
+    result = batch.rows[0].result
+    assert result.match_status == "ambiguous"
+    assert result.matched_target_id is None
+    assert "auxiliary_uniprot_unresolved" not in {
         item.code for item in result.diagnostics
     }

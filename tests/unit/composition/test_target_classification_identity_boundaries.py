@@ -139,3 +139,26 @@ def test_historical_profile_does_not_qualify_role_separated_matching():
         selected.normalization_profile_hash,
         selected.normalization_profile_ref,
     }
+
+
+def test_unqualified_profile_cannot_select_role_separated_matching(tmp_path):
+    import hashlib
+    import json
+
+    from bioetl.infrastructure.adapters.iuphar.acceptance_receipt import load_profile
+    from iuphar_target_class.bioetl_input import UNIPROT_PROJECTION_POLICY_V1
+    from iuphar_target_class.matching import MATCHING_POLICY_STRICT_ANCHORS_V1
+
+    root, bundle = synthetic_snapshot_bundle(tmp_path / "frozen")
+    loaded = load_profile(
+        root / "profile.json", bundle.profile_sha256, require_acceptance=False
+    )
+    assert loaded.matching_policy == MATCHING_POLICY_STRICT_ANCHORS_V1
+    assert loaded.uniprot_projection_policy == UNIPROT_PROJECTION_POLICY_V1
+    document = json.loads((root / "profile.json").read_text(encoding="utf-8"))
+    document["matching_policy"] = MATCHING_POLICY_ROLE_SEPARATED_V2
+    payload = json.dumps(document).encode("utf-8")
+    (root / "profile.json").write_bytes(payload)
+    digest = hashlib.sha256(payload).hexdigest()
+    with pytest.raises(ValueError, match="does not qualify role-separated matching"):
+        load_profile(root / "profile.json", digest, require_acceptance=False)
