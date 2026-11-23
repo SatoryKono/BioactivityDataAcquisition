@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "8eec8e98c64aebef7f4b89b596c76f88eda787be",
+  "source_ref": "8eec8e98c64aebef7f4b89b596c76f88eda787be",
+  "source_reviews": {
+    "src/bioetl/infrastructure/storage/gold/pipeline_helpers.py": "Merged the SCD2 null business-key rejection from main. The check stays inside the existing gold write path; no new external resource acquisition or ownership change."
+  },
+  "expression_updates": {},
+  "segment_updates": {},
+  "line_updates": {},
+  "reference_moves": [],
+  "exclusion_moves": [],
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": []
+}
