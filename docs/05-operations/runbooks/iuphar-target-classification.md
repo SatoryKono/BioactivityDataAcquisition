@@ -608,6 +608,166 @@ moving both candidates and the configuration into place. It journals each
 move, retains originals, and restores already moved pairs on an activation
 error. Keep the maintenance window open through verification.
 
+### Record main-contour acceptance
+
+Shadow, the isolated `--limit 1000` enrich, composite enrich, migration, and
+live readback are separate statuses. A passing smoke does not prove the full
+cohort. `biological_accuracy_accepted` stays false for a bounded RF-008
+reference; a matched count must not be recorded as biological qualification.
+The canonical entity document stays `mode: "off"` until `promotion_decision`
+is `READY` and `promote` then runs in a window with no writers. `LIVE_ACCEPTED`
+requires that promotion plus a readback of the next ordinary run. If a gate
+fails after promotion, the command exits 1 with `rollback_required: true`;
+restore with the rollback command above. Do not switch the mode to `"off"`
+instead of restoring the tables.
+
+Write the evidence JSON outside the committed tree. Point the command at the
+actual discrepancy report, independent expectations, shadow business table,
+shadow classification artifact, enrich table, repeat table, XLSX, isolated
+Silver/Gold, main-contour Silver/Gold, and assay inputs. `--shadow-table` is
+the unchanged V30 business cohort. `--shadow-classification` supplies the
+status distributions; the business table does not. `--table`,
+`--isolated-silver`, and `--isolated-gold` are the `--limit 1000` enrich
+cohort. `--silver` and `--gold` are only the later main-contour readback. The
+command recomputes hashes, status distributions, XLSX round-trip, historical
+columns, current assay FK closure, and the canonical config digest. A file is
+identified by its byte SHA-256. A Delta directory is identified by the SHA-256
+of its current business-field projection, and a pinned hash is not accepted
+when that identity was not measured. Every current enrich, Silver, and Gold
+row must carry the claimed `target_class_profile_sha256`; a digest that is
+only well formed does not confirm the classifier that wrote the rows. Current
+rows of `--silver` and `--gold` are checked against
+`migration.effective_profile_sha256`. Those live observations stay separate
+from the isolated `--limit 1000` profile values. Current
+rows are those with a missing or true `_is_current`. A CSV cell `False`,
+`false`, or `0` is closed before that check. Closed versions do not close an
+assay FK. Live readback compares each current Gold target with the current
+Silver row of the same id. Two current rows of one id fail that readback.
+Both rows must contain every classification field; a missing field is not a
+null match. The comparison does not use the `--limit 1000` smoke table, and
+the smoke hashes are not taken from the main-contour tables. A standard XLSX that carries
+`_bioetl_export_manifest` is restored before the historical-column check, so
+text split across cells is joined. The command does not promote, edit
+configuration, or replace an existing report path.
+
+```powershell
+.\.venv-win\Scripts\python.exe -m scripts.ops target-classification-migration contour-report `
+  --evidence 'PATH_TO_CONTOUR_EVIDENCE_JSON' `
+  --discrepancy-report 'PATH_TO_DISCREPANCY_REPORT' `
+  --expectations 'PATH_TO_INDEPENDENT_EXPECTATIONS' `
+  --shadow-table 'PATH_TO_SHADOW_BUSINESS_TABLE' `
+  --shadow-classification 'PATH_TO_SHADOW_CLASSIFICATION_TABLE' `
+  --table 'PATH_TO_ENRICH_TABLE' `
+  --repeat-table 'PATH_TO_REPEAT_ENRICH_TABLE' `
+  --xlsx 'PATH_TO_STANDARD_XLSX' `
+  --isolated-silver 'PATH_TO_ISOLATED_SILVER' `
+  --isolated-gold 'PATH_TO_ISOLATED_GOLD' `
+  --silver 'PATH_TO_MAIN_SILVER' `
+  --gold 'PATH_TO_MAIN_GOLD' `
+  --assay 'PATH_TO_ASSAY_TABLE' `
+  --output 'NEW_CONTOUR_REPORT_JSON' `
+  --require-ready
+```
+
+On Linux or WSL, use the prepared interpreter from the repository root. The
+evidence document uses `schema_version`
+`bioetl_iuphar_main_contour_evidence_v1`. Every key below is required; a
+not-run phase still uses these objects. `local` and `ci` stay `NOT_RUN` until
+their own evidence hash or 40-character commit SHA is supplied. Composite
+acceptance stays `BLOCKED` while the composite Gold contract omits the nine
+classification fields, even when both column groups already list them. Keep
+the report with the occurrence; do not commit it.
+
+```json
+{
+  "schema_version": "bioetl_iuphar_main_contour_evidence_v1",
+  "shadow": {
+    "executed": false,
+    "run_id": null,
+    "separate_directory": false,
+    "contract_version": null,
+    "business_rows_unchanged": false,
+    "profile_sha256": null,
+    "config_sha256": null,
+    "cohort_sha256": null,
+    "discrepancy_report_sha256": null,
+    "independent_expectations_sha256": null,
+    "row_count": 0,
+    "status_counts": {
+      "iuphar_match_status": {},
+      "local_class": {},
+      "effective_class": {},
+      "decision_status": {}
+    },
+    "source_completeness": "not_recorded"
+  },
+  "isolated_enrich": {
+    "executed": false,
+    "separate_directory": false,
+    "limit": null,
+    "full_table_proof": false,
+    "silver_contract": null,
+    "gold_contract": null,
+    "profile_sha256": null,
+    "config_sha256": null,
+    "evidence_manifest_sha256": null,
+    "persisted_silver_sha256": null,
+    "persisted_gold_sha256": null,
+    "repeat": {
+      "same_inputs": false,
+      "same_versions": false,
+      "classification_sha256": null,
+      "repeat_classification_sha256": null
+    },
+    "xlsx": {
+      "table_sha256": null,
+      "xlsx_sha256": null,
+      "historical_columns": []
+    }
+  },
+  "composite_enrich": {
+    "executed": false,
+    "separate_directory": false,
+    "agreed_cohort_sha256": null,
+    "same_cohort_as_shadow": false,
+    "classification_columns_present": false
+  },
+  "migration": {
+    "rehearsal_rollback": "NOT_RUN",
+    "fk_unresolved": null,
+    "writers_quiesced": false,
+    "promoted": false,
+    "source_identity_matches": false,
+    "effective_config_sha256": null,
+    "effective_profile_sha256": null,
+    "physical_contract": null,
+    "backup_retained": false,
+    "full_cohort": false
+  },
+  "live": {
+    "readback": false,
+    "next_run_executed": false,
+    "next_run_id": null,
+    "tables_match_promoted": false,
+    "classification_reproduced": false,
+    "observed_profile_sha256": null,
+    "observed_config_sha256": null
+  },
+  "biological": {
+    "biological_accuracy_accepted": false,
+    "matched_count": null,
+    "matched_count_used_as_qualification": false,
+    "scientific_status": null,
+    "rf008_receipt_status": "NOT_RUN",
+    "rf008_receipt_sha256": null,
+    "independent_reference_sha256": null,
+    "reviewer_reference": null
+  },
+  "local": {"status": "NOT_RUN", "evidence_sha256": null},
+  "ci": {"status": "NOT_RUN", "commit_sha": null}
+}
+```
+
 ## Verification
 
 - Confirm the selected configuration, contract version, actual schema hash,
@@ -623,6 +783,10 @@ error. Keep the maintenance window open through verification.
 - For shadow, verify unchanged V30 rows/hash scope plus complete separate
   evidence. For enrich, verify V31 on both tables, coherent profile values,
   completed evidence, full cohort preservation, and baseline FK closure.
+- Read `contour-report` phases and axes separately: `local`, `ci`,
+  `migration`, and `biological`. `promotion_decision` is not a biological
+  accuracy claim, and `matched_count` does not change
+  `biological_accuracy_accepted`.
 - Inspect all executed receipt checks, category dispositions, bounded scope,
   source digests, output hashes,
   and matching successful integration report. Retain unresolved disagreements
