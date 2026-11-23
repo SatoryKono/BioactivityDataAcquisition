@@ -127,6 +127,128 @@ def test_ambiguous_and_source_unavailable_are_not_absence():
     assert _run(absent).rows[0].result.match_status == "not_found"
 
 
+def test_family_subclass_vocabulary_allows_resolution_without_type_map():
+    """Codex P2: family→subclass labels must enter direct_vocabulary."""
+    raw = '{"id":"2","type":"enzyme"}'
+    annotation = ProviderAnnotation(
+        "2",
+        "enzyme",
+        ("900",),
+        hashlib.sha256(raw.encode()).hexdigest(),
+        "Human",
+        raw,
+    )
+    snapshot = pipeline.IndexedSnapshot.build(
+        snapshot_id="fixture",
+        mapping_version="fixture-release",
+        complete=True,
+        catalog=(
+            CatalogTarget("2", ("Q12345",), "E2", "20", "Human", ("enzyme",), ()),
+        ),
+        annotations={"2": annotation},
+        family_nodes=(FamilyNode("900", (), "enzyme"),),
+        type_to_class={"enzyme": "Enzyme"},
+        family_to_class={"900": "Enzyme"},
+        type_to_subclass={},
+        family_to_subclass={"900": "Enzymes"},
+    )
+    row = RawTargetRow(
+        "row",
+        {"target_id": "2", "uniprot": "Q12345", "organism": "Human"},
+        "protein",
+    )
+    result = _run(row, snapshot=snapshot).rows[0].result
+    assert result.iuphar_class == "Enzyme"
+    assert result.iuphar_subclass == "Enzymes"
+    assert result.effective_class == "Enzyme"
+    assert "contract_error" not in result.conflict_codes
+    assert result.effective_subclasses == ("Enzymes",)
+
+
+def test_family_only_partial_serializes_confirmed_and_effective_subclasses():
+    """Devin: partial family_only must fill confirmed→effective subclasses."""
+    raw = '{"id":"2","families":["900"]}'
+    annotation = ProviderAnnotation(
+        "2",
+        None,
+        ("900",),
+        hashlib.sha256(raw.encode()).hexdigest(),
+        "Human",
+        raw,
+    )
+    snapshot = pipeline.IndexedSnapshot.build(
+        snapshot_id="fixture",
+        mapping_version="fixture-release",
+        complete=True,
+        catalog=(
+            CatalogTarget("2", ("Q12345",), "E2", "20", "Human", ("enzyme",), ()),
+        ),
+        annotations={"2": annotation},
+        family_nodes=(FamilyNode("900", (), "enzyme"),),
+        type_to_class={},
+        family_to_class={"900": "Enzyme"},
+        family_to_subclass={"900": "Enzymes"},
+    )
+    row = RawTargetRow(
+        "row",
+        {"target_id": "2", "uniprot": "Q12345", "organism": "Human"},
+        "protein",
+    )
+    batch = _run(row, snapshot=snapshot)
+    result = batch.rows[0].result
+    assert result.iuphar_annotation_status == "partial"
+    assert result.iuphar_subclass == "Enzymes"
+    assert result.effective_class == "Enzyme"
+    assert result.effective_subclasses == ("Enzymes",)
+    payload = json.loads(render_batch(batch)["classification.json"].decode("utf-8"))
+    assert payload[0]["iuphar_subclass"] == "Enzymes"
+    assert payload[0]["effective_subclasses"] == ["Enzymes"]
+    assert payload[0]["iuphar_annotation_status"] == "partial"
+
+
+def test_mixed_local_family_nodes_preserve_official_partial_class():
+    """Codex P2: local family records must not wipe an intact official graph."""
+    raw = '{"id":"2","type":"enzyme"}'
+    annotation = ProviderAnnotation(
+        "2",
+        None,
+        ("900", "local:x"),
+        hashlib.sha256(raw.encode()).hexdigest(),
+        "Human",
+        raw,
+    )
+    snapshot = pipeline.IndexedSnapshot.build(
+        snapshot_id="fixture",
+        mapping_version="fixture-release",
+        complete=True,
+        catalog=(
+            CatalogTarget("2", ("Q12345",), "E2", "20", "Human", ("enzyme",), ()),
+        ),
+        annotations={"2": annotation},
+        family_nodes=(
+            FamilyNode("900", (), "enzyme"),
+            FamilyNode("local:x", ("900",), "enzyme"),
+        ),
+        type_to_class={},
+        family_to_class={"900": "Enzyme"},
+        family_to_subclass={"900": "Enzymes"},
+    )
+    row = RawTargetRow(
+        "row",
+        {"target_id": "2", "uniprot": "Q12345", "organism": "Human"},
+        "protein",
+    )
+    output = _run(row, snapshot=snapshot).rows[0]
+    result = output.result
+    assert result.iuphar_annotation_status == "partial"
+    assert result.iuphar_class == "Enzyme"
+    assert result.iuphar_subclass == "Enzymes"
+    assert result.effective_class == "Enzyme"
+    assert result.effective_subclasses == ("Enzymes",)
+    assert [path.root_to_leaf for path in output.direct.paths] == [("900",)]
+    assert "contract_error" not in result.conflict_codes
+
+
 def test_graph_defect_and_complex_do_not_promote_the_wrong_class():
     item = RawTargetRow("r1", {"target_id": "1", "organism": "Human"}, "protein")
     bad = _run(item, snapshot=_snapshot(broken=True)).rows[0]
