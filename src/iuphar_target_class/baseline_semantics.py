@@ -870,6 +870,29 @@ def _dictionary_or_null(
     )
 
 
+def _layers_disagree(observation: BoundaryObservation) -> bool:
+    if observation.dictionary_class is None:
+        return False
+    if observation.local_status == "conflicting":
+        return True
+    return (
+        observation.local_status == "supported"
+        and observation.local_class != observation.dictionary_class
+    )
+
+
+def _layer_disagreement(observation: BoundaryObservation) -> BoundaryDecision | None:
+    """Keep the dictionary fact, but do not call a disagreeing local layer resolved."""
+    if not _layers_disagree(observation):
+        return None
+    return _dictionary_or_null(
+        observation,
+        rule_id="layer_conflict",
+        completeness="conflict",
+        codes=("layer_conflict",),
+    )
+
+
 def _dictionary_resolved(observation: BoundaryObservation) -> BoundaryDecision | None:
     if observation.dictionary_class is None:
         return None
@@ -917,6 +940,7 @@ _WALKER = (
     _dropped_parents,
     _other_decision,
     _uncertainty,
+    _layer_disagreement,
     _dictionary_resolved,
     _otherwise_unknown,
 )

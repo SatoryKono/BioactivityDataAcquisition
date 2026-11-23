@@ -277,6 +277,7 @@ def verify_baseline_manifest(
     for row in materials:
         if isinstance(row, dict):
             _check_material(row, problems)
+            _check_published_worktree(root, row, problems)
             if row.get("availability") == "present":
                 present.append(row)
         else:
@@ -602,6 +603,27 @@ def _check_unavailable(
         problems.append(f"{material_id} must not bind semantics or a recalculation")
     if row.get("confirmed_absence") is not False:
         problems.append(f"{material_id} is not a confirmed absence")
+
+
+def _check_published_worktree(
+    root: Path, row: Mapping[str, object], problems: list[str]
+) -> None:
+    """Pin files that did not exist at the baseline revision to their published bytes."""
+    if row.get("delta") != "absent_on_baseline":
+        return
+    material_id = str(row.get("material_id"))
+    path = row.get("path")
+    if not isinstance(path, str):
+        return
+    file_path = root / path
+    if not file_path.is_file():
+        problems.append(f"{material_id} published file is missing")
+        return
+    actual = sha256_bytes(file_path.read_bytes())
+    if row.get("worktree_sha256") != actual:
+        problems.append(
+            f"{material_id} worktree hash does not match the published file"
+        )
 
 
 def _check_present(

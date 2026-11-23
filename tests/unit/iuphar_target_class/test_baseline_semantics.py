@@ -501,6 +501,47 @@ def test_tree_path_is_unreadable_rather_than_absent(tmp_path: Path) -> None:
     assert problems == ("classifier_source baseline blob is unreadable",)
 
 
+def test_local_disagreement_is_not_a_resolved_dictionary_fact() -> None:
+    conflicting = decide(
+        BoundaryObservation(
+            case_id="conflict",
+            dictionary_class="Receptor",
+            local_status="conflicting",
+        )
+    )
+    assert conflicting.rule_id == "layer_conflict"
+    assert conflicting.decision_status == "requires_review"
+    assert conflicting.completeness == "conflict"
+    assert conflicting.iuphar_class == "Receptor"
+    assert conflicting.effective_class == "Receptor"
+    assert conflicting.effective_source == "iuphar"
+
+    different = decide(
+        BoundaryObservation(
+            case_id="different-local",
+            dictionary_class="Receptor",
+            local_class="Enzyme",
+            local_status="supported",
+        )
+    )
+    assert different.rule_id == "layer_conflict"
+    assert different.decision_status == "requires_review"
+    assert different.local_class == "Enzyme"
+    assert different.iuphar_class == "Receptor"
+    assert different.effective_class == "Receptor"
+
+    agreed = decide(
+        BoundaryObservation(
+            case_id="same-local",
+            dictionary_class="Receptor",
+            local_class="Receptor",
+            local_status="supported",
+        )
+    )
+    assert agreed.rule_id == "dictionary_resolved"
+    assert agreed.decision_status == "resolved"
+
+
 def test_blank_classes_do_not_become_dictionary_or_local_facts() -> None:
     with pytest.raises(ValueError, match="supported local"):
         BoundaryObservation(
