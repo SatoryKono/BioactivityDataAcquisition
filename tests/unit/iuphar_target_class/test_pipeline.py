@@ -188,10 +188,11 @@ def test_identity_conflict_publishes_the_cross_species_witnesses():
         "1",
         "2",
     }
-    assert {row["source_id"] for row in json.loads(rendered["evidence.json"])} == {
-        "1",
-        "2",
+    evidence_sources = {
+        row["source_id"] for row in json.loads(rendered["evidence.json"])
     }
+    assert {"1", "2"}.issubset(evidence_sources)
+    assert "primary_uniprot" in evidence_sources
     assert result.effective_class is None
     only_mouse = _run(
         RawTargetRow("filtered", {"uniprot": "Q88888", "organism": "Human"}, "protein"),

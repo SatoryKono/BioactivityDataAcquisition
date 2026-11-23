@@ -286,12 +286,36 @@ def test_species_filter_cannot_hide_exact_identifier_conflict() -> None:
         _query(uniprot_ids=("P11111", "missing")),
     ],
 )
-def test_every_supplied_identifier_must_support_a_match(query: MatchQuery) -> None:
+def test_every_supplied_primary_identifier_must_support_a_match(
+    query: MatchQuery,
+) -> None:
+    """Primary/trusted UniProt anchors remain mandatory exact channels (RF-002)."""
     result = resolve_match(
         query, (_target("1", uniprot="P11111"),), snapshot_complete=True
     )
     assert result.match_status == "ambiguous"
     assert result.matched_target_id is None
+
+
+def test_unknown_auxiliary_uniprot_does_not_force_ambiguous() -> None:
+    """RF-002: auxiliary xref is diagnostic-only, not a mandatory exact channel."""
+    result = resolve_match(
+        MatchQuery(
+            None,
+            ("P11111",),
+            None,
+            None,
+            "human",
+            None,
+            (),
+            auxiliary_uniprot_ids=("missing",),
+        ),
+        (_target("1", uniprot="P11111", species="human"),),
+        snapshot_complete=True,
+    )
+    assert result.match_status == "matched"
+    assert result.matched_target_id == "1"
+    assert "unknown_auxiliary_uniprot" in {item.code for item in result.diagnostics}
 
 
 def test_gene_without_species_cannot_hide_an_existing_identity_conflict() -> None:

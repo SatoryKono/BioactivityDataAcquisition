@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from .models import Diagnostic, MatchResult
 
@@ -21,6 +21,8 @@ METHOD_ORDER = (
     EXACT_NAME,
     EXACT_SYNONYM,
 )
+UNKNOWN_AUXILIARY = "unknown_auxiliary_uniprot"
+AUXILIARY_DIVERGENCE = "auxiliary_uniprot_divergence"
 
 
 @dataclass(frozen=True, slots=True)
@@ -38,7 +40,12 @@ class CatalogTarget:
 
 @dataclass(frozen=True, slots=True)
 class MatchQuery:
-    """Identifiers already normalized. Original text is not repaired here."""
+    """Identifiers already normalized. Original text is not repaired here.
+
+    ``uniprot_ids`` are primary/trusted anchors (exact channels).
+    ``auxiliary_uniprot_ids`` are diagnostic-only cross-references (RF-002);
+    they must not open empty exact-channels or qualify as identity_conflict.
+    """
 
     target_id: str | None
     uniprot_ids: tuple[str, ...]
@@ -47,6 +54,7 @@ class MatchQuery:
     organism: str | None
     name: str | None
     synonyms: tuple[str, ...]
+    auxiliary_uniprot_ids: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -193,6 +201,8 @@ def validate_identity(
     ----------
     query : MatchQuery
         Normalized query; this function does not validate the input-row schema.
+        Primary ``uniprot_ids`` remain strict; ``auxiliary_uniprot_ids`` only
+        contribute RF-002 diagnostics (see ``identifier_roles``).
     catalog : tuple[CatalogTarget, ...]
         Targets from the same snapshot used to collect candidates.
     candidates : tuple[Candidate, ...]
@@ -207,7 +217,8 @@ def validate_identity(
         searchable query fields, ``not_found`` on a complete snapshot means
         no query-channel hits; it does not assert biological absence.
     """
-    return _decide(query, catalog, candidates, snapshot_complete=snapshot_complete)
+    result = _decide(query, catalog, candidates, snapshot_complete=snapshot_complete)
+    return _attach_auxiliary_diagnostics(query, catalog, result)
 
 
 def resolve_match(
@@ -515,3 +526,46 @@ def _result(
             diagnostics=diagnostics,
         )
     )
+
+
+def _attach_auxiliary_diagnostics(
+    query: MatchQuery,
+    catalog: tuple[CatalogTarget, ...],
+    result: MatchResult,
+) -> MatchResult:
+    """Record unknown/divergent auxiliary UniProt xrefs without changing status.
+
+    Auxiliary hits never open exact channels and never promote name-only rows
+    to ``matched`` (RF-002 / ``identifier_roles.MATCHING_POLICY_VERSION``).
+    """
+    if not query.auxiliary_uniprot_ids:
+        return result
+    extras: list[Diagnostic] = []
+    targets = _species_targets(query, catalog)
+    for accession in query.auxiliary_uniprot_ids:
+        hits = _ids(
+            target.target_id for target in targets if accession in target.uniprot_ids
+        )
+        if not hits:
+            extras.append(
+                Diagnostic(
+                    UNKNOWN_AUXILIARY,
+                    "info",
+                    f"{UNKNOWN_AUXILIARY}:{accession}",
+                )
+            )
+            continue
+        if (
+            result.matched_target_id is not None
+            and result.matched_target_id not in hits
+        ):
+            extras.append(
+                Diagnostic(
+                    AUXILIARY_DIVERGENCE,
+                    "warning",
+                    f"{AUXILIARY_DIVERGENCE}:{accession}",
+                )
+            )
+    if not extras:
+        return result
+    return replace(result, diagnostics=(*result.diagnostics, *extras))

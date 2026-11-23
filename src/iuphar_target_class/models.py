@@ -92,6 +92,9 @@ class ValidatedInput:
     diagnostics: tuple[Diagnostic, ...]
     row_sha256: str
     provenance: RunProvenance
+    # RF-002: diagnostic-only UniProt xrefs; defaults keep legacy call sites valid.
+    auxiliary_uniprot_accessions: tuple[str, ...] = ()
+    equivalent_uniprot_accessions: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         """Detach read-only field snapshots from caller-owned dictionaries."""

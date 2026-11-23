@@ -227,6 +227,9 @@ SCOPED_CHECKS_TEST = "tests/unit/scripts/repo/test_scoped_checks.py"
 HOOK_RECEIPTS_TEST = "tests/unit/scripts/repo/test_hook_receipts.py"
 IUPHAR_STAGE0_TEST = "tests/unit/iuphar_target_class/test_stage0_manifest.py"
 IUPHAR_SEMANTICS_RF001_TEST = "tests/unit/iuphar_target_class/test_semantics_rf001.py"
+IUPHAR_IDENTIFIER_ROLES_RF002_TEST = (
+    "tests/unit/iuphar_target_class/test_identifier_roles_rf002.py"
+)
 IUPHAR_POLICY_TEST = "tests/unit/iuphar_target_class/test_policy.py"
 
 
@@ -782,6 +785,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         IUPHAR_SEMANTICS_RF001_TEST,
         IUPHAR_POLICY_TEST,
     ),
+    "src/iuphar_target_class/identifier_roles.py": (
+        IUPHAR_IDENTIFIER_ROLES_RF002_TEST,
+        IUPHAR_POLICY_TEST,
+    ),
     **dict.fromkeys(
         (
             "docs/04-reference/pipelines/chembl/04-target-spec.md",
@@ -792,12 +799,16 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
         ),
     ),
+    "docs/04-reference/pipelines/chembl/17-iuphar-uniprot-identifier-roles.md": (
+        IUPHAR_IDENTIFIER_ROLES_RF002_TEST,
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
     **dict.fromkeys(
         (
             "src/iuphar_target_class/policy.py",
             "data/iuphar_target_class/policy/policy.json",
         ),
-        (IUPHAR_POLICY_TEST,),
+        (IUPHAR_POLICY_TEST, IUPHAR_IDENTIFIER_ROLES_RF002_TEST),
     ),
     **dict.fromkeys(
         (
@@ -953,6 +964,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "docs/05-operations/runbooks/iuphar-target-classification.md": (
         "tests/architecture/test_doc_crossref_integrity.py",
+        IUPHAR_IDENTIFIER_ROLES_RF002_TEST,
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
     **dict.fromkeys(
@@ -2329,6 +2341,7 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
         "tests/unit/iuphar_target_class/test_acceptance.py",
     ),
     "data/iuphar_target_class/rf001/": (IUPHAR_SEMANTICS_RF001_TEST,),
+    "data/iuphar_target_class/rf002/": (IUPHAR_IDENTIFIER_ROLES_RF002_TEST,),
     **dict.fromkeys(
         (
             ".codex/agents/",

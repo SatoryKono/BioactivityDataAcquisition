@@ -368,6 +368,21 @@ def _evidence(
         )
         for hit in hits
     ]
+    for role, values in (
+        ("primary_uniprot", row.uniprot_accessions),
+        ("equivalent_uniprot", row.equivalent_uniprot_accessions),
+        ("auxiliary_uniprot", row.auxiliary_uniprot_accessions),
+    ):
+        for accession in values:
+            draft.append(
+                EvidenceDraft(
+                    row.input_row_id,
+                    "match",
+                    role,
+                    accession,
+                    "match",
+                )
+            )
     if annotation is not None and match.matched_target_id and annotation.raw_payload:
         draft.append(
             EvidenceDraft(
@@ -425,6 +440,7 @@ def classify_target(
         row.taxon,
         row.name,
         row.synonyms,
+        auxiliary_uniprot_ids=row.auxiliary_uniprot_accessions,
     )
     subset = _shortlist(query, snapshot)
     hits = collect_candidates(query, subset)
@@ -491,6 +507,7 @@ def _publication_hits(
         organism=None,
         name=query.name,
         synonyms=query.synonyms,
+        auxiliary_uniprot_ids=query.auxiliary_uniprot_ids,
     )
     unfiltered = collect_candidates(unfiltered_query, catalog)
     conflict = {
