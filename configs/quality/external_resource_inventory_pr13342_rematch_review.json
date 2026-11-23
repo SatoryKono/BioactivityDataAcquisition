@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "catalog_ref": "a9bb5f70900e9d4122618b2737b4ed976d207f9d",
-  "source_ref": "ac1e3daca9f20146782e98068bfc7aa2bb141a7f",
+  "source_ref": "e7507c11164c49018773b535e58a8b0929457169",
   "source_reviews": {
-    "src/bioetl/infrastructure/storage/target_classification_guard.py": "Rematch after #13349 (#13342): blob relocated vs catalog pin; no new acquisition sites.",
-    "src/bioetl/infrastructure/storage/target_classification_migration.py": "Rematch after #13349 (#13342): blob relocated vs catalog pin; no new acquisition sites.",
-    "src/bioetl/infrastructure/storage/target_classification_migration_bundle.py": "Rematch after #13349 (#13342): blob relocated vs catalog pin; no new acquisition sites.",
-    "src/bioetl/infrastructure/storage/target_classification_migration_pins.py": "Rematch after #13349 (#13342): blob relocated vs catalog pin; no new acquisition sites.",
-    "src/bioetl/infrastructure/storage/target_classification_migration_state.py": "Rematch after #13349 (#13342): blob relocated vs catalog pin; no new acquisition sites."
+    "src/bioetl/infrastructure/storage/target_classification_guard.py": "Rematch after #13343 (#13342): blob relocated vs catalog pin; RF-011 profile/cutover pins retained; no new acquisition sites. Prior: Rematch after #13349 (#13342): blob relocated vs catalog pin; no new acquisition sites.",
+    "src/bioetl/infrastructure/storage/target_classification_migration.py": "Rematch after #13343 (#13342): blob relocated vs catalog pin; RF-011 profile/cutover pins retained; no new acquisition sites. Prior: Rematch after #13349 (#13342): blob relocated vs catalog pin; no new acquisition sites.",
+    "src/bioetl/infrastructure/storage/target_classification_migration_bundle.py": "Rematch after #13343 (#13342): blob relocated vs catalog pin; RF-011 profile/cutover pins retained; no new acquisition sites. Prior: Rematch after #13349 (#13342): blob relocated vs catalog pin; no new acquisition sites.",
+    "src/bioetl/infrastructure/storage/target_classification_migration_pins.py": "Rematch after #13343 (#13342): blob relocated vs catalog pin; RF-011 profile/cutover pins retained; no new acquisition sites. Prior: Rematch after #13349 (#13342): blob relocated vs catalog pin; no new acquisition sites.",
+    "src/bioetl/infrastructure/storage/target_classification_migration_state.py": "Rematch after #13343 (#13342): blob relocated vs catalog pin; RF-011 profile/cutover pins retained; no new acquisition sites. Prior: Rematch after #13349 (#13342): blob relocated vs catalog pin; no new acquisition sites."
   },
   "expression_updates": {},
   "resource_updates": {},
@@ -15,6 +15,71 @@
   "new_resources": [],
   "new_exclusions": [],
   "segment_updates": {},
-  "reference_moves": {},
-  "line_updates": {}
+  "reference_moves": [
+    {
+      "identity": "iuphar.bioetl.infrastructure.storage.target_classification_migration.directory-enumeration",
+      "fields": [
+        "creation_sites",
+        "production_binding"
+      ],
+      "from": {
+        "file": "src/bioetl/infrastructure/storage/target_classification_migration.py",
+        "line": 131,
+        "expression": "path.rglob('*')"
+      },
+      "to": {
+        "file": "src/bioetl/infrastructure/storage/target_classification_migration_bundle.py",
+        "scope": "_tree_hashes",
+        "call": "path.rglob",
+        "expression": "path.rglob('*')"
+      }
+    },
+    {
+      "identity": "iuphar.bioetl.infrastructure.storage.target_classification_migration.file",
+      "fields": [
+        "creation_sites",
+        "production_binding"
+      ],
+      "from": {
+        "file": "src/bioetl/infrastructure/storage/target_classification_migration.py",
+        "line": 158,
+        "expression": "temporary.write_bytes(canonical_json_bytes(state))"
+      },
+      "to": {
+        "file": "src/bioetl/infrastructure/storage/target_classification_migration_bundle.py",
+        "scope": "_save",
+        "call": "temporary.write_bytes",
+        "expression": "temporary.write_bytes(canonical_json_bytes(state))"
+      }
+    },
+    {
+      "identity": "iuphar.bioetl.infrastructure.storage.target_classification_migration.file",
+      "fields": [
+        "creation_sites",
+        "production_binding"
+      ],
+      "from": {
+        "file": "src/bioetl/infrastructure/storage/target_classification_migration.py",
+        "line": 376,
+        "expression": "source.read_bytes()"
+      },
+      "to": {
+        "file": "src/bioetl/infrastructure/storage/target_classification_migration_bundle.py",
+        "scope": "_restore_dependencies",
+        "call": "source.read_bytes",
+        "expression": "source.read_bytes()"
+      }
+    }
+  ],
+  "line_updates": {
+    "src/bioetl/infrastructure/storage/target_classification_migration.py": {
+      "144": 92,
+      "150": 98,
+      "152": 100,
+      "217": 143,
+      "219": 145,
+      "258": 206,
+      "326": 289
+    }
+  }
 }
