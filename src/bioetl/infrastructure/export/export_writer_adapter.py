@@ -34,6 +34,9 @@ _XLSX_MAX_ROWS = 1048576
 _RUN_ID_COLUMNS = ("_run_id", "run_id")
 _PROFILE_COLUMN = "target_class_profile_sha256"
 _VERSION_COLUMNS = ("table_version", "delta_version")
+_OPENPYXL_REQUIRED = (
+    "openpyxl is required for XLSX export. Install with: pip install openpyxl"
+)
 
 
 class ExportWriterAdapter(ExportWriterPort):
@@ -246,9 +249,7 @@ def _write_duck_xlsx(table: Any, output_path: Path) -> Path:
                 for sheet in writer.book.worksheets:
                     _force_explicit_text(sheet)
     except ImportError as exc:
-        raise ImportError(
-            "openpyxl is required for XLSX export. Install with: pip install openpyxl"
-        ) from exc
+        raise ImportError(_OPENPYXL_REQUIRED) from exc
     return output_path
 
 
@@ -580,9 +581,7 @@ def _new_workbook() -> Any:
     try:
         from openpyxl import Workbook
     except ImportError as exc:
-        raise ImportError(
-            "openpyxl is required for XLSX export. Install with: pip install openpyxl"
-        ) from exc
+        raise ImportError(_OPENPYXL_REQUIRED) from exc
     return Workbook()
 
 
@@ -590,9 +589,7 @@ def _load_workbook(path: str) -> Any:
     try:
         from openpyxl import load_workbook
     except ImportError as exc:
-        raise ImportError(
-            "openpyxl is required for XLSX export. Install with: pip install openpyxl"
-        ) from exc
+        raise ImportError(_OPENPYXL_REQUIRED) from exc
     return load_workbook(path, data_only=False)
 
 

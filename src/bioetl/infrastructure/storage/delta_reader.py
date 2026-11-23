@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from pathlib import Path
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import pyarrow as pa
 from deltalake import DeltaTable
@@ -52,6 +52,70 @@ def _with_table_version(table: pa.Table, version: object) -> pa.Table:
     metadata = dict(table.schema.metadata or {})
     metadata[_TABLE_VERSION_METADATA_KEY] = str(version).encode("ascii")
     return table.replace_schema_metadata(metadata)
+
+
+def _open_delta_table(resolved_path: Path) -> DeltaTable:
+    """Open a Delta table or raise ``FileNotFoundError`` when it is absent."""
+    try:
+        return DeltaTable(str(resolved_path))
+    except DeltaTableNotFoundError as exc:
+        raise FileNotFoundError(f"Delta table not found: {resolved_path}") from exc
+
+
+def _require_snapshot(
+    opened: DeltaTable,
+    resolved_path: Path,
+    snapshot_version: int,
+    snapshot_table_id: str,
+) -> DeltaTable:
+    """Return the pinned table when the opened identity matches the pin."""
+    if (
+        opened.version() != snapshot_version
+        or str(opened.metadata().id) != snapshot_table_id
+    ):
+        raise ValueError("reference_cohort producer snapshot drift")
+    return DeltaTable(str(resolved_path), version=snapshot_version)
+
+
+def _materialize_scanner(
+    scanner: Any,
+    opened: DeltaTable,
+    limit: int | None,
+) -> pa.Table:
+    """Read the scanner without a silent row cap."""
+    if limit is not None:
+        return cast(pa.Table, scanner.head(limit))
+    row_count = _try_native_delta_row_count(opened)
+    if row_count is not None:
+        return cast(pa.Table, scanner.head(row_count))
+    to_table = getattr(scanner, "to_table", None)
+    if callable(to_table):
+        return cast(pa.Table, to_table())
+    # Last-resort head with the documented full-read ceiling only when the
+    # scanner has no uncapped materialization.
+    return cast(pa.Table, scanner.head(_FULL_READ_HEAD_LIMIT))
+
+
+def _read_resolved_table(
+    resolved_path: Path,
+    *,
+    columns: list[str] | None,
+    limit: int | None,
+    snapshot_version: int | None,
+    snapshot_table_id: str | None,
+) -> pa.Table:
+    """Read one resolved Delta path and stamp the opened version."""
+    opened = _open_delta_table(resolved_path)
+    if snapshot_version is not None:
+        opened = _require_snapshot(
+            opened,
+            resolved_path,
+            snapshot_version,
+            cast(str, snapshot_table_id),
+        )
+    scanner = opened.to_pyarrow_dataset().scanner(columns=columns)
+    table = _materialize_scanner(scanner, opened, limit)
+    return _with_table_version(table, _opened_table_version(opened))
 
 
 def _count_delta_rows(dt: DeltaTable, resolved_path: Path) -> int:
@@ -129,40 +193,13 @@ class DeltaReader:
             raise ValueError("pinned Delta reads require version and table identity")
 
         def _read() -> pa.Table:
-            try:
-                dt = DeltaTable(str(resolved_path))
-            except DeltaTableNotFoundError as e:
-                raise FileNotFoundError(
-                    f"Delta table not found: {resolved_path}"
-                ) from e
-
-            if snapshot_version is not None:
-                if (
-                    dt.version() != snapshot_version
-                    or str(dt.metadata().id) != snapshot_table_id
-                ):
-                    raise ValueError("reference_cohort producer snapshot drift")
-                dt = DeltaTable(str(resolved_path), version=snapshot_version)
-
-            scanner = dt.to_pyarrow_dataset().scanner(columns=columns)
-            if limit is not None:
-                table = cast(pa.Table, scanner.head(limit))
-            else:
-                row_count = _try_native_delta_row_count(dt)
-                if row_count is not None:
-                    table = cast(pa.Table, scanner.head(row_count))
-                else:
-                    # Unbounded full read: never fall back to a synthetic head
-                    # limit that would silently truncate when native count is
-                    # unavailable.
-                    to_table = getattr(scanner, "to_table", None)
-                    if callable(to_table):
-                        table = cast(pa.Table, to_table())
-                    else:
-                        # Last-resort head with the documented full-read ceiling
-                        # only when the scanner has no uncapped materialization.
-                        table = cast(pa.Table, scanner.head(_FULL_READ_HEAD_LIMIT))
-            return _with_table_version(table, _opened_table_version(dt))
+            return _read_resolved_table(
+                resolved_path,
+                columns=columns,
+                limit=limit,
+                snapshot_version=snapshot_version,
+                snapshot_table_id=snapshot_table_id,
+            )
 
         self._logger.debug(
             "Reading Delta table",
