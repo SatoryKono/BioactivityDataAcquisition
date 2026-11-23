@@ -932,15 +932,25 @@ def test_threshold_aliases_follow_layer_precedence(
 
 
 @pytest.mark.integration
-@pytest.mark.parametrize("conflict", [False, True])
-def test_threshold_aliases_in_same_layer(tmp_path: Path, conflict: bool) -> None:
+@pytest.mark.parametrize(
+    ("flat_value", "nested_value", "conflict"),
+    [
+        (0.04, 0.04, False),
+        ("0.04", 0.04, False),
+        (0.04, "0.040", False),
+        ("0.04", 0.1, True),
+    ],
+)
+def test_threshold_aliases_in_same_layer(
+    tmp_path: Path, flat_value: float | str, nested_value: float | str, conflict: bool
+) -> None:
     (tmp_path / "base").mkdir()
     (tmp_path / "base" / "quality.yaml").write_text(
         yaml.safe_dump(
             {
-                "soft_fail_threshold": 0.04,
+                "soft_fail_threshold": flat_value,
                 "thresholds": {
-                    "soft_fail": 0.1 if conflict else 0.04,
+                    "soft_fail": nested_value,
                     "hard_fail": 0.2,
                 },
             }

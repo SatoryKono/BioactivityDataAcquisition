@@ -4,7 +4,11 @@ from __future__ import annotations
 
 import copy
 
+from pydantic import TypeAdapter
+
 from bioetl.domain.types import JsonDict
+
+_THRESHOLD_VALUE = TypeAdapter(float)
 
 
 def normalize_to_file_format(
@@ -53,10 +57,12 @@ def _normalize_thresholds(
         if flat not in result:
             continue
         value = result.pop(flat)
-        if nested in thresholds and thresholds[nested] != value:
-            raise ValueError(
-                f"Conflicting DQ threshold aliases: {flat} and thresholds.{nested}"
-            )
+        if nested in thresholds:
+            existing = _THRESHOLD_VALUE.validate_python(thresholds[nested])
+            if existing != _THRESHOLD_VALUE.validate_python(value):
+                raise ValueError(
+                    f"Conflicting DQ threshold aliases: {flat} and thresholds.{nested}"
+                )
         thresholds[nested] = value
 
     result["thresholds"] = thresholds
