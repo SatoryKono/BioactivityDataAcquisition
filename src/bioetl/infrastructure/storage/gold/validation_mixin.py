@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
-from typing import TYPE_CHECKING, Any, Protocol
+from typing import TYPE_CHECKING, Any, Protocol, cast
 
 from bioetl.domain.medallion import GoldWriteMode
 from bioetl.domain.types import (
@@ -82,10 +82,10 @@ class GoldWriterValidationMixin:
         contract_version: str | None = None,
     ) -> None:
         """Validate that schema has strict=True."""
-        is_strict = getattr(schema, "strict", False) or getattr(
-            getattr(schema, "Config", None), "strict", False
+        is_strict = getattr(
+            schema, "strict", getattr(getattr(schema, "Config", None), "strict", False)
         )
-        if not is_strict:
+        if is_strict is not True:
             reject_reason = build_gold_contract_reject_reason(
                 reason_code=GoldRejectReasonCode.CONTRACT_SCHEMA_FAILURE,
                 contract_version=resolve_gold_contract_version(
@@ -110,7 +110,28 @@ class GoldWriterValidationMixin:
         df = pd.DataFrame(records)
         try:
             schema_any: Any = schema  # Any: Pandera model class
-            await self._run_in_executor(lambda: schema_any.validate(df, lazy=False))
+            validated = cast(
+                pd.DataFrame,
+                await self._run_in_executor(
+                    lambda: schema_any.validate(df, lazy=False)
+                ),
+            )
+            for column in df.columns:
+                dtype = validated[column].dtype
+                if (
+                    pd.api.types.is_numeric_dtype(dtype)
+                    and not pd.api.types.is_bool_dtype(dtype)
+                    and any(isinstance(value, str) for value in df[column])
+                ):
+                    reject_reason = build_gold_contract_reject_reason(
+                        reason_code=GoldRejectReasonCode.CONTRACT_SCHEMA_FAILURE,
+                        contract_version=resolve_gold_contract_version(
+                            schema, explicit_contract_version=contract_version
+                        ),
+                        rule_id="gold.contract.schema",
+                        message=f"Numeric column '{column}' contains string values",
+                    )
+                    raise GoldContractValidationError(reject_reason)
         except (pandera.errors.SchemaError, pandera.errors.SchemaErrors) as exc:
             reason_code = classify_gold_schema_error_reason(exc)
             reject_reason = build_gold_contract_reject_reason(
