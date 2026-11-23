@@ -870,6 +870,14 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     **dict.fromkeys(
         (
+            "src/iuphar_target_class/enablement.py",
+            "src/iuphar_target_class/qualification.py",
+            "src/iuphar_target_class/semantics.py",
+        ),
+        ("tests/unit/iuphar_target_class/test_rf000_target_classification.py",),
+    ),
+    **dict.fromkeys(
+        (
             "src/iuphar_target_class/pipeline.py",
             "src/iuphar_target_class/pipeline_io.py",
             "src/iuphar_target_class/pipeline_acceptance.py",

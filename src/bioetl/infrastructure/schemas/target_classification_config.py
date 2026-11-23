@@ -4,7 +4,14 @@ from __future__ import annotations
 
 from typing import Self
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    SerializerFunctionWrapHandler,
+    model_serializer,
+    model_validator,
+)
 
 from bioetl.domain.config.target_classification import (
     TargetClassificationConfig,
@@ -61,6 +68,16 @@ class TargetClassificationYamlConfig(BaseModel):
     def validate_profile(self) -> Self:
         self.to_domain()
         return self
+
+    @model_serializer(mode="wrap")
+    def _omit_absent_table_contract(
+        self, handler: SerializerFunctionWrapHandler
+    ) -> object:
+        """Keep an unset contract out of dumps so older configs stay identical."""
+        payload = handler(self)
+        if isinstance(payload, dict) and payload.get("table_contract") is None:
+            payload.pop("table_contract")
+        return payload
 
     def to_domain(self) -> TargetClassificationConfig:
         return TargetClassificationConfig(

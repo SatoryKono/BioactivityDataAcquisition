@@ -136,26 +136,43 @@ _DETAIL_FIELDS = (
 )
 
 
+_CLASSIFICATION_FIELDS = (
+    "effective_class",
+    "effective_source",
+    "decision_status",
+    "match_status",
+    "local_class",
+    "local_status",
+    "iuphar_annotation_status",
+)
+
+
+def _shared_fields(
+    m_row: Mapping[str, str], python_row: Mapping[str, str]
+) -> tuple[str, ...]:
+    return tuple(
+        field for field in _DETAIL_FIELDS if field in m_row and field in python_row
+    )
+
+
+def _differing_fields(
+    m_row: Mapping[str, str], python_row: Mapping[str, str]
+) -> tuple[str, ...]:
+    """Name every compared field that actually differs. Absence is not a change."""
+    names = []
+    if _class(m_row) != _class(python_row):
+        names.append("iuphar_class")
+    for field in (*_CLASSIFICATION_FIELDS, *_shared_fields(m_row, python_row)):
+        if m_row.get(field) != python_row.get(field):
+            names.append(field)
+    return tuple(sorted(set(names)))
+
+
 def _same_classification(
     m_row: Mapping[str, str], python_row: Mapping[str, str]
 ) -> bool:
     """Compare class projections without inferring missing historical values."""
-    classification_fields = (
-        "effective_class",
-        "effective_source",
-        "decision_status",
-        "match_status",
-        "local_class",
-        "local_status",
-        "iuphar_annotation_status",
-    )
-    shared_details = tuple(
-        field for field in _DETAIL_FIELDS if field in m_row and field in python_row
-    )
-    return _class(m_row) == _class(python_row) and all(
-        m_row.get(field) == python_row.get(field)
-        for field in (*classification_fields, *shared_details)
-    )
+    return not _differing_fields(m_row, python_row)
 
 
 def _record_legacy(
@@ -200,6 +217,15 @@ def _class(row: Mapping[str, str]) -> str:
     return row.get("iuphar_class", row.get("legacy_iuphar_class", ""))
 
 
+def _row_for_label(
+    rows: tuple[Mapping[str, str], ...], label: str
+) -> Mapping[str, str] | None:
+    for row in rows:
+        if _label(_group((row,)).popitem()[0]) == label:
+            return row
+    return None
+
+
 def _label(key: tuple[tuple[str, str], ...]) -> str:
     return "|".join(f"{name}={value}" for name, value in key) or "<missing identity>"
 
@@ -224,27 +250,31 @@ def build_m_parity_report(
         if item.get("basis_sha256")
     }
     for label, sign, explanation in report.changes:
-        basis = ""
-        field = ""
-        target_id = ""
-        for row in python_rows:
-            if _label(_group((row,)).popitem()[0]) == label:
-                basis = row.get("basis_sha256", "")
-                field = row.get("changed_field", "")
-                target_id = row.get("target_id", row.get("input_row_id", ""))
-                break
-        key = (target_id, field, sign, basis)
-        if key in allowed_index and explanation:
-            qualified.append(
+        python_row = _row_for_label(python_rows, label)
+        reference_row = _row_for_label(reference.m_rows, label)
+        if python_row is None or reference_row is None or not explanation:
+            unexplained.append(label)
+            continue
+        basis = python_row.get("basis_sha256", "")
+        target_id = python_row.get("target_id", python_row.get("input_row_id", ""))
+        fields = _differing_fields(reference_row, python_row)
+        covered = [
+            field
+            for field in fields
+            if (target_id, field, sign, basis) in allowed_index
+        ]
+        if fields and len(covered) == len(fields):
+            qualified.extend(
                 {
                     "target_id": target_id,
                     "field": field,
                     "category": sign,
                     "basis_sha256": basis,
                 }
+                for field in fields
             )
-        else:
-            unexplained.append(label)
+            continue
+        unexplained.append(label)
     return {
         "artifact": "m-parity-report",
         "biological_accuracy_metric": False,

@@ -145,6 +145,29 @@ def test_subclass_disagreement_is_not_class_agreement(tmp_path) -> None:
     assert report["biological_accuracy_metric"] is False
     assert report["unexplained"] == ["input_row_id=1"]
     assert report["qualified_changes"] == []
+    partial = build_m_parity_report(
+        reference,
+        (
+            {
+                **shared,
+                "iuphar_subclasses": "Transferase",
+                "effective_class": "Receptor",
+                "basis_sha256": "a" * 64,
+                "change_sign": "direct_local_separation",
+                "explanation": "recorded class split",
+            },
+        ),
+        allowed=(
+            {
+                "target_id": "1",
+                "field": "effective_class",
+                "category": "direct_local_separation",
+                "basis_sha256": "a" * 64,
+            },
+        ),
+    )
+    assert partial["qualified_changes"] == []
+    assert partial["unexplained"] == ["input_row_id=1"]
 
 
 def test_expectations_cannot_be_the_classifier_output() -> None:
