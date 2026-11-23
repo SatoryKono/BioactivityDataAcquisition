@@ -144,8 +144,8 @@ def status_distributions(
 
 
 def _is_current_row(row: dict[str, object]) -> bool:
-    """Match migration closure: a missing flag is current, False is closed."""
-    return row.get("_is_current", True) is not False
+    """Match migration closure: a missing flag is current, a falsy flag is closed."""
+    return bool(row.get("_is_current", True))
 
 
 def _current_rows(rows: list[dict[str, object]]) -> list[dict[str, object]]:
@@ -199,15 +199,15 @@ def unresolved_assay_targets(
 ) -> int:
     """Count current assay target ids absent from current Gold rows."""
     gold_ids = {
-        str(row.get("target_id"))
+        normalized
         for row in _current_rows(gold_rows)
-        if _norm_cell(row.get("target_id")) is not None
+        if (normalized := _norm_cell(row.get("target_id"))) is not None
     }
     missing = {
-        str(row.get("target_id"))
+        normalized
         for row in _current_rows(assay_rows)
-        if _norm_cell(row.get("target_id")) is not None
-        and str(row.get("target_id")) not in gold_ids
+        if (normalized := _norm_cell(row.get("target_id"))) is not None
+        and normalized not in gold_ids
     }
     return len(missing)
 

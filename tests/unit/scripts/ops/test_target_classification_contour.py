@@ -543,6 +543,20 @@ def test_closed_gold_version_does_not_close_a_current_assay_fk() -> None:
     assert unresolved_assay_targets(current_assay, current_gold) == 0
     assert unresolved_assay_targets(closed_assay, current_gold) == 0
     assert unresolved_assay_targets([{"target_id": "CHEMBL1"}], current_gold) == 0
+    assert (
+        unresolved_assay_targets(
+            [{"target_id": "CHEMBL9", "_is_current": 0}],
+            current_gold,
+        )
+        == 0
+    )
+    assert (
+        unresolved_assay_targets(
+            [{"target_id": "CHEMBL9", "_is_current": None}],
+            current_gold,
+        )
+        == 0
+    )
 
 
 def test_shadow_counts_are_not_taken_from_the_enrich_table(tmp_path: Path) -> None:
