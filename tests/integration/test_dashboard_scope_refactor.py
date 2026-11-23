@@ -265,7 +265,9 @@ def test_compact_selected_run_summary_uses_shared_projection() -> None:
             else "UNKNOWN"
         )
         if no_value != expected_no_value:
-            missing.append(f"{name}:{panel_id} missing {expected_no_value!r} no-value state")
+            missing.append(
+                f"{name}:{panel_id} missing {expected_no_value!r} no-value state"
+            )
         if "SELECT RUN" not in panel["description"]:
             missing.append(f"{name}:{panel_id} missing SELECT RUN explanation")
     assert not missing, "selected-run summary:\n" + "\n".join(missing)
