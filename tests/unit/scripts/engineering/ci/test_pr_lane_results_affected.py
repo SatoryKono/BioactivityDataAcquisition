@@ -1808,6 +1808,7 @@ def test_shadow_compare_routes_codex_launchers_and_guidance(changed_file: str) -
                 "external_resource_inventory_pr13342_merge_review.json",
                 "external_resource_inventory_pr13342_dq_resume_review.json",
                 "external_resource_inventory_pr13342_rf002_review.json",
+                "external_resource_inventory_pr13342_delta_pin_review.json",
                 "external_resource_inventory_pr13360_rf002_review.json",
                 "external_resource_inventory_pr13166_dq_data_dir_review.json",
                 "external_resource_inventory_pr13166_metrics_fold_review.json",

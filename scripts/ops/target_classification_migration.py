@@ -15,6 +15,7 @@ from bioetl.infrastructure.storage.target_candidates import (
     freeze_target_inputs,
 )
 from bioetl.infrastructure.storage.target_classification_migration import (
+    TargetMigrationJournal,
     TargetMigrationPaths,
     migration_status,
     prepare_target_migration,
@@ -188,7 +189,9 @@ def _build_candidates(
     print(json.dumps({"status": "complete", "output": str(args.output)}))
 
 
-def _print_migration_state(paths: TargetMigrationPaths, state: dict[str, Any]) -> None:
+def _print_migration_state(
+    paths: TargetMigrationPaths, state: TargetMigrationJournal
+) -> None:
     reported = migration_status(state)
     print(
         json.dumps(

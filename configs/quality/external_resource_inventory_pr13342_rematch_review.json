@@ -22,8 +22,8 @@
         "_delta_pin"
       ],
       "owner": "bioetl.infrastructure.storage.target_classification_migration_pins owns DeltaTable pin reads for RF-011 migration profile checks",
-      "closer": "DeltaTable finishes the native table operation before return; no table handle is stored on a process-global owner.",
-      "shutdown_contract": "Synchronous DeltaTable construction and metadata/version reads release the native handle before _delta_pin returns; failures before allocation have no close obligation.",
+      "closer": "No process-global owner retains the DeltaTable. The local Python wrapper is dropped when _delta_pin returns; native-handle release follows that wrapper lifetime in deltalake and is not a separate close call in this source.",
+      "shutdown_contract": "DeltaTable is constructed locally for schema, version, and metadata reads. deltalake>=0.18,<1.0 is not cited as a guarantee that the native handle is released before _delta_pin returns; release follows the Python wrapper lifetime. Failures before allocation have no close obligation.",
       "production_entrypoint": "opt-in IUPHAR target classification migration prepare/promote/rollback",
       "call_path": [
         "target_classification_migration_pins._delta_pin -> DeltaTable"
