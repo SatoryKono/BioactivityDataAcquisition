@@ -499,6 +499,22 @@ def _separated(family_ids: tuple[str, ...]) -> tuple[tuple[str, str], ...]:
 
 
 def _prepare_graph(nodes: tuple[FamilyNode, ...]) -> _PreparedGraph | Diagnostic:
+    merged = _merge_family_rows(nodes)
+    if isinstance(merged, Diagnostic):
+        return merged
+    spaces: dict[str, dict[str, FamilyNode]] = {space: {} for space in _SPACES}
+    detached: list[tuple[str, str, str]] = []
+    for space in _SPACES:
+        built = _space_nodes(space, merged[space], detached)
+        if isinstance(built, Diagnostic):
+            return built
+        spaces[space] = built
+    return _PreparedGraph(spaces, tuple(sorted(set(detached))))
+
+
+def _merge_family_rows(
+    nodes: tuple[FamilyNode, ...],
+) -> dict[str, dict[str, tuple[str, tuple[str, ...]]]] | Diagnostic:
     grouped: dict[tuple[str, str], list[FamilyNode]] = {}
     for node in nodes:
         grouped.setdefault((_space(node.family_id), node.family_id), []).append(node)
@@ -506,30 +522,55 @@ def _prepare_graph(nodes: tuple[FamilyNode, ...]) -> _PreparedGraph | Diagnostic
         space: {} for space in _SPACES
     }
     for space, family_id in sorted(grouped):
-        items = grouped[(space, family_id)]
-        payloads = {item.payload for item in items}
-        if len(payloads) > 1:
-            return _defect(_CONTRADICTORY)
-        parents = tuple(
-            sorted({parent for item in items for parent in item.parent_ids})
-        )
-        merged[space][family_id] = (next(iter(payloads)), parents)
-    spaces: dict[str, dict[str, FamilyNode]] = {space: {} for space in _SPACES}
-    detached: list[tuple[str, str, str]] = []
-    for space in _SPACES:
-        for family_id in sorted(merged[space]):
-            payload, parents = merged[space][family_id]
-            kept: list[str] = []
-            for parent_id in parents:
-                parent_space = _space(parent_id)
-                if parent_space != space:
-                    detached.append((family_id, parent_id, parent_space))
-                    continue
-                if parent_id not in merged[space]:
-                    return _defect(_MISSING_PARENT)
-                kept.append(parent_id)
-            spaces[space][family_id] = FamilyNode(family_id, tuple(kept), payload)
-    return _PreparedGraph(spaces, tuple(sorted(set(detached))))
+        recorded = _merged_record(grouped[(space, family_id)])
+        if isinstance(recorded, Diagnostic):
+            return recorded
+        merged[space][family_id] = recorded
+    return merged
+
+
+def _merged_record(
+    items: list[FamilyNode],
+) -> tuple[str, tuple[str, ...]] | Diagnostic:
+    payloads = {item.payload for item in items}
+    if len(payloads) > 1:
+        return _defect(_CONTRADICTORY)
+    parents = tuple(sorted({parent for item in items for parent in item.parent_ids}))
+    return next(iter(payloads)), parents
+
+
+def _space_nodes(
+    space: str,
+    records: dict[str, tuple[str, tuple[str, ...]]],
+    detached: list[tuple[str, str, str]],
+) -> dict[str, FamilyNode] | Diagnostic:
+    nodes: dict[str, FamilyNode] = {}
+    for family_id in sorted(records):
+        payload, parents = records[family_id]
+        kept = _kept_parents(space, family_id, parents, records, detached)
+        if isinstance(kept, Diagnostic):
+            return kept
+        nodes[family_id] = FamilyNode(family_id, kept, payload)
+    return nodes
+
+
+def _kept_parents(
+    space: str,
+    family_id: str,
+    parents: tuple[str, ...],
+    present: dict[str, tuple[str, tuple[str, ...]]],
+    detached: list[tuple[str, str, str]],
+) -> tuple[str, ...] | Diagnostic:
+    kept: list[str] = []
+    for parent_id in parents:
+        parent_space = _space(parent_id)
+        if parent_space != space:
+            detached.append((family_id, parent_id, parent_space))
+            continue
+        if parent_id not in present:
+            return _defect(_MISSING_PARENT)
+        kept.append(parent_id)
+    return tuple(kept)
 
 
 def _audit_prepared(
@@ -565,19 +606,33 @@ def _structural_defect(
 ) -> Diagnostic | None:
     """Reject cycles and root distance above ``max_depth`` in any order."""
     for family_id in sorted(nodes):
-        node = nodes[family_id]
-        if not multiple_parents_allowed and len(node.parent_ids) > 1:
-            return _defect(_MULTI_PARENT)
-        for parent_id in node.parent_ids:
-            if parent_id == family_id:
-                return _defect(_SELF_LOOP)
-            if parent_id not in nodes:
-                return _defect(_MISSING_PARENT)
+        defect = _local_edge_defect(
+            nodes, family_id, multiple_parents_allowed=multiple_parents_allowed
+        )
+        if defect is not None:
+            return defect
     distances: dict[str, int] = {}
     for start in sorted(nodes):
         defect = _bind_root_distance(nodes, start, distances, max_depth=max_depth)
         if defect is not None:
             return defect
+    return None
+
+
+def _local_edge_defect(
+    nodes: dict[str, FamilyNode],
+    family_id: str,
+    *,
+    multiple_parents_allowed: bool,
+) -> Diagnostic | None:
+    node = nodes[family_id]
+    if not multiple_parents_allowed and len(node.parent_ids) > 1:
+        return _defect(_MULTI_PARENT)
+    for parent_id in node.parent_ids:
+        if parent_id == family_id:
+            return _defect(_SELF_LOOP)
+        if parent_id not in nodes:
+            return _defect(_MISSING_PARENT)
     return None
 
 
@@ -606,14 +661,11 @@ def _bind_root_distance(
             stacked.add(node_id)
             best[node_id] = 0
         if cursor < len(parents):
-            parent_id = parents[cursor]
-            if parent_id not in distances:
-                if parent_id in stacked:
-                    return _defect(_CYCLE)
-                frames.append([parent_id, 0])
-                continue
-            best[node_id] = max(best[node_id], distances[parent_id] + 1)
-            frame[1] = cursor + 1
+            defect = _follow_parent(
+                frames, frame, parents[cursor], node_id, distances, stacked, best
+            )
+            if defect is not None:
+                return defect
             continue
         distance = best[node_id]
         if distance > max_depth:
@@ -621,6 +673,25 @@ def _bind_root_distance(
         distances[node_id] = distance
         stacked.remove(node_id)
         frames.pop()
+    return None
+
+
+def _follow_parent(
+    frames: list[list[int | str]],
+    frame: list[int | str],
+    parent_id: str,
+    node_id: str,
+    distances: dict[str, int],
+    stacked: set[str],
+    best: dict[str, int],
+) -> Diagnostic | None:
+    if parent_id not in distances:
+        if parent_id in stacked:
+            return _defect(_CYCLE)
+        frames.append([parent_id, 0])
+        return None
+    best[node_id] = max(best[node_id], distances[parent_id] + 1)
+    frame[1] = int(frame[1]) + 1
     return None
 
 
