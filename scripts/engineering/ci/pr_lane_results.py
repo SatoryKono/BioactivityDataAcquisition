@@ -956,9 +956,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/architecture/test_doc_crossref_integrity.py",
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
-    "docs/05-operations/runbooks/checkpoint-debugging.md": (
-        "tests/unit/application/services/test_observability_workflow_service.py",
-    ),
     "docs/05-operations/runbooks/iuphar-target-classification.md": (
         "tests/architecture/test_doc_crossref_integrity.py",
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
@@ -1359,7 +1356,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
     ),
     "configs/quality/external_resource_inventory_pr13328_review.json": (
-    "configs/quality/external_resource_inventory_pr13348_review.json": (
         EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
         EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
     ),
