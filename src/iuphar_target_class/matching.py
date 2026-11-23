@@ -11,7 +11,7 @@ does not prove a complex or a family.
 from __future__ import annotations
 
 from collections.abc import Iterable
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 
 from .models import Diagnostic, MatchResult
 
@@ -679,7 +679,10 @@ def _apply_auxiliary(
     diagnostics = result.diagnostics
     if extra_ids:
         candidates = _ids((*candidates, *extra_ids))
-    if disagree and status in {"matched", "not_found", "source_unavailable"}:
+    # Only a confirmed reliable match can be withdrawn. An auxiliary hit must
+    # not turn source_unavailable or not_found into ambiguous: those statuses
+    # still carry the incomplete-snapshot and absence decisions.
+    if disagree and status == "matched":
         status = "ambiguous"
         matched = None
         if not any(item.code == "ambiguous_match" for item in diagnostics):
@@ -688,11 +691,12 @@ def _apply_auxiliary(
                 Diagnostic("ambiguous_match", "warning", "ambiguous_match"),
             )
     return enforce_match_invariant(
-        replace(
-            result,
+        MatchResult(
             match_status=status,
             matched_target_id=matched,
             candidate_target_ids=candidates,
+            match_method=result.match_method,
+            match_evidence_ids=result.match_evidence_ids,
             diagnostics=(*diagnostics, *notes),
         )
     )
@@ -761,10 +765,12 @@ def _apply_object_scope(query: MatchQuery, result: MatchResult) -> MatchResult:
     if result.match_status != "matched" or EXPLICIT in result.match_method:
         return result
     return enforce_match_invariant(
-        replace(
-            result,
+        MatchResult(
             match_status="ambiguous",
             matched_target_id=None,
+            candidate_target_ids=result.candidate_target_ids,
+            match_method=result.match_method,
+            match_evidence_ids=result.match_evidence_ids,
             diagnostics=(
                 *result.diagnostics,
                 Diagnostic("ambiguous_match", "warning", "ambiguous_match"),

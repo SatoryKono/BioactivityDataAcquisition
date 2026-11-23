@@ -429,8 +429,8 @@ def _retained_uniprot_drafts(row: ValidatedInput) -> tuple[EvidenceDraft, ...]:
         EvidenceDraft(
             row.input_row_id,
             "match",
-            accession,
-            f"uniprot_role={role}",
+            _evidence_source_id(accession),
+            _uniprot_role_content(role, accession),
             "match",
         )
         for role, values in grouped
@@ -438,13 +438,32 @@ def _retained_uniprot_drafts(row: ValidatedInput) -> tuple[EvidenceDraft, ...]:
     )
 
 
+def _evidence_source_id(accession: str) -> str:
+    """Evidence ids reject the separator. Keep a stable digest for those values."""
+    if (
+        accession
+        and "/" not in accession
+        and "\n" not in accession
+        and "\r" not in accession
+    ):
+        return accession
+    return hashlib.sha256(accession.encode("utf-8")).hexdigest()
+
+
+def _uniprot_role_content(role: str, accession: str) -> str:
+    if _evidence_source_id(accession) == accession:
+        return f"uniprot_role={role}"
+    return f"uniprot_role={role}:{accession}"
+
+
 def _match_query(row: ValidatedInput) -> MatchQuery:
     """Use role-separated anchors when the business payload still has them.
 
     Historical kernel rows that only stored a merged ``uniprot`` string keep
-    the strict anchor API. Component accessions do not become required anchors
-    for a complex; that guard stays in ``_match_complex_target``.
+    the strict anchor API. A complex row passes ``object_scope`` so a component
+    accession cannot confirm the complex by itself.
     """
+    scope = "complex" if row.target_kind == "complex" else None
     roles = uniprot_roles_from_business_json(row.raw_fields.get("source_business_data"))
     if roles is None:
         return MatchQuery(
@@ -455,6 +474,7 @@ def _match_query(row: ValidatedInput) -> MatchQuery:
             row.taxon,
             row.name,
             row.synonyms,
+            object_scope=scope,
         )
     return MatchQuery(
         row.target_id,
@@ -467,6 +487,7 @@ def _match_query(row: ValidatedInput) -> MatchQuery:
         roles.auxiliary_ids,
         roles.equivalent_ids,
         MATCHING_POLICY_ROLE_SEPARATED_V2,
+        scope,
     )
 
 
@@ -544,7 +565,19 @@ def _publication_hits(
     """Expose the conflicting exact channels without confirming cross-species hits."""
     if match.match_status != "identity_conflict":
         return hits
-    unfiltered_query = replace(query, organism=None)
+    unfiltered_query = MatchQuery(
+        query.target_id,
+        query.uniprot_ids,
+        query.gene_symbol,
+        query.gene_id,
+        None,
+        query.name,
+        query.synonyms,
+        query.auxiliary_uniprot_ids,
+        query.equivalent_uniprot_ids,
+        query.matching_policy,
+        query.object_scope,
+    )
     unfiltered = collect_candidates(unfiltered_query, catalog)
     conflict = {
         hit

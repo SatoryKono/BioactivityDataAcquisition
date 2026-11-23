@@ -8,6 +8,7 @@ import re
 from collections.abc import Mapping
 from dataclasses import dataclass
 
+from iuphar_target_class.policy import BASE_MISSING_MARKERS
 from iuphar_target_class.stage0.io import canonical_json_bytes
 
 # v1 merged component accessions and UniProt xrefs into one required anchor.
@@ -17,6 +18,9 @@ _UNIPROT_ROLE_KEYS = (
     "component_accessions",
     "target_xref_uniprot_ids",
     "proven_uniprot_equivalents",
+)
+_MISSING_ROLE_TOKENS = frozenset(
+    marker.casefold() for marker in BASE_MISSING_MARKERS if marker
 )
 
 _TAXONOMY_ERROR = "taxonomy_id must be a positive integer"
@@ -107,6 +111,13 @@ def _ordered(values: tuple[str, ...]) -> tuple[str, ...]:
     return tuple(dict.fromkeys(values))
 
 
+def _role_tokens(value: object) -> tuple[str, ...]:
+    """Identifier tokens with the same missing markers as normalization removed."""
+    return tuple(
+        part for part in _tokens(value) if part.casefold() not in _MISSING_ROLE_TOKENS
+    )
+
+
 def partition_uniprot_roles(data: Mapping[str, object]) -> UniprotIdentifierRoles:
     """Split UniProt links into required anchors and auxiliary evidence.
 
@@ -120,10 +131,11 @@ def partition_uniprot_roles(data: Mapping[str, object]) -> UniprotIdentifierRole
     UniprotIdentifierRoles
         Primary component accessions, declared equivalents, and xref-only ids.
         A value present as a primary accession is not repeated as auxiliary.
+        ``N/A``, ``n/a`` and ``#n/a`` are missing markers, not anchors.
     """
-    primary = _ordered(_tokens(data.get("component_accessions")))
-    declared = _ordered(_tokens(data.get("proven_uniprot_equivalents")))
-    xref = _ordered(_tokens(data.get("target_xref_uniprot_ids")))
+    primary = _ordered(_role_tokens(data.get("component_accessions")))
+    declared = _ordered(_role_tokens(data.get("proven_uniprot_equivalents")))
+    xref = _ordered(_role_tokens(data.get("target_xref_uniprot_ids")))
     primary_ids = set(primary)
     equivalent = tuple(item for item in declared if item not in primary_ids)
     excluded = primary_ids | set(equivalent)

@@ -568,7 +568,11 @@ class _ControlCase:
 
 
 def _control_cases() -> tuple[_ControlCase, ...]:
-    """Fixed offline cohort with the reported 1000-row outcome shape."""
+    """Deterministic stand-in for the reported 1000-row counts.
+
+    The original ChEMBL extract is not in the repository. These cases reproduce
+    the published status shape and the channel split, not those source rows.
+    """
     matched = tuple(
         _ControlCase("legacy_matched", (f"PM{index:05d}",)) for index in range(117)
     )
@@ -822,3 +826,133 @@ def test_runtime_projection_records_unknown_auxiliary_without_false_ambiguity() 
     unknown_retained = {record.content for record in unknown.rows[0].evidence.records}
     assert "uniprot_role=auxiliary" in unknown_retained
     assert "uniprot_role=primary" in unknown_retained
+
+
+def test_missing_markers_and_slash_xrefs_do_not_abort_the_batch() -> None:
+    from iuphar_target_class.pipeline import IndexedSnapshot, classify_batch
+
+    marked = partition_uniprot_roles(
+        {
+            "component_accessions": '["P35372"]',
+            "target_xref_uniprot_ids": "N/A|n/a|#n/a",
+        }
+    )
+    assert marked.auxiliary_ids == ()
+    assert marked.primary_ids == ("P35372",)
+    fields = project_target_fields(
+        {
+            "target_id": "CHEMBL7",
+            "component_accessions": '["P35372"]',
+            "target_xref_uniprot_ids": "N/A|FOO/BAR",
+            "pref_name": "mu opioid receptor",
+        },
+        "9606",
+    )
+    assert partition_uniprot_roles(
+        {
+            "component_accessions": '["P35372"]',
+            "target_xref_uniprot_ids": "N/A|FOO/BAR",
+        }
+    ).auxiliary_ids == ("FOO/BAR",)
+    snapshot = IndexedSnapshot.build(
+        snapshot_id="fixture",
+        mapping_version="fixture",
+        complete=True,
+        catalog=(_target("1", uniprot="P35372", species="9606"),),
+        annotations={},
+        family_nodes=(),
+        type_to_class={},
+        family_to_class={},
+    )
+    batch = classify_batch(
+        (RawTargetRow("row-slash", fields, "protein"),),
+        snapshot=snapshot,
+        provenance=RunProvenance("fixture", "n", "r", "s", "t", "t"),
+        run_id="run-slash",
+    )
+    result = batch.rows[0].result
+    assert result.match_status == "matched"
+    assert result.matched_target_id == "1"
+    retained = {
+        (record.source_id, record.content) for record in batch.rows[0].evidence.records
+    }
+    assert any(
+        "/" not in source_id and content == "uniprot_role=auxiliary:FOO/BAR"
+        for source_id, content in retained
+    )
+
+
+def test_auxiliary_hit_keeps_source_unavailable_on_an_incomplete_snapshot() -> None:
+    result = resolve_match(
+        _role_query(
+            policy=MATCHING_POLICY_ROLE_SEPARATED_V2,
+            primary=("MISSING",),
+            auxiliary=("P11111",),
+        ),
+        (_target("1", uniprot="P11111", species="9606"),),
+        snapshot_complete=False,
+    )
+    assert result.match_status == "source_unavailable"
+    assert result.matched_target_id is None
+    assert "auxiliary_uniprot_disagreement" in {
+        item.code for item in result.diagnostics
+    }
+    assert "1" in result.candidate_target_ids
+
+
+def test_auxiliary_outside_species_does_not_conflict_with_the_primary() -> None:
+    result = resolve_match(
+        _role_query(
+            policy=MATCHING_POLICY_ROLE_SEPARATED_V2,
+            primary=("P11111",),
+            auxiliary=("Q99999",),
+            organism="human",
+        ),
+        (
+            _target("1", uniprot="P11111", species="human"),
+            _target("2", uniprot="Q99999", species="mouse"),
+        ),
+        snapshot_complete=True,
+    )
+    assert result.match_status == "matched"
+    assert result.matched_target_id == "1"
+    assert tuple(item.code for item in result.diagnostics) == (
+        "auxiliary_uniprot_outside_species",
+    )
+
+
+def test_complex_row_is_not_confirmed_by_a_component_accession() -> None:
+    from iuphar_target_class.pipeline import IndexedSnapshot, classify_batch
+
+    fields = project_target_fields(
+        {
+            "target_id": "CHEMBL6",
+            "component_accessions": '["P35372"]',
+            "target_xref_uniprot_ids": "Q99999",
+            "pref_name": "complex",
+        },
+        "9606",
+    )
+    snapshot = IndexedSnapshot.build(
+        snapshot_id="fixture",
+        mapping_version="fixture",
+        complete=True,
+        catalog=(_target("1", uniprot="P35372", species="9606"),),
+        annotations={},
+        family_nodes=(),
+        type_to_class={},
+        family_to_class={},
+        complex_ids=frozenset({"1"}),
+    )
+    batch = classify_batch(
+        (RawTargetRow("row-complex", fields, "complex"),),
+        snapshot=snapshot,
+        provenance=RunProvenance("fixture", "n", "r", "s", "t", "t"),
+        run_id="run-complex",
+    )
+    result = batch.rows[0].result
+    assert result.match_status == "ambiguous"
+    assert result.matched_target_id is None
+    assert "component_accession_not_object_identity" in {
+        item.code for item in result.diagnostics
+    }
