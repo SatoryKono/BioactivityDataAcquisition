@@ -11,6 +11,12 @@ import polars as pl
 
 from bioetl.application.composite.column_service import ColumnOrderService
 from bioetl.application.composite.conflict_resolver import ConflictResolverService
+from bioetl.application.composite.post_join_classification import (
+    apply_post_join_target_classification,
+    discard_post_join_classification,
+    finalize_post_join_classification,
+    publish_post_join_classification,
+)
 from bioetl.application.runtime_timestamps import derive_completion_timestamp
 from bioetl.domain.composite import EnricherConfig
 from bioetl.domain.composite.cross_validation import CrossValidationStats
@@ -31,6 +37,7 @@ class MergePostJoinContext:
     records_enriched: int
     cv_stats: CrossValidationStats | None
     quarantine_payloads: list[dict[str, object]]
+    classification_pending_indices: tuple[int, ...] = ()
 
 
 class MergePostJoinWorkflowContext(Protocol):
@@ -163,6 +170,14 @@ def finalize_post_join_context(
         dependency_results=dependency_results,
         enricher_dfs=enricher_dfs,
     )
+    # RF-003: classify after seed_priority conflicts so IUPHAR columns own the result.
+    classification = apply_post_join_target_classification(
+        host,  # type: ignore[arg-type]
+        merged_df=merged_df,
+        run_id=run_id,
+        metadata_timestamp=metadata_timestamp,
+    )
+    merged_df = classification.merged_df
     records_merged = len(merged_df)
     records_enriched = host._count_enriched_records(
         merged_df,
@@ -175,6 +190,7 @@ def finalize_post_join_context(
         records_enriched=records_enriched,
         cv_stats=cv_stats,
         quarantine_payloads=quarantine_payloads,
+        classification_pending_indices=tuple(classification._pending_indices),
     )
 
 
@@ -193,13 +209,34 @@ async def persist_and_build_result(
     run_id: str,
     started_at: datetime,
     started_monotonic: float,
+    classification_pending_indices: Sequence[int] = (),
 ) -> MergeResult:
     """Persist merge outputs and build the domain ``MergeResult``."""
-    await host._write_outputs(
-        merged_df,
-        metadata_timestamp=metadata_timestamp,
+    try:
+        await host._write_outputs(
+            merged_df,
+            metadata_timestamp=metadata_timestamp,
+            run_id=run_id,
+            sources_used=sources_used,
+        )
+    except Exception:
+        discard_post_join_classification(
+            host,  # type: ignore[arg-type]
+            run_id=run_id,
+            metadata_timestamp=metadata_timestamp,
+            indices=classification_pending_indices,
+        )
+        raise
+    publish_post_join_classification(
+        host,  # type: ignore[arg-type]
         run_id=run_id,
-        sources_used=sources_used,
+        metadata_timestamp=metadata_timestamp,
+        indices=classification_pending_indices,
+    )
+    finalize_post_join_classification(
+        host,  # type: ignore[arg-type]
+        run_id=run_id,
+        metadata_timestamp=metadata_timestamp,
     )
     _, duration = derive_completion_timestamp(
         started_at=started_at,

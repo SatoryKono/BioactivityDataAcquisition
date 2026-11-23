@@ -85,6 +85,10 @@ def project_target_fields(
     business fields remain in ``source_business_data``.
     """
     primary = tuple(dict.fromkeys(_tokens(data.get("component_accessions"))))
+    # RF-003: idmapping accession may fill primary only when component list is empty.
+    idmapping = _text(data.get("uniprot_accession"))
+    if not primary and idmapping is not None:
+        primary = (idmapping,)
     xref = tuple(dict.fromkeys(_tokens(data.get("target_xref_uniprot_ids"))))
     primary_set = set(primary)
     proven = tuple(item for item in xref if item in primary_set)
@@ -97,6 +101,8 @@ def project_target_fields(
             )
         )
     )
+    # RF-003 (#13311): when the composite post-join surface supplies keywords /
+    # predicted_l* they flow into the kernel; standalone seed rows leave them empty.
     return {
         "target_chembl_id": _text(data.get("target_id")),
         # ChEMBL identity is never passed as the kernel's explicit IUPHAR ID.
@@ -111,6 +117,9 @@ def project_target_fields(
         "ec": "|".join(_tokens(data.get("target_ec_numbers"))) or None,
         "gene_symbol": _text(data.get("gene_symbol")),
         "gene_id": _text(data.get("gene_id")),
+        "keywords": "|".join(_tokens(data.get("keywords"))) or None,
+        "predicted_l1": _text(data.get("predicted_l1")),
+        "predicted_l2": _text(data.get("predicted_l2")),
         "source_business_data": canonical_json_bytes(plain_target_value(data)).decode(
             "utf-8"
         ),

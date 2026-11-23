@@ -1,0 +1,206 @@
+"""RF-003 (#13311): classify composite targets after dependency joins.
+
+Runs after conflict resolution so ``seed_priority`` cannot clobber IUPHAR
+projection columns. Evidence publish/finalize stay outside pure compute and
+follow successful persistence.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass, field
+from datetime import datetime
+from typing import TYPE_CHECKING, Protocol
+
+import polars as pl
+
+from bioetl.domain.config.target_classification import TARGET_CLASSIFICATION_FIELDS
+from bioetl.domain.context import PipelineContext
+from iuphar_target_class.composite_features import build_classification_business_data
+
+if TYPE_CHECKING:
+    from bioetl.application.services.target_runtime.classification import (
+        TargetClassificationRunState,
+    )
+    from bioetl.domain.ports import LoggerPort
+
+
+class _ClassificationHost(Protocol):
+    _logger: LoggerPort
+    _target_classification_session: TargetClassificationRunState | None
+
+
+@dataclass(slots=True)
+class PostJoinClassificationOutcome:
+    """DataFrame after optional post-join classification plus publish bookkeeping."""
+
+    merged_df: pl.DataFrame
+    classified_rows: int = 0
+    mode: str | None = None
+    _pending_indices: list[int] = field(default_factory=list)
+
+
+def _row_mapping(row: Mapping[str, object]) -> dict[str, object]:
+    return {str(key): value for key, value in row.items()}
+
+
+def apply_post_join_target_classification(
+    host: _ClassificationHost,
+    *,
+    merged_df: pl.DataFrame,
+    run_id: str,
+    metadata_timestamp: datetime | None,
+) -> PostJoinClassificationOutcome:
+    """Classify rows with a whitelist built from post-join features.
+
+    No-op when Composition did not bind a classification session (mode ``off``).
+    """
+    session = getattr(host, "_target_classification_session", None)
+    if session is None or merged_df.is_empty():
+        return PostJoinClassificationOutcome(merged_df=merged_df)
+
+    context = PipelineContext.create(
+        run_id=run_id,  # type: ignore[arg-type]
+        run_type="composite",  # type: ignore[arg-type]
+        logger=host._logger,
+        started_at=metadata_timestamp,
+        source_batch_id="composite_merge",  # type: ignore[arg-type]
+        replay_timestamp_anchor=metadata_timestamp,
+        pipeline_name="composite_target",
+        workflow_id="composite_post_join",
+    )
+    records = merged_df.to_dicts()
+    projections: list[dict[str, object]] = []
+    pending: list[int] = []
+    for index, raw in enumerate(records):
+        row = _row_mapping(raw)
+        business = build_classification_business_data(row)
+        enriched = session.enrich(context, index, business)
+        pending.append(index)
+        if session.mode == "shadow":
+            projections.append({})
+            continue
+        projections.append(
+            {
+                field: enriched.get(field)
+                for field in TARGET_CLASSIFICATION_FIELDS
+                if field in enriched
+            }
+        )
+
+    if session.mode == "shadow":
+        host._logger.info(
+            "RF-003 post-join classification computed in shadow mode",
+            classified_rows=len(pending),
+            run_id=run_id,
+        )
+        return PostJoinClassificationOutcome(
+            merged_df=merged_df,
+            classified_rows=len(pending),
+            mode=session.mode,
+            _pending_indices=pending,
+        )
+
+    updates = {
+        field: [projection.get(field) for projection in projections]
+        for field in TARGET_CLASSIFICATION_FIELDS
+        if any(field in projection for projection in projections)
+    }
+    result_df = merged_df
+    for field, values in updates.items():
+        result_df = result_df.with_columns(pl.Series(name=field, values=values))
+
+    host._logger.info(
+        "RF-003 post-join classification applied after dependency joins",
+        classified_rows=len(pending),
+        projection_fields=sorted(updates),
+        run_id=run_id,
+    )
+    return PostJoinClassificationOutcome(
+        merged_df=result_df,
+        classified_rows=len(pending),
+        mode=session.mode,
+        _pending_indices=pending,
+    )
+
+
+def publish_post_join_classification(
+    host: _ClassificationHost,
+    *,
+    run_id: str,
+    metadata_timestamp: datetime | None,
+    indices: Sequence[int],
+) -> None:
+    """Publish pending evidence after a successful merge persist."""
+    session = getattr(host, "_target_classification_session", None)
+    if session is None or not indices:
+        return
+    context = PipelineContext.create(
+        run_id=run_id,  # type: ignore[arg-type]
+        run_type="composite",  # type: ignore[arg-type]
+        logger=host._logger,
+        started_at=metadata_timestamp,
+        source_batch_id="composite_merge",  # type: ignore[arg-type]
+        replay_timestamp_anchor=metadata_timestamp,
+        pipeline_name="composite_target",
+        workflow_id="composite_post_join",
+    )
+    for index in indices:
+        session.publish(context, index)
+
+
+def finalize_post_join_classification(
+    host: _ClassificationHost,
+    *,
+    run_id: str,
+    metadata_timestamp: datetime | None,
+) -> None:
+    """Finalize evidence only after merge outputs are written."""
+    session = getattr(host, "_target_classification_session", None)
+    if session is None:
+        return
+    context = PipelineContext.create(
+        run_id=run_id,  # type: ignore[arg-type]
+        run_type="composite",  # type: ignore[arg-type]
+        logger=host._logger,
+        started_at=metadata_timestamp,
+        source_batch_id="composite_merge",  # type: ignore[arg-type]
+        replay_timestamp_anchor=metadata_timestamp,
+        pipeline_name="composite_target",
+        workflow_id="composite_post_join",
+    )
+    session.finalize(context)
+
+
+def discard_post_join_classification(
+    host: _ClassificationHost,
+    *,
+    run_id: str,
+    metadata_timestamp: datetime | None,
+    indices: Sequence[int],
+) -> None:
+    """Drop unpublished evidence when persistence fails."""
+    session = getattr(host, "_target_classification_session", None)
+    if session is None or not indices:
+        return
+    context = PipelineContext.create(
+        run_id=run_id,  # type: ignore[arg-type]
+        run_type="composite",  # type: ignore[arg-type]
+        logger=host._logger,
+        started_at=metadata_timestamp,
+        source_batch_id="composite_merge",  # type: ignore[arg-type]
+        replay_timestamp_anchor=metadata_timestamp,
+        pipeline_name="composite_target",
+        workflow_id="composite_post_join",
+    )
+    for index in indices:
+        session.discard(context, index)
+
+
+__all__ = [
+    "PostJoinClassificationOutcome",
+    "apply_post_join_target_classification",
+    "discard_post_join_classification",
+    "finalize_post_join_classification",
+    "publish_post_join_classification",
+]

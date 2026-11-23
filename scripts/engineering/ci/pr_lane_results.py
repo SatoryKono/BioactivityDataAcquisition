@@ -230,6 +230,12 @@ IUPHAR_SEMANTICS_RF001_TEST = "tests/unit/iuphar_target_class/test_semantics_rf0
 IUPHAR_IDENTIFIER_ROLES_RF002_TEST = (
     "tests/unit/iuphar_target_class/test_identifier_roles_rf002.py"
 )
+IUPHAR_COMPOSITE_FEATURES_RF003_TEST = (
+    "tests/unit/iuphar_target_class/test_composite_features_rf003.py"
+)
+IUPHAR_POST_JOIN_CLASSIFICATION_RF003_TEST = (
+    "tests/unit/application/composite/test_post_join_classification_rf003.py"
+)
 IUPHAR_POLICY_TEST = "tests/unit/iuphar_target_class/test_policy.py"
 IUPHAR_HIERARCHY_TEST = "tests/unit/iuphar_target_class/test_hierarchy.py"
 
@@ -922,6 +928,18 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/unit/iuphar_target_class/test_integration_acceptance.py",
         "tests/unit/infrastructure/adapters/iuphar/test_target_classification.py",
         "tests/unit/infrastructure/adapters/iuphar/test_classification_evidence_boundaries.py",
+        IUPHAR_COMPOSITE_FEATURES_RF003_TEST,
+    ),
+    "src/iuphar_target_class/composite_features.py": (
+        IUPHAR_COMPOSITE_FEATURES_RF003_TEST,
+    ),
+    "src/bioetl/application/composite/post_join_classification.py": (
+        IUPHAR_POST_JOIN_CLASSIFICATION_RF003_TEST,
+        "tests/unit/application/composite/test_merger_post_join.py",
+    ),
+    "src/bioetl/application/composite/merger_post_join.py": (
+        "tests/unit/application/composite/test_merger_post_join.py",
+        IUPHAR_POST_JOIN_CLASSIFICATION_RF003_TEST,
     ),
     **dict.fromkeys(
         (
@@ -2375,6 +2393,10 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
     ),
     "data/iuphar_target_class/rf001/": (IUPHAR_SEMANTICS_RF001_TEST,),
     "data/iuphar_target_class/rf002/": (IUPHAR_IDENTIFIER_ROLES_RF002_TEST,),
+    "data/iuphar_target_class/rf003/": (
+        IUPHAR_COMPOSITE_FEATURES_RF003_TEST,
+        IUPHAR_POST_JOIN_CLASSIFICATION_RF003_TEST,
+    ),
     "data/iuphar_target_class/rf005/": (IUPHAR_HIERARCHY_TEST,),
     **dict.fromkeys(
         (

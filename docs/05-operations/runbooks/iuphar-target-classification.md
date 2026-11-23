@@ -84,24 +84,32 @@ Promotion is only the migration procedure below.
 
 ### Base `chembl_target` and a composite target
 
-Classification runs inside the `chembl_target` transformer, on the business
-projection that transformer builds from the ChEMBL target record: `target_id`,
-`target_type`, `taxonomy_id`, `organism`, `pref_name`, component accessions,
-UniProt cross-references, EC numbers, and protein/gene synonyms. `shadow`
-returns that business row unchanged. `enrich` merges the nine projection
-fields into it. `"off"` does not bind a classifier.
+Standalone classification runs inside the `chembl_target` transformer, on the
+seed business projection: `target_id`, `target_type`, `taxonomy_id`,
+`organism`, `pref_name`, component accessions, UniProt cross-references, EC
+numbers, and protein/gene synonyms. `shadow` returns that business row
+unchanged. `enrich` merges the nine projection fields into it. `"off"` does
+not bind a classifier.
 
-The step does not run again after composite dependency joins. A composite
-target record can hold fields this projection never sees. The kernel reads
-`gene_symbol` and `gene_id` only when they are already on the business row.
-The `chembl_target` extractor does not set them, and it does not supply
-`keywords`, `predicted_l1`, or `predicted_l2`.
+**RF-003 (#13311):** `composite_target` runs a second classification stage
+**after** dependency joins and **after** `seed_priority` conflict resolution,
+before persist. The stage projects a bounded whitelist (EC, UniProt keywords,
+ChEMBL protein-class L1/L2 summary as `predicted_l*`, taxon, RF-002
+identifier roles, gene fields, source digests) — never the full merged
+payload. `predicted_l1` / `predicted_l2` are ChEMBL hierarchy predictions for
+local rules; they are **not** IUPHAR class identity by name. Contract pin:
+`data/iuphar_target_class/rf003/feature_whitelist.json`. Production mode stays
+`"off"` until a later RF admits enrich; Composition wires the same
+compute → publish → finalize session used by standalone when shadow/enrich is
+enabled on `chembl_target`.
 
-The kernel UniProt channel is the ordered union of `component_accessions` and
-`target_xref_uniprot_ids`. Those two sources are not separate match channels.
+RF-002 identifier roles still apply: primary UniProt is
+`component_accessions` (with idmapping accession only as empty-primary
+fallback); auxiliary xrefs stay diagnostic-only.
 
 `chembl_target_protein_classification` is a different pipeline. It is not this
-IUPHAR classifier. Workflows that write the same Silver/Gold target tables
+IUPHAR classifier; RF-003 only consumes its L1–L5 summary columns as
+prediction inputs. Workflows that write the same Silver/Gold target tables
 still share the one `chembl_target` configuration.
 
 ### Stage signs and statuses

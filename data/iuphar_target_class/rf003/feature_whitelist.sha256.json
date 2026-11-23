@@ -1,0 +1,7 @@
+{
+  "artifact": "iuphar_rf003_feature_whitelist",
+  "bytes": 2333,
+  "contract_version": "rf003-2026-11-24",
+  "path": "data/iuphar_target_class/rf003/feature_whitelist.json",
+  "sha256": "516e45b42e31d3bce8c08392ba7ea1154d11c471d6c9e659ef3ac3d5a694d861"
+}

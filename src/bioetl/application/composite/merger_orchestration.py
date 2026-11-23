@@ -227,6 +227,7 @@ async def execute_merge_execution_core(
         run_id=request.run_id,
         started_at=execution_context.started_at,
         started_monotonic=execution_context.started_monotonic,
+        classification_pending_indices=post_join_context.classification_pending_indices,
     )
 
 

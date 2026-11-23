@@ -142,6 +142,10 @@ class CompositeSupportServicesFactory:
                 logger=runtime_context.logger,
                 field_group_registry=runtime_context.field_group_registry,
             )
+        from bioetl.composition.bootstrap.assembly.target_classification_runtime import (
+            resolve_composite_post_join_classification_session,
+        )
+
         merger = build_composite_merge_service(
             config=self._config,
             storage=storage,
@@ -154,6 +158,10 @@ class CompositeSupportServicesFactory:
             normalization_policies=self._JOIN_KEY_NORMALIZATION_POLICIES,
             clock=self._infra.clock,
             execution_hook=execution_hook,
+            target_classification_session=resolve_composite_post_join_classification_session(
+                composite_name=self._config.name,
+                settings=self._infra.settings,
+            ),
         )
         runtime_management_services = build_runtime_management_services(
             config=self._config,

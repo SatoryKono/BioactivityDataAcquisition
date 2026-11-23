@@ -121,6 +121,10 @@ class MergeService(
             ]
             | None
         ) = runtime.pop("execution_hook", None)
+        # RF-003: optional Composition-bound classification session for post-join.
+        target_classification_session = runtime.pop(
+            "target_classification_session", None
+        )
         if runtime:
             unexpected = ", ".join(sorted(str(key) for key in runtime))
             raise TypeError(
@@ -133,6 +137,7 @@ class MergeService(
         self._cross_validator = cross_validator
         self._gold_schema = gold_schema
         self._clock = resolve_runtime_clock(clock)
+        self._target_classification_session = target_classification_session
 
         self._deduplicator = collaborators.deduplicator
         self._aggregator = collaborators.aggregator

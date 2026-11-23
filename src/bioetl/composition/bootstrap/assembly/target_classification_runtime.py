@@ -120,3 +120,33 @@ def configure_target_transformer(
         )
         if session is not None:
             transformer.configure_target_classification(session)
+
+
+def resolve_composite_post_join_classification_session(
+    *,
+    composite_name: str,
+    settings: Settings | None = None,
+    load_seed_config: object | None = None,
+) -> object | None:
+    """RF-003: bind chembl_target classification into composite_target merge host.
+
+    Production mode stays ``off`` until a later RF admits enrich. When the seed
+    entity config enables shadow/enrich, Composition injects the same session
+    type used by the standalone transformer so post-join classification reuses
+    compute/publish/finalize boundaries.
+    """
+    if composite_name != "composite_target":
+        return None
+    from bioetl.infrastructure.config.pipeline_config_api import (  # noqa: PLC0415
+        load_pipeline_config,
+    )
+
+    loader = load_seed_config or load_pipeline_config
+    seed_config = loader("chembl_target")  # type: ignore[operator]
+    if not isinstance(seed_config, PipelineYamlConfig):
+        return None
+    if not seed_config.target_classification.enabled:
+        return None
+    return build_target_classification_session(
+        seed_config, settings or get_settings()
+    )

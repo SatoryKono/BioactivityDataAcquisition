@@ -62,7 +62,7 @@ They remain distinct.
 
 | Surface | Priority | Full features | Notes |
 | --- | --- | --- | --- |
-| `composite_target` | 1 | After dependency joins | UniProt protein, idmapping accession, L1–L5 protein-class summary. |
+| `composite_target` | 1 | After dependency joins | UniProt protein, idmapping accession, L1–L5 protein-class summary. **RF-003 (#13311)** runs full classification after joins via `data/iuphar_target_class/rf003/feature_whitelist.json`. |
 | standalone `chembl_target` | 2 | No | Seed fields only; early classification cannot use post-join features. |
 
 Production `target_classification.mode` remains `"off"` until a later RF admits

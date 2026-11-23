@@ -73,6 +73,7 @@ def _make_host() -> MagicMock:
     host._count_enriched_records = MagicMock(return_value=1)
     host._write_outputs = AsyncMock()
     host._build_merge_result = MagicMock()
+    host._target_classification_session = None
     return host
 
 

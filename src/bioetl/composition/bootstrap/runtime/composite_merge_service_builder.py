@@ -82,6 +82,7 @@ def build_composite_merge_service(
         Awaitable[MergeResult],
     ]
     | None = None,
+    target_classification_session: object | None = None,
 ) -> MergeService:
     """Build the composite merge service from explicit owner-only collaborators."""
     merge_dependencies = build_merge_dependencies(
@@ -102,6 +103,7 @@ def build_composite_merge_service(
         gold_schema=resolve_gold_schema(config.name),
         clock=clock,
         execution_hook=execution_hook,
+        target_classification_session=target_classification_session,
         collaborators=MergeCollaboratorGroup(
             deduplicator=merge_dependencies.deduplicator,
             aggregator=merge_dependencies.aggregator,
