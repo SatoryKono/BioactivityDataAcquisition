@@ -314,6 +314,11 @@ def test_runtime_pipeline_error_code_breakdown_uses_bounded_runtime_error_metric
             "Track Global Audit Query Latency",
             "[$__rate_interval]",
         ),
+        (
+            "bioetl-incident-v1.json",
+            "Track Global Read Latency",
+            "[$__rate_interval]",
+        ),
     ],
 )
 def test_runtime_and_control_plane_operator_panels_use_active_time_windows(
@@ -347,10 +352,6 @@ def test_runtime_and_control_plane_operator_panels_use_active_time_windows(
         ("bioetl-incident-v1.json", "Monitor Failed Runs"),
         ("bioetl-incident-v1.json", "Track Failed Workflow Runs"),
         ("bioetl-incident-v1.json", "Track Global Read Failures"),
-        (
-            "bioetl-incident-v1.json",
-            "Track Global Read Latency",
-        ),
         ("bioetl-incident-v1.json", "Compare Records by Stage & Run Type"),
     ],
 )
