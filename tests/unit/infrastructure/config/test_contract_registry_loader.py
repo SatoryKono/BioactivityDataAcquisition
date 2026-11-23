@@ -30,9 +30,11 @@
 from __future__ import annotations
 
 import ctypes
+from concurrent.futures import Future
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from time import sleep
+from threading import Event, Thread, current_thread
+from time import monotonic
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -201,33 +203,58 @@ class TestLoadYamlWithTimeout:
             assert result == {"key": "value"}
 
     def test_raises_timeout_on_slow_load(self, monkeypatch):
-        """Test timeout exception for slow loading."""
-        # Skip this test on Windows due to threading issues
-        import sys
-
-        if sys.platform == "win32":
-            pytest.skip("Threading timeout test skipped on Windows")
-
+        """A finite slow read is joined before the timeout reaches the caller."""
         monkeypatch.setattr(
             "bioetl.infrastructure.config.contract_registry_loader._is_likely_network_drive",
             lambda x: True,
         )
 
-        with TemporaryDirectory() as temp_dir:
-            test_file = Path(temp_dir) / "test.yaml"
-            test_file.write_text("key: value", encoding="utf-8")
+        def check_one_timeout():
+            released = Event()
+            finished = Event()
+            timed_out = Event()
+            workers = []
+            original_result = Future.result
 
-            original_read_text = Path.read_text
+            def observed_result(self, timeout=None):
+                try:
+                    return original_result(self, timeout)
+                except TimeoutError:
+                    timed_out.set()
+                    raise
+
+            def release_after_timeout():
+                if timed_out.wait(2):
+                    released.wait(0.15)
+                released.set()
 
             def slow_read_text(self: Path, *args, **kwargs):
-                if self == test_file:
-                    sleep(0.1)  # Simulate slow network-drive read latency.
-                return original_read_text(self, *args, **kwargs)
+                workers.append(current_thread())
+                try:
+                    assert released.wait(2), "synthetic read was not released"
+                    return "key: value"
+                finally:
+                    finished.set()
 
             monkeypatch.setattr(Path, "read_text", slow_read_text)
+            monkeypatch.setattr(Future, "result", observed_result)
+            releaser = Thread(target=release_after_timeout)
+            releaser.start()
+            started = monotonic()
+            try:
+                with pytest.raises(TimeoutError, match="running read was awaited"):
+                    _load_yaml_with_timeout(Path("synthetic.yaml"), timeout=0.01)
+                elapsed = monotonic() - started
+            finally:
+                released.set()
+                releaser.join()
+                monkeypatch.setattr(Future, "result", original_result)
+            assert elapsed >= 0.1
+            assert finished.is_set()
+            assert len(workers) == 1 and not workers[0].is_alive()
 
-            with pytest.raises(TimeoutError, match="did not complete"):
-                _load_yaml_with_timeout(test_file, timeout=0.01)
+        for _ in range(3):
+            check_one_timeout()
 
     def test_propagates_yaml_error(self, monkeypatch):
         """Test that YAML errors are propagated."""

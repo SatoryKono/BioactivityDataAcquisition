@@ -52,7 +52,13 @@ def _is_likely_network_drive(path: Path) -> bool:
 def _load_yaml_with_timeout(
     path: Path, timeout: float = _YAML_LOAD_TIMEOUT_SECONDS
 ) -> JsonDict:
-    """Load YAML file with timeout protection for network drives."""
+    """Load YAML, classifying slow network reads without a caller deadline.
+
+    The timeout limits waiting for the network read's result, not the time
+    before this function returns. A running read cannot be cancelled: executor
+    shutdown waits for it to finish before raising TimeoutError. Local reads
+    are synchronous and do not use the timeout.
+    """
     if not _is_likely_network_drive(path):
         # Direct read for local drives
         payload = yaml.safe_load(path.read_text(encoding="utf-8"))
@@ -60,7 +66,7 @@ def _load_yaml_with_timeout(
             raise ValueError(f"YAML root must be a mapping: {path}")
         return cast("JsonDict", dict(payload))
 
-    # Timeout-protected read for network drives via Future.result(timeout=).
+    # Classify network reads via Future.result(timeout=); shutdown still waits.
     def _load_payload() -> JsonDict:
         payload = yaml.safe_load(path.read_text(encoding="utf-8"))
         if not isinstance(payload, Mapping):
@@ -73,7 +79,8 @@ def _load_yaml_with_timeout(
             result = future.result(timeout=timeout)
         except FuturesTimeoutError as exc:
             raise TimeoutError(
-                f"YAML load did not complete within {timeout} seconds: {path}"
+                f"YAML load did not complete within {timeout} seconds; "
+                f"the running read was awaited before returning: {path}"
             ) from exc
         return result
 
@@ -115,7 +122,9 @@ def load_contract_registry_payload(registry_path: Path | None = None) -> JsonDic
     try:
         payload = _load_yaml_with_timeout(path)
     except TimeoutError as exc:
-        raise TimeoutError(f"Contract registry load timeout: {path}") from exc
+        raise TimeoutError(
+            f"Contract registry load timeout (return may await the read): {path}"
+        ) from exc
     except OSError as exc:
         raise OSError(f"Failed to read contract registry: {path}") from exc
     except yaml.YAMLError as exc:
