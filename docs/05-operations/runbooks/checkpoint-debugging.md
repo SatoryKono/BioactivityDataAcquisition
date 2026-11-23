@@ -88,6 +88,14 @@ bioetl run --pipeline chembl_activity --run-type rebuild
 
 - **Symptom**: `--resume` does not resume and starts from beginning.
 
+- Manifest-selected checkpoint diagnostics return the matching manifest and
+  audit context on a best-effort basis even when checkpoint history is absent.
+  The compatibility result reports `missing_checkpoint` and is not compatible;
+  this does not authorize resume. The selected manifest must belong to the
+  requested pipeline and any checkpoint must have the same run identity.
+  Deleting the mutable checkpoint pointer normally preserves immutable history,
+  so it is not itself a reproduction of missing manifest-indexed history.
+
 - **Diagnosis**:
 
 ```bash

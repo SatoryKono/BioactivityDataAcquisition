@@ -154,7 +154,21 @@ async def inspect_checkpoint_workflow(
         )
     else:
         checkpoint = await checkpoint_service.get_checkpoint(pipeline_name)
+    run_manifest = None
+    if manifest_id is not None and run_manifest_service is not None:
+        run_manifest = resolve_run_manifest(run_manifest_service, manifest_id)
+        if run_manifest is not None:
+            manifest = run_manifest.manifest
+            if (
+                manifest.manifest_id != manifest_id
+                or manifest.pipeline_name != pipeline_name
+            ):
+                raise ValueError("manifest identity does not match checkpoint selector")
+            if checkpoint is not None and checkpoint.run_id != str(manifest.run_id):
+                raise ValueError("checkpoint and manifest run identity do not match")
     resolved_run_id = run_id or (checkpoint.run_id if checkpoint is not None else None)
+    if manifest_id is not None and run_manifest_service is not None:
+        resolved_run_id = str(run_manifest.manifest.run_id) if run_manifest else None
 
     if resolved_run_id is None:
         audit = AuditInspectionResult(
@@ -176,10 +190,8 @@ async def inspect_checkpoint_workflow(
         resolved_run_id,
         limit=audit_limit,
     )
-    run_manifest = resolve_run_manifest(
-        run_manifest_service,
-        resolved_run_id,
-    )
+    if manifest_id is None:
+        run_manifest = resolve_run_manifest(run_manifest_service, resolved_run_id)
     return CheckpointAuditWorkflowResult(
         pipeline_name=pipeline_name,
         checkpoint=checkpoint,
