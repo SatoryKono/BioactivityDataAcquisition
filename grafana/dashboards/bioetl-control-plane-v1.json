@@ -971,7 +971,7 @@
               },
               {
                 "id": "custom.hidden",
-                "value": true
+                "value": false
               },
               {
                 "id": "noValue",
@@ -983,6 +983,10 @@
                   "type": "auto",
                   "wrapText": false
                 }
+              },
+              {
+                "id": "displayName",
+                "value": "Reasons"
               }
             ]
           },

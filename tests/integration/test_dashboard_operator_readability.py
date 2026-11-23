@@ -61,7 +61,10 @@ def test_overview_stages_and_quality_are_outside_saved_evidence() -> None:
     assert stages["datasource"].get("uid") == "bioetl-ops-http"
     assert 9450 not in panels
     assert 9452 not in {p["id"] for p in get_dashboard_panels(dashboard)}
-    assert quality["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
+    assert (
+        quality["fieldConfig"]["defaults"]["noValue"]
+        == "No result · inspect source panel 9002"
+    )
     assert any(
         item.get("type") == "regex"
         and (item.get("options") or {}).get("pattern") == "^CRIT.*"
@@ -673,11 +676,9 @@ def test_9460_removal_columns_use_per_stage_removals() -> None:
     assert removal_target["url"].startswith("/ops/observability/selected-run-status?")
     assert "quality_evidence.funnel" in removal_target["root_selector"]
     assert removal_target["parser"] == "backend"
-    assert removal_target["root_selector"] == removal_target["uql"].removeprefix(
-        'parse-json | jsonata "'
-    ).removesuffix('"')
-    assert "removals[outcome=" in removal_target["uql"]
-    assert "$s.tracking = 'full' ? 0" in removal_target["uql"]
+    assert "uql" not in removal_target
+    assert "removals[outcome=" in removal_target["root_selector"]
+    assert "$s.tracking = 'full' ? 0" in removal_target["root_selector"]
     transforms = ov_panel["transformations"]
     assert not any(t["id"] == "joinByField" for t in transforms)
     assert "records_in" in removal_target["root_selector"]
@@ -711,7 +712,10 @@ def test_9460_removal_columns_use_per_stage_removals() -> None:
     }
     assert ov_panel["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
     assert "per-stage saved funnel removals" in ov_panel["description"]
-    assert dq_panel["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
+    assert (
+        dq_panel["fieldConfig"]["defaults"]["noValue"]
+        == "No result · inspect source panel 9406"
+    )
     assert "per-stage saved funnel removals" in dq_panel["description"]
 
     control = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
@@ -770,9 +774,11 @@ def test_dq_renderer_copy_matches_shipped() -> None:
         panels[9403]["fieldConfig"]["defaults"]["noValue"] == _PROCESSED_RECORDS_NOVALUE
     )
     assert panels[9450]["description"] == ROW_9450_DESCRIPTION
+    assert panels[9451]["description"].startswith(
+        f"{_DQ_DOMAINS_DESCRIPTION} {HTTP_EVIDENCE_STATES}"
+    )
     assert (
-        panels[9451]["description"]
-        == f"{_DQ_DOMAINS_DESCRIPTION} {HTTP_EVIDENCE_STATES}"
+        "inspect Review Selected Run Status (panel 9406)" in panels[9451]["description"]
     )
     # Phase 2.5 / §2.4: DQ identity is a handoff to Overview 9300.
     assert panels[9452]["type"] == "text"
