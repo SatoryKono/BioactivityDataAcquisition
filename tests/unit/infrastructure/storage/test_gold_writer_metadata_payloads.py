@@ -35,6 +35,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.domain.medallion import GoldWriteMode
+from bioetl.domain.value_objects.silver_result import SilverWriteResult
 from bioetl.infrastructure.storage.gold.metadata_payloads import (
     build_gold_merged_metadata_input,
     build_gold_metadata_input,
@@ -59,10 +60,9 @@ class TestBuildGoldMetadataInput:
 
     def test_converts_silver_refs_and_preserves_transform_metadata(self) -> None:
         """Coordinator input should expose canonical SilverRef lineage objects."""
-        silver_ref = MagicMock()
-        silver_ref.table_name = "chembl.activity"
-        silver_ref.table_path = "silver/chembl/activity"
-        silver_ref.delta_version = 7
+        silver_ref = SilverWriteResult(
+            "chembl.activity", "silver/chembl/activity", 7, 1
+        )
 
         result = build_gold_metadata_input(
             table_path="gold/chembl/activity",
