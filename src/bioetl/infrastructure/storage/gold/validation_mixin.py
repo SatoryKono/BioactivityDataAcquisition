@@ -82,10 +82,10 @@ class GoldWriterValidationMixin:
         contract_version: str | None = None,
     ) -> None:
         """Validate that schema has strict=True."""
-        is_strict = getattr(schema, "strict", False) or getattr(
-            getattr(schema, "Config", None), "strict", False
+        is_strict = getattr(
+            schema, "strict", getattr(getattr(schema, "Config", None), "strict", False)
         )
-        if not is_strict:
+        if is_strict is not True:
             reject_reason = build_gold_contract_reject_reason(
                 reason_code=GoldRejectReasonCode.CONTRACT_SCHEMA_FAILURE,
                 contract_version=resolve_gold_contract_version(
