@@ -6,6 +6,9 @@ plan parameters stay null. EC, L1, and L2 rules stay on the local layer.
 
 RF-001 (#13309) embeds the field-layer / status / capability semantics contract
 without changing biological acceptance or rewriting historical artifacts.
+
+RF-002 (#13310) embeds the UniProt identifier-role / matching-policy contract
+(primary vs auxiliary xref) without relaxing trusted-anchor conflicts.
 """
 
 from __future__ import annotations
@@ -26,6 +29,7 @@ from .gtopdb_2026_3_1 import (
     TARGETS_CSV_URL,
     TYPE_SUBCLASS_PAIRS,
 )
+from .identifier_roles import identifier_roles_document
 from .iuphar_mapping import approved_class_mappings
 from .semantics import semantics_document
 from .stage0.io import atomic_write_bytes, canonical_json_bytes
@@ -390,6 +394,7 @@ def policy_document() -> dict[str, object]:
         "class_dictionary": [_rule_payload(rule) for rule in class_rules()],
         "direct_mappings": direct_mapping_document(),
         "rf001_semantics": semantics_document(),
+        "rf002_identifier_roles": identifier_roles_document(),
         "gold_cases": {
             "cases": [],
             "checker": "Cursor",

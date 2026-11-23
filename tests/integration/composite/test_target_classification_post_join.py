@@ -10,6 +10,7 @@ import polars as pl
 import pytest
 
 from iuphar_target_class.bioetl_input import project_target_fields
+from iuphar_target_class.identifier_roles import MATCHING_POLICY_VERSION
 
 from bioetl.application.composite.coalesce_policy import CoalescePolicyService
 from bioetl.application.composite.conflict_resolver import ConflictResolverService
@@ -112,6 +113,7 @@ def _stage(
         normalization_version="bioetl-iuphar-input-v1",
         rules_version="plan-v1-r8",
         classification_schema_version="3.1.0",
+        matching_policy_version=MATCHING_POLICY_VERSION,
     )
     return CompositeTargetClassification(session), classifier, evidence
 
