@@ -728,6 +728,24 @@ def test_duplicate_identity_is_not_silently_deduplicated() -> None:
     assert identity["disposition"] == "allowed"
     assert identity["basis_sha256"] == basis.basis_sha256
     assert _field_diff(allowed, "iuphar_subclass") is None
+    changed_class = (
+        _identity(iuphar_class="Enzyme"),
+        _identity(iuphar_class="Enzyme"),
+    )
+    receptor = (_identity(iuphar_class="Receptor"),)
+    hidden = _comparison(
+        _report(changed_class, receptor, (basis,)), "original_m:new_result"
+    )
+    hidden_identity = _field_diff(hidden, "identity")
+    hidden_class = _field_diff(hidden, "iuphar_class")
+    assert hidden_identity is not None and hidden_identity["disposition"] == "allowed"
+    assert hidden_class is not None
+    assert hidden_class["disposition"] == "unexplained"
+    assert hidden_class["basis_id"] is None
+    assert hidden_class["old_value"] == "Enzyme"
+    assert hidden_class["new_value"] == "Receptor"
+    assert hidden["unexplained_count"] == 1
+    assert hidden["allowed_count"] == 1
     lost = _comparison(_report(historical, (), (basis,)), "original_m:new_result")
     lost_identity = _field_diff(lost, "identity")
     assert lost_identity is not None
@@ -749,6 +767,46 @@ def test_rows_without_identity_are_not_a_class_match() -> None:
     assert identity is not None
     assert identity["disposition"] == "unexplained"
     assert identity["target_id"] == ""
+
+
+def test_provenance_object_formatting_is_not_a_difference() -> None:
+    historical = _identity(
+        iuphar_class="Enzyme",
+        provenance=json.dumps({"b": "2", "a": "1"}, indent=2),
+    )
+    current = _identity(
+        iuphar_class="Enzyme",
+        provenance=json.dumps(
+            {"a": "1", "b": "2"}, sort_keys=True, separators=(",", ":")
+        ),
+    )
+    changed = _identity(
+        iuphar_class="Enzyme",
+        provenance=json.dumps({"a": "9", "b": "2"}, separators=(",", ":")),
+    )
+    stage0 = compare_stage0(Stage0Reference("fixture", 1, (historical,)), (current,))
+    assert stage0.residual == ()
+    assert stage0.changes == ()
+    same = _comparison(_report((historical,), (current,)), "original_m:new_result")
+    assert _field_diff(same, "provenance") is None
+    assert same["semantic_mismatch_count"] == 0
+    difference = _field_diff(
+        _comparison(_report((historical,), (changed,)), "original_m:new_result"),
+        "provenance",
+    )
+    assert difference is not None
+    assert difference["disposition"] == "unexplained"
+    assert difference["old_value"] == '{"a":"1","b":"2"}'
+    assert difference["new_value"] == '{"a":"9","b":"2"}'
+    plain = _identity(iuphar_class="Enzyme", provenance="rule-a")
+    other = _identity(iuphar_class="Enzyme", provenance="rule-b")
+    text = _field_diff(
+        _comparison(_report((plain,), (other,)), "original_m:new_result"),
+        "provenance",
+    )
+    assert text is not None
+    assert text["old_value"] == "rule-a"
+    assert text["new_value"] == "rule-b"
 
 
 def test_structured_family_paths_ignore_key_and_record_order() -> None:

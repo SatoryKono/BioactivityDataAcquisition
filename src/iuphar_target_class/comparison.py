@@ -824,7 +824,20 @@ def _irregular_key(
         input_row_id=input_row_id,
         post_hoc=_group_post_hoc(right_group),
     )
-    return _KeyOutcome((difference,), 0, 0, ())
+    differences = [difference]
+    availability: tuple[tuple[str, str, str], ...] = ()
+    if len(left_group) > 1 and len(right_group) == 1:
+        survivor = _compare_singleton(
+            _closest_historical_row(left_group, right_group[0]),
+            right_group[0],
+            pair,
+            bases,
+            target_id,
+            input_row_id,
+        )
+        differences.extend(survivor.differences)
+        availability = survivor.availability
+    return _KeyOutcome(tuple(differences), 0, 0, availability)
 
 
 def _irregular_values(
@@ -923,6 +936,8 @@ def _observe(row: Mapping[str, str], field: str) -> tuple[str, str | None]:
 
 
 def _canonical_field_value(field: str, value: str) -> str:
+    if field == "provenance":
+        return _canonical_object(value)
     if field not in _LIST_FIELDS:
         return value
     try:
@@ -938,6 +953,31 @@ def _canonical_field_value(field: str, value: str) -> str:
     ):
         return _canonical_family_paths(loaded)
     return value
+
+
+def _canonical_object(value: str) -> str:
+    """Sort object keys. A non-object provenance string stays exact."""
+    try:
+        loaded = json.loads(value)
+    except json.JSONDecodeError:
+        return value
+    if not isinstance(loaded, dict):
+        return value
+    return json.dumps(loaded, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+
+
+def _closest_historical_row(
+    rows: tuple[Mapping[str, str], ...], survivor: Mapping[str, str]
+) -> Mapping[str, str]:
+    """Pick the historical duplicate whose compared fields are nearest the survivor."""
+
+    def distance(row: Mapping[str, str]) -> int:
+        return sum(
+            _observe(row, field) != _observe(survivor, field)
+            for field in COMPARED_FIELDS
+        )
+
+    return min(rows, key=distance)
 
 
 def _canonical_family_paths(loaded: list[object]) -> str:
