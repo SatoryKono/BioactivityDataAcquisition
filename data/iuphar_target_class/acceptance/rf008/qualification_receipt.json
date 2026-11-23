@@ -172,7 +172,7 @@
   "issue": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/13316",
   "pins": {
     "classification_schema_version": "3.1.0",
-    "expectations_sha256": "de834e2f53de6a58f8f704c4f04965650c3d075d43f9bf132e99902aeb914921",
+    "expectations_sha256": "4ad503802b86e3ffe33652bfb97c83f3c7584ea0882b569e048e20e37c52b589",
     "normalization": {
       "normalization_sha256": "72f39b0e080f20ce484b81795a6d0aeffac091b4f7f8e54c68f99ef814fe3b26",
       "normalization_version": "bioetl-iuphar-input-v1",
@@ -249,18 +249,26 @@
       "expected": {
         "annotation_status": "available",
         "iuphar_class": "Receptor",
-        "parents_retained": [
-          "301"
+        "root_to_leaf_paths": [
+          [
+            "688",
+            "862",
+            "301",
+            "305"
+          ]
         ]
       },
       "observed": {
         "annotation_status": "available",
+        "branch_count": 1,
         "iuphar_class": "Receptor",
-        "path_ids": [
-          "301",
-          "305",
-          "688",
-          "862"
+        "root_to_leaf_paths": [
+          [
+            "688",
+            "862",
+            "301",
+            "305"
+          ]
         ]
       }
     },
@@ -279,16 +287,22 @@
       "expected": {
         "annotation_status": "available",
         "iuphar_class": "Enzyme",
-        "parents_retained": [
-          "690"
+        "root_to_leaf_paths": [
+          [
+            "690",
+            "104"
+          ]
         ]
       },
       "observed": {
         "annotation_status": "available",
+        "branch_count": 1,
         "iuphar_class": "Enzyme",
-        "path_ids": [
-          "104",
-          "690"
+        "root_to_leaf_paths": [
+          [
+            "690",
+            "104"
+          ]
         ]
       }
     },
@@ -307,17 +321,24 @@
       "expected": {
         "annotation_status": "available",
         "iuphar_class": "Receptor",
-        "parents_retained": [
-          "694"
+        "root_to_leaf_paths": [
+          [
+            "688",
+            "694",
+            "1"
+          ]
         ]
       },
       "observed": {
         "annotation_status": "available",
+        "branch_count": 1,
         "iuphar_class": "Receptor",
-        "path_ids": [
-          "1",
-          "688",
-          "694"
+        "root_to_leaf_paths": [
+          [
+            "688",
+            "694",
+            "1"
+          ]
         ]
       }
     },
@@ -336,17 +357,24 @@
       "expected": {
         "annotation_status": "available",
         "iuphar_class": "Ion Channel",
-        "parents_retained": [
-          "697"
+        "root_to_leaf_paths": [
+          [
+            "689",
+            "697",
+            "68"
+          ]
         ]
       },
       "observed": {
         "annotation_status": "available",
+        "branch_count": 1,
         "iuphar_class": "Ion Channel",
-        "path_ids": [
-          "68",
-          "689",
-          "697"
+        "root_to_leaf_paths": [
+          [
+            "689",
+            "697",
+            "68"
+          ]
         ]
       }
     },
@@ -365,17 +393,24 @@
       "expected": {
         "annotation_status": "available",
         "iuphar_class": "Receptor",
-        "parents_retained": [
-          "695"
+        "root_to_leaf_paths": [
+          [
+            "688",
+            "695",
+            "84"
+          ]
         ]
       },
       "observed": {
         "annotation_status": "available",
+        "branch_count": 1,
         "iuphar_class": "Receptor",
-        "path_ids": [
-          "688",
-          "695",
-          "84"
+        "root_to_leaf_paths": [
+          [
+            "688",
+            "695",
+            "84"
+          ]
         ]
       }
     },
@@ -394,17 +429,24 @@
       "expected": {
         "annotation_status": "available",
         "iuphar_class": "Ion Channel",
-        "parents_retained": [
-          "861"
+        "root_to_leaf_paths": [
+          [
+            "689",
+            "861",
+            "119"
+          ]
         ]
       },
       "observed": {
         "annotation_status": "available",
+        "branch_count": 1,
         "iuphar_class": "Ion Channel",
-        "path_ids": [
-          "119",
-          "689",
-          "861"
+        "root_to_leaf_paths": [
+          [
+            "689",
+            "861",
+            "119"
+          ]
         ]
       }
     },
@@ -423,16 +465,22 @@
       "expected": {
         "annotation_status": "available",
         "iuphar_class": "Other Protein Target",
-        "parents_retained": [
-          "864"
+        "root_to_leaf_paths": [
+          [
+            "864",
+            "106"
+          ]
         ]
       },
       "observed": {
         "annotation_status": "available",
+        "branch_count": 1,
         "iuphar_class": "Other Protein Target",
-        "path_ids": [
-          "106",
-          "864"
+        "root_to_leaf_paths": [
+          [
+            "864",
+            "106"
+          ]
         ]
       }
     },
@@ -451,17 +499,24 @@
       "expected": {
         "annotation_status": "available",
         "iuphar_class": "Transporter",
-        "parents_retained": [
-          "136"
+        "root_to_leaf_paths": [
+          [
+            "691",
+            "136",
+            "151"
+          ]
         ]
       },
       "observed": {
         "annotation_status": "available",
+        "branch_count": 1,
         "iuphar_class": "Transporter",
-        "path_ids": [
-          "136",
-          "151",
-          "691"
+        "root_to_leaf_paths": [
+          [
+            "691",
+            "136",
+            "151"
+          ]
         ]
       }
     },
@@ -480,18 +535,26 @@
       "expected": {
         "annotation_status": "available",
         "iuphar_class": "Ion Channel",
-        "parents_retained": [
-          "133"
+        "root_to_leaf_paths": [
+          [
+            "689",
+            "696",
+            "133",
+            "69"
+          ]
         ]
       },
       "observed": {
         "annotation_status": "available",
+        "branch_count": 1,
         "iuphar_class": "Ion Channel",
-        "path_ids": [
-          "133",
-          "689",
-          "69",
-          "696"
+        "root_to_leaf_paths": [
+          [
+            "689",
+            "696",
+            "133",
+            "69"
+          ]
         ]
       }
     },
@@ -526,15 +589,24 @@
       "expected": {
         "annotation_status": "unmapped_type",
         "iuphar_class": null,
-        "parents_retained": []
+        "root_to_leaf_paths": [
+          [
+            "688",
+            "694",
+            "16"
+          ]
+        ]
       },
       "observed": {
         "annotation_status": "unmapped_type",
+        "branch_count": 1,
         "iuphar_class": null,
-        "path_ids": [
-          "16",
-          "688",
-          "694"
+        "root_to_leaf_paths": [
+          [
+            "688",
+            "694",
+            "16"
+          ]
         ]
       }
     },
@@ -573,20 +645,36 @@
       },
       "expected": {
         "annotation_status": "available",
+        "branch_count": 2,
         "iuphar_class": "Enzyme",
-        "parents_retained": [
-          "239",
-          "865"
+        "root_to_leaf_paths": [
+          [
+            "690",
+            "239",
+            "254"
+          ],
+          [
+            "690",
+            "865",
+            "254"
+          ]
         ]
       },
       "observed": {
         "annotation_status": "available",
+        "branch_count": 2,
         "iuphar_class": "Enzyme",
-        "path_ids": [
-          "239",
-          "254",
-          "690",
-          "865"
+        "root_to_leaf_paths": [
+          [
+            "690",
+            "239",
+            "254"
+          ],
+          [
+            "690",
+            "865",
+            "254"
+          ]
         ]
       }
     },
@@ -603,17 +691,24 @@
       "expected": {
         "annotation_status": "partial",
         "iuphar_class": "Receptor",
-        "parents_retained": [
-          "694"
+        "root_to_leaf_paths": [
+          [
+            "688",
+            "694",
+            "1"
+          ]
         ]
       },
       "observed": {
         "annotation_status": "partial",
+        "branch_count": 1,
         "iuphar_class": "Receptor",
-        "path_ids": [
-          "1",
-          "688",
-          "694"
+        "root_to_leaf_paths": [
+          [
+            "688",
+            "694",
+            "1"
+          ]
         ]
       }
     },
@@ -627,19 +722,27 @@
         "source": "IUBMB EC class via policy.EC_CATEGORIES"
       },
       "expected": {
+        "direct_layer_rule_ids": [],
         "ec_categories": [
           "Oxidoreductases"
         ],
         "local_class": null,
-        "not_an_iuphar_class": true
+        "not_an_iuphar_class": true,
+        "rule_family": "ec",
+        "rule_marks_direct_layer": false,
+        "rule_output": "Oxidoreductases"
       },
       "observed": {
+        "direct_layer_rule_ids": [],
         "ec_categories": [
           "Oxidoreductases"
         ],
         "local_class": null,
         "multiple_ec_categories": false,
-        "not_an_iuphar_class": true
+        "not_an_iuphar_class": true,
+        "rule_family": "ec",
+        "rule_marks_direct_layer": false,
+        "rule_output": "Oxidoreductases"
       }
     },
     {
@@ -652,19 +755,27 @@
         "source": "IUBMB EC class via policy.EC_CATEGORIES"
       },
       "expected": {
+        "direct_layer_rule_ids": [],
         "ec_categories": [
           "Transferases"
         ],
         "local_class": null,
-        "not_an_iuphar_class": true
+        "not_an_iuphar_class": true,
+        "rule_family": "ec",
+        "rule_marks_direct_layer": false,
+        "rule_output": "Transferases"
       },
       "observed": {
+        "direct_layer_rule_ids": [],
         "ec_categories": [
           "Transferases"
         ],
         "local_class": null,
         "multiple_ec_categories": false,
-        "not_an_iuphar_class": true
+        "not_an_iuphar_class": true,
+        "rule_family": "ec",
+        "rule_marks_direct_layer": false,
+        "rule_output": "Transferases"
       }
     },
     {
@@ -677,19 +788,27 @@
         "source": "IUBMB EC class via policy.EC_CATEGORIES"
       },
       "expected": {
+        "direct_layer_rule_ids": [],
         "ec_categories": [
           "Hydrolases"
         ],
         "local_class": null,
-        "not_an_iuphar_class": true
+        "not_an_iuphar_class": true,
+        "rule_family": "ec",
+        "rule_marks_direct_layer": false,
+        "rule_output": "Hydrolases"
       },
       "observed": {
+        "direct_layer_rule_ids": [],
         "ec_categories": [
           "Hydrolases"
         ],
         "local_class": null,
         "multiple_ec_categories": false,
-        "not_an_iuphar_class": true
+        "not_an_iuphar_class": true,
+        "rule_family": "ec",
+        "rule_marks_direct_layer": false,
+        "rule_output": "Hydrolases"
       }
     },
     {
@@ -702,19 +821,27 @@
         "source": "IUBMB EC class via policy.EC_CATEGORIES"
       },
       "expected": {
+        "direct_layer_rule_ids": [],
         "ec_categories": [
           "Lyases"
         ],
         "local_class": null,
-        "not_an_iuphar_class": true
+        "not_an_iuphar_class": true,
+        "rule_family": "ec",
+        "rule_marks_direct_layer": false,
+        "rule_output": "Lyases"
       },
       "observed": {
+        "direct_layer_rule_ids": [],
         "ec_categories": [
           "Lyases"
         ],
         "local_class": null,
         "multiple_ec_categories": false,
-        "not_an_iuphar_class": true
+        "not_an_iuphar_class": true,
+        "rule_family": "ec",
+        "rule_marks_direct_layer": false,
+        "rule_output": "Lyases"
       }
     },
     {
@@ -727,19 +854,27 @@
         "source": "IUBMB EC class via policy.EC_CATEGORIES"
       },
       "expected": {
+        "direct_layer_rule_ids": [],
         "ec_categories": [
           "Isomerases"
         ],
         "local_class": null,
-        "not_an_iuphar_class": true
+        "not_an_iuphar_class": true,
+        "rule_family": "ec",
+        "rule_marks_direct_layer": false,
+        "rule_output": "Isomerases"
       },
       "observed": {
+        "direct_layer_rule_ids": [],
         "ec_categories": [
           "Isomerases"
         ],
         "local_class": null,
         "multiple_ec_categories": false,
-        "not_an_iuphar_class": true
+        "not_an_iuphar_class": true,
+        "rule_family": "ec",
+        "rule_marks_direct_layer": false,
+        "rule_output": "Isomerases"
       }
     },
     {
@@ -752,19 +887,27 @@
         "source": "IUBMB EC class via policy.EC_CATEGORIES"
       },
       "expected": {
+        "direct_layer_rule_ids": [],
         "ec_categories": [
           "Ligases"
         ],
         "local_class": null,
-        "not_an_iuphar_class": true
+        "not_an_iuphar_class": true,
+        "rule_family": "ec",
+        "rule_marks_direct_layer": false,
+        "rule_output": "Ligases"
       },
       "observed": {
+        "direct_layer_rule_ids": [],
         "ec_categories": [
           "Ligases"
         ],
         "local_class": null,
         "multiple_ec_categories": false,
-        "not_an_iuphar_class": true
+        "not_an_iuphar_class": true,
+        "rule_family": "ec",
+        "rule_marks_direct_layer": false,
+        "rule_output": "Ligases"
       }
     },
     {
@@ -777,19 +920,27 @@
         "source": "IUBMB EC class via policy.EC_CATEGORIES"
       },
       "expected": {
+        "direct_layer_rule_ids": [],
         "ec_categories": [
           "Translocases"
         ],
         "local_class": null,
-        "not_an_iuphar_class": true
+        "not_an_iuphar_class": true,
+        "rule_family": "ec",
+        "rule_marks_direct_layer": false,
+        "rule_output": "Translocases"
       },
       "observed": {
+        "direct_layer_rule_ids": [],
         "ec_categories": [
           "Translocases"
         ],
         "local_class": null,
         "multiple_ec_categories": false,
-        "not_an_iuphar_class": true
+        "not_an_iuphar_class": true,
+        "rule_family": "ec",
+        "rule_marks_direct_layer": false,
+        "rule_output": "Translocases"
       }
     },
     {
@@ -801,22 +952,40 @@
         "source": "IUBMB classes 1 and 3; multiple categories are not one IUPHAR class"
       },
       "expected": {
+        "direct_layer_rule_ids": [],
         "ec_categories": [
           "Oxidoreductases",
           "Hydrolases"
         ],
         "local_class": null,
         "multiple_ec_categories": true,
-        "not_an_iuphar_class": true
+        "not_an_iuphar_class": true,
+        "rule_marks_direct_layer": [
+          false,
+          false
+        ],
+        "rule_outputs": [
+          "Oxidoreductases",
+          "Hydrolases"
+        ]
       },
       "observed": {
+        "direct_layer_rule_ids": [],
         "ec_categories": [
           "Oxidoreductases",
           "Hydrolases"
         ],
         "local_class": null,
         "multiple_ec_categories": true,
-        "not_an_iuphar_class": true
+        "not_an_iuphar_class": true,
+        "rule_marks_direct_layer": [
+          false,
+          false
+        ],
+        "rule_outputs": [
+          "Oxidoreductases",
+          "Hydrolases"
+        ]
       }
     },
     {
@@ -866,11 +1035,25 @@
         "source": "WORKING_CLASSES has no transcription-factor class, and an unregistered keyword is not an exact local rule"
       },
       "expected": {
+        "free_text_marks_direct_layer": [
+          false
+        ],
+        "free_text_rule_ids": [
+          "free-text"
+        ],
         "local_class": null,
+        "local_rule_ids": [],
         "local_status": "not_supported"
       },
       "observed": {
+        "free_text_marks_direct_layer": [
+          false
+        ],
+        "free_text_rule_ids": [
+          "free-text"
+        ],
         "local_class": null,
+        "local_rule_ids": [],
         "local_status": "not_supported"
       }
     },

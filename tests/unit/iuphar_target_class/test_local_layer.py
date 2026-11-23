@@ -274,9 +274,10 @@ def test_rf008_ec_tf_and_missing_markers_follow_the_source_tables() -> None:
     assert len(ec_cases) == 7
     assert all(item["disposition"] == "verified" for item in ec_cases)
     by_id = {str(item["case_id"]): item for item in cases if isinstance(item, dict)}
-    assert by_id["local-tf-broad"]["observed"] == {
-        "local_class": None,
-        "local_status": "not_supported",
-    }
+    assert by_id["local-tf-broad"]["observed"]["local_class"] is None
+    assert by_id["local-tf-broad"]["observed"]["local_status"] == "not_supported"
+    assert by_id["local-tf-broad"]["observed"]["free_text_rule_ids"] == ["free-text"]
+    assert by_id["local-ec-7"]["observed"]["rule_output"] == "Translocases"
+    assert by_id["local-ec-7"]["observed"]["rule_marks_direct_layer"] is False
     assert by_id["local-ec-7"]["observed"]["ec_categories"] == ["Translocases"]
     assert by_id["local-ec-7"]["observed"]["local_class"] is None

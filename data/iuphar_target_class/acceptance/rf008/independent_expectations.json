@@ -74,8 +74,13 @@
       "expected": {
         "annotation_status": "available",
         "iuphar_class": "Receptor",
-        "parents_retained": [
-          "301"
+        "root_to_leaf_paths": [
+          [
+            "688",
+            "862",
+            "301",
+            "305"
+          ]
         ]
       },
       "fixture": {
@@ -101,8 +106,11 @@
       "expected": {
         "annotation_status": "available",
         "iuphar_class": "Enzyme",
-        "parents_retained": [
-          "690"
+        "root_to_leaf_paths": [
+          [
+            "690",
+            "104"
+          ]
         ]
       },
       "fixture": {
@@ -128,8 +136,12 @@
       "expected": {
         "annotation_status": "available",
         "iuphar_class": "Receptor",
-        "parents_retained": [
-          "694"
+        "root_to_leaf_paths": [
+          [
+            "688",
+            "694",
+            "1"
+          ]
         ]
       },
       "fixture": {
@@ -155,8 +167,12 @@
       "expected": {
         "annotation_status": "available",
         "iuphar_class": "Ion Channel",
-        "parents_retained": [
-          "697"
+        "root_to_leaf_paths": [
+          [
+            "689",
+            "697",
+            "68"
+          ]
         ]
       },
       "fixture": {
@@ -182,8 +198,12 @@
       "expected": {
         "annotation_status": "available",
         "iuphar_class": "Receptor",
-        "parents_retained": [
-          "695"
+        "root_to_leaf_paths": [
+          [
+            "688",
+            "695",
+            "84"
+          ]
         ]
       },
       "fixture": {
@@ -209,8 +229,12 @@
       "expected": {
         "annotation_status": "available",
         "iuphar_class": "Ion Channel",
-        "parents_retained": [
-          "861"
+        "root_to_leaf_paths": [
+          [
+            "689",
+            "861",
+            "119"
+          ]
         ]
       },
       "fixture": {
@@ -236,8 +260,11 @@
       "expected": {
         "annotation_status": "available",
         "iuphar_class": "Other Protein Target",
-        "parents_retained": [
-          "864"
+        "root_to_leaf_paths": [
+          [
+            "864",
+            "106"
+          ]
         ]
       },
       "fixture": {
@@ -263,8 +290,12 @@
       "expected": {
         "annotation_status": "available",
         "iuphar_class": "Transporter",
-        "parents_retained": [
-          "136"
+        "root_to_leaf_paths": [
+          [
+            "691",
+            "136",
+            "151"
+          ]
         ]
       },
       "fixture": {
@@ -290,8 +321,13 @@
       "expected": {
         "annotation_status": "available",
         "iuphar_class": "Ion Channel",
-        "parents_retained": [
-          "133"
+        "root_to_leaf_paths": [
+          [
+            "689",
+            "696",
+            "133",
+            "69"
+          ]
         ]
       },
       "fixture": {
@@ -350,7 +386,13 @@
       "expected": {
         "annotation_status": "unmapped_type",
         "iuphar_class": null,
-        "parents_retained": []
+        "root_to_leaf_paths": [
+          [
+            "688",
+            "694",
+            "16"
+          ]
+        ]
       },
       "fixture": {
         "family_ids": [
@@ -405,10 +447,19 @@
       "executor": "approved_hierarchy",
       "expected": {
         "annotation_status": "available",
+        "branch_count": 2,
         "iuphar_class": "Enzyme",
-        "parents_retained": [
-          "239",
-          "865"
+        "root_to_leaf_paths": [
+          [
+            "690",
+            "239",
+            "254"
+          ],
+          [
+            "690",
+            "865",
+            "254"
+          ]
         ]
       },
       "fixture": {
@@ -432,8 +483,12 @@
       "expected": {
         "annotation_status": "partial",
         "iuphar_class": "Receptor",
-        "parents_retained": [
-          "694"
+        "root_to_leaf_paths": [
+          [
+            "688",
+            "694",
+            "1"
+          ]
         ]
       },
       "fixture": {
@@ -454,11 +509,15 @@
       },
       "executor": "local_ec",
       "expected": {
+        "direct_layer_rule_ids": [],
         "ec_categories": [
           "Oxidoreductases"
         ],
         "local_class": null,
-        "not_an_iuphar_class": true
+        "not_an_iuphar_class": true,
+        "rule_family": "ec",
+        "rule_marks_direct_layer": false,
+        "rule_output": "Oxidoreductases"
       },
       "fixture": {
         "ec": "1.-.-.-"
@@ -474,11 +533,15 @@
       },
       "executor": "local_ec",
       "expected": {
+        "direct_layer_rule_ids": [],
         "ec_categories": [
           "Transferases"
         ],
         "local_class": null,
-        "not_an_iuphar_class": true
+        "not_an_iuphar_class": true,
+        "rule_family": "ec",
+        "rule_marks_direct_layer": false,
+        "rule_output": "Transferases"
       },
       "fixture": {
         "ec": "2.-.-.-"
@@ -494,11 +557,15 @@
       },
       "executor": "local_ec",
       "expected": {
+        "direct_layer_rule_ids": [],
         "ec_categories": [
           "Hydrolases"
         ],
         "local_class": null,
-        "not_an_iuphar_class": true
+        "not_an_iuphar_class": true,
+        "rule_family": "ec",
+        "rule_marks_direct_layer": false,
+        "rule_output": "Hydrolases"
       },
       "fixture": {
         "ec": "3.-.-.-"
@@ -514,11 +581,15 @@
       },
       "executor": "local_ec",
       "expected": {
+        "direct_layer_rule_ids": [],
         "ec_categories": [
           "Lyases"
         ],
         "local_class": null,
-        "not_an_iuphar_class": true
+        "not_an_iuphar_class": true,
+        "rule_family": "ec",
+        "rule_marks_direct_layer": false,
+        "rule_output": "Lyases"
       },
       "fixture": {
         "ec": "4.-.-.-"
@@ -534,11 +605,15 @@
       },
       "executor": "local_ec",
       "expected": {
+        "direct_layer_rule_ids": [],
         "ec_categories": [
           "Isomerases"
         ],
         "local_class": null,
-        "not_an_iuphar_class": true
+        "not_an_iuphar_class": true,
+        "rule_family": "ec",
+        "rule_marks_direct_layer": false,
+        "rule_output": "Isomerases"
       },
       "fixture": {
         "ec": "5.-.-.-"
@@ -554,11 +629,15 @@
       },
       "executor": "local_ec",
       "expected": {
+        "direct_layer_rule_ids": [],
         "ec_categories": [
           "Ligases"
         ],
         "local_class": null,
-        "not_an_iuphar_class": true
+        "not_an_iuphar_class": true,
+        "rule_family": "ec",
+        "rule_marks_direct_layer": false,
+        "rule_output": "Ligases"
       },
       "fixture": {
         "ec": "6.-.-.-"
@@ -574,11 +653,15 @@
       },
       "executor": "local_ec",
       "expected": {
+        "direct_layer_rule_ids": [],
         "ec_categories": [
           "Translocases"
         ],
         "local_class": null,
-        "not_an_iuphar_class": true
+        "not_an_iuphar_class": true,
+        "rule_family": "ec",
+        "rule_marks_direct_layer": false,
+        "rule_output": "Translocases"
       },
       "fixture": {
         "ec": "7.-.-.-"
@@ -593,13 +676,22 @@
       },
       "executor": "local_ec",
       "expected": {
+        "direct_layer_rule_ids": [],
         "ec_categories": [
           "Oxidoreductases",
           "Hydrolases"
         ],
         "local_class": null,
         "multiple_ec_categories": true,
-        "not_an_iuphar_class": true
+        "not_an_iuphar_class": true,
+        "rule_marks_direct_layer": [
+          false,
+          false
+        ],
+        "rule_outputs": [
+          "Oxidoreductases",
+          "Hydrolases"
+        ]
       },
       "fixture": {
         "ec": "1.-.-.-|3.-.-.-"
@@ -650,7 +742,14 @@
       },
       "executor": "local_text",
       "expected": {
+        "free_text_marks_direct_layer": [
+          false
+        ],
+        "free_text_rule_ids": [
+          "free-text"
+        ],
         "local_class": null,
+        "local_rule_ids": [],
         "local_status": "not_supported"
       },
       "fixture": {

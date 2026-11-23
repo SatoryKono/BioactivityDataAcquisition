@@ -35,6 +35,8 @@ from .policy import (
     UNSET,
     WORKING_CLASSES,
     all_rules,
+    local_rules,
+    policy_document,
 )
 from .stage0.io import canonical_json_bytes, sha256_bytes, sha256_file
 
@@ -316,7 +318,6 @@ def _direct_type_cases() -> list[dict[str, object]]:
     cases: list[dict[str, object]] = []
     for source_type, mapped in TYPE_CLASS_PAIRS:
         family_id = _representative(source_type)
-        _, parents = _family_index()[family_id]
         cases.append(
             _case(
                 f"direct-type-{source_type}",
@@ -334,7 +335,7 @@ def _direct_type_cases() -> list[dict[str, object]]:
                 {
                     "annotation_status": "available",
                     "iuphar_class": mapped,
-                    "parents_retained": [str(parent) for parent in parents],
+                    "root_to_leaf_paths": _dictionary_paths(family_id),
                 },
                 claim="dictionary_class",
             )
@@ -358,9 +359,7 @@ def _partial_source_case() -> dict[str, object]:
         {
             "annotation_status": "partial",
             "iuphar_class": mapped,
-            "parents_retained": [
-                str(parent) for parent in _family_index()[family_id][1]
-            ],
+            "root_to_leaf_paths": _dictionary_paths(family_id),
         },
         claim="dictionary_class",
     )
@@ -387,8 +386,9 @@ def _multi_parent_case() -> dict[str, object]:
         },
         {
             "annotation_status": "available",
+            "branch_count": len(parents),
             "iuphar_class": mapped,
-            "parents_retained": [str(parent) for parent in parents],
+            "root_to_leaf_paths": _dictionary_paths(family_id),
         },
         claim="dictionary_class",
     )
@@ -412,7 +412,7 @@ def _grouping_case() -> dict[str, object]:
         {
             "annotation_status": "unmapped_type",
             "iuphar_class": None,
-            "parents_retained": [],
+            "root_to_leaf_paths": _dictionary_paths(family_id),
         },
         claim="dictionary_class",
     )
@@ -470,9 +470,13 @@ def _ec_cases() -> list[dict[str, object]]:
             {"number": number, "source": "IUBMB EC class via policy.EC_CATEGORIES"},
             {"ec": f"{number}.-.-.-"},
             {
+                "direct_layer_rule_ids": [],
                 "ec_categories": [name],
                 "local_class": None,
                 "not_an_iuphar_class": True,
+                "rule_family": "ec",
+                "rule_marks_direct_layer": False,
+                "rule_output": name,
             },
             claim="dictionary_class",
         )
@@ -498,10 +502,13 @@ def _multiple_ec_case() -> dict[str, object]:
         },
         {"ec": "1.-.-.-|3.-.-.-"},
         {
+            "direct_layer_rule_ids": [],
             "ec_categories": ["Oxidoreductases", "Hydrolases"],
             "local_class": None,
             "multiple_ec_categories": True,
             "not_an_iuphar_class": True,
+            "rule_marks_direct_layer": [False, False],
+            "rule_outputs": ["Oxidoreductases", "Hydrolases"],
         },
         claim="dictionary_class",
     )
@@ -522,7 +529,13 @@ def _broad_tf_case() -> dict[str, object]:
             "free_text": "transcription factor kinase channel zinc finger",
             "keyword_ids": ["KW-BROAD-TF"],
         },
-        {"local_class": None, "local_status": "not_supported"},
+        {
+            "free_text_marks_direct_layer": [False],
+            "free_text_rule_ids": ["free-text"],
+            "local_class": None,
+            "local_rule_ids": [],
+            "local_status": "not_supported",
+        },
         claim="engineering_rule",
     )
 
@@ -1010,11 +1023,12 @@ def _execute_approved(fixture: Mapping[str, object]) -> dict[str, object]:
         type_name=type_name if isinstance(type_name, str) else None,
         family_ids=tuple(str(item) for item in _sequence(fixture["family_ids"])),
     )
-    path_ids = sorted({node for path in result.paths for node in path.root_to_leaf})
+    paths = [list(path.root_to_leaf) for path in result.paths]
     return {
         "annotation_status": result.annotation_status,
+        "branch_count": len(paths),
         "iuphar_class": result.iuphar_class,
-        "path_ids": path_ids,
+        "root_to_leaf_paths": paths,
     }
 
 
@@ -1043,36 +1057,72 @@ def _execute_synthetic(fixture: Mapping[str, object]) -> dict[str, object]:
 
 
 def _execute_ec(fixture: Mapping[str, object]) -> dict[str, object]:
-    result = apply_local(parse_ec_numbers(str(fixture["ec"])), rules=())
+    rules = local_rules()
+    result = apply_local(parse_ec_numbers(str(fixture["ec"])), rules=rules)
+    numbers = [
+        int(token.split(".", maxsplit=1)[0])
+        for token in str(fixture["ec"]).split("|")
+        if token
+    ]
+    selected = [
+        rule for number in numbers for rule in rules if rule.rule_id == f"ec:{number}"
+    ]
     iuphar_fields = [
         name for name in result.__dataclass_fields__ if name.startswith("iuphar_")
     ]
-    return {
+    observed: dict[str, object] = {
+        "direct_layer_rule_ids": [
+            rule.rule_id for rule in rules if rule.marks_direct_layer
+        ],
         "ec_categories": list(result.ec_categories),
         "local_class": result.local_class,
         "multiple_ec_categories": result.multiple_ec_categories,
         "not_an_iuphar_class": not iuphar_fields and result.local_class is None,
     }
+    if len(selected) == 1:
+        observed["rule_family"] = selected[0].family
+        observed["rule_marks_direct_layer"] = selected[0].marks_direct_layer
+        observed["rule_output"] = selected[0].output
+    else:
+        observed["rule_marks_direct_layer"] = [
+            rule.marks_direct_layer for rule in selected
+        ]
+        observed["rule_outputs"] = [rule.output for rule in selected]
+    return observed
 
 
 def _execute_text(fixture: Mapping[str, object]) -> dict[str, object]:
+    rules = local_rules()
     result = apply_local(
         (),
-        rules=(),
+        rules=rules,
         keyword_ids=tuple(str(item) for item in _sequence(fixture["keyword_ids"])),
         free_text=str(fixture["free_text"]),
     )
-    return {"local_class": result.local_class, "local_status": result.local_status}
+    free_text_rules = [rule for rule in rules if rule.family == "free_text"]
+    return {
+        "free_text_marks_direct_layer": [
+            rule.marks_direct_layer for rule in free_text_rules
+        ],
+        "free_text_rule_ids": [rule.rule_id for rule in free_text_rules],
+        "local_class": result.local_class,
+        "local_rule_ids": list(result.local_rule_ids),
+        "local_status": result.local_status,
+    }
 
 
 def _execute_markers(fixture: Mapping[str, object]) -> dict[str, object]:
     markers = [
         None if item is None else str(item) for item in _sequence(fixture["markers"])
     ]
+    parameters = policy_document()["parameters"]
+    if not isinstance(parameters, dict):
+        message = "policy parameters are missing"
+        raise ValueError(message)
     return {
         "normalized": [normalize_missing(item) for item in markers],
-        "version": None,
-        "version_status": UNSET,
+        "version": parameters.get("missing_markers_version"),
+        "version_status": parameters.get("missing_markers_version_status"),
     }
 
 
@@ -1110,7 +1160,12 @@ def _execute_projection(fixture: Mapping[str, object]) -> dict[str, object]:
         },
         str(fixture["taxon"]),
     )
-    return {"uniprot": projected["uniprot"]}
+    observed: dict[str, object] = {
+        key: projected[key]
+        for key in ("auxiliary_uniprot", "primary_uniprot", "uniprot")
+        if key in projected
+    }
+    return observed
 
 
 def _execute_eligibility(fixture: Mapping[str, object]) -> dict[str, object]:
@@ -1156,15 +1211,32 @@ def _catalog_target(item: Mapping[str, object]) -> CatalogTarget:
 
 
 def _matches(observed: Mapping[str, object], expected: Mapping[str, object]) -> bool:
-    for key, expected_value in expected.items():
-        if key == "parents_retained":
-            path_ids = set(_sequence(observed.get("path_ids", [])))
-            if any(str(parent) not in path_ids for parent in _sequence(expected_value)):
-                return False
-            continue
-        if observed.get(key) != expected_value:
-            return False
-    return True
+    return all(observed.get(key) == value for key, value in expected.items())
+
+
+def _dictionary_paths(family_id: int) -> list[list[str]]:
+    """Root-to-leaf paths from the pinned family table, one branch per parent."""
+    index = _family_index()
+    paths: list[list[str]] = []
+
+    def walk(current: int, leaf_to_root: list[int]) -> None:
+        if current in leaf_to_root:
+            message = f"GtoPdb family {family_id} contains a cycle"
+            raise ValueError(message)
+        row = index.get(current)
+        if row is None:
+            message = f"GtoPdb family {family_id} references missing node {current}"
+            raise ValueError(message)
+        chain = [*leaf_to_root, current]
+        parents = row[1]
+        if not parents:
+            paths.append([str(node) for node in reversed(chain)])
+            return
+        for parent in parents:
+            walk(parent, chain)
+
+    walk(family_id, [])
+    return paths
 
 
 def _family_index() -> dict[int, tuple[str, tuple[int, ...]]]:

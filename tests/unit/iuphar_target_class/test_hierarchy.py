@@ -364,3 +364,7 @@ def test_rf008_direct_class_and_graph_defects_follow_the_dictionary() -> None:
     assert by_id["graph-cycle"]["observed"]["iuphar_class"] is None
     assert by_id["graph-missing-node"]["observed"]["paths_empty"] is True
     assert by_id["graph-multi-parent"]["disposition"] == "verified"
+    branches = by_id["graph-multi-parent"]["observed"]["root_to_leaf_paths"]
+    assert isinstance(branches, list)
+    assert by_id["graph-multi-parent"]["observed"]["branch_count"] == len(branches)
+    assert len(branches) > 1
