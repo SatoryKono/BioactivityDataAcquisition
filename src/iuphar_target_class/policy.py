@@ -321,56 +321,84 @@ def all_rules() -> tuple[RuleRecord, ...]:
     return class_rules() + local_rules()
 
 
+_REQUIRED_RULE_FIELDS = (
+    "rule_id",
+    "family",
+    "input_conditions",
+    "output",
+    "justification_source",
+    "version",
+    "limits",
+)
+_LOCAL_FAMILIES = frozenset({"ec", "ec_class", "annotation", "l1_l2", "l2", "rejected"})
+
+
 def validate_rules(rules: tuple[RuleRecord, ...]) -> None:
     """Reject a rule config that omits a field or marks EC/L1/L2 as direct."""
-    required = (
-        "rule_id",
-        "family",
-        "input_conditions",
-        "output",
-        "justification_source",
-        "version",
-        "limits",
-    )
     for rule in rules:
-        for field_name in required:
-            if not getattr(rule, field_name):
-                message = f"rule {rule.rule_id} missing {field_name}"
-                raise ValueError(message)
-        if (
-            rule.family in {"ec", "ec_class", "annotation", "l1_l2", "l2", "rejected"}
-            and rule.marks_direct_layer
-        ):
-            message = f"rule {rule.rule_id} must not be marked direct"
+        _reject_incomplete_rule(rule)
+        _reject_direct_local_rule(rule)
+        _reject_dictionary_output(rule)
+        _reject_negative_priority(rule)
+        _reject_forbidden_output(rule)
+        _reject_ec7_transporter(rule)
+        _reject_excluded_nhr_annotation(rule)
+
+
+def _reject_incomplete_rule(rule: RuleRecord) -> None:
+    for field_name in _REQUIRED_RULE_FIELDS:
+        if not getattr(rule, field_name):
+            message = f"rule {rule.rule_id} missing {field_name}"
             raise ValueError(message)
-        if rule.family == "dictionary" and rule.output not in WORKING_CLASSES:
-            message = f"rule {rule.rule_id} output is outside the class dictionary"
-            raise ValueError(message)
-        if rule.priority < 0:
-            message = f"rule {rule.rule_id} priority must not be negative"
-            raise ValueError(message)
-        if rule.output.casefold() in _FORBIDDEN_CLASS_OUTPUTS:
-            message = (
-                f"rule {rule.rule_id} must not assign {rule.output}; "
-                "Multifunctional and nuclear hormone receptor are not inferred"
-            )
-            raise ValueError(message)
-        if (
-            rule.family == "ec_class"
-            and rule.input_conditions == "ec_category=7"
-            and rule.output == "Transporter"
-        ):
-            message = f"rule {rule.rule_id} must not map EC 7 to Transporter"
-            raise ValueError(message)
-        if rule.family == "annotation" and any(
-            rule.input_conditions == f"keyword_id={keyword_id}"
-            for keyword_id in EXCLUDED_NHR_KEYWORDS
-        ):
-            message = (
-                f"rule {rule.rule_id} must not map a transcription factor or "
-                "zinc finger keyword to a class"
-            )
-            raise ValueError(message)
+
+
+def _reject_direct_local_rule(rule: RuleRecord) -> None:
+    if rule.family in _LOCAL_FAMILIES and rule.marks_direct_layer:
+        message = f"rule {rule.rule_id} must not be marked direct"
+        raise ValueError(message)
+
+
+def _reject_dictionary_output(rule: RuleRecord) -> None:
+    if rule.family == "dictionary" and rule.output not in WORKING_CLASSES:
+        message = f"rule {rule.rule_id} output is outside the class dictionary"
+        raise ValueError(message)
+
+
+def _reject_negative_priority(rule: RuleRecord) -> None:
+    if rule.priority < 0:
+        message = f"rule {rule.rule_id} priority must not be negative"
+        raise ValueError(message)
+
+
+def _reject_forbidden_output(rule: RuleRecord) -> None:
+    if rule.output.casefold() in _FORBIDDEN_CLASS_OUTPUTS:
+        message = (
+            f"rule {rule.rule_id} must not assign {rule.output}; "
+            "Multifunctional and nuclear hormone receptor are not inferred"
+        )
+        raise ValueError(message)
+
+
+def _reject_ec7_transporter(rule: RuleRecord) -> None:
+    if (
+        rule.family == "ec_class"
+        and rule.input_conditions == "ec_category=7"
+        and rule.output == "Transporter"
+    ):
+        message = f"rule {rule.rule_id} must not map EC 7 to Transporter"
+        raise ValueError(message)
+
+
+def _reject_excluded_nhr_annotation(rule: RuleRecord) -> None:
+    if rule.family == "annotation" and any(
+        rule.input_conditions == f"keyword_id={keyword_id}"
+        for keyword_id in EXCLUDED_NHR_KEYWORDS
+    ):
+        message = (
+            f"rule {rule.rule_id} must not map a transcription factor or "
+            "zinc finger keyword to a class"
+        )
+        raise ValueError(message)
 
 
 def assign_mapped_class(
