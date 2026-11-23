@@ -476,7 +476,7 @@
   "normalization_profile": {
     "ref": "chembl.target",
     "version": "1.0.0",
-    "hash": "7375d30c12f21a666d18023ef52d071e0971ae60b9cc66efc0197fa40ba273f6"
+    "hash": "1c43187c0d3d958f85c3f7d0d39306610752ab82f35899e4e8c575662873a598"
   },
   "x-bioetl-schema-sha256": "8339d5b219317f3dbfd56531e02a3415e1785eae2e5fb484f04bbab432c2ad06",
   "x-bioetl-physical-contract": "3.2.0",

@@ -5,13 +5,17 @@ Aligned with RULES.md v5.24 and ChEMBL 34 schema.
 
 from __future__ import annotations
 
-from typing import Any
+from collections.abc import Callable
+from typing import Any, cast
 
 import pandas as pd
 import pandera.pandas as pa
+from pandera.api.checks import Check
 from pandera.typing import Series
 
-import bioetl.domain.normalization.target_classification_values  # noqa: F401
+from bioetl.domain.normalization.target_classification_values import (
+    detail_is_canonical,
+)
 from bioetl.domain.schemas.base import ETLRecordSchema
 from bioetl.domain.schemas.constants import (
     CHEMBL_ID_PATTERN,
@@ -23,6 +27,7 @@ __all__ = [
     "TargetSchema",
     "TargetSchemaV31",
     "TargetSchemaV32",
+    "register_canonical_classification_detail",
 ]
 
 
@@ -220,6 +225,26 @@ class TargetSchemaV31(TargetSchema):
     target_class_profile_sha256: Series[str] = pa.Field(
         nullable=True, str_matches=r"^[0-9a-f]{64}$"
     )
+
+
+def register_canonical_classification_detail() -> None:
+    """Register the 3.2.0 column check on the schema boundary, once."""
+    if hasattr(Check, "canonical_classification_detail"):
+        return
+
+    register = cast(
+        Callable[[Callable[..., bool]], Callable[..., bool]],
+        pa.extensions.register_check_method(
+            statistics=["field_name"], check_type="element_wise"
+        ),
+    )
+
+    @register
+    def canonical_classification_detail(value: object, *, field_name: str) -> bool:
+        return detail_is_canonical(field_name, value)
+
+
+register_canonical_classification_detail()
 
 
 def _detail_field(name: str, description: str) -> Any:

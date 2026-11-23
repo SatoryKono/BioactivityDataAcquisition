@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from dataclasses import FrozenInstanceError, fields
 from pathlib import Path
 
@@ -34,6 +35,7 @@ from bioetl.domain.normalization.profiles.chembl_target_classification import (
     target_v31_normalization_profile,
     target_v32_normalization_profile,
 )
+from bioetl.composition.bootstrap.assembly.storage import stable_target_config_dump
 from bioetl.domain.normalization.target_classification_values import (
     project_classification_detail,
 )
@@ -410,6 +412,54 @@ def test_explicit_table_contract_selects_v32_without_changing_default_enrich() -
         for name in selected.content_hash_include_fields
         if name in TARGET_CLASSIFICATION_DETAIL_FIELDS
     ]
+
+
+def test_absent_selector_matches_a_manifest_written_before_the_field() -> None:
+    current = load_pipeline_config_from_root(
+        "chembl_target", configs_root=ROOT / "configs"
+    )
+    stored = current.model_dump(mode="json")
+    stored_classification = stored["target_classification"]
+    assert isinstance(stored_classification, dict)
+    stored_classification.pop("table_contract", None)
+    dumped = stable_target_config_dump(current)
+    assert dumped["target_classification"] == stored_classification
+    selected = stable_target_config_dump(_config("enrich", "3.2.0"))
+    assert selected["target_classification"]["table_contract"] == "3.2.0"
+
+
+def test_v32_gold_contract_records_the_detail_normalization_profile() -> None:
+    payload = json.loads(
+        (ROOT / "docs/04-reference/contracts/gold/chembl_target_v3.2.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    identity = target_v32_normalization_profile().identity
+    assert payload["normalization_profile"] == {
+        "ref": identity.profile_name,
+        "version": identity.profile_version,
+        "hash": identity.profile_hash,
+    }
+
+
+def test_unavailable_match_is_not_recorded_as_unannotated() -> None:
+    detail = project_classification_detail(
+        computed=True,
+        iuphar_type_raw=None,
+        annotation_status=None,
+        match_status="source_unavailable",
+        family_ids=(),
+        subclasses=(),
+        paths=(),
+        local_status=None,
+        local_subclasses=(),
+        local_rule_ids=(),
+        effective_subclasses=(),
+        conflict_codes=(),
+        match_evidence_ids=(),
+        local_evidence_ids=(),
+    )
+    assert detail["iuphar_source_completeness"] == "source_unavailable"
 
 
 @pytest.mark.parametrize(

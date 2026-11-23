@@ -295,6 +295,28 @@ def build_target_classification_session(
     )
 
 
+def stable_target_config_dump(target: object) -> dict[str, object]:
+    """Keep an absent physical selector out of the stored dependency identity.
+
+    Manifests written before ``table_contract`` existed omit the key. Serializing
+    the default as null would reject those resumes as a changed dependency.
+    An explicit selector stays in the payload.
+    """
+    dump = getattr(target, "model_dump", None)
+    if not callable(dump):
+        raise TypeError("target config must provide model_dump")
+    payload = dump(mode="json")
+    if not isinstance(payload, dict):
+        raise TypeError("target config dump must be an object")
+    classification = payload.get("target_classification")
+    if (
+        isinstance(classification, dict)
+        and classification.get("table_contract") is None
+    ):
+        classification.pop("table_contract")
+    return payload
+
+
 def preflight_workflow_target_dependencies(
     config: WorkflowConfig,
     launch_context: dict[str, object],
@@ -330,7 +352,7 @@ def preflight_workflow_target_dependencies(
     profile = load_target_runtime_profile(
         target, require_new_admission=admission.pending_writes
     )
-    binding: dict[str, object] = {"target_config": target.model_dump(mode="json")}
+    binding: dict[str, object] = {"target_config": stable_target_config_dump(target)}
     if profile is not None:
         binding.update(
             {

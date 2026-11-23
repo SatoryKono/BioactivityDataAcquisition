@@ -11,7 +11,7 @@ ordered by family id and that chain. These strings participate in content_hash.
 from __future__ import annotations
 
 import json
-from collections.abc import Callable, Iterable, Mapping, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from typing import cast
 
 from bioetl.domain.normalization.json import serialize_json_canonical
@@ -164,9 +164,13 @@ def source_completeness(
     annotation_status: str | None,
     type_raw: str | None,
     family_ids: Iterable[object],
+    match_status: str | None = None,
 ) -> str:
     """Classify how much of the IUPHAR source was available for one row."""
-    if annotation_status == "source_unavailable":
+    if (
+        annotation_status == "source_unavailable"
+        or match_status == "source_unavailable"
+    ):
         return "source_unavailable"
     if type_raw is not None and type_raw.strip():
         return "typed"
@@ -180,6 +184,7 @@ def project_classification_detail(
     computed: bool,
     iuphar_type_raw: str | None,
     annotation_status: str | None,
+    match_status: str | None = None,
     family_ids: Iterable[object],
     subclasses: Iterable[object],
     paths: Iterable[tuple[object, Sequence[object]]],
@@ -205,6 +210,7 @@ def project_classification_detail(
         else _canonical_scalar("iuphar_type_raw", iuphar_type_raw),
         "iuphar_source_completeness": source_completeness(
             annotation_status=annotation_status,
+            match_status=match_status,
             type_raw=iuphar_type_raw,
             family_ids=families,
         ),
@@ -299,25 +305,6 @@ def _evidence_members(parsed: object) -> tuple[list[object], list[object]]:
     return match_ids, local_ids
 
 
-def register_canonical_detail_check() -> None:
-    """Register the Pandera check used by the 3.2.0 string columns."""
-    import pandera.pandas as pa
-
-    register = cast(
-        Callable[[Callable[..., bool]], Callable[..., bool]],
-        pa.extensions.register_check_method(
-            statistics=["field_name"], check_type="element_wise"
-        ),
-    )
-
-    @register
-    def canonical_classification_detail(value: object, *, field_name: str) -> bool:
-        return detail_is_canonical(field_name, value)
-
-
-register_canonical_detail_check()
-
-
 __all__ = [
     "DETAIL_LOGICAL_CONTRACT",
     "IUPHAR_SOURCE_COMPLETENESS",
@@ -328,6 +315,5 @@ __all__ = [
     "canonical_string_set",
     "detail_is_canonical",
     "project_classification_detail",
-    "register_canonical_detail_check",
     "source_completeness",
 ]

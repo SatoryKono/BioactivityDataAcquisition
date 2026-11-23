@@ -69,6 +69,7 @@ def _detail_projection(row: object | None, *, computed: bool) -> dict[str, str |
         computed=result.input_validation_status != "invalid_input",
         iuphar_type_raw=result.iuphar_type_raw,
         annotation_status=result.iuphar_annotation_status,
+        match_status=result.match_status,
         family_ids=annotation.family_ids if annotation is not None else (),
         subclasses=(subclass,) if subclass else (),
         paths=(

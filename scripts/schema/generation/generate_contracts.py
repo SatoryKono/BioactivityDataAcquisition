@@ -22,6 +22,9 @@ from bioetl.domain.contracts.gold.chembl_target_classification import (
     target_v31_schema_hash,
     target_v32_schema_hash,
 )
+from bioetl.domain.normalization.profiles.chembl_target_classification import (
+    target_v32_normalization_profile,
+)
 from bioetl.domain.normalization.target_classification_values import (
     DETAIL_LOGICAL_CONTRACT,
 )
@@ -263,6 +266,12 @@ def _expected_artifacts() -> dict[Path, str]:
     profile_hash_v32["pattern"] = "^[0-9a-f]{64}$"
     for name, annotation in DETAIL_LOGICAL_CONTRACT.items():
         target_v32["properties"][name].update(annotation)
+    detail_profile = target_v32_normalization_profile().identity
+    target_v32["normalization_profile"] = {
+        "ref": detail_profile.profile_name,
+        "version": detail_profile.profile_version,
+        "hash": detail_profile.profile_hash,
+    }
     target_v32["x-bioetl-schema-sha256"] = target_v32_schema_hash()
     target_v32["x-bioetl-physical-contract"] = "3.2.0"
     target_v32["x-bioetl-computational-contract"] = "independent"

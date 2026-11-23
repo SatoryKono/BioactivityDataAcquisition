@@ -11,13 +11,17 @@ import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
-import bioetl.domain.normalization.target_classification_values  # noqa: F401
 from bioetl.domain.contracts.gold._strict_gold_contract_schema import (
     CONTENT_HASH_HEX64_PATTERN,
     StrictGoldContractSchema,
 )
+from bioetl.domain.schemas.chembl.target import (
+    register_canonical_classification_detail as _register_detail,
+)
 from bioetl.domain.transformations import canonical_json_dumps
 from bioetl.domain.types import JsonDict
+
+_register_detail()
 
 
 class ChEMBLTargetGoldSchema(StrictGoldContractSchema):
