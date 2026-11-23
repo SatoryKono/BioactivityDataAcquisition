@@ -137,7 +137,7 @@ def _write_delimited_file(
 _XLSX_CELL_LIMIT = 32767
 _XLSX_PART_SIZE = 32000
 _XLSX_PARTS_SHEET = "bioetl_xlsx_parts"
-_XLSX_PART_TOKEN = "bioetl-xlsx-part:{digest}:{part_count}"
+_XLSX_PART_MARKER = "bioetl-xlsx-part:{digest}:{part_count}"
 
 
 def split_xlsx_text(value: str) -> tuple[str, tuple[str, ...]] | None:
@@ -151,7 +151,7 @@ def split_xlsx_text(value: str) -> tuple[str, tuple[str, ...]] | None:
         value[index : index + _XLSX_PART_SIZE]
         for index in range(0, len(value), _XLSX_PART_SIZE)
     )
-    return _XLSX_PART_TOKEN.format(digest=digest, part_count=len(parts)), parts
+    return _XLSX_PART_MARKER.format(digest=digest, part_count=len(parts)), parts
 
 
 def restore_xlsx_text(token: object, parts: tuple[str, ...]) -> str | None:
