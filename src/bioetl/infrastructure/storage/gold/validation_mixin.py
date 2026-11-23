@@ -117,8 +117,11 @@ class GoldWriterValidationMixin:
                 ),
             )
             for column in df.columns:
-                if pd.api.types.is_numeric_dtype(validated[column].dtype) and any(
-                    isinstance(value, str) for value in df[column]
+                dtype = validated[column].dtype
+                if (
+                    pd.api.types.is_numeric_dtype(dtype)
+                    and not pd.api.types.is_bool_dtype(dtype)
+                    and any(isinstance(value, str) for value in df[column])
                 ):
                     reject_reason = build_gold_contract_reject_reason(
                         reason_code=GoldRejectReasonCode.CONTRACT_SCHEMA_FAILURE,
