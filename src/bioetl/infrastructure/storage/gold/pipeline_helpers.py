@@ -62,7 +62,6 @@ _SCD2_SQL_RESERVED = frozenset(
         "order",
         "outer",
         "primary",
-        "references",
         "right",
         "select",
         "set",
@@ -84,7 +83,7 @@ _SCD2_SQL_RESERVED = frozenset(
 def _validate_scd2_column_names(
     records: list[GoldRecord], scd_config: ScdConfig
 ) -> None:
-    """Require unquoted lowercase ASCII identifiers, excluding SQL reserved words."""
+    """Require lowercase ASCII identifiers and reject unsupported SQL words."""
     names = (
         *scd_config.business_keys,
         scd_config.valid_from_col,
@@ -98,6 +97,7 @@ def _validate_scd2_column_names(
             not isinstance(name, str)
             or not re.fullmatch(r"[a-z_][a-z0-9_]*", name)
             or name in _SCD2_SQL_RESERVED
+            or name == "__bioetl_scd2_expire"
         ):
             raise ValueError(f"Unsupported SCD2 column name: {name!r}")
 

@@ -531,6 +531,8 @@ class TestGoldWriterValidation:
             ({"business_key": "entity_id", "version": "select"}, None),
             ({"business_key": "entity_id"}, "bad field"),
             ({"business_key": "entity_id"}, "select"),
+            ({"business_key": "entity_id"}, "__bioetl_scd2_expire"),
+            ({"business_key": "entity_id", "version": "__bioetl_scd2_expire"}, None),
         ],
     )
     async def test_scd2_rejects_unsupported_names_before_dispatch(
