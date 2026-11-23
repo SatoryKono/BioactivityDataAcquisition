@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "catalog_ref": "a9bb5f70900e9d4122618b2737b4ed976d207f9d",
-  "source_ref": "1e4a2f3cd58d398e181cc2cfdc26f72f1ba9c8cf",
+  "catalog_ref": "f836d84186756730897fe6254e67834eecc1dc6c",
+  "source_ref": "f836d84186756730897fe6254e67834eecc1dc6c",
   "source_reviews": {
     "src/bioetl/application/composite/merge_service.py": "Rematch after #13349 (#13341): blob relocated vs catalog pin; no new acquisition sites.",
     "src/bioetl/application/composite/merger_post_join.py": "Rematch after #13349 (#13341): blob relocated vs catalog pin; no new acquisition sites.",
@@ -28,14 +28,80 @@
     "src/bioetl/infrastructure/storage/target_classification_migration.py": "Rematch after #13349 (#13341): blob relocated vs catalog pin; no new acquisition sites.",
     "src/bioetl/infrastructure/storage/target_contract_transition.py": "Rematch after #13349 (#13341): blob relocated vs catalog pin; no new acquisition sites.",
     "src/bioetl/infrastructure/storage/target_migration_classification_checks.py": "Rematch after #13349 (#13341): blob relocated vs catalog pin; no new acquisition sites.",
-    "src/bioetl/infrastructure/storage/target_migration_validation.py": "Rematch after #13349 (#13341): blob relocated vs catalog pin; no new acquisition sites."
+    "src/bioetl/infrastructure/storage/target_migration_validation.py": "Rematch after #13349 (#13341): existing file reads relocate. _candidate_table_contract adds one local YAML read_text for the candidate table contract; no network client."
   },
-  "expression_updates": {},
+  "expression_updates": {
+    "src/bioetl/infrastructure/export/export_writer_adapter.py": {
+      "dataframe.to_excel(writer, index=False)": "dataframe.to_excel(writer, index=False, sheet_name='Sheet1')"
+    }
+  },
   "resource_updates": {},
   "additional_bindings": {},
-  "new_resources": [],
+  "new_resources": [
+    {
+      "identity": "iuphar.bioetl.infrastructure.storage.target_migration_validation.candidate-contract-file",
+      "type": "file",
+      "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
+      "lifetime": "owner/operation",
+      "creator": ["_candidate_table_contract"],
+      "owner": "bioetl.infrastructure.storage.target_migration_validation owns this candidate YAML read for opt-in IUPHAR target classification",
+      "closer": "Path read_text releases its stream before the owning function returns; no handle is retained on the caller.",
+      "shutdown_contract": "Path read_text releases its stream before the owning function returns; no handle is retained on the caller.",
+      "production_entrypoint": "opt-in IUPHAR target classification maintenance and pipeline admission",
+      "call_path": [
+        "bioetl.infrastructure.storage.target_migration_validation -> _candidate_table_contract -> path.read_text"
+      ],
+      "configuration_predicates": [],
+      "shutdown_by_site": {},
+      "scenarios": {
+        "cancellation": {
+          "applicability": "owning async boundary; these primitives are synchronous",
+          "expected": "Propagate cancellation after the documented cleanup; do not infer a stopped native call from a cancelled await.",
+          "observation": "Cancel the owner around the call and observe remaining handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "error": {
+          "applicability": "applicable after successful acquisition; no close obligation for a handle never created",
+          "expected": "Preserve the original failure and release any handle this function already acquired.",
+          "observation": "Inject after allocation and during close; inspect retained handles.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "normal": {
+          "applicability": "applicable",
+          "expected": "The owning function acquires this local file and releases it before return.",
+          "observation": "At acquisition and owning return: resource identity, open/close events, and handles remaining.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "retry": {
+          "applicability": "outer caller attempt; the primitive has no internal retry",
+          "expected": "A failed attempt must not leave the previous handle open before the next attempt.",
+          "observation": "Compare opened and closed identities per attempt.",
+          "runtime_result": "NOT_RUN_12553"
+        },
+        "timeout": {
+          "applicability": "no intrinsic timeout on the synchronous primitive",
+          "expected": "Apply only an outer deadline; timeout is not itself a close receipt.",
+          "observation": "Observe the outer deadline and whether the call returned.",
+          "runtime_result": "NOT_RUN_12553"
+        }
+      },
+      "site_selectors": [
+        {
+          "file": "src/bioetl/infrastructure/storage/target_migration_validation.py",
+          "scope": "_candidate_table_contract",
+          "call": "path.read_text",
+          "expression": "path.read_text(encoding='utf-8')"
+        }
+      ]
+    }
+  ],
   "new_exclusions": [],
   "segment_updates": {},
-  "reference_moves": {},
-  "line_updates": {}
+  "reference_moves": [],
+  "exclusion_moves": [],
+  "line_updates": {
+    "src/bioetl/infrastructure/export/export_writer_adapter.py": {
+      "57": 62
+    }
+  }
 }
