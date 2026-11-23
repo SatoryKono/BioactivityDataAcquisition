@@ -1,0 +1,8 @@
+{
+  "artifact": "iuphar_rf002_matching_policy",
+  "bytes": 2596,
+  "contract_version": "rf002-2026-11-23",
+  "matching_policy_version": "rf002-uniprot-roles-2026-11-23",
+  "path": "data/iuphar_target_class/rf002/matching_policy.json",
+  "sha256": "2925168a1d50a3383f6a439ec55a57e5e898319b995a7812f1a27c2834af3796"
+}

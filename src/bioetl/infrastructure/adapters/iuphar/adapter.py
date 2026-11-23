@@ -197,6 +197,7 @@ class IupharTargetClassificationAdapter:
                 profile.classification_schema_version,
                 profile.snapshot.retrieved_at,
                 run_started_at,
+                matching_policy_version=profile.matching_policy_version,
             ),
             run_id=run_id,
         )

@@ -76,14 +76,19 @@ def plain_target_value(value: object) -> object:
 def project_target_fields(
     data: Mapping[str, object], taxon: str | None
 ) -> dict[str, str | None]:
-    accessions = tuple(
-        dict.fromkeys(
-            (
-                *_tokens(data.get("component_accessions")),
-                *_tokens(data.get("target_xref_uniprot_ids")),
-            )
-        )
-    )
+    """Project ChEMBL target fields onto the offline classification kernel.
+
+    RF-002 (#13310): ``component_accessions`` are primary UniProt anchors;
+    ``target_xref_uniprot_ids`` are split into proven equivalents (overlap with
+    primary) and auxiliary xrefs. Only primary values fill ``uniprot`` so
+    unknown auxiliary tokens cannot open empty exact-channels. All original
+    business fields remain in ``source_business_data``.
+    """
+    primary = tuple(dict.fromkeys(_tokens(data.get("component_accessions"))))
+    xref = tuple(dict.fromkeys(_tokens(data.get("target_xref_uniprot_ids"))))
+    primary_set = set(primary)
+    proven = tuple(item for item in xref if item in primary_set)
+    auxiliary = tuple(item for item in xref if item not in primary_set)
     synonyms = tuple(
         dict.fromkeys(
             (
@@ -96,7 +101,9 @@ def project_target_fields(
         "target_chembl_id": _text(data.get("target_id")),
         # ChEMBL identity is never passed as the kernel's explicit IUPHAR ID.
         "target_id": _text(data.get("iuphar_target_id")),
-        "uniprot": "|".join(accessions) or None,
+        "uniprot": "|".join(primary) or None,
+        "uniprot_equivalent": "|".join(proven) or None,
+        "uniprot_xref": "|".join(auxiliary) or None,
         "organism": taxon,
         "source_organism": _text(data.get("organism")),
         "name": _text(data.get("pref_name")),
