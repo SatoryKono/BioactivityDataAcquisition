@@ -13,11 +13,13 @@ import yaml
 from bioetl.domain.config.target_classification import TARGET_CLASSIFICATION_FIELDS
 from iuphar_target_class.baseline_manifest import (
     BASELINE_REVISION,
+    CANDIDATE_MANIFEST_RELATIVE_PATH,
     INCOMPLETE_HISTORY,
     MANIFEST_RELATIVE_PATH,
     build_baseline_manifest,
     historical_blob_problems,
     verify_baseline_manifest,
+    write_baseline_manifest,
 )
 from iuphar_target_class.gtopdb_2026_3_1 import (
     ARCHIVE_SHA256,
@@ -250,10 +252,14 @@ def test_committed_configs_match_the_baseline_claim() -> None:
     assert entity["contracts"]["active_version"] == COMMITTED_ENTITY_CONTRACT
     assert COMMITTED_TABLE_GENERATION == "V30"
     assert composite["composite"]["version"] == COMMITTED_COMPOSITE_VERSION
-    snapshot = (
-        ROOT / "src/bioetl/infrastructure/adapters/iuphar/snapshot_payload.py"
-    ).read_text(encoding="utf-8")
-    assert f'"annotation_capability": "{SNAPSHOT_ANNOTATION_CAPABILITY}"' in snapshot
+
+
+def test_snapshot_builder_records_family_only_capability(tmp_path: Path) -> None:
+    from tests.helpers.iuphar_snapshot import synthetic_snapshot_bundle
+
+    root, _bundle = synthetic_snapshot_bundle(tmp_path)
+    document = json.loads((root / "snapshot.json").read_bytes())
+    assert document["annotation_capability"] == SNAPSHOT_ANNOTATION_CAPABILITY
 
 
 def test_supported_local_stays_out_of_the_dictionary_layer() -> None:
@@ -575,6 +581,24 @@ def test_embedded_semantics_must_carry_the_decision_contract() -> None:
     assert "semantics decision table is missing" in problems
     assert "semantics field dictionary is missing" in problems
     assert "semantics hash mismatch" not in problems
+
+
+def test_writer_does_not_replace_the_published_manifest() -> None:
+    published = ROOT / MANIFEST_RELATIVE_PATH
+    before = published.read_bytes()
+    candidate = ROOT / CANDIDATE_MANIFEST_RELATIVE_PATH
+    try:
+        written = write_baseline_manifest(ROOT)
+    except RuntimeError as exc:
+        if str(exc) == INCOMPLETE_HISTORY:
+            pytest.skip(INCOMPLETE_HISTORY)
+        raise
+    try:
+        assert written == candidate
+        assert published.read_bytes() == before
+        assert candidate.is_file()
+    finally:
+        candidate.unlink(missing_ok=True)
 
 
 def test_rebuild_refuses_when_the_revision_object_is_missing(

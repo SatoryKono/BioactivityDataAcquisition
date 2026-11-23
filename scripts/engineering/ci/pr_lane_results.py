@@ -777,7 +777,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "src/iuphar_target_class/policy.py",
             "data/iuphar_target_class/policy/policy.json",
         ),
-        ("tests/unit/iuphar_target_class/test_policy.py",),
+        (
+            "tests/unit/iuphar_target_class/test_policy.py",
+            "tests/unit/iuphar_target_class/test_baseline_semantics.py",
+        ),
     ),
     **dict.fromkeys(
         (

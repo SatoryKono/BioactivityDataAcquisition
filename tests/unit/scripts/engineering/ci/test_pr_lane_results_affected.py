@@ -491,9 +491,14 @@ def test_iuphar_shadow_paths_keep_explicit_owners(tmp_path: Path) -> None:
 
 
 def test_iuphar_policy_paths_keep_the_policy_owner(tmp_path: Path) -> None:
-    owner = tmp_path / "tests/unit/iuphar_target_class/test_policy.py"
-    owner.parent.mkdir(parents=True)
-    owner.write_text("def test_policy():\n    assert True\n", encoding="utf-8")
+    directory = tmp_path / "tests/unit/iuphar_target_class"
+    directory.mkdir(parents=True)
+    (directory / "test_policy.py").write_text(
+        "def test_policy():\n    assert True\n", encoding="utf-8"
+    )
+    (directory / "test_baseline_semantics.py").write_text(
+        "def test_baseline():\n    assert True\n", encoding="utf-8"
+    )
     report = build_shadow_compare(
         [
             "src/iuphar_target_class/policy.py",
@@ -501,7 +506,10 @@ def test_iuphar_policy_paths_keep_the_policy_owner(tmp_path: Path) -> None:
         ],
         repo_root=tmp_path,
     )
-    assert report["selected"] == ["tests/unit/iuphar_target_class/test_policy.py"]
+    assert report["selected"] == [
+        "tests/unit/iuphar_target_class/test_policy.py",
+        "tests/unit/iuphar_target_class/test_baseline_semantics.py",
+    ]
     assert report["covers_full_suite"] is False
     for unowned in (
         "src/iuphar_target_class/unmapped.py",

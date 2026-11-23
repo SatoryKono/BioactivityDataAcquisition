@@ -30,6 +30,9 @@ from .gtopdb_2026_3_1 import (
 from .stage0.io import atomic_write_bytes, canonical_json_bytes, sha256_bytes
 
 MANIFEST_RELATIVE_PATH = "data/iuphar_target_class/baseline/rf001/manifest.json"
+CANDIDATE_MANIFEST_RELATIVE_PATH = (
+    "data/iuphar_target_class/baseline/rf001/manifest.candidate.json"
+)
 BASELINE_REVISION = (
     "e01ca762a3ffc5f2a4bd4ea89f17fa807e49b9e2"  # pragma: allowlist secret
 )
@@ -290,9 +293,16 @@ def verify_baseline_manifest(
 
 
 def write_baseline_manifest(repo_root: Path) -> Path:
-    """Write the manifest atomically inside ``repo_root``."""
+    """Write a manifest atomically without replacing a published canonical file.
+
+    The first publication uses the canonical path. A later call writes
+    ``manifest.candidate.json`` beside it and leaves the published bytes intact.
+    """
     root = repo_root.resolve()
-    destination = root / MANIFEST_RELATIVE_PATH
+    canonical = root / MANIFEST_RELATIVE_PATH
+    destination = (
+        root / CANDIDATE_MANIFEST_RELATIVE_PATH if canonical.is_file() else canonical
+    )
     payload = canonical_json_bytes(build_baseline_manifest(root))
     atomic_write_bytes(destination, payload, root=root)
     return destination
@@ -636,6 +646,7 @@ def _sha256_or_none(value: object) -> bool:
 
 __all__ = [
     "BASELINE_REVISION",
+    "CANDIDATE_MANIFEST_RELATIVE_PATH",
     "INCOMPLETE_HISTORY",
     "MANIFEST_RELATIVE_PATH",
     "MATERIAL_SPECS",
