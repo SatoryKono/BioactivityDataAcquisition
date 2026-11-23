@@ -48,6 +48,10 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.domain.config import DQConfig
+from bioetl.infrastructure.config.pipeline_config_api import (
+    load_pipeline_config,
+    load_pipeline_config_from_root,
+)
 import bioetl.infrastructure.config.pipeline_config_loader as pipeline_config_loader_module
 from bioetl.infrastructure.config.pipeline_config_loader import PipelineConfigLoader
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
@@ -541,6 +545,59 @@ class TestResolveDqConfigFallback:
 @pytest.mark.unit
 class TestClearCache:
     """Tests for PipelineConfigLoader.clear_cache()."""
+
+    def test_local_and_canonical_cache_scope(self, tmp_path: Path) -> None:
+        """Local clear retains shared caches; canonical clear refreshes every root."""
+        roots = [tmp_path / "first", tmp_path / "second"]
+        for root in roots:
+            (root / "base").mkdir(parents=True)
+            (root / "entities" / "test").mkdir(parents=True)
+            (root / "base" / "pipeline.yaml").write_text("batch_size: 111\n")
+            (root / "entities" / "test" / "item.yaml").write_text(
+                "pipeline:\n  pipeline_name: test_item\n  provider: test\n"
+                "  entity_type: item\n  business_primary_keys: [id]\n"
+                "  silver_table: silver.test\n"
+            )
+        dq_loader = MagicMock()
+        filter_loader = MagicMock()
+        loader = PipelineConfigLoader(
+            roots[0], dq_loader=dq_loader, filter_loader=filter_loader
+        )
+        load_pipeline_config.cache_clear()
+        try:
+            assert loader.load_pipeline_config("test_item").batch_size == 111
+            for root in roots:
+                assert (
+                    load_pipeline_config_from_root(
+                        "test_item", configs_root=root
+                    ).batch_size
+                    == 111
+                )
+                (root / "base" / "pipeline.yaml").write_text("batch_size: 222\n")
+            loader.clear_cache()
+            loader.clear_cache()
+            assert dq_loader.clear_cache.call_count == 2
+            assert filter_loader.clear_cache.call_count == 2
+            assert loader.load_pipeline_config("test_item").batch_size == 111
+            for root in roots:
+                assert (
+                    load_pipeline_config_from_root(
+                        "test_item", configs_root=root
+                    ).batch_size
+                    == 111
+                )
+            load_pipeline_config.cache_clear()
+            load_pipeline_config.cache_clear()
+            assert loader.load_pipeline_config("test_item").batch_size == 222
+            for root in roots:
+                assert (
+                    load_pipeline_config_from_root(
+                        "test_item", configs_root=root
+                    ).batch_size
+                    == 222
+                )
+        finally:
+            load_pipeline_config.cache_clear()
 
     def test_clear_cache_delegates_to_dq_loader(self) -> None:
         """clear_cache() calls clear_cache on dq_loader."""
