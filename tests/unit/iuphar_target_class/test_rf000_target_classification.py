@@ -23,9 +23,9 @@ from bioetl.domain.normalization.profiles.chembl_target_classification import (
 from bioetl.domain.schemas.chembl.target import TargetSchemaV32
 from bioetl.infrastructure.export.export_writer_adapter import (
     _write_xlsx_file,
-    restore_xlsx_long_text,
     restore_xlsx_text,
 )
+from bioetl.infrastructure.export.xlsx_workbook import restore_xlsx_table
 from bioetl.infrastructure.storage.target_contract_transition import (
     assert_live_promotion_allowed,
     plan_target_contract_transition,
@@ -225,9 +225,8 @@ def test_xlsx_round_trip_restores_only_verified_parts(tmp_path) -> None:
         pa.table({"note": [original, token_like, "short"]}),
         path,
     )
-    restored = restore_xlsx_long_text(path)
-    values = [row[0] for row in restored["Sheet1"][1:]]
-    assert values == [original, token_like, "short"]
+    restored = restore_xlsx_table(str(path))
+    assert restored.column("note").to_pylist() == [original, token_like, "short"]
     assert restore_xlsx_text(token_like, ("nope",)) is None
 
 

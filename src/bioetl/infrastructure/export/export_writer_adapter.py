@@ -11,11 +11,30 @@ if TYPE_CHECKING:
     from openpyxl.workbook.workbook import Workbook
     from pandas import DataFrame
 
+import pyarrow as pa
+
 from bioetl.domain.ports import ExportFileFingerprint, ExportWriterPort
 from bioetl.infrastructure.export.csv_exporter_table_ops import spreadsheet_safe_table
+from bioetl.infrastructure.export.xlsx_text_parts import write_arrow_xlsx
+from bioetl.infrastructure.export.xlsx_workbook import (
+    XLSX_EXPORT_MANIFEST_SHEET,
+    XLSX_TEXT_PARTS_VERSION,
+    read_xlsx_export_manifest,
+    restore_xlsx_table,
+)
 from bioetl.infrastructure.storage.atomic import atomic_write_text
 
-__all__ = ["ExportWriterAdapter"]
+__all__ = [
+    "XLSX_EXPORT_MANIFEST_SHEET",
+    "XLSX_TEXT_PARTS_VERSION",
+    "ExportWriterAdapter",
+    "read_xlsx_export_manifest",
+    "restore_xlsx_table",
+]
+
+_OPENPYXL_REQUIRED = (
+    "openpyxl is required for XLSX export. Install with: pip install openpyxl"
+)
 
 
 class ExportWriterAdapter(ExportWriterPort):
@@ -51,7 +70,12 @@ class ExportWriterAdapter(ExportWriterPort):
             )
         if fmt == "xlsx":
             return str(
-                _write_xlsx_file(arrow_table, output_dir_obj / f"{safe_name}.xlsx")
+                _write_xlsx_file(
+                    arrow_table,
+                    output_dir_obj / f"{safe_name}.xlsx",
+                    table_name=table_name,
+                    layer=layer,
+                )
             )
         raise ValueError(f"Unsupported format: {fmt}")
 
@@ -232,24 +256,33 @@ def _split_xlsx_cells(dataframe: DataFrame) -> list[tuple[object, ...]]:
     return parts
 
 
-def _force_xlsx_shared_strings(book: Workbook) -> None:
-    for sheet in book.worksheets:
-        for row in sheet.iter_rows():
-            for cell in row:
-                if isinstance(cell.value, str):
-                    cell.data_type = "s"
-
-
 def _write_xlsx_file(
     table: Any,  # Any: Arrow table duck-type for pandas/xlsx export
     output_path: Path,
+    *,
+    table_name: str = "",
+    layer: str = "",
 ) -> Path:
-    """Write Arrow table to XLSX."""
+    """Write one table to XLSX without dropping columns or long text."""
+    if isinstance(table, pa.Table):
+        return write_arrow_xlsx(
+            table,
+            output_path,
+            table_name=table_name,
+            layer=layer,
+        )
+    return _write_duck_xlsx(table, output_path)
+
+
+def _write_duck_xlsx(
+    table: Any,  # Any: non-Arrow export double with to_pandas
+    output_path: Path,
+) -> Path:
+    """Preserve the pandas path used by non-Arrow export doubles."""
     from bioetl.domain.serialization import flatten_arrow_table_for_export
 
     flattened = flatten_arrow_table_for_export(table)
     dataframe = flattened.to_pandas()
-
     try:
         import pandas as pd
 
@@ -263,10 +296,17 @@ def _write_xlsx_file(
                     _write_xlsx_parts(writer.book, parts)
             finally:
                 # ExcelWriter saves on exceptional exit too: sanitize partial output.
-                _force_xlsx_shared_strings(writer.book)
+                for sheet in writer.book.worksheets:
+                    _force_explicit_text(sheet)
     except ImportError as exc:
-        raise ImportError(
-            "openpyxl is required for XLSX export. Install with: pip install openpyxl"
-        ) from exc
-
+        raise ImportError(_OPENPYXL_REQUIRED) from exc
     return output_path
+
+
+def _force_explicit_text(
+    sheet: Any,  # Any: openpyxl worksheet duck type
+) -> None:
+    for row in sheet.iter_rows():
+        for cell in row:
+            if isinstance(cell.value, str):
+                cell.data_type = "s"
