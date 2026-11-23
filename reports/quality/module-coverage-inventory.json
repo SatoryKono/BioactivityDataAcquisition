@@ -24436,36 +24436,6 @@
       "source_lines": 382
     },
     {
-      "coverage_percent": 89.2,
-      "coverage_status": "partially_covered",
-      "covered_lines": 157,
-      "executable_lines": 176,
-      "missing_lines": 19,
-      "module": "bioetl.infrastructure.storage.target_fk_restoration",
-      "path": "src/bioetl/infrastructure/storage/target_fk_restoration.py",
-      "source_lines": 427
-    },
-    {
-      "coverage_percent": 90.59,
-      "coverage_status": "partially_covered",
-      "covered_lines": 77,
-      "executable_lines": 85,
-      "missing_lines": 8,
-      "module": "bioetl.infrastructure.storage.target_fk_restoration_documents",
-      "path": "src/bioetl/infrastructure/storage/target_fk_restoration_documents.py",
-      "source_lines": 203
-    },
-    {
-      "coverage_percent": 84.5,
-      "coverage_status": "partially_covered",
-      "covered_lines": 169,
-      "executable_lines": 200,
-      "missing_lines": 31,
-      "module": "bioetl.infrastructure.storage.target_fk_restoration_plan",
-      "path": "src/bioetl/infrastructure/storage/target_fk_restoration_plan.py",
-      "source_lines": 408
-    },
-    {
       "coverage_percent": 95.0,
       "coverage_status": "partially_covered",
       "covered_lines": 38,
@@ -51028,36 +50998,6 @@
       "source_lines": 382
     },
     {
-      "coverage_percent": 89.2,
-      "coverage_status": "partially_covered",
-      "covered_lines": 157,
-      "executable_lines": 176,
-      "missing_lines": 19,
-      "module": "bioetl.infrastructure.storage.target_fk_restoration",
-      "path": "src/bioetl/infrastructure/storage/target_fk_restoration.py",
-      "source_lines": 427
-    },
-    {
-      "coverage_percent": 90.59,
-      "coverage_status": "partially_covered",
-      "covered_lines": 77,
-      "executable_lines": 85,
-      "missing_lines": 8,
-      "module": "bioetl.infrastructure.storage.target_fk_restoration_documents",
-      "path": "src/bioetl/infrastructure/storage/target_fk_restoration_documents.py",
-      "source_lines": 203
-    },
-    {
-      "coverage_percent": 84.5,
-      "coverage_status": "partially_covered",
-      "covered_lines": 169,
-      "executable_lines": 200,
-      "missing_lines": 31,
-      "module": "bioetl.infrastructure.storage.target_fk_restoration_plan",
-      "path": "src/bioetl/infrastructure/storage/target_fk_restoration_plan.py",
-      "source_lines": 408
-    },
-    {
       "coverage_percent": 95.0,
       "coverage_status": "partially_covered",
       "covered_lines": 38,
@@ -53190,7 +53130,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-11-20",
-  "source_tree_sha256": "e2eacc5b5359281098ee3854ca6cb376760f66c81b59443c811a98582e317768",
+  "source_tree_sha256": "91a5d0de0f59e48d08a043c591764df887d5bbde0a161b73e916c54d2e710322",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -53345,12 +53285,12 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 2659,
+    "source_module_count": 2656,
     "status_counts": {
       "coverage_xml_missing": 3,
       "fully_covered": 2537,
       "no_executable_lines": 1,
-      "partially_covered": 118,
+      "partially_covered": 115,
       "uncovered": 0,
       "unmeasured": 0
     },
