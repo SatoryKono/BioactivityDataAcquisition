@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "56cf2cee2dc95a2ab6a2820b3ef1b07bf8b2f258",
+  "source_ref": "56cf2cee2dc95a2ab6a2820b3ef1b07bf8b2f258",
+  "source_reviews": {
+    "src/bioetl/application/serialization/snapshot_serialization.py": "Incoming main changes for workflow resume and inline DQ settings. No new resource acquisition.",
+    "src/bioetl/application/services/run_reports/workflow_observations.py": "Incoming main changes for workflow resume and inline DQ settings. No new resource acquisition.",
+    "src/bioetl/application/services/workflow/workflow_runner_reports.py": "Incoming main changes for workflow resume and inline DQ settings. No new resource acquisition.",
+    "src/bioetl/application/services/workflow/workflow_runner_transitions.py": "Incoming main changes for workflow resume and inline DQ settings. No new resource acquisition.",
+    "src/bioetl/infrastructure/config/pipeline_dq_resolution.py": "Incoming main changes for workflow resume and inline DQ settings. No new resource acquisition."
+  },
+  "line_updates": {},
+  "expression_updates": {},
+  "segment_updates": {},
+  "reference_moves": [],
+  "exclusion_moves": [],
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": []
+}
