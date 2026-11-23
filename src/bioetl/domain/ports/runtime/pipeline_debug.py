@@ -43,7 +43,12 @@ class DebugAction(StrEnum):
 
 @dataclass(frozen=True, slots=True)
 class PipelineSnapshot:
-    """Immutable snapshot of pipeline state at a breakpoint.
+    """Snapshot of pipeline state at a breakpoint.
+
+    Attributes cannot be reassigned, but their contents may be mutable.
+    PipelineDebugService history copies built-in dict and list containers,
+    recursively, at capture and on access. Other payload objects are retained
+    by reference and are not covered by the stable-history guarantee.
 
     Attributes:
         stage: Current lifecycle stage name.
