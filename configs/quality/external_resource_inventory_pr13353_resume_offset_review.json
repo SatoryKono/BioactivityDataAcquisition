@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "3fe1e118f33c0ad3b1c9f03cc7ddd4bb7cd61beb",
+  "source_ref": "3fe1e118f33c0ad3b1c9f03cc7ddd4bb7cd61beb",
+  "source_reviews": {
+    "src/bioetl/application/services/workflow/control_plane/execution_preparation.py": "Restore and validate the saved resume offset before fingerprint validation; extracted helpers do not introduce external resource acquisitions or change ownership.",
+    "src/bioetl/application/services/workflow/control_plane/execution_service.py": "Preserve the incremental cursor after resuming a manifest with a pinned offset; no external resource acquisition or ownership change."
+  },
+  "expression_updates": {},
+  "segment_updates": {},
+  "line_updates": {},
+  "reference_moves": [],
+  "exclusion_moves": [],
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": []
+}
