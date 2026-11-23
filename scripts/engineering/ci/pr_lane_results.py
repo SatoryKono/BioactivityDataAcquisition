@@ -781,6 +781,14 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     **dict.fromkeys(
         (
+            "src/iuphar_target_class/baseline_semantics.py",
+            "src/iuphar_target_class/baseline_manifest.py",
+            "data/iuphar_target_class/baseline/rf001/manifest.json",
+        ),
+        ("tests/unit/iuphar_target_class/test_baseline_semantics.py",),
+    ),
+    **dict.fromkeys(
+        (
             "docs/00-project/ai/agents/guides/SKILL_EFFICIENCY_PROTOCOL.md",
             "docs/reports/generated/skill-efficiency-source-comparison.json",
         ),

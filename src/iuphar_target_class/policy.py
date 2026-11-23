@@ -488,6 +488,17 @@ def _rule_payload(rule: RuleRecord) -> dict[str, object]:
     }
 
 
+def baseline_contract() -> dict[str, object]:
+    """Return the RF-001 semantic baseline.
+
+    ``policy_document`` stays the historical stage-1 record. The unset
+    missing-marker version remains unset until a separate approval.
+    """
+    from .baseline_semantics import contract_document
+
+    return contract_document()
+
+
 def _reject_foreign_targets(mapping: Mapping[str, str]) -> None:
     foreign = sorted(
         {value for value in mapping.values() if value not in WORKING_CLASSES}

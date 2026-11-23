@@ -511,6 +511,24 @@ def test_iuphar_policy_paths_keep_the_policy_owner(tmp_path: Path) -> None:
             build_shadow_compare([unowned], repo_root=tmp_path)
 
 
+def test_iuphar_rf001_baseline_has_a_bounded_owner(tmp_path: Path) -> None:
+    owner = tmp_path / "tests/unit/iuphar_target_class/test_baseline_semantics.py"
+    owner.parent.mkdir(parents=True)
+    owner.write_text("def test_baseline():\n    assert True\n", encoding="utf-8")
+    report = build_shadow_compare(
+        [
+            "src/iuphar_target_class/baseline_semantics.py",
+            "src/iuphar_target_class/baseline_manifest.py",
+            "data/iuphar_target_class/baseline/rf001/manifest.json",
+        ],
+        repo_root=tmp_path,
+    )
+    assert report["selected"] == [
+        "tests/unit/iuphar_target_class/test_baseline_semantics.py"
+    ]
+    assert report["covers_full_suite"] is False
+
+
 def test_file_policy_doc_keeps_structure_catalog_owners() -> None:
     root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare(
