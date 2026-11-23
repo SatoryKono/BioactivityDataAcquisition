@@ -1,36 +1,36 @@
 {
   "summary": {
-    "scanned_modules": 2651,
-    "total_internal_imports": 8783,
+    "scanned_modules": 2657,
+    "total_internal_imports": 8814,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 330,
     "violations": 0,
-    "source_fingerprint": "23d84dc25ed741679cf1c56aa757684500bb3daace93e1d8ef0d43c201b6f958"
+    "source_fingerprint": "98aa7bfb68a7375225731c3b87b8f94f2932788e9e78efaf9ab5f0980c47ea21"
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1686,
+      "imports": 1700,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 1156,
+      "imports": 1167,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "application",
-      "imports": 254,
+      "imports": 256,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "composition",
-      "imports": 688,
+      "imports": 691,
       "allowed": true
     },
     {
@@ -48,7 +48,7 @@
     {
       "source": "domain",
       "target": "domain",
-      "imports": 1331,
+      "imports": 1332,
       "allowed": true
     },
     {
@@ -102,7 +102,7 @@
     {
       "source": "application.composite",
       "target": "domain.composite",
-      "imports": 116
+      "imports": 122
     },
     {
       "source": "application.core",
@@ -137,7 +137,7 @@
     {
       "source": "composition.bootstrap",
       "target": "application.services",
-      "imports": 57
+      "imports": 58
     },
     {
       "source": "application.composite",
@@ -270,6 +270,11 @@
       "imports": 23
     },
     {
+      "source": "composition.bootstrap",
+      "target": "application.composite",
+      "imports": 23
+    },
+    {
       "source": "interfaces.cli",
       "target": "composition.runtime_builders",
       "imports": 23
@@ -282,11 +287,6 @@
     {
       "source": "application.services",
       "target": "domain.normalization",
-      "imports": 22
-    },
-    {
-      "source": "composition.bootstrap",
-      "target": "application.composite",
       "imports": 22
     },
     {

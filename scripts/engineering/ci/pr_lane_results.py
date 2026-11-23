@@ -2231,6 +2231,12 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/unit/repo_backed/scripts/test_generate_pipeline_normalization_field_matrix.py",
         "tests/architecture/test_reproducibility_docs_contract_drift.py",
     ),
+    "docs/02-architecture/generated/module-dependency-map.json": (
+        "tests/architecture/test_architecture_dependency_docs_drift.py",
+    ),
+    "docs/02-architecture/generated/module-dependency-map.md": (
+        "tests/architecture/test_architecture_dependency_docs_drift.py",
+    ),
     "reports/quality/flaky-test-burndown-review.json": FLAKY_BURNDOWN_REVIEW_TESTS,
     "reports/quality/test-governance-current.json": TEST_GOVERNANCE_ARTIFACT_TESTS,
     "scripts/ai/agent_tools/README.md": (
