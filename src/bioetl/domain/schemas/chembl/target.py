@@ -5,10 +5,13 @@ Aligned with RULES.md v5.24 and ChEMBL 34 schema.
 
 from __future__ import annotations
 
+from typing import Any
+
 import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
+import bioetl.domain.normalization.target_classification_values  # noqa: F401
 from bioetl.domain.schemas.base import ETLRecordSchema
 from bioetl.domain.schemas.constants import (
     CHEMBL_ID_PATTERN,
@@ -19,6 +22,7 @@ from bioetl.domain.schemas.constants import (
 __all__ = [
     "TargetSchema",
     "TargetSchemaV31",
+    "TargetSchemaV32",
 ]
 
 
@@ -215,4 +219,54 @@ class TargetSchemaV31(TargetSchema):
     decision_status: Series[str] = pa.Field(nullable=True)
     target_class_profile_sha256: Series[str] = pa.Field(
         nullable=True, str_matches=r"^[0-9a-f]{64}$"
+    )
+
+
+def _detail_field(name: str, description: str) -> Any:
+    return pa.Field(
+        nullable=True,
+        description=description,
+        canonical_classification_detail=name,
+    )
+
+
+class TargetSchemaV32(TargetSchemaV31):
+    """Persist IUPHAR detail as canonical JSON strings. Null means not computed."""
+
+    iuphar_type_raw: Series[str] = _detail_field(
+        "iuphar_type_raw", "Raw IUPHAR source type. Null means not computed."
+    )
+    iuphar_source_completeness: Series[str] = _detail_field(
+        "iuphar_source_completeness",
+        "IUPHAR source completeness: typed, family_only, source_unavailable or unannotated.",
+    )
+    iuphar_family_ids: Series[str] = _detail_field(
+        "iuphar_family_ids", "Canonical JSON set of IUPHAR family ids."
+    )
+    iuphar_subclasses: Series[str] = _detail_field(
+        "iuphar_subclasses", "Canonical JSON set of IUPHAR subclasses."
+    )
+    iuphar_family_paths: Series[str] = _detail_field(
+        "iuphar_family_paths",
+        "Canonical JSON set of structs {family_id, root_to_leaf}.",
+    )
+    local_status: Series[str] = _detail_field(
+        "local_status",
+        "Local-rule status. Null means the local layer was not computed.",
+    )
+    local_subclasses: Series[str] = _detail_field(
+        "local_subclasses", "Canonical JSON set of local subclasses."
+    )
+    local_rule_ids: Series[str] = _detail_field(
+        "local_rule_ids", "Canonical JSON set of local rule ids."
+    )
+    effective_subclasses: Series[str] = _detail_field(
+        "effective_subclasses", "Canonical JSON set of effective subclasses."
+    )
+    conflict_codes: Series[str] = _detail_field(
+        "conflict_codes", "Canonical JSON set of conflict codes."
+    )
+    classification_evidence_refs: Series[str] = _detail_field(
+        "classification_evidence_refs",
+        "Canonical JSON struct of match_evidence_ids and local_evidence_ids.",
     )

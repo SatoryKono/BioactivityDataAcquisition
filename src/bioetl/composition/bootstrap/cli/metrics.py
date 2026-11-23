@@ -182,6 +182,11 @@ def bind_target_deployment(
     )
     if classification.mode != "enrich":
         raise ValueError("deployment configuration must select enrich")
+    if classification.to_domain().contract_version != "3.1.0":
+        raise ValueError(
+            "target candidate migration writes physical contract 3.1.0 only; "
+            "3.2.0 requires a later migration"
+        )
     baseline = load_pipeline_config_uncached("chembl_target", configs_root=root)
     future = baseline.model_copy(update={"target_classification": classification})
     future = resolve_target_classification_profile(future).resolved_yaml_config
@@ -264,6 +269,11 @@ def _rehearsal_future(
     )
     if classification.mode != "enrich":
         raise ValueError("deployment configuration must select enrich")
+    if classification.to_domain().contract_version != "3.1.0":
+        raise ValueError(
+            "target candidate migration writes physical contract 3.1.0 only; "
+            "3.2.0 requires a later migration"
+        )
     baseline = load_pipeline_config_uncached("chembl_target", configs_root=configs_root)
     future = baseline.model_copy(update={"target_classification": classification})
     return resolve_target_classification_profile(future).resolved_yaml_config

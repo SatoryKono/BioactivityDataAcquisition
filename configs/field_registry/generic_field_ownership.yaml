@@ -85,6 +85,15 @@ entries:
     rationale: Target description remains source-specific biological target text on the v3.1 Gold contract and must not be treated as a generic cross-entity description alias.
 
   - surface: gold_json_property
+    path: docs/04-reference/contracts/gold/chembl_target_v3.2.json
+    context: properties
+    fields:
+      - description
+    owner: BioETL Team
+    semantic_role: chembl_target_descriptive_metadata
+    rationale: Target description remains source-specific biological target text on the v3.2 Gold contract and must not be treated as a generic cross-entity description alias.
+
+  - surface: gold_json_property
     path: docs/04-reference/contracts/gold/composite_target_v1.0.json
     context: properties
     fields:

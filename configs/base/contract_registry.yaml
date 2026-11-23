@@ -284,7 +284,8 @@ entries:
     published_artifacts:
       - "../../docs/04-reference/contracts/gold/chembl_target_v3.0.json"
       - "../../docs/04-reference/contracts/gold/chembl_target_v3.1.json"
-    supported_versions: ["1.0.0", "2.0.0", "3.0.0", "3.1.0"]
+      - "../../docs/04-reference/contracts/gold/chembl_target_v3.2.json"
+    supported_versions: ["1.0.0", "2.0.0", "3.0.0", "3.1.0", "3.2.0"]
     migration_guides: {}
     last_updated: "2026-06-01T00:00:00Z"
     owners: ["chembl-team"]

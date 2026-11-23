@@ -18,7 +18,12 @@ from urllib.parse import urlunsplit
 from bioetl.domain.contracts import gold as gold_contracts
 from bioetl.domain.contracts.gold.chembl_target_classification import (
     ChEMBLTargetGoldSchemaV31,
+    ChEMBLTargetGoldSchemaV32,
     target_v31_schema_hash,
+    target_v32_schema_hash,
+)
+from bioetl.domain.normalization.target_classification_values import (
+    DETAIL_LOGICAL_CONTRACT,
 )
 from bioetl.domain.normalization.profiles import (
     resolve_normalization_profile_identity,
@@ -251,6 +256,18 @@ def _expected_artifacts() -> dict[Path, str]:
     target_v31["x-bioetl-schema-sha256"] = target_v31_schema_hash()
     artifacts[CONTRACTS_DIR / "chembl_target_v3.1.json"] = (
         json.dumps(target_v31, indent=2, ensure_ascii=False) + "\n"
+    )
+    # V32 is selected only by an explicit table contract. V30 and V31 stay stable.
+    target_v32 = _build_contract(ChEMBLTargetGoldSchemaV32, "chembl_target", "3.2.0")
+    profile_hash_v32 = target_v32["properties"]["target_class_profile_sha256"]
+    profile_hash_v32["pattern"] = "^[0-9a-f]{64}$"
+    for name, annotation in DETAIL_LOGICAL_CONTRACT.items():
+        target_v32["properties"][name].update(annotation)
+    target_v32["x-bioetl-schema-sha256"] = target_v32_schema_hash()
+    target_v32["x-bioetl-physical-contract"] = "3.2.0"
+    target_v32["x-bioetl-computational-contract"] = "independent"
+    artifacts[CONTRACTS_DIR / "chembl_target_v3.2.json"] = (
+        json.dumps(target_v32, indent=2, ensure_ascii=False) + "\n"
     )
 
     return artifacts

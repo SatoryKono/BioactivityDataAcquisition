@@ -9,6 +9,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from bioetl.domain.config.target_classification import (
     TargetClassificationConfig,
     TargetClassificationMode,
+    TargetTableContract,
 )
 
 
@@ -44,7 +45,24 @@ class TargetClassificationYamlConfig(BaseModel):
                             },
                         },
                     },
-                }
+                },
+                {
+                    "if": {
+                        "properties": {"mode": {"enum": ["off", "shadow"]}},
+                        "required": ["mode"],
+                    },
+                    "then": {"properties": {"table_contract": {"enum": ["3.0.0"]}}},
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "mode": {"const": "enrich"},
+                            "table_contract": {"const": "3.0.0"},
+                        },
+                        "required": ["mode", "table_contract"],
+                    },
+                    "then": {"not": {}},
+                },
             ],
         },
     )
@@ -54,6 +72,7 @@ class TargetClassificationYamlConfig(BaseModel):
     snapshot_manifest_sha256: str | None = Field(
         default=None, pattern=r"^[0-9a-f]{64}$"
     )
+    table_contract: TargetTableContract | None = None
 
     @model_validator(mode="after")
     def validate_profile(self) -> Self:
@@ -65,6 +84,7 @@ class TargetClassificationYamlConfig(BaseModel):
             mode=self.mode,
             snapshot_manifest=self.snapshot_manifest,
             snapshot_manifest_sha256=self.snapshot_manifest_sha256,
+            table_contract=self.table_contract,
         )
 
 

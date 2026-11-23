@@ -144,7 +144,7 @@ def _validate_existing_transforms(
     target: PipelineYamlConfig,
     settings: Settings,
 ) -> None:
-    if profile == "V31":
+    if profile in {"V31", "V32"}:
         for step in transforms:
             _validate_target_transform(config, step, intents, paths, target, settings)
 
@@ -193,7 +193,7 @@ def _validate_pipeline_writers(
     target: PipelineYamlConfig,
     profile: str,
 ) -> None:
-    if profile == "V31" and any(
+    if profile in {"V31", "V32"} and any(
         item.step.pipeline_name != "chembl_target" for item in writers
     ):
         raise ValueError(
@@ -204,6 +204,7 @@ def _validate_pipeline_writers(
         gold_path=paths[1],
         mode=target.target_classification.mode,
         destructive=any(item.destructive for item in writers),
+        table_contract=target.target_classification.to_domain().contract_version,
     )
 
 
@@ -227,7 +228,10 @@ def _validate_target_transform(
     if _verification_only(step):
         return  # The canonical adapter either verifies closure or raises before mutation.
     assert_target_table_compatibility(
-        silver_path=paths[0], gold_path=paths[1], mode=target.target_classification.mode
+        silver_path=paths[0],
+        gold_path=paths[1],
+        mode=target.target_classification.mode,
+        table_contract=target.target_classification.to_domain().contract_version,
     )
     upstream = _ancestors(config, step.step_id)
     if mode == "selected-snapshot":

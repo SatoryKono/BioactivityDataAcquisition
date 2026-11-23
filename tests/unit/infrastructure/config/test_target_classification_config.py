@@ -17,21 +17,31 @@ from bioetl.application.core.record_normalization_processor import (
 from bioetl.domain.behavior.identity_service import EntityIdentityGenerator
 from bioetl.domain.config import PipelineConfig, TableConfig
 from bioetl.domain.config.target_classification import (
+    TARGET_CLASSIFICATION_DETAIL_FIELDS,
     TARGET_CLASSIFICATION_FIELDS,
     TargetClassificationConfig,
 )
 from bioetl.domain.contracts.gold import ChEMBLTargetGoldSchema
 from bioetl.domain.contracts.gold.chembl_target_classification import (
     ChEMBLTargetGoldSchemaV31,
+    ChEMBLTargetGoldSchemaV32,
     target_v31_schema_hash,
 )
 from bioetl.domain.entities.chembl_structures_foundation import Target
-from bioetl.domain.entities.chembl_target_classification import TargetV31
+from bioetl.domain.entities.chembl_target_classification import TargetV31, TargetV32
 from bioetl.domain.normalization.profiles.chembl_target import CHEMBL_TARGET_PROFILE
 from bioetl.domain.normalization.profiles.chembl_target_classification import (
     target_v31_normalization_profile,
+    target_v32_normalization_profile,
 )
-from bioetl.domain.schemas.chembl.target import TargetSchema, TargetSchemaV31
+from bioetl.domain.normalization.target_classification_values import (
+    project_classification_detail,
+)
+from bioetl.domain.schemas.chembl.target import (
+    TargetSchema,
+    TargetSchemaV31,
+    TargetSchemaV32,
+)
 from bioetl.infrastructure.config.contract_policy_loader import (
     load_pipeline_contract_policy,
 )
@@ -49,6 +59,7 @@ from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.schemas.silver_chembl_core import CHEMBL_TARGET_SCHEMA
 from bioetl.infrastructure.schemas.silver_chembl_target_classification import (
     CHEMBL_TARGET_SCHEMA_V31,
+    CHEMBL_TARGET_SCHEMA_V32,
 )
 from bioetl.infrastructure.schemas.target_classification_config import (
     TargetClassificationYamlConfig,
@@ -58,15 +69,17 @@ pytestmark = pytest.mark.unit
 ROOT = Path(__file__).resolve().parents[4]
 
 
-def _config(mode: str = "off") -> PipelineYamlConfig:
+def _config(mode: str = "off", table_contract: str | None = None) -> PipelineYamlConfig:
     base = load_pipeline_config_from_root(
         "chembl_target", configs_root=ROOT / "configs"
     )
-    options = {"mode": mode}
+    options: dict[str, str] = {"mode": mode}
     if mode != "off":
         options.update(
             snapshot_manifest="snapshot.json", snapshot_manifest_sha256="a" * 64
         )
+    if table_contract is not None:
+        options["table_contract"] = table_contract
     return base.model_copy(
         update={
             "target_classification": TargetClassificationYamlConfig.model_validate(
@@ -351,3 +364,171 @@ def test_v31_normalization_preserves_legacy_rules_and_accepts_new_hash_fields() 
     assert CHEMBL_TARGET_PROFILE.identity == legacy_identity
     assert CHEMBL_TARGET_PROFILE.fields.isdisjoint(TARGET_CLASSIFICATION_FIELDS)
     assert profile.identity.profile_hash != legacy_identity.profile_hash
+
+
+def _detail(**overrides: object) -> dict[str, str | None]:
+    payload: dict[str, object] = {
+        "computed": True,
+        "iuphar_type_raw": "enzyme",
+        "annotation_status": "annotated",
+        "family_ids": ("b", "a", "a"),
+        "subclasses": ("zeta", "alpha"),
+        "paths": (("2", ("leaf", "root")), ("1", ("root", "leaf"))),
+        "local_status": "supported",
+        "local_subclasses": ("local-b", "local-a"),
+        "local_rule_ids": ("rule-b", "rule-a"),
+        "effective_subclasses": ("eff-b", "eff-a"),
+        "conflict_codes": ("conflict-b", "conflict-a"),
+        "match_evidence_ids": ("match-b", "match-a"),
+        "local_evidence_ids": ("local-ev-b", "local-ev-a"),
+    }
+    payload.update(overrides)
+    return project_classification_detail(**payload)  # type: ignore[arg-type]
+
+
+def test_explicit_table_contract_selects_v32_without_changing_default_enrich() -> None:
+    contract = load_pipeline_contract_policy("chembl", "target")
+    default = resolve_target_classification_profile(_config("enrich"), contract)
+    assert default.contract_version == "3.1.0"
+    assert set(TARGET_CLASSIFICATION_DETAIL_FIELDS).isdisjoint(
+        default.content_hash_include_fields
+    )
+    selected = resolve_target_classification_profile(
+        _config("enrich", "3.2.0"), contract
+    )
+    assert selected.contract_version == "3.2.0"
+    assert selected.entity_class is TargetV32
+    assert selected.silver_schema is CHEMBL_TARGET_SCHEMA_V32
+    assert selected.pandera_silver_schema is TargetSchemaV32
+    assert selected.gold_schema is ChEMBLTargetGoldSchemaV32
+    assert selected.contract_policy.active_version == "3.2.0"
+    assert selected.contract_policy.read_order == ["3.2.0"]
+    assert selected.contract_policy.write_versions == ["3.2.0"]
+    validate_contract_policy_registry_alignment(selected.contract_policy)
+    assert list(TARGET_CLASSIFICATION_DETAIL_FIELDS) == [
+        name
+        for name in selected.content_hash_include_fields
+        if name in TARGET_CLASSIFICATION_DETAIL_FIELDS
+    ]
+
+
+@pytest.mark.parametrize(
+    ("mode", "table_contract"),
+    [("off", "3.2.0"), ("shadow", "3.1.0"), ("enrich", "3.0.0")],
+)
+def test_incompatible_profile_and_table_contract_are_rejected(
+    mode: str, table_contract: str
+) -> None:
+    payload: dict[str, str] = {"mode": mode, "table_contract": table_contract}
+    if mode != "off":
+        payload.update(
+            snapshot_manifest="snapshot.json", snapshot_manifest_sha256="a" * 64
+        )
+    with pytest.raises(ValidationError):
+        TargetClassificationYamlConfig.model_validate(payload)
+
+
+def test_v32_layers_share_detail_columns_and_keep_v31_fields() -> None:
+    arrow = list(CHEMBL_TARGET_SCHEMA_V32.names)
+    pandera = list(TargetSchemaV32.to_schema().columns)
+    gold = list(ChEMBLTargetGoldSchemaV32.to_schema().columns)
+    expected = (*TARGET_CLASSIFICATION_FIELDS, *TARGET_CLASSIFICATION_DETAIL_FIELDS)
+    for names in (arrow, pandera, gold):
+        start = names.index(expected[0])
+        assert tuple(names[start : start + len(expected)]) == expected
+    assert [name for name in arrow if name not in expected] == list(
+        CHEMBL_TARGET_SCHEMA.names
+    )
+    assert set(TARGET_CLASSIFICATION_DETAIL_FIELDS) <= {
+        field.name for field in fields(TargetV32)
+    }
+
+
+def test_v32_projection_is_stable_under_permutation_and_distinguishes_null() -> None:
+    first = _detail()
+    second = _detail(
+        family_ids=("a", "b"),
+        subclasses=("alpha", "zeta"),
+        paths=(("1", ("root", "leaf")), ("2", ("leaf", "root"))),
+        local_subclasses=("local-a", "local-b"),
+        local_rule_ids=("rule-a", "rule-b"),
+        effective_subclasses=("eff-a", "eff-b"),
+        conflict_codes=("conflict-a", "conflict-b"),
+        match_evidence_ids=("match-a", "match-b"),
+        local_evidence_ids=("local-ev-a", "local-ev-b"),
+    )
+    assert first == second
+    assert first["iuphar_source_completeness"] == "typed"
+    empty = _detail(
+        iuphar_type_raw=None,
+        annotation_status=None,
+        family_ids=(),
+        subclasses=(),
+        paths=(),
+        local_status=None,
+        local_subclasses=(),
+        local_rule_ids=(),
+        effective_subclasses=(),
+        conflict_codes=(),
+        match_evidence_ids=(),
+        local_evidence_ids=(),
+    )
+    assert empty["iuphar_family_ids"] == "[]"
+    assert empty["iuphar_source_completeness"] == "unannotated"
+    absent = project_classification_detail(
+        computed=False,
+        iuphar_type_raw=None,
+        annotation_status=None,
+        family_ids=(),
+        subclasses=(),
+        paths=(),
+        local_status=None,
+        local_subclasses=(),
+        local_rule_ids=(),
+        effective_subclasses=(),
+        conflict_codes=(),
+        match_evidence_ids=(),
+        local_evidence_ids=(),
+    )
+    assert all(value is None for value in absent.values())
+    binding = resolve_target_classification_profile(_config("enrich", "3.2.0"))
+    processor = RecordNormalizationProcessor(
+        provider="chembl",
+        entity_type="target",
+        profile=target_v32_normalization_profile(),
+        content_hash_policy_authoritative=True,
+        content_hash_include_fields=frozenset(binding.content_hash_include_fields),
+    )
+    source = {"target_id": "CHEMBL1", **first}
+    permuted = {"target_id": "CHEMBL1", **second}
+    assert processor.compute_content_hash(source) == processor.compute_content_hash(
+        permuted
+    )
+    assert processor.compute_content_hash(source) != processor.compute_content_hash(
+        {"target_id": "CHEMBL1", **empty}
+    )
+    assert processor.compute_content_hash(
+        {"target_id": "CHEMBL1", **empty}
+    ) != processor.compute_content_hash({"target_id": "CHEMBL1", **absent})
+
+
+def test_v32_gold_accepts_canonical_detail_and_rejects_unsorted_json() -> None:
+    row: dict[str, object] = dict.fromkeys(
+        ChEMBLTargetGoldSchemaV32.to_schema().columns
+    )
+    row.update(
+        entity_id="chembl:CHEMBL1",
+        content_hash="a" * 64,
+        target_id="CHEMBL1",
+        species_group_flag=False,
+        _index=0,
+        _dq_warn=False,
+        _dq_error=False,
+        target_class_profile_sha256="b" * 64,
+        **_detail(),
+    )
+    validated = ChEMBLTargetGoldSchemaV32.validate(pd.DataFrame([row]))
+    assert validated.iloc[0]["iuphar_family_ids"] == row["iuphar_family_ids"]
+    row["iuphar_family_ids"] = '["b","a"]'
+    with pytest.raises((pandera.errors.SchemaError, pandera.errors.SchemaErrors)):
+        ChEMBLTargetGoldSchemaV32.validate(pd.DataFrame([row]))
