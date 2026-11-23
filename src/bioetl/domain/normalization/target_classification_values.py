@@ -11,6 +11,7 @@ ordered by family id and that chain. These strings participate in content_hash.
 from __future__ import annotations
 
 import json
+import math
 from collections.abc import Iterable, Mapping, Sequence
 from typing import cast
 
@@ -101,7 +102,7 @@ DETAIL_LOGICAL_CONTRACT: dict[str, dict[str, str]] = {
 def _missing(value: object) -> bool:
     if value is None:
         return True
-    return isinstance(value, float) and value != value
+    return isinstance(value, float) and math.isnan(value)
 
 
 def _one_string(value: object) -> str:

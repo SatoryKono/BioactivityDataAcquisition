@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import hashlib
 from collections.abc import Callable
-from typing import Any, cast
+from typing import cast
 
 import pandas as pd
 import pandera.pandas as pa
@@ -14,6 +14,9 @@ from pandera.typing import Series
 from bioetl.domain.contracts.gold._strict_gold_contract_schema import (
     CONTENT_HASH_HEX64_PATTERN,
     StrictGoldContractSchema,
+)
+from bioetl.domain.schemas.chembl.target import (
+    build_target_classification_detail_model,
 )
 from bioetl.domain.schemas.chembl.target import (
     register_canonical_classification_detail as _register_detail,
@@ -275,54 +278,12 @@ class ChEMBLTargetGoldSchemaV31(ChEMBLTargetGoldSchema):
     )
 
 
-def _detail_field(name: str, description: str) -> Any:
-    return pa.Field(
-        nullable=True,
-        description=description,
-        canonical_classification_detail=name,
-    )
-
-
-class ChEMBLTargetGoldSchemaV32(ChEMBLTargetGoldSchemaV31):
-    """Additive 3.2.0 detail. Existing V31 columns stay nullable strings."""
-
-    iuphar_type_raw: Series[str] = _detail_field(
-        "iuphar_type_raw", "Raw IUPHAR source type. Null means not computed."
-    )
-    iuphar_source_completeness: Series[str] = _detail_field(
-        "iuphar_source_completeness",
-        "IUPHAR source completeness: typed, family_only, source_unavailable or unannotated.",
-    )
-    iuphar_family_ids: Series[str] = _detail_field(
-        "iuphar_family_ids", "Canonical JSON set of IUPHAR family ids."
-    )
-    iuphar_subclasses: Series[str] = _detail_field(
-        "iuphar_subclasses", "Canonical JSON set of IUPHAR subclasses."
-    )
-    iuphar_family_paths: Series[str] = _detail_field(
-        "iuphar_family_paths",
-        "Canonical JSON set of structs {family_id, root_to_leaf}.",
-    )
-    local_status: Series[str] = _detail_field(
-        "local_status",
-        "Local-rule status. Null means the local layer was not computed.",
-    )
-    local_subclasses: Series[str] = _detail_field(
-        "local_subclasses", "Canonical JSON set of local subclasses."
-    )
-    local_rule_ids: Series[str] = _detail_field(
-        "local_rule_ids", "Canonical JSON set of local rule ids."
-    )
-    effective_subclasses: Series[str] = _detail_field(
-        "effective_subclasses", "Canonical JSON set of effective subclasses."
-    )
-    conflict_codes: Series[str] = _detail_field(
-        "conflict_codes", "Canonical JSON set of conflict codes."
-    )
-    classification_evidence_refs: Series[str] = _detail_field(
-        "classification_evidence_refs",
-        "Canonical JSON struct of match_evidence_ids and local_evidence_ids.",
-    )
+ChEMBLTargetGoldSchemaV32 = build_target_classification_detail_model(
+    ChEMBLTargetGoldSchemaV31,
+    "ChEMBLTargetGoldSchemaV32",
+    "Additive 3.2.0 detail. Existing V31 columns stay nullable strings.",
+    __name__,
+)
 
 
 def target_v31_schema_hash() -> str:

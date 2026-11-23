@@ -12,6 +12,7 @@ from bioetl.domain.config.target_classification import (
 )
 
 _TargetProfile = Literal["empty", "V30", "V31", "V32"]
+_INCOMPLETE_TARGET_SCHEMA = "incomplete target classification schema; recovery required"
 
 
 def _profile_for_fields(fields: frozenset[str]) -> Literal["V30", "V31", "V32"]:
@@ -22,9 +23,9 @@ def _profile_for_fields(fields: frozenset[str]) -> Literal["V30", "V31", "V32"]:
     if (present and present != required) or (
         present_detail and present_detail != detail
     ):
-        raise ValueError("incomplete target classification schema; recovery required")
+        raise ValueError(_INCOMPLETE_TARGET_SCHEMA)
     if present_detail and not present:
-        raise ValueError("incomplete target classification schema; recovery required")
+        raise ValueError(_INCOMPLETE_TARGET_SCHEMA)
     if present_detail:
         return "V32"
     if present:
@@ -54,7 +55,7 @@ def get_target_table_profile(*, silver_path: Path, gold_path: Path) -> _TargetPr
         return "V31"
     if found == "V32":
         return "V32"
-    raise ValueError("incomplete target classification schema; recovery required")
+    raise ValueError(_INCOMPLETE_TARGET_SCHEMA)
 
 
 def assert_target_table_compatibility(

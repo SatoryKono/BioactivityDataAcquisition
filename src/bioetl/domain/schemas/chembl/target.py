@@ -27,6 +27,7 @@ __all__ = [
     "TargetSchema",
     "TargetSchemaV31",
     "TargetSchemaV32",
+    "build_target_classification_detail_model",
     "register_canonical_classification_detail",
 ]
 
@@ -255,43 +256,58 @@ def _detail_field(name: str, description: str) -> Any:
     )
 
 
-class TargetSchemaV32(TargetSchemaV31):
-    """Persist IUPHAR detail as canonical JSON strings. Null means not computed."""
-
-    iuphar_type_raw: Series[str] = _detail_field(
-        "iuphar_type_raw", "Raw IUPHAR source type. Null means not computed."
-    )
-    iuphar_source_completeness: Series[str] = _detail_field(
+_DETAIL_FIELD_SPECS: tuple[tuple[str, str], ...] = (
+    ("iuphar_type_raw", "Raw IUPHAR source type. Null means not computed."),
+    (
         "iuphar_source_completeness",
         "IUPHAR source completeness: typed, family_only, source_unavailable or unannotated.",
-    )
-    iuphar_family_ids: Series[str] = _detail_field(
-        "iuphar_family_ids", "Canonical JSON set of IUPHAR family ids."
-    )
-    iuphar_subclasses: Series[str] = _detail_field(
-        "iuphar_subclasses", "Canonical JSON set of IUPHAR subclasses."
-    )
-    iuphar_family_paths: Series[str] = _detail_field(
+    ),
+    ("iuphar_family_ids", "Canonical JSON set of IUPHAR family ids."),
+    ("iuphar_subclasses", "Canonical JSON set of IUPHAR subclasses."),
+    (
         "iuphar_family_paths",
         "Canonical JSON set of structs {family_id, root_to_leaf}.",
-    )
-    local_status: Series[str] = _detail_field(
+    ),
+    (
         "local_status",
         "Local-rule status. Null means the local layer was not computed.",
-    )
-    local_subclasses: Series[str] = _detail_field(
-        "local_subclasses", "Canonical JSON set of local subclasses."
-    )
-    local_rule_ids: Series[str] = _detail_field(
-        "local_rule_ids", "Canonical JSON set of local rule ids."
-    )
-    effective_subclasses: Series[str] = _detail_field(
-        "effective_subclasses", "Canonical JSON set of effective subclasses."
-    )
-    conflict_codes: Series[str] = _detail_field(
-        "conflict_codes", "Canonical JSON set of conflict codes."
-    )
-    classification_evidence_refs: Series[str] = _detail_field(
+    ),
+    ("local_subclasses", "Canonical JSON set of local subclasses."),
+    ("local_rule_ids", "Canonical JSON set of local rule ids."),
+    ("effective_subclasses", "Canonical JSON set of effective subclasses."),
+    ("conflict_codes", "Canonical JSON set of conflict codes."),
+    (
         "classification_evidence_refs",
         "Canonical JSON struct of match_evidence_ids and local_evidence_ids.",
-    )
+    ),
+)
+
+
+def build_target_classification_detail_model(
+    base: type[pa.DataFrameModel],
+    name: str,
+    doc: str,
+    module: str,
+) -> type[pa.DataFrameModel]:
+    """Add the shared detail columns after the columns of ``base``."""
+    annotations: dict[str, object] = {}
+    namespace: dict[str, object] = {
+        "__annotations__": annotations,
+        "__module__": module,
+        "__doc__": doc,
+    }
+    for field_name, description in _DETAIL_FIELD_SPECS:
+        annotations[field_name] = Series[str]
+        namespace[field_name] = _detail_field(field_name, description)
+    model = type(name, (base,), namespace)
+    if not isinstance(model, type) or not issubclass(model, pa.DataFrameModel):
+        raise TypeError("detail schema must be a Pandera model")
+    return model
+
+
+TargetSchemaV32 = build_target_classification_detail_model(
+    TargetSchemaV31,
+    "TargetSchemaV32",
+    "Persist IUPHAR detail as canonical JSON strings. Null means not computed.",
+    __name__,
+)
