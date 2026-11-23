@@ -11,6 +11,9 @@ from bioetl.domain.config.target_classification import TARGET_CLASSIFICATION_FIE
 # is not present: seeing these names must not be inferred from enrich mode.
 TARGET_CLASSIFICATION_V32_FIELDS: tuple[str, ...] = ()
 _PROFILE_CONTRACT_VERSIONS = {"V30": "3.0.0", "V31": "3.1.0", "V32": "3.2.0"}
+_INCOMPLETE_CLASSIFICATION = (
+    "incomplete target classification schema; recovery required"
+)
 
 
 def classification_profile_name(fields: frozenset[str]) -> str:
@@ -18,19 +21,15 @@ def classification_profile_name(fields: frozenset[str]) -> str:
     required = frozenset(TARGET_CLASSIFICATION_FIELDS)
     present = required.intersection(fields)
     if present and present != required:
-        raise ValueError("incomplete target classification schema; recovery required")
+        raise ValueError(_INCOMPLETE_CLASSIFICATION)
     v32 = frozenset(TARGET_CLASSIFICATION_V32_FIELDS)
     if v32:
         v32_present = v32.intersection(fields)
         if v32_present and v32_present != v32:
-            raise ValueError(
-                "incomplete target classification schema; recovery required"
-            )
+            raise ValueError(_INCOMPLETE_CLASSIFICATION)
         if v32_present == v32:
             if present != required:
-                raise ValueError(
-                    "incomplete target classification schema; recovery required"
-                )
+                raise ValueError(_INCOMPLETE_CLASSIFICATION)
             return "V32"
     return "V31" if present else "V30"
 

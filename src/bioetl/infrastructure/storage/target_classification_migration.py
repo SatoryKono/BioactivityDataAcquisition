@@ -54,6 +54,7 @@ from iuphar_target_class.stage0.io import (
 )
 
 _JOURNAL_JSON = "journal.json"
+_INVALID_TARGET_ID = "assay/target FK restoration RF-009 found an invalid target id"
 _CANONICAL_CUTOVER = "RF-013"
 # Physical transitions the driver can execute. 3.2.0 stays declared and
 # refused until its field contract is installed and this set is updated.
@@ -355,9 +356,7 @@ def _target_ids(table: DeltaTable) -> set[str]:
         if value is None:
             continue
         if not isinstance(value, str) or not value:
-            raise ValueError(
-                "assay/target FK restoration RF-009 found an invalid target id"
-            )
+            raise ValueError(_INVALID_TARGET_ID)
         ids.add(value)
     return ids
 
@@ -414,9 +413,7 @@ def _fk_restoration(
     assay_ids = pins["assay"]["target_ids"]
     gold_ids = pins["gold"]["target_ids"]
     if not isinstance(assay_ids, set) or not isinstance(gold_ids, set):
-        raise ValueError(
-            "assay/target FK restoration RF-009 found an invalid target id"
-        )
+        raise ValueError(_INVALID_TARGET_ID)
     return require_rf009_fk_restoration(assay_ids, gold_ids)
 
 
@@ -499,29 +496,42 @@ def _assert_recorded_versions(
         raise ValueError("recorded source versions are no longer readable")
     live = _public_pins(current)
     for name, previous in recorded.items():
-        observed = live[name]
-        if (
-            observed["version"] != previous["version"]
-            or observed["table_id"] != previous["table_id"]
-        ):
-            raise ValueError("source table version changed since preparation")
-        if observed["profile"] != previous["profile"]:
-            raise ValueError("source table profile changed since preparation")
-        if observed["target_id_sha256"] != previous["target_id_sha256"]:
-            if name == "assay":
-                raise ValueError("assay reference cohort changed since preparation")
-            if name == "gold":
-                raise ValueError("baseline target cohort changed since preparation")
-            raise ValueError("source cohort changed since preparation")
+        _assert_one_pin(name, live[name], previous)
+    _assert_closed_fk(current, state)
+
+
+def _assert_one_pin(
+    name: str, observed: Mapping[str, object], previous: object
+) -> None:
+    if not isinstance(previous, dict):
+        raise ValueError("source table version changed since preparation")
+    if (
+        observed["version"] != previous["version"]
+        or observed["table_id"] != previous["table_id"]
+    ):
+        raise ValueError("source table version changed since preparation")
+    if observed["profile"] != previous["profile"]:
+        raise ValueError("source table profile changed since preparation")
+    if observed["target_id_sha256"] == previous["target_id_sha256"]:
+        return
+    if name == "assay":
+        raise ValueError("assay reference cohort changed since preparation")
+    if name == "gold":
+        raise ValueError("baseline target cohort changed since preparation")
+    raise ValueError("source cohort changed since preparation")
+
+
+def _assert_closed_fk(
+    current: dict[str, dict[str, object]], state: TargetMigrationJournal
+) -> None:
     restoration = state.get("fk_restoration") or {}
-    if restoration.get("status") == "closed":
-        assay_ids = current["assay"]["target_ids"]
-        gold_ids = current["gold"]["target_ids"]
-        if not isinstance(assay_ids, set) or not isinstance(gold_ids, set):
-            raise ValueError(
-                "assay/target FK restoration RF-009 found an invalid target id"
-            )
-        require_rf009_fk_restoration(assay_ids, gold_ids)
+    if restoration.get("status") != "closed":
+        return
+    assay_ids = current["assay"]["target_ids"]
+    gold_ids = current["gold"]["target_ids"]
+    if not isinstance(assay_ids, set) or not isinstance(gold_ids, set):
+        raise ValueError(_INVALID_TARGET_ID)
+    require_rf009_fk_restoration(assay_ids, gold_ids)
 
 
 def _assert_recorded_contracts(
