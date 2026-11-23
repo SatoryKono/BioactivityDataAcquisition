@@ -772,12 +772,8 @@ def test_incident_ranked_suspects_uses_one_comparable_value_column() -> None:
     assert "sortBy" in transform_ids
     assert "limit" not in transform_ids
     assert suspects["options"]["footer"]["enablePagination"] is True
-    sort = next(
-        transform for transform in transforms if transform.get("id") == "sortBy"
-    )
-    sort_field = (sort.get("options") or {}).get("sort", [{}])[0].get("field")
-    assert sort_field == "Value"
-    assert (sort.get("options") or {}).get("sort", [{}])[0].get("desc") is True
+    sorts = [transform for transform in transforms if transform.get("id") == "sortBy"]
+    assert sorts[-1]["options"]["sort"] == [{"desc": True, "field": "Value"}]
     # Complete ranked evidence remains available, not just the first two rows.
     assert not any(transform.get("id") == "limit" for transform in transforms)
     for field in ("Time", "Time 1", "Time 2"):

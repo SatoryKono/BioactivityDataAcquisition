@@ -1436,7 +1436,10 @@ def test_provider_dashboard_surfaces_current_health_status_panel() -> None:
 def test_provider_health_panel_114_description_disallows_zero_as_healthy() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
     panel = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9481)
-    assert panel["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
+    assert (
+        panel["fieldConfig"]["defaults"]["noValue"]
+        == "No result · inspect source panel 9002"
+    )
     assert "Missing evidence stays UNKNOWN" in panel["description"]
     assert "Source unavailable" in panel["description"]
     assert "vector(0)" not in json.dumps(panel)
