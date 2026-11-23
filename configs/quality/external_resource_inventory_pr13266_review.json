@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "289ea2a75d851d51d0613146f57e21a7b1e1904b",
+  "source_ref": "cd3944363454728fa3518f2e8fb12df09a0a0c95",
+  "source_reviews": {
+    "src/bioetl/application/ports/pipeline.py": "Removed an obsolete mypy suppression after exposing EntityTypeExtractor in the static facade; runtime imports, resource acquisition, ownership and lifecycle are unchanged."
+  }
+}

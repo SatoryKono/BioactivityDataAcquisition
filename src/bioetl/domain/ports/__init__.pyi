@@ -90,6 +90,7 @@ from bioetl.domain.ports.data_source import (
     PublicationTermEnrichmentPort as PublicationTermEnrichmentPort,
 )
 from bioetl.domain.ports.delta_reader import DeltaReaderPort as DeltaReaderPort
+from bioetl.domain.ports.entity_type import EntityTypeExtractor as EntityTypeExtractor
 from bioetl.domain.ports.export import (
     DebugExportPort as DebugExportPort,
 )
@@ -185,6 +186,15 @@ from bioetl.domain.ports.observability import (
     resolve_metric_labels as resolve_metric_labels,
 )
 from bioetl.domain.ports.pii import PiiHasherPort as PiiHasherPort
+from bioetl.domain.ports.pipeline_callbacks import (
+    GoldFilterCallback as GoldFilterCallback,
+)
+from bioetl.domain.ports.pipeline_callbacks import (
+    GoldTransformCallback as GoldTransformCallback,
+)
+from bioetl.domain.ports.pipeline_callbacks import (
+    TransformCallback as TransformCallback,
+)
 from bioetl.domain.ports.protein_classification import (
     ProteinClassificationPort as ProteinClassificationPort,
 )
@@ -334,6 +344,10 @@ from bioetl.domain.ports.runtime.runner import (
     PipelineCreateWithServicesRequest as PipelineCreateWithServicesRequest,
 )
 from bioetl.domain.ports.serialization import JsonEncoderPort as JsonEncoderPort
+from bioetl.domain.ports.source_config import (
+    PaginationConfigLike as PaginationConfigLike,
+)
+from bioetl.domain.ports.source_config import SourceConfigLike as SourceConfigLike
 from bioetl.domain.ports.stage_accounting import (
     StageAccountingPort as StageAccountingPort,
 )
@@ -369,6 +383,9 @@ from bioetl.domain.ports.target_classification import (
 )
 from bioetl.domain.ports.target_classification import (
     TargetClassificationPort as TargetClassificationPort,
+)
+from bioetl.domain.ports.workflow_foreign_key_reconciliation import (
+    ForeignKeyReconciliationAction as ForeignKeyReconciliationAction,
 )
 from bioetl.domain.ports.workflow_foreign_key_reconciliation import (
     ForeignKeyReconciliationLayer as ForeignKeyReconciliationLayer,
