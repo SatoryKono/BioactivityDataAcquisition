@@ -5,7 +5,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from pydantic import ValidationError
 
 from bioetl.composition.factories.datasource.data_source_factory import (
     resolve_datasource_provider_registry as _resolve_provider_registry,
@@ -19,7 +18,10 @@ from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.health import (
     resolve_provider_resources,
 )
-from bioetl.infrastructure.config.source_config_loader import load_source_config
+from bioetl.infrastructure.config.source_config_loader import (
+    SourceConfigNotFoundError,
+    load_source_config,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
@@ -133,10 +135,7 @@ class HttpClientFactory:
         registry = _resolve_provider_registry(provider_registry)
         try:
             source_config = load_source_config(provider)
-        except ValidationError:
-            # Invalid throttling must never turn into a faster fallback client.
-            raise
-        except ValueError:
+        except SourceConfigNotFoundError:
             source_config = None
 
         if source_config is not None:

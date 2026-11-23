@@ -115,10 +115,15 @@ class TestSourceConfigLoading:
         assert config.circuit_breaker.recovery_timeout >= 60
 
     def test_load_source_config_raises_for_unknown_provider(self) -> None:
-        """load_source_config() should raise ValueError for unknown provider."""
-        from bioetl.infrastructure.config.source_config_loader import load_source_config
+        """load_source_config() should identify missing provider files."""
+        from bioetl.infrastructure.config.source_config_loader import (
+            SourceConfigNotFoundError,
+            load_source_config,
+        )
 
-        with pytest.raises(ValueError, match="Source configuration file not found"):
+        with pytest.raises(
+            SourceConfigNotFoundError, match="Source configuration file not found"
+        ):
             load_source_config("nonexistent_provider")
 
     @pytest.mark.parametrize(
