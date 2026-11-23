@@ -11,8 +11,8 @@
 | Tracked doc-like files | 4209 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 80 |
-| Generated without route or exception | 142 |
-| Generated routes | 0 |
+| Generated without route or exception | 0 |
+| Generated routes | 76 |
 
 ## Tracking State
 
@@ -24,6 +24,7 @@
 
 | Lifecycle | Count |
 | --- | --- |
+| active_backlog | 1 |
 | active_quality_baseline | 126 |
 | closeout_evidence | 168 |
 | docs_reports_curated_entrypoint | 2 |
@@ -37,6 +38,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 26 |
 | reports_workspace_entrypoint | 1 |
+| supporting_context | 1 |
 | working_report | 387 |
 
 ## GitHub Issue Drafts And Packs
@@ -50,42 +52,35 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 953 |
+| Active | 779 |
 | Archived | 1554 |
 | Canonical | 77 |
-| Duplicate | 2 |
-| Generated | 880 |
-| Working | 743 |
+| Generated | 1071 |
+| Working | 728 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 953 |
+| active | 779 |
 | archive | 1554 |
 | canonical | 77 |
-| duplicate | 2 |
-| generated | 880 |
-| working | 743 |
+| generated | 1071 |
+| working | 728 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-migration | 449 |
-| generate-automatically | 880 |
-| keep | 2878 |
-| merge | 2 |
+| archive-after-migration | 434 |
+| generate-automatically | 1071 |
+| keep | 2704 |
 
 ## Cleanup Candidates
 
 | Path | Status | Inbound | Action |
 | --- | --- | --- | --- |
 | `docs/00-project/ai/grok/personas/closeout-table.toml` | Working | 0 | archive-after-migration |
-| `docs/00-project/ai/prompts/fragments/audit-scale.md` | Working | 0 | archive-after-migration |
-| `docs/00-project/ai/prompts/profiles/audit-readonly.yaml` | Working | 0 | archive-after-migration |
-| `docs/00-project/ai/skills/local/gh-fix-ci/LICENSE.txt` | Duplicate | 0 | merge |
-| `docs/00-project/ai/skills/local/openai-docs/LICENSE.txt` | Duplicate | 0 | merge |
 | `docs/03-guides/dashboards/archive/audit-protocols/dux3-audit-selection-notes.md` | Working | 2 | archive-after-migration |
 | `docs/03-guides/dashboards/archive/audit-protocols/dux3-first-screen-inventory.json` | Working | 2 | archive-after-migration |
 | `docs/03-guides/dashboards/archive/audit-protocols/dux3-residual-contracts.md` | Working | 6 | archive-after-migration |
@@ -98,7 +93,6 @@
 | `docs/03-guides/dashboards/archive/audit-protocols/dux5-screenshot-regression-protocol.md` | Working | 4 | archive-after-migration |
 | `docs/03-guides/dashboards/archive/audit-protocols/dux6-residual-readability.md` | Working | 3 | archive-after-migration |
 | `docs/03-guides/dashboards/migration-map-v2.md` | Working | 3 | archive-after-migration |
-| `docs/plans/consolidated-open-tasks-plan-2026-03-21.md` | Working | 3 | archive-after-migration |
 | `docs/plans/memory-recovery-2026-11-17.md` | Working | 1 | archive-after-migration |
 | `docs/reports/audit/N1_SHADOW_STATUS.md` | Working | 0 | archive-after-migration |
 | `docs/reports/audit/github_settings_inventory.md` | Working | 0 | archive-after-migration |
@@ -161,91 +155,96 @@
 | `reports/audit-runs/12106-s5/matrix.md` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12106-s6/durability-crash-restart-matrix.md` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/12106-s6/evidence/evidence.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/12107-r07-history/6b39eef8bf65aacb/adapter-owner-map.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/12107-r07-history/6b39eef8bf65aacb/adapter-owner-map.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/12107-r07-history/6b39eef8bf65aacb/handoff.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/12107-r07-history/6b39eef8bf65aacb/scan-manifest.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/12107-r07-history/KIT-MANIFEST-acceptance.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
 | Path | Route | Exception | Kind | Generator |
 | --- | --- | --- | --- | --- |
-| `docs/00-project/ai/skills/_references/README.md` |  | generated_skill_reference_mirror |  |  |
-| `docs/00-project/ai/skills/_references/local/README.md` |  | generated_skill_reference_mirror |  |  |
-| `docs/00-project/ai/skills/_references/local/deep-research/references/critique-framework.md` |  | generated_skill_reference_mirror |  |  |
-| `docs/00-project/ai/skills/_references/local/deep-research/references/report-templates.md` |  | generated_skill_reference_mirror |  |  |
-| `docs/00-project/ai/skills/_references/local/deep-research/references/search-patterns.md` |  | generated_skill_reference_mirror |  |  |
-| `docs/00-project/ai/skills/_references/local/deep-research/references/source-evaluation.md` |  | generated_skill_reference_mirror |  |  |
-| `docs/00-project/ai/skills/_references/local/documentation-audit/references/audit-checklist.md` |  | generated_skill_reference_mirror |  |  |
-| `docs/00-project/ai/skills/_references/local/documentation-audit/references/report-template.md` |  | generated_skill_reference_mirror |  |  |
-| `docs/00-project/ai/skills/_references/local/gh-address-comments/LICENSE.txt` |  | generated_skill_reference_mirror |  |  |
-| `docs/00-project/ai/skills/_references/local/gh-address-comments/SKILL.md` |  | generated_skill_reference_mirror |  |  |
-| `docs/00-project/ai/skills/_references/local/gh-address-comments/agents/openai.yaml` |  | generated_skill_reference_mirror |  |  |
-| `docs/00-project/ai/skills/_references/local/gh-fix-ci/LICENSE.txt` |  | generated_skill_reference_mirror |  |  |
-| `docs/00-project/ai/skills/_references/local/gh-fix-ci/SKILL.md` |  | generated_skill_reference_mirror |  |  |
-| `docs/00-project/ai/skills/_references/local/gh-fix-ci/agents/openai.yaml` |  | generated_skill_reference_mirror |  |  |
-| `docs/00-project/ai/skills/_references/local/openai-docs/LICENSE.txt` |  | generated_skill_reference_mirror |  |  |
-| `docs/00-project/ai/skills/_references/local/openai-docs/SKILL.md` |  | generated_skill_reference_mirror |  |  |
-| `docs/00-project/ai/skills/_references/local/openai-docs/agents/openai.yaml` |  | generated_skill_reference_mirror |  |  |
-| `docs/00-project/ai/skills/_references/local/public/architecture-guardian/SKILL.md` |  | generated_skill_reference_mirror |  |  |
-| `docs/00-project/ai/skills/_references/local/public/architecture-guardian/agents/openai.yaml` |  | generated_skill_reference_mirror |  |  |
-| `docs/02-architecture/diagrams/_template.mmd` |  | diagram_kind:diagram_support | diagram_support |  |
-| `docs/02-architecture/diagrams/adr-040-compliance-map.md` |  | diagram_kind:diagram_support | diagram_support |  |
-| `docs/02-architecture/diagrams/architecture/svg/INDEX.md` |  | diagram_kind:diagram_render_artifact | diagram_render_artifact |  |
-| `docs/02-architecture/diagrams/bundles/architecture.bundle.md` |  | diagram_kind:diagram_bundle | diagram_bundle |  |
-| `docs/02-architecture/diagrams/bundles/class.bundle.md` |  | diagram_kind:diagram_bundle | diagram_bundle |  |
-| `docs/02-architecture/diagrams/bundles/foundation.bundle.md` |  | diagram_kind:diagram_bundle | diagram_bundle |  |
-| `docs/02-architecture/diagrams/bundles/views.bundle.md` |  | diagram_kind:diagram_bundle | diagram_bundle |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-composite-checkpoint.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-composite-helpers.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-composite-runner-pkg-part1.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-composite-runner-pkg-part2.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-core-base-transformer.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-core-batch-execution.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-core-data-sources.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-core-lifecycle.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-core-postrun.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-core-preflight.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-observability-control-plane-evidence.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-observability.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-pipelines-chembl-part1.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-pipelines-chembl-part2.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-pipelines-common.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-pipelines-crossref.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-pipelines-pubmed.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-pipelines-uniprot-extractors.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-pipelines-uniprot.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-ports-part1.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-ports-part2.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-services-checkpoint.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-services-contracts.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-services-control-plane-ledger.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-services-control-plane-manifest-diagnostics.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-services-control-plane-manifest.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-services-control-plane-replay.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-services-control-plane-workflow.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-services-dq.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-services-evidence-location.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-services-execution.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-services-export-lineage.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-services-lineage.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-services-medallion.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-services-ops-part1.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-services-ops-part2.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-services-protein.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-services-quality.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-services-run-reports.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-services-workflow-control-plane.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-services-workflow.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-composition-bootstrap-assembly.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-composition-bootstrap-cli.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-composition-bootstrap-runtime.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-composition-contracts.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-composition-factories-datasource.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-composition-factories-services.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-composition-factories-storage.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-composition-providers.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-composition-runtime-builders.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-composition.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-domain-aggregates.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-domain-behavior-part1.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-domain-behavior-part2.mmd` |  | diagram_kind:diagram_generated_source | diagram_generated_source |  |
+| `docs/00-project/ai/agents/agents/ORCHESTRATION.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/agents/README.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/agents/py-audit-bot.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/agents/py-config-bot.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/agents/py-debug-bot.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/agents/py-doc-bot.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/agents/py-plan-bot.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/agents/py-test-bot.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/orchestration/ORCHESTRATION.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/orchestration/py-team-orchestration.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/policy/AGENT_GOVERNANCE.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/policy/agent-orchestration-rules.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/memory/MEMORY_ARCHITECTURE.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/memory/README.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/memory/agent-memory.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/memory/gemini-memory.json` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/memory/gh-issues-documentation-update.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/memory/mcp-memory.json` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/memory/memory-py-audit-bot.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/memory/memory-py-config-bot.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/memory/memory-py-debug-bot.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/memory/memory-py-doc-bot.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/memory/memory-py-plan-bot.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/memory/memory-py-test-bot.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/memory/neo4j-project-memory-seed.json` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/memory/neo4j-project-memory-seed.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/README.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/REGISTRY.yaml` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/_schema/domain-overlay.schema.json` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/_schema/execution-profile.schema.json` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/_schema/finding-v3.schema.json` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/_schema/kernel.schema.json` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/_schema/ledger-event.schema.json` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/_schema/prompt.schema.json` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/domains.yaml` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/fragments/audit-scale.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/fragments/cyclic-kernel-v3.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/fragments/dashboard-requirements-audit.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/fragments/debt-budget-ban.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/fragments/env-guardrail.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/fragments/evidence-contract-v3.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/fragments/finding-schema.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/fragments/generated-artifact-ci.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/fragments/gh-powershell.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/fragments/git-safety.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/fragments/issue-state-machine-v3.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/fragments/language-ru.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/fragments/orchestrator-guards.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/fragments/peer-review-gate.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/fragments/project-requirements-audit.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/agents-runtime.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/architecture-review.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/architecture.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/comprehensive.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/cycle.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/cyclic-pack.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/dashboard.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/debug.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/diagrams.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/generic-nine.pack.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/github-actions.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/grafana-data.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/grafana-layout.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/grafana-master.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/grafana-regression.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/grafana-visual.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/grok-audit-cycle.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/observability-sequential.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/orchestrator.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/reconcile.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/repo-tree.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/sequential-run.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/tech-debt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/closeout/grok-closeout.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/config/validate.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/doc/audit.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 
 ## GitHub Issue Evidence Examples
 
@@ -307,6 +306,82 @@
 
 | Route | Generator | Commit Policy |
 | --- | --- | --- |
+| adr-enforcement-matrix | `scripts/engineering/qa/report_adr_enforcement_matrix.py` | tracked_quality_baseline |
+| adr-registry-generated-docs | `scripts/generate_adr_registry.py` | tracked_curated_generated_doc |
+| ai-local-generated-docs-helpers | `AI runtime memory, prompts, and local skill generators` | ignored_local_export |
+| ai-runtime-governance-mirrors | `scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py` | tracked_mirror_surface |
+| ai-skill-license-mirrors | `scripts/ai/codex/check_skills_mirror.sh` | tracked_mirror_surface |
+| ai-skill-reference-mirror | `scripts/ai/codex/check_skills_mirror.sh` | tracked_mirror_surface |
+| api-reference-generated-docs | `docs API reference generation workflow` | tracked_curated_generated_doc |
+| architecture-debt-execution-plan-quality-report | `scripts/engineering/qa/reduce_architecture_debt.py` | ignored_local_output |
+| architecture-debt-task-backlog-quality-report | `scripts/engineering/qa/generate_architecture_debt_tasks.py` | ignored_local_output |
+| architecture-dependency-map-generated-docs | `scripts/engineering/qa/generate_architecture_dependency_map.py` | tracked_curated_generated_doc |
+| architecture-diagram-bundles | `scripts/diagrams/render/generate_all_bundles.py` | tracked_curated_generated_doc |
+| architecture-diagram-description-indexes | `scripts/diagrams/render/generate_description_indexes.py` | tracked_curated_generated_doc |
+| architecture-diagram-package-family-sources | `scripts/diagrams/render/generate_package_family_class_diagrams.py` | tracked_curated_generated_doc |
+| architecture-diagram-render-artifacts | `docs/02-architecture/diagrams/tooling/render.sh` | tracked_curated_generated_doc |
+| captured-test-telemetry-squash-provenance | `reviewed read-only GitHub PR capture` | tracked_quality_evidence |
+| chembl-field-matrix-generated-docs | `scripts/docs/matrix/generate_field_matrix.py` | ignored_local_output |
+| ci-quality-integral-gate-report | `scripts/engineering/ci/quality_integral_gate.py` | working_output |
+| committed-test-telemetry-baseline-summary-layer | `scripts/engineering/ci/update_test_telemetry_baseline.py` | tracked_quality_baseline |
+| compatibility-facade-snapshot-generated-doc | `scripts/engineering/qa/generate_compatibility_facade_snapshot.py` | tracked_curated_generated_doc |
+| config-comparison-matrix-generated-doc | `scripts/schema/analysis/generate_config_matrix.py` | tracked_curated_generated_doc |
+| config-contract-registry-artifact-duplication-quality-report | `scripts/engineering/qa/report_artifact_duplication_audit.py` | tracked_quality_baseline |
+| config-extra-forbid-inventory-quality-baseline | `tests/architecture/_config_extra_forbid_inventory.py` | tracked_quality_baseline |
+| contract-coverage-matrix-quality-baseline | `scripts/engineering/qa/report_contract_coverage_matrix.py` | tracked_quality_baseline |
+| contract-identity-diagnostics-quality-report | `scripts/engineering/ci/validate_contract_identity.py` | working_output |
+| contract-registry-diagnostics-quality-report | `scripts/engineering/ci/validate_contract_registry.py` | working_output |
+| contract-registry-dq-diagnostics-quality-report | `scripts/engineering/ci/validate_registry_dq_refs.py` | working_output |
+| contract-schema-classifier-diagnostics-quality-report | `scripts/engineering/ci/validate_schema_classifier_gate.py` | working_output |
+| contract-tests-junit-report | `.github/workflows/contract-tests.yml` | ignored_ci_output |
+| dashboard-dux7-live-residual-protocol-archived | `historical DUX audit protocol (archived, issue` | tracked_curated_generated_doc |
+| dashboard-navigation-contract-generated-doc | `scripts/ops/observability/grafana/render_nav_bus.py` | tracked_curated_generated_doc |
+| dashboard-panel-title-inventory-generated-doc | `scripts/engineering/qa/report_panel_title_inventory.py` | tracked_curated_generated_doc |
+| dashboard-scenes-parity-ledger | `scripts/engineering/qa/report_dashboard_scenes_parity.py` | tracked_quality_evidence |
+| dashboard-shipped-panel-inventory-blocks | `scripts/docs/generate_dashboard_panel_inventory.py` | tracked_curated_generated_doc |
+| dead-code-inventory-quality-baseline | `scripts/engineering/qa/report_dead_code_inventory.py` | tracked_quality_baseline |
+| debt-governance-gates-quality-baseline | `scripts/engineering/qa/report_debt_governance_gates.py` | tracked_quality_baseline |
+| docker-security-baseline-reports | `.github/workflows/docker.yml` | ignored_ci_output |
+| docker-stability-runbooks-generated-docs | `manual closeout plus architecture QA verification` | tracked_curated_generated_doc |
+| docs-export-merged-markdown | `scripts/docs/build/generate_docs_export.py` | ignored_local_export |
+| docs-reports-generated-curated-misc | `multiple governed docs and quality generators` | tracked_or_local_curated_generated_doc |
+| documentation-cleanup-inventory | `scripts/docs/checks/documentation_cleanup_inventory.py` | tracked_curated_generated_doc |
+| domain-io-taint-inventory-quality-baseline | `scripts/engineering/qa/report_domain_io_taint_inventory.py` | tracked_quality_baseline |
+| dq-contracts-generated-doc | `scripts/data_quality/check_dq_dsl_parity.py` | tracked_curated_generated_doc |
+| duplication-baseline-quality-report | `scripts/engineering/qa/report_duplication_baseline.py` | working_output |
+| engineering-closeout-curated-docs | `manual closeout plus architecture QA verification` | tracked_curated_generated_doc |
+| executable-unit-passport-projections | `scripts/docs/passports/cli.py` | tracked_curated_generated_doc |
+| field-level-diagnostics-quality-report | `scripts/schema/analysis/generate_field_level_diagnostics.py` | working_output |
+| file-merger-working-reports | `scripts/engineering/common/file_merger.py` | working_output |
+| flaky-test-burndown-review-quality-baseline | `scripts/engineering/qa/report_flaky_test_burndown_review.py` | tracked_quality_baseline |
+| full-app-duplication-baseline-quality-report | `scripts/engineering/qa/report_duplication_baseline.py` | tracked_quality_baseline |
+| grafana-dashboard-release-gate-report | `scripts/ops/observability/grafana/run_grafana_dashboard_audit_cycle.py` | working_output |
+| grafana-dashboard-screenshot-report | `scripts/ops/observability/grafana/rerender_grafana_screenshots.py` | working_output |
+| grafana-live-panel-audit-report | `scripts/ops/observability/grafana/audit_live_grafana_panels.py` | working_output |
+| grafana-panel-fill-error-report | `scripts/ops/observability/grafana/check_dashboard_panel_fill.py` | working_output |
+| hotspot-family-baseline-quality-report | `scripts/engineering/qa/report_hotspot_family_baseline.py` | tracked_quality_baseline |
+| invariant-audit-rebaseline-quality-report | `scripts/engineering/qa/report_invariant_audit_rebaseline.py` | tracked_quality_baseline |
+| matrix-dictionaries-curated-docs | `scripts/docs/matrix/build_matrix_dicts.py` | ignored_local_output |
+| observability-runtime-cardinality-evidence | `scripts/engineering/qa/report_observability_metric_inventory.py` | tracked_quality_baseline |
+| pipeline-config-contract-ownership-quality-baseline | `scripts/engineering/qa/report_pipeline_config_contract_ownership.py` | tracked_quality_baseline |
+| pipeline-dataflow-generated-docs | `scripts/diagrams/render/generate_pipeline_dataflows.py` | tracked_curated_generated_doc |
+| pipeline-normalization-generated-docs | `scripts/docs/matrix/generate_pipeline_normalization_matrix.py` | tracked_curated_generated_doc |
+| port-contracts-junit-report | `.github/workflows/port-contracts.yml` | ignored_ci_output |
+| pretest-guardrails-quality-report | `scripts/engineering/dev/pretest_guardrails.sh` | working_output |
+| provider-contract-drift-quality-report | `scripts/engineering/qa/report_provider_contract_drift.py` | working_output |
+| pytest-dev-html-coverage-report | `scripts/engineering/dev/run_tests.py` | ignored_local_output |
+| pytest-resilient-telemetry-report | `scripts/engineering/ci/run_pytest_resilient.py` | working_output |
+| reproducibility-support-matrix-generated-doc | `scripts/engineering/qa/generate_reproducibility_support_matrix.py` | tracked_curated_generated_doc |
+| root-local-clutter-cleanup-governance-doc | `manual-governance-doc` | tracked_curated_generated_doc |
+| runtime-structured-log-file | `src/bioetl/infrastructure/observability/logging_config.py` | ignored_runtime_output |
+| schema-generated-source | `scripts/schema/generation/generate_schema_artifacts.py` | tracked_generated_source |
+| silver-filter-inventory-baseline | `scripts/data_quality/inventory_silver_filters_migration.py` | tracked_curated_generated_doc |
+| targeted-s7-governance-hotspot-telemetry | `manual closeout from bounded pytest JUnit telemetry` | tracked_quality_evidence |
+| test-governance-quality-baseline | `scripts/engineering/qa/report_test_governance_audit.py` | tracked_quality_baseline |
+| test-health-run-history | `scripts/engineering/qa/test_health.py` | ignored_local_output |
+| unified-schema-quality-report | `scripts/schema/analysis/generate_unified_schema_map.py` | working_output |
+| vcr-metadata-quality-report | `scripts/engineering/qa/report_vcr_metadata_catalog.py` | working_output |
+| weekly-quality-debt-report | `scripts/engineering/ci/report_quality_debt_weekly.py` | working_output |
 
 ## Verification
 
