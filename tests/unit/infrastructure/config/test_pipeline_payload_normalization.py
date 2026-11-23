@@ -15,10 +15,45 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+import yaml
+from pydantic import ValidationError
 
 from bioetl.infrastructure.config import pipeline_payload_normalization as mod
+from bioetl.infrastructure.config import source_config_loader
+from bioetl.composition.providers import _config_helpers
 
 pytestmark = pytest.mark.unit
+
+
+def test_invalid_provider_source_is_rejected_by_optional_callers(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    provider_dir = tmp_path / "providers"
+    provider_dir.mkdir()
+    (provider_dir / "chembl.yaml").write_text(
+        yaml.safe_dump({"source": {"unexpected_provider_setting": True}}),
+        encoding="utf-8",
+    )
+
+    def loader(provider: str):
+        return source_config_loader.load_source_config_from_root(
+            provider, configs_root=tmp_path
+        )
+
+    monkeypatch.setattr(_config_helpers, "load_source_config", loader)
+    config_path = tmp_path / "entities" / "chembl" / "activity.yaml"
+
+    with pytest.raises(ValidationError):
+        loader("chembl")
+    with pytest.raises(ValidationError):
+        _config_helpers._get_source_config("chembl")
+    with pytest.raises(ValidationError):
+        mod.load_source_section({"provider": "chembl"}, config_path)
+
+    assert _config_helpers._get_source_config("absent") is None
+    payload = {"provider": "absent"}
+    mod.load_source_section(payload, config_path)
+    assert payload == {"provider": "absent"}
 
 
 def test_present_override_paths_only_includes_existing_keys() -> None:
