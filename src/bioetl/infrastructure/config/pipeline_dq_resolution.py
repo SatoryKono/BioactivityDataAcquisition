@@ -103,11 +103,11 @@ def conditional_validation_to_dict(
     return result
 
 
-def normalize_inline_dq_overrides(
+def _normalize_inline_dq_settings(
     dq_overrides: InlineDQConfig,
-) -> JsonDict:  # Any: dynamic YAML config values
-    """Convert inline Pydantic DQ overrides into mergeable file-shape dict."""
-    result: JsonDict = {}  # Any: dynamic YAML config values
+) -> JsonDict:
+    """Keep only explicitly supplied scalar and report settings."""
+    result: JsonDict = {}
     supplied = dq_overrides.model_fields_set
     thresholds: JsonDict = {}
     for source, target in (
@@ -125,7 +125,14 @@ def normalize_inline_dq_overrides(
         report = dq_overrides.report.model_dump(exclude_unset=True, by_alias=True)
         if report:
             result["report"] = report
+    return result
 
+
+def normalize_inline_dq_overrides(
+    dq_overrides: InlineDQConfig,
+) -> JsonDict:  # Any: dynamic YAML config values
+    """Convert inline Pydantic DQ overrides into mergeable file-shape dict."""
+    result = _normalize_inline_dq_settings(dq_overrides)
     if dq_overrides.field_validations:
         result["entity_field_validations"] = [
             field_validation_to_dict(fv) for fv in dq_overrides.field_validations
