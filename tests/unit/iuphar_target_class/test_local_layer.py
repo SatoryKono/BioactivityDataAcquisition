@@ -25,6 +25,7 @@ from iuphar_target_class.policy import (
     policy_document,
     validate_rules,
 )
+from iuphar_target_class.rf008_qualification import evaluate_categories
 
 pytestmark = pytest.mark.unit
 
@@ -747,3 +748,33 @@ def test_pipeline_reads_prediction_evidence_instead_of_constants() -> None:
         "ec:7.1.1.1" in content and "ec-class:1" in content
         for content in local_contents
     )
+
+
+def test_rf008_ec_tf_and_missing_markers_follow_the_source_tables() -> None:
+    report = evaluate_categories(
+        ("ec_category", "multiple_ec", "broad_tf_tag", "missing_marker")
+    )
+    assert report["unexplained_error_count"] == 0
+    cases = report["cases"]
+    assert isinstance(cases, list)
+    ec_cases = [
+        item
+        for item in cases
+        if isinstance(item, dict) and item["category"] == "ec_category"
+    ]
+    assert len(ec_cases) == 7
+    assert all(item["disposition"] == "verified" for item in ec_cases)
+    by_id = {str(item["case_id"]): item for item in cases if isinstance(item, dict)}
+    assert by_id["local-tf-broad"]["observed"]["local_class"] is None
+    assert by_id["local-tf-broad"]["observed"]["local_status"] == "not_supported"
+    assert by_id["local-tf-broad"]["observed"]["free_text_rule_ids"] == ["free-text"]
+    assert by_id["local-ec-7"]["observed"]["rule_output"] == "Translocases"
+    assert by_id["local-ec-7"]["observed"]["rule_marks_direct_layer"] is False
+    assert by_id["local-ec-7"]["observed"]["ec_categories"] == ["Translocases"]
+    assert by_id["local-ec-7"]["observed"]["local_class"] is None
+    parameters = policy_document()["parameters"]
+    assert isinstance(parameters, dict)
+    markers = by_id["local-missing-markers"]["observed"]
+    assert isinstance(markers, dict)
+    assert markers["version"] == parameters["missing_markers_version"]
+    assert markers["version_status"] == parameters["missing_markers_version_status"]
