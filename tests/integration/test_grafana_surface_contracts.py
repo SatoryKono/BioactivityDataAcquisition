@@ -307,12 +307,12 @@ def test_runtime_pipeline_error_code_breakdown_uses_bounded_runtime_error_metric
         (
             "bioetl-incident-v1.json",
             "Track Global Audit Write Latency",
-            "[$__range]",
+            "[$__rate_interval]",
         ),
         (
             "bioetl-incident-v1.json",
             "Track Global Audit Query Latency",
-            "[$__range]",
+            "[$__rate_interval]",
         ),
     ],
 )
