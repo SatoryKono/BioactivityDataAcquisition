@@ -592,6 +592,25 @@ def _bound_diagnostics(
     return tuple(result)
 
 
+def _resolved_subclasses(
+    direct: HierarchyResult | None,
+    annotation_status: str | None,
+    family_to_subclass: Mapping[str, str],
+) -> tuple[str | None, tuple[str, ...], frozenset[str]]:
+    """Split one explicit subclass the way resolution reads each status.
+
+    A partial annotation uses ``confirmed_subclasses``. Any other status uses
+    ``iuphar_subclass``. The dictionary values are the allowed vocabulary, so a
+    known subclass is not a contract defect.
+    """
+    allowed = frozenset(family_to_subclass.values())
+    subclass = None if direct is None else direct.iuphar_subclass
+    if annotation_status == "partial":
+        confirmed = () if subclass is None else (subclass,)
+        return None, confirmed, allowed
+    return subclass, (), allowed
+
+
 def _partial_basis(
     direct: HierarchyResult | None, annotation_status: str | None
 ) -> Literal["type", "family_mapping"] | None:
@@ -628,13 +647,19 @@ def _resolution_input(
     direct_class: str | None,
 ) -> ResolutionInput:
     """Project frozen classification inputs without changing fallback rules."""
+    subclass, confirmed, vocabulary = _resolved_subclasses(
+        direct, annotation_status, snapshot.family_to_subclass
+    )
     return ResolutionInput(
         match_status=match.match_status or "contract_error",
         iuphar_annotation_status=annotation_status,
         local_status=local.local_status or "not_supported",
         iuphar_class=direct_class,
         local_class=local.local_class,
+        iuphar_subclass=subclass,
         local_subclasses=local.local_subclasses,
+        confirmed_subclasses=confirmed,
+        direct_vocabulary=vocabulary,
         partial_basis=_partial_basis(direct, annotation_status),
         target_kind=row.target_kind or "protein",
         complex_direct_match=match.matched_target_id in snapshot.complex_ids,
