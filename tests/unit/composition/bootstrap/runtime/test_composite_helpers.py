@@ -929,13 +929,13 @@ class TestResolveBronzeOpts:
 
 
 # =============================================================================
-# Tests for _load_field_group_registry — graceful degradation paths
+# Tests for _load_field_group_registry
 # =============================================================================
 
 
 @pytest.mark.unit
 class TestLoadFieldGroupRegistry:
-    """Tests for _load_field_group_registry function (graceful degradation)."""
+    """Tests for optional and invalid field group configurations."""
 
     def test_returns_none_when_config_file_not_found(self, tmp_path: Path) -> None:
         """Test that None is returned when field group config doesn't exist."""
@@ -954,8 +954,8 @@ class TestLoadFieldGroupRegistry:
         assert result is None
         mock_logger.debug.assert_called()
 
-    def test_returns_none_on_load_error(self, tmp_path: Path) -> None:
-        """Test that None is returned when field group loading fails."""
+    def test_invalid_gold_flag_stops_registry_loading(self, tmp_path: Path) -> None:
+        """An invalid config must not silently disable Gold filtering."""
         from bioetl.composition.bootstrap.runtime.composite import (
             _load_field_group_registry,
         )
@@ -964,7 +964,10 @@ class TestLoadFieldGroupRegistry:
         field_group_dir = tmp_path / "field_groups"
         field_group_dir.mkdir()
         config_file = field_group_dir / "publication.yaml"
-        config_file.write_text("invalid: yaml: content: here")
+        config_file.write_text(
+            'groups:\n  - id: bibliography\n    include_in_gold: "false"\n',
+            encoding="utf-8",
+        )
 
         mock_logger = MagicMock()
 
@@ -973,15 +976,11 @@ class TestLoadFieldGroupRegistry:
                 "bioetl.composition.bootstrap.runtime.composite_support_helpers.FIELD_GROUP_CONFIG_DIR",
                 field_group_dir,
             ),
-            patch(
-                "bioetl.composition.bootstrap.runtime.composite_support_helpers.load_field_groups",
-                side_effect=FieldGroupLoadError("Test error"),
+            pytest.raises(
+                FieldGroupLoadError, match="include_in_gold must be a boolean"
             ),
         ):
-            result = _load_field_group_registry("composite_publication", mock_logger)
-
-        assert result is None
-        mock_logger.warning.assert_called()
+            _load_field_group_registry("composite_publication", mock_logger)
 
     def test_extracts_entity_from_composite_name(self, tmp_path: Path) -> None:
         """Test that entity is correctly extracted from composite name."""

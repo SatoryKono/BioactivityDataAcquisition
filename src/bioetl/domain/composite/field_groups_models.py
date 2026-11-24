@@ -104,6 +104,8 @@ class FieldGroupDefinition:
         """Validate and convert types."""
         if not self.display_name:
             raise ValueError("display_name cannot be empty")
+        if not isinstance(self.include_in_gold, bool):
+            raise ValueError("include_in_gold must be a boolean")
         raw_fields: object = self.fields
         if isinstance(raw_fields, list):
             object.__setattr__(self, "fields", tuple(raw_fields))
