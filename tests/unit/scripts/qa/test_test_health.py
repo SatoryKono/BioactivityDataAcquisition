@@ -159,7 +159,7 @@ classifiers:
 
 
 @pytest.mark.parametrize("returncode", [0, 1])
-@pytest.mark.parametrize("root_option", ["--repo", "--repo-root"])
+@pytest.mark.parametrize("root_option", ["--r", "--repo", "--repo-root"])
 def test_read_only_lane__owner_exit__propagates_without_artifacts(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, returncode: int, root_option: str
 ) -> None:

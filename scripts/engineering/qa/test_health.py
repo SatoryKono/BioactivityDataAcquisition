@@ -462,7 +462,14 @@ def _discover_junit_paths(plan: RunPlan) -> tuple[list[Path], list[str]]:
 
 def _run_tests(argv: list[str]) -> int:
     wrapper_args, pytest_extra = _split_passthrough(argv)
-    parser = argparse.ArgumentParser(description="Run a named test-health lane.")
+    selector = argparse.ArgumentParser(add_help=False, allow_abbrev=False)
+    selector.add_argument("--suite")
+    selected, _ = selector.parse_known_args(wrapper_args)
+    lane = _load_lanes().get(selected.suite, {})
+    parser = argparse.ArgumentParser(
+        description="Run a named test-health lane.",
+        allow_abbrev=lane.get("runner_backend") != "engineering_qa",
+    )
     parser.add_argument("--suite", required=True)
     parser.add_argument("--run-id")
     parser.add_argument("--reports-dir", type=Path, default=DEFAULT_REPORTS_DIR)
@@ -475,11 +482,6 @@ def _run_tests(argv: list[str]) -> int:
         help="YAML failure-classifier rules.",
     )
     args, runner_args = parser.parse_known_args(wrapper_args)
-    lane = _load_lanes().get(args.suite, {})
-    if lane.get("runner_backend") == "engineering_qa":
-        # Do not consume abbreviated owner options as wrapper options.
-        parser.allow_abbrev = False
-        args, runner_args = parser.parse_known_args(wrapper_args)
 
     run_id = _unique_run_id(
         args.reports_dir,
