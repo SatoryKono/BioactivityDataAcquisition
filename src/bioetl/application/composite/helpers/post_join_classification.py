@@ -77,9 +77,7 @@ def _projection_from_enrich(
 ) -> dict[str, object]:
     if shadow:
         return {}
-    return {
-        name: enriched.get(name) for name in _PROJECTION_FIELDS if name in enriched
-    }
+    return {name: enriched.get(name) for name in _PROJECTION_FIELDS if name in enriched}
 
 
 def _apply_projections(

@@ -14,6 +14,9 @@ _POST_JOIN_OWNER = (
 )
 
 
+_OWNERSHIP_OWNER = "tests/architecture/test_composite_ownership.py"
+
+
 def test_rf003_surfaces_select_their_owners() -> None:
     root = Path(__file__).resolve().parents[5]
     report = build_shadow_compare(
@@ -22,6 +25,7 @@ def test_rf003_surfaces_select_their_owners() -> None:
             "data/iuphar_target_class/rf003/feature_whitelist.json",
             "src/bioetl/application/composite/helpers/post_join_classification.py",
             "src/bioetl/application/composite/merger_post_join.py",
+            "configs/quality/composite_ownership.yaml",
         ],
         repo_root=root,
     )
@@ -32,4 +36,5 @@ def test_rf003_surfaces_select_their_owners() -> None:
         _POST_JOIN_OWNER in report["selected"]
         or "tests/unit/application" in report["selected"]
     )
+    assert _OWNERSHIP_OWNER in report["selected"]
     assert report["covers_full_suite"] is False

@@ -1280,6 +1280,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "configs/quality/architecture_acceptance_baseline.yaml": (
         "tests/architecture/test_architecture_acceptance_baseline.py",
     ),
+    "configs/quality/composite_ownership.yaml": (
+        "tests/architecture/test_composite_ownership.py",
+    ),
     **dict.fromkeys(
         (
             "configs/quality/repo_structure_catalog.yaml",
