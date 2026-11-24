@@ -25,7 +25,7 @@ from .hierarchy import (
     normalize_provider_class,
 )
 from .iuphar_mapping import approved_class_mappings, approved_subclass_mappings
-from .local_layer import Prediction, apply_local
+from .local_layer import apply_local, predictions_from_row
 from .matching import (
     METHOD_ORDER,
     Candidate,
@@ -46,7 +46,12 @@ from .models import (
     ValidatedInput,
 )
 from .normalization import isolated_invalid_result, validate_input
-from .policy import GRAPH_MAX_VISITED_NODES, local_rules, validate_rules
+from .policy import (
+    GRAPH_MAX_VISITED_NODES,
+    local_evidence_content,
+    local_rules,
+    validate_rules,
+)
 from .resolution import ResolutionInput, select_effective_class
 
 
@@ -453,12 +458,13 @@ def _evidence(
                 "match",
             )
         )
+    rules_for_evidence = dict(local.local_rules_by_evidence)
     draft.extend(
         EvidenceDraft(
             row.input_row_id,
             "local_rule",
             hashlib.sha256(ref.encode()).hexdigest(),
-            f"{ref}; rules={','.join(local.local_rule_ids)}",
+            local_evidence_content(ref, rules_for_evidence[ref]),
             "local",
         )
         for ref in local.local_evidence_ids
@@ -721,10 +727,10 @@ def _complete(
         keyword_ids=row.keywords,
         free_text=row.name,
         organism=row.taxon,
-        predictions=tuple(
-            Prediction(layer, value, False, False, layer)
-            for layer, value in (("L1", row.predicted_l1), ("L2", row.predicted_l2))
-            if value is not None
+        predictions=predictions_from_row(
+            predicted_l1=row.predicted_l1,
+            predicted_l2=row.predicted_l2,
+            raw_fields=row.raw_fields,
         ),
     )
     direct_class, rule_id, annotation_status = _direct_metadata(direct, match)
