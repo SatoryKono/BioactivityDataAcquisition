@@ -20,6 +20,15 @@ OWNERS = {
 UNKNOWN = "configs/quality/external_resource_inventory_pr0_unreviewed.json"
 
 
+def test_issue13285_inventory_decisions_keep_bounded_owners() -> None:
+    path = "configs/quality/external_resource_inventory_issue13285_decisions.json"
+    selected = affected_pytest_targets([path], repo_root=ROOT)
+    assert OWNERS.issubset(selected)
+    assert build_shadow_compare([path], repo_root=ROOT)["covers_full_suite"] is False
+    with pytest.raises(ValueError, match="unmapped"):
+        build_shadow_compare([path, UNKNOWN], repo_root=ROOT)
+
+
 @pytest.mark.parametrize(
     "path",
     [
