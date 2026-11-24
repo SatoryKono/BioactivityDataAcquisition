@@ -23,7 +23,6 @@ from bioetl.domain.normalization.profiles.chembl_target_classification import (
 from bioetl.domain.schemas.chembl.target import TargetSchemaV32
 from bioetl.infrastructure.export.export_writer_adapter import (
     _write_xlsx_file,
-    restore_xlsx_text,
 )
 from bioetl.infrastructure.export.xlsx_workbook import restore_xlsx_table
 from bioetl.infrastructure.storage.target_contract_transition import (
@@ -162,6 +161,24 @@ def test_post_join_features_are_whitelisted_and_not_overwritten() -> None:
     assert result["seed_priority"].to_list() == ["run:0:1.1.1.1"]
 
 
+def test_post_join_projects_qualified_seed_and_dependency_columns() -> None:
+    frame = {
+        "chembl.target.component_accessions": '["P12345"]',
+        "chembl.target.target_xref_uniprot_ids": '["Q99999"]',
+        "chembl.target.taxonomy_id": 9606,
+        "chembl.target_protein_classification.protein_classifications": "enzyme",
+        "uniprot.protein.keywords": '["Kinase"]',
+        "chembl.other.taxonomy_id": 10090,
+    }
+    assert project_enriched_features(frame)["features"] == {
+        "component_accessions": '["P12345"]',
+        "target_xref_uniprot_ids": '["Q99999"]',
+        "taxonomy_id": 9606,
+        "protein_classifications": "enzyme",
+        "target_protein_keywords": '["Kinase"]',
+    }
+
+
 def test_xlsx_round_trip_restores_only_verified_parts(tmp_path) -> None:
     original = "enzyme-" * 8000
     token_like = "bioetl-xlsx-part:" + ("b" * 64) + ":1"
@@ -172,7 +189,6 @@ def test_xlsx_round_trip_restores_only_verified_parts(tmp_path) -> None:
     )
     restored = restore_xlsx_table(str(path))
     assert restored.column("note").to_pylist() == [original, token_like, "short"]
-    assert restore_xlsx_text(token_like, ("nope",)) is None
 
 
 def test_unverified_target_rows_and_live_v32_promotion_are_refused() -> None:

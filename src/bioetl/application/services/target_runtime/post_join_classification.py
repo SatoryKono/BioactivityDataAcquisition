@@ -24,14 +24,26 @@ FEATURE_FIELDS: tuple[str, ...] = (
     "target_id",
 )
 
+_DEPENDENCY_COLUMNS = {
+    "protein_classifications": (
+        "chembl.target_protein_classification.protein_classifications",
+    ),
+    "target_protein_keywords": ("uniprot.protein.keywords",),
+    "target_ec_numbers": ("uniprot.protein.protein_ec_numbers",),
+}
+
+
 RowClassifier = Callable[[Mapping[str, object], str, int], Mapping[str, object]]
 
 
 def project_enriched_features(row: Mapping[str, object]) -> dict[str, object]:
     """Keep present whitelist fields. Absence is explicit and is not invented."""
-    features = {
-        key: row[key] for key in FEATURE_FIELDS if key in row and row[key] is not None
-    }
+    features = {}
+    for key in FEATURE_FIELDS:
+        for column in (*_DEPENDENCY_COLUMNS.get(key, ()), f"chembl.target.{key}", key):
+            if (value := row.get(column)) is not None:
+                features[key] = value
+                break
     return {
         "features": features,
         "feature_provenance": "post_join" if features else "absent",

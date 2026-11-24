@@ -6,14 +6,12 @@ import os
 from collections.abc import Mapping, Sequence
 from pathlib import Path
 
-import pandas as pd
 import psutil
 import yaml
-from pandera.pandas import DataFrameModel, DataFrameSchema
+from pandera.pandas import DataFrameModel
 
 from bioetl.domain.config.target_classification import (
-    TARGET_CLASSIFICATION_DETAIL_FIELDS,
-    TARGET_CLASSIFICATION_FIELDS,
+    resolve_physical_table_contract,
 )
 from bioetl.domain.normalization.profiles.chembl_target import CHEMBL_TARGET_PROFILE
 from bioetl.domain.normalization.profiles.chembl_target_classification import (
@@ -26,6 +24,9 @@ from bioetl.infrastructure.storage.target_migration_classification_checks import
     assert_candidate_cohort_closure as _assert_candidate_cohort_closure,
 )
 from bioetl.infrastructure.storage.target_migration_classification_checks import (
+    classification_fields,
+)
+from bioetl.infrastructure.storage.target_migration_classification_checks import (
     verify_candidate_hashes as _verify_candidate_hashes,
 )
 from bioetl.infrastructure.storage.target_migration_classification_checks import (
@@ -34,8 +35,8 @@ from bioetl.infrastructure.storage.target_migration_classification_checks import
 from bioetl.infrastructure.storage.target_migration_dependencies import (
     _local_path,
 )
-from bioetl.infrastructure.storage.target_migration_row_ops import (
-    GOLD_SCD_COLUMNS as _GOLD_SCD_COLUMNS,
+from bioetl.infrastructure.storage.target_migration_physical import (
+    validate_physical_projection,
 )
 from bioetl.infrastructure.storage.target_migration_row_ops import (
     by_id as _by_id,
@@ -46,15 +47,6 @@ from bioetl.infrastructure.storage.target_migration_row_ops import (
 from bioetl.infrastructure.storage.target_migration_row_ops import (
     scoped_target_hash as _scoped_target_hash,
 )
-from bioetl.infrastructure.storage.target_migration_row_ops import (
-    validate_scd_types as _validate_scd_types,
-)
-
-_LEGACY_PHYSICAL_POLICY = "legacy_physical_target_v30_to_v31_v1"
-_OMITTABLE_RUNTIME_COLUMNS = {
-    "silver": frozenset({"_run_id", "_run_type", "_ingestion_ts"}),
-    "gold": frozenset({"_index", "_dq_error", "_dq_warn"}),
-}
 
 
 def assert_no_managed_writers() -> None:
@@ -200,9 +192,13 @@ def compare_target_rows(
 
 
 def _assert_restored_values(
-    key: str, published: Mapping[str, object], current: Mapping[str, object]
+    key: str,
+    published: Mapping[str, object],
+    current: Mapping[str, object],
+    *,
+    contract: str,
 ) -> None:
-    """Keep a published restoration intact apart from its V31 hash and class."""
+    """Keep a published restoration intact apart from its candidate hash and classification."""
     for field, value in published.items():
         if field == "content_hash":
             continue
@@ -212,7 +208,7 @@ def _assert_restored_values(
             or current[field] != value
         ):
             raise ValueError(f"restored target changed: {key}/{field}")
-    unexpected = set(current) - set(published) - set(TARGET_CLASSIFICATION_FIELDS)
+    unexpected = set(current) - set(published) - set(classification_fields(contract))
     if unexpected:
         raise ValueError(f"restored target gained unexpected fields: {key}")
 
@@ -236,7 +232,9 @@ def _assert_legacy_values(
 
 
 def _frozen_v31_hash_fields(
-    paths: dict[str, Path], legacy_include_fields: tuple[str, ...]
+    paths: dict[str, Path],
+    legacy_include_fields: tuple[str, ...],
+    contract: str = "3.1.0",
 ) -> tuple[str, ...]:
     """Extend the exact canonical V30 scope; candidate YAML cannot weaken it."""
     config = yaml.safe_load(paths["config"].read_text(encoding="utf-8"))
@@ -245,17 +243,27 @@ def _frozen_v31_hash_fields(
         raise ValueError(
             "migration hash scope differs from the frozen canonical V30 policy"
         )
-    return tuple(dict.fromkeys((*legacy_include_fields, *TARGET_CLASSIFICATION_FIELDS)))
+    return tuple(
+        dict.fromkeys((*legacy_include_fields, *classification_fields(contract)))
+    )
+
+
+def _candidate_classification(paths: dict[str, Path]) -> dict[str, object]:
+    config = yaml.safe_load(paths["candidate_config"].read_text(encoding="utf-8"))
+    classification = config["pipeline"]["target_classification"]
+    if not isinstance(classification, dict):
+        raise ValueError("candidate target classification must be a mapping")
+    return classification
 
 
 def _candidate_table_contract(paths: dict[str, Path]) -> str:
     """Missing candidate YAML keeps the admitted 3.1.0 checker."""
-    path = paths.get("candidate_config")
-    if path is None:
+    if "candidate_config" not in paths:
         return "3.1.0"
-    config = yaml.safe_load(path.read_text(encoding="utf-8"))
-    classification = config["pipeline"]["target_classification"]
-    return str(classification.get("table_contract", "3.1.0"))
+    selected = _candidate_classification(paths).get("table_contract")
+    if selected is not None and not isinstance(selected, str):
+        raise ValueError("candidate table_contract must be a string")
+    return resolve_physical_table_contract("enrich", selected)
 
 
 def validate_target_candidate(
@@ -274,16 +282,12 @@ def validate_target_candidate(
 
     profile = _load_candidate_profile(paths, workspace=workspace)
     contract = _candidate_table_contract(paths)
-    v31_include_fields = _frozen_v31_hash_fields(paths, legacy_include_fields)
-    include_fields = v31_include_fields
+    include_fields = _frozen_v31_hash_fields(paths, legacy_include_fields, contract)
     silver_schema: type[DataFrameModel] = TargetSchemaV31
     gold_schema: type[DataFrameModel] = ChEMBLTargetGoldSchemaV31
     if contract == "3.2.0":
         silver_schema = TargetSchemaV32
         gold_schema = ChEMBLTargetGoldSchemaV32
-        include_fields = tuple(
-            dict.fromkeys((*v31_include_fields, *TARGET_CLASSIFICATION_DETAIL_FIELDS))
-        )
     additions = _restoration_additions(
         paths, workspace=workspace, manifest=restoration_manifest
     )
@@ -303,7 +307,7 @@ def validate_target_candidate(
             contract,
             additions[name],
         )
-    _verify_source_classifications(layers, profile)
+    _verify_source_classifications(layers, profile, contract)
     _assert_candidate_cohort_closure(paths, layers["gold"])
     result["fk_closure"] = "PASS"
     result["profile_sha256"] = profile.profile_sha256
@@ -314,11 +318,13 @@ def _load_candidate_profile(
     paths: dict[str, Path], workspace: Path | None = None
 ) -> LoadedIupharProfile:
     """Require the exact admitted enrich profile selected by candidate YAML."""
-    config = yaml.safe_load(paths["candidate_config"].read_text(encoding="utf-8"))
-    classification = config["pipeline"]["target_classification"]
+    classification = _candidate_classification(paths)
     if classification["mode"] != "enrich":
         raise ValueError("candidate configuration must select admitted enrich")
     manifest = classification["snapshot_manifest"]
+    digest = classification["snapshot_manifest_sha256"]
+    if not isinstance(manifest, str) or not isinstance(digest, str):
+        raise ValueError("candidate classification requires a profile path and digest")
     if workspace is not None:
         profile_path = _local_path(workspace, str(manifest), base=workspace)
     else:
@@ -328,7 +334,7 @@ def _load_candidate_profile(
             profile_path = paths["config"].resolve().parents[3] / profile_path
     return load_profile(
         profile_path,
-        classification["snapshot_manifest_sha256"],
+        digest,
         require_acceptance=True,
     )
 
@@ -369,7 +375,7 @@ def _validate_candidate_layer(
     paths: dict[str, Path],
     profile_sha256: str,
     legacy_include_fields: tuple[str, ...],
-    v31_include_fields: tuple[str, ...],
+    include_fields: tuple[str, ...],
     contract: str,
     additions: Mapping[tuple[str, int | None], Mapping[str, object]],
 ) -> tuple[dict[str, object], list[dict[str, object]]]:
@@ -384,8 +390,10 @@ def _validate_candidate_layer(
     if additions:
         current = _by_id(new)
         for key, published in additions.items():
-            _assert_restored_values(str(key), published, current[key])
-    result["physical_projection"] = _validate_physical_projection(
+            _assert_restored_values(
+                str(key), published, current[key], contract=contract
+            )
+    result["physical_projection"] = validate_physical_projection(
         name, schema, old, new, contract
     )
     if any(row.get("target_class_profile_sha256") != profile_sha256 for row in new):
@@ -395,97 +403,5 @@ def _validate_candidate_layer(
         if contract == "3.2.0"
         else target_v31_normalization_profile()
     )
-    _verify_candidate_hashes(new, v31_include_fields, hash_profile)
+    _verify_candidate_hashes(new, include_fields, hash_profile)
     return result, new
-
-
-def _physical_columns(rows: Sequence[Mapping[str, object]]) -> set[str]:
-    if not rows:
-        raise ValueError("empty physical target cohort")
-    columns = set(rows[0])
-    if any(set(row) != columns for row in rows):
-        raise ValueError("target physical cohort has inconsistent columns")
-    return columns
-
-
-def _physical_policy_id(contract: str, *, legacy: bool) -> str:
-    """Name the physical shape without nesting the contract choice."""
-    if legacy:
-        return _LEGACY_PHYSICAL_POLICY
-    if contract == "3.2.0":
-        return "target_v32_runtime_shape"
-    return "target_v31_runtime_shape"
-
-
-def _validate_physical_projection(
-    layer: str,
-    model: type[DataFrameModel],
-    old: Sequence[Mapping[str, object]],
-    new: Sequence[Mapping[str, object]],
-    contract: str = "3.1.0",
-) -> dict[str, object]:
-    """Validate a frozen physical projection without changing runtime schemas.
-
-    Only declared historical technical omissions are permitted. Gold's absent
-    nullable description is represented as unknown in the validation view,
-    never materialized into the preserved rows or used as invented provenance.
-    """
-    previous, current = _physical_columns(old), _physical_columns(new)
-    added = set(TARGET_CLASSIFICATION_FIELDS)
-    if contract == "3.2.0":
-        added.update(TARGET_CLASSIFICATION_DETAIL_FIELDS)
-    if previous.intersection(added):
-        raise ValueError("physical target migration requires a legacy V30 cohort")
-    if current != previous.union(added):
-        message = (
-            "candidate physical columns must equal old columns plus the 3.2.0 classification fields"
-            if contract == "3.2.0"
-            else "candidate physical columns must equal old columns plus nine classification fields"
-        )
-        raise ValueError(message)
-    schema = model.to_schema()
-    omissions = sorted(
-        _OMITTABLE_RUNTIME_COLUMNS[layer].intersection(schema.columns) - previous
-    )
-    if omissions:
-        schema = schema.remove_columns(omissions)
-    frame = pd.DataFrame(new)
-    storage = _validate_storage_envelope(layer, previous, old)
-    if storage:
-        frame = frame.drop(columns=storage)
-    nullable_absences = _logical_nullable_absences(layer, previous, schema, frame)
-    schema.validate(frame, lazy=True)
-    return {
-        "policy_id": _physical_policy_id(
-            contract,
-            legacy=any((omissions, storage, nullable_absences)),
-        ),
-        "omitted_runtime_columns": omissions,
-        "logical_nullable_absences": nullable_absences,
-        "storage_envelope_columns": storage,
-        "physical_columns_preserved": True,
-    }
-
-
-def _logical_nullable_absences(
-    layer: str, previous: set[str], schema: DataFrameSchema, frame: pd.DataFrame
-) -> list[str]:
-    if layer != "gold" or "description" in previous:
-        return []
-    if not schema.columns["description"].nullable:
-        raise ValueError("Gold description is no longer a nullable logical field")
-    frame["description"] = None
-    return ["description"]
-
-
-def _validate_storage_envelope(
-    layer: str, columns: set[str], rows: Sequence[Mapping[str, object]]
-) -> list[str]:
-    storage = columns.intersection(_GOLD_SCD_COLUMNS)
-    if not storage:
-        return []
-    if layer != "gold" or storage != _GOLD_SCD_COLUMNS:
-        raise ValueError("unsupported or incomplete target storage envelope")
-    for row in rows:
-        _validate_scd_types(row)
-    return sorted(storage)

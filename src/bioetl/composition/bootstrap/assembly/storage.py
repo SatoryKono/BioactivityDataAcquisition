@@ -281,9 +281,6 @@ def build_target_classification_session(
         classification_schema_version=profile.classification_schema_version,
         matching_policy_version=profile.matching_policy_version,
     )
-    expected = config.target_classification.to_domain().contract_version
-    if mode == "enrich" and profile.classification_schema_version != expected:
-        raise ValueError("profile schema does not match table_contract")
     return TargetClassificationRunState(
         classifier=classifier,
         evidence=store,

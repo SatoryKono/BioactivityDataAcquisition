@@ -11,10 +11,7 @@ import orjson
 import pyarrow as pa
 from deltalake import DeltaTable, write_deltalake
 
-from bioetl.domain.config.target_classification import (
-    TARGET_CLASSIFICATION_DETAIL_FIELDS,
-    TARGET_CLASSIFICATION_FIELDS,
-)
+from bioetl.domain.config.target_classification import TARGET_CLASSIFICATION_FIELDS
 from bioetl.domain.normalization.profiles.chembl_target_classification import (
     target_v31_normalization_profile,
     target_v32_normalization_profile,
@@ -37,6 +34,7 @@ from bioetl.infrastructure.storage.target_migration_classification_checks import
 )
 from bioetl.infrastructure.storage.target_migration_classification_checks import (
     candidate_input_row_id,
+    classification_fields,
 )
 from bioetl.infrastructure.storage.target_migration_row_ops import (
     business_fields as _business,
@@ -319,13 +317,13 @@ def build_target_candidates(request: TargetCandidateBuildRequest) -> dict[str, o
     )
 
     contract = _candidate_table_contract(checked)
-    columns = TARGET_CLASSIFICATION_FIELDS
-    fields = _frozen_v31_hash_fields(checked, request.legacy_include_fields)
-    normalization = target_v31_normalization_profile()
-    if contract == "3.2.0":
-        columns = (*columns, *TARGET_CLASSIFICATION_DETAIL_FIELDS)
-        fields = tuple(dict.fromkeys((*fields, *TARGET_CLASSIFICATION_DETAIL_FIELDS)))
-        normalization = target_v32_normalization_profile()
+    columns = classification_fields(contract)
+    fields = _frozen_v31_hash_fields(checked, request.legacy_include_fields, contract)
+    normalization = (
+        target_v32_normalization_profile()
+        if contract == "3.2.0"
+        else target_v31_normalization_profile()
+    )
     old_silver, old_gold = _read_delta(checked["silver"]), _read_delta(checked["gold"])
     expected_cohorts = _cohort_keys(old_silver, old_gold)
     if frozen["cohorts"] != expected_cohorts:
@@ -334,7 +332,7 @@ def build_target_candidates(request: TargetCandidateBuildRequest) -> dict[str, o
         request, frozen, old_silver, old_gold
     )
     request.output_dir.mkdir(parents=True, exist_ok=True)
-    adapter = IupharTargetClassificationAdapter(profile)
+    adapter = IupharTargetClassificationAdapter(profile, table_contract=contract)
     store = LocalTargetClassificationEvidenceStore(
         request.output_dir / "classification",
         mode="enrich",
@@ -356,7 +354,7 @@ def build_target_candidates(request: TargetCandidateBuildRequest) -> dict[str, o
             run_id=request.run_id,
             run_started_at=request.run_started_at,
         )
-        projected = {name: result.projection.get(name) for name in columns}
+        projected = {name: result.projection[name] for name in columns}
         projections[identity] = projected
         updated = {**row, **projected}
         updated["content_hash"] = _scoped_target_hash(updated, fields, normalization)

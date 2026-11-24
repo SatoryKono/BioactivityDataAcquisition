@@ -300,8 +300,6 @@ __all__ = [
     "ChEMBLTargetGoldSchemaV32",
     "ChEMBLTargetProteinClassificationGoldSchema",
     "ChEMBLTissueGoldSchema",
-    "Series",
-    "pa",
     "target_v31_schema_hash",
     "target_v32_schema_hash",
 ]
