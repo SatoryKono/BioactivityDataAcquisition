@@ -27,6 +27,7 @@ from iuphar_target_class.pipeline_proof import (
     _classification_input_projection,
     execution_semantics,
 )
+from iuphar_target_class.policy import LOCAL_CATALOG_VERSION
 from iuphar_target_class.stage0.io import (
     canonical_json_bytes,
     sha256_bytes,
@@ -246,10 +247,11 @@ def acceptance_inputs(tmp_path):
     provenance = RunProvenance(
         "synthetic-fixture",
         "bioetl-iuphar-input-v1",
-        "plan-v1-r9",
+        LOCAL_CATALOG_VERSION,
         "3.1.0",
         "frozen",
         "frozen",
+        matching_policy_version="rf002-uniprot-roles-2026-11-23",
     )
     proof = _stored_proof(tmp_path, snapshot, provenance)
     report = tmp_path / "pipeline-report.json"
@@ -280,6 +282,7 @@ def acceptance_inputs(tmp_path):
                                 "normalization_version",
                                 "rules_version",
                                 "classification_schema_version",
+                                "matching_policy_version",
                                 "row_count",
                             }
                         },
@@ -336,6 +339,7 @@ def _stored_proof(tmp_path, snapshot, provenance, row_id="r1", *, rows=None):
         normalization_version=provenance.normalization_version,
         rules_version=provenance.rules_version,
         classification_schema_version=provenance.schema_version,
+        matching_policy_version=provenance.matching_policy_version,
     )
     result = TargetClassificationResult(
         row_id,

@@ -28,7 +28,7 @@ from .hierarchy import (
     validate_family_graph,
 )
 from .iuphar_mapping import approved_class_mappings, approved_subclass_mappings
-from .local_layer import Prediction, apply_local
+from .local_layer import apply_local, predictions_from_row
 from .matching import (
     METHOD_ORDER,
     Candidate,
@@ -52,6 +52,7 @@ from .normalization import isolated_invalid_result, validate_input
 from .policy import (
     GRAPH_MAX_DEPTH,
     GRAPH_MAX_VISITED_NODES,
+    local_evidence_content,
     local_rules,
     validate_rules,
 )
@@ -406,6 +407,38 @@ def _conflict_catalog(
     return tuple(row for row in ctx.catalog if row.target_id in ids)
 
 
+def _auxiliary_diagnostic_catalog(
+    query: MatchQuery,
+    identity_catalog: tuple[CatalogTarget, ...],
+    ctx: IndexedSnapshot,
+) -> tuple[CatalogTarget, ...]:
+    """Resolve auxiliary UniProt rows without admitting them to identity channels.
+
+    RF-002: primary shortlist omits auxiliary xrefs on purpose. Diagnostics still
+    need those catalog rows so a same-species hit becomes
+    ``auxiliary_uniprot_divergence`` rather than a false
+    ``unknown_auxiliary_uniprot``.
+    """
+    if not query.auxiliary_uniprot_ids:
+        return identity_catalog
+    indexes = {
+        index
+        for accession in query.auxiliary_uniprot_ids
+        for index in ctx.lookup.get(("uniprot", accession), ())
+    }
+    if not indexes:
+        return identity_catalog
+    seen = {row.target_id for row in identity_catalog}
+    extras = tuple(
+        ctx.catalog[index]
+        for index in sorted(indexes)
+        if ctx.catalog[index].target_id not in seen
+    )
+    if not extras:
+        return identity_catalog
+    return (*identity_catalog, *extras)
+
+
 def _ancestor_records(
     ctx: IndexedSnapshot, ids: tuple[str, ...]
 ) -> tuple[FamilyNode, ...]:
@@ -468,6 +501,21 @@ def _evidence(
         )
         for hit in hits
     ]
+    for role, values in (
+        ("primary_uniprot", row.uniprot_accessions),
+        ("equivalent_uniprot", row.equivalent_uniprot_accessions),
+        ("auxiliary_uniprot", row.auxiliary_uniprot_accessions),
+    ):
+        for accession in values:
+            draft.append(
+                EvidenceDraft(
+                    row.input_row_id,
+                    "match",
+                    role,
+                    accession,
+                    "match",
+                )
+            )
     if annotation is not None and match.matched_target_id and annotation.raw_payload:
         draft.append(
             EvidenceDraft(
@@ -488,12 +536,13 @@ def _evidence(
                 "match",
             )
         )
+    rules_for_evidence = dict(local.local_rules_by_evidence)
     draft.extend(
         EvidenceDraft(
             row.input_row_id,
             "local_rule",
             hashlib.sha256(ref.encode()).hexdigest(),
-            f"{ref}; rules={','.join(local.local_rule_ids)}",
+            local_evidence_content(ref, rules_for_evidence[ref]),
             "local",
         )
         for ref in local.local_evidence_ids
@@ -525,14 +574,19 @@ def classify_target(
         row.taxon,
         row.name,
         row.synonyms,
+        auxiliary_uniprot_ids=row.auxiliary_uniprot_accessions,
     )
     subset = _shortlist(query, snapshot)
     hits = collect_candidates(query, subset)
+    identity_catalog = _conflict_catalog(subset, snapshot)
     match = validate_identity(
         query,
-        _conflict_catalog(subset, snapshot),
+        identity_catalog,
         hits,
         snapshot_complete=snapshot.complete,
+        auxiliary_catalog=_auxiliary_diagnostic_catalog(
+            query, identity_catalog, snapshot
+        ),
     )
     match = _scope_match(row, match, snapshot)
     hits = _publication_hits(query, subset, hits, match)
@@ -591,6 +645,7 @@ def _publication_hits(
         organism=None,
         name=query.name,
         synonyms=query.synonyms,
+        auxiliary_uniprot_ids=query.auxiliary_uniprot_ids,
     )
     unfiltered = collect_candidates(unfiltered_query, catalog)
     conflict = {
@@ -750,10 +805,10 @@ def _complete(
         keyword_ids=row.keywords,
         free_text=row.name,
         organism=row.taxon,
-        predictions=tuple(
-            Prediction(layer, value, False, False, layer)
-            for layer, value in (("L1", row.predicted_l1), ("L2", row.predicted_l2))
-            if value is not None
+        predictions=predictions_from_row(
+            predicted_l1=row.predicted_l1,
+            predicted_l2=row.predicted_l2,
+            raw_fields=row.raw_fields,
         ),
     )
     direct_class, rule_id, annotation_status = _direct_metadata(direct, match)

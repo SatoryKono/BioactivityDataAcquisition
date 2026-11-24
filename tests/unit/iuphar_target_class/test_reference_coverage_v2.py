@@ -13,6 +13,7 @@ from iuphar_target_class.models import ProviderAnnotation, RunProvenance
 from iuphar_target_class.matching import CatalogTarget
 from iuphar_target_class.pipeline import IndexedSnapshot, classify_batch
 from iuphar_target_class.pipeline_acceptance import load_admitted_cohort
+from iuphar_target_class.policy import LOCAL_CATALOG_VERSION
 from iuphar_target_class.reference_coverage import (
     REQUIRED_REFERENCE_CATEGORIES,
     REQUIRED_REFERENCE_FIELDS,
@@ -62,17 +63,20 @@ def reference_inputs(tmp_path: Path):
     provenance = RunProvenance(
         "synthetic-snapshot",
         "bioetl-iuphar-input-v1",
-        "plan-v1-r9",
+        LOCAL_CATALOG_VERSION,
         "3.1.0",
         "2026-11-16T00:00:00Z",
         "2026-11-16T00:01:00Z",
+        matching_policy_version="rf002-uniprot-roles-2026-11-23",
     )
+    # The synthetic row carries EC 1.1.1.1, so the local catalog now supports
+    # Enzyme beside the direct Receptor label and the decision stays in review.
     expected = {
         "match_status": "matched",
         "matched_target_id": "1",
         "iuphar_class": "Receptor",
         "iuphar_annotation_status": "available",
-        "decision_status": "resolved",
+        "decision_status": "requires_review",
     }
     spec = {
         "artifact": "bioetl_iuphar_reference_cases",
@@ -98,6 +102,7 @@ def reference_inputs(tmp_path: Path):
         "normalization_version": provenance.normalization_version,
         "rules_version": provenance.rules_version,
         "classification_schema_version": provenance.schema_version,
+        "matching_policy_version": provenance.matching_policy_version,
         "taxonomy_scope": ["9606"],
         "scope_declaration": {
             "scope_id": "synthetic-contract-scope",

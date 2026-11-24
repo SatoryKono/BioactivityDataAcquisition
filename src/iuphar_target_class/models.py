@@ -43,6 +43,8 @@ class RunProvenance:
     schema_version: str | None
     retrieved_at: str
     run_started_at: str
+    # RF-002 matching pin; None only for pre-binding kernel fixtures.
+    matching_policy_version: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -92,6 +94,9 @@ class ValidatedInput:
     diagnostics: tuple[Diagnostic, ...]
     row_sha256: str
     provenance: RunProvenance
+    # RF-002: diagnostic-only UniProt xrefs; defaults keep legacy call sites valid.
+    auxiliary_uniprot_accessions: tuple[str, ...] = ()
+    equivalent_uniprot_accessions: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         """Detach read-only field snapshots from caller-owned dictionaries."""
@@ -150,6 +155,7 @@ class LocalInference:
     multiple_ec_categories: bool = False
     local_candidates: tuple[str, ...] = ()
     diagnostics: tuple[Diagnostic, ...] = ()
+    local_rules_by_evidence: tuple[tuple[str, tuple[str, ...]], ...] = ()
 
 
 @dataclass(frozen=True, slots=True)

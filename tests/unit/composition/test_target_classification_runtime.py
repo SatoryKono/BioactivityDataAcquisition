@@ -114,8 +114,9 @@ def shadow_config(tmp_path: Path, monkeypatch) -> PipelineYamlConfig:
             "snapshot": snapshot,
             "acceptance": None,
             "normalization_version": "bioetl-iuphar-input-v1",
-            "rules_version": "plan-v1-r9",
+            "rules_version": "local-rules-2026.11.23",
             "classification_schema_version": "3.1.0",
+            "matching_policy_version": "rf002-uniprot-roles-2026-11-23",
         },
     )
     payload = load_pipeline_config("chembl_target").model_dump(exclude_defaults=True)
@@ -889,6 +890,7 @@ def _assert_shadow_pipeline_proof(
         profile.classification_schema_version,
         profile.snapshot.retrieved_at,
         FIXED_TEST_TIME.isoformat(),
+        matching_policy_version=profile.matching_policy_version,
     )
     expected = classify_batch(
         read_bioetl_target_kernel_csv_v1(
