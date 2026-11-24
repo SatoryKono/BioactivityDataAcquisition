@@ -3,7 +3,7 @@
   "linked_issue": "#6891",
   "follow_up_issue": "#7464",
   "parent_epic": "#6890",
-  "snapshot_date": "2026-11-24",
+  "snapshot_date": "2026-11-18",
   "generated_by": "scripts.engineering.qa.report_live_residual_snapshot",
   "policy": {
     "direction": "shrink_only",
@@ -14,18 +14,18 @@
     "application_core": {
       "files_ge_250_loc": 0,
       "max_internal_fan_in": 5,
-      "helper_function_ratio": 0.379,
+      "helper_function_ratio": 0.382,
       "files": 207,
-      "total_loc": 25904,
+      "total_loc": 25905,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 7
     },
     "composition_bootstrap_runtime": {
       "files_ge_250_loc": 0,
       "max_internal_fan_in": 2,
-      "helper_function_ratio": 0.294,
+      "helper_function_ratio": 0.288,
       "files": 49,
-      "total_loc": 6539,
+      "total_loc": 6489,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 3
     },
@@ -50,7 +50,7 @@
     "composition_runtime_builders": {
       "files_ge_250_loc": 0,
       "max_internal_fan_in": 2,
-      "helper_function_ratio": 0.29,
+      "helper_function_ratio": 0.294,
       "files": 55,
       "total_loc": 6691,
       "budget_files_ge_250_loc": 0,
@@ -68,7 +68,7 @@
   },
   "module_coverage": {
     "uncovered_module_count": 0,
-    "unmeasured_module_count": 12
+    "unmeasured_module_count": 0
   },
   "closeout_program": {
     "tech_debt_closeout_test_file_count": 51,
