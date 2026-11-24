@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "catalog_ref": "55b8b2c305c407cef939abef73a33bee8ef3fe60",
-  "source_ref": "55b8b2c305c407cef939abef73a33bee8ef3fe60",
+  "catalog_ref": "88d9197d9ef0676e0a1084a30eed14334d7f4618",
+  "source_ref": "933f7fc01567e6c68ef06deddafdbaec474e34e9",
   "resource_updates": {
     "infrastructure.storage.metadata.builder_base._get_git_commit_cached.process": {
       "closer": "return of synchronous run_protected_command (git rev-parse --short HEAD; timeout=5; check=False)",

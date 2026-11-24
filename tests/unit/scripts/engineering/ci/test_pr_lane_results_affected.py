@@ -1841,6 +1841,7 @@ def test_shadow_compare_routes_codex_launchers_and_guidance(changed_file: str) -
             )
             for review_name in (
                 "external_resource_inventory_pr13061_review.json",
+                "external_resource_inventory_pr13371_gold_bool_review.json",
                 "external_resource_inventory_pr13266_review.json",
                 "external_resource_inventory_pr13281_review.json",
                 "external_resource_inventory_pr13329_review.json",
