@@ -24,9 +24,9 @@ flowchart LR
     application -->|1701 OK| application
     application -->|1167 OK| domain
     composition -->|256 OK| application
-    composition -->|692 OK| composition
+    composition -->|691 OK| composition
     composition -->|337 OK| domain
-    composition -->|362 OK| infrastructure
+    composition -->|363 OK| infrastructure
     domain -->|1337 OK| domain
     infrastructure -->|831 OK| domain
     infrastructure -->|1416 OK| infrastructure
@@ -43,9 +43,9 @@ flowchart LR
 | `application`    | `application`    |    1701 | allowed |
 | `application`    | `domain`         |    1167 | allowed |
 | `composition`    | `application`    |     256 | allowed |
-| `composition`    | `composition`    |     692 | allowed |
+| `composition`    | `composition`    |     691 | allowed |
 | `composition`    | `domain`         |     337 | allowed |
-| `composition`    | `infrastructure` |     362 | allowed |
+| `composition`    | `infrastructure` |     363 | allowed |
 | `domain`         | `domain`         |    1337 | allowed |
 | `infrastructure` | `domain`         |     831 | allowed |
 | `infrastructure` | `infrastructure` |    1416 | allowed |
@@ -73,9 +73,9 @@ flowchart LR
 | `infrastructure.storage`       | `domain.value_objects`         |      44 |
 | `composition.runtime_builders` | `domain.control_plane`         |      42 |
 | `composition.bootstrap`        | `domain.ports`                 |      37 |
+| `composition.bootstrap`        | `infrastructure.config`        |      37 |
 | `composition.factories`        | `domain.ports`                 |      37 |
 | `application.composite`        | `domain.exceptions`            |      36 |
-| `composition.bootstrap`        | `infrastructure.config`        |      36 |
 | `infrastructure.storage`       | `domain.models`                |      36 |
 | `infrastructure.control_plane` | `domain.control_plane`         |      35 |
 | `composition.bootstrap`        | `infrastructure.storage`       |      34 |

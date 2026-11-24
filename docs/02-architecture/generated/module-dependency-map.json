@@ -6,7 +6,7 @@
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 330,
     "violations": 0,
-    "source_fingerprint": "fbc81313782c875edc323947b097360d0feba84fb61325f2c6cb4b071d50db02"
+    "source_fingerprint": "99a5062853ccfd426fccd939f056e276e2a213892fa6eba8b22153c3cffaddaa"
   },
   "layer_edges": [
     {
@@ -30,7 +30,7 @@
     {
       "source": "composition",
       "target": "composition",
-      "imports": 692,
+      "imports": 691,
       "allowed": true
     },
     {
@@ -42,7 +42,7 @@
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 362,
+      "imports": 363,
       "allowed": true
     },
     {
@@ -165,6 +165,11 @@
       "imports": 37
     },
     {
+      "source": "composition.bootstrap",
+      "target": "infrastructure.config",
+      "imports": 37
+    },
+    {
       "source": "composition.factories",
       "target": "domain.ports",
       "imports": 37
@@ -172,11 +177,6 @@
     {
       "source": "application.composite",
       "target": "domain.exceptions",
-      "imports": 36
-    },
-    {
-      "source": "composition.bootstrap",
-      "target": "infrastructure.config",
       "imports": 36
     },
     {
