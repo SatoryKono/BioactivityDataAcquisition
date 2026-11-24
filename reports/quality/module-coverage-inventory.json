@@ -53293,7 +53293,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-11-20",
-  "source_tree_sha256": "acdf77e66e6a02b8cfb5b0ed651a8b81f2dd530aa53f6689bab3fec3c5a0b655",
+  "source_tree_sha256": "b394689a8b39b810c0902faa1ba919bbbef6588563486e73e7aa08a1531f137d",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
