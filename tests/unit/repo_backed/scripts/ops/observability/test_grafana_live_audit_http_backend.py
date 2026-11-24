@@ -161,9 +161,7 @@ def test_replay_status_panels_resolve_donor_and_explain_empty_values() -> None:
         assert target is not None
         assert target["url"].startswith("/ops/observability/selected-run-status?")
         assert panel["fieldConfig"]["defaults"]["noValue"] == (
-            "UNKNOWN"
-            if panel_id == 9422
-            else "SELECT RUN if no Run ID is selected. Source unavailable if the request failed."
+            "SELECT RUN if no Run ID is selected. Source unavailable if the request failed."
         )
 
 
