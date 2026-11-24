@@ -53233,7 +53233,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-11-20",
-  "source_tree_sha256": "ebf58e7a35361ed5e83b0611084fbb4ea115d5277cd4920c5b8ce7e81c2eeed3",
+  "source_tree_sha256": "30636a236950ca93b4e30dcce28bb1f890daa505528f31a8b22d82a753856f38",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
