@@ -169,17 +169,17 @@
   "issue": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/13316",
   "pins": {
     "classification_schema_version": "3.1.0",
-    "expectations_sha256": "f1e98fae6a82366906a28ec9ac2a395f52bc4098bab049fc63d5b12d0c908c93",
+    "expectations_sha256": "027ef9b6fa4fee8f8df3d3fc3439f9bb65b52a7a407259e9feaf2aee1b7d6faf",
     "normalization": {
       "normalization_sha256": "72f39b0e080f20ce484b81795a6d0aeffac091b4f7f8e54c68f99ef814fe3b26",
       "normalization_version": "bioetl-iuphar-input-v1",
       "version_status": "не утверждено"
     },
     "partition_sha256": "9a9bfb127e0bff84d1b3c22cd6b13a8c605e6b730ceccad70801a7d2dbe4f790",
-    "profile_sha256": "30b3438ed6ea6611d11a9d781173d3e4309bf3c0a4cbc9001ebd385686fd726a",
+    "profile_sha256": "9ab15c754a6395deda21c57b96caf77446d1380ec05ff5788c3f91e5bf8929f1",
     "rules": {
-      "rules_sha256": "ff627e7e47887e26b49e57684aab5c004a9a6d3723646b61fb8e045008cb6447",
-      "rules_version": "plan-v1-r9",
+      "rules_sha256": "cf65fa2cbc17c6808a4d11efe1905eca917bdaaa218520e8c3a403d806f17db9",
+      "rules_version": "local-rules-2026.11.23",
       "working_classes": [
         "Receptor",
         "Ion Channel",
@@ -716,14 +716,14 @@
       "disposition": "verified",
       "evidence": {
         "number": 1,
-        "source": "IUBMB EC class via policy.EC_CATEGORIES"
+        "source": "IUBMB EC class via policy.EC_CATEGORIES; EC 1-6 map to local Enzyme and EC 7 does not"
       },
       "expected": {
         "direct_layer_rule_ids": [],
         "ec_categories": [
           "Oxidoreductases"
         ],
-        "local_class": null,
+        "local_class": "Enzyme",
         "not_an_iuphar_class": true,
         "rule_family": "ec",
         "rule_marks_direct_layer": false,
@@ -734,7 +734,7 @@
         "ec_categories": [
           "Oxidoreductases"
         ],
-        "local_class": null,
+        "local_class": "Enzyme",
         "multiple_ec_categories": false,
         "not_an_iuphar_class": true,
         "rule_family": "ec",
@@ -749,14 +749,14 @@
       "disposition": "verified",
       "evidence": {
         "number": 2,
-        "source": "IUBMB EC class via policy.EC_CATEGORIES"
+        "source": "IUBMB EC class via policy.EC_CATEGORIES; EC 1-6 map to local Enzyme and EC 7 does not"
       },
       "expected": {
         "direct_layer_rule_ids": [],
         "ec_categories": [
           "Transferases"
         ],
-        "local_class": null,
+        "local_class": "Enzyme",
         "not_an_iuphar_class": true,
         "rule_family": "ec",
         "rule_marks_direct_layer": false,
@@ -767,7 +767,7 @@
         "ec_categories": [
           "Transferases"
         ],
-        "local_class": null,
+        "local_class": "Enzyme",
         "multiple_ec_categories": false,
         "not_an_iuphar_class": true,
         "rule_family": "ec",
@@ -782,14 +782,14 @@
       "disposition": "verified",
       "evidence": {
         "number": 3,
-        "source": "IUBMB EC class via policy.EC_CATEGORIES"
+        "source": "IUBMB EC class via policy.EC_CATEGORIES; EC 1-6 map to local Enzyme and EC 7 does not"
       },
       "expected": {
         "direct_layer_rule_ids": [],
         "ec_categories": [
           "Hydrolases"
         ],
-        "local_class": null,
+        "local_class": "Enzyme",
         "not_an_iuphar_class": true,
         "rule_family": "ec",
         "rule_marks_direct_layer": false,
@@ -800,7 +800,7 @@
         "ec_categories": [
           "Hydrolases"
         ],
-        "local_class": null,
+        "local_class": "Enzyme",
         "multiple_ec_categories": false,
         "not_an_iuphar_class": true,
         "rule_family": "ec",
@@ -815,14 +815,14 @@
       "disposition": "verified",
       "evidence": {
         "number": 4,
-        "source": "IUBMB EC class via policy.EC_CATEGORIES"
+        "source": "IUBMB EC class via policy.EC_CATEGORIES; EC 1-6 map to local Enzyme and EC 7 does not"
       },
       "expected": {
         "direct_layer_rule_ids": [],
         "ec_categories": [
           "Lyases"
         ],
-        "local_class": null,
+        "local_class": "Enzyme",
         "not_an_iuphar_class": true,
         "rule_family": "ec",
         "rule_marks_direct_layer": false,
@@ -833,7 +833,7 @@
         "ec_categories": [
           "Lyases"
         ],
-        "local_class": null,
+        "local_class": "Enzyme",
         "multiple_ec_categories": false,
         "not_an_iuphar_class": true,
         "rule_family": "ec",
@@ -848,14 +848,14 @@
       "disposition": "verified",
       "evidence": {
         "number": 5,
-        "source": "IUBMB EC class via policy.EC_CATEGORIES"
+        "source": "IUBMB EC class via policy.EC_CATEGORIES; EC 1-6 map to local Enzyme and EC 7 does not"
       },
       "expected": {
         "direct_layer_rule_ids": [],
         "ec_categories": [
           "Isomerases"
         ],
-        "local_class": null,
+        "local_class": "Enzyme",
         "not_an_iuphar_class": true,
         "rule_family": "ec",
         "rule_marks_direct_layer": false,
@@ -866,7 +866,7 @@
         "ec_categories": [
           "Isomerases"
         ],
-        "local_class": null,
+        "local_class": "Enzyme",
         "multiple_ec_categories": false,
         "not_an_iuphar_class": true,
         "rule_family": "ec",
@@ -881,14 +881,14 @@
       "disposition": "verified",
       "evidence": {
         "number": 6,
-        "source": "IUBMB EC class via policy.EC_CATEGORIES"
+        "source": "IUBMB EC class via policy.EC_CATEGORIES; EC 1-6 map to local Enzyme and EC 7 does not"
       },
       "expected": {
         "direct_layer_rule_ids": [],
         "ec_categories": [
           "Ligases"
         ],
-        "local_class": null,
+        "local_class": "Enzyme",
         "not_an_iuphar_class": true,
         "rule_family": "ec",
         "rule_marks_direct_layer": false,
@@ -899,7 +899,7 @@
         "ec_categories": [
           "Ligases"
         ],
-        "local_class": null,
+        "local_class": "Enzyme",
         "multiple_ec_categories": false,
         "not_an_iuphar_class": true,
         "rule_family": "ec",
@@ -914,7 +914,7 @@
       "disposition": "verified",
       "evidence": {
         "number": 7,
-        "source": "IUBMB EC class via policy.EC_CATEGORIES"
+        "source": "IUBMB EC class via policy.EC_CATEGORIES; EC 1-6 map to local Enzyme and EC 7 does not"
       },
       "expected": {
         "direct_layer_rule_ids": [],
@@ -946,7 +946,7 @@
       "claim": "dictionary_class",
       "disposition": "verified",
       "evidence": {
-        "source": "IUBMB classes 1 and 3; multiple categories are not one IUPHAR class"
+        "source": "IUBMB classes 1 and 3 stay the local class Enzyme and do not become one extra IUPHAR class"
       },
       "expected": {
         "direct_layer_rule_ids": [],
@@ -954,7 +954,7 @@
           "Oxidoreductases",
           "Hydrolases"
         ],
-        "local_class": null,
+        "local_class": "Enzyme",
         "multiple_ec_categories": true,
         "not_an_iuphar_class": true,
         "rule_marks_direct_layer": [
@@ -972,7 +972,7 @@
           "Oxidoreductases",
           "Hydrolases"
         ],
-        "local_class": null,
+        "local_class": "Enzyme",
         "multiple_ec_categories": true,
         "not_an_iuphar_class": true,
         "rule_marks_direct_layer": [
