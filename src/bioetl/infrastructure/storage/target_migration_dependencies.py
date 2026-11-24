@@ -95,8 +95,11 @@ def _dependency_document(raw: bytes) -> Mapping[str, object]:
 
 
 class _DependencyCollector:
-    def __init__(self, workspace: Path) -> None:
+    def __init__(
+        self, workspace: Path, *, include_acceptance_proofs: bool = True
+    ) -> None:
         self.workspace = workspace
+        self.include_acceptance_proofs = include_acceptance_proofs
         self.dependencies: dict[str, str] = {}
         self.visited: set[tuple[Path, str]] = set()
         # Matches snapshot_evidence._review: evidence paths are relative to the
@@ -194,7 +197,7 @@ class _DependencyCollector:
         # Historical shadow receipts bind hashes without a typed file closure.
         # Preserve their pinned bytes; load_profile still validates the receipt
         # and requires schema 2 whenever the configuration activates enrich.
-        if document["schema_version"] == 1:
+        if document["schema_version"] == 1 or not self.include_acceptance_proofs:
             return
         references = document.get("artifact_references")
         if not isinstance(references, list) or not references:
@@ -331,6 +334,14 @@ def collect_target_dependencies(
         profiles.append((path, digest, mode == "enrich"))
     for path, digest, required in profiles:
         load_profile(path, digest, require_acceptance=required)
+    return dict(sorted(collector.dependencies.items()))
+
+
+def collect_target_profile_runtime_files(path: Path, digest: str) -> dict[str, str]:
+    """Return the pinned files consumed by the classifier, relative to its profile."""
+    path = path.resolve(strict=True)
+    collector = _DependencyCollector(path.parent, include_acceptance_proofs=False)
+    collector.document(path, "profile", digest)
     return dict(sorted(collector.dependencies.items()))
 
 

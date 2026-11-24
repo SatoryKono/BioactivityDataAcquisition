@@ -13,7 +13,12 @@ import bioetl.infrastructure.config.protein_class_target_type_loader as mapping
 from bioetl.domain.normalization.json import serialize_json_canonical
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.storage.composite_replay_inputs import _table_bytes
+from bioetl.infrastructure.storage.target_migration_dependencies import (
+    collect_target_profile_runtime_files,
+)
 
+TARGET_CLASSIFICATION_CONFIG = "target-classification.json"
+_TARGET_CLASSIFIER_DIR = "target-classifier"
 SUPPORTED_COMPOSITES = frozenset(
     f"composite_{name}"
     for name in ("activity", "assay", "molecule", "publication", "target")
@@ -95,6 +100,50 @@ def publish_table(root: Path, name: str, table: pa.Table) -> str:
     return publish_bytes(root, name, _table_bytes(canonical_table(table)))
 
 
+def publish_target_classifier(
+    root: Path, profile: Path, digest: str
+) -> tuple[str, dict[str, str]]:
+    """Seal the exact profile and all files its loader reads, preserving layout."""
+    profile = profile.resolve(strict=True)
+    objects = {}
+    for relative, expected in collect_target_profile_runtime_files(
+        profile, digest
+    ).items():
+        content = confined_path(profile.parent, relative).read_bytes()
+        if digest_bytes(content) != expected:
+            raise ValueError("composite_replay_classifier_changed_during_capture")
+        name = f"{_TARGET_CLASSIFIER_DIR}/{relative}"
+        objects[name] = publish_bytes(root, name, content)
+    return f"{_TARGET_CLASSIFIER_DIR}/{profile.name}", objects
+
+
+def restore_target_classification_config(
+    root: Path, objects: JsonDict
+) -> JsonDict | None:
+    """Anchor an enabled classifier to its sealed profile in this replay directory."""
+    if TARGET_CLASSIFICATION_CONFIG not in objects:
+        return None
+    config = load_verified_json(
+        root, TARGET_CLASSIFICATION_CONFIG, objects[TARGET_CLASSIFICATION_CONFIG]
+    )
+    classification = config.get("target_classification")
+    if not isinstance(classification, dict):
+        raise ValueError("composite_replay_classifier_config_invalid")
+    if classification.get("mode", "off") == "off":
+        return config
+    name = classification.get("snapshot_manifest")
+    digest = classification.get("snapshot_manifest_sha256")
+    if (
+        not isinstance(name, str)
+        or not isinstance(digest, str)
+        or Path(name).parent.as_posix() != _TARGET_CLASSIFIER_DIR
+        or objects.get(name) != digest
+    ):
+        raise ValueError("composite_replay_classifier_profile_unsealed")
+    classification["snapshot_manifest"] = str(confined_path(root, name))
+    return config
+
+
 def verify_bundle(root: Path, envelope_digest: str) -> JsonDict:
     """Re-check every mandatory object; historical success does not bypass loss."""
     envelope = load_verified_json(root, "parent.json", envelope_digest)
@@ -113,9 +162,27 @@ def verify_bundle(root: Path, envelope_digest: str) -> JsonDict:
         raise ValueError("composite_replay_objects_missing")
     _verify_required_objects(envelope, objects, version)
     _verify_objects(root, objects)
+    if envelope["pipeline"] == "composite_target":
+        _verify_target_classifier(root, objects)
     if envelope.get("implementation") != implementation_fingerprint():
         raise ValueError("composite_replay_implementation_mismatch")
     return envelope
+
+
+def _verify_target_classifier(root: Path, objects: JsonDict) -> None:
+    config = restore_target_classification_config(root, objects)
+    if config is None or config["target_classification"].get("mode", "off") == "off":
+        return
+    classification = config["target_classification"]
+    files = collect_target_profile_runtime_files(
+        Path(classification["snapshot_manifest"]),
+        classification["snapshot_manifest_sha256"],
+    )
+    if any(
+        objects.get(f"{_TARGET_CLASSIFIER_DIR}/{name}") != digest
+        for name, digest in files.items()
+    ):
+        raise ValueError("composite_replay_classifier_dependency_unsealed")
 
 
 def _verify_required_objects(

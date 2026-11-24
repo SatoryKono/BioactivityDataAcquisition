@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
+
 from contextvars import Token
 from pathlib import Path
 from typing import Literal, cast
@@ -46,6 +46,7 @@ from bioetl.infrastructure.storage.composite_replay_bundle import (
     digest_bytes,
     load_verified_json,
     publish_json,
+    restore_target_classification_config,
     verify_bundle,
 )
 from bioetl.infrastructure.storage.composite_replay_evidence import (
@@ -65,17 +66,11 @@ from bioetl.application.composite.helpers.replay_context import (
 
 
 def _bind_target_replay(
-    envelope: JsonDict,
-    objects: JsonDict,
-    verified_json: Callable[[str], JsonDict],
+    root: Path, envelope: JsonDict
 ) -> Token[dict[str, object] | None] | None:
     if envelope["pipeline"] != "composite_target":
         return None
-    pinned = (
-        verified_json("target-classification.json")
-        if "target-classification.json" in objects
-        else None
-    )
+    pinned = restore_target_classification_config(root, envelope["objects"])
     payload: dict[str, object] = (
         {"target_config": pinned}
         if pinned is not None
@@ -138,7 +133,7 @@ async def replay_assay(
         observation_token = bind_run_observations()
         target_token = None
         try:
-            target_token = _bind_target_replay(envelope, objects, verified_json)
+            target_token = _bind_target_replay(root, envelope)
             merger = build_composite_merge_service(
                 config=config,
                 storage=cast(CompositeMergeStorageProtocol, storage),

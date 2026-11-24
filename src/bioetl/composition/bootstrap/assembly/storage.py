@@ -76,6 +76,7 @@ __all__ = [
     "hydrate_target_runtime_config",
     "load_target_runtime_profile",
     "preflight_workflow_target_dependencies",
+    "resolve_target_runtime_profile_path",
 ]
 
 
@@ -238,6 +239,21 @@ def hydrate_target_runtime_config(payload: Mapping[str, object]) -> PipelineYaml
     return PipelineYamlConfig.model_validate(restored)
 
 
+def resolve_target_runtime_profile_path(
+    reference: str, *, dependency_root: Path | None = None
+) -> Path:
+    """Locate a configured classifier profile with the usual config-root semantics."""
+    path = Path(reference)
+    if not path.is_absolute():
+        base = (
+            dependency_root
+            if dependency_root is not None
+            else resolve_configs_root().parent
+        )
+        path = base / path
+    return path.resolve()
+
+
 def load_target_runtime_profile(
     config: PipelineYamlConfig,
     *,
@@ -248,16 +264,10 @@ def load_target_runtime_profile(
     classification = config.target_classification.to_domain()
     if not classification.enabled:
         return None
-    path = Path(classification.snapshot_manifest or "")
-    if not path.is_absolute():
-        base = (
-            dependency_root
-            if dependency_root is not None
-            else resolve_configs_root().parent
-        )
-        path = base / path
     return load_profile(
-        path.resolve(),
+        resolve_target_runtime_profile_path(
+            classification.snapshot_manifest or "", dependency_root=dependency_root
+        ),
         classification.snapshot_manifest_sha256 or "",
         require_acceptance=classification.mode == "enrich" and require_new_admission,
     )
