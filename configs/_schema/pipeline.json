@@ -1753,6 +1753,47 @@
               "snapshot_manifest_sha256"
             ]
           }
+        },
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "enum": [
+                  "off",
+                  "shadow"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "table_contract": {
+                "enum": [
+                  "3.0.0",
+                  null
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "enrich"
+              },
+              "table_contract": {
+                "const": "3.0.0"
+              }
+            },
+            "required": [
+              "mode",
+              "table_contract"
+            ]
+          },
+          "then": {
+            "not": {}
+          }
         }
       ],
       "dependentRequired": {
@@ -1801,6 +1842,23 @@
           ],
           "default": null,
           "title": "Snapshot Manifest Sha256"
+        },
+        "table_contract": {
+          "anyOf": [
+            {
+              "enum": [
+                "3.0.0",
+                "3.1.0",
+                "3.2.0"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Table Contract"
         }
       },
       "title": "TargetClassificationYamlConfig",
