@@ -2216,11 +2216,11 @@
         "merged_at": "2026-11-24T02:53:29Z",
         "number": 13330
       },
-      "retrieved_at_utc": "2026-11-24T04:02:57Z",
+      "retrieved_at_utc": "2026-11-24T04:04:45Z",
       "retrieved_from": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/pulls/13330",
       "reviewed_source_commits": ["e507e38dd9e60487ebacd07e029bee4e296999bd"],
       "schema_version": 1,
-      "trust_statement": "Supervisor reviewed live GitHub publication lineage; not a runtime qualification or CI execution receipt.",
+      "trust_statement": "Operator reviewed live GitHub publication lineage; Git ancestry and tree equality are independently checked. Not a runtime qualification or CI execution receipt.",
       "verification_mode": "live_github"
     }
   ],
