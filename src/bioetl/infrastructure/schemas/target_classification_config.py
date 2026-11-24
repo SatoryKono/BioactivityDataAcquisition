@@ -2,10 +2,16 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
 from typing import Self
 
-from pydantic import BaseModel, ConfigDict, Field, model_serializer, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    SerializerFunctionWrapHandler,
+    model_serializer,
+    model_validator,
+)
 
 from bioetl.domain.config.target_classification import (
     TargetClassificationConfig,
@@ -77,7 +83,7 @@ class TargetClassificationYamlConfig(BaseModel):
 
     @model_serializer(mode="wrap")
     def _omit_absent_table_contract(
-        self, handler: Callable[[TargetClassificationYamlConfig], object]
+        self, handler: SerializerFunctionWrapHandler
     ) -> object:
         """Omit a null selector so manifests written before the field still match."""
         payload = handler(self)

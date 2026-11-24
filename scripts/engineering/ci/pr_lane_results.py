@@ -787,6 +787,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "src/iuphar_target_class/semantics.py": (
         IUPHAR_SEMANTICS_RF001_TEST,
         IUPHAR_POLICY_TEST,
+        "tests/unit/iuphar_target_class/test_rf000_target_classification.py",
     ),
     "src/iuphar_target_class/identifier_roles.py": (
         IUPHAR_IDENTIFIER_ROLES_RF002_TEST,
@@ -915,6 +916,13 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "src/iuphar_target_class/hierarchy.py": (IUPHAR_HIERARCHY_TEST,),
     "src/iuphar_target_class/rf008_qualification.py": (
         "tests/unit/iuphar_target_class/test_rf008_qualification.py",
+    ),
+    **dict.fromkeys(
+        (
+            "src/iuphar_target_class/enablement.py",
+            "src/iuphar_target_class/qualification.py",
+        ),
+        ("tests/unit/iuphar_target_class/test_rf000_target_classification.py",),
     ),
     **dict.fromkeys(
         (

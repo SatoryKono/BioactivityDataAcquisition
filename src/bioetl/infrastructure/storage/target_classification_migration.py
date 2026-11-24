@@ -255,6 +255,16 @@ def promote_target_migration(
             workspace=paths.workspace,
             restoration_manifest=restoration_manifest,
         )
+        from bioetl.infrastructure.storage.target_contract_transition import (
+            assert_live_promotion_allowed,
+        )
+        from bioetl.infrastructure.storage.target_migration_validation import (
+            _candidate_table_contract,
+        )
+
+        plan = dict(state)
+        plan["table_contract"] = _candidate_table_contract(checked)
+        assert_live_promotion_allowed(plan)
         state["phase"] = "promoting"
         _save(checked["backup"], state)
         try:
