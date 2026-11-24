@@ -14,23 +14,37 @@ from bioetl.domain.config.target_classification import (
 _TargetProfile = Literal["empty", "V30", "V31", "V32"]
 _INCOMPLETE_TARGET_SCHEMA = "incomplete target classification schema; recovery required"
 
+TARGET_CLASSIFICATION_V32_FIELDS = TARGET_CLASSIFICATION_DETAIL_FIELDS
+_PROFILE_CONTRACT_VERSIONS = {"V30": "3.0.0", "V31": "3.1.0", "V32": "3.2.0"}
+_INCOMPLETE_CLASSIFICATION = (
+    "incomplete target classification schema; recovery required"
+)
 
-def _profile_for_fields(fields: frozenset[str]) -> Literal["V30", "V31", "V32"]:
+
+def classification_profile_name(fields: frozenset[str]) -> Literal["V30", "V31", "V32"]:
+    """Name one physical table contract from its classification columns."""
     required = frozenset(TARGET_CLASSIFICATION_FIELDS)
-    detail = frozenset(TARGET_CLASSIFICATION_DETAIL_FIELDS)
     present = required.intersection(fields)
-    present_detail = detail.intersection(fields)
-    if (present and present != required) or (
-        present_detail and present_detail != detail
-    ):
-        raise ValueError(_INCOMPLETE_TARGET_SCHEMA)
-    if present_detail and not present:
-        raise ValueError(_INCOMPLETE_TARGET_SCHEMA)
-    if present_detail:
-        return "V32"
-    if present:
-        return "V31"
-    return "V30"
+    if present and present != required:
+        raise ValueError(_INCOMPLETE_CLASSIFICATION)
+    v32 = frozenset(TARGET_CLASSIFICATION_V32_FIELDS)
+    if v32:
+        v32_present = v32.intersection(fields)
+        if v32_present and v32_present != v32:
+            raise ValueError(_INCOMPLETE_CLASSIFICATION)
+        if v32_present == v32:
+            if present != required:
+                raise ValueError(_INCOMPLETE_CLASSIFICATION)
+            return "V32"
+    return "V31" if present else "V30"
+
+
+def contract_version_for_profile(profile: str) -> str:
+    """Return the hash/table contract bound to one physical profile name."""
+    try:
+        return _PROFILE_CONTRACT_VERSIONS[profile]
+    except KeyError as error:
+        raise ValueError("unsupported target table profile") from error
 
 
 def get_target_table_profile(*, silver_path: Path, gold_path: Path) -> _TargetProfile:
@@ -40,7 +54,7 @@ def get_target_table_profile(*, silver_path: Path, gold_path: Path) -> _TargetPr
         fields = _target_table_fields(path)
         if fields is None:
             continue
-        profiles.add(_profile_for_fields(fields))
+        profiles.add(classification_profile_name(fields))
     if len(profiles) > 1:
         if profiles == {"V30", "V31"}:
             raise ValueError("mixed V30/V31 target destinations; recovery required")
@@ -94,7 +108,7 @@ def _assert_target_schema_compatibility(
     fields: frozenset[str], table_contract: str, destructive: bool
 ) -> None:
     """Require one coherent contract and preserve existing enriched tables."""
-    profile = _profile_for_fields(fields)
+    profile = classification_profile_name(fields)
     if table_contract == "3.0.0" and profile != "V30":
         raise ValueError(
             f"{profile} target requires physical rollback before legacy writes"
@@ -122,6 +136,9 @@ def _assert_target_schema_compatibility(
 
 __all__ = [
     "TARGET_CLASSIFICATION_FIELDS",
+    "TARGET_CLASSIFICATION_V32_FIELDS",
     "assert_target_table_compatibility",
+    "classification_profile_name",
+    "contract_version_for_profile",
     "get_target_table_profile",
 ]
