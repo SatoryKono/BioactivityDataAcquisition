@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from dataclasses import replace
 from pathlib import Path
 from shutil import copytree, ignore_patterns
@@ -144,6 +145,22 @@ def test_actual_build_prepare_promote_and_physical_rollback_on_copy(rehearsal):
         paths, legacy_include_fields=fields, deployment=binding
     )
     assert state["phase"] == "prepared"
+    assert state["source_profile"] == "V30"
+    assert state["destination_profile"] == "V31"
+    assert state["source_contract_version"] == "3.0.0"
+    assert state["destination_contract_version"] == "3.1.0"
+    assert state["config_contract_version"] == "3.0.0"
+    assert state["fk_restoration"]["status"] == "closed"
+    assert state["fk_restoration"]["missing_target_ids"] == []
+    assert state["table_versions"]["silver"]["profile"] == "V30"
+    assert state["table_versions"]["gold"]["profile"] == "V30"
+    assert state["table_versions"]["assay"]["version"] == 0
+    assert state["candidate_profiles"] == {"silver": "V31", "gold": "V31"}
+    assert state["validation"]["profile_sha256"] == sha256_file(profile)
+    assert (
+        profile.relative_to(paths.workspace).as_posix()
+        in state["dependency_schema_versions"]
+    )
     assert profile.relative_to(paths.workspace).as_posix() in state["dependencies"]
     assert all(
         Path(paths.workspace / p).is_relative_to(occurrence)
@@ -169,6 +186,63 @@ def test_actual_build_prepare_promote_and_physical_rollback_on_copy(rehearsal):
     with _lock(paths.workspace):
         pass
     assert sha256_file(active_config) == active_before
+
+
+def test_source_version_change_between_phases_blocks_promotion(rehearsal):
+    paths, occurrence, _, _, _, fields, _ = rehearsal
+    binding = _bind(rehearsal)
+    frozen = occurrence / "frozen-version.json"
+    freeze_target_inputs(paths, legacy_include_fields=fields, output=frozen)
+    build_target_candidates(
+        TargetCandidateBuildRequest(
+            paths,
+            frozen,
+            sha256_file(frozen),
+            occurrence / "build-version",
+            fields,
+            "synthetic-version-rehearsal",
+            "2026-11-16T00:00:00Z",
+            binding,
+        )
+    )
+    prepare_target_migration(paths, legacy_include_fields=fields, deployment=binding)
+    current = DeltaTable(paths.silver).to_pyarrow_table()
+    write_deltalake(paths.silver, current, mode="append")
+    with pytest.raises(ValueError, match="source table version changed"):
+        promote_target_migration(paths, deployment=binding)
+    assert "iuphar_class" not in DeltaTable(paths.gold).to_pyarrow_table().column_names
+    journal = json.loads((paths.backup / "journal.json").read_text(encoding="utf-8"))
+    assert journal["phase"] == "prepared"
+
+
+def test_assay_cohort_change_on_a_full_copy_blocks_promotion(rehearsal):
+    paths, occurrence, _, _, _, fields, _ = rehearsal
+    binding = _bind(rehearsal)
+    frozen = occurrence / "frozen-assay.json"
+    freeze_target_inputs(paths, legacy_include_fields=fields, output=frozen)
+    build_target_candidates(
+        TargetCandidateBuildRequest(
+            paths,
+            frozen,
+            sha256_file(frozen),
+            occurrence / "build-assay",
+            fields,
+            "synthetic-assay-rehearsal",
+            "2026-11-16T00:00:00Z",
+            binding,
+        )
+    )
+    prepare_target_migration(paths, legacy_include_fields=fields, deployment=binding)
+    data_file = next(paths.assay.rglob("*.parquet"))
+    data_file.write_bytes(data_file.read_bytes() + b"\0")
+    with pytest.raises(
+        ValueError, match="assay reference cohort changed|no longer readable"
+    ):
+        promote_target_migration(paths, deployment=binding)
+    mode = yaml.safe_load(paths.config.read_bytes())["pipeline"][
+        "target_classification"
+    ]["mode"]
+    assert mode == "off"
 
 
 def test_production_binder_cannot_accept_rehearsal_config_root(rehearsal):
