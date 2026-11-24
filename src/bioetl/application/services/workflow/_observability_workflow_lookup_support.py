@@ -17,6 +17,11 @@ if TYPE_CHECKING:
 
 
 class CheckpointLookupService(Protocol):
+    """Lookup evidence must carry its storage run ID at the top level.
+
+    Metadata alone is not a supported run identity or resumable checkpoint.
+    """
+
     async def get_checkpoint(self, pipeline_name: str) -> CheckpointInfo | None: ...
 
     async def get_checkpoint_for_run(
@@ -71,14 +76,18 @@ async def resolve_checkpoint_for_run(
         )
     if checkpoint is None:
         return None
-    if checkpoint.run_id in {None, run_id}:
+    if checkpoint.run_id == run_id:
         return checkpoint
     return CheckpointInfo(
         pipeline_name=checkpoint.pipeline_name,
         run_id=checkpoint.run_id,
         metadata={
             **_copy_checkpoint_metadata(checkpoint.metadata),
-            "status": "mismatched_run_context",
+            "status": (
+                "missing_run_identity"
+                if not checkpoint.run_id
+                else "mismatched_run_context"
+            ),
         },
     )
 

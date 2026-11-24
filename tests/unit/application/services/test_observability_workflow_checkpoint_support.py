@@ -95,6 +95,35 @@ def test_build_checkpoint_compatibility_section_reports_missing_checkpoint() -> 
     assert section["missing_anchors"] == ["checkpoint"]
 
 
+@pytest.mark.parametrize("metadata_run_id", ["run-abc", "other-run"])
+def test_metadata_only_checkpoint_is_not_resumable(metadata_run_id: str) -> None:
+    checkpoint = CheckpointInfo(
+        pipeline_name="chembl_activity",
+        run_id=None,
+        metadata={"run_id": metadata_run_id},
+    )
+
+    section = build_checkpoint_compatibility_section(
+        checkpoint=checkpoint, run_manifest=_manifest_result(exact_replay=False)
+    )
+
+    assert section["status"] == "missing_evidence"
+    assert section["taxonomy"] == "missing_checkpoint_run_identity"
+    assert section["missing_anchors"] == ["run_id"]
+    assert section["compatible"] is False
+    assert section["replay_resume_rebuild_verdict"] == "non_replayable"
+
+
+def test_top_level_checkpoint_identity_takes_precedence_over_metadata() -> None:
+    checkpoint = _matching_checkpoint()
+    checkpoint.metadata["run_id"] = "other-run"
+    section = build_checkpoint_compatibility_section(
+        checkpoint=checkpoint, run_manifest=_manifest_result(exact_replay=False)
+    )
+    assert section["checkpoint_anchors"]["run_id"] == "run-abc"
+    assert "run_id" in section["matched_anchors"]
+
+
 def test_build_checkpoint_compatibility_section_reports_compatible_anchors() -> None:
     checkpoint = _matching_checkpoint(exact_replay=False)
 
