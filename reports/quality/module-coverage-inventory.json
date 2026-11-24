@@ -8171,16 +8171,6 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 45,
-      "executable_lines": 45,
-      "missing_lines": 0,
-      "module": "bioetl.application.services.workflow.control_plane.execution_preparation",
-      "path": "src/bioetl/application/services/workflow/control_plane/execution_preparation.py",
-      "source_lines": 192
-    },
-    {
-      "coverage_percent": 100.0,
-      "coverage_status": "fully_covered",
       "covered_lines": 26,
       "executable_lines": 26,
       "missing_lines": 0,
@@ -8217,16 +8207,6 @@
       "module": "bioetl.application.services.workflow.control_plane.execution_recording_state",
       "path": "src/bioetl/application/services/workflow/control_plane/execution_recording_state.py",
       "source_lines": 151
-    },
-    {
-      "coverage_percent": 99.11,
-      "coverage_status": "partially_covered",
-      "covered_lines": 111,
-      "executable_lines": 112,
-      "missing_lines": 1,
-      "module": "bioetl.application.services.workflow.control_plane.execution_service",
-      "path": "src/bioetl/application/services/workflow/control_plane/execution_service.py",
-      "source_lines": 404
     },
     {
       "coverage_percent": 100.0,
@@ -34763,16 +34743,6 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 45,
-      "executable_lines": 45,
-      "missing_lines": 0,
-      "module": "bioetl.application.services.workflow.control_plane.execution_preparation",
-      "path": "src/bioetl/application/services/workflow/control_plane/execution_preparation.py",
-      "source_lines": 192
-    },
-    {
-      "coverage_percent": 100.0,
-      "coverage_status": "fully_covered",
       "covered_lines": 26,
       "executable_lines": 26,
       "missing_lines": 0,
@@ -34809,16 +34779,6 @@
       "module": "bioetl.application.services.workflow.control_plane.execution_recording_state",
       "path": "src/bioetl/application/services/workflow/control_plane/execution_recording_state.py",
       "source_lines": 151
-    },
-    {
-      "coverage_percent": 99.11,
-      "coverage_status": "partially_covered",
-      "covered_lines": 111,
-      "executable_lines": 112,
-      "missing_lines": 1,
-      "module": "bioetl.application.services.workflow.control_plane.execution_service",
-      "path": "src/bioetl/application/services/workflow/control_plane/execution_service.py",
-      "source_lines": 404
     },
     {
       "coverage_percent": 100.0,
@@ -53193,7 +53153,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-11-20",
-  "source_tree_sha256": "14065c94c292b42a52be94865e4d5edfb6cdff045d88e56abd44037856667c5c",
+  "source_tree_sha256": "ebe2218e8e715fb2fffc0ac2843e89dd5637a967202234bb99e32d93290bac5a",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -53348,12 +53308,12 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 2659,
+    "source_module_count": 2657,
     "status_counts": {
       "coverage_xml_missing": 3,
-      "fully_covered": 2537,
+      "fully_covered": 2536,
       "no_executable_lines": 1,
-      "partially_covered": 118,
+      "partially_covered": 117,
       "uncovered": 0,
       "unmeasured": 0
     },
