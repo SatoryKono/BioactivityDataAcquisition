@@ -30,6 +30,7 @@ from bioetl.infrastructure.adapters.iuphar.snapshot_loader import (
     LoadedIupharProfile,
     LoadedIupharSnapshot,
 )
+from iuphar_target_class.identifier_roles import MATCHING_POLICY_VERSION
 from bioetl.infrastructure.storage import target_migration_validation as validation
 from bioetl.infrastructure.storage.target_migration_row_ops import (
     hash_input,
@@ -289,6 +290,7 @@ def _synthetic_profile(tmp_path: Path) -> LoadedIupharProfile:
         "bioetl-iuphar-input-v1",
         "plan-v1-r9",
         "3.1.0",
+        MATCHING_POLICY_VERSION,
     )
 
 

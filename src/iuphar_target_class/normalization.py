@@ -20,7 +20,14 @@ from .stage0.io import canonical_json_bytes, sha256_bytes
 
 _NAMED_MARKERS = frozenset(marker for marker in BASE_MISSING_MARKERS if marker)
 _EC_NAMES = dict(EC_CATEGORIES)
-_MULTI_FIELDS = ("uniprot", "synonyms", "ec", "keywords")
+_MULTI_FIELDS = (
+    "uniprot",
+    "uniprot_equivalent",
+    "uniprot_xref",
+    "synonyms",
+    "ec",
+    "keywords",
+)
 _SCALAR_FIELDS = (
     "target_id",
     "gene_symbol",
@@ -175,6 +182,10 @@ def validate_input(
         diagnostics=tuple(diagnostics),
         row_sha256=row_hash,
         provenance=provenance,
+        auxiliary_uniprot_accessions=_split_stored(normalized.get("uniprot_xref")),
+        equivalent_uniprot_accessions=_split_stored(
+            normalized.get("uniprot_equivalent")
+        ),
     )
 
 
