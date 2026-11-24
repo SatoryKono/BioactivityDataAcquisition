@@ -27,6 +27,12 @@ class LockPort(Protocol):
 
     The protocol models lock acquisition, liveness, and ownership validation
     for pipeline execution coordination.
+
+    Implementations must make acquisition non-reentrant per key, including
+    for the current owner, and must not release another owner's lock. These
+    guarantees apply within the coordination scope of the implementation.
+    A successful pre-write validation is a point-in-time check, not an atomic
+    guarantee that ownership persists through a subsequent storage write.
     """
 
     async def acquire(
@@ -48,7 +54,8 @@ class LockPort(Protocol):
                 explicit release or process teardown). When ``ttl`` is a positive
                 int, adapters that support TTL expire the lock after that many
                 seconds of wall time.
-            wait: If True, wait for the lock to be released if it's already held.
+            wait: If True, wait for the lock to be released if it's already held,
+                including when it is held by the same owner.
             wait_timeout: Maximum time to wait for the lock in seconds.
             exclusive: If True, acquire an exclusive lock.
 
@@ -73,7 +80,8 @@ class LockPort(Protocol):
             exclusive: If True, release an exclusive lock.
 
         Returns:
-            True if the lock was released, False otherwise.
+            True if the lock was released, False if missing or held by another
+            owner.
         """
         ...
 
@@ -103,8 +111,9 @@ class LockPort(Protocol):
         """Validate that the given owner_id holds the lock.
 
         This is the Safety Guard: before writing to storage, the writer
-        MUST validate that it still holds the lock. This prevents split-brain
-        scenarios where the lock expired but the writer continued.
+        MUST validate that it still holds the lock. A successful check cannot
+        prevent ownership changing between validation and the subsequent write;
+        storage-enforced fencing is needed to reject writes in that interval.
 
         Args:
             key: The unique key for the lock.

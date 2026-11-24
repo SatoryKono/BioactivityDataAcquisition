@@ -56,6 +56,27 @@ async def test_memory_lock_prevents_duplicate_workflow_key_within_one_process() 
 
 
 @pytest.mark.asyncio
+async def test_memory_lock_rejects_reentry_and_non_owner_release() -> None:
+    lock = MemoryLock()
+    owner = RunID(UUID("00000000-0000-0000-0000-000000000121"))
+    other = RunID(UUID("00000000-0000-0000-0000-000000000122"))
+    key = "pipeline"
+
+    try:
+        token = await lock.acquire(key, owner)
+        assert token is not None
+        assert await lock.acquire(key, owner) is None
+        assert await lock.acquire(key, owner, wait=True, wait_timeout=0) is None
+        assert await lock.release(key, other) is False
+        assert await lock.validate_owner(key, owner) is True
+        assert await lock.validate_fencing_token(key, token) is True
+        assert await lock.release(key, owner) is True
+        assert await lock.acquire(key, other) is not None
+    finally:
+        await lock.aclose()
+
+
+@pytest.mark.asyncio
 async def test_memory_lock_missing_and_wrong_owner_operations_fail_closed() -> None:
     """Release/heartbeat never mutate a missing lock or another owner's lease."""
     lock = MemoryLock()
