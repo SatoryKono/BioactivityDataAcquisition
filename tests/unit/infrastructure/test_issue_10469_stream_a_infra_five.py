@@ -324,7 +324,8 @@ class TestPipelineAndWorkflowConfig:
         assert pipeline_api._load_yaml_mapping(missing) is None
         not_mapping = tmp_path / "list.yaml"
         not_mapping.write_text("- a\n", encoding="utf-8")
-        assert pipeline_api._load_yaml_mapping(not_mapping) is None
+        with pytest.raises(ValueError, match="Expected a YAML mapping"):
+            pipeline_api._load_yaml_mapping(not_mapping)
         pipelines = tmp_path / "pipelines"
         pipelines.mkdir()
         with pytest.raises(ValueError, match="Legacy pipeline config"):
