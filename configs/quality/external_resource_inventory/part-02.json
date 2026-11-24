@@ -6779,6 +6779,30 @@
           "line": 290,
           "expression": "temp_path.unlink()",
           "cleanup_relation": "actual close/transfer in enclosing implementation"
+        },
+        {
+          "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
+          "source_commit": "e83015de334e4ee9b385ccf554051596d497e53a",
+          "source_blob": "549d8a4e1e000461f32aa1a7dd4811de1c27875a",
+          "content_sha256": "fc717096400eaacd74b6606fa1b56e5f04e4d959ce35c9475586a50e901fe4f0",
+          "line": 220,
+          "expression": "temp_path.unlink()"
+        },
+        {
+          "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
+          "source_commit": "e83015de334e4ee9b385ccf554051596d497e53a",
+          "source_blob": "549d8a4e1e000461f32aa1a7dd4811de1c27875a",
+          "content_sha256": "fc717096400eaacd74b6606fa1b56e5f04e4d959ce35c9475586a50e901fe4f0",
+          "line": 275,
+          "expression": "temp_path.unlink()"
+        },
+        {
+          "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
+          "source_commit": "e83015de334e4ee9b385ccf554051596d497e53a",
+          "source_blob": "549d8a4e1e000461f32aa1a7dd4811de1c27875a",
+          "content_sha256": "fc717096400eaacd74b6606fa1b56e5f04e4d959ce35c9475586a50e901fe4f0",
+          "line": 294,
+          "expression": "temp_path.unlink()"
         }
       ],
       "configuration_predicates": [],
