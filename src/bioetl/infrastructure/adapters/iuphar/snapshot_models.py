@@ -51,3 +51,4 @@ class LoadedIupharProfile:
     normalization_version: str
     rules_version: str
     classification_schema_version: str
+    matching_policy_version: str
