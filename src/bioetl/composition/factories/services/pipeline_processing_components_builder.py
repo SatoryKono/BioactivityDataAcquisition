@@ -29,6 +29,7 @@ from bioetl.application.services.export_lineage.debug_export_service import (
 from bioetl.infrastructure.export.debug_export_adapter import DebugExportAdapter
 from bioetl.domain.normalization.profiles.chembl_target_classification import (
     target_v31_normalization_profile,
+    target_v32_normalization_profile,
 )
 from bioetl.domain.normalization.profiles.base import NormalizationProfile
 
@@ -46,11 +47,11 @@ def _target_normalization_profile(
     config: RecordProcessorConfig,
 ) -> NormalizationProfile | None:
     versions = config.content_hash_policy_by_version
-    if (
-        config.pipeline_name == "chembl_target"
-        and versions is not None
-        and versions.active_version == "3.1.0"
-    ):
+    if config.pipeline_name != "chembl_target" or versions is None:
+        return None
+    if versions.active_version == "3.2.0":
+        return target_v32_normalization_profile()
+    if versions.active_version == "3.1.0":
         return target_v31_normalization_profile()
     return None
 

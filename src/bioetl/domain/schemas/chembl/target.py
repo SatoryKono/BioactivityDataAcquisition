@@ -5,10 +5,16 @@ Aligned with RULES.md v5.24 and ChEMBL 34 schema.
 
 from __future__ import annotations
 
+from collections.abc import Callable
+from typing import cast
+
 import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
+from bioetl.domain.normalization.target_classification_values import (
+    detail_is_canonical,
+)
 from bioetl.domain.schemas.base import ETLRecordSchema
 from bioetl.domain.schemas.constants import (
     CHEMBL_ID_PATTERN,
@@ -19,6 +25,9 @@ from bioetl.domain.schemas.constants import (
 __all__ = [
     "TargetSchema",
     "TargetSchemaV31",
+    "TargetSchemaV32",
+    "build_target_classification_detail_model",
+    "register_canonical_classification_detail",
 ]
 
 
@@ -216,3 +225,79 @@ class TargetSchemaV31(TargetSchema):
     target_class_profile_sha256: Series[str] = pa.Field(
         nullable=True, str_matches=r"^[0-9a-f]{64}$"
     )
+
+
+def register_canonical_classification_detail() -> None:
+    """Register the 3.2.0 column check on the schema boundary, once."""
+    if hasattr(pa.Check, "canonical_classification_detail"):
+        return
+
+    register = cast(
+        Callable[[Callable[..., bool]], Callable[..., bool]],
+        pa.extensions.register_check_method(
+            statistics=["field_name"], check_type="element_wise"
+        ),
+    )
+
+    @register
+    def canonical_classification_detail(value: object, *, field_name: str) -> bool:
+        return detail_is_canonical(field_name, value)
+
+
+register_canonical_classification_detail()
+
+
+def _detail_field(name: str, description: str) -> object:
+    return pa.Field(
+        nullable=True,
+        description=description,
+        canonical_classification_detail=name,
+    )
+
+
+_DETAIL_FIELD_SPECS: tuple[tuple[str, str], ...] = (
+    ("iuphar_type_raw", "Raw IUPHAR source type. Null means not computed."),
+    (
+        "iuphar_source_completeness",
+        "typed, family_only, source_unavailable or unannotated.",
+    ),
+    ("iuphar_family_ids", "Canonical JSON set of IUPHAR family ids."),
+    ("iuphar_subclasses", "Canonical JSON set of IUPHAR subclasses."),
+    ("iuphar_family_paths", "Canonical JSON set of {family_id, root_to_leaf}."),
+    ("local_status", "Local-rule status. Null means not computed."),
+    ("local_subclasses", "Canonical JSON set of local subclasses."),
+    ("local_rule_ids", "Canonical JSON set of local rule ids."),
+    ("effective_subclasses", "Canonical JSON set of effective subclasses."),
+    ("conflict_codes", "Canonical JSON set of conflict codes."),
+    ("classification_evidence_refs", "Canonical JSON struct of evidence id sets."),
+)
+
+
+def build_target_classification_detail_model(
+    base: type[pa.DataFrameModel],
+    name: str,
+    doc: str,
+    module: str,
+) -> type[pa.DataFrameModel]:
+    """Add the shared detail columns after the columns of ``base``."""
+    annotations: dict[str, object] = {}
+    namespace: dict[str, object] = {
+        "__annotations__": annotations,
+        "__module__": module,
+        "__doc__": doc,
+    }
+    for field_name, description in _DETAIL_FIELD_SPECS:
+        annotations[field_name] = Series[str]
+        namespace[field_name] = _detail_field(field_name, description)
+    model = type(name, (base,), namespace)
+    if not issubclass(model, pa.DataFrameModel):
+        raise TypeError("detail schema must be a Pandera model")
+    return model
+
+
+TargetSchemaV32 = build_target_classification_detail_model(
+    TargetSchemaV31,
+    "TargetSchemaV32",
+    "Persist IUPHAR detail as canonical JSON strings. Null means not computed.",
+    __name__,
+)

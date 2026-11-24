@@ -976,6 +976,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "docs/04-reference/contracts/gold/chembl_target_v3.1.json": (
         "tests/architecture/test_gold_schema_contracts.py",
     ),
+    "docs/04-reference/contracts/gold/chembl_target_v3.2.json": (
+        "tests/architecture/test_gold_schema_contracts.py",
+    ),
     "configs/base/contract_registry.yaml": (
         "tests/unit/infrastructure/config/test_contract_registry_loader.py",
         "tests/integration/config/test_non_chembl_contract_registry_coverage.py",

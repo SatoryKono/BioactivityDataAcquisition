@@ -18,7 +18,9 @@ from dataclasses import dataclass
 from typing import Literal
 
 TargetClassificationMode = Literal["off", "shadow", "enrich"]
+TargetTableContract = Literal["3.0.0", "3.1.0", "3.2.0"]
 _TARGET_CLASSIFICATION_MODES = frozenset({"off", "shadow", "enrich"})
+_TARGET_TABLE_CONTRACTS = frozenset({"3.0.0", "3.1.0", "3.2.0"})
 
 # RF-001 baseline identity for the additive V31 column set and profile rules.
 RF001_SEMANTICS_CONTRACT = "rf001-2026-11-23"
@@ -39,6 +41,37 @@ FIELD_LAYER_BY_NAME: dict[str, str] = {
 def _validate_target_classification_mode(mode: str) -> None:
     if mode not in _TARGET_CLASSIFICATION_MODES:
         raise ValueError("target classification mode must be off, shadow or enrich")
+
+
+def _default_physical_table_contract(mode: str) -> str:
+    return "3.1.0" if mode == "enrich" else "3.0.0"
+
+
+def _reject_incompatible_table_contract(mode: str, table_contract: str) -> None:
+    if mode != "enrich" and table_contract != "3.0.0":
+        raise ValueError(
+            "off/shadow target profiles require physical table contract 3.0.0"
+        )
+    if mode == "enrich" and table_contract == "3.0.0":
+        raise ValueError(
+            "enrich target profile cannot use physical table contract 3.0.0"
+        )
+
+
+def resolve_physical_table_contract(mode: str, table_contract: str | None) -> str:
+    """Select the physical table contract without reading a snapshot.
+
+    Computational classification_schema_version stays on the loaded profile.
+    off and shadow stay on 3.0.0. enrich stays on 3.1.0 unless the caller
+    explicitly selects 3.2.0. Those combinations are the only compatible ones.
+    """
+    _validate_target_classification_mode(mode)
+    if table_contract is None:
+        return _default_physical_table_contract(mode)
+    if table_contract not in _TARGET_TABLE_CONTRACTS:
+        raise ValueError("target table contract must be 3.0.0, 3.1.0 or 3.2.0")
+    _reject_incompatible_table_contract(mode, table_contract)
+    return table_contract
 
 
 def _validate_manifest_hash(digest: str | None) -> None:
@@ -83,6 +116,19 @@ TARGET_CLASSIFICATION_FIELDS: tuple[str, ...] = (
     "decision_status",
     "target_class_profile_sha256",
 )
+TARGET_CLASSIFICATION_DETAIL_FIELDS: tuple[str, ...] = (
+    "iuphar_type_raw",
+    "iuphar_source_completeness",
+    "iuphar_family_ids",
+    "iuphar_subclasses",
+    "iuphar_family_paths",
+    "local_status",
+    "local_subclasses",
+    "local_rule_ids",
+    "effective_subclasses",
+    "conflict_codes",
+    "classification_evidence_refs",
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -96,9 +142,11 @@ class TargetClassificationConfig:
     mode: TargetClassificationMode = "off"
     snapshot_manifest: str | None = None
     snapshot_manifest_sha256: str | None = None
+    table_contract: str | None = None
 
     def __post_init__(self) -> None:
         _validate_target_classification_mode(self.mode)
+        resolve_physical_table_contract(self.mode, self.table_contract)
         _validate_target_classification_manifest(
             self.mode,
             self.snapshot_manifest,
@@ -111,7 +159,8 @@ class TargetClassificationConfig:
 
     @property
     def contract_version(self) -> str:
-        return "3.1.0" if self.mode == "enrich" else "3.0.0"
+        """Physical table contract. It is not the computational schema version."""
+        return resolve_physical_table_contract(self.mode, self.table_contract)
 
     @property
     def semantics_contract_version(self) -> str:
@@ -122,7 +171,10 @@ class TargetClassificationConfig:
 __all__ = [
     "FIELD_LAYER_BY_NAME",
     "RF001_SEMANTICS_CONTRACT",
+    "TARGET_CLASSIFICATION_DETAIL_FIELDS",
     "TARGET_CLASSIFICATION_FIELDS",
     "TargetClassificationConfig",
     "TargetClassificationMode",
+    "TargetTableContract",
+    "resolve_physical_table_contract",
 ]

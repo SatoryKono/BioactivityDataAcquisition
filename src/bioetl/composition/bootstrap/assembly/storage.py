@@ -275,7 +275,10 @@ def build_target_classification_session(
     mode = config.target_classification.mode
     if mode not in ("shadow", "enrich"):
         raise ValueError("enabled target classification requires shadow or enrich mode")
-    classifier = IupharTargetClassificationAdapter(profile)
+    classifier = IupharTargetClassificationAdapter(
+        profile,
+        table_contract=config.target_classification.to_domain().contract_version,
+    )
     versions = {
         "normalization_version": profile.normalization_version,
         "rules_version": profile.rules_version,
