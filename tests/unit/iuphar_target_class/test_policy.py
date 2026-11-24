@@ -8,6 +8,8 @@ from pathlib import Path
 import pytest
 
 from iuphar_target_class.policy import (
+    LOCAL_CATALOG_VERSION,
+    PLAN_VERSION,
     WORKING_CLASSES,
     RuleRecord,
     all_rules,
@@ -17,12 +19,23 @@ from iuphar_target_class.policy import (
     publish_policy,
     validate_rules,
 )
+from iuphar_target_class.semantics import RULES_VERSION
 from iuphar_target_class.stage0.io import canonical_json_bytes
 
 pytestmark = pytest.mark.unit
 
 REPO = Path(__file__).resolve().parents[3]
 POLICY_PATH = REPO / "data" / "iuphar_target_class" / "policy" / "policy.json"
+
+
+def test_executing_rules_version_is_the_local_catalog() -> None:
+    assert RULES_VERSION == LOCAL_CATALOG_VERSION
+    assert LOCAL_CATALOG_VERSION != PLAN_VERSION
+    embedded = policy_document()["rf001_semantics"]
+    assert isinstance(embedded, dict)
+    rules = embedded["profile_change_rules"]
+    assert isinstance(rules, dict)
+    assert LOCAL_CATALOG_VERSION in str(rules["rules_version"])
 
 
 def test_every_class_has_a_source_and_ec_rules_are_not_direct() -> None:
