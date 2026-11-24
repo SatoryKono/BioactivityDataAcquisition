@@ -107,7 +107,12 @@ def _load_acceptance(
     validate_acceptance_receipt(
         receipt, snapshot_manifest_sha256=snapshot.snapshot_manifest_sha256
     )
-    versions = tuple(text(receipt, key) for key in _VERSION_KEYS)
+    versions = (
+        text(receipt, "normalization_version"),
+        text(receipt, "rules_version"),
+        text(receipt, "classification_schema_version"),
+        text(receipt, "matching_policy_version"),
+    )
     return digest, versions
 
 
