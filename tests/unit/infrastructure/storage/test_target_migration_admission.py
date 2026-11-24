@@ -747,20 +747,34 @@ def test_open_assay_fk_requires_rf009_before_promotion():
 
 
 def test_cli_plan_requires_profiles_and_refuses_canonical_promote(
-    tmp_path, monkeypatch
+    tmp_path, monkeypatch, capsys
 ):
     import json
 
     from scripts.ops import target_classification_migration as cli
 
+    paths = {
+        name: str(tmp_path / name)
+        for name in (
+            "silver",
+            "gold",
+            "assay",
+            "config",
+            "candidate_silver",
+            "candidate_gold",
+            "candidate_config",
+            "backup",
+        )
+    }
+    paths["workspace"] = str(tmp_path)
     plan = tmp_path / "plan.json"
     plan.write_text(
-        json.dumps({"paths": {}, "legacy_include_fields": ["target_id"]}),
+        json.dumps({"paths": paths, "legacy_include_fields": ["target_id"]}),
         encoding="utf-8",
     )
     monkeypatch.setattr(cli, "confined_io_path", lambda path, root: Path(path))
-    monkeypatch.setattr(cli, "resolve_configs_root", lambda: tmp_path)
-    with pytest.raises(SystemExit):
+    monkeypatch.setattr(cli, "resolve_configs_root", lambda: tmp_path / "configs")
+    with pytest.raises(SystemExit) as missing_profiles:
         cli.main(
             [
                 "freeze-inputs",
@@ -770,10 +784,15 @@ def test_cli_plan_requires_profiles_and_refuses_canonical_promote(
                 str(tmp_path / "out.json"),
             ]
         )
+    assert missing_profiles.value.code == 2
+    assert (
+        "plan requires explicit source_profile and destination_profile"
+        in capsys.readouterr().err
+    )
     plan.write_text(
         json.dumps(
             {
-                "paths": {},
+                "paths": paths,
                 "legacy_include_fields": ["target_id"],
                 "source_profile": "V30",
                 "destination_profile": "V32",
@@ -781,12 +800,14 @@ def test_cli_plan_requires_profiles_and_refuses_canonical_promote(
         ),
         encoding="utf-8",
     )
-    with pytest.raises(SystemExit):
+    with pytest.raises(SystemExit) as unsupported_profile:
         cli.main(["prepare", "--plan", str(plan)])
+    assert unsupported_profile.value.code == 2
+    assert "3.2.0 is not installed" in capsys.readouterr().err
     plan.write_text(
         json.dumps(
             {
-                "paths": {},
+                "paths": paths,
                 "legacy_include_fields": ["target_id"],
                 "source_profile": "V30",
                 "destination_profile": "V31",
@@ -794,8 +815,10 @@ def test_cli_plan_requires_profiles_and_refuses_canonical_promote(
         ),
         encoding="utf-8",
     )
-    with pytest.raises(SystemExit):
+    with pytest.raises(SystemExit) as missing_authority:
         cli.main(["promote", "--plan", str(plan)])
+    assert missing_authority.value.code == 2
+    assert "canonical table promotion is reserved for RF-013" in capsys.readouterr().err
 
 
 @pytest.mark.parametrize("field,value", [("_version", True), ("_is_current", 1)])
