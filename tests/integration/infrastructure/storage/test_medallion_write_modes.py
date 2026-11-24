@@ -318,3 +318,30 @@ async def test_gold_writer_scd2_with_ts(
     historical_df = df[~df["is_current"]]
     assert len(historical_df) == 1
     assert historical_df["val"].iloc[0] == "A"
+
+
+@pytest.mark.asyncio
+async def test_gold_scd2_accepts_crossref_references_field(
+    gold_writer: GoldWriter, temp_delta_path: str
+) -> None:
+    """The shipped CrossRef references field survives a physical SCD2 merge."""
+    schema = DataFrameSchema(
+        {"id": Column(str), "references": Column(str), "content_hash": Column(str)},
+        strict=True,
+    )
+    for day, references in ((1, "old"), (2, "new")):
+        record = {"id": "1", "references": references}
+        await gold_writer.write_gold(
+            table_name="crossref_publication",
+            records=[
+                {**record, "content_hash": str(generate_content_hash(record, "test"))}
+            ],
+            primary_keys=["id"],
+            schema=schema,
+            mode="scd2",
+            scd_config=_SCD2_CONFIG,
+            ingestion_ts=datetime.datetime(2026, 1, day, tzinfo=datetime.UTC),
+        )
+    rows = DeltaTable(f"{temp_delta_path}/crossref_publication").to_pandas()
+    assert set(rows["references"]) == {"old", "new"}
+    assert rows.loc[rows["is_current"], "references"].tolist() == ["new"]
