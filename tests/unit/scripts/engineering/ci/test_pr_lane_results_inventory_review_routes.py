@@ -54,6 +54,14 @@ def test_pr13166_inventory_review_snapshots_keep_bounded_owners(path: str) -> No
         build_shadow_compare([path, UNKNOWN], repo_root=ROOT)
 
 
+def test_pr13346_review_receipt_routes_only_to_inventory_owners() -> None:
+    path = "configs/quality/external_resource_inventory_pr13346_dq_alias_review.json"
+    assert set(affected_pytest_targets([path], repo_root=ROOT)) == OWNERS
+    assert build_shadow_compare([path], repo_root=ROOT)["covers_full_suite"] is False
+    with pytest.raises(ValueError, match="unmapped"):
+        build_shadow_compare([path, UNKNOWN], repo_root=ROOT)
+
+
 def test_target_replay_owner_keeps_lock_and_admission_coverage() -> None:
     selected = affected_pytest_targets(
         ["src/bioetl/composition/bootstrap/cli/lock.py"], repo_root=ROOT
