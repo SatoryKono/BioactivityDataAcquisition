@@ -31,7 +31,7 @@ from .matching import CatalogTarget, MatchQuery, resolve_match
 from .normalization import normalize_missing, parse_ec_numbers
 from .policy import (
     BASE_MISSING_MARKERS,
-    PLAN_VERSION,
+    LOCAL_CATALOG_VERSION,
     UNSET,
     WORKING_CLASSES,
     all_rules,
@@ -468,12 +468,18 @@ def _ec_cases() -> list[dict[str, object]]:
             f"local-ec-{number}",
             "ec_category",
             "local_ec",
-            {"number": number, "source": "IUBMB EC class via policy.EC_CATEGORIES"},
+            {
+                "number": number,
+                "source": (
+                    "IUBMB EC class via policy.EC_CATEGORIES; EC 1-6 map to "
+                    "local Enzyme and EC 7 does not"
+                ),
+            },
             {"ec": f"{number}.-.-.-"},
             {
                 "direct_layer_rule_ids": [],
                 "ec_categories": [name],
-                "local_class": None,
+                "local_class": None if number == 7 else "Enzyme",
                 "not_an_iuphar_class": True,
                 "rule_family": "ec",
                 "rule_marks_direct_layer": False,
@@ -499,13 +505,16 @@ def _multiple_ec_case() -> dict[str, object]:
         "multiple_ec",
         "local_ec",
         {
-            "source": "IUBMB classes 1 and 3; multiple categories are not one IUPHAR class"
+            "source": (
+                "IUBMB classes 1 and 3 stay the local class Enzyme and do not "
+                "become one extra IUPHAR class"
+            )
         },
         {"ec": "1.-.-.-|3.-.-.-"},
         {
             "direct_layer_rule_ids": [],
             "ec_categories": ["Oxidoreductases", "Hydrolases"],
-            "local_class": None,
+            "local_class": "Enzyme",
             "multiple_ec_categories": True,
             "not_an_iuphar_class": True,
             "rule_marks_direct_layer": [False, False],
@@ -942,6 +951,7 @@ def _rules_pin() -> dict[str, object]:
             "limits": rule.limits,
             "marks_direct_layer": rule.marks_direct_layer,
             "output": rule.output,
+            "priority": rule.priority,
             "rule_id": rule.rule_id,
             "version": rule.version,
         }
@@ -950,7 +960,7 @@ def _rules_pin() -> dict[str, object]:
     body = canonical_json_bytes(payload)
     return {
         "rules_sha256": sha256_bytes(body),
-        "rules_version": PLAN_VERSION,
+        "rules_version": LOCAL_CATALOG_VERSION,
         "working_classes": list(WORKING_CLASSES),
     }
 
@@ -1079,7 +1089,7 @@ def _execute_ec(fixture: Mapping[str, object]) -> dict[str, object]:
         "ec_categories": list(result.ec_categories),
         "local_class": result.local_class,
         "multiple_ec_categories": result.multiple_ec_categories,
-        "not_an_iuphar_class": not iuphar_fields and result.local_class is None,
+        "not_an_iuphar_class": not iuphar_fields,
     }
     if len(selected) == 1:
         observed["rule_family"] = selected[0].family

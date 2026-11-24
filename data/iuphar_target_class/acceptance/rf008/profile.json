@@ -18,8 +18,8 @@
     "why": "New materials are not qualified, so the last profile stays off."
   },
   "rules": {
-    "rules_sha256": "ff627e7e47887e26b49e57684aab5c004a9a6d3723646b61fb8e045008cb6447",
-    "rules_version": "plan-v1-r9",
+    "rules_sha256": "cf65fa2cbc17c6808a4d11efe1905eca917bdaaa218520e8c3a403d806f17db9",
+    "rules_version": "local-rules-2026.11.23",
     "working_classes": [
       "Receptor",
       "Ion Channel",
