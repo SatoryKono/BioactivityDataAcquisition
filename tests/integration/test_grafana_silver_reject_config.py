@@ -57,12 +57,16 @@ def test_dq_v2_exposes_current_silver_reject_evidence_panels() -> None:
     assert "run_id=${selected_run_id}" in target["url"]
     assert "pipeline=${selected_pipeline}" in target["url"]
     stage_input = next(t for t in panel["targets"] if t["refId"] == "StageInput")
+    # Audit R5-03 / N4-06: StageInput uses backend parser + root_selector (uql removed).
+    assert stage_input.get("parser") == "backend"
+    assert "uql" not in stage_input
+    stage_selector = str(stage_input.get("root_selector") or "")
     for outcome in (
         "silver_filtered_out_records",
         "silver_quarantined_records",
         "silver_deduplicated_records",
     ):
-        assert outcome in stage_input["uql"]
+        assert outcome in stage_selector
     assert all("expr" not in t for t in panel["targets"])
     assert panel["gridPos"]["h"] == 6
     assert panel["gridPos"]["y"] + panel["gridPos"]["h"] == 18

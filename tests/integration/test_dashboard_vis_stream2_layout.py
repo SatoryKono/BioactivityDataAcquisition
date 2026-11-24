@@ -151,5 +151,7 @@ def test_nav_chips_use_eight_px_gap_and_status_stats_stay_compact() -> None:
         assert nav["gridPos"]["h"] == 2
     readiness = _panel(load_dashboard(_CONTROL), 9422)
     assert readiness["options"]["textMode"] == "value"
-    assert readiness["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
+    assert readiness["fieldConfig"]["defaults"]["noValue"] == (
+        "SELECT RUN if no Run ID is selected. Source unavailable if the request failed."
+    )
     assert readiness["options"]["text"]["valueSize"] >= 20
