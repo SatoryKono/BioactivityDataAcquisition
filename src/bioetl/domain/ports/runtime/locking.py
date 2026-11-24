@@ -131,8 +131,9 @@ class LockPort(Protocol):
     ) -> bool:
         """Validate that the given fencing token is still valid for the lock.
 
-        This is the Safety Guard for fencing tokens. Writers SHOULD validate
-        the token before writes to prevent stale lock holders from writing.
+        Writers SHOULD validate the token before writes to detect stale lock
+        holders. As with owner validation, this is a point-in-time check, not
+        an atomic fence on a subsequent storage write.
 
         Args:
             key: The unique key for the lock.

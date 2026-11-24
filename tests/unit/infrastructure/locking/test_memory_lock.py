@@ -77,6 +77,28 @@ async def test_memory_lock_rejects_reentry_and_non_owner_release() -> None:
 
 
 @pytest.mark.asyncio
+async def test_same_owner_waits_for_release_before_reacquiring() -> None:
+    lock = MemoryLock()
+    owner = RunID(UUID("00000000-0000-0000-0000-000000000123"))
+    key = "pipeline"
+    waiter = None
+    try:
+        assert await lock.acquire(key, owner) is not None
+        waiter = asyncio.create_task(
+            lock.acquire(key, owner, wait=True, wait_timeout=2)
+        )
+        with pytest.raises(TimeoutError):
+            await asyncio.wait_for(asyncio.shield(waiter), timeout=0.15)
+        assert await lock.release(key, owner) is True
+        assert await asyncio.wait_for(waiter, timeout=1) is not None
+    finally:
+        if waiter is not None and not waiter.done():
+            waiter.cancel()
+            await asyncio.gather(waiter, return_exceptions=True)
+        await lock.aclose()
+
+
+@pytest.mark.asyncio
 async def test_memory_lock_missing_and_wrong_owner_operations_fail_closed() -> None:
     """Release/heartbeat never mutate a missing lock or another owner's lease."""
     lock = MemoryLock()
