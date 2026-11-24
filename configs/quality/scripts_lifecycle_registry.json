@@ -2581,6 +2581,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-11-17"
     },
+    "scripts/ops/target_classification_contour.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the import-only acceptance/report helper used by scripts.ops.target_classification_migration and its owning unit tests. The migration module owns the CLI; this module has no standalone command surface.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-02-24"
+    },
     "scripts/ops/target_classification_migration.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain behind python -m scripts.ops so active_script_count_max stays unchanged.",
