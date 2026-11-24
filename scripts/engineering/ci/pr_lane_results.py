@@ -1305,6 +1305,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
         ),
     ),
+    "configs/quality/external_resource_inventory_pr13348_rematch_review.json": (
+        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
+        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
+    ),
     "configs/quality/external_resource_inventory_pr12751_review.json": (
         EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
         EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
@@ -1492,6 +1496,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "docs/05-operations/runbooks/workflow-control-plane.md": (
         "tests/unit/application/services/test_selected_snapshot_resume_contracts.py",
         "tests/unit/application/services/test_workflow_child_archive_contract.py",
+    ),
+    "docs/05-operations/runbooks/checkpoint-debugging.md": (
+        "tests/unit/application/services/test_observability_workflow_service.py",
     ),
     # RF-008: run-id preflight + deployed replay readiness own this runbook.
     "docs/04-reference/domain/workflow-state-machine.md": (
