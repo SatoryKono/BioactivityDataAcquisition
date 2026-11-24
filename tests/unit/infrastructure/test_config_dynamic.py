@@ -33,7 +33,10 @@ from typing import Any
 import pytest
 import yaml
 
-from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
+from bioetl.infrastructure.config.pipeline_config_api import (
+    load_pipeline_config,
+    read_pipeline_config_payload,
+)
 from bioetl.infrastructure.config.source_config_loader import load_source_config
 from bioetl.infrastructure.config.source_normalizers.source import (
     normalize_source_config,
@@ -862,3 +865,60 @@ def test_pipeline_source_file_is_rejected_as_legacy_key(setup_configs):
 
     with pytest.raises(ValueError, match="source_file"):
         load_pipeline_config("chembl_bridge")
+
+
+@pytest.mark.parametrize(
+    "invalid", ["- item\n", "42\n", "false\n", "null\n", "[broken\n"]
+)
+def test_base_config_invalid_is_not_cached_as_missing(tmp_path: Path, invalid: str):
+    root = tmp_path / "configs"
+    _write_unified_entity_config(
+        root / "entities", "chembl", "activity", {"name": "entity"}
+    )
+    base = root / "base" / "pipeline.yaml"
+    base.parent.mkdir(parents=True)
+
+    assert read_pipeline_config_payload(
+        "chembl_activity", configs_root=root
+    ).config == {"name": "entity"}
+    base.write_text(invalid, encoding="utf-8")
+    with pytest.raises((ValueError, yaml.YAMLError)):
+        read_pipeline_config_payload("chembl_activity", configs_root=root)
+
+    base.write_text("name: base\nlimit: 10\n", encoding="utf-8")
+    assert read_pipeline_config_payload(
+        "chembl_activity", configs_root=root
+    ).config == {
+        "name": "entity",
+        "limit": 10,
+    }
+
+
+def test_base_config_read_failure_is_not_cached(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    root = tmp_path / "configs"
+    _write_unified_entity_config(
+        root / "entities", "chembl", "activity", {"name": "entity"}
+    )
+    base = root / "base" / "pipeline.yaml"
+    base.parent.mkdir(parents=True)
+    base.write_text("limit: 10\n", encoding="utf-8")
+    original = Path.read_bytes
+
+    def read_bytes(path: Path) -> bytes:
+        if path == base:
+            raise PermissionError("denied")
+        return original(path)
+
+    with monkeypatch.context() as patch:
+        patch.setattr(Path, "read_bytes", read_bytes)
+        with pytest.raises(PermissionError, match="denied"):
+            read_pipeline_config_payload("chembl_activity", configs_root=root)
+
+    assert (
+        read_pipeline_config_payload("chembl_activity", configs_root=root).config[
+            "limit"
+        ]
+        == 10
+    )

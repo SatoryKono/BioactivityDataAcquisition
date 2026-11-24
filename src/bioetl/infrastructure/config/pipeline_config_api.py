@@ -60,11 +60,13 @@ def _load_yaml_mapping(path: Path) -> JsonDict | None:
     """
     try:
         raw = path.read_bytes()
-    except OSError:
+    except FileNotFoundError:
         return None
-    data = yaml.safe_load(raw) or {}
+    data = yaml.safe_load(raw)
+    if data is None and yaml.compose(raw, Loader=yaml.SafeLoader) is None:
+        return {}
     if not isinstance(data, dict):
-        return None
+        raise ValueError(f"Expected a YAML mapping in {path}")
     return data
 
 
@@ -73,7 +75,7 @@ def _load_base_config_cached(base_path_key: str) -> JsonDict:
     """Cache shared base pipeline defaults (same file for every entity)."""
     payload = _load_yaml_mapping(Path(base_path_key))
     if payload is None:
-        return {}
+        raise FileNotFoundError(base_path_key)
     base_config = dict(payload)
     base_config.pop("schema_version", None)
     return base_config
@@ -87,13 +89,18 @@ def _load_base_config(config_path: Path) -> JsonDict:
     )
 
     for base_path in candidate_paths:
-        if not base_path.is_file():
+        try:
+            base_path.stat()
+        except FileNotFoundError:
             continue
         try:
             resolved_key = str(base_path.resolve())
         except OSError:
             resolved_key = str(base_path)
-        return _load_base_config_cached(resolved_key)
+        try:
+            return _load_base_config_cached(resolved_key)
+        except FileNotFoundError:
+            continue
 
     return {}
 
