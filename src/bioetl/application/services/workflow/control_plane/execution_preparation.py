@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime
 from typing import Any
 
@@ -20,6 +20,7 @@ from bioetl.application.services.workflow.control_plane._execution_resume_suppor
 )
 from bioetl.application.services.workflow.control_plane.execution_preparation_incremental import (
     _apply_incremental_offset,
+    _workflow_step_with_start_offset,
 )
 from bioetl.domain.control_plane import (
     WorkflowExecutionState,
@@ -30,6 +31,7 @@ from bioetl.domain.ports import WorkflowExecutionStatePort
 from bioetl.domain.types import RunID
 from bioetl.domain.workflow import (
     WorkflowConfig,
+    WorkflowStepConfig,
 )
 
 __all__ = ["WorkflowExecutionPreparationResult", "prepare_workflow_execution"]
@@ -76,7 +78,6 @@ def prepare_workflow_execution(
         config=config,
         launch_context=launch_context,
     )
-    current_fingerprint = manifest_service.compute_execution_fingerprint(request)
     if not (resume_last or resume_manifest_id or resume_run_id):
         return _prepare_new_execution(
             manifest_service=manifest_service,
@@ -85,7 +86,7 @@ def prepare_workflow_execution(
         )
     return _prepare_resumed_execution(
         config=config,
-        current_fingerprint=current_fingerprint,
+        request=request,
         resume_manifest_id=resume_manifest_id,
         resume_run_id=resume_run_id,
         force_steps=force_steps,
@@ -118,7 +119,7 @@ def _prepare_new_execution(
 def _prepare_resumed_execution(
     *,
     config: WorkflowConfig,
-    current_fingerprint: str,
+    request: WorkflowManifestCreateSpec,
     resume_manifest_id: str | None,
     resume_run_id: RunID | str | None,
     force_steps: tuple[str, ...],
@@ -133,16 +134,28 @@ def _prepare_resumed_execution(
         resume_manifest_id=resume_manifest_id,
         resume_run_id=resume_run_id,
     )
+    manifest = load_resume_manifest(
+        manifest_service=manifest_service,
+        latest_state=latest_state,
+    )
+    config = _restore_pinned_offset(config, manifest)
+    current_fingerprint = manifest_service.compute_execution_fingerprint(
+        replace(request, config=config)
+    )
+    if "start_offset" not in manifest.defaults and (
+        config.defaults.start_offset is not None
+        or current_fingerprint != latest_state.execution_fingerprint
+    ):
+        raise RuntimeError(
+            "Workflow resume failed: manifest has no pinned start_offset "
+            "and the execution fingerprint does not match"
+        )
     validate_resume_state(
         latest_state=latest_state,
         workflow_name=config.name,
         current_fingerprint=current_fingerprint,
         force_steps=force_steps,
         repair_steps=repair_steps,
-    )
-    manifest = load_resume_manifest(
-        manifest_service=manifest_service,
-        latest_state=latest_state,
     )
     normalized_state = normalize_resume_state(
         latest_state,
@@ -165,6 +178,41 @@ def _prepare_resumed_execution(
         ),
         resumed=True,
     )
+
+
+def _restore_pinned_offset(
+    config: WorkflowConfig, manifest: WorkflowManifest
+) -> WorkflowConfig:
+    if "start_offset" not in manifest.defaults:
+        return config
+    pinned_offset = manifest.defaults["start_offset"]
+    if type(pinned_offset) is not int or pinned_offset < 0:
+        raise RuntimeError(
+            "Workflow resume failed: manifest has invalid pinned start_offset"
+        )
+    pinned_steps = _pinned_step_ids(manifest, pinned_offset)
+    inherited_offset = config.defaults.start_offset
+    return replace(
+        config,
+        defaults=replace(config.defaults, start_offset=pinned_offset),
+        steps=tuple(
+            _workflow_step_with_start_offset(step, pinned_offset)
+            if isinstance(step, WorkflowStepConfig)
+            and step.run_options.start_offset in (None, inherited_offset)
+            and step.step_id in pinned_steps
+            else step
+            for step in config.steps
+        ),
+    )
+
+
+def _pinned_step_ids(manifest: WorkflowManifest, offset: int) -> set[str]:
+    return {
+        step.step_id
+        for step in manifest.steps
+        if step.run_options is not None
+        and step.run_options.get("start_offset") == offset
+    }
 
 
 def _build_initial_state(manifest: WorkflowManifest) -> WorkflowExecutionState:

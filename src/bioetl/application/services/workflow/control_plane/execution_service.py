@@ -241,7 +241,8 @@ class WorkflowExecutionService:
             repair_steps=repair_steps,
             force_steps=force_steps,
             now_factory=self.now_factory,
-            incremental=incremental,
+            incremental=incremental
+            or (prepared.resumed and "start_offset" in prepared.manifest.defaults),
         )
 
     def record_expected_pipeline_metrics(self, config: WorkflowConfig) -> None:
