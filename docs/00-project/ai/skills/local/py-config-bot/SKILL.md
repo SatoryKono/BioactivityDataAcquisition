@@ -6,7 +6,7 @@ ______________________________________________________________________
 
 ---
 name: "py-config-bot"
-description: "Validate or fix BioETL YAML configs, schemas, and pipeline contracts. For a brand-new provider pipeline use new-pipeline."
+description: "Validate or fix existing BioETL YAML configs, schemas, and pipeline contracts. For a new provider or entity pipeline, use new-pipeline."
 ---
 
 # py-config-bot
@@ -29,8 +29,8 @@ description: "Validate or fix BioETL YAML configs, schemas, and pipeline contrac
 
 ## Trigger Scope
 
-Use this wrapper for config/schema work, config drift, DQ contract configuration,
-pipeline generation inputs, and config-related audit closeout.
+Use this wrapper for existing config and schema work, drift, DQ contracts, generation inputs, and related audit closeout.
+Use `new-pipeline` when scaffolding a pipeline for a new provider or a new entity.
 
 ## Workflow
 
