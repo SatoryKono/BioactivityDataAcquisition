@@ -167,6 +167,30 @@ def build_run_plan(
     summary_path = reports_dir / f"{run_id}.json"
     junit_root = reports_dir / "junit"
 
+    if backend == "engineering_qa":
+        if runner != "scripts/engineering/qa/run_architecture_audit_read_only.py":
+            raise ValueError(f"Unsupported engineering_qa runner: {runner}")
+        if skip_preflight or pytest_extra:
+            raise ValueError(
+                "engineering_qa does not accept pytest or preflight options"
+            )
+        return RunPlan(
+            suite=suite,
+            run_id=run_id,
+            backend=backend,
+            command=[
+                sys.executable,
+                "-B",
+                "-m",
+                "scripts.engineering.qa",
+                "run-architecture-audit-read-only",
+                *runner_args,
+            ],
+            junit_paths=[],
+            junit_dir=None,
+            summary_path=summary_path,
+        )
+
     command = ["bash", runner]
     if skip_preflight:
         command.append("--skip-preflight")
@@ -438,7 +462,14 @@ def _discover_junit_paths(plan: RunPlan) -> tuple[list[Path], list[str]]:
 
 def _run_tests(argv: list[str]) -> int:
     wrapper_args, pytest_extra = _split_passthrough(argv)
-    parser = argparse.ArgumentParser(description="Run a named test-health lane.")
+    selector = argparse.ArgumentParser(add_help=False, allow_abbrev=False)
+    selector.add_argument("--suite")
+    selected, _ = selector.parse_known_args(wrapper_args)
+    lane = _load_lanes().get(selected.suite, {})
+    parser = argparse.ArgumentParser(
+        description="Run a named test-health lane.",
+        allow_abbrev=lane.get("runner_backend") != "engineering_qa",
+    )
     parser.add_argument("--suite", required=True)
     parser.add_argument("--run-id")
     parser.add_argument("--reports-dir", type=Path, default=DEFAULT_REPORTS_DIR)
@@ -456,19 +487,32 @@ def _run_tests(argv: list[str]) -> int:
         args.reports_dir,
         args.run_id or _default_run_id(args.suite),
     )
-    plan = build_run_plan(
-        suite=args.suite,
-        run_id=run_id,
-        reports_dir=args.reports_dir,
-        runner_args=runner_args,
-        pytest_extra=pytest_extra,
-        skip_preflight=args.skip_preflight,
-    )
+    try:
+        plan = build_run_plan(
+            suite=args.suite,
+            run_id=run_id,
+            reports_dir=args.reports_dir,
+            runner_args=runner_args,
+            pytest_extra=pytest_extra,
+            skip_preflight=args.skip_preflight,
+        )
+    except ValueError as exc:
+        parser.error(str(exc))
 
-    print(f"[test-health] suite={plan.suite} run_id={plan.run_id}")
-    print(f"[test-health] command: {shlex.join(plan.command)}")
+    output = sys.stderr if plan.backend == "engineering_qa" else sys.stdout
+    print(
+        f"[test-health] suite={plan.suite} run_id={plan.run_id}",
+        file=output,
+        flush=True,
+    )
+    print(f"[test-health] command: {shlex.join(plan.command)}", file=output, flush=True)
     if args.dry_run:
         return 0
+
+    if plan.backend == "engineering_qa":
+        return subprocess.run(
+            plan.command, cwd=ROOT, env=_with_pythonpath_src(os.environ), check=False
+        ).returncode
 
     args.reports_dir.mkdir(parents=True, exist_ok=True)
     (args.reports_dir / "junit").mkdir(parents=True, exist_ok=True)
