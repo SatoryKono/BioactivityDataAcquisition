@@ -161,12 +161,18 @@ def compare_target_rows(
     original: Sequence[Mapping[str, object]],
     candidate: Sequence[Mapping[str, object]],
     legacy_include_fields: tuple[str, ...],
+    *,
+    allowed_additions: frozenset[tuple[str, int | None]] = frozenset(),
 ) -> dict[str, int]:
-    """Reject subsets, changed old fields, duplicates or legacy-hash drift."""
+    """Reject subsets, changed old fields, duplicates or legacy-hash drift.
+
+    ``allowed_additions`` is the exact set of verified FK restorations. Any
+    other extra or missing identity still fails the cohort check.
+    """
     if not legacy_include_fields:
         raise ValueError("explicit frozen legacy hash include-policy required")
     old, new = _by_id(original), _by_id(candidate)
-    if old.keys() != new.keys():
+    if set(old) - set(new) or set(new) - set(old) != set(allowed_additions):
         raise ValueError("candidate target IDs differ from the full canonical cohort")
     for key, previous in old.items():
         current = new[key]
@@ -179,7 +185,29 @@ def compare_target_rows(
         )
         if old_hash != previous.get("content_hash") or old_hash != new_legacy_hash:
             raise ValueError("legacy 3.0 hash equivalence failed")
-    return {"rows": len(old), "legacy_hashes_verified": len(old)}
+    return {
+        "rows": len(new),
+        "legacy_hashes_verified": len(old),
+        "restored_rows": len(new) - len(old),
+    }
+
+
+def _assert_restored_values(
+    key: str, published: Mapping[str, object], current: Mapping[str, object]
+) -> None:
+    """Keep a published restoration intact apart from its V31 hash and class."""
+    for field, value in published.items():
+        if field == "content_hash":
+            continue
+        if (
+            field not in current
+            or type(current[field]) is not type(value)
+            or current[field] != value
+        ):
+            raise ValueError(f"restored target changed: {key}/{field}")
+    unexpected = set(current) - set(published) - set(TARGET_CLASSIFICATION_FIELDS)
+    if unexpected:
+        raise ValueError(f"restored target gained unexpected fields: {key}")
 
 
 def _assert_legacy_values(
@@ -218,6 +246,7 @@ def validate_target_candidate(
     legacy_include_fields: tuple[str, ...],
     *,
     workspace: Path | None = None,
+    restoration_manifest: Path | None = None,
 ) -> dict[str, object]:
     """Validate admission, strict candidate schemas and both entire cohorts."""
     from bioetl.domain.schemas.chembl.target import TargetSchemaV31
@@ -227,6 +256,9 @@ def validate_target_candidate(
 
     profile = _load_candidate_profile(paths, workspace=workspace)
     v31_include_fields = _frozen_v31_hash_fields(paths, legacy_include_fields)
+    additions = _restoration_additions(
+        paths, workspace=workspace, manifest=restoration_manifest
+    )
     result: dict[str, object] = {}
     layers = {}
     for name, schema in (
@@ -240,6 +272,7 @@ def validate_target_candidate(
             profile.profile_sha256,
             legacy_include_fields,
             v31_include_fields,
+            additions[name],
         )
     _verify_source_classifications(layers, profile)
     _assert_candidate_cohort_closure(paths, layers["gold"])
@@ -271,6 +304,36 @@ def _load_candidate_profile(
     )
 
 
+def _restoration_additions(
+    paths: dict[str, Path], *, workspace: Path | None, manifest: Path | None
+) -> dict[str, dict[tuple[str, int | None], Mapping[str, object]]]:
+    """Load verified additive rows; an absent manifest adds nothing."""
+    empty: dict[str, dict[tuple[str, int | None], Mapping[str, object]]] = {
+        "silver": {},
+        "gold": {},
+    }
+    if manifest is None:
+        return empty
+    if workspace is None:
+        raise ValueError("target FK restoration requires the approved workspace")
+    from bioetl.infrastructure.storage.target_fk_restoration import (
+        load_published_restoration,
+    )
+
+    published = load_published_restoration(
+        manifest,
+        workspace=workspace,
+        silver=paths["silver"],
+        gold=paths["gold"],
+        assay=paths["assay"],
+        config=paths["config"],
+    )
+    return {
+        layer: dict(_by_id(rows)) if rows else {}
+        for layer, rows in published.additions.items()
+    }
+
+
 def _validate_candidate_layer(
     name: str,
     schema: type[DataFrameModel],
@@ -278,13 +341,20 @@ def _validate_candidate_layer(
     profile_sha256: str,
     legacy_include_fields: tuple[str, ...],
     v31_include_fields: tuple[str, ...],
+    additions: Mapping[tuple[str, int | None], Mapping[str, object]],
 ) -> tuple[dict[str, object], list[dict[str, object]]]:
     """Validate one full layer and its unchanged legacy/hash projection."""
     old = _read_delta(paths[name])
     new = _read_delta(paths["candidate_" + name])
     result: dict[str, object] = dict(
-        compare_target_rows(old, new, legacy_include_fields)
+        compare_target_rows(
+            old, new, legacy_include_fields, allowed_additions=frozenset(additions)
+        )
     )
+    if additions:
+        current = _by_id(new)
+        for key, published in additions.items():
+            _assert_restored_values(str(key), published, current[key])
     result["physical_projection"] = _validate_physical_projection(
         name, schema, old, new
     )

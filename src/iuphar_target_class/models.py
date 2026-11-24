@@ -155,6 +155,7 @@ class LocalInference:
     multiple_ec_categories: bool = False
     local_candidates: tuple[str, ...] = ()
     diagnostics: tuple[Diagnostic, ...] = ()
+    local_rules_by_evidence: tuple[tuple[str, tuple[str, ...]], ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
