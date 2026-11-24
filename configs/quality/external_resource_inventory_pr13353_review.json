@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "46aa243b1c4668113a7c3766c511b1147e7e0338",
+  "source_ref": "f4c1c991694ce9d758524b84a044ac56581b480f",
+  "source_reviews": {
+    "src/bioetl/application/services/workflow/control_plane/execution_preparation.py": "Restore the manifest-pinned offset and inherited step offsets before computing the resume fingerprint. Dataclass replacement and offset validation add no resource acquisition or cleanup path; existing state-port writes and delegated manifest calls remain in their original scopes and are relocated by the inventory validator.",
+    "src/bioetl/application/services/workflow/control_plane/execution_service.py": "Pass the resumed manifest's pinned-window mode into the existing completion recorder so the cursor advances after successful resume. Existing resource acquisition, ownership and cleanup paths remain unchanged."
+  }
+}
