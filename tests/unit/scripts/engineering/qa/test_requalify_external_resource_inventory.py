@@ -337,38 +337,6 @@ def test_invalid_delta_never_changes_outputs(candidate: tuple, fault: str) -> No
     assert outputs(root) == before
 
 
-def test_retired_site_can_be_replaced_on_the_same_resource(candidate: tuple) -> None:
-    root, review, _ = candidate
-    review["source_ref"] = commit_source(
-        root,
-        "def read_file():\n    return None\n\n"
-        "def read_second():\n    with open('second') as stream:\n        return stream.read()\n",
-    )
-    review["retired_references"] = [
-        {
-            "identity": "fixture.file",
-            "field": field,
-            "file": SOURCE,
-            "line": 2,
-            "expression": "open('fixture')",
-            "reason": "The original read moved to read_second.",
-        }
-        for field in ("creation_sites", "production_binding")
-    ]
-    selector = {
-        "file": SOURCE,
-        "scope": "read_second",
-        "call": "open",
-        "expression": "open('second')",
-    }
-    review["additional_creation_sites"] = {"fixture.file": [selector]}
-    review["additional_bindings"] = {"fixture.file": [selector]}
-    assert invoke(root, review, "--update") == 0
-    resource = inventory.load_catalog(root)["resources"][0]
-    assert resource["creation_sites"][0]["expression"] == "open('second')"
-    assert resource["production_binding"][0]["line"] == 5
-
-
 def test_new_resource_must_cover_the_actual_new_acquisition(candidate: tuple) -> None:
     root, review, original = candidate
     review["source_ref"] = commit_source(

@@ -183,10 +183,6 @@ def _relocate(
     if reviewed_line is not None:
         candidates = [line for line in candidates if line == reviewed_line]
     if len(candidates) != 1:
-        if _accept_reviewed_segment(
-            ref, old, new, path, segment_replacements, reviewed_line
-        ):
-            return
         raise ValueError(
             f"Reference relocation needs an explicit unambiguous review: {path}:{line}"
         )
@@ -195,34 +191,6 @@ def _relocate(
         ref["source_segment"] = (
             new.sources[path].decode().splitlines()[ref["line"] - 1].strip()
         )
-
-
-def _accept_reviewed_segment(
-    ref: dict[str, Any],
-    old: Snapshot,
-    new: Snapshot,
-    path: str,
-    segment_replacements: dict[str, str],
-    reviewed_line: int | None,
-) -> bool:
-    """Accept a reviewed line whose text matches after the enclosing scope moved."""
-    if reviewed_line is None or "expression" in ref:
-        return False
-    lines = new.sources[path].decode().splitlines()
-    if not 1 <= reviewed_line <= len(lines):
-        return False
-    raw = ref.get("source_segment")
-    if not isinstance(raw, str):
-        old_lines = old.sources[path].decode().splitlines()
-        old_line = ref["line"]
-        raw = old_lines[old_line - 1].strip() if 1 <= old_line <= len(old_lines) else ""
-    segment = segment_replacements.get(raw, raw)
-    if lines[reviewed_line - 1].strip() != segment:
-        return False
-    ref["line"] = reviewed_line
-    if "source_segment" in ref:
-        ref["source_segment"] = segment
-    return True
 
 
 def _expression_candidates(
@@ -284,11 +252,9 @@ def _validate_review_schema(review: dict[str, Any]) -> None:
         "segment_updates",
         "line_updates",
         "reference_moves",
-        "retired_references",
         "exclusion_moves",
         "resource_updates",
         "additional_bindings",
-        "additional_creation_sites",
         "new_resources",
         "new_exclusions",
     }
@@ -326,7 +292,6 @@ def _apply_reference_moves(
     payload: dict[str, Any], review: dict[str, Any], new: Snapshot
 ) -> None:
     """Apply exact, reviewed moves for resource references that changed files."""
-    _retire_references(payload, review)
     records = {row["identity"]: row for row in payload["resources"]}
     allowed_fields = {"creation_sites", "production_binding", "cleanup_sources"}
     for move in review.get("reference_moves", []):
@@ -340,38 +305,6 @@ def _apply_reference_moves(
         if matches != len(fields):
             raise ValueError("Reviewed reference move was missing or ambiguous")
     _apply_exclusion_moves(payload, review, new)
-
-
-def _retire_references(payload: dict[str, Any], review: dict[str, Any]) -> None:
-    """Drop reviewed references whose acquisition collapsed into one remaining site."""
-    records = {row["identity"]: row for row in payload["resources"]}
-    allowed_fields = {
-        "creation_sites",
-        "production_binding",
-        "cleanup_sources",
-        "configuration_predicates",
-    }
-    required = {"identity", "field", "file", "line", "reason"}
-    for item in review.get("retired_references", []):
-        if not required <= set(item) or set(item) - required - {"expression"}:
-            raise ValueError("Invalid retired reference schema")
-        reason = item["reason"]
-        if not isinstance(reason, str) or not reason.strip():
-            raise ValueError("Retired reference requires a reason")
-        if item["field"] not in allowed_fields or item["identity"] not in records:
-            raise ValueError("Retired reference must name an existing resource field")
-        refs = records[item["identity"]].get(item["field"], [])
-        selector = {
-            key: item[key] for key in ("file", "line", "expression") if key in item
-        }
-        matches = [
-            index
-            for index, ref in enumerate(refs)
-            if all(ref.get(key) == value for key, value in selector.items())
-        ]
-        if len(matches) != 1:
-            raise ValueError("Retired reference was missing or ambiguous")
-        del refs[matches[0]]
 
 
 def _validated_reference_move(
@@ -430,7 +363,6 @@ def _apply_resource_reviews(
             "call_path",
             "production_entrypoint",
             "scenarios",
-            "shutdown_by_site",
         }:
             raise ValueError(
                 "Existing resource identity, acquisition and qualification cannot be replaced"
@@ -439,12 +371,6 @@ def _apply_resource_reviews(
     for identity, selectors in review.get("additional_bindings", {}).items():
         records[identity]["production_binding"].extend(
             _locate(new, s) for s in selectors
-        )
-    for identity, selectors in review.get("additional_creation_sites", {}).items():
-        if identity not in records:
-            raise ValueError("Additional creation site names a missing resource")
-        records[identity]["creation_sites"].extend(
-            _locate(new, selector) for selector in selectors
         )
     for record in deepcopy(review.get("new_resources", [])):
         record["creation_sites"] = [
