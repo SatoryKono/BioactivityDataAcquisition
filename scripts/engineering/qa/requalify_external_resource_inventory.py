@@ -395,6 +395,29 @@ def _apply_resource_reviews(
         payload["delegations_and_exclusions"].append(ref)
 
 
+def _relocate_shutdown_sites(original: dict[str, Any], payload: dict[str, Any]) -> None:
+    previous = {record["identity"]: record for record in original["resources"]}
+    for record in payload["resources"]:
+        prior = previous.get(record["identity"])
+        if prior is None or not record.get("shutdown_by_site"):
+            continue
+        locations: dict[tuple[str, int], set[tuple[str, int]]] = {}
+        for old_site, new_site in zip(
+            prior["creation_sites"], record["creation_sites"], strict=True
+        ):
+            old = (old_site["file"], old_site["line"])
+            new = (new_site["file"], new_site["line"])
+            locations.setdefault(old, set()).add(new)
+        for shutdown in record["shutdown_by_site"]:
+            old = (shutdown["file"], shutdown["line"])
+            candidates = locations.get(old)
+            if candidates is None:
+                continue
+            if len(candidates) != 1:
+                raise ValueError(f"Ambiguous shutdown site relocation: {old}")
+            shutdown["file"], shutdown["line"] = next(iter(candidates))
+
+
 def build_requalification(root: Path, review: dict[str, Any]) -> dict[str, Any]:
     """Construct a candidate only after proving the old and new source closures."""
     _validate_review_schema(review)
@@ -431,6 +454,7 @@ def build_requalification(root: Path, review: dict[str, Any]) -> dict[str, Any]:
                 .get(str(ref["line"])),
             )
     _apply_resource_reviews(payload, review, new)
+    _relocate_shutdown_sites(original, payload)
     for ref in inventory._references(payload):
         path = ref["file"]
         ref.update(

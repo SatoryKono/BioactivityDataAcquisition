@@ -26,18 +26,25 @@ from bioetl.domain.mapping.protein_class_target_type import (
     current_protein_class_target_type_mapping,
 )
 from bioetl.infrastructure.storage.composite_replay_bundle import (
+    TARGET_CLASSIFICATION_CONFIG,
     digest_bytes,
     implementation_fingerprint,
     publish_bytes,
     publish_json,
     publish_table,
+    publish_target_classifier,
 )
 from bioetl.infrastructure.storage.composite_replay_inputs import (
     CompositeInputCapture,
 )
 from bioetl.infrastructure.storage.delta_reader import DeltaReader
 from bioetl.infrastructure.time import SystemClock
+from bioetl.infrastructure.config.config_root import resolve_repo_relative_path
+from bioetl.composition.bootstrap.assembly.target_classification_runtime import (
+    resolve_target_runtime_config,
+)
 from bioetl.composition.bootstrap.runtime.assay_replay import replay_assay
+from bioetl.composition.runtime_builders.config_access import load_pipeline_config
 from bioetl.application.composite.helpers.replay_context import (
     freeze_field_groups,
     freeze_merge_request,
@@ -49,6 +56,22 @@ from bioetl.application.composite.helpers.replay_context import (
 _DEPENDENCY_LOCK_FILE = "uv.lock"
 MergeExecutor = Callable[[MergeExecutionRequest], Awaitable[MergeResult]]
 MergeHook = Callable[[MergeExecutionRequest, MergeExecutor], Awaitable[MergeResult]]
+
+
+def _capture_target_classification(root: Path, objects: dict[str, str]) -> None:
+    config = resolve_target_runtime_config(load_pipeline_config("chembl_target"))
+    payload = config.model_dump(mode="json")
+    classification = config.target_classification.to_domain()
+    if classification.enabled:
+        profile = resolve_repo_relative_path(classification.snapshot_manifest or "")
+        relative, files = publish_target_classifier(
+            root, profile, classification.snapshot_manifest_sha256 or ""
+        )
+        objects.update(files)
+        payload["target_classification"]["snapshot_manifest"] = relative
+    objects[TARGET_CLASSIFICATION_CONFIG] = publish_json(
+        root, TARGET_CLASSIFICATION_CONFIG, payload
+    )
 
 
 class RequestReader(DeltaReaderPort):
@@ -131,6 +154,7 @@ def prepare_assay_replay(
                     current_protein_class_target_type_mapping()
                 ),
             )
+            _capture_target_classification(root, objects)
         output_reader = DeltaReader(Path(settings.data_dir) / "output", logger)
         for layer in ("silver", "gold"):
             table_name = output_table_name(

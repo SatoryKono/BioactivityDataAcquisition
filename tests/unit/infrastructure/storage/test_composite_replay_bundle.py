@@ -138,6 +138,69 @@ def test_sealed_target_mapping_must_restore_domain_invariants(bundle, damage):
         verify_bundle(root, digest_bytes((root / "parent.json").read_bytes()))
 
 
+@pytest.mark.parametrize("damage", ["unsealed", "missing", "tampered"])
+def test_target_classifier_dependencies_are_required(bundle, tmp_path, damage):
+    from bioetl.infrastructure.storage.composite_replay_bundle import (
+        TARGET_CLASSIFICATION_CONFIG,
+        publish_target_classifier,
+    )
+    from tests.helpers.iuphar_snapshot import synthetic_snapshot_bundle
+
+    root, envelope, _ = bundle
+    snapshot, source = synthetic_snapshot_bundle(tmp_path / "classifier-source")
+    profile, files = publish_target_classifier(
+        root, snapshot / "profile.json", source.profile_sha256
+    )
+    envelope.update(version="composite-parent-replay-v2", pipeline="composite_target")
+    objects = envelope["objects"]
+    objects.update(files)
+    objects["field-groups.json"] = publish_json(root, "field-groups.json", {})
+    objects["target-mapping.json"] = publish_json(
+        root,
+        "target-mapping.json",
+        {
+            "mapping_version": "v1",
+            "entries": [
+                {
+                    "raw_label": "enzyme",
+                    "canonical_l1": "enzyme",
+                    "counts_for_target_type": True,
+                }
+            ],
+            "non_counting_classes": [],
+        },
+    )
+    objects[TARGET_CLASSIFICATION_CONFIG] = publish_json(
+        root,
+        TARGET_CLASSIFICATION_CONFIG,
+        {
+            "target_classification": {
+                "mode": "shadow",
+                "snapshot_manifest": profile,
+                "snapshot_manifest_sha256": source.profile_sha256,
+            }
+        },
+    )
+    parent = root / "parent.json"
+    parent.write_text(json.dumps(envelope))
+    assert verify_bundle(root, digest_bytes(parent.read_bytes())) == envelope
+    dependency = "target-classifier/sources/acquisition/official-fixture.csv"
+    if damage == "unsealed":
+        del objects[dependency]
+        parent.write_text(json.dumps(envelope))
+    elif damage == "missing":
+        (root / dependency).unlink()
+    else:
+        (root / dependency).write_bytes(b"different source")
+    expected_type, message = {
+        "unsealed": (ValueError, "classifier_dependency_unsealed"),
+        "missing": (FileNotFoundError, "official-fixture"),
+        "tampered": (ValueError, "object_digest_mismatch"),
+    }[damage]
+    with pytest.raises(expected_type, match=message):
+        verify_bundle(root, digest_bytes(parent.read_bytes()))
+
+
 @pytest.fixture
 def bundle(tmp_path):
     root = tmp_path / "pipeline/composite_assay/run/replay"
