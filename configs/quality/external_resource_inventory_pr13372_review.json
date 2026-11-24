@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "catalog_ref": "a7469493adea988ce21b5f3322f502380578fa32",
-  "source_ref": "a7469493adea988ce21b5f3322f502380578fa32",
+  "catalog_ref": "bd09eca63269596b4f61a0be5ddac14c2a141a0a",
+  "source_ref": "e0155c0701aa3127e299ec8895a77f4e028fa501",
   "source_reviews": {
     "src/bioetl/infrastructure/config/pipeline_config_api.py": "Reviewed the complete source delta in PR #13372: optional base absence is distinguished from invalid or unreadable YAML; exceptions are propagated without caching failures. Path.read_bytes remains the same synchronous, eagerly closed read; no resource acquisition, ownership, transfer, cancellation or shutdown contract changes.",
     "src/bioetl/interfaces/cli/commands/config.py": "Reviewed the complete source delta in PR #13372: YAML parse and filesystem errors are mapped to existing CLI exit codes. Moving the yaml import and adding exception handlers introduces no resource acquisition, ownership, transfer, cancellation or shutdown contract changes."
