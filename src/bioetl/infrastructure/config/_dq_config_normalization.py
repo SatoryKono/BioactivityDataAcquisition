@@ -4,7 +4,11 @@ from __future__ import annotations
 
 import copy
 
+from pydantic import TypeAdapter
+
 from bioetl.domain.types import JsonDict
+
+_THRESHOLD_VALUE = TypeAdapter(float)
 
 
 def normalize_to_file_format(
@@ -18,9 +22,15 @@ def normalize_to_file_format(
     Returns:
         Normalized copy with flat threshold keys nested and no mutation of input.
     """
-    result = copy.deepcopy(merged)
-    _normalize_thresholds(result)
+    result = normalize_threshold_aliases(merged)
     _normalize_allowed_value_aliases(result)
+    return result
+
+
+def normalize_threshold_aliases(layer: JsonDict) -> JsonDict:
+    """Normalize threshold aliases within one layer without mutating it."""
+    result = copy.deepcopy(layer)
+    _normalize_thresholds(result)
     return result
 
 
@@ -40,10 +50,20 @@ def _normalize_thresholds(
     if not isinstance(thresholds, dict):
         thresholds = {}
 
-    if "soft_fail_threshold" in result:
-        thresholds["soft_fail"] = result.pop("soft_fail_threshold")
-    if "hard_fail_threshold" in result:
-        thresholds["hard_fail"] = result.pop("hard_fail_threshold")
+    for flat, nested in (
+        ("soft_fail_threshold", "soft_fail"),
+        ("hard_fail_threshold", "hard_fail"),
+    ):
+        if flat not in result:
+            continue
+        value = result.pop(flat)
+        if nested in thresholds:
+            existing = _THRESHOLD_VALUE.validate_python(thresholds[nested])
+            if existing != _THRESHOLD_VALUE.validate_python(value):
+                raise ValueError(
+                    f"Conflicting DQ threshold aliases: {flat} and thresholds.{nested}"
+                )
+        thresholds[nested] = value
 
     result["thresholds"] = thresholds
 
