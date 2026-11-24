@@ -122,7 +122,7 @@ def test_relative_profile_uses_actual_configs_parent_and_checks_frozen_bytes(
         }
     )
     monkeypatch.setattr(
-        "bioetl.composition.bootstrap.assembly.storage.resolve_configs_root",
+        "bioetl.infrastructure.config.config_root.resolve_configs_root",
         lambda: tmp_path / "configs",
     )
     profile = load_target_runtime_profile(config)

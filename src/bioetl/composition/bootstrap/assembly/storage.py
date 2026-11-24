@@ -63,7 +63,7 @@ from bioetl.infrastructure.adapters.iuphar import (
     LocalTargetClassificationEvidenceStore,
     load_profile,
 )
-from bioetl.infrastructure.config.config_root import resolve_configs_root
+from bioetl.infrastructure.config.config_root import resolve_repo_relative_path
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.schemas.workflow_config import WorkflowConfig
 
@@ -249,16 +249,10 @@ def load_target_runtime_profile(
     classification = config.target_classification.to_domain()
     if not classification.enabled:
         return None
-    path = Path(classification.snapshot_manifest or "")
-    if not path.is_absolute():
-        base = (
-            dependency_root
-            if dependency_root is not None
-            else resolve_configs_root().parent
-        )
-        path = base / path
     return load_profile(
-        path.resolve(),
+        resolve_repo_relative_path(
+            classification.snapshot_manifest or "", dependency_root=dependency_root
+        ),
         classification.snapshot_manifest_sha256 or "",
         require_acceptance=classification.mode == "enrich" and require_new_admission,
     )

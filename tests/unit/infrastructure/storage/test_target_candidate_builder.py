@@ -11,6 +11,9 @@ import pytest
 import yaml
 from deltalake import write_deltalake
 
+from bioetl.domain.config.target_classification import (
+    TARGET_CLASSIFICATION_DETAIL_FIELDS,
+)
 from bioetl.infrastructure.storage import target_candidates as builder
 from bioetl.infrastructure.storage import target_migration_validation as validation
 from bioetl.infrastructure.storage.delta.schema_ops import coerce_null_types_for_delta
@@ -123,6 +126,52 @@ def test_frozen_rows_build_real_candidates_and_pass_validator(source_bundle):
         )["fk_closure"]
         == "PASS"
     )
+
+
+def test_v32_builder_passes_contract_to_adapter(source_bundle, monkeypatch):
+    request = source_bundle
+    config = yaml.safe_load(request.paths.candidate_config.read_text())
+    config["pipeline"]["target_classification"]["table_contract"] = "3.2.0"
+    request.paths.candidate_config.write_text(yaml.safe_dump(config))
+    request = replace(
+        request,
+        deployment=replace(
+            request.deployment,
+            deployment_config_sha256=sha256_file(request.paths.candidate_config),
+        ),
+    )
+    contracts = []
+    original = builder.IupharTargetClassificationAdapter
+
+    def adapter(profile, *, table_contract):
+        contracts.append(table_contract)
+        return original(profile, table_contract=table_contract)
+
+    monkeypatch.setattr(builder, "IupharTargetClassificationAdapter", adapter)
+    builder.build_target_candidates(request)
+    assert contracts == ["3.2.0"]
+    rows = validation._read_delta(request.paths.candidate_silver)
+    assert all(set(TARGET_CLASSIFICATION_DETAIL_FIELDS) <= set(row) for row in rows)
+
+
+def test_restored_v32_allows_only_contract_fields():
+    published = {"target_id": "CHEMBL1", "content_hash": "old"}
+    current = {
+        **published,
+        "content_hash": "new",
+        **dict.fromkeys(TARGET_CLASSIFICATION_DETAIL_FIELDS),
+    }
+    validation._assert_restored_values("CHEMBL1", published, current, "3.2.0")
+    with pytest.raises(ValueError, match="unexpected fields"):
+        validation._assert_restored_values("CHEMBL1", published, current, "3.1.0")
+    with pytest.raises(ValueError, match="unexpected fields"):
+        validation._assert_restored_values(
+            "CHEMBL1", published, {**current, "unrelated": None}, "3.2.0"
+        )
+    with pytest.raises(ValueError, match="restored target changed"):
+        validation._assert_restored_values(
+            "CHEMBL1", published, {**current, "target_id": "CHEMBL2"}, "3.2.0"
+        )
 
 
 def test_source_drift_refuses_before_any_candidate_write(source_bundle):

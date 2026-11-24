@@ -261,6 +261,40 @@ def test_candidate_reclassification_uses_the_stored_row_identity(tmp_path):
     verify_source_classifications({"silver": [row], "gold": [row]}, profile)
 
 
+def test_candidate_reclassification_rejects_v32_detail_drift(tmp_path):
+    from bioetl.domain.config.target_classification import (
+        TARGET_CLASSIFICATION_DETAIL_FIELDS,
+    )
+    from bioetl.infrastructure.storage.target_migration_classification_checks import (
+        verify_source_classifications,
+    )
+
+    profile = _profile(
+        tmp_path,
+        target_changes={"type": "gpcr"},
+        required_target_types=["gpcr"],
+        rules_version=LOCAL_RULE_CATALOG_VERSION,
+        schema_version="3.2.0",
+    )
+    business = _business(target_ec_numbers="3.4.21.1")
+    result = IupharTargetClassificationAdapter(
+        profile, table_contract="3.2.0"
+    ).classify_record(
+        business,
+        input_row_id="candidate:CHEMBL1",
+        run_id="run-a",
+        run_started_at="2026-11-16T00:01:00Z",
+    )
+    row = {**business, **result.projection, "target_id": "CHEMBL1"}
+    verify_source_classifications({"silver": [row], "gold": [row]}, profile, "3.2.0")
+    field = TARGET_CLASSIFICATION_DETAIL_FIELDS[0]
+    corrupt = {**row, field: "incorrect"}
+    with pytest.raises(ValueError, match="candidate classification differs"):
+        verify_source_classifications(
+            {"silver": [corrupt], "gold": [row]}, profile, "3.2.0"
+        )
+
+
 def test_previous_plan_rules_version_cannot_admit_the_new_catalog():
     receipt = _receipt("a" * 64)
     receipt["rules_version"] = "plan-v1-r8"

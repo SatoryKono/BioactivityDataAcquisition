@@ -28,10 +28,16 @@ RowClassifier = Callable[[Mapping[str, object], str, int], Mapping[str, object]]
 
 
 def project_enriched_features(row: Mapping[str, object]) -> dict[str, object]:
-    """Keep present whitelist fields. Absence is explicit and is not invented."""
-    features = {
-        key: row[key] for key in FEATURE_FIELDS if key in row and row[key] is not None
-    }
+    """Project allowed fields, preferring unqualified values over ChEMBL seed values."""
+    features: dict[str, object] = {}
+    for key in FEATURE_FIELDS:
+        value = row.get(key)
+        if value is None:
+            value = row.get(f"chembl.target.{key}")
+        if value is None and key == "protein_classifications":
+            value = row.get("chembl.target_component.protein_classifications")
+        if value is not None:
+            features[key] = value
     return {
         "features": features,
         "feature_provenance": "post_join" if features else "absent",

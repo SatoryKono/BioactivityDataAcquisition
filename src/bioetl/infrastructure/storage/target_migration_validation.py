@@ -200,9 +200,12 @@ def compare_target_rows(
 
 
 def _assert_restored_values(
-    key: str, published: Mapping[str, object], current: Mapping[str, object]
+    key: str,
+    published: Mapping[str, object],
+    current: Mapping[str, object],
+    contract: str = "3.1.0",
 ) -> None:
-    """Keep a published restoration intact apart from its V31 hash and class."""
+    """Keep a published restoration intact apart from its hash and class."""
     for field, value in published.items():
         if field == "content_hash":
             continue
@@ -212,7 +215,10 @@ def _assert_restored_values(
             or current[field] != value
         ):
             raise ValueError(f"restored target changed: {key}/{field}")
-    unexpected = set(current) - set(published) - set(TARGET_CLASSIFICATION_FIELDS)
+    added = set(TARGET_CLASSIFICATION_FIELDS)
+    if contract == "3.2.0":
+        added.update(TARGET_CLASSIFICATION_DETAIL_FIELDS)
+    unexpected = set(current) - set(published) - added
     if unexpected:
         raise ValueError(f"restored target gained unexpected fields: {key}")
 
@@ -303,7 +309,7 @@ def validate_target_candidate(
             contract,
             additions[name],
         )
-    _verify_source_classifications(layers, profile)
+    _verify_source_classifications(layers, profile, contract)
     _assert_candidate_cohort_closure(paths, layers["gold"])
     result["fk_closure"] = "PASS"
     result["profile_sha256"] = profile.profile_sha256
@@ -384,7 +390,7 @@ def _validate_candidate_layer(
     if additions:
         current = _by_id(new)
         for key, published in additions.items():
-            _assert_restored_values(str(key), published, current[key])
+            _assert_restored_values(str(key), published, current[key], contract)
     result["physical_projection"] = _validate_physical_projection(
         name, schema, old, new, contract
     )

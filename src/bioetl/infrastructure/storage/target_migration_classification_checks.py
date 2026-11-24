@@ -56,7 +56,8 @@ def _business_without_classification(
     return {
         key: value
         for key, value in hash_input(row).items()
-        if key not in TARGET_CLASSIFICATION_FIELDS
+        if key
+        not in (*TARGET_CLASSIFICATION_FIELDS, *TARGET_CLASSIFICATION_DETAIL_FIELDS)
     }
 
 
@@ -66,14 +67,16 @@ def candidate_input_row_id(target_id: str) -> str:
 
 
 def verify_source_classifications(
-    layers: Mapping[str, list[dict[str, object]]], profile: LoadedIupharProfile
+    layers: Mapping[str, list[dict[str, object]]],
+    profile: LoadedIupharProfile,
+    table_contract: str = "3.1.0",
 ) -> None:
     """Reclassify Silver, then require every Gold version to carry that projection.
 
     Historical Gold business fields are not classified again. The documented
     migration copies the current Silver projection onto each Gold version.
     """
-    adapter = IupharTargetClassificationAdapter(profile)
+    adapter = IupharTargetClassificationAdapter(profile, table_contract=table_contract)
     projections: dict[str, Mapping[str, str | None]] = {}
     for (target_id, _version), row in by_id(layers["silver"]).items():
         result = adapter.classify_record(

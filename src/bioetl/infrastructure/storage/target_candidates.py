@@ -334,7 +334,7 @@ def build_target_candidates(request: TargetCandidateBuildRequest) -> dict[str, o
         request, frozen, old_silver, old_gold
     )
     request.output_dir.mkdir(parents=True, exist_ok=True)
-    adapter = IupharTargetClassificationAdapter(profile)
+    adapter = IupharTargetClassificationAdapter(profile, table_contract=contract)
     store = LocalTargetClassificationEvidenceStore(
         request.output_dir / "classification",
         mode="enrich",
