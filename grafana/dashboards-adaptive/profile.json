@@ -3,11 +3,11 @@
   "selection": "explicit_local_only",
   "native_fallback": "grafana/dashboards",
   "canonical_sha256": {
-    "bioetl-control-plane-v1.json": "97df142a1ce5993617c8f9274c8843aa6702d7337824ee510458894e70af14af",
-    "bioetl-dq-v2.json": "58c554dffae74b17ae1566283ded9f06f46bac71cded990e9a7ffc6662ed813a",
-    "bioetl-incident-v1.json": "1c692c8b07cc985eb01698602686472d3f7f749c91959f0eadc9fd69e5dd4e0a",
-    "bioetl-overview-v2.json": "f84c4a535f763d89a9cc5c565e8be36646ed9e3dde5f681e91a9a95a3fe24507",
-    "bioetl-run-explorer-v1.json": "7181f111dbc00828794f016d02819e308e8ceb2ad552025d2b998a84fdb54ab0"
+    "bioetl-control-plane-v1.json": "34882b415bfcdd1397ca666001d296b5cd1b74b2248f145307e1654851a5a7c7",
+    "bioetl-dq-v2.json": "ede31b2375e896f1d6cdd93019d465e04a258aa8069170d550e29be98d3446cc",
+    "bioetl-incident-v1.json": "6e840b6193912d5017fbd6dee9809d053eead5dfa952d33848b7c5b71322721c",
+    "bioetl-overview-v2.json": "025d4ca4ce92539ebd1f51841e271d672f96183db6c542af59f5fa85b401894f",
+    "bioetl-run-explorer-v1.json": "5589d2b3debe6741db84537130c69fbfcf248d23437b98621b4e42489d6be9b1"
   },
   "plugin_version": "1.1.9",
   "module_sha256": "14e1deb3ff7e1a95bec3d244c979c13ddd1cb22041a0ade9faaa61bb92efac0f"

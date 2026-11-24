@@ -88,7 +88,9 @@ def test_dq_dashboard_gold_reject_panel_is_not_silver_alias_surface() -> None:
     stage_input = next(target for target in targets if target["refId"] == "StageInput")
     assert "run_id=${selected_run_id}" in stage_input["url"]
     assert "pipeline=${selected_pipeline}" in stage_input["url"]
-    projection = stage_input["uql"]
+    assert stage_input["parser"] == "backend"
+    assert "uql" not in stage_input
+    projection = stage_input["root_selector"]
     assert "gold_quarantined_records" in projection
     assert "gold_excluded_by_contract_records" in projection
     assert "stage_id = $layerName" in projection

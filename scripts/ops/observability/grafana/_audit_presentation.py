@@ -579,3 +579,71 @@ def _restore_catalog_field(override: dict, actions: list[dict]) -> None:
             and prop.get("id") == "custom.hidden"
         ):
             prop["value"] = False
+
+
+def stamp_overview_query_diagnostics(dashboard: dict) -> None:
+    """Retain approved source/error guidance on rebuilt Overview panels."""
+    uid = dashboard.get("uid")
+    if uid not in {"bioetl-overview-v2", "bioetl-incident-v1"}:
+        return
+    pending = list(dashboard.get("panels", []))
+    while pending:
+        panel = pending.pop()
+        pending.extend(panel.get("panels", []))
+        panel_id = panel.get("id")
+        if uid == "bioetl-incident-v1":
+            if panel_id == 2101:
+                _append_query_guidance(
+                    panel,
+                    "Requires an exact Run ID; '-' prompts selection and does not request AUTO. "
+                    "The Provider selector is not an input for this saved-run request.",
+                )
+            continue
+        if panel_id in {99, 9300, 9480, 9481, 9482, 9483, 9603, 9604}:
+            panel["fieldConfig"]["defaults"]["noValue"] = (
+                "No result · inspect source panel 9002"
+            )
+        if panel_id in {99, 9300, 9603, 9604}:
+            _append_query_guidance(
+                panel,
+                "If this panel has no result, inspect Review Run Domains (panel 9002) "
+                "and its query status. No result alone cannot distinguish a successful "
+                "query without evidence from a source query error.",
+            )
+        if panel_id == 99:
+            _append_query_guidance(
+                panel,
+                "AUTO is local to Run Overview and Data Quality; Replay Readiness "
+                "and Incident Workspace request an explicit exact run.",
+            )
+        elif panel_id == 9002:
+            _append_query_guidance(
+                panel,
+                "QUERY ERROR means the request or query evaluation failed; use Query "
+                "Inspector for the cause. A failed expression does not establish a backend outage.",
+            )
+        elif panel_id == 9605:
+            panel["fieldConfig"]["overrides"] = [
+                {
+                    "matcher": {"id": "byName", "options": "FIRING"},
+                    "properties": [
+                        {"id": "color", "value": {"mode": "thresholds"}},
+                        {
+                            "id": "thresholds",
+                            "value": {
+                                "mode": "absolute",
+                                "steps": [
+                                    {"value": None, "color": "text"},
+                                    {"value": 1, "color": "red"},
+                                ],
+                            },
+                        },
+                    ],
+                }
+            ]
+
+
+def _append_query_guidance(panel: dict, guidance: str) -> None:
+    description = panel.get("description", "")
+    if guidance not in description:
+        panel["description"] = f"{description} {guidance}".strip()

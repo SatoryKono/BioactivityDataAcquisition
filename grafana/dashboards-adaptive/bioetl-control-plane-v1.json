@@ -44,11 +44,11 @@
           "value": "$__all"
         },
         "datasource": {
-          "type": "prometheus",
-          "uid": "prometheus"
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "bioetl-ops-http"
         },
-        "definition": "label_values(bioetl_workflow_universe, workflow)",
-        "description": "Shared operator context: workflow evidence selector. This selector does not imply exact current-status intersection unless the dashboard explicitly documents that semantics.",
+        "definition": "/ops/control-plane/filter-options?dimension=workflow&response_shape=options&allow_stale=1",
+        "description": "Workflow values come from the shared control-plane run catalog. All includes every workflow. A [STALE catalog] label identifies an option served from a stale catalog snapshot; it does not describe source-data freshness.",
         "hide": 0,
         "includeAll": true,
         "label": "Workflow",
@@ -56,8 +56,32 @@
         "name": "workflow",
         "options": [],
         "query": {
-          "query": "label_values(bioetl_workflow_universe, workflow)",
-          "refId": "StandardVariableQuery"
+          "queryType": "infinity",
+          "refId": "variable",
+          "infinityQuery": {
+            "format": "table",
+            "parser": "backend",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO RUNS\",\"value\":\"-\"}] : [$map(items, function($item) { $item })]",
+            "type": "json",
+            "source": "url",
+            "url_options": {
+              "data": "",
+              "method": "GET"
+            },
+            "url": "/ops/control-plane/filter-options?dimension=workflow&response_shape=options&allow_stale=1",
+            "columns": [
+              {
+                "selector": "text",
+                "text": "__text",
+                "type": "string"
+              },
+              {
+                "selector": "value",
+                "text": "__value",
+                "type": "string"
+              }
+            ]
+          }
         },
         "refresh": 1,
         "regex": "",
@@ -93,7 +117,7 @@
           "infinityQuery": {
             "format": "table",
             "parser": "backend",
-            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO RUNS\",\"value\":\"-\"}] : [$map(items, function($item) { $merge([$item, {\"text\": $replace($item.text, \" [STALE catalog]\", \"\")}]) })]",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO RUNS\",\"value\":\"-\"}] : [$map(items, function($item) { $item })]",
             "type": "json",
             "source": "url",
             "url_options": {
@@ -124,7 +148,7 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false,
-        "description": "Core scope: pipeline option list from the local control-plane catalog (/ops/control-plane/filter-options?dimension=pipeline), not the Prometheus universe. PromQL current-state panels still match $pipeline against the shared universe metrics. Single-select unless this board documents All. Default selection is All pipelines until the operator narrows to a concrete pipeline. A pasted var-pipeline value that exists in the catalog remains selectable even when Prometheus has no series."
+        "description": "Core scope: pipeline option list from the local control-plane catalog (/ops/control-plane/filter-options?dimension=pipeline), not the Prometheus universe. PromQL current-state panels still match $pipeline against the shared universe metrics. Single-select unless this board documents All. Default selection is All pipelines until the operator narrows to a concrete pipeline. A pasted var-pipeline value that exists in the catalog remains selectable even when Prometheus has no series. A [STALE catalog] label indicates a stale catalog snapshot, not source-data freshness."
       },
       {
         "allValue": ".*",
@@ -150,7 +174,7 @@
           "infinityQuery": {
             "format": "table",
             "parser": "backend",
-            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO RUNS\",\"value\":\"-\"}] : [$map(items, function($item) { $merge([$item, {\"text\": $replace($item.text, \" [STALE catalog]\", \"\")}]) })]",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO RUNS\",\"value\":\"-\"}] : [$map(items, function($item) { $item })]",
             "type": "json",
             "source": "url",
             "url_options": {
@@ -181,7 +205,7 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false,
-        "description": "Browse scope from the local control-plane catalog. Default All includes every run type. Explicit URL selections take precedence."
+        "description": "Browse scope from the local control-plane catalog. Default All includes every run type. Explicit URL selections take precedence. A [STALE catalog] label indicates a stale catalog snapshot, not source-data freshness."
       },
       {
         "allValue": null,
@@ -195,7 +219,7 @@
           "uid": "bioetl-ops-http"
         },
         "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&timezone=${__timezone}&allow_stale=1",
-        "description": "Run ID from the catalog snapshot; run dates describe execution, not catalog freshness. Catalog freshness is Not verified here. Refresh the dashboard to request an updated list.",
+        "description": "Run ID from the control-plane catalog. A [STALE catalog] label indicates a stale catalog snapshot; run dates describe execution, not catalog or source-data freshness. Refresh the dashboard to request an updated list.",
         "hide": 0,
         "includeAll": false,
         "label": "Run ID",
@@ -214,7 +238,7 @@
           "infinityQuery": {
             "format": "table",
             "parser": "backend",
-            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO RUNS\",\"value\":\"-\"}] : [$map(items, function($item) { $merge([$item, {\"text\": $replace($item.text, \" [STALE catalog]\", \"\")}]) })]",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO RUNS\",\"value\":\"-\"}] : [$map(items, function($item) { $item })]",
             "type": "json",
             "source": "url",
             "url_options": {
@@ -417,7 +441,7 @@
       "fieldConfig": {
         "defaults": {
           "unit": "none",
-          "noValue": "UNKNOWN",
+          "noValue": "SELECT RUN if no Run ID is selected. Source unavailable if the request failed.",
           "mappings": [
             {
               "type": "value",
@@ -665,10 +689,10 @@
         "type": "yesoreyeram-infinity-datasource",
         "uid": "bioetl-ops-http"
       },
-      "description": "SELECTED RUN · All identity anchors, missing first. Presence is not verification. VALID EMPTY means the successful response contains no anchors. Exact Replay Checks determines readiness. Inspect a value to copy it in full. No rows is not a pass; missing evidence is UNKNOWN and failed requests are QUERY ERROR. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is Source unavailable.",
+      "description": "SELECTED RUN · Identity anchors, missing first. Presence is not verification. SELECT RUN requests an explicit Run ID; UNKNOWN means the reply lacks required anchor evidence. A valid empty response (no required anchors returned) is not verification. QUERY ERROR means the source reported a query failure or Grafana could not complete the query; inspect the query for details. Exact Replay Checks determines readiness. Inspect a value to copy it in full. Exact Run ID selects evidence; the Workflow filter only narrows the run catalog. Catalog freshness does not establish evidence freshness.",
       "fieldConfig": {
         "defaults": {
-          "noValue": "UNKNOWN",
+          "noValue": "No result · inspect this query",
           "custom": {
             "inspect": true,
             "wrapText": false,
@@ -758,17 +782,16 @@
       "targets": [
         {
           "format": "table",
-          "parser": "uql",
+          "parser": "backend",
           "refId": "A",
-          "root_selector": "",
+          "root_selector": "($requested := \"${run_id:percentencode}\"; $listed := $type(rows) = 'array' ? rows : []; $state := function($status, $value, $why){[{'label':'Run selection','priority':'—','present':false,'status':$status,'value_full':$value,'why':$why}]}; (status in ['scope_resolve_timeout','evidence_build_timeout','QUERY ERROR'] or summary.overall_status = 'QUERY ERROR') ? $state('QUERY ERROR','Exact-run evidence unavailable','The source reported a scope or evidence query error.') : (($requested in ['', '-', 'All', '$__all', '%24__all', '__all', '*', '%2A'] or summary.overall_status = 'SELECT RUN') ? $state('SELECT RUN','Choose a Run ID','No exact-run evidence has been requested.') : ($count($listed) > 0 ? [$listed^(present ? 1 : 0, priority, name)] : $state('UNKNOWN','No anchor evidence returned','A successful response with no required anchors is not verification.'))))",
           "source": "url",
           "type": "json",
-          "url": "/ops/control-plane/identity-evidence?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&view=anchors",
+          "url": "/ops/control-plane/identity-evidence?pipeline=${pipeline:csv}&run_type=${run_type:csv}&run_id=${run_id}&view=anchors",
           "url_options": {
             "data": "",
             "method": "GET"
           },
-          "uql": "parse-json | jsonata \"summary.overall_status='SELECT RUN' ? [{'label':'Run selection','priority':'—','present':false,'status':'SELECT RUN','value_full':'Choose a Run ID','why':'No exact-run evidence has been requested.'}] : [rows^(present ? 1 : 0, priority, name)]\"",
           "datasource": {
             "type": "yesoreyeram-infinity-datasource",
             "uid": "bioetl-ops-http"
@@ -902,9 +925,9 @@
               {
                 "id": "custom.hideFrom",
                 "value": {
-                  "viz": true,
                   "legend": true,
-                  "tooltip": true
+                  "tooltip": true,
+                  "viz": true
                 }
               }
             ]
@@ -912,66 +935,12 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "evidence_observed_at"
+              "options": "Assessed at"
             },
             "properties": [
               {
                 "id": "unit",
                 "value": "time:YYYY-MM-DD HH:mm"
-              },
-              {
-                "id": "custom.hidden",
-                "value": false
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": false
-                }
-              },
-              {
-                "id": "noValue",
-                "value": "UNKNOWN"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "processing_status"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Processing result"
-              },
-              {
-                "id": "custom.hidden",
-                "value": false
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": false
-                }
-              },
-              {
-                "id": "noValue",
-                "value": "UNKNOWN"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "trust_status"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Saved trust verdict"
               },
               {
                 "id": "custom.hidden",
@@ -1002,7 +971,7 @@
               },
               {
                 "id": "custom.hidden",
-                "value": true
+                "value": false
               },
               {
                 "id": "noValue",
@@ -1014,26 +983,10 @@
                   "type": "auto",
                   "wrapText": false
                 }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "reasons_count"
-            },
-            "properties": [
+              },
               {
                 "id": "displayName",
-                "value": "Reason count"
-              },
-              {
-                "id": "links",
-                "value": []
-              },
-              {
-                "id": "custom.hidden",
-                "value": false
+                "value": "Reasons"
               }
             ]
           },
@@ -1054,51 +1007,55 @@
                 "id": "mappings",
                 "value": [
                   {
-                    "type": "value",
                     "options": {
-                      "success": {
-                        "text": "success",
-                        "color": "green"
-                      },
-                      "failed": {
-                        "text": "failed",
-                        "color": "red"
-                      },
-                      "shutdown": {
-                        "text": "shutdown",
-                        "color": "orange"
-                      },
-                      "unknown": {
-                        "text": "unknown",
-                        "color": "#A3A3A3"
-                      },
-                      "UNKNOWN": {
-                        "text": "UNKNOWN",
-                        "color": "#A3A3A3"
+                      "NO RUNS": {
+                        "color": "gray",
+                        "text": "NO RUNS"
                       },
                       "SELECT RUN": {
-                        "text": "SELECT RUN",
-                        "color": "#A3A3A3"
+                        "color": "#A3A3A3",
+                        "text": "SELECT RUN"
                       },
                       "UNFINISHED": {
-                        "text": "UNFINISHED",
-                        "color": "#A3A3A3"
+                        "color": "#A3A3A3",
+                        "text": "UNFINISHED"
+                      },
+                      "UNKNOWN": {
+                        "color": "#A3A3A3",
+                        "text": "UNKNOWN"
+                      },
+                      "failed": {
+                        "color": "red",
+                        "text": "failed"
+                      },
+                      "shutdown": {
+                        "color": "orange",
+                        "text": "shutdown"
+                      },
+                      "success": {
+                        "color": "green",
+                        "text": "success"
+                      },
+                      "unknown": {
+                        "color": "#A3A3A3",
+                        "text": "unknown"
                       },
                       "НЕТ ЗАПУСКОВ": {
-                        "text": "NO RUNS",
-                        "color": "gray"
-                      },
-                      "NO RUNS": {
-                        "text": "NO RUNS",
-                        "color": "gray"
+                        "color": "gray",
+                        "text": "NO RUNS"
                       }
-                    }
+                    },
+                    "type": "value"
                   }
                 ]
               },
               {
                 "id": "custom.width",
                 "value": 110
+              },
+              {
+                "id": "noValue",
+                "value": "UNKNOWN"
               }
             ]
           },
@@ -1119,72 +1076,69 @@
                 "id": "mappings",
                 "value": [
                   {
-                    "type": "value",
                     "options": {
-                      "OK": {
-                        "text": "OK",
-                        "color": "green"
-                      },
-                      "WARN": {
-                        "text": "WARN",
-                        "color": "orange"
-                      },
-                      "WARNING": {
-                        "text": "WARN",
-                        "color": "orange"
+                      "CRIT": {
+                        "color": "red",
+                        "text": "ERROR"
                       },
                       "ERROR": {
-                        "text": "ERROR",
-                        "color": "red"
-                      },
-                      "CRIT": {
-                        "text": "ERROR",
-                        "color": "red"
-                      },
-                      "QUERY ERROR": {
-                        "text": "QUERY ERROR",
-                        "color": "red"
+                        "color": "red",
+                        "text": "ERROR"
                       },
                       "INCOMPLETE": {
-                        "text": "INCOMPLETE",
-                        "color": "#A3A3A3"
-                      },
-                      "UNKNOWN": {
-                        "text": "UNKNOWN",
-                        "color": "#A3A3A3"
+                        "color": "#A3A3A3",
+                        "text": "INCOMPLETE"
                       },
                       "N/A": {
-                        "text": "N/A",
-                        "color": "#A3A3A3"
-                      },
-                      "SELECT RUN": {
-                        "text": "SELECT RUN",
-                        "color": "#A3A3A3"
-                      },
-                      "НЕТ ЗАПУСКОВ": {
-                        "text": "NO RUNS",
-                        "color": "gray"
+                        "color": "#A3A3A3",
+                        "text": "N/A"
                       },
                       "NO RUNS": {
-                        "text": "NO RUNS",
-                        "color": "gray"
+                        "color": "gray",
+                        "text": "NO RUNS"
+                      },
+                      "OK": {
+                        "color": "green",
+                        "text": "OK"
+                      },
+                      "QUERY ERROR": {
+                        "color": "red",
+                        "text": "QUERY ERROR"
+                      },
+                      "SELECT RUN": {
+                        "color": "#A3A3A3",
+                        "text": "SELECT RUN"
+                      },
+                      "UNKNOWN": {
+                        "color": "#A3A3A3",
+                        "text": "UNKNOWN"
+                      },
+                      "WARN": {
+                        "color": "orange",
+                        "text": "WARN"
+                      },
+                      "WARNING": {
+                        "color": "orange",
+                        "text": "WARN"
+                      },
+                      "НЕТ ЗАПУСКОВ": {
+                        "color": "gray",
+                        "text": "NO RUNS"
                       }
-                    }
+                    },
+                    "type": "value"
                   }
                 ]
               },
               {
                 "id": "custom.width",
                 "value": 110
+              },
+              {
+                "id": "noValue",
+                "value": "UNKNOWN"
               }
             ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Assessed at"
-            },
-            "properties": []
           },
           {
             "matcher": {
@@ -1219,12 +1173,12 @@
                 "id": "mappings",
                 "value": [
                   {
-                    "type": "value",
                     "options": {
                       "0": {
                         "text": "no"
                       }
-                    }
+                    },
+                    "type": "value"
                   }
                 ]
               },
@@ -1248,16 +1202,16 @@
                 "id": "links",
                 "value": [
                   {
-                    "title": "View trust reasons",
-                    "url": "/d/bioetl-control-plane-v1/2-replay-readiness?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9414&${__url_time_range}",
                     "includeVars": false,
-                    "targetBlank": false
+                    "targetBlank": false,
+                    "title": "View trust reasons",
+                    "url": "/d/bioetl-control-plane-v1/2-replay-readiness?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9418&${__url_time_range}"
                   }
                 ]
               },
               {
                 "id": "displayName",
-                "value": "Action"
+                "value": "Trust reasons"
               }
             ]
           },
@@ -1292,15 +1246,14 @@
           "refId": "A",
           "type": "json",
           "source": "url",
-          "parser": "uql",
+          "parser": "backend",
           "format": "table",
-          "root_selector": "($schema := {'_bioetl_frame': null, 'domain': null, 'verdict': null, 'status': null, 'detail': null, 'reason': null, 'reason_display': null, 'domain_reason_brief': null, 'run_reason_brief': null, 'status_display': null, 'run_execution': null, 'run_verdict': null, 'saved_trust': null, 'run_reason': null, 'parameter': null, 'value': null, 'provider': null, 'data_source': null, 'check_performed': null, 'check_result': null, 'check_result_display': null, 'provider_check_note': null, 'evidence': null, 'observed_at': null, 'observed_display': null, 'report_label': null, 'stage_id': null, 'stage_name': null, 'tracking': null, 'records_in': null, 'records_out': null, 'removals': null, 'execution_state': null, 'workflow': null, 'pipeline': null, 'run_type': null, 'run_id': null, 'started_at': null, 'completed_at': null, 'reasons_count': null, 'reasons_display': null, 'trust_status': null, 'trust_reasons_action': null, 'trust_action_note': null, 'result': null, 'step_id': null, 'mode': null, 'scope': null, 'pins': null, 'limit': null, 'meaning': null, 'check_id': null, 'replay_ready': null, 'readiness': null, 'Run duration': null, 'trust': null}; $map($append($append([presentation_trust.($base := $sift($, function($v,$k){$k != 'trust_reasons_action'}); $merge([$base, ($type(reasons_count)='number' ? reasons_count > 0 : false) ? {'trust_reasons_action':'View trust reasons'} : {'trust_action_note': reasons_count = 0 ? 'No trust issues' : 'Not assessed'}, {'_bioetl_frame': 'trust'}]))], $map(replay_readiness, function($row){$merge([$row, {'_bioetl_frame': 'replay_readiness'}])})), $map(replay_checks^(result='fail' ? 0 : result='unknown' ? 1 : result='pass' ? 2 : 3), function($row){$merge([$row, {'_bioetl_frame': 'replay_checks'}])})), function($row){$merge([$schema, $row])}))",
+          "root_selector": "($requested := \"${run_id:percentencode}\"; $state := function($status, $message){[{'_bioetl_frame':'trust', 'processing_status':$status, 'trust_status':$status, 'reasons_count':null, 'reasons_text':$message, 'reasons_display':$message, 'trust_action_note':$message, 'evidence_observed_at':null, 'evidence_freshness':null, 'verdict':null, 'status':null, 'detail':null, 'code':null, 'result':null, 'reason':null, 'evidence_ref':null},{'_bioetl_frame':'replay_readiness', 'verdict':$status, 'status':$status, 'detail':$message, 'processing_status':null, 'trust_status':null, 'reasons_count':null, 'reasons_text':null, 'reasons_display':null, 'trust_action_note':null, 'evidence_observed_at':null, 'evidence_freshness':null, 'code':null, 'result':null, 'reason':null, 'evidence_ref':null},{'_bioetl_frame':'replay_checks', 'code':$status, 'result':$status, 'reason':$message, 'evidence_ref':null, 'status':$status, 'detail':$message, 'processing_status':null, 'trust_status':null, 'reasons_count':null, 'reasons_text':null, 'reasons_display':null, 'trust_action_note':null, 'evidence_observed_at':null, 'evidence_freshness':null, 'verdict':null}]}; (status in ['scope_resolve_timeout','evidence_build_timeout','QUERY ERROR'] or summary.overall_status = 'QUERY ERROR') ? $state('QUERY ERROR','The selected-run status request failed.') : (($requested in ['', '-', 'All', '$__all', '%24__all', '__all', '*', '%2A'] or summary.overall_status = 'SELECT RUN') ? $state('SELECT RUN','No exact Run ID is selected.') : ($schema := {'_bioetl_frame': null, 'domain': null, 'verdict': null, 'status': null, 'detail': null, 'reason': null, 'reason_display': null, 'domain_reason_brief': null, 'run_reason_brief': null, 'status_display': null, 'run_execution': null, 'run_verdict': null, 'saved_trust': null, 'run_reason': null, 'parameter': null, 'value': null, 'provider': null, 'data_source': null, 'check_performed': null, 'check_result': null, 'check_result_display': null, 'provider_check_note': null, 'evidence': null, 'observed_at': null, 'observed_display': null, 'report_label': null, 'stage_id': null, 'stage_name': null, 'tracking': null, 'records_in': null, 'records_out': null, 'removals': null, 'execution_state': null, 'workflow': null, 'pipeline': null, 'run_type': null, 'run_id': null, 'started_at': null, 'completed_at': null, 'reasons_count': null, 'reasons_display': null, 'trust_status': null, 'trust_reasons_action': null, 'trust_action_note': null, 'result': null, 'step_id': null, 'mode': null, 'scope': null, 'pins': null, 'limit': null, 'meaning': null, 'check_id': null, 'replay_ready': null, 'readiness': null, 'Run duration': null, 'trust': null}; $map($append($append([presentation_trust.($base := $sift($, function($v,$k){$k != 'trust_reasons_action'}); $merge([$base, ($type(reasons_count)='number' ? reasons_count > 0 : false) ? {'trust_reasons_action':'View trust reasons'} : {'trust_action_note': reasons_count = 0 ? 'No trust issues' : 'Not assessed'}, {'_bioetl_frame': 'trust'}]))], $map(replay_readiness, function($row){$merge([$row, {'_bioetl_frame': 'replay_readiness'}])})), $map(replay_checks^(result='fail' ? 0 : result='unknown' ? 1 : result='pass' ? 2 : 3), function($row){$merge([$row, {'_bioetl_frame': 'replay_checks'}])})), function($row){$merge([$schema, $row])}))))",
           "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}&require_exact_run=1",
           "url_options": {
             "method": "GET",
             "data": ""
           },
-          "uql": "parse-json | jsonata \"($schema := {'_bioetl_frame': null, 'domain': null, 'verdict': null, 'status': null, 'detail': null, 'reason': null, 'reason_display': null, 'domain_reason_brief': null, 'run_reason_brief': null, 'status_display': null, 'run_execution': null, 'run_verdict': null, 'saved_trust': null, 'run_reason': null, 'parameter': null, 'value': null, 'provider': null, 'data_source': null, 'check_performed': null, 'check_result': null, 'check_result_display': null, 'provider_check_note': null, 'evidence': null, 'observed_at': null, 'observed_display': null, 'report_label': null, 'stage_id': null, 'stage_name': null, 'tracking': null, 'records_in': null, 'records_out': null, 'removals': null, 'execution_state': null, 'workflow': null, 'pipeline': null, 'run_type': null, 'run_id': null, 'started_at': null, 'completed_at': null, 'reasons_count': null, 'reasons_display': null, 'trust_status': null, 'trust_reasons_action': null, 'trust_action_note': null, 'result': null, 'step_id': null, 'mode': null, 'scope': null, 'pins': null, 'limit': null, 'meaning': null, 'check_id': null, 'replay_ready': null, 'readiness': null, 'Run duration': null, 'trust': null}; $map($append($append([presentation_trust.($base := $sift($, function($v,$k){$k != 'trust_reasons_action'}); $merge([$base, ($type(reasons_count)='number' ? reasons_count > 0 : false) ? {'trust_reasons_action':'View trust reasons'} : {'trust_action_note': reasons_count = 0 ? 'No trust issues' : 'Not assessed'}, {'_bioetl_frame': 'trust'}]))], $map(replay_readiness, function($row){$merge([$row, {'_bioetl_frame': 'replay_readiness'}])})), $map(replay_checks^(result='fail' ? 0 : result='unknown' ? 1 : result='pass' ? 2 : 3), function($row){$merge([$row, {'_bioetl_frame': 'replay_checks'}])})), function($row){$merge([$schema, $row])}))\"",
           "datasource": {
             "type": "yesoreyeram-infinity-datasource",
             "uid": "bioetl-ops-http"
@@ -1412,7 +1365,7 @@
             "type": "yesoreyeram-infinity-datasource",
             "uid": "bioetl-ops-http"
           },
-          "description": "SELECTED RUN · Manifest parse, structure, schema version, and contract compatibility for this Run ID. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is Source unavailable.",
+          "description": "SELECTED RUN · Manifest parse, structure, schema version, and contract compatibility for this Run ID. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR. ",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -2775,7 +2728,7 @@
             "type": "yesoreyeram-infinity-datasource",
             "uid": "bioetl-ops-http"
           },
-          "description": "SELECTED RUN · Checkpoint parse, schema, checksum, and required identity anchors for this Run ID. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is Source unavailable.",
+          "description": "SELECTED RUN · Checkpoint parse, schema, checksum, and required identity anchors for this Run ID. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR. ",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -3078,7 +3031,7 @@
             "type": "yesoreyeram-infinity-datasource",
             "uid": "bioetl-ops-http"
           },
-          "description": "SELECTED RUN · This run's runtime anchors compared with its checkpoint. MISMATCH is critical. MISSING or PARTIAL is a warning. No row is not a pass. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is Source unavailable. A blank grid is not used: N/A means no Run ID is selected, NO RECORDS means this run recorded no checkpoint anchors, NO DATA means the comparison payload is missing or the request timed out. A blank grid is not used: N/A means no Run ID is selected, NO RECORDS means this run recorded no checkpoint anchors, NO DATA means the comparison payload is missing or the request timed out.",
+          "description": "SELECTED RUN · This run's runtime anchors compared with its checkpoint. MISMATCH is critical. MISSING or PARTIAL is a warning. No row is not a pass. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR. A blank grid is not used: N/A means no Run ID is selected, NO RECORDS means this run recorded no checkpoint anchors, NO DATA means the comparison payload is missing or the request timed out. Exact Run ID selects evidence; the Workflow filter only narrows the run catalog. Catalog freshness does not establish evidence freshness.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -3328,79 +3281,13 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "current_value_full"
+                  "options": "Checkpoint"
                 },
                 "properties": [
                   {
                     "id": "custom.hidden",
                     "value": false
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "checkpoint_value_full"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": false
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "anchor"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Parameter"
                   },
-                  {
-                    "id": "custom.width",
-                    "value": 140
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": false
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "current_value_full"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Current"
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": false
-                    }
-                  },
-                  {
-                    "id": "custom.inspect",
-                    "value": true
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "checkpoint_value_full"
-                },
-                "properties": [
                   {
                     "id": "displayName",
                     "value": "Checkpoint"
@@ -3425,7 +3312,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "status"
+                  "options": "Result"
                 },
                 "properties": [
                   {
@@ -3447,13 +3334,13 @@
                     "id": "mappings",
                     "value": [
                       {
-                        "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "ERROR",
-                            "color": "red"
+                            "color": "red",
+                            "text": "ERROR"
                           }
-                        }
+                        },
+                        "type": "value"
                       }
                     ]
                   }
@@ -3522,49 +3409,49 @@
                     "id": "mappings",
                     "value": [
                       {
-                        "type": "value",
                         "options": {
-                          "deadline_exceeded": {
-                            "text": "QUERY ERROR — deadline exceeded",
-                            "color": "red"
-                          },
                           "capacity_exhausted": {
-                            "text": "QUERY ERROR — capacity exhausted",
-                            "color": "red"
+                            "color": "red",
+                            "text": "QUERY ERROR — capacity exhausted"
                           },
                           "catalog_unavailable": {
-                            "text": "QUERY ERROR — catalog unavailable",
-                            "color": "red"
-                          },
-                          "retention_plan_read_error": {
-                            "text": "UNAVAILABLE — retention plan read error",
-                            "color": "text"
-                          },
-                          "lineage_source_read_error": {
-                            "text": "UNAVAILABLE — lineage source read error",
-                            "color": "text"
-                          },
-                          "trust_evidence_read_error": {
-                            "text": "UNAVAILABLE — trust evidence read error",
-                            "color": "text"
-                          },
-                          "manifest_parse_error": {
-                            "text": "UNAVAILABLE — manifest parse error",
-                            "color": "text"
-                          },
-                          "run_ledger_parse_error": {
-                            "text": "UNAVAILABLE — run ledger parse error",
-                            "color": "text"
+                            "color": "red",
+                            "text": "QUERY ERROR — catalog unavailable"
                           },
                           "checkpoint_parse_error": {
-                            "text": "UNAVAILABLE — checkpoint parse error",
-                            "color": "text"
+                            "color": "text",
+                            "text": "UNAVAILABLE — checkpoint parse error"
                           },
                           "checkpoint_scope_manifest_parse_error": {
-                            "text": "UNAVAILABLE — checkpoint scope parse error",
-                            "color": "text"
+                            "color": "text",
+                            "text": "UNAVAILABLE — checkpoint scope parse error"
+                          },
+                          "deadline_exceeded": {
+                            "color": "red",
+                            "text": "QUERY ERROR — deadline exceeded"
+                          },
+                          "lineage_source_read_error": {
+                            "color": "text",
+                            "text": "UNAVAILABLE — lineage source read error"
+                          },
+                          "manifest_parse_error": {
+                            "color": "text",
+                            "text": "UNAVAILABLE — manifest parse error"
+                          },
+                          "retention_plan_read_error": {
+                            "color": "text",
+                            "text": "UNAVAILABLE — retention plan read error"
+                          },
+                          "run_ledger_parse_error": {
+                            "color": "text",
+                            "text": "UNAVAILABLE — run ledger parse error"
+                          },
+                          "trust_evidence_read_error": {
+                            "color": "text",
+                            "text": "UNAVAILABLE — trust evidence read error"
                           }
-                        }
+                        },
+                        "type": "value"
                       }
                     ]
                   }
@@ -3580,49 +3467,49 @@
                     "id": "mappings",
                     "value": [
                       {
-                        "type": "value",
                         "options": {
-                          "deadline_exceeded": {
-                            "text": "QUERY ERROR — deadline exceeded",
-                            "color": "red"
-                          },
                           "capacity_exhausted": {
-                            "text": "QUERY ERROR — capacity exhausted",
-                            "color": "red"
+                            "color": "red",
+                            "text": "QUERY ERROR — capacity exhausted"
                           },
                           "catalog_unavailable": {
-                            "text": "QUERY ERROR — catalog unavailable",
-                            "color": "red"
-                          },
-                          "retention_plan_read_error": {
-                            "text": "UNAVAILABLE — retention plan read error",
-                            "color": "text"
-                          },
-                          "lineage_source_read_error": {
-                            "text": "UNAVAILABLE — lineage source read error",
-                            "color": "text"
-                          },
-                          "trust_evidence_read_error": {
-                            "text": "UNAVAILABLE — trust evidence read error",
-                            "color": "text"
-                          },
-                          "manifest_parse_error": {
-                            "text": "UNAVAILABLE — manifest parse error",
-                            "color": "text"
-                          },
-                          "run_ledger_parse_error": {
-                            "text": "UNAVAILABLE — run ledger parse error",
-                            "color": "text"
+                            "color": "red",
+                            "text": "QUERY ERROR — catalog unavailable"
                           },
                           "checkpoint_parse_error": {
-                            "text": "UNAVAILABLE — checkpoint parse error",
-                            "color": "text"
+                            "color": "text",
+                            "text": "UNAVAILABLE — checkpoint parse error"
                           },
                           "checkpoint_scope_manifest_parse_error": {
-                            "text": "UNAVAILABLE — checkpoint scope parse error",
-                            "color": "text"
+                            "color": "text",
+                            "text": "UNAVAILABLE — checkpoint scope parse error"
+                          },
+                          "deadline_exceeded": {
+                            "color": "red",
+                            "text": "QUERY ERROR — deadline exceeded"
+                          },
+                          "lineage_source_read_error": {
+                            "color": "text",
+                            "text": "UNAVAILABLE — lineage source read error"
+                          },
+                          "manifest_parse_error": {
+                            "color": "text",
+                            "text": "UNAVAILABLE — manifest parse error"
+                          },
+                          "retention_plan_read_error": {
+                            "color": "text",
+                            "text": "UNAVAILABLE — retention plan read error"
+                          },
+                          "run_ledger_parse_error": {
+                            "color": "text",
+                            "text": "UNAVAILABLE — run ledger parse error"
+                          },
+                          "trust_evidence_read_error": {
+                            "color": "text",
+                            "text": "UNAVAILABLE — trust evidence read error"
                           }
-                        }
+                        },
+                        "type": "value"
                       }
                     ]
                   }
@@ -3638,43 +3525,19 @@
                     "id": "mappings",
                     "value": [
                       {
-                        "type": "value",
                         "options": {
                           "ERROR": {
-                            "text": "ERROR",
-                            "color": "red"
+                            "color": "red",
+                            "text": "ERROR"
                           }
-                        }
+                        },
+                        "type": "value"
                       }
                     ]
                   },
                   {
                     "id": "custom.width",
                     "value": 115
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Result"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 125
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "checkpoint_value_short"
-                },
-                "properties": [
-                  {
-                    "id": "noValue",
-                    "value": "UNKNOWN"
                   }
                 ]
               }
@@ -3704,7 +3567,7 @@
               "root_selector": "($listed := $type(rows) = 'array' ? rows : []; $hasRun := $exists(selected_run_id) and selected_run_id != null and selected_run_id != '' and selected_run_id != '-' and selected_run_id != 'All'; $timeout := $exists(status) and (status = 'scope_resolve_timeout' or status = 'evidence_build_timeout'); $msg := $exists(message) and message != ''; $state := function($status, $current){({'anchor': '—', 'status': $status, 'current_value_full': $current, 'checkpoint_value_full': '—'})}; $timeout or $msg ? ($count($listed) > 0 ? $listed : [$state('NO DATA', $msg ? message : 'NO DATA — checkpoint comparison request timed out')]) : ($not($hasRun) ? [$state('N/A', 'N/A — no Run ID selected')] : (($exists(checkpoint_compare) and checkpoint_compare.status = 'MISSING') ? $append($listed, [$state('NO RECORDS', 'NO RECORDS — checkpoint anchors were not recorded for this run')]) : ($count($listed) > 0 ? $listed : [$state('NO DATA', 'NO DATA — checkpoint comparison returned no rows')]))))",
               "source": "url",
               "type": "json",
-              "url": "/ops/control-plane/identity-evidence?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&view=checkpoint_compare",
+              "url": "/ops/control-plane/identity-evidence?pipeline=${pipeline:csv}&run_type=${run_type:csv}&run_id=${run_id}&view=checkpoint_compare",
               "url_options": {
                 "data": "",
                 "method": "GET"

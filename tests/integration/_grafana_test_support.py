@@ -559,7 +559,13 @@ def _assert_workflow_context_variable(
     assert workflow_var is not None, (
         f"Dashboard {dashboard_path.name} must define shared 'workflow' context"
     )
-    if dashboard_path.name == "bioetl-run-explorer-v1.json":
+    if dashboard_path.name in {
+        "bioetl-control-plane-v1.json",
+        "bioetl-dq-v2.json",
+        "bioetl-overview-v2.json",
+        "bioetl-run-explorer-v1.json",
+    }:
+        assert workflow_var["type"] == "query"
         assert workflow_var["datasource"] == {
             "type": "yesoreyeram-infinity-datasource",
             "uid": "bioetl-ops-http",
@@ -569,6 +575,7 @@ def _assert_workflow_context_variable(
         assert "/ops/control-plane/filter-options" in query["url"]
         assert "dimension=workflow" in query["url"]
         assert "response_shape=options" in query["url"]
+        assert query["root_selector"] == SELECTOR_ROWS
         assert workflow_var["multi"] is False
         assert workflow_var["includeAll"] is True
         return

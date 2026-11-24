@@ -57,7 +57,10 @@ def test_overview_dq_timeline_hides_dotstar_and_in_band_state() -> None:
     assert {9018, 9019, 9020}.isdisjoint(ids)
     quality = _panel(dashboard, 9482)
     assert quality["type"] == "canvas"
-    assert quality["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
+    # Accepted audit model: canvas empty-state points operators to donor panel 9002.
+    assert quality["fieldConfig"]["defaults"]["noValue"] == (
+        "No result · inspect source panel 9002"
+    )
     target = quality["targets"][0]
     assert target["datasource"]["uid"] == "-- Dashboard --"
     assert target["panelId"] == 9002
