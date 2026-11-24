@@ -114,29 +114,58 @@ def assign_mapped_subclass(
 ) -> str | None:
     """Return a subclass only from the approved type/family dictionaries.
 
-    Family fallback applies only when every family that maps to the sole
-    subclass shares the selected ``iuphar_class`` (when that class is set).
+    A non-empty type label wins. A blank or whitespace type entry is ignored,
+    and the family fallback still applies. Family fallback applies only when
+    every family that maps to the sole subclass shares the selected
+    ``iuphar_class`` (when that class is set).
     """
-    mapped = {
-        family_to_subclass[family_id]
-        for family_id in family_ids
-        if family_id in family_to_subclass
-    }
+    mapped = _subclass_labels(family_ids, family_to_subclass)
     if len(mapped) > 1:
         return None
     if type_name and type_name in type_to_subclass:
-        return type_to_subclass[type_name]
+        type_label = _kept_subclass_label(type_to_subclass[type_name])
+        if type_label is not None:
+            return type_label
     if len(mapped) != 1:
         return None
     subclass = next(iter(mapped))
     if iuphar_class is None or family_to_class is None:
         return subclass
     for family_id in family_ids:
-        if family_to_subclass.get(family_id) != subclass:
+        if _kept_subclass_label(family_to_subclass.get(family_id, "")) != subclass:
             continue
         if family_to_class.get(family_id) != iuphar_class:
             return None
     return subclass
+
+
+def _kept_subclass_label(value: str) -> str | None:
+    label = value.strip()
+    return label or None
+
+
+def _subclass_labels(
+    family_ids: tuple[str, ...], mapping: Mapping[str, str]
+) -> set[str]:
+    labels: set[str] = set()
+    for family_id in family_ids:
+        if family_id not in mapping:
+            continue
+        label = _kept_subclass_label(mapping[family_id])
+        if label is not None:
+            labels.add(label)
+    return labels
+
+
+def allowed_subclass_vocabulary(*mappings: Mapping[str, str]) -> frozenset[str]:
+    """Return trimmed, non-empty labels from explicit subclass dictionaries."""
+    labels: set[str] = set()
+    for mapping in mappings:
+        for value in mapping.values():
+            label = _kept_subclass_label(value)
+            if label is not None:
+                labels.add(label)
+    return frozenset(labels)
 
 
 def validate_family_graph(
@@ -147,10 +176,25 @@ def validate_family_graph(
     max_visited_nodes: int,
     multiple_parents_allowed: bool = True,
 ) -> Diagnostic | None:
-    """Return the first graph defect, or ``None`` when the walk is intact."""
+    """Return the first defect in the supplied nodes, or ``None``.
+
+    Every official node is checked, not only ``family_ids``. The requested
+    ids select the walk that also enforces the visit budget. A cycle, a
+    missing parent, or a root distance above ``max_depth`` anywhere in the
+    supplied official nodes still blocks the graph. Synthetic identifiers
+    are removed before that audit. The result does not depend on identifier
+    order.
+    """
     indexed = _index_nodes(nodes)
     if isinstance(indexed, Diagnostic):
         return indexed
+    defect = _structural_defect(
+        indexed,
+        max_depth=max_depth,
+        multiple_parents_allowed=multiple_parents_allowed,
+    )
+    if defect is not None:
+        return defect
     return _walk_ancestors(
         indexed,
         family_ids,
@@ -335,6 +379,122 @@ def normalize_provider_class(
         family_evidence=evidence,
         diagnostics=tuple(extras),
     )
+
+
+def hierarchy_for_graph_defect(
+    defect: Diagnostic,
+    *,
+    type_name: str | None,
+    type_to_class: Mapping[str, str],
+    type_to_subclass: Mapping[str, str] | None = None,
+) -> HierarchyResult:
+    """Keep a type class when the snapshot graph was already rejected."""
+    return _graph_error_result(
+        defect,
+        type_name=type_name,
+        type_to_class=type_to_class,
+        type_to_subclass=type_to_subclass or {},
+        name=None,
+        path_text=None,
+    )
+
+
+def _structural_defect(
+    nodes: dict[str, FamilyNode],
+    *,
+    max_depth: int,
+    multiple_parents_allowed: bool,
+) -> Diagnostic | None:
+    if not multiple_parents_allowed:
+        for node in nodes.values():
+            if len(node.parent_ids) > 1:
+                return _defect(_MULTI_PARENT)
+    distances: dict[str, int] = {}
+    for start in sorted(nodes):
+        defect = _bind_root_distance(nodes, start, distances, max_depth=max_depth)
+        if defect is not None:
+            return defect
+    return None
+
+
+def _bind_root_distance(
+    nodes: dict[str, FamilyNode],
+    start: str,
+    distances: dict[str, int],
+    *,
+    max_depth: int,
+) -> Diagnostic | None:
+    if start in distances:
+        return None
+    frames: list[list[str | int]] = [[start, 0]]
+    trail: list[str] = []
+    while frames:
+        defect = _advance_distance_frame(nodes, frames, trail, distances, max_depth)
+        if defect is not None:
+            return defect
+    return None
+
+
+def _advance_distance_frame(
+    nodes: dict[str, FamilyNode],
+    frames: list[list[str | int]],
+    trail: list[str],
+    distances: dict[str, int],
+    max_depth: int,
+) -> Diagnostic | None:
+    frame = frames[-1]
+    node_id = str(frame[0])
+    cursor = int(frame[1])
+    node = nodes.get(node_id)
+    if node is None:
+        return _defect(_MISSING_PARENT)
+    if cursor == 0:
+        if node_id in distances:
+            frames.pop()
+            return None
+        trail.append(node_id)
+    if cursor < len(node.parent_ids):
+        return _follow_parent(nodes, node, cursor, frame, frames, trail)
+    return _store_root_distance(node, frames, trail, distances, max_depth=max_depth)
+
+
+def _follow_parent(
+    nodes: dict[str, FamilyNode],
+    node: FamilyNode,
+    cursor: int,
+    frame: list[str | int],
+    frames: list[list[str | int]],
+    trail: list[str],
+) -> Diagnostic | None:
+    parent_id = node.parent_ids[cursor]
+    frame[1] = cursor + 1
+    if parent_id == node.family_id:
+        return _defect(_SELF_LOOP)
+    if parent_id in trail:
+        return _defect(_CYCLE)
+    if parent_id not in nodes:
+        return _defect(_MISSING_PARENT)
+    frames.append([parent_id, 0])
+    return None
+
+
+def _store_root_distance(
+    node: FamilyNode,
+    frames: list[list[str | int]],
+    trail: list[str],
+    distances: dict[str, int],
+    *,
+    max_depth: int,
+) -> Diagnostic | None:
+    parent_distance = 0
+    for parent_id in node.parent_ids:
+        parent_distance = max(parent_distance, distances[parent_id] + 1)
+    if parent_distance > max_depth:
+        return _defect(_LIMIT)
+    distances[node.family_id] = parent_distance
+    trail.pop()
+    frames.pop()
+    return None
 
 
 def _graph_error_result(
