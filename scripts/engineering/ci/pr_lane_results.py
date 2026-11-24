@@ -232,10 +232,10 @@ IUPHAR_IDENTIFIER_ROLES_RF002_TEST = (
 )
 IUPHAR_POLICY_TEST = "tests/unit/iuphar_target_class/test_policy.py"
 IUPHAR_HIERARCHY_TEST = "tests/unit/iuphar_target_class/test_hierarchy.py"
-
-
+AI_MEMORY_PROGRAM_TEST = "tests/architecture/test_ai_memory_program_contracts.py"
+CODEX_TASK_ROUTING_TEST = "tests/architecture/test_codex_task_routing.py"
 MEMORY_BASELINE_TEST_TARGETS: tuple[str, ...] = (
-    "tests/architecture/test_ai_memory_program_contracts.py",
+    AI_MEMORY_PROGRAM_TEST,
     "tests/integration/memory/test_workflow_partial_retrieval.py",
     "tests/integration/memory/test_workflow_tooling.py",
     "tests/unit/memory/graph/importers/test_expanded_json.py",
@@ -852,7 +852,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "docs/05-operations/runbooks/ai-rules-loading.md",
         ),
         (
-            "tests/architecture/test_codex_task_routing.py",
+            CODEX_TASK_ROUTING_TEST,
             RUNTIME_AGENT_DOCS_DRIFT_TEST,
             CODEX_NATIVE_RUNTIME_TEST,
             JUNIE_RUNTIME_CI_TEST,
@@ -861,8 +861,18 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
         ),
     ),
+    "docs/00-project/ai/agents/guides/CODEX_TASK_ROUTING.md": (
+        CODEX_TASK_ROUTING_TEST,
+        AI_RUNTIME_GOVERNANCE_LINKS_TEST,
+        RUNTIME_AGENT_DOCS_DRIFT_TEST,
+    ),
+    "docs/00-project/ai/memory/agent-memory.md": (
+        AI_MEMORY_PROGRAM_TEST,
+        CODEX_TASK_ROUTING_TEST,
+        RUNTIME_AGENT_DOCS_DRIFT_TEST,
+    ),
     "scripts/memory/run_workflow.sh": (
-        "tests/architecture/test_ai_memory_program_contracts.py",
+        AI_MEMORY_PROGRAM_TEST,
         "tests/integration/memory/test_workflow_tooling.py",
     ),
     "src/iuphar_target_class/models.py": (
