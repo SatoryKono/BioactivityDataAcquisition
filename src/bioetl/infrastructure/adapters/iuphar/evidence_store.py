@@ -101,6 +101,7 @@ class LocalTargetClassificationEvidenceStore:
         normalization_version: str | None = None,
         rules_version: str | None = None,
         classification_schema_version: str | None = None,
+        matching_policy_version: str | None = None,
     ) -> None:
         if mode not in {"shadow", "enrich"}:
             raise ValueError("evidence store needs shadow or enrich mode")
@@ -112,6 +113,7 @@ class LocalTargetClassificationEvidenceStore:
             "normalization_version": normalization_version,
             "rules_version": rules_version,
             "classification_schema_version": classification_schema_version,
+            "matching_policy_version": matching_policy_version,
         }
         self._lock = RLock()
 

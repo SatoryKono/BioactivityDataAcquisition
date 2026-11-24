@@ -1360,6 +1360,47 @@
       "Other Protein Target"
     ]
   },
+  "rf002_identifier_roles": {
+    "artifact": "iuphar_rf002_identifier_roles",
+    "biological_accuracy_accepted": false,
+    "component_scope_policy": {
+      "complex_or_family": "A component accession match does not prove identity of a multi-component complex, protein family, or group object; pipeline keeps complex_component_only / ambiguous when the matched catalog id is not itself a complex.",
+      "name_only": "Text channels (exact_name / exact_synonym) never confirm identity alone.",
+      "single_protein": "For SINGLE PROTEIN, primary component accessions identify the object."
+    },
+    "contract_version": "rf002-2026-11-23",
+    "diagnostic_codes": {
+      "auxiliary_uniprot_divergence": "Auxiliary UniProt xref hits a different catalog target than the primary decision; recorded as diagnostic, not identity_conflict",
+      "identity_conflict": "Two or more trusted/primary exact channels disagree; unchanged from pre-RF-002 strict API",
+      "unknown_auxiliary_uniprot": "Auxiliary UniProt xref has no catalog hit under the active species guard"
+    },
+    "epic": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/13308",
+    "identifier_roles": {
+      "auxiliary_xref": {
+        "kernel_field": "uniprot_xref",
+        "matching": "diagnostic_only",
+        "meaning": "Auxiliary UniProt cross-references. Unknown values yield diagnostics; they must not force false ambiguity.",
+        "source_field": "target_xref_uniprot_ids \\ component_accessions"
+      },
+      "primary": {
+        "kernel_field": "uniprot",
+        "matching": "exact_channel",
+        "meaning": "Primary UniProt accessions of the ChEMBL target object (component list). Mandatory exact-channel anchors.",
+        "source_field": "component_accessions"
+      },
+      "proven_equivalent": {
+        "kernel_field": "uniprot_equivalent",
+        "matching": "evidence_only",
+        "meaning": "Xref tokens that duplicate a primary accession. Recorded in evidence; they do not open a second mandatory exact channel.",
+        "source_field": "target_xref_uniprot_ids ∩ component_accessions"
+      }
+    },
+    "issue": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/13310",
+    "legacy_matching_policy_version": "pre-rf002-merged-uniprot-anchors",
+    "matching_policy_version": "rf002-uniprot-roles-2026-11-23",
+    "profile_qualification": "Profile envelopes and acceptance receipts must pin matching_policy_version to MATCHING_POLICY_VERSION. A pre-RF-002 receipt/profile (missing pin or legacy_matching_policy_version) is rejected by load_profile / validate_acceptance_receipt. RF-008 performs independent biological admission",
+    "strict_primary_api": true
+  },
   "role_assignment": "владелец результата — Федор Новиков; исполнитель модуля и проверяющий эталонов — Cursor, назначение владельца 2026-11-11",
   "stage": "1",
   "stage_status": "recorded_without_biological_acceptance",

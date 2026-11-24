@@ -46,6 +46,7 @@ Current specification summary:
 | Provider reference   | [target.md](../../providers/chembl/target.md)                                            |
 | Gold contract export | [chembl_target_v3.0.json](../../contracts/gold/chembl_target_v3.0.json)                  |
 | IUPHAR semantics (RF-001) | [16-iuphar-target-classification-semantics.md](16-iuphar-target-classification-semantics.md) |
+| IUPHAR UniProt roles (RF-002) | [17-iuphar-uniprot-identifier-roles.md](17-iuphar-uniprot-identifier-roles.md) |
 | Gold schemas index   | [gold-schemas.md](../../contracts/gold-schemas.md)                                       |
 | Versioning policy    | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
 

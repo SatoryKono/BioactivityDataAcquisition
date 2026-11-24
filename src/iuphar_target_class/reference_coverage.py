@@ -304,12 +304,14 @@ def _same_versions(spec: Mapping[str, object], provenance: RunProvenance) -> Non
             "normalization_version",
             "rules_version",
             "classification_schema_version",
+            "matching_policy_version",
         )
     )
     if observed != (
         provenance.normalization_version,
         provenance.rules_version,
         provenance.schema_version,
+        provenance.matching_policy_version,
     ):
         raise ValueError("reference profile versions differ from executing code")
 
