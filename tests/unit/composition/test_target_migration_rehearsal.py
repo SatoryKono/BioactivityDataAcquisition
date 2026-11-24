@@ -6,6 +6,7 @@ from dataclasses import replace
 from pathlib import Path
 from shutil import copytree, ignore_patterns
 
+import orjson
 import pyarrow as pa
 import pytest
 import yaml
@@ -324,6 +325,258 @@ def test_rehearsal_rejects_another_physical_target(rehearsal, monkeypatch):
     )
     with pytest.raises(ValueError, match="different physical target"):
         _bind(rehearsal)
+
+
+def _same_shape(row: dict[str, object], target_id: str) -> dict[str, object]:
+    updated = dict(row)
+    updated["target_id"] = target_id
+    if "entity_id" in updated:
+        updated["entity_id"] = "chembl:" + target_id
+    if "pref_name" in updated:
+        updated["pref_name"] = "Adenosine receptor A2b"
+    for field, value in (
+        ("component_ids", '["1"]'),
+        ("component_types", '["PROTEIN"]'),
+        ("component_accessions", '["Q60614"]'),
+    ):
+        if field in updated:
+            updated[field] = value
+    return updated
+
+
+def test_restored_assay_target_closes_migration_without_changing_assay(rehearsal):
+    from bioetl.infrastructure.storage.target_fk_restoration import (
+        publish_target_fk_restoration,
+    )
+    from bioetl.infrastructure.storage.target_migration_classification_checks import (
+        TargetRecoveryInput,
+    )
+    from bioetl.infrastructure.storage.target_migration_row_ops import read_delta
+
+    paths, occurrence, _, _, _, fields, _ = rehearsal
+    silver_before = _tree_hashes(paths.silver)
+    gold_before = _tree_hashes(paths.gold)
+    silver_row = next(
+        row for row in read_delta(paths.silver) if row["target_id"] == "CHEMBL1"
+    )
+    gold_row = read_delta(paths.gold)[0]
+    restored_silver = _same_shape(silver_row, "CHEMBL2237")
+    restored_gold = _same_shape(gold_row, "CHEMBL2237")
+    for field in (
+        "component_ids",
+        "component_types",
+        "component_accessions",
+        "pref_name",
+    ):
+        if field in restored_silver and field in restored_gold:
+            restored_gold[field] = restored_silver[field]
+    source = occurrence / "recovery/CHEMBL2237.json"
+    source.parent.mkdir()
+    source.write_bytes(
+        orjson.dumps(
+            {
+                "target_id": "CHEMBL2237",
+                "silver": restored_silver,
+                "gold": restored_gold,
+            },
+            option=orjson.OPT_SORT_KEYS,
+        )
+    )
+    write_deltalake(
+        paths.assay,
+        pa.table({"target_id": ["CHEMBL1", None, "CHEMBL2237"]}),
+        mode="overwrite",
+    )
+    assay_gap = _tree_hashes(paths.assay)
+    recovery = TargetRecoveryInput(
+        "CHEMBL2237",
+        "verified_pipeline_output",
+        source.resolve().relative_to(paths.workspace.resolve()).as_posix(),
+        source,
+        sha256_file(source),
+        restored_silver,
+        restored_gold,
+    )
+    destination = occurrence / "fk-restoration"
+    manifest = publish_target_fk_restoration(
+        silver=paths.silver,
+        gold=paths.gold,
+        assay=paths.assay,
+        config=paths.config,
+        recoveries=(recovery,),
+        destination=destination,
+        workspace=paths.workspace,
+    )
+    assert (
+        publish_target_fk_restoration(
+            silver=paths.silver,
+            gold=paths.gold,
+            assay=paths.assay,
+            config=paths.config,
+            recoveries=(recovery,),
+            destination=destination,
+            workspace=paths.workspace,
+        ).read_bytes()
+        == manifest.read_bytes()
+    )
+    assert _tree_hashes(paths.assay) == assay_gap
+    assert _tree_hashes(paths.silver) == silver_before
+    assert _tree_hashes(paths.gold) == gold_before
+    with pytest.raises(ValueError, match="foreign-key closure"):
+        freeze_target_inputs(
+            paths,
+            legacy_include_fields=fields,
+            output=occurrence / "frozen-open.json",
+        )
+    frozen = occurrence / "frozen-restored.json"
+    freeze_target_inputs(
+        paths,
+        legacy_include_fields=fields,
+        output=frozen,
+        restoration_manifest=manifest,
+    )
+    binding = _bind(rehearsal)
+    built = build_target_candidates(
+        TargetCandidateBuildRequest(
+            paths,
+            frozen,
+            sha256_file(frozen),
+            occurrence / "build-restored",
+            fields,
+            "synthetic-fk-restoration",
+            "2026-11-23T00:00:00Z",
+            binding,
+        )
+    )
+    assert built["status"] == "complete"
+    gold_ids = {
+        row["target_id"]
+        for row in DeltaTable(paths.candidate_gold).to_pyarrow_table().to_pylist()
+    }
+    assert gold_ids == {"CHEMBL1", "CHEMBL2237"}
+    state = prepare_target_migration(
+        paths,
+        legacy_include_fields=fields,
+        deployment=binding,
+        restoration_manifest=manifest,
+    )
+    assert state["phase"] == "prepared"
+    assert _tree_hashes(paths.assay) == assay_gap
+    assert any(name.endswith("CHEMBL2237.json") for name in state["dependencies"])
+    assert _tree_hashes(paths.gold) == gold_before
+    promoted = promote_target_migration(paths, deployment=binding)
+    assert promoted["phase"] == "promoted"
+    promoted_ids = {
+        row["target_id"]
+        for row in DeltaTable(paths.gold).to_pyarrow_table().to_pylist()
+    }
+    assert promoted_ids == {"CHEMBL1", "CHEMBL2237"}
+    assert _tree_hashes(paths.assay) == assay_gap
+
+
+def test_gold_filter_conflict_stays_a_blocker_and_writes_a_decision(tmp_path):
+    from bioetl.infrastructure.storage.target_fk_restoration import (
+        publish_target_fk_restoration,
+    )
+    from bioetl.infrastructure.storage.target_migration_classification_checks import (
+        TargetRecoveryInput,
+        current_target_ids,
+    )
+    from bioetl.infrastructure.storage.target_migration_row_ops import read_delta
+
+    row = {
+        "target_id": "CHEMBL1",
+        "target_type": "SINGLE PROTEIN",
+        "pref_name": "Known",
+        "organism": "Homo sapiens",
+        "organism_class": "multicellular",
+        "component_accessions": '["P12345"]',
+        "component_ids": '["1"]',
+        "component_types": '["PROTEIN"]',
+    }
+    blocked = {
+        **row,
+        "target_id": "CHEMBL2411",
+        "pref_name": "5-HT3 receptor",
+        "organism": "Rattus norvegicus",
+        "organism_class": "unicellular",
+    }
+    for name, rows in (
+        ("silver", [row]),
+        ("gold", [row]),
+        ("assay", [{"target_id": "CHEMBL1"}, {"target_id": "CHEMBL2411"}]),
+    ):
+        write_deltalake(tmp_path / name, pa.Table.from_pylist(rows))
+    source = tmp_path / "recovery/CHEMBL2411.json"
+    source.parent.mkdir()
+    source.write_bytes(
+        orjson.dumps(
+            {"target_id": "CHEMBL2411", "silver": blocked, "gold": blocked},
+            option=orjson.OPT_SORT_KEYS,
+        )
+    )
+    from bioetl.infrastructure.storage.target_classification_migration import (
+        _tree_hashes,
+    )
+
+    before = {
+        name: _tree_hashes(tmp_path / name) for name in ("silver", "gold", "assay")
+    }
+    destination = tmp_path / "blocked-restoration"
+    with pytest.raises(ValueError, match="foreign-key closure"):
+        publish_target_fk_restoration(
+            silver=tmp_path / "silver",
+            gold=tmp_path / "gold",
+            assay=tmp_path / "assay",
+            config=Path(__file__).resolve().parents[3]
+            / "configs/entities/chembl/target.yaml",
+            recoveries=(
+                TargetRecoveryInput(
+                    "CHEMBL2411",
+                    "verified_pipeline_output",
+                    source.relative_to(tmp_path).as_posix(),
+                    source,
+                    sha256_file(source),
+                    blocked,
+                    blocked,
+                ),
+            ),
+            destination=destination,
+            workspace=tmp_path,
+        )
+    decision = destination / "contract-decision.json"
+    assert decision.is_file()
+    payload = decision.read_bytes()
+    assert b"blocked_pending_contract_reconciliation" in payload
+    assert b"CHEMBL2411" in payload
+    assert b"gold_filter" in payload
+    assert not (destination / "gold").exists()
+    assert {
+        name: _tree_hashes(tmp_path / name) for name in ("silver", "gold", "assay")
+    } == before
+    assert current_target_ids(read_delta(tmp_path / "gold")) == {"CHEMBL1"}
+    with pytest.raises(ValueError, match="foreign-key closure"):
+        publish_target_fk_restoration(
+            silver=tmp_path / "silver",
+            gold=tmp_path / "gold",
+            assay=tmp_path / "assay",
+            config=Path(__file__).resolve().parents[3]
+            / "configs/entities/chembl/target.yaml",
+            recoveries=(
+                TargetRecoveryInput(
+                    "CHEMBL2411",
+                    "verified_pipeline_output",
+                    source.relative_to(tmp_path).as_posix(),
+                    source,
+                    sha256_file(source),
+                    blocked,
+                    blocked,
+                ),
+            ),
+            destination=destination,
+            workspace=tmp_path,
+        )
+    assert decision.read_bytes() == payload
 
 
 def test_rehearsal_protects_active_destinations_from_overlap(rehearsal):
