@@ -243,7 +243,7 @@ must stay inside that directory, and bind exact bytes:
   "snapshot": {"path": "snapshot.json", "sha256": "SNAPSHOT_SHA256"},
   "acceptance": null,
   "normalization_version": "bioetl-iuphar-input-v1",
-  "rules_version": "plan-v1-r9",
+  "rules_version": "local-rules-2026.11.23",
   "classification_schema_version": "3.1.0"
 }
 ```

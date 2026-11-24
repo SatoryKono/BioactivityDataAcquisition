@@ -1305,10 +1305,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
         ),
     ),
-    "configs/quality/external_resource_inventory_pr13339_rematch_review.json": (
-        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
-        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
-    ),
     "configs/quality/external_resource_inventory_pr12751_review.json": (
         EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
         EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
@@ -1374,50 +1370,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
     ),
     "configs/quality/external_resource_inventory_pr13328_review.json": (
-        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
-        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
-    ),
-    "configs/quality/external_resource_inventory_pr13339_review.json": (
-        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
-        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
-    ),
-    "configs/quality/external_resource_inventory_pr13339_edges_review.json": (
-        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
-        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
-    ),
-    "configs/quality/external_resource_inventory_pr13339_main_review.json": (
-        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
-        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
-    ),
-    "configs/quality/external_resource_inventory_pr13339_export_merge_review.json": (
-        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
-        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
-    ),
-    "configs/quality/external_resource_inventory_pr13339_config_cache_review.json": (
-        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
-        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
-    ),
-    "configs/quality/external_resource_inventory_pr13339_rf001_merge_review.json": (
-        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
-        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
-    ),
-    "configs/quality/external_resource_inventory_pr13339_producer_report_review.json": (
-        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
-        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
-    ),
-    "configs/quality/external_resource_inventory_pr13339_inline_dq_review.json": (
-        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
-        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
-    ),
-    "configs/quality/external_resource_inventory_pr13339_dq_rules_review.json": (
-        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
-        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
-    ),
-    "configs/quality/external_resource_inventory_pr13339_snapshot_history_review.json": (
-        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
-        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
-    ),
-    "configs/quality/external_resource_inventory_pr13339_rf002_merge_review.json": (
         EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
         EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
     ),
