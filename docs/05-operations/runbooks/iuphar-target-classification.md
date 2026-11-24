@@ -243,7 +243,7 @@ must stay inside that directory, and bind exact bytes:
   "snapshot": {"path": "snapshot.json", "sha256": "SNAPSHOT_SHA256"},
   "acceptance": null,
   "normalization_version": "bioetl-iuphar-input-v1",
-  "rules_version": "plan-v1-r9",
+  "rules_version": "local-rules-2026.11.23",
   "classification_schema_version": "3.1.0"
 }
 ```
@@ -529,7 +529,8 @@ through preparation, promotion, and recovery.
 ```powershell
 .\.venv-win\Scripts\python.exe -m scripts.ops target-classification-migration freeze-inputs `
   --plan 'PATH_TO_APPROVED_PLAN_JSON' `
-  --output 'NEW_FROZEN_INPUT_MANIFEST_JSON'
+  --output 'NEW_FROZEN_INPUT_MANIFEST_JSON' `
+  --restoration-manifest 'PATH_TO_VALIDATED_FK_RESTORATION_MANIFEST'
 .\.venv-win\Scripts\python.exe -m scripts.ops target-classification-migration build-candidates `
   --plan 'PATH_TO_APPROVED_PLAN_JSON' `
   --input-manifest 'PATH_TO_FROZEN_INPUT_MANIFEST_JSON' `
@@ -541,6 +542,9 @@ through preparation, promotion, and recovery.
 
 `freeze-inputs` records table IDs, versions, physical file hashes, complete
 Silver and Gold target IDs, assay facts, and original configuration digest.
+When assay references targets absent from current Gold, pass the validated
+`--restoration-manifest`. The same flag is required again on `prepare`.
+`build-candidates` and `promote` reuse the frozen input and the prepare journal.
 `build-candidates` requires those exact inputs still to exist. It classifies
 every old Silver row with the admitted profile, computes V31 business hashes,
 and uses the matching Silver projection for each old Gold target. Historical
@@ -595,7 +599,9 @@ does not itself prevent a later writer. Do not start preparation while a
 pipeline or reconciliation transform can still mutate these resources.
 
 ```powershell
-.\.venv-win\Scripts\python.exe -m scripts.ops target-classification-migration prepare --plan 'PATH_TO_APPROVED_PLAN_JSON'
+.\.venv-win\Scripts\python.exe -m scripts.ops target-classification-migration prepare `
+  --plan 'PATH_TO_APPROVED_PLAN_JSON' `
+  --restoration-manifest 'PATH_TO_VALIDATED_FK_RESTORATION_MANIFEST'
 .\.venv-win\Scripts\python.exe -m scripts.ops target-classification-migration promote --plan 'PATH_TO_APPROVED_PLAN_JSON'
 ```
 
