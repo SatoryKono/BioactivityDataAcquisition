@@ -19,6 +19,7 @@ from bioetl.domain.mapping.protein_class_target_type import (
 __all__ = [
     "MULTIFUNCTIONAL_TARGET_NAME",
     "TARGET_PROTEIN_CLASSIFICATION_PIPELINE",
+    "agreed_chembl_release",
     "empty_target_protein_classification_summary",
     "summarize_target_protein_classification_dependency",
     "summarize_target_protein_classification_rows",
@@ -111,6 +112,26 @@ def summarize_target_protein_classification_rows(
 
     _mark_multifunctional(summary)
     return summary
+
+
+def agreed_chembl_release(values: Iterable[object]) -> tuple[str | None, str]:
+    """Bind one ChEMBL release only when every supplied text value agrees.
+
+    Non-text values are ignored. Disagreeing releases stay unresolved instead
+    of selecting one by position or by a shared column name.
+    """
+    found: list[str] = []
+    for value in values:
+        if not isinstance(value, str):
+            continue
+        text = value.strip()
+        if text and text not in found:
+            found.append(text)
+    if not found:
+        return None, "unbound"
+    if len(found) == 1:
+        return found[0], "unique"
+    return None, "conflict"
 
 
 def empty_target_protein_classification_summary(target_id: str) -> dict[str, object]:

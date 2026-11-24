@@ -787,6 +787,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "src/iuphar_target_class/semantics.py": (
         IUPHAR_SEMANTICS_RF001_TEST,
         IUPHAR_POLICY_TEST,
+        "tests/unit/iuphar_target_class/test_rf000_target_classification.py",
     ),
     "src/iuphar_target_class/identifier_roles.py": (
         IUPHAR_IDENTIFIER_ROLES_RF002_TEST,
@@ -915,6 +916,13 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "src/iuphar_target_class/hierarchy.py": (IUPHAR_HIERARCHY_TEST,),
     "src/iuphar_target_class/rf008_qualification.py": (
         "tests/unit/iuphar_target_class/test_rf008_qualification.py",
+    ),
+    **dict.fromkeys(
+        (
+            "src/iuphar_target_class/enablement.py",
+            "src/iuphar_target_class/qualification.py",
+        ),
+        ("tests/unit/iuphar_target_class/test_rf000_target_classification.py",),
     ),
     **dict.fromkeys(
         (
@@ -1413,6 +1421,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "configs/quality/external_resource_inventory_issue13285_decisions.json": (
         EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
         EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
+    ),
+    "configs/quality/composite_ownership.yaml": (
+        "tests/architecture/test_composite_ownership.py",
     ),
     "scripts/engineering/README.md": (
         SCRIPTS_INVENTORY_MANIFEST_TEST,
@@ -2304,6 +2315,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "tests/unit/interfaces/cli/__snapshots__/test_registry_consistency.ambr": (
         "tests/unit/interfaces/cli/test_registry_consistency.py",
     ),
+    "tests/snapshots/composite_config_real_yaml_golden_master.json": (
+        "tests/unit/infrastructure/schemas/test_composite_config_invariants_source_of_truth.py",
+    ),
     "tests/snapshots/pipeline_configs.json": (
         "tests/architecture/test_config_golden_master.py",
     ),
@@ -2312,6 +2326,20 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "docs/reports/generated/documentation-cleanup-inventory.md": (
         DOCUMENTATION_CLEANUP_INVENTORY_TESTS
+    ),
+    "docs/reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.csv": (
+        "tests/unit/repo_backed/scripts/test_generate_pipeline_normalization_field_matrix.py",
+        "tests/architecture/test_reproducibility_docs_contract_drift.py",
+    ),
+    "docs/reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.md": (
+        "tests/unit/repo_backed/scripts/test_generate_pipeline_normalization_field_matrix.py",
+        "tests/architecture/test_reproducibility_docs_contract_drift.py",
+    ),
+    "docs/02-architecture/generated/module-dependency-map.json": (
+        "tests/architecture/test_architecture_dependency_docs_drift.py",
+    ),
+    "docs/02-architecture/generated/module-dependency-map.md": (
+        "tests/architecture/test_architecture_dependency_docs_drift.py",
     ),
     "reports/quality/flaky-test-burndown-review.json": FLAKY_BURNDOWN_REVIEW_TESTS,
     "reports/quality/test-governance-current.json": TEST_GOVERNANCE_ARTIFACT_TESTS,

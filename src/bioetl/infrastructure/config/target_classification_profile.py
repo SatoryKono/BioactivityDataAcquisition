@@ -269,6 +269,7 @@ def resolve_target_classification_profile(
 
 
 __all__ = [
+    "TARGET_CLASSIFICATION_DETAIL_FIELDS",
     "ChEMBLTargetGoldSchemaV31",
     "ChEMBLTargetGoldSchemaV32",
     "TargetClassificationSchemaProfile",
