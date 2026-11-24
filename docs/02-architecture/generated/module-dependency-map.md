@@ -5,11 +5,11 @@
 
 ## Summary
 
-- Scanned modules: `2655`
-- Internal import edges (raw): `8798`
+- Scanned modules: `2656`
+- Internal import edges (raw): `8800`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
-- Cross-layer module-group edges (total): `332`
+- Cross-layer module-group edges (total): `330`
 - Cross-layer module-group edges (top 55): `55`
 
 ## Layer Dependency Graph
@@ -21,8 +21,8 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|1688 OK| application
-    application -->|1158 OK| domain
+    application -->|1689 OK| application
+    application -->|1159 OK| domain
     composition -->|254 OK| application
     composition -->|689 OK| composition
     composition -->|337 OK| domain
@@ -40,8 +40,8 @@ flowchart LR
 
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
-| `application`    | `application`    |    1688 | allowed |
-| `application`    | `domain`         |    1158 | allowed |
+| `application`    | `application`    |    1689 | allowed |
+| `application`    | `domain`         |    1159 | allowed |
 | `composition`    | `application`    |     254 | allowed |
 | `composition`    | `composition`    |     689 | allowed |
 | `composition`    | `domain`         |     337 | allowed |
@@ -60,7 +60,7 @@ flowchart LR
 | ------------------------------ | ------------------------------ | ------: |
 | `application.services`         | `domain.control_plane`         |     160 |
 | `infrastructure.adapters`      | `domain.types`                 |     125 |
-| `application.composite`        | `domain.composite`             |     116 |
+| `application.composite`        | `domain.composite`             |     118 |
 | `application.core`             | `domain.types`                 |     107 |
 | `application.services`         | `domain.types`                 |      89 |
 | `infrastructure.storage`       | `domain.types`                 |      83 |

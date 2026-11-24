@@ -9,7 +9,9 @@ from unittest.mock import MagicMock
 import polars as pl
 import pytest
 
-from bioetl.application.composite.helpers import post_join_classification as post_join_mod
+from bioetl.application.composite.helpers import (
+    post_join_classification as post_join_mod,
+)
 from bioetl.application.composite.helpers.post_join_classification import (
     apply_post_join_target_classification,
     discard_post_join_classification,
