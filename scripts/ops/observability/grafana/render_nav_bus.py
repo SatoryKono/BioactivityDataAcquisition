@@ -2916,9 +2916,11 @@ def apply_to_dashboard(
     apply_accessible_status_colors(payload)
     from scripts.ops.observability.grafana._audit_presentation import (
         mark_native_snapshot_clocks,
+        stamp_overview_query_diagnostics,
     )
 
     mark_native_snapshot_clocks(payload)
+    stamp_overview_query_diagnostics(payload)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     current = safe_path.read_text(encoding="utf-8")
     if check:
@@ -2936,13 +2938,13 @@ def apply_to_dashboard(
 
 
 _CP_EXACT_REPLAY_NO_VALUE: dict[int, str] = {
-    9422: "UNKNOWN",
+    9422: (_SELECT_RUN_OR_SOURCE_UNAVAILABLE),
     9423: (_SELECT_RUN_OR_SOURCE_UNAVAILABLE),
 }
 
 
 def _stamp_control_plane_exact_replay_no_value(panel: dict[str, Any]) -> None:
-    """Keep panel 9422 UNKNOWN distinct from 9423 SELECT RUN / QUERY ERROR copy."""
+    """Keep SELECT RUN / QUERY ERROR guidance consistent across replay views."""
     panel_id = panel.get("id")
     if not isinstance(panel_id, int):
         return
@@ -3063,9 +3065,6 @@ def _neutralize_mapped_status_thresholds(payload: dict[str, Any]) -> None:
         "Monitor Runtime Error Rate",
         "Monitor Worst Stage Lag",
         "Monitor Active Blocker Count",
-        "Monitor Manifest (30m)",
-        "Monitor Ledger (30m)",
-        "Monitor Global Read Failures (30m)",
     }
     for panel in _walk_panels(payload.get("panels", [])):
         if panel.get("type") != "stat" or _keep_healthy_zero_threshold(
