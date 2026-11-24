@@ -16,6 +16,7 @@ def test_projection_move_selects_real_consumers_without_a_kernel_catch_all():
         repo_root=root,
     )
     assert set(report["selected"]) == {
+        "tests/unit/iuphar_target_class/test_composite_features_rf003.py",
         "tests/unit/iuphar_target_class/test_stage0_v2.py",
         "tests/unit/iuphar_target_class/test_integration_acceptance.py",
         "tests/unit/infrastructure/adapters/iuphar/test_target_classification.py",

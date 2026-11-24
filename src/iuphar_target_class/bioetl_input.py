@@ -108,9 +108,7 @@ def project_target_fields(
             )
         )
     )
-    # RF-003 (#13311): when the composite post-join surface supplies keywords /
-    # predicted_l* they flow into the kernel; standalone seed rows leave them empty.
-    return {
+    projected = {
         "target_chembl_id": _text(data.get("target_id")),
         # ChEMBL identity is never passed as the kernel's explicit IUPHAR ID.
         "target_id": _text(data.get("iuphar_target_id")),
@@ -124,12 +122,19 @@ def project_target_fields(
         "ec": "|".join(_tokens(data.get("target_ec_numbers"))) or None,
         "gene_symbol": _text(data.get("gene_symbol")),
         "gene_id": _text(data.get("gene_id")),
-        "keywords": "|".join(_tokens(data.get("keywords"))) or None,
-        "predicted_l1": _text(data.get("predicted_l1")),
-        "predicted_l2": _text(data.get("predicted_l2")),
         "source_business_data": canonical_json_bytes(plain_target_value(data)).decode(
             "utf-8"
         ),
+    }
+    # The standalone v1 cohort has no columns for post-join features.
+    # Emit the extra keys only when the composite input supplies usable values.
+    composite_features = {
+        "keywords": "|".join(_tokens(data.get("keywords"))) or None,
+        "predicted_l1": _text(data.get("predicted_l1")),
+        "predicted_l2": _text(data.get("predicted_l2")),
+    }
+    return projected | {
+        name: value for name, value in composite_features.items() if value is not None
     }
 
 
