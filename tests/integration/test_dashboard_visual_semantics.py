@@ -27,7 +27,10 @@ def test_dq_canvas_uses_saved_exclusions_frame_without_inventing_rates() -> None
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
     quality = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9482)
     assert quality["type"] == "canvas"
-    assert quality["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
+    assert (
+        quality["fieldConfig"]["defaults"]["noValue"]
+        == "No result · inspect source panel 9002"
+    )
     by_id = {p["id"]: p for p in get_dashboard_panels(dashboard)}
     target = quality["targets"][0]
     assert target["datasource"]["uid"] == "-- Dashboard --"
