@@ -22,6 +22,7 @@ from bioetl.composition.bootstrap.assembly.target_classification_runtime import 
 )
 from bioetl.domain.contracts.gold.chembl_target_classification import (
     target_v31_schema_hash,
+    target_v32_schema_hash,
 )
 from bioetl.domain.normalization.profiles.chembl_target_classification import (
     target_v31_normalization_profile,
@@ -74,6 +75,21 @@ def test_selected_contract_identity_preserves_dq_and_legacy_modes(mode):
     assert selected.dq_policy_ref == original.dq_policy_ref
     assert selected.rule_bundle_version == original.rule_bundle_version
     assert selected.contract_ref == original.contract_ref
+
+
+def test_explicit_v32_contract_selects_the_v32_identity():
+    config = load_pipeline_config("chembl_target")
+    config = config.model_copy(
+        update={
+            "target_classification": config.target_classification.model_copy(
+                update={"mode": "enrich", "table_contract": "3.2.0"}
+            )
+        }
+    )
+    assert target_classification_contract_schema_identity(config) == (
+        "3.2.0",
+        target_v32_schema_hash(),
+    )
 
 
 def test_disabled_or_unrelated_config_has_no_classification_dependency():

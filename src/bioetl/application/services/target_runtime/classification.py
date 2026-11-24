@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Literal
 
@@ -141,4 +142,30 @@ class TargetClassificationRunState:
         return reference
 
 
-__all__ = ["TargetClassificationRunState"]
+def equivalent_target_binding(
+    stored: Mapping[str, object], binding: Mapping[str, object]
+) -> bool:
+    """Treat a missing table_contract and an explicit null as the same pin."""
+    return _normalize_target_binding(stored) == _normalize_target_binding(binding)
+
+
+def _normalize_target_binding(value: Mapping[str, object]) -> dict[str, object]:
+    rendered = dict(value)
+    config = rendered.get("target_config")
+    if not isinstance(config, dict):
+        return rendered
+    classification = config.get("target_classification")
+    if (
+        not isinstance(classification, dict)
+        or classification.get("table_contract") is not None
+    ):
+        return rendered
+    config = dict(config)
+    config["target_classification"] = {
+        key: item for key, item in classification.items() if key != "table_contract"
+    }
+    rendered["target_config"] = config
+    return rendered
+
+
+__all__ = ["TargetClassificationRunState", "equivalent_target_binding"]

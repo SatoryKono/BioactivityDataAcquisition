@@ -254,6 +254,12 @@ def _classification_row(output: RowResult) -> dict[str, object]:
         provider_release=output.provider_release,
         payload_sha256=output.annotation.payload_sha256 if output.annotation else None,
         iuphar_family_ids=output.annotation.family_ids if output.annotation else (),
+        iuphar_subclasses=list(output.direct.iuphar_subclasses)
+        if output.direct
+        else [],
+        iuphar_annotation_capability=(
+            output.direct.annotation_capability if output.direct else None
+        ),
         iuphar_family_paths=[asdict(path) for path in output.direct.paths]
         if output.direct
         else [],
