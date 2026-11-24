@@ -3706,8 +3706,8 @@
         "_get_git_commit_cached"
       ],
       "owner": "infrastructure.storage.metadata.builder_base._get_git_commit_cached",
-      "closer": "operator/process lifecycle for detached backend; subprocess.run for bounded probes",
-      "shutdown_contract": "Detached health backend intentionally outlives launcher; parent log handle closes on with-exit. Explicit stop uses listening PID/taskkill path. Synchronous probes wait or terminate on subprocess.run timeout; inspect exact argv and pipe ownership.",
+      "closer": "return of synchronous run_protected_command (git rev-parse --short HEAD; timeout=5; check=False)",
+      "shutdown_contract": "Synchronous bounded Git probe completes or reports a subprocess error/timeout before returning. A nonzero exit, empty output, or caught subprocess/FileNotFoundError/OSError returns None. No detached backend is involved.",
       "production_entrypoint": "bioetl run / run-all / debug / run-composite / workflow",
       "production_binding": [
         {
@@ -5744,8 +5744,8 @@
         "docker_engine_not_ready_message"
       ],
       "owner": "interfaces.cli.commands.domains.health.observability_backend_runtime.docker_engine_not_ready_message",
-      "closer": "operator/process lifecycle for detached backend; subprocess.run for bounded probes",
-      "shutdown_contract": "Detached health backend intentionally outlives launcher; parent log handle closes on with-exit. Explicit stop uses listening PID/taskkill path. Synchronous probes wait or terminate on subprocess.run timeout; inspect exact argv and pipe ownership.",
+      "closer": "return of synchronous run_protected_command (docker info; timeout=8; check=False)",
+      "shutdown_contract": "Synchronous bounded Docker probe completes or times out before returning. TimeoutExpired/OSError or a nonzero exit produces an operator readiness message; success returns None. No detached backend is involved.",
       "production_entrypoint": "bioetl run / run-all / debug / run-composite / workflow",
       "production_binding": [
         {

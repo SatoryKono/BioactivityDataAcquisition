@@ -2,6 +2,16 @@
   "schema_version": 1,
   "catalog_ref": "55b8b2c305c407cef939abef73a33bee8ef3fe60",
   "source_ref": "55b8b2c305c407cef939abef73a33bee8ef3fe60",
+  "resource_updates": {
+    "infrastructure.storage.metadata.builder_base._get_git_commit_cached.process": {
+      "closer": "return of synchronous run_protected_command (git rev-parse --short HEAD; timeout=5; check=False)",
+      "shutdown_contract": "Synchronous bounded Git probe completes or reports a subprocess error/timeout before returning. A nonzero exit, empty output, or caught subprocess/FileNotFoundError/OSError returns None. No detached backend is involved."
+    },
+    "interfaces.cli.commands.domains.health.observability_backend_runtime.docker_engine_not_ready_message.process": {
+      "closer": "return of synchronous run_protected_command (docker info; timeout=8; check=False)",
+      "shutdown_contract": "Synchronous bounded Docker probe completes or times out before returning. TimeoutExpired/OSError or a nonzero exit produces an operator readiness message; success returns None. No detached backend is involved."
+    }
+  },
   "source_reviews": {
     "src/bioetl/domain/composite/field_groups_models.py": "Reject non-boolean include_in_gold at the domain boundary. No external-resource acquisitions, bindings, ownership or cleanup changes.",
     "src/bioetl/composition/bootstrap/runtime/composite_support_helpers.py": "Propagate invalid existing field-group configuration instead of disabling Gold filtering. Resource creation expressions, ownership and cleanup are unchanged; relocate their source references after removal of the exception handler and unused import."

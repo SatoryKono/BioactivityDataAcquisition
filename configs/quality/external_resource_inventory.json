@@ -11223,7 +11223,7 @@
     "catalog_ref": "55b8b2c305c407cef939abef73a33bee8ef3fe60",
     "source_ref": "55b8b2c305c407cef939abef73a33bee8ef3fe60",
     "baseline_source_ref": "448ca3a86090d56d80539dfcfde4d5b843318324",
-    "review_sha256": "8717ed4730f6a56e92841cdbe360fcbb3fb0a4b09dde6161b4bf8701337e1c2f",
+    "review_sha256": "73061d351832fad6a2a0e6392f16683b37e36e8c30a4296bf43f97436d402dba",
     "production_file_count": 2670,
     "definition_count": 236,
     "creation_site_count": 612,
@@ -11518,7 +11518,7 @@
     },
     {
       "file": "configs/quality/external_resource_inventory/part-04.json",
-      "sha256": "74298241bb16d00d0e95d9a7af1e67e893a28add5759485e777775e5d4598c44",
+      "sha256": "772156b28647bcdde34b7a5ade0bfb02047c236e414722630bc5af23717fb483",
       "resource_count": 48
     },
     {
