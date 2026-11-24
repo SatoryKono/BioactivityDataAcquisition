@@ -3706,8 +3706,8 @@
         "_get_git_commit_cached"
       ],
       "owner": "infrastructure.storage.metadata.builder_base._get_git_commit_cached",
-      "closer": "run_protected_command / subprocess.run waits for completion; timeout terminates and waits for the child",
-      "shutdown_contract": "Synchronous git rev-parse --short HEAD with capture_output=True, text=True, timeout=5 and check=False. The caller waits and consumes captured output; nonzero exit or caught subprocess/OS errors return None.",
+      "closer": "run_protected_command waits via Popen.communicate; exceptions invoke _cleanup_process",
+      "shutdown_contract": "Synchronous git rev-parse --short HEAD with capture_output=True, text=True, timeout=5 and check=False. The wrapper waits via Popen.communicate; exceptions invoke _cleanup_process before re-raising. The caller returns None for nonzero exit or caught subprocess/OS errors.",
       "production_entrypoint": "bioetl run / run-all / debug / run-composite / workflow",
       "production_binding": [
         {
@@ -3767,7 +3767,7 @@
         },
         "timeout": {
           "applicability": "intrinsic timeout=5 passed to run_protected_command",
-          "expected": "The bounded subprocess call terminates/waits on timeout; _get_git_commit_cached catches SubprocessError and returns None.",
+          "expected": "Popen.communicate(timeout=5) raises TimeoutExpired; run_protected_command invokes _cleanup_process before re-raising, and _get_git_commit_cached catches SubprocessError and returns None.",
           "observation": "Observe deadline, close/drain completion and remaining resources separately. If no intrinsic deadline exists, inject at outer owner boundary.",
           "runtime_result": "NOT_RUN_12553"
         },
@@ -3794,8 +3794,8 @@
         {
           "file": "src/bioetl/infrastructure/storage/metadata/builder_base.py",
           "line": 38,
-          "closer": "run_protected_command / subprocess.run waits for completion; timeout terminates and waits for the child",
-          "contract": "Synchronous git rev-parse --short HEAD with capture_output=True, text=True, timeout=5 and check=False. The caller waits and consumes captured output; nonzero exit or caught subprocess/OS errors return None."
+          "closer": "run_protected_command waits via Popen.communicate; exceptions invoke _cleanup_process",
+          "contract": "Synchronous git rev-parse --short HEAD with capture_output=True, text=True, timeout=5 and check=False. The wrapper waits via Popen.communicate; exceptions invoke _cleanup_process before re-raising. The caller returns None for nonzero exit or caught subprocess/OS errors."
         }
       ]
     },
