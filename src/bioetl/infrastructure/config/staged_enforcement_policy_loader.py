@@ -28,7 +28,11 @@ _STAGE_BY_NAME = {
 def load_staged_enforcement_policies(
     registry_path: Path | None = None,
 ) -> dict[str, EnforcementPolicy]:
-    """Load staged-enforcement policy definitions from governance config."""
+    """Load policies, requiring unique check names among domain-engine rows.
+
+    Raises:
+        ValueError: If the registry has invalid rows or duplicate active check names.
+    """
     path = registry_path or DEFAULT_POLICY_REGISTRY_PATH
     payload = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     policies = payload.get("policies")
@@ -44,6 +48,8 @@ def load_staged_enforcement_policies(
         if row.get("domain_engine", True) is False:
             continue
         check_name = str(row["check_name"])
+        if check_name in loaded:
+            raise ValueError(f"Duplicate active check_name {check_name!r} in {path}")
         current_stage = _STAGE_BY_NAME[str(row["current_stage"])]
         loaded[check_name] = EnforcementPolicy(
             check_name=check_name,
