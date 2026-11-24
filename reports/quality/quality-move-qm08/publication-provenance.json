@@ -2136,11 +2136,11 @@
         "merged_at": "2026-11-23T20:53:12Z",
         "number": 13349
       },
-      "retrieved_at_utc": "2026-11-23T23:08:57Z",
+      "retrieved_at_utc": "2026-11-23T22:01:45Z",
       "retrieved_from": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/pulls/13349",
       "reviewed_source_commits": ["0ed2c1484dea9293789ac422fad145bf58114484"],
       "schema_version": 1,
-      "trust_statement": "Operator reviewed live GitHub publication lineage; not a runtime qualification or CI execution receipt.",
+      "trust_statement": "Supervisor reviewed live GitHub publication lineage; not a runtime qualification or CI execution receipt.",
       "verification_mode": "live_github"
     },
     {
@@ -2152,11 +2152,11 @@
         "merged_at": "2026-11-23T22:18:12Z",
         "number": 13365
       },
-      "retrieved_at_utc": "2026-11-23T23:10:59Z",
+      "retrieved_at_utc": "2026-11-23T23:16:06Z",
       "retrieved_from": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/pulls/13365",
       "reviewed_source_commits": ["889d91f2d7d023035ecf6aee66575b814b40026f"],
       "schema_version": 1,
-      "trust_statement": "Operator reviewed live GitHub publication lineage; not a runtime qualification or CI execution receipt.",
+      "trust_statement": "Supervisor reviewed live GitHub publication lineage; not a runtime qualification or CI execution receipt.",
       "verification_mode": "live_github"
     },
     {
@@ -2168,11 +2168,11 @@
         "merged_at": "2026-11-23T23:16:12Z",
         "number": 13360
       },
-      "retrieved_at_utc": "2026-11-24T01:18:53Z",
+      "retrieved_at_utc": "2026-11-24T01:11:26Z",
       "retrieved_from": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/pulls/13360",
       "reviewed_source_commits": ["cb81d0c2b28984746696825b325c934b75250418"],
       "schema_version": 1,
-      "trust_statement": "Operator reviewed live GitHub publication lineage; not a runtime qualification or CI execution receipt.",
+      "trust_statement": "Supervisor reviewed live GitHub publication lineage; not a runtime qualification or CI execution receipt.",
       "verification_mode": "live_github"
     },
     {
@@ -2184,11 +2184,11 @@
         "merged_at": "2026-11-24T00:17:21Z",
         "number": 13338
       },
-      "retrieved_at_utc": "2026-11-24T01:30:59Z",
+      "retrieved_at_utc": "2026-11-24T01:23:52Z",
       "retrieved_from": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/pulls/13338",
       "reviewed_source_commits": ["0798142e73edb4fe66d83b53f1ca37ede9e0f31b"],
       "schema_version": 1,
-      "trust_statement": "Operator reviewed live GitHub publication lineage; not a runtime qualification or CI execution receipt.",
+      "trust_statement": "Supervisor reviewed live GitHub publication lineage; not a runtime qualification or CI execution receipt.",
       "verification_mode": "live_github"
     },
     {
@@ -2200,11 +2200,11 @@
         "merged_at": "2026-11-24T01:16:09Z",
         "number": 13344
       },
-      "retrieved_at_utc": "2026-11-24T02:00:09Z",
+      "retrieved_at_utc": "2026-11-24T01:56:42Z",
       "retrieved_from": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/pulls/13344",
       "reviewed_source_commits": ["b0569219ccccdb82c780e80ccb805ca13e0019c5"],
       "schema_version": 1,
-      "trust_statement": "Operator reviewed live GitHub publication lineage; not a runtime qualification or CI execution receipt.",
+      "trust_statement": "Supervisor reviewed live GitHub publication lineage; not a runtime qualification or CI execution receipt.",
       "verification_mode": "live_github"
     }
   ],

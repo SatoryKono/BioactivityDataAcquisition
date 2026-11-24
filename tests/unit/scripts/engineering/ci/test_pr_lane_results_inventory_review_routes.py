@@ -1,4 +1,4 @@
-"""Keep pr13166 inventory review snapshots on their bounded impact owners."""
+"""Keep inventory review snapshots on their bounded impact owners."""
 
 from __future__ import annotations
 
