@@ -11,6 +11,8 @@
 from __future__ import annotations
 
 import json
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -154,6 +156,67 @@ classifiers:
         )
         == "custom_assertion"
     )
+
+
+@pytest.mark.parametrize("returncode", [0, 1])
+@pytest.mark.parametrize("root_option", ["--r", "--repo", "--repo-root"])
+def test_read_only_lane__owner_exit__propagates_without_artifacts(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, returncode: int, root_option: str
+) -> None:
+    commands = []
+
+    def fake_run(command, **kwargs):
+        commands.append(command)
+        return subprocess.CompletedProcess(command, returncode)
+
+    monkeypatch.setattr(test_health.subprocess, "run", fake_run)
+    reports = tmp_path / "reports"
+    result = test_health.main(
+        [
+            "run-tests",
+            "--suite",
+            "architecture-read-only-audit",
+            "--reports-dir",
+            str(reports),
+            "--timeout-seconds",
+            "5",
+            root_option,
+            "../other",
+        ]
+    )
+    assert result == returncode
+    assert commands == [
+        [
+            sys.executable,
+            "-B",
+            "-m",
+            "scripts.engineering.qa",
+            "run-architecture-audit-read-only",
+            "--timeout-seconds",
+            "5",
+            root_option,
+            "../other",
+        ]
+    ]
+    assert not reports.exists()
+
+
+@pytest.mark.parametrize("extra", [["--skip-preflight"], ["--", "-q"]])
+def test_read_only_lane__pytest_options__are_rejected(
+    tmp_path: Path, extra: list[str]
+) -> None:
+    with pytest.raises(SystemExit, match="2"):
+        test_health.main(
+            [
+                "run-tests",
+                "--suite",
+                "architecture-read-only-audit",
+                "--reports-dir",
+                str(tmp_path / "reports"),
+                *extra,
+            ]
+        )
+    assert not (tmp_path / "reports").exists()
 
 
 def test_build_run_plan_for_direct_lane_adds_single_junit_xml(
