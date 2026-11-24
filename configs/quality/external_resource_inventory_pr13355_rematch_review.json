@@ -1,0 +1,8 @@
+{
+  "catalog_ref": "396e7499cfec95cbdb198048effd4f85dfc318c5",
+  "schema_version": 1,
+  "source_ref": "12241630d6950147c2716af2b35e6d431dea86b0",
+  "source_reviews": {
+    "src/bioetl/infrastructure/config/contract_registry_loader.py": "Docstring and diagnostic copy clarify timeout classification and executor join semantics. Existing file reads, executor creation, context-managed cleanup, and return behavior remain unchanged; source sites only relocate."
+  }
+}
