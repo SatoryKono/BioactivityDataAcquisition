@@ -18,7 +18,6 @@ from iuphar_target_class.integration_acceptance import (
 )
 from iuphar_target_class.matching import CatalogTarget
 from iuphar_target_class.models import ProviderAnnotation, RawTargetRow, RunProvenance
-from iuphar_target_class.policy import LOCAL_CATALOG_VERSION
 from iuphar_target_class.pipeline import IndexedSnapshot, classify_batch
 from iuphar_target_class.pipeline_io import (
     read_bioetl_target_kernel_csv_v1,
