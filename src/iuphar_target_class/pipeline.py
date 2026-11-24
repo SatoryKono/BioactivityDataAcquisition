@@ -21,11 +21,14 @@ from .gtopdb_2026_3_1 import FAMILY_ROWS
 from .hierarchy import (
     FamilyNode,
     HierarchyResult,
+    allowed_subclass_vocabulary,
+    hierarchy_for_graph_defect,
     is_synthetic_local_family_id,
     normalize_provider_class,
+    validate_family_graph,
 )
 from .iuphar_mapping import approved_class_mappings, approved_subclass_mappings
-from .local_layer import Prediction, apply_local
+from .local_layer import apply_local, predictions_from_row
 from .matching import (
     METHOD_ORDER,
     Candidate,
@@ -46,7 +49,13 @@ from .models import (
     ValidatedInput,
 )
 from .normalization import isolated_invalid_result, validate_input
-from .policy import GRAPH_MAX_VISITED_NODES, local_rules, validate_rules
+from .policy import (
+    GRAPH_MAX_DEPTH,
+    GRAPH_MAX_VISITED_NODES,
+    local_evidence_content,
+    local_rules,
+    validate_rules,
+)
 from .resolution import ResolutionInput, select_effective_class
 
 
@@ -71,6 +80,26 @@ class IndexedSnapshot:
     admission_complete: bool | None = None
     type_to_subclass: Mapping[str, str] = field(default_factory=dict)
     family_to_subclass: Mapping[str, str] = field(default_factory=dict)
+    graph_defect: Diagnostic | None = None
+
+    def __post_init__(self) -> None:
+        """Copy every mapping so a later edit of the caller's dict is ignored."""
+        object.__setattr__(self, "lookup", _frozen_lookup(self.lookup))
+        object.__setattr__(self, "annotations", _frozen_annotations(self.annotations))
+        object.__setattr__(self, "families", _frozen_families(self.families))
+        object.__setattr__(self, "type_to_class", _frozen_strings(self.type_to_class))
+        object.__setattr__(
+            self, "family_to_class", _frozen_strings(self.family_to_class)
+        )
+        object.__setattr__(
+            self, "species_annotations", _frozen_species(self.species_annotations)
+        )
+        object.__setattr__(
+            self, "type_to_subclass", _frozen_strings(self.type_to_subclass)
+        )
+        object.__setattr__(
+            self, "family_to_subclass", _frozen_strings(self.family_to_subclass)
+        )
 
     @classmethod
     def from_approved_gtopdb(
@@ -85,14 +114,19 @@ class IndexedSnapshot:
         species_annotations: Mapping[tuple[str, str], ProviderAnnotation] | None = None,
         admission_complete: bool | None = None,
     ) -> IndexedSnapshot:
-        """Bind a frozen provider snapshot to the exact approved release."""
+        """Bind a frozen provider snapshot to the exact approved release.
+
+        The full pinned family graph is admitted before the snapshot exists.
+        A cycle, a missing parent, or a root distance above the limit blocks
+        the snapshot, including a branch that no requested target uses.
+        """
         types, families = approved_class_mappings(release)
         type_sub, family_sub = approved_subclass_mappings(release)
         nodes = tuple(
             FamilyNode(str(family), tuple(map(str, parents)), source_type)
             for family, source_type, parents in FAMILY_ROWS
         )
-        return cls.build(
+        snapshot = cls.build(
             snapshot_id=snapshot_id,
             mapping_version=release,
             complete=complete,
@@ -107,6 +141,12 @@ class IndexedSnapshot:
             species_annotations=species_annotations,
             admission_complete=admission_complete,
         )
+        if snapshot.graph_defect is not None:
+            raise ValueError(
+                "approved family graph is not admitted: "
+                + snapshot.graph_defect.message
+            )
+        return snapshot
 
     @classmethod
     def build(
@@ -131,6 +171,12 @@ class IndexedSnapshot:
         _validate_provider_payloads(annotations)
         scoped = dict(species_annotations or {})
         _validate_species_payloads(scoped)
+        admission = validate_family_graph(
+            family_nodes,
+            (),
+            max_depth=GRAPH_MAX_DEPTH,
+            max_visited_nodes=GRAPH_MAX_VISITED_NODES,
+        )
         return cls(
             snapshot_id,
             mapping_version,
@@ -147,7 +193,36 @@ class IndexedSnapshot:
             admission_complete,
             MappingProxyType(dict(type_to_subclass or {})),
             MappingProxyType(dict(family_to_subclass or {})),
+            admission,
         )
+
+
+def _frozen_lookup(
+    mapping: Mapping[tuple[str, str], tuple[int, ...]],
+) -> Mapping[tuple[str, str], tuple[int, ...]]:
+    return MappingProxyType({key: tuple(value) for key, value in mapping.items()})
+
+
+def _frozen_families(
+    mapping: Mapping[str, tuple[FamilyNode, ...]],
+) -> Mapping[str, tuple[FamilyNode, ...]]:
+    return MappingProxyType({key: tuple(value) for key, value in mapping.items()})
+
+
+def _frozen_strings(mapping: Mapping[str, str]) -> Mapping[str, str]:
+    return MappingProxyType(dict(mapping))
+
+
+def _frozen_annotations(
+    mapping: Mapping[str, ProviderAnnotation],
+) -> Mapping[str, ProviderAnnotation]:
+    return MappingProxyType(dict(mapping))
+
+
+def _frozen_species(
+    mapping: Mapping[tuple[str, str], ProviderAnnotation],
+) -> Mapping[tuple[str, str], ProviderAnnotation]:
+    return MappingProxyType(dict(mapping))
 
 
 def _snapshot_indexes(
@@ -389,8 +464,16 @@ def _direct(
 ) -> HierarchyResult | None:
     if annotation is None:
         return None
+    type_name = annotation.type_raw.strip().lower() if annotation.type_raw else None
+    if ctx.graph_defect is not None:
+        return hierarchy_for_graph_defect(
+            ctx.graph_defect,
+            type_name=type_name,
+            type_to_class=ctx.type_to_class,
+            type_to_subclass=ctx.type_to_subclass,
+        )
     return normalize_provider_class(
-        type_name=annotation.type_raw.strip().lower() if annotation.type_raw else None,
+        type_name=type_name,
         family_ids=annotation.family_ids,
         nodes=_ancestor_records(ctx, annotation.family_ids),
         type_to_class=ctx.type_to_class,
@@ -453,12 +536,13 @@ def _evidence(
                 "match",
             )
         )
+    rules_for_evidence = dict(local.local_rules_by_evidence)
     draft.extend(
         EvidenceDraft(
             row.input_row_id,
             "local_rule",
             hashlib.sha256(ref.encode()).hexdigest(),
-            f"{ref}; rules={','.join(local.local_rule_ids)}",
+            local_evidence_content(ref, rules_for_evidence[ref]),
             "local",
         )
         for ref in local.local_evidence_ids
@@ -679,8 +763,8 @@ def _resolution_input(
     """Project frozen classification inputs without changing fallback rules."""
     subclass = direct.iuphar_subclass if direct else None
     # Family-only subclass labels must be allowed even when type→subclass is empty.
-    direct_vocabulary = frozenset(snapshot.type_to_subclass.values()) | frozenset(
-        snapshot.family_to_subclass.values()
+    direct_vocabulary = allowed_subclass_vocabulary(
+        snapshot.type_to_subclass, snapshot.family_to_subclass
     )
     return ResolutionInput(
         match_status=match.match_status or "contract_error",
@@ -721,10 +805,10 @@ def _complete(
         keyword_ids=row.keywords,
         free_text=row.name,
         organism=row.taxon,
-        predictions=tuple(
-            Prediction(layer, value, False, False, layer)
-            for layer, value in (("L1", row.predicted_l1), ("L2", row.predicted_l2))
-            if value is not None
+        predictions=predictions_from_row(
+            predicted_l1=row.predicted_l1,
+            predicted_l2=row.predicted_l2,
+            raw_fields=row.raw_fields,
         ),
     )
     direct_class, rule_id, annotation_status = _direct_metadata(direct, match)

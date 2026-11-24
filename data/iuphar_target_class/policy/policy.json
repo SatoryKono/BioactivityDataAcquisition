@@ -44,6 +44,7 @@
       "limits": "проектная группировка, не схема API; без утверждённого отображения класс не присваивается",
       "marks_direct_layer": false,
       "output": "Receptor",
+      "priority": 100,
       "rule_id": "class:Receptor",
       "version": "plan-v1-r9"
     },
@@ -54,6 +55,7 @@
       "limits": "проектная группировка, не схема API; без утверждённого отображения класс не присваивается",
       "marks_direct_layer": false,
       "output": "Ion Channel",
+      "priority": 100,
       "rule_id": "class:Ion Channel",
       "version": "plan-v1-r9"
     },
@@ -64,6 +66,7 @@
       "limits": "проектная группировка, не схема API; без утверждённого отображения класс не присваивается",
       "marks_direct_layer": false,
       "output": "Enzyme",
+      "priority": 100,
       "rule_id": "class:Enzyme",
       "version": "plan-v1-r9"
     },
@@ -74,6 +77,7 @@
       "limits": "проектная группировка, не схема API; без утверждённого отображения класс не присваивается",
       "marks_direct_layer": false,
       "output": "Transporter",
+      "priority": 100,
       "rule_id": "class:Transporter",
       "version": "plan-v1-r9"
     },
@@ -84,6 +88,7 @@
       "limits": "проектная группировка, не схема API; без утверждённого отображения класс не присваивается",
       "marks_direct_layer": false,
       "output": "Other Protein Target",
+      "priority": 100,
       "rule_id": "class:Other Protein Target",
       "version": "plan-v1-r9"
     }
@@ -456,6 +461,7 @@
         "limits": "только выпуск и явно перечисленные значения; не по названию, пути или типу предка",
         "marks_direct_layer": true,
         "output": "Enzyme",
+        "priority": 100,
         "rule_id": "iuphar_family:Enzyme",
         "version": "2026.3.1"
       },
@@ -500,6 +506,7 @@
         "limits": "только выпуск и явно перечисленные значения; не по названию, пути или типу предка",
         "marks_direct_layer": true,
         "output": "Ion Channel",
+        "priority": 100,
         "rule_id": "iuphar_family:Ion Channel",
         "version": "2026.3.1"
       },
@@ -614,6 +621,7 @@
         "limits": "только выпуск и явно перечисленные значения; не по названию, пути или типу предка",
         "marks_direct_layer": true,
         "output": "Other Protein Target",
+        "priority": 100,
         "rule_id": "iuphar_family:Other Protein Target",
         "version": "2026.3.1"
       },
@@ -770,6 +778,7 @@
         "limits": "только выпуск и явно перечисленные значения; не по названию, пути или типу предка",
         "marks_direct_layer": true,
         "output": "Receptor",
+        "priority": 100,
         "rule_id": "iuphar_family:Receptor",
         "version": "2026.3.1"
       },
@@ -892,6 +901,7 @@
         "limits": "только выпуск и явно перечисленные значения; не по названию, пути или типу предка",
         "marks_direct_layer": true,
         "output": "Transporter",
+        "priority": 100,
         "rule_id": "iuphar_family:Transporter",
         "version": "2026.3.1"
       }
@@ -920,6 +930,7 @@
         "limits": "только выпуск и явно перечисленные значения; не по названию, пути или типу предка",
         "marks_direct_layer": true,
         "output": "Enzyme",
+        "priority": 100,
         "rule_id": "iuphar_type:Enzyme",
         "source_types": [
           "enzyme"
@@ -933,6 +944,7 @@
         "limits": "только выпуск и явно перечисленные значения; не по названию, пути или типу предка",
         "marks_direct_layer": true,
         "output": "Ion Channel",
+        "priority": 100,
         "rule_id": "iuphar_type:Ion Channel",
         "source_types": [
           "lgic",
@@ -948,6 +960,7 @@
         "limits": "только выпуск и явно перечисленные значения; не по названию, пути или типу предка",
         "marks_direct_layer": true,
         "output": "Other Protein Target",
+        "priority": 100,
         "rule_id": "iuphar_type:Other Protein Target",
         "source_types": [
           "other_protein"
@@ -961,6 +974,7 @@
         "limits": "только выпуск и явно перечисленные значения; не по названию, пути или типу предка",
         "marks_direct_layer": true,
         "output": "Receptor",
+        "priority": 100,
         "rule_id": "iuphar_type:Receptor",
         "source_types": [
           "catalytic_receptor",
@@ -976,6 +990,7 @@
         "limits": "только выпуск и явно перечисленные значения; не по названию, пути или типу предка",
         "marks_direct_layer": true,
         "output": "Transporter",
+        "priority": 100,
         "rule_id": "iuphar_type:Transporter",
         "source_types": [
           "transporter"
@@ -1016,96 +1031,250 @@
     "role_assignment": "владелец результата — Федор Новиков; исполнитель модуля и проверяющий эталонов — Cursor, назначение владельца 2026-11-11",
     "usage": "candidate_only"
   },
+  "local_rule_catalog_sha256": "f5f83fd432363427bca12b47afbf2d75fac74510d33da078362c495e070d2ccf",
+  "local_rule_catalog_version": "local-rules-2026.11.23",
   "local_rules": [
     {
       "family": "ec",
-      "input_conditions": "EC с подтверждённой категорией 1",
-      "justification_source": "план v1 r8 шаг D, справочник IUBMB",
-      "limits": "категория EC, не класс IUPHAR; EC 7 не становится Transporter; слой local",
+      "input_conditions": "ec_category=1",
+      "justification_source": "план v1 r8 шаг D; справочник IUBMB",
+      "limits": "категория Oxidoreductase / Oxidoreductases, не идентификатор и не класс IUPHAR; EC 7 не становится Transporter; слой local",
       "marks_direct_layer": false,
       "output": "Oxidoreductases",
+      "priority": 0,
       "rule_id": "ec:1",
-      "version": "plan-v1-r9"
+      "version": "local-rules-2026.11.23"
     },
     {
       "family": "ec",
-      "input_conditions": "EC с подтверждённой категорией 2",
-      "justification_source": "план v1 r8 шаг D, справочник IUBMB",
-      "limits": "категория EC, не класс IUPHAR; EC 7 не становится Transporter; слой local",
+      "input_conditions": "ec_category=2",
+      "justification_source": "план v1 r8 шаг D; справочник IUBMB",
+      "limits": "категория Transferase / Transferases, не идентификатор и не класс IUPHAR; EC 7 не становится Transporter; слой local",
       "marks_direct_layer": false,
       "output": "Transferases",
+      "priority": 0,
       "rule_id": "ec:2",
-      "version": "plan-v1-r9"
+      "version": "local-rules-2026.11.23"
     },
     {
       "family": "ec",
-      "input_conditions": "EC с подтверждённой категорией 3",
-      "justification_source": "план v1 r8 шаг D, справочник IUBMB",
-      "limits": "категория EC, не класс IUPHAR; EC 7 не становится Transporter; слой local",
+      "input_conditions": "ec_category=3",
+      "justification_source": "план v1 r8 шаг D; справочник IUBMB",
+      "limits": "категория Hydrolase / Hydrolases, не идентификатор и не класс IUPHAR; EC 7 не становится Transporter; слой local",
       "marks_direct_layer": false,
       "output": "Hydrolases",
+      "priority": 0,
       "rule_id": "ec:3",
-      "version": "plan-v1-r9"
+      "version": "local-rules-2026.11.23"
     },
     {
       "family": "ec",
-      "input_conditions": "EC с подтверждённой категорией 4",
-      "justification_source": "план v1 r8 шаг D, справочник IUBMB",
-      "limits": "категория EC, не класс IUPHAR; EC 7 не становится Transporter; слой local",
+      "input_conditions": "ec_category=4",
+      "justification_source": "план v1 r8 шаг D; справочник IUBMB",
+      "limits": "категория Lyase / Lyases, не идентификатор и не класс IUPHAR; EC 7 не становится Transporter; слой local",
       "marks_direct_layer": false,
       "output": "Lyases",
+      "priority": 0,
       "rule_id": "ec:4",
-      "version": "plan-v1-r9"
+      "version": "local-rules-2026.11.23"
     },
     {
       "family": "ec",
-      "input_conditions": "EC с подтверждённой категорией 5",
-      "justification_source": "план v1 r8 шаг D, справочник IUBMB",
-      "limits": "категория EC, не класс IUPHAR; EC 7 не становится Transporter; слой local",
+      "input_conditions": "ec_category=5",
+      "justification_source": "план v1 r8 шаг D; справочник IUBMB",
+      "limits": "категория Isomerase / Isomerases, не идентификатор и не класс IUPHAR; EC 7 не становится Transporter; слой local",
       "marks_direct_layer": false,
       "output": "Isomerases",
+      "priority": 0,
       "rule_id": "ec:5",
-      "version": "plan-v1-r9"
+      "version": "local-rules-2026.11.23"
     },
     {
       "family": "ec",
-      "input_conditions": "EC с подтверждённой категорией 6",
-      "justification_source": "план v1 r8 шаг D, справочник IUBMB",
-      "limits": "категория EC, не класс IUPHAR; EC 7 не становится Transporter; слой local",
+      "input_conditions": "ec_category=6",
+      "justification_source": "план v1 r8 шаг D; справочник IUBMB",
+      "limits": "категория Ligase / Ligases, не идентификатор и не класс IUPHAR; EC 7 не становится Transporter; слой local",
       "marks_direct_layer": false,
       "output": "Ligases",
+      "priority": 0,
       "rule_id": "ec:6",
-      "version": "plan-v1-r9"
+      "version": "local-rules-2026.11.23"
     },
     {
       "family": "ec",
-      "input_conditions": "EC с подтверждённой категорией 7",
-      "justification_source": "план v1 r8 шаг D, справочник IUBMB",
-      "limits": "категория EC, не класс IUPHAR; EC 7 не становится Transporter; слой local",
+      "input_conditions": "ec_category=7",
+      "justification_source": "план v1 r8 шаг D; справочник IUBMB",
+      "limits": "категория Translocase / Translocases, не идентификатор и не класс IUPHAR; EC 7 не становится Transporter; слой local",
       "marks_direct_layer": false,
       "output": "Translocases",
+      "priority": 0,
       "rule_id": "ec:7",
-      "version": "plan-v1-r9"
+      "version": "local-rules-2026.11.23"
+    },
+    {
+      "family": "ec_class",
+      "input_conditions": "ec_category=1",
+      "justification_source": "IUBMB EC 1 Oxidoreductase входит в рабочий класс Enzyme; несколько номеров этой категории не создают Multifunctional",
+      "limits": "не пишет iuphar_*; не выбирает первую строку; равный приоритет с другим классом оставляет конфликт",
+      "marks_direct_layer": false,
+      "output": "Enzyme",
+      "priority": 100,
+      "rule_id": "ec-class:1",
+      "version": "local-rules-2026.11.23"
+    },
+    {
+      "family": "ec_class",
+      "input_conditions": "ec_category=2",
+      "justification_source": "IUBMB EC 2 Transferase входит в рабочий класс Enzyme; несколько номеров этой категории не создают Multifunctional",
+      "limits": "не пишет iuphar_*; не выбирает первую строку; равный приоритет с другим классом оставляет конфликт",
+      "marks_direct_layer": false,
+      "output": "Enzyme",
+      "priority": 100,
+      "rule_id": "ec-class:2",
+      "version": "local-rules-2026.11.23"
+    },
+    {
+      "family": "ec_class",
+      "input_conditions": "ec_category=3",
+      "justification_source": "IUBMB EC 3 Hydrolase входит в рабочий класс Enzyme; несколько номеров этой категории не создают Multifunctional",
+      "limits": "не пишет iuphar_*; не выбирает первую строку; равный приоритет с другим классом оставляет конфликт",
+      "marks_direct_layer": false,
+      "output": "Enzyme",
+      "priority": 100,
+      "rule_id": "ec-class:3",
+      "version": "local-rules-2026.11.23"
+    },
+    {
+      "family": "ec_class",
+      "input_conditions": "ec_category=4",
+      "justification_source": "IUBMB EC 4 Lyase входит в рабочий класс Enzyme; несколько номеров этой категории не создают Multifunctional",
+      "limits": "не пишет iuphar_*; не выбирает первую строку; равный приоритет с другим классом оставляет конфликт",
+      "marks_direct_layer": false,
+      "output": "Enzyme",
+      "priority": 100,
+      "rule_id": "ec-class:4",
+      "version": "local-rules-2026.11.23"
+    },
+    {
+      "family": "ec_class",
+      "input_conditions": "ec_category=5",
+      "justification_source": "IUBMB EC 5 Isomerase входит в рабочий класс Enzyme; несколько номеров этой категории не создают Multifunctional",
+      "limits": "не пишет iuphar_*; не выбирает первую строку; равный приоритет с другим классом оставляет конфликт",
+      "marks_direct_layer": false,
+      "output": "Enzyme",
+      "priority": 100,
+      "rule_id": "ec-class:5",
+      "version": "local-rules-2026.11.23"
+    },
+    {
+      "family": "ec_class",
+      "input_conditions": "ec_category=6",
+      "justification_source": "IUBMB EC 6 Ligase входит в рабочий класс Enzyme; несколько номеров этой категории не создают Multifunctional",
+      "limits": "не пишет iuphar_*; не выбирает первую строку; равный приоритет с другим классом оставляет конфликт",
+      "marks_direct_layer": false,
+      "output": "Enzyme",
+      "priority": 100,
+      "rule_id": "ec-class:6",
+      "version": "local-rules-2026.11.23"
+    },
+    {
+      "family": "annotation",
+      "input_conditions": "keyword_id=KW-0378",
+      "justification_source": "UniProt KW-0378 Hydrolase",
+      "limits": "только точный идентификатор; свободный текст, zinc finger и transcription factor класс не назначают",
+      "marks_direct_layer": false,
+      "output": "Enzyme",
+      "priority": 100,
+      "rule_id": "annotation:KW-0378",
+      "version": "local-rules-2026.11.23"
+    },
+    {
+      "family": "annotation",
+      "input_conditions": "keyword_id=KW-0418",
+      "justification_source": "UniProt KW-0418 Kinase; не подстрока свободного текста",
+      "limits": "только точный идентификатор; свободный текст, zinc finger и transcription factor класс не назначают",
+      "marks_direct_layer": false,
+      "output": "Enzyme",
+      "priority": 100,
+      "rule_id": "annotation:KW-0418",
+      "version": "local-rules-2026.11.23"
+    },
+    {
+      "family": "annotation",
+      "input_conditions": "keyword_id=KW-0675",
+      "justification_source": "UniProt KW-0675 Receptor; не zinc finger и не transcription",
+      "limits": "только точный идентификатор; свободный текст, zinc finger и transcription factor класс не назначают",
+      "marks_direct_layer": false,
+      "output": "Receptor",
+      "priority": 100,
+      "rule_id": "annotation:KW-0675",
+      "version": "local-rules-2026.11.23"
+    },
+    {
+      "family": "annotation",
+      "input_conditions": "keyword_id=KW-0808",
+      "justification_source": "UniProt KW-0808 Transferase",
+      "limits": "только точный идентификатор; свободный текст, zinc finger и transcription factor класс не назначают",
+      "marks_direct_layer": false,
+      "output": "Enzyme",
+      "priority": 100,
+      "rule_id": "annotation:KW-0808",
+      "version": "local-rules-2026.11.23"
     },
     {
       "family": "l1_l2",
-      "input_conditions": "predicted L1/L2 при неизвестном происхождении",
-      "justification_source": "план v1 r8 шаг D; этап 0: происхождение не установлено",
+      "input_conditions": "provenance missing",
+      "justification_source": "происхождение не подтверждено свидетельством и не берётся из константы True",
       "limits": "не независимое подтверждение и не direct-слой",
       "marks_direct_layer": false,
       "output": "candidate_only",
-      "rule_id": "predicted-l1-l2",
-      "version": "plan-v1-r9"
+      "priority": 0,
+      "rule_id": "predicted-l1-l2-unknown",
+      "version": "local-rules-2026.11.23"
+    },
+    {
+      "family": "l1_l2",
+      "input_conditions": "relation=iuphar",
+      "justification_source": "предсказание, выведенное из IUPHAR, не подтверждает IUPHAR повторно",
+      "limits": "не независимое свидетельство direct-слоя",
+      "marks_direct_layer": false,
+      "output": "dependent_not_confirmation",
+      "priority": 0,
+      "rule_id": "predicted-l1-l2-iuphar-derived",
+      "version": "local-rules-2026.11.23"
+    },
+    {
+      "family": "l1_l2",
+      "input_conditions": "provenance present and relation=independent",
+      "justification_source": "независимость допустима только при явном relation=independent и непустом provenance",
+      "limits": "значение True без такого свидетельства не принимается",
+      "marks_direct_layer": false,
+      "output": "predicted working class",
+      "priority": 100,
+      "rule_id": "predicted-l1-l2-independent",
+      "version": "local-rules-2026.11.23"
     },
     {
       "family": "free_text",
-      "input_conditions": "свободный текст, подстроки kinase/channel/zinc finger",
+      "input_conditions": "свободный текст, подстроки kinase/channel/zinc finger/transcription factor",
       "justification_source": "план v1 r8 шаг D",
       "limits": "класс автоматически не определяется",
       "marks_direct_layer": false,
       "output": "кандидат ручного разбора",
+      "priority": 0,
       "rule_id": "free-text",
-      "version": "plan-v1-r9"
+      "version": "local-rules-2026.11.23"
+    },
+    {
+      "family": "rejected",
+      "input_conditions": "keyword KW-0863 or KW-0804 or KW-0805 or free text zinc finger/transcription factor",
+      "justification_source": "нет специфического основания назначать nuclear hormone receptor",
+      "limits": "правило не применяется; TF и zinc finger не становятся nuclear hormone receptor",
+      "marks_direct_layer": false,
+      "output": "not_assigned",
+      "priority": 0,
+      "rule_id": "rejected:tf-zinc-finger-nhr",
+      "version": "local-rules-2026.11.23"
     }
   ],
   "parameters": {
@@ -1301,7 +1470,7 @@
       "immutability": "Originals, historical results, and stage-0 copies are preserved; recomputes are separate runs with new digests",
       "normalization_version": "Missing-marker or identifier normalization changes publish a new normalization_version; current approved value is unset",
       "profile_envelope": "snapshot_manifest points at the profile envelope; digest is SHA-256 of exact profile bytes; acceptance and biological_accuracy_accepted stay false unless independently proven",
-      "rules_version": "New or edited local/direct rules publish a new rules_version; current baseline is plan-v1-r9",
+      "rules_version": "New or edited local/direct rules publish a new rules_version; current baseline is local-rules-2026.11.23",
       "table_contract": "Business-row / Gold hash scope: off and shadow keep chembl_target_v3.0 (TargetClassificationConfig.contract_version 3.0.0); enrich alone advances to chembl_target_v3.1 / 3.1.0 and the nine additive columns"
     },
     "source_unavailable_vs_not_found": {
