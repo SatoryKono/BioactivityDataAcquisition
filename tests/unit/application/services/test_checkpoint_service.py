@@ -37,6 +37,9 @@ from bioetl.application.services.checkpoint.checkpoint_service import (
     CheckpointInfo,
     CheckpointService,
 )
+from bioetl.application.services.workflow._observability_workflow_lookup_support import (
+    resolve_checkpoint_for_run,
+)
 from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 
@@ -293,6 +296,26 @@ class TestCheckpointServiceGetCheckpoint:
 @pytest.mark.unit
 class TestCheckpointServiceExtendedLookupCoverage:
     """Additional coverage for run/manifest lookup and tracing helpers."""
+
+    @pytest.mark.asyncio
+    async def test_workflow_lookup_preserves_storage_identity_without_fallback(
+        self, checkpoint_service, mock_checkpoint_port
+    ) -> None:
+        run_id = str(deterministic_uuid_from_callsite("checkpoint-service-for-run"))
+        mock_checkpoint_port.load_for_run = AsyncMock(
+            return_value=(run_id, {"run_id": "other-run"})
+        )
+
+        result = await resolve_checkpoint_for_run(
+            checkpoint_service=checkpoint_service,
+            pipeline_name="pipeline1",
+            run_id=run_id,
+        )
+
+        assert result is not None
+        assert result.run_id == run_id
+        assert result.metadata == {"run_id": "other-run"}
+        mock_checkpoint_port.load.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def test_get_checkpoint_for_run_found(

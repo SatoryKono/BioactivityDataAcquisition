@@ -65,6 +65,8 @@ def resolve_required_evidence_profile(diagnostics: dict[str, object]) -> str | N
 def classify_checkpoint_status(checkpoint: CheckpointInfo | None) -> list[str]:
     if checkpoint is None:
         return ["checkpoint"]
+    if not checkpoint.run_id:
+        return ["checkpoint_missing_run_identity"]
     if checkpoint.metadata.get("status") == "mismatched_run_context":
         return ["checkpoint_mismatched_run"]
     return []
