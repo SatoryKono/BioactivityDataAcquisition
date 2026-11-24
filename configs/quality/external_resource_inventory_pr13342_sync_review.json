@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "3f692291b83721d83dc44682edeaf9162a8923f1",
+  "source_ref": "b621c0ff21d58ffd51c30fa42fefb0bea57790f5",
+  "source_reviews": {
+    "src/bioetl/application/services/workflow/workflow_transform_service.py": "Merge preserves the keyword-only context handling and canonical workflow transform dispatch from main. No resource acquisition or cleanup ownership is changed by RF-011.",
+    "src/bioetl/application/workflow/transforms/__init__.py": "Merge preserves the transform exports from main. Export changes contain no resource acquisitions or cleanup boundaries.",
+    "src/bioetl/infrastructure/config/staged_enforcement_policy_loader.py": "Merge preserves staged enforcement policy loading from main. Review retains the existing file/executor cleanup and timeout semantics; source references are requalified without runtime claims."
+  }
+}
