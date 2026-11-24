@@ -27,6 +27,7 @@ FEATURE_FIELDS: tuple[str, ...] = (
 _DEPENDENCY_COLUMNS = {
     "protein_classifications": (
         "chembl.target_protein_classification.protein_classifications",
+        "chembl.target_component.protein_classifications",
     ),
     "target_protein_keywords": ("uniprot.protein.keywords",),
     "target_ec_numbers": ("uniprot.protein.protein_ec_numbers",),
@@ -40,7 +41,7 @@ def project_enriched_features(row: Mapping[str, object]) -> dict[str, object]:
     """Keep present whitelist fields. Absence is explicit and is not invented."""
     features = {}
     for key in FEATURE_FIELDS:
-        for column in (*_DEPENDENCY_COLUMNS.get(key, ()), f"chembl.target.{key}", key):
+        for column in (*_DEPENDENCY_COLUMNS.get(key, ()), key, f"chembl.target.{key}"):
             if (value := row.get(column)) is not None:
                 features[key] = value
                 break

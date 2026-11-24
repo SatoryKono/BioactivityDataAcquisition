@@ -179,6 +179,10 @@ def test_restored_v32_rows_accept_only_the_selected_classification_fields():
         validation._assert_restored_values(
             "CHEMBL1", restored, {**current, "foreign": None}, contract="3.2.0"
         )
+    with pytest.raises(ValueError, match="restored target changed"):
+        validation._assert_restored_values(
+            "CHEMBL1", restored, {**current, "target_id": "CHEMBL2"}, contract="3.2.0"
+        )
 
 
 def test_source_drift_refuses_before_any_candidate_write(source_bundle):
