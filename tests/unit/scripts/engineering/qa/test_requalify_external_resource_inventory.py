@@ -102,6 +102,14 @@ def candidate(
         "production_entrypoint": "fixture.read_file",
         "call_path": ["read_file", "open"],
         "creation_sites": [deepcopy(ref)],
+        "shutdown_by_site": [
+            {
+                "file": SOURCE,
+                "line": 2,
+                "closer": "with exit",
+                "contract": "file context exits",
+            }
+        ],
         "production_binding": [deepcopy(ref)],
         "qualification": "SOURCE_QUALIFIED_NOT_RUNTIME_VERIFIED",
         "scenarios": {
@@ -194,6 +202,14 @@ def test_check_update_check_is_readonly_idempotent_and_preserves_history(
     assert invoke(root, review, "--update") == 0
     assert outputs(root) == after
     current = inventory.load_catalog(root)
+    assert current["resources"][0]["shutdown_by_site"] == [
+        {
+            "file": SOURCE,
+            "line": 4,
+            "closer": "with exit",
+            "contract": "file context exits",
+        }
+    ]
     assert (
         current["prior_candidate_dispositions"]
         == original["prior_candidate_dispositions"]

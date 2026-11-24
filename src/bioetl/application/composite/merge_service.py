@@ -149,6 +149,7 @@ class MergeService(
         self._coalesce_policy = collaborators.coalesce_policy
         self._conflict_resolver = collaborators.conflict_resolver
         self._join_planner = collaborators.join_planner
+        self._target_classification_stage: object | None = None
         _io_host: _MergeIOHost = self
 
     async def merge(
@@ -201,3 +202,13 @@ class MergeService(
         if self._execution_hook is not None:
             return await self._execution_hook(request, execute)
         return await execute(request)
+
+    def bind_post_join_target_classification(self, stage: object | None) -> None:
+        """Attach the composition-built post-join classifier, if one is enabled."""
+        from bioetl.application.composite.helpers.target_classification_stage import (
+            CompositeTargetClassification,
+        )
+
+        if stage is not None and not isinstance(stage, CompositeTargetClassification):
+            raise TypeError("post-join target classification stage has the wrong type")
+        self._target_classification_stage = stage

@@ -35,6 +35,9 @@ class TargetClassificationRunState:
     _pending: dict[tuple[str, str, int], TargetClassificationResult] = field(
         default_factory=dict, init=False
     )
+    _detached: dict[tuple[str, str, str], TargetClassificationResult] = field(
+        default_factory=dict, init=False
+    )
     _published: dict[str, set[str]] = field(default_factory=dict, init=False)
 
     @staticmethod
@@ -60,6 +63,41 @@ class TargetClassificationRunState:
             return business_data
         return {**business_data, **result.projection}
 
+    def classify_detached(
+        self,
+        *,
+        run_id: str,
+        batch_id: str,
+        row_id: str,
+        business_data: JsonDict,
+        run_started_at: str,
+    ) -> TargetClassificationResult:
+        """Classify one enriched row and keep evidence unpublished."""
+        result = self.classifier.classify_record(
+            business_data,
+            input_row_id=row_id,
+            run_id=run_id,
+            run_started_at=run_started_at,
+        )
+        self._detached[(run_id, batch_id, row_id)] = result
+        return result
+
+    def commit_detached(self, run_id: str) -> TargetClassificationArtifactReference:
+        """Publish every detached row for ``run_id``, then complete the run."""
+        pending = sorted(key for key in self._detached if key[0] == run_id)
+        for key in pending:
+            result = self._detached[key]
+            self.evidence.publish_result(result, run_id=key[0], batch_id=key[1])
+            self._published.setdefault(key[0], set()).add(result.input_row_id)
+            del self._detached[key]
+        return self.finalize_run_id(run_id)
+
+    def abandon_detached(self, run_id: str) -> None:
+        """Drop unpublished detached rows. A completed manifest is not written."""
+        pending = [key for key in self._detached if key[0] == run_id]
+        for key in pending:
+            self._detached.pop(key, None)
+
     def discard(self, context: PipelineContext, index: int) -> None:
         """Release unpublished evidence when row finalization ends."""
         self._pending.pop(self._key(context, index), None)
@@ -77,7 +115,10 @@ class TargetClassificationRunState:
         self, context: PipelineContext
     ) -> TargetClassificationArtifactReference:
         """Complete evidence only after the runner has completed all data writes."""
-        run_id = str(context.run_id)
+        return self.finalize_run_id(str(context.run_id))
+
+    def finalize_run_id(self, run_id: str) -> TargetClassificationArtifactReference:
+        """Complete one run occurrence after its rows have been published."""
         expected = tuple(sorted(self._published.get(run_id, set())))
         reference = self.evidence.finalize_run(run_id=run_id, expected_row_ids=expected)
         record_run_observation(

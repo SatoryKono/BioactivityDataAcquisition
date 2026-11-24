@@ -36,11 +36,13 @@ from unittest.mock import patch
 import polars as pl
 import pytest
 
+from bioetl.application.composite.helpers.merger_post_join_persist import (
+    persist_and_build_result,
+)
 from bioetl.application.composite.merger_post_join import (
     MergePostJoinContext,
     finalize_merged_dataframe,
     finalize_post_join_context,
-    persist_and_build_result,
 )
 from bioetl.application.services.target_runtime.post_join_classification import (
     attach_post_join_target_classifier,
@@ -229,7 +231,7 @@ class TestPersistAndBuildResult:
         started_at = datetime(2020, 1, 1, tzinfo=UTC)
 
         with patch(
-            "bioetl.application.composite.merger_post_join.derive_completion_timestamp",
+            "bioetl.application.composite.helpers.merger_post_join_persist.derive_completion_timestamp",
             return_value=(started_at, 3.5),
         ):
             await persist_and_build_result(

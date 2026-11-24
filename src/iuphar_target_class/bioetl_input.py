@@ -86,10 +86,19 @@ def project_target_fields(
     RF-002 (#13310): ``component_accessions`` are primary UniProt anchors;
     ``target_xref_uniprot_ids`` are split into proven equivalents (overlap with
     primary) and auxiliary xrefs. Only primary values fill ``uniprot`` so
-    unknown auxiliary tokens cannot open empty exact-channels. All original
-    business fields remain in ``source_business_data``.
+    unknown auxiliary tokens cannot open empty exact-channels. A joined
+    ``uniprot_accession`` is a primary anchor from the dependency join, not an
+    auxiliary xref. All original business fields remain in
+    ``source_business_data``.
     """
-    primary = tuple(dict.fromkeys(_tokens(data.get("component_accessions"))))
+    primary = tuple(
+        dict.fromkeys(
+            (
+                *_tokens(data.get("component_accessions")),
+                *_tokens(data.get("uniprot_accession")),
+            )
+        )
+    )
     xref = tuple(dict.fromkeys(_tokens(data.get("target_xref_uniprot_ids"))))
     primary_set = set(primary)
     proven = tuple(item for item in xref if item in primary_set)
@@ -102,7 +111,7 @@ def project_target_fields(
             )
         )
     )
-    return {
+    projected = {
         "target_chembl_id": _text(data.get("target_id")),
         # ChEMBL identity is never passed as the kernel's explicit IUPHAR ID.
         "target_id": _text(data.get("iuphar_target_id")),
@@ -120,6 +129,10 @@ def project_target_fields(
             "utf-8"
         ),
     }
+    keyword_ids = "|".join(_tokens(data.get("controlled_keyword_ids"))) or None
+    if keyword_ids is not None:
+        projected["keywords"] = keyword_ids
+    return projected
 
 
 def target_input_eligibility(
