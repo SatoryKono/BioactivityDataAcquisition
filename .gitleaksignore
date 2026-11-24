@@ -254,3 +254,9 @@ fe3308006e3265859d849a5e61fbf4a9dd1f7c83:configs/quality/external_resource_inven
 81d7f1f294f072db82252b0039de644bdfe9c711:scripts/engineering/repo/offline_precommit.py:generic-api-key:32
 # The same verified public command digest in the GitHub squash commit of #13226.
 7076e3c2fe2aca95395a73dee3fa3fd19ff05748:scripts/engineering/repo/offline_precommit.py:generic-api-key:38
+
+# PR #13372: independently verified public Git blob OIDs for pipeline_config_api.py.
+# Exact historical findings only; other commits, paths, rules and lines stay blocking.
+1f08131d2125478cee393b89ff42c8be9a938b21:configs/quality/external_resource_inventory.json:generic-api-key:4072
+ddc7bbbf4d0d9c9c13c12687cb19df86eb1653e4:configs/quality/external_resource_inventory.json:generic-api-key:4072
+2c0aa2cf5d8638a317f330c165aec96a258f9e88:configs/quality/external_resource_inventory.json:generic-api-key:4072

@@ -11,6 +11,7 @@ import json
 from typing import TYPE_CHECKING, Any, NoReturn, cast
 
 import click
+import yaml
 
 from bioetl.domain.types import JsonDict
 from bioetl.interfaces.cli.commands.domains.shared.click_options import (
@@ -115,16 +116,16 @@ def show_command(pipeline: str, output_format: str) -> None:
 
     try:
         config_dict = service.get_pipeline_yaml_config(pipeline)
-    except ValueError as e:
+    except (ValueError, yaml.YAMLError) as e:
         _fail_config("Configuration error", str(e), ExitCode.CONFIG_ERROR)
     except FileNotFoundError as e:
         _fail_config("Config file not found", str(e), ExitCode.EX_NOINPUT)
+    except OSError as e:
+        _fail_config("Configuration error", str(e), ExitCode.CONFIG_ERROR)
 
     if output_format == "json":
         echo_info(json.dumps(config_dict, indent=2, default=str))
     else:
-        import yaml
-
         echo_info(yaml.dump(config_dict, default_flow_style=False, sort_keys=False))
 
 
@@ -152,10 +153,12 @@ def validate_command(pipeline: str) -> None:
         echo_info(f"  Silver table: {info.silver_table}")
         if info.gold_table:
             echo_info(f"  Gold table: {info.gold_table}")
-    except ValueError as e:
+    except (ValueError, yaml.YAMLError) as e:
         _fail_config("Configuration invalid", str(e), ExitCode.CONFIG_ERROR)
     except FileNotFoundError as e:
         _fail_config("Config file not found", str(e), ExitCode.EX_NOINPUT)
+    except OSError as e:
+        _fail_config("Configuration invalid", str(e), ExitCode.CONFIG_ERROR)
 
 
 @typed_group_command(config, "show-settings")

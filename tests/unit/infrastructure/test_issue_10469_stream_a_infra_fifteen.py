@@ -152,7 +152,8 @@ def test_pipeline_base_config_missing_and_oserror(
 ) -> None:
     _load_base_config_cached.cache_clear()
     missing = tmp_path / "nope.yaml"
-    assert _load_base_config_cached(str(missing)) == {}
+    with pytest.raises(FileNotFoundError):
+        _load_base_config_cached(str(missing))
     _load_base_config_cached.cache_clear()
 
     config_path = tmp_path / "entity" / "chembl" / "activity.yaml"
