@@ -105,15 +105,13 @@ def publish_target_classifier(
 ) -> tuple[str, dict[str, str]]:
     """Seal the exact profile and all files its loader reads, preserving layout."""
     profile = profile.resolve(strict=True)
-    objects = {}
-    for relative, expected in collect_target_profile_runtime_files(
-        profile, digest
-    ).items():
-        content = confined_path(profile.parent, relative).read_bytes()
-        if digest_bytes(content) != expected:
-            raise ValueError("composite_replay_classifier_changed_during_capture")
+    objects: dict[str, str] = {}
+
+    def seal(relative: str, content: bytes) -> None:
         name = f"{_TARGET_CLASSIFIER_DIR}/{relative}"
         objects[name] = publish_bytes(root, name, content)
+
+    collect_target_profile_runtime_files(profile, digest, on_file=seal)
     return f"{_TARGET_CLASSIFIER_DIR}/{profile.name}", objects
 
 

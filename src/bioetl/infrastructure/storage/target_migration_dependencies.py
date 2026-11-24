@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import re
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from pathlib import Path
 from urllib.parse import urlsplit
 from urllib.request import url2pathname
@@ -96,10 +96,15 @@ def _dependency_document(raw: bytes) -> Mapping[str, object]:
 
 class _DependencyCollector:
     def __init__(
-        self, workspace: Path, *, include_acceptance_proofs: bool = True
+        self,
+        workspace: Path,
+        *,
+        include_acceptance_proofs: bool = True,
+        on_file: Callable[[str, bytes], None] | None = None,
     ) -> None:
         self.workspace = workspace
         self.include_acceptance_proofs = include_acceptance_proofs
+        self.on_file = on_file
         self.dependencies: dict[str, str] = {}
         self.visited: set[tuple[Path, str]] = set()
         # Matches snapshot_evidence._review: evidence paths are relative to the
@@ -113,9 +118,12 @@ class _DependencyCollector:
         if expected is not None and digest != _digest(expected):
             raise ValueError("target dependency digest mismatch")
         key = path.relative_to(self.workspace).as_posix()
-        previous = self.dependencies.setdefault(key, digest)
-        if previous != digest:
+        previous = self.dependencies.get(key)
+        if previous is not None and previous != digest:
             raise ValueError("target dependency changed during collection")
+        self.dependencies[key] = digest
+        if previous is None and self.on_file is not None:
+            self.on_file(key, raw)
         return raw
 
     def document(self, path: Path, kind: str, expected: str | None = None) -> None:
@@ -337,10 +345,14 @@ def collect_target_dependencies(
     return dict(sorted(collector.dependencies.items()))
 
 
-def collect_target_profile_runtime_files(path: Path, digest: str) -> dict[str, str]:
+def collect_target_profile_runtime_files(
+    path: Path, digest: str, *, on_file: Callable[[str, bytes], None] | None = None
+) -> dict[str, str]:
     """Return the pinned files consumed by the classifier, relative to its profile."""
     path = path.resolve(strict=True)
-    collector = _DependencyCollector(path.parent, include_acceptance_proofs=False)
+    collector = _DependencyCollector(
+        path.parent, include_acceptance_proofs=False, on_file=on_file
+    )
     collector.document(path, "profile", digest)
     return dict(sorted(collector.dependencies.items()))
 
