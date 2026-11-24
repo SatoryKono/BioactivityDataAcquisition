@@ -332,7 +332,7 @@
   "provenance": {
     "projector_version": "1.1.0",
     "semantic_content_hash": "sha256:8c5713fd77345dcf20d92d01f5c53d818ebb405bcc43de5e79309161a08711e8",
-    "source_revision": "sha256:254ca2361b8aa0ea6150645fdef12e318136917a6e30002c83125ddac0fb0877"
+    "source_revision": "sha256:4397fe36293e3ce6920cded8335be96aff120e42b6b4d751da76d9dc09297736"
   },
   "silver": {
     "column_projection": {

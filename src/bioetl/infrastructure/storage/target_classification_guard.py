@@ -5,30 +5,57 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Literal
 
-from bioetl.domain.config.target_classification import TARGET_CLASSIFICATION_FIELDS
+from bioetl.domain.config.target_classification import (
+    TARGET_CLASSIFICATION_DETAIL_FIELDS,
+    TARGET_CLASSIFICATION_FIELDS,
+    resolve_physical_table_contract,
+)
+
+_TargetProfile = Literal["empty", "V30", "V31", "V32"]
+_INCOMPLETE_TARGET_SCHEMA = "incomplete target classification schema; recovery required"
 
 
-def get_target_table_profile(
-    *, silver_path: Path, gold_path: Path
-) -> Literal["empty", "V30", "V31"]:
-    """Inspect both destinations without constructing or mutating writers."""
-    profiles = set()
+def _profile_for_fields(fields: frozenset[str]) -> Literal["V30", "V31", "V32"]:
     required = frozenset(TARGET_CLASSIFICATION_FIELDS)
+    detail = frozenset(TARGET_CLASSIFICATION_DETAIL_FIELDS)
+    present = required.intersection(fields)
+    present_detail = detail.intersection(fields)
+    if (present and present != required) or (
+        present_detail and present_detail != detail
+    ):
+        raise ValueError(_INCOMPLETE_TARGET_SCHEMA)
+    if present_detail and not present:
+        raise ValueError(_INCOMPLETE_TARGET_SCHEMA)
+    if present_detail:
+        return "V32"
+    if present:
+        return "V31"
+    return "V30"
+
+
+def get_target_table_profile(*, silver_path: Path, gold_path: Path) -> _TargetProfile:
+    """Inspect both destinations without constructing or mutating writers."""
+    profiles: set[str] = set()
     for path in (silver_path, gold_path):
         fields = _target_table_fields(path)
         if fields is None:
             continue
-        present = required.intersection(fields)
-        if present and present != required:
-            raise ValueError(
-                "incomplete target classification schema; recovery required"
-            )
-        profiles.add("V31" if present else "V30")
+        profiles.add(_profile_for_fields(fields))
     if len(profiles) > 1:
-        raise ValueError("mixed V30/V31 target destinations; recovery required")
-    if "V31" in profiles:
+        if profiles == {"V30", "V31"}:
+            raise ValueError("mixed V30/V31 target destinations; recovery required")
+        joined = "/".join(sorted(profiles))
+        raise ValueError(f"mixed {joined} target destinations; recovery required")
+    if not profiles:
+        return "empty"
+    found = next(iter(profiles))
+    if found == "V30":
+        return "V30"
+    if found == "V31":
         return "V31"
-    return "V30" if profiles else "empty"
+    if found == "V32":
+        return "V32"
+    raise ValueError(_INCOMPLETE_TARGET_SCHEMA)
 
 
 def assert_target_table_compatibility(
@@ -37,18 +64,19 @@ def assert_target_table_compatibility(
     gold_path: Path,
     mode: str,
     destructive: bool = False,
+    table_contract: str | None = None,
 ) -> None:
     """Check both existing tables before the runner can clear either one.
 
-    Empty candidate destinations are allowed. Enrich against V30 requires the
-    explicit paired migration; off/shadow against V31 requires a real rollback.
+    Empty candidate destinations are allowed. Enrich 3.1.0 against V30 requires
+    the explicit paired migration. Enrich 3.2.0 does not migrate V30 or V31.
+    off/shadow against an enriched table requires a real rollback.
     """
-    if mode not in {"off", "shadow", "enrich"}:
-        raise ValueError("unknown target classification mode")
+    contract = resolve_physical_table_contract(mode, table_contract)
     for path in (silver_path, gold_path):
         fields = _target_table_fields(path)
         if fields is not None:
-            _assert_target_schema_compatibility(fields, mode, destructive)
+            _assert_target_schema_compatibility(fields, contract, destructive)
 
 
 def _target_table_fields(path: Path) -> frozenset[str] | None:
@@ -63,20 +91,32 @@ def _target_table_fields(path: Path) -> frozenset[str] | None:
 
 
 def _assert_target_schema_compatibility(
-    fields: frozenset[str], mode: str, destructive: bool
+    fields: frozenset[str], table_contract: str, destructive: bool
 ) -> None:
     """Require one coherent contract and preserve existing enriched tables."""
-    required = frozenset(TARGET_CLASSIFICATION_FIELDS)
-    present = required.intersection(fields)
-    if present and present != required:
-        raise ValueError("incomplete target classification schema; recovery required")
-    if mode == "enrich" and not present:
+    profile = _profile_for_fields(fields)
+    if table_contract == "3.0.0" and profile != "V30":
+        raise ValueError(
+            f"{profile} target requires physical rollback before legacy writes"
+        )
+    if table_contract == "3.1.0" and profile == "V30":
         raise ValueError("V30 target requires complete-cohort migration before enrich")
-    if mode in {"off", "shadow"} and present:
-        raise ValueError("V31 target requires physical rollback before legacy writes")
-    if destructive and present:
+    if table_contract == "3.1.0" and profile == "V32":
+        raise ValueError(
+            "physical table contract 3.1.0 cannot write an existing V32 target table"
+        )
+    if table_contract == "3.2.0" and profile in {"V30", "V31"}:
+        raise ValueError(
+            "physical table contract 3.2.0 requires an empty destination or an existing "
+            "V32 table; migration is a later task"
+        )
+    if destructive and profile == "V31":
         raise ValueError(
             "V31 target requires staged complete-cohort migration before destructive writes"
+        )
+    if destructive and profile == "V32":
+        raise ValueError(
+            "V32 target requires staged complete-cohort migration before destructive writes"
         )
 
 

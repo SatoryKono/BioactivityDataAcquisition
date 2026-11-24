@@ -5,8 +5,8 @@
 
 ## Summary
 
-- Scanned modules: `2655`
-- Internal import edges (raw): `8782`
+- Scanned modules: `2659`
+- Internal import edges (raw): `8813`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `330`
@@ -21,15 +21,15 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|1672 OK| application
-    application -->|1148 OK| domain
+    application -->|1687 OK| application
+    application -->|1156 OK| domain
     composition -->|254 OK| application
     composition -->|688 OK| composition
-    composition -->|336 OK| domain
+    composition -->|337 OK| domain
     composition -->|362 OK| infrastructure
-    domain -->|1331 OK| domain
-    infrastructure -->|830 OK| domain
-    infrastructure -->|1414 OK| infrastructure
+    domain -->|1336 OK| domain
+    infrastructure -->|831 OK| domain
+    infrastructure -->|1415 OK| infrastructure
     interfaces -->|86 OK| application
     interfaces -->|64 OK| composition
     interfaces -->|100 OK| domain
@@ -40,15 +40,15 @@ flowchart LR
 
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
-| `application`    | `application`    |    1672 | allowed |
-| `application`    | `domain`         |    1148 | allowed |
+| `application`    | `application`    |    1687 | allowed |
+| `application`    | `domain`         |    1156 | allowed |
 | `composition`    | `application`    |     254 | allowed |
 | `composition`    | `composition`    |     688 | allowed |
-| `composition`    | `domain`         |     336 | allowed |
+| `composition`    | `domain`         |     337 | allowed |
 | `composition`    | `infrastructure` |     362 | allowed |
-| `domain`         | `domain`         |    1331 | allowed |
-| `infrastructure` | `domain`         |     830 | allowed |
-| `infrastructure` | `infrastructure` |    1414 | allowed |
+| `domain`         | `domain`         |    1336 | allowed |
+| `infrastructure` | `domain`         |     831 | allowed |
+| `infrastructure` | `infrastructure` |    1415 | allowed |
 | `interfaces`     | `application`    |      86 | allowed |
 | `interfaces`     | `composition`    |      64 | allowed |
 | `interfaces`     | `domain`         |     100 | allowed |
@@ -58,15 +58,15 @@ flowchart LR
 
 | From Group                     | To Group                       | Imports |
 | ------------------------------ | ------------------------------ | ------: |
-| `application.services`         | `domain.control_plane`         |     158 |
+| `application.services`         | `domain.control_plane`         |     160 |
 | `infrastructure.adapters`      | `domain.types`                 |     125 |
 | `application.composite`        | `domain.composite`             |     116 |
 | `application.core`             | `domain.types`                 |     107 |
-| `application.services`         | `domain.types`                 |      87 |
+| `application.services`         | `domain.types`                 |      89 |
 | `infrastructure.storage`       | `domain.types`                 |      84 |
 | `infrastructure.storage`       | `domain.ports`                 |      68 |
+| `application.services`         | `domain.ports`                 |      59 |
 | `application.pipelines`        | `domain.types`                 |      58 |
-| `application.services`         | `domain.ports`                 |      57 |
 | `composition.bootstrap`        | `application.services`         |      57 |
 | `application.composite`        | `domain.ports`                 |      55 |
 | `composition.factories`        | `application.core`             |      50 |
@@ -109,10 +109,10 @@ flowchart LR
 | `application.pipelines`        | `domain.value_objects`         |      17 |
 | `application.services`         | `domain.lineage`               |      17 |
 | `application.services`         | `domain.run_reports`           |      17 |
+| `application.services`         | `domain.workflow`              |      17 |
 | `infrastructure.storage`       | `domain.exceptions`            |      17 |
 | `interfaces.http`              | `domain.ports`                 |      17 |
 | `infrastructure.control_plane` | `domain.types`                 |      16 |
-| `application.services`         | `domain.workflow`              |      15 |
 
 ## Policy Violations
 
