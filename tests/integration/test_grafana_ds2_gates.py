@@ -75,7 +75,9 @@ def test_overview_status_uses_only_l0_operator_terminology() -> None:
     """Saved verdict never implies healthy fleet or permission to replay."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
     status = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9604)
-    assert status["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
+    assert status["fieldConfig"]["defaults"]["noValue"] == (
+        "No result · inspect source panel 9002"
+    )
     assert status["datasource"]["uid"] == "-- Dashboard --"
     assert status["targets"][0]["panelId"] == 9002
     assert "run_verdict" in str(status["transformations"])

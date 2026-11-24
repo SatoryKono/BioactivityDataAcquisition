@@ -54,9 +54,9 @@ def test_provider_health_no_value_copy_confirms_exactly_one_empty_state() -> Non
             f"panel {panel_id} noValue concatenates UNKNOWN and VALID EMPTY as "
             f"alternative explanations: {no_value!r}"
         )
-        assert no_value.startswith("UNKNOWN"), (
-            f"panel {panel_id} noValue must lead with the confirmed UNKNOWN state: "
-            f"{no_value!r}"
+        assert no_value == "No result · inspect source panel 9002", (
+            f"panel {panel_id} must identify the source without asserting why no "
+            f"result is available: {no_value!r}"
         )
 
 
@@ -145,7 +145,7 @@ def test_runtime_10251_select_run_novalue_drops_hedge_tails() -> None:
     panels = _runtime_panels_by_id()
     for pid in (9603, 9604, 9480, 9481):
         no_value = panels[pid]["fieldConfig"]["defaults"]["noValue"]
-        assert no_value == "UNKNOWN"
+        assert no_value == "No result · inspect source panel 9002"
         assert "VALID EMPTY if" not in no_value
         assert "UNKNOWN/QUERY ERROR if" not in no_value
     assert not Path("grafana/dashboards/bioetl-runtime.json").exists()
