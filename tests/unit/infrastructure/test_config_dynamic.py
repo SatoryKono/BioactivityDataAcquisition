@@ -922,3 +922,17 @@ def test_base_config_read_failure_is_not_cached(
         ]
         == 10
     )
+
+
+@pytest.mark.parametrize("content", ["", "# comment\n", "---\n# comment\n"])
+def test_empty_base_config_is_valid(tmp_path: Path, content: str) -> None:
+    root = tmp_path / "configs"
+    _write_unified_entity_config(
+        root / "entities", "chembl", "activity", {"name": "entity"}
+    )
+    base = root / "base" / "pipeline.yaml"
+    base.parent.mkdir(parents=True)
+    base.write_text(content, encoding="utf-8")
+    assert read_pipeline_config_payload(
+        "chembl_activity", configs_root=root
+    ).config == {"name": "entity"}

@@ -37,6 +37,7 @@ from dataclasses import dataclass, field
 from unittest.mock import MagicMock, patch
 
 import pytest
+import yaml
 from click.testing import CliRunner
 
 from bioetl.interfaces.cli import cli
@@ -237,6 +238,32 @@ class TestConfigValidateCommand:
 
         assert result.exit_code == 80
         assert "invalid" in result.output.lower() or "Configuration" in result.output
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "command,method",
+    [("show", "get_pipeline_yaml_config"), ("validate", "validate_pipeline_config")],
+)
+@pytest.mark.parametrize(
+    "error", [PermissionError("denied"), yaml.YAMLError("invalid yaml")]
+)
+def test_config_commands_report_read_errors(
+    cli_runner: CliRunner,
+    mock_config_service: MagicMock,
+    command: str,
+    method: str,
+    error: Exception,
+) -> None:
+    getattr(mock_config_service, method).side_effect = error
+    with patch(
+        "bioetl.interfaces.cli.commands.config.get_config_service",
+        return_value=mock_config_service,
+    ):
+        result = cli_runner.invoke(cli, ["config", command, "chembl_activity"])
+    assert result.exit_code == 80
+    assert str(error) in result.output
+    assert "Traceback" not in result.output
 
 
 @pytest.mark.unit

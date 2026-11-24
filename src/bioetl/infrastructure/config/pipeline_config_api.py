@@ -63,8 +63,10 @@ def _load_yaml_mapping(path: Path) -> JsonDict | None:
     except FileNotFoundError:
         return None
     data = yaml.safe_load(raw)
-    if data is None and yaml.compose(raw, Loader=yaml.SafeLoader) is None:
-        return {}
+    if data is None:
+        node = yaml.compose(raw, Loader=yaml.SafeLoader)
+        if node is None or (isinstance(node, yaml.ScalarNode) and node.value == ""):
+            return {}
     if not isinstance(data, dict):
         raise ValueError(f"Expected a YAML mapping in {path}")
     return data
