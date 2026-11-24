@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "55b8b2c305c407cef939abef73a33bee8ef3fe60",
+  "source_ref": "55b8b2c305c407cef939abef73a33bee8ef3fe60",
+  "source_reviews": {
+    "src/bioetl/domain/composite/field_groups_models.py": "Reject non-boolean include_in_gold at the domain boundary. No external-resource acquisitions, bindings, ownership or cleanup changes.",
+    "src/bioetl/composition/bootstrap/runtime/composite_support_helpers.py": "Propagate invalid existing field-group configuration instead of disabling Gold filtering. Resource creation expressions, ownership and cleanup are unchanged; relocate their source references after removal of the exception handler and unused import."
+  }
+}
