@@ -6,10 +6,7 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from bioetl.infrastructure.config.field_group_loader import (
-    FieldGroupLoadError,
-    load_field_groups,
-)
+from bioetl.infrastructure.config.field_group_loader import load_field_groups
 
 from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage_adapter
 from bioetl.composition.bootstrap.runtime.composite_filter_extraction_service import (
@@ -185,23 +182,15 @@ def _load_field_group_registry(
         )
         return None
 
-    try:
-        registry = load_field_groups(config_path)
-        logger.info(
-            "Loaded field group registry",
-            config_path=str(config_path),
-            groups=len(registry.groups),
-            fields=registry.field_count,
-            columns=registry.column_count,
-        )
-        return registry
-    except (FieldGroupLoadError, FileNotFoundError) as error:
-        logger.warning(
-            "Failed to load field group config, continuing without it",
-            error=str(error),
-            config_path=str(config_path),
-        )
-        return None
+    registry = load_field_groups(config_path)
+    logger.info(
+        "Loaded field group registry",
+        config_path=str(config_path),
+        groups=len(registry.groups),
+        fields=registry.field_count,
+        columns=registry.column_count,
+    )
+    return registry
 
 
 def _create_dq_report_service(

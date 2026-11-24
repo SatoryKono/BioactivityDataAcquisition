@@ -125,6 +125,66 @@ def test_frozen_rows_build_real_candidates_and_pass_validator(source_bundle):
     )
 
 
+def test_v32_candidate_persists_details_and_revalidates_them(source_bundle):
+    request = source_bundle
+    config_path = request.paths.candidate_config
+    config = yaml.safe_load(config_path.read_bytes())
+    config["pipeline"]["target_classification"]["table_contract"] = "3.2.0"
+    config_path.write_text(yaml.safe_dump(config), encoding="utf-8")
+    frozen = request.input_manifest.with_name("frozen-v32.json")
+    builder.freeze_target_inputs(
+        request.paths,
+        legacy_include_fields=request.legacy_include_fields,
+        output=frozen,
+    )
+    request = replace(
+        request,
+        input_manifest=frozen,
+        input_manifest_sha256=sha256_file(frozen),
+        deployment=replace(
+            request.deployment, deployment_config_sha256=sha256_file(config_path)
+        ),
+    )
+
+    report = builder.build_target_candidates(request)
+    assert report["status"] == "complete"
+    silver = validation._read_delta(request.paths.candidate_silver)
+    gold = validation._read_delta(request.paths.candidate_gold)
+    assert silver[0]["local_rule_ids"] is not None
+    assert (
+        gold[0]["classification_evidence_refs"]
+        == silver[0]["classification_evidence_refs"]
+    )
+    gold[0]["local_rule_ids"] = None
+    with pytest.raises(
+        ValueError, match="candidate classification differs.*local_rule_ids"
+    ):
+        validation._verify_source_classifications(
+            {"silver": silver, "gold": gold},
+            builder._load_candidate_profile({}),
+            "3.2.0",
+        )
+
+
+def test_restored_v32_rows_accept_only_the_selected_classification_fields():
+    fields = validation.classification_fields("3.2.0")
+    restored = {"target_id": "CHEMBL1", "content_hash": "original"}
+    current = {**restored, **dict.fromkeys(fields), "content_hash": "candidate"}
+    validation._assert_restored_values("CHEMBL1", restored, current, contract="3.2.0")
+    with pytest.raises(ValueError, match="gained unexpected fields"):
+        validation._assert_restored_values(
+            "CHEMBL1", restored, current, contract="3.1.0"
+        )
+    with pytest.raises(ValueError, match="gained unexpected fields"):
+        validation._assert_restored_values(
+            "CHEMBL1", restored, {**current, "foreign": None}, contract="3.2.0"
+        )
+    with pytest.raises(ValueError, match="restored target changed"):
+        validation._assert_restored_values(
+            "CHEMBL1", restored, {**current, "target_id": "CHEMBL2"}, contract="3.2.0"
+        )
+
+
 def test_source_drift_refuses_before_any_candidate_write(source_bundle):
     request = source_bundle
     (request.paths.silver / "unexpected-writer.txt").write_text("new bytes")

@@ -10,6 +10,9 @@ from bioetl.application.composite.runtime_wiring_api import (
     MergeCollaboratorGroup,
     MergeService,
 )
+from bioetl.composition.bootstrap.assembly.target_classification_runtime import (
+    build_composite_target_classification_stage,
+)
 from bioetl.composition.bootstrap.runtime.composite_merge_dependency_builder import (
     build_merge_dependencies,
 )
@@ -26,6 +29,7 @@ if TYPE_CHECKING:
     from bioetl.domain.composite import CompositeConfig
     from bioetl.domain.composite.field_groups import FieldGroupRegistry
     from bioetl.domain.ports import ClockPort, DeltaReaderPort, LoggerPort
+    from bioetl.infrastructure.config.settings_api import Settings
 
 from bioetl.application.ports.storage import (
     CompositeMergeStorageProtocol as _CompositeMergeStorage,
@@ -74,6 +78,7 @@ def build_composite_merge_service(
     system_columns_to_drop: frozenset[str],
     normalization_policies: Mapping[str, JoinKeyNormalizationPolicy],
     clock: ClockPort | None = None,
+    classification_settings: Settings | None = None,
     execution_hook: Callable[
         [
             MergeExecutionRequest,
@@ -91,7 +96,7 @@ def build_composite_merge_service(
         normalization_policies=normalization_policies,
         system_columns_to_drop=system_columns_to_drop,
     )
-    return MergeService(
+    service = MergeService(
         merge_config=config.merge,
         storage=storage,
         logger=logger,
@@ -112,6 +117,12 @@ def build_composite_merge_service(
             join_planner=merge_dependencies.join_planner,
         ),
     )
+    service.bind_post_join_target_classification(
+        build_composite_target_classification_stage(
+            config, settings=classification_settings
+        )
+    )
+    return service
 
 
 __all__ = ["build_composite_merge_service"]
