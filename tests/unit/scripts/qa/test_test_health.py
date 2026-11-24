@@ -159,8 +159,9 @@ classifiers:
 
 
 @pytest.mark.parametrize("returncode", [0, 1])
-def test_read_only_lane_dispatches_python_without_artifacts(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, returncode: int
+@pytest.mark.parametrize("root_option", ["--repo", "--repo-root"])
+def test_read_only_lane__owner_exit__propagates_without_artifacts(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, returncode: int, root_option: str
 ) -> None:
     commands = []
 
@@ -179,6 +180,8 @@ def test_read_only_lane_dispatches_python_without_artifacts(
             str(reports),
             "--timeout-seconds",
             "5",
+            root_option,
+            "../other",
         ]
     )
     assert result == returncode
@@ -191,13 +194,15 @@ def test_read_only_lane_dispatches_python_without_artifacts(
             "run-architecture-audit-read-only",
             "--timeout-seconds",
             "5",
+            root_option,
+            "../other",
         ]
     ]
     assert not reports.exists()
 
 
 @pytest.mark.parametrize("extra", [["--skip-preflight"], ["--", "-q"]])
-def test_read_only_lane_rejects_pytest_options(
+def test_read_only_lane__pytest_options__are_rejected(
     tmp_path: Path, extra: list[str]
 ) -> None:
     with pytest.raises(SystemExit, match="2"):

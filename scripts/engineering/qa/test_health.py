@@ -475,6 +475,11 @@ def _run_tests(argv: list[str]) -> int:
         help="YAML failure-classifier rules.",
     )
     args, runner_args = parser.parse_known_args(wrapper_args)
+    lane = _load_lanes().get(args.suite, {})
+    if lane.get("runner_backend") == "engineering_qa":
+        # Do not consume abbreviated owner options as wrapper options.
+        parser.allow_abbrev = False
+        args, runner_args = parser.parse_known_args(wrapper_args)
 
     run_id = _unique_run_id(
         args.reports_dir,
