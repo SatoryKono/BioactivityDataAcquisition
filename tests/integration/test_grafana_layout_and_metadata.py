@@ -589,7 +589,10 @@ def test_control_plane_bounded_failure_rows_preserve_unknown_evidence() -> None:
     target = panel["targets"][0]
     assert target.get("panelId") == 9418
     donor = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9418)
-    assert "replay_checks" in donor["targets"][0]["uql"]
+    donor_target = donor["targets"][0]
+    assert donor_target["parser"] == "backend"
+    assert "uql" not in donor_target
+    assert "replay_checks" in donor_target["root_selector"]
     assert "run_id=${run_id}" in donor["targets"][0]["url"]
     assert "/ops/observability/selected-run-status?" in donor["targets"][0]["url"]
     assert "QUERY ERROR" in panel["description"]
@@ -662,10 +665,20 @@ def test_control_plane_failure_ratio_thresholds_match_descriptions() -> None:
             .get("steps", [])
         )
         assert steps == [
-            {"color": "green", "value": None},
+            {"color": "text", "value": None},
             {"color": "orange", "value": 1},
             {"color": "red", "value": 2},
         ]
+        value_mapping = next(
+            item["options"]
+            for item in panel["fieldConfig"]["defaults"]["mappings"]
+            if item["type"] == "value"
+        )
+        assert value_mapping == {
+            "0": {"text": "OK", "color": "green"},
+            "1": {"text": "WARN", "color": "orange"},
+            "2": {"text": "CRIT", "color": "red"},
+        }
 
 
 def test_dashboard_default_time_and_refresh_policy_by_uid_class() -> None:

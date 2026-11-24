@@ -160,7 +160,10 @@ def test_primary_dashboards_expose_common_context_header_panels() -> None:
                 5 if panel.get("title") == "Review Run Context" else 3
             )
         if filename == "bioetl-control-plane-v1.json":
-            assert panels[9422]["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
+            assert panels[9422]["fieldConfig"]["defaults"]["noValue"] == (
+                "SELECT RUN if no Run ID is selected. "
+                "Source unavailable if the request failed."
+            )
             assert "SELECT RUN" in panels[9422]["description"]
             assert "Source unavailable" in panels[9422]["description"]
             value_map = panels[9422]["fieldConfig"]["defaults"]["mappings"][0][
