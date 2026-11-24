@@ -88,14 +88,14 @@ a native adapter.
 
 ## Common Task Routing
 
-Use the smallest existing skill that matches the request:
+Use the smallest existing skill that matches the request. See CI evidence and PR feedback below.
 
 | Request template                            | Mutation default                         | Route                                                      | Minimum validation                                 |
 | ------------------------------------------- | ---------------------------------------- | ---------------------------------------------------------- | -------------------------------------------------- |
 | Diagnose without fixing                     | read-only                                | `py-debug-bot`                                             | reproduction and evidence only                     |
 | Implement a focused fix                     | write in requested scope                 | direct implementation; `py-config-bot` when configs change | targeted lint/tests                                |
 | Review the current diff                     | read-only                                | `py-audit-bot` (`review`)                                  | diff inspection; no external writes                |
-| Diagnose CI failure                         | read-only                                | `py-debug-bot`                                             | reproduction, root cause, remediation guidance     |
+| Diagnose CI failure                         | read-only                                | parent collects CI evidence; `py-debug-bot` diagnoses     | requested SHA, failing job/attempt and first causal error |
 | Implement diagnosed CI remediation          | write in requested scope                 | direct parent implementation                               | failed check plus targeted regression              |
 | Hash-only / date-stamp / remote-main rebind | write generated artifacts only           | parent in the existing worktree; no extra `implementer`    | matching `--check` after `--update`                |
 | Prepare a PR                                | branch/commit/push authorized by request | direct parent workflow                                     | repository quality gates for touched scope         |
@@ -181,6 +181,19 @@ for supported arguments, limitations and rollback.
 - `.codex/config.toml`
 - `.codex/agents/py-*.toml`
 - `.codex/skills/`
+
+## CI Evidence and PR Feedback
+
+For CI diagnosis, the parent reads GitHub run and job metadata and retrieves the
+relevant log before handing off to `py-debug-bot`. Pass the requested head SHA,
+run, attempt, job, and the first relevant failure with enough context to
+reproduce it. GitHub access stays with the parent.
+
+Use `github-pr-comments` for ordinary review feedback and `qodo-pr-resolver`
+when the request explicitly selects Qodo feedback. Use `gh-review-loop` only
+for an explicitly authorized complete loop. Limit comments, thread resolution,
+commits, pushes, and re-review requests to the authorized scope. Check required
+CI against the current head when acceptance is requested.
 
 ## Env File Guardrail
 
