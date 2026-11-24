@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import pyarrow as pa
 
@@ -50,18 +50,17 @@ def _policy_fields(
     return tuple(policy.include_fields), tuple(policy.exclude_fields)
 
 
-def _contract_for_mode(
+def _contract_for_version(
     *,
-    enrich: bool,
-    contract_version: str,
+    table_contract: str,
     contract_policy: PipelineContractPolicy | None,
     policy: AuthoritativeContentHashPolicyConfig | None,
 ) -> PipelineContractPolicy | None:
-    if not enrich or contract_policy is None:
+    if table_contract == "3.0.0" or contract_policy is None:
         return contract_policy
     include_fields, exclude_fields = _policy_fields(policy)
     return _enrich_contract_policy(
-        contract_policy, include_fields, exclude_fields, contract_version
+        contract_policy, table_contract, include_fields, exclude_fields
     )
 
 
@@ -81,26 +80,21 @@ class TargetClassificationSchemaProfile:
     contract_policy: PipelineContractPolicy | None
 
 
-def _classification_fields(contract_version: str) -> tuple[str, ...]:
-    if contract_version == "3.2.0":
-        return (*TARGET_CLASSIFICATION_FIELDS, *TARGET_CLASSIFICATION_DETAIL_FIELDS)
-    return TARGET_CLASSIFICATION_FIELDS
-
-
-def _business_fields(
-    fields: tuple[str, ...], contract_version: str = "3.1.0"
-) -> tuple[str, ...]:
-    return tuple(dict.fromkeys((*fields, *_classification_fields(contract_version))))
+def _business_fields(fields: tuple[str, ...], table_contract: str) -> tuple[str, ...]:
+    extra = TARGET_CLASSIFICATION_FIELDS
+    if table_contract == "3.2.0":
+        extra = (*extra, *TARGET_CLASSIFICATION_DETAIL_FIELDS)
+    return tuple(dict.fromkeys((*fields, *extra)))
 
 
 def _extend_groups(
     groups: tuple[ColumnGroupConfig, ...],
-    contract_version: str,
+    table_contract: str,
 ) -> tuple[ColumnGroupConfig, ...]:
     if not any(group.name == "business" for group in groups):
         raise ValueError("enrich target profile requires the business column group")
     return tuple(
-        replace(group, fields=_business_fields(group.fields, contract_version))
+        replace(group, fields=_business_fields(group.fields, table_contract))
         if group.name == "business"
         else group
         for group in groups
@@ -108,30 +102,49 @@ def _extend_groups(
 
 
 def _extend_data_schema(
-    schema: DataSchemaConfig | None, contract_version: str
+    schema: DataSchemaConfig | None, table_contract: str
 ) -> DataSchemaConfig | None:
     if schema is None:
         return None
     return replace(
-        schema, column_groups=_extend_groups(schema.column_groups, contract_version)
+        schema, column_groups=_extend_groups(schema.column_groups, table_contract)
     )
 
 
+def _accepted_source_versions(table_contract: str) -> frozenset[str]:
+    if table_contract == "3.2.0":
+        return frozenset({"3.0.0", "3.1.0", "3.2.0"})
+    return frozenset({"3.0.0", "3.1.0"})
+
+
+def _migration_note(table_contract: str) -> str:
+    if table_contract == "3.2.0":
+        return (
+            "Add nullable IUPHAR classification detail: source type, completeness, "
+            "family ids, subclasses, structured paths, local rules and evidence refs."
+        )
+    return "Add nullable offline IUPHAR classification and its pinned profile identity."
+
+
 def _enrich_yaml_config(
-    yaml_config: PipelineYamlConfig, contract_version: str
+    yaml_config: PipelineYamlConfig, table_contract: str
 ) -> PipelineYamlConfig:
     policy = yaml_config.content_hash_policy
-    if policy is None or policy.contract.version not in {"3.0.0", "3.1.0", "3.2.0"}:
-        raise ValueError(
-            "enrich target profile requires an explicit V30, V31 or V32 hash policy"
-        )
-    if contract_version == "3.1.0" and policy.contract.version == "3.2.0":
-        raise ValueError("V31 enrich cannot narrow an existing V32 hash policy")
-    include = _business_fields(tuple(policy.include_fields), contract_version)
+    if policy is None or policy.contract.version not in _accepted_source_versions(
+        table_contract
+    ):
+        if table_contract == "3.1.0":
+            detail = "explicit V30/V31"
+        else:
+            detail = "explicit " + "/".join(
+                sorted(_accepted_source_versions(table_contract))
+            )
+        raise ValueError(f"enrich target profile requires an {detail} hash policy")
+    include = _business_fields(tuple(policy.include_fields), table_contract)
     contract = policy.contract.model_copy(
         update={
-            "version": contract_version,
-            "migration_note": "Add nullable offline IUPHAR classification and its pinned profile identity.",
+            "version": table_contract,
+            "migration_note": _migration_note(table_contract),
         }
     )
     resolved_policy = policy.model_copy(
@@ -140,7 +153,7 @@ def _enrich_yaml_config(
     groups = [
         group.model_copy(
             update={
-                "fields": list(_business_fields(tuple(group.fields), contract_version))
+                "fields": list(_business_fields(tuple(group.fields), table_contract))
             }
         )
         if group.name == "business"
@@ -157,28 +170,26 @@ def _enrich_yaml_config(
                 }
             ),
             "column_groups": groups,
-            "data_schema": _extend_data_schema(
-                yaml_config.data_schema, contract_version
-            ),
+            "data_schema": _extend_data_schema(yaml_config.data_schema, table_contract),
         }
     )
 
 
 def _enrich_contract_policy(
     policy: PipelineContractPolicy,
+    table_contract: str,
     include_fields: tuple[str, ...],
     exclude_fields: tuple[str, ...],
-    contract_version: str,
 ) -> PipelineContractPolicy:
     raw = policy.model_dump()
     raw.update(
-        active_version=contract_version,
+        active_version=table_contract,
         hash_include=list(include_fields),
         hash_exclude=list(exclude_fields),
         rollout={
             "mode": "single",
-            "read_order": [contract_version],
-            "write_versions": [contract_version],
+            "read_order": [table_contract],
+            "write_versions": [table_contract],
             "affects_hash": False,
         },
     )
@@ -186,17 +197,17 @@ def _enrich_contract_policy(
 
 
 def _target_schemas(
-    contract_version: str,
+    table_contract: str,
 ) -> tuple[type[Target], pa.Schema, type[TargetSchema], type[ChEMBLTargetGoldSchema]]:
-    """Select all four schema representations as one coherent version."""
-    if contract_version == "3.2.0":
+    """Select all four schema representations as one coherent physical version."""
+    if table_contract == "3.2.0":
         return (
             TargetV32,
             CHEMBL_TARGET_SCHEMA_V32,
-            TargetSchemaV32,
-            ChEMBLTargetGoldSchemaV32,
+            cast(type[TargetSchema], TargetSchemaV32),
+            cast(type[ChEMBLTargetGoldSchema], ChEMBLTargetGoldSchemaV32),
         )
-    if contract_version == "3.1.0":
+    if table_contract == "3.1.0":
         return (
             TargetV31,
             CHEMBL_TARGET_SCHEMA_V31,
@@ -210,24 +221,27 @@ def resolve_target_classification_profile(
     yaml_config: PipelineYamlConfig,
     contract_policy: PipelineContractPolicy | None = None,
 ) -> TargetClassificationSchemaProfile:
-    """Select unchanged V30 or explicitly extended V31 without reading files."""
+    """Select V30, V31 or explicit V32 without reading files."""
     if (yaml_config.provider, yaml_config.entity_type) != ("chembl", "target"):
         raise ValueError("target classification profiles require chembl_target")
     config = yaml_config.target_classification.to_domain()
-    enrich = config.mode == "enrich"
+    table_contract = config.contract_version
     resolved = (
-        _enrich_yaml_config(yaml_config, config.contract_version)
-        if enrich
+        _enrich_yaml_config(yaml_config, table_contract)
+        if table_contract != "3.0.0"
         else yaml_config
     )
     policy = resolved.content_hash_policy
-    if not enrich and policy is not None and policy.contract.version != "3.0.0":
+    if (
+        table_contract == "3.0.0"
+        and policy is not None
+        and policy.contract.version != "3.0.0"
+    ):
         raise ValueError(
             "off/shadow target profiles require the legacy V30 hash policy"
         )
-    resolved_contract = _contract_for_mode(
-        enrich=enrich,
-        contract_version=config.contract_version,
+    resolved_contract = _contract_for_version(
+        table_contract=table_contract,
         contract_policy=contract_policy,
         policy=policy,
     )
@@ -238,7 +252,7 @@ def resolve_target_classification_profile(
         raise ValueError("target classification schema and contract versions disagree")
     include_fields, exclude_fields = _policy_fields(policy)
     entity_class, silver_schema, pandera_schema, gold_schema = _target_schemas(
-        config.contract_version
+        table_contract
     )
     return TargetClassificationSchemaProfile(
         config=config,

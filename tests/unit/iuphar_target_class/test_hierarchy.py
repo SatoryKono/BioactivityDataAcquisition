@@ -270,6 +270,25 @@ def test_depth_limit_and_one_past_it() -> None:
     assert past.paths == ()
 
 
+def test_unrequested_deep_branch_blocks_admission_in_either_id_order() -> None:
+    deep = _chain(GRAPH_MAX_DEPTH + 1)
+    shallow = (FamilyNode("ok", (), "ok"),)
+    forward = validate_family_graph(
+        (*deep, *shallow),
+        ("ok",),
+        max_depth=GRAPH_MAX_DEPTH,
+        max_visited_nodes=10_000,
+    )
+    reverse = validate_family_graph(
+        (*tuple(reversed(deep)), *shallow),
+        ("ok",),
+        max_depth=GRAPH_MAX_DEPTH,
+        max_visited_nodes=10_000,
+    )
+    assert forward is not None and reverse is not None
+    assert forward.message == reverse.message == "превышение лимита"
+
+
 def test_visited_node_limit_and_one_past_it() -> None:
     at_limit = validate_family_graph(
         _chain(GRAPH_MAX_VISITED_NODES - 1),
@@ -418,6 +437,55 @@ def test_family_subclass_fallback_requires_matching_family_class() -> None:
     )
     assert via_normalize.iuphar_class == "Enzyme"
     assert via_normalize.iuphar_subclass is None
+
+
+def test_blank_type_subclass_falls_through_to_family() -> None:
+    """A whitespace type label is not a subclass and must not hide the family."""
+    blank_type = assign_mapped_subclass(
+        type_name="gpcr",
+        family_ids=("family",),
+        type_to_subclass={"gpcr": " "},
+        family_to_subclass={"family": "Kinase"},
+        iuphar_class="Receptor",
+        family_to_class={"family": "Receptor"},
+    )
+    assert blank_type == "Kinase"
+    empty_type = assign_mapped_subclass(
+        type_name="gpcr",
+        family_ids=("family",),
+        type_to_subclass={"gpcr": ""},
+        family_to_subclass={"family": "Kinase"},
+    )
+    assert empty_type == "Kinase"
+    type_wins = assign_mapped_subclass(
+        type_name="gpcr",
+        family_ids=("family",),
+        type_to_subclass={"gpcr": "GPCR"},
+        family_to_subclass={"family": "Kinase"},
+        iuphar_class="Receptor",
+        family_to_class={"family": "Receptor"},
+    )
+    assert type_wins == "GPCR"
+    mismatched_family = assign_mapped_subclass(
+        type_name="gpcr",
+        family_ids=("1",),
+        type_to_subclass={"gpcr": " "},
+        family_to_subclass={"1": "Kinase"},
+        iuphar_class="Enzyme",
+        family_to_class={"1": "Receptor"},
+    )
+    assert mismatched_family is None
+    via_normalize = normalize_provider_class(
+        type_name="gpcr",
+        family_ids=("1",),
+        nodes=(FamilyNode("1", (), "gpcr"),),
+        type_to_class={"gpcr": "Receptor"},
+        family_to_class={"1": "Receptor"},
+        type_to_subclass={"gpcr": " "},
+        family_to_subclass={"1": "Kinase"},
+    )
+    assert via_normalize.iuphar_class == "Receptor"
+    assert via_normalize.iuphar_subclass == "Kinase"
 
 
 def test_synthetic_family_ids_stay_outside_official_paths() -> None:

@@ -1,52 +1,52 @@
-"""Canonical JSON cells for the additive 3.2.0 target projection."""
+"""Project one IUPHAR row result onto the persisted 3.2.0 detail columns."""
 
 from __future__ import annotations
 
-import json
-
+from bioetl.domain.normalization.target_classification_values import (
+    project_classification_detail,
+)
 from iuphar_target_class.pipeline import RowResult
 
 
-def _jsonable(value: object) -> object:
-    if isinstance(value, tuple):
-        return [_jsonable(item) for item in value]
-    if isinstance(value, dict):
-        return {str(key): _jsonable(item) for key, item in value.items()}
-    fields = getattr(value, "__dataclass_fields__", None)
-    if isinstance(fields, dict):
-        return {str(name): _jsonable(getattr(value, str(name))) for name in fields}
-    return value
-
-
-def _cell_json(value: object) -> str:
-    """Compact canonical JSON for a table cell. Empty means computed empty."""
-    return json.dumps(
-        _jsonable(value), ensure_ascii=False, sort_keys=True, separators=(",", ":")
+def detail_projection(row: object | None, *, computed: bool) -> dict[str, str | None]:
+    """Return canonical detail text, or nulls when the row was not computed."""
+    if not computed or row is None:
+        return project_classification_detail(
+            computed=False,
+            iuphar_type_raw=None,
+            annotation_status=None,
+            family_ids=(),
+            subclasses=(),
+            paths=(),
+            local_status=None,
+            local_subclasses=(),
+            local_rule_ids=(),
+            effective_subclasses=(),
+            conflict_codes=(),
+            evidence_ids=((), ()),
+        )
+    if not isinstance(row, RowResult):
+        raise TypeError("classification detail requires a row result")
+    result = row.result
+    annotation = row.annotation
+    direct = row.direct
+    subclass = result.iuphar_subclass
+    return project_classification_detail(
+        computed=result.input_validation_status != "invalid_input",
+        iuphar_type_raw=result.iuphar_type_raw,
+        annotation_status=result.iuphar_annotation_status,
+        match_status=result.match_status,
+        family_ids=annotation.family_ids if annotation is not None else (),
+        subclasses=(subclass,) if subclass else (),
+        paths=(
+            tuple((item.family_id, item.root_to_leaf) for item in direct.paths)
+            if direct is not None
+            else ()
+        ),
+        local_status=result.local_status,
+        local_subclasses=result.local_subclasses,
+        local_rule_ids=result.local_rule_ids,
+        effective_subclasses=result.effective_subclasses,
+        conflict_codes=result.conflict_codes,
+        evidence_ids=(result.match_evidence_ids, result.local_evidence_ids),
     )
-
-
-def detail_projection(output: RowResult) -> dict[str, str | None]:
-    """Project 3.2.0 detail. Null stays reserved for rows that were not computed."""
-    result = output.result
-    direct = output.direct
-    annotation = output.annotation
-    evidence = tuple(sorted({*result.match_evidence_ids, *result.local_evidence_ids}))
-    return {
-        "iuphar_type_raw": result.iuphar_type_raw,
-        "iuphar_annotation_capability": (
-            direct.annotation_capability if direct is not None else None
-        ),
-        "iuphar_family_ids": _cell_json(
-            annotation.family_ids if annotation is not None else ()
-        ),
-        "iuphar_subclasses": _cell_json(
-            direct.iuphar_subclasses if direct is not None else ()
-        ),
-        "iuphar_paths": _cell_json(direct.paths if direct is not None else ()),
-        "local_status": result.local_status,
-        "local_subclasses": _cell_json(result.local_subclasses),
-        "local_rule_ids": _cell_json(result.local_rule_ids),
-        "effective_subclasses": _cell_json(result.effective_subclasses),
-        "conflict_codes": _cell_json(result.conflict_codes),
-        "classification_evidence_ids": _cell_json(evidence),
-    }

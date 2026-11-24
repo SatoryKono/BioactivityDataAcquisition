@@ -52,7 +52,24 @@ class TargetClassificationYamlConfig(BaseModel):
                             },
                         },
                     },
-                }
+                },
+                {
+                    # Missing mode also matches: the runtime defaults to off.
+                    "if": {"properties": {"mode": {"enum": ["off", "shadow"]}}},
+                    "then": {
+                        "properties": {"table_contract": {"enum": ["3.0.0", None]}}
+                    },
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "mode": {"const": "enrich"},
+                            "table_contract": {"const": "3.0.0"},
+                        },
+                        "required": ["mode", "table_contract"],
+                    },
+                    "then": {"not": {}},
+                },
             ],
         },
     )
@@ -64,24 +81,24 @@ class TargetClassificationYamlConfig(BaseModel):
     )
     table_contract: TargetTableContract | None = None
 
-    @model_validator(mode="after")
-    def validate_profile(self) -> Self:
-        self.to_domain()
-        return self
-
     @model_serializer(mode="wrap")
     def _omit_absent_table_contract(
         self, handler: SerializerFunctionWrapHandler
     ) -> object:
-        """Keep an unset contract out of dumps so older configs stay identical."""
+        """Omit a null selector so manifests written before the field still match."""
         payload = handler(self)
         if (
             isinstance(payload, dict)
             and "table_contract" in payload
             and payload["table_contract"] is None
         ):
-            del payload["table_contract"]
+            payload.pop("table_contract")
         return payload
+
+    @model_validator(mode="after")
+    def validate_profile(self) -> Self:
+        self.to_domain()
+        return self
 
     def to_domain(self) -> TargetClassificationConfig:
         return TargetClassificationConfig(

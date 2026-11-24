@@ -6,7 +6,11 @@ from collections.abc import Mapping
 from pathlib import Path
 
 from iuphar_target_class.identifier_roles import MATCHING_POLICY_VERSION
-from iuphar_target_class.policy import LOCAL_RULE_CATALOG_VERSION, PLAN_VERSION
+from iuphar_target_class.policy import (
+    LOCAL_CATALOG_VERSION,
+    LOCAL_RULE_CATALOG_VERSION,
+    PLAN_VERSION,
+)
 
 from ._manifest import checked_document, header, referenced_path, require_sha256, text
 from .snapshot_loader import load_snapshot_manifest
@@ -19,6 +23,12 @@ from .snapshot_models import (
     LoadedIupharSnapshot,
 )
 
+_ADAPTER_VERSIONS = (
+    NORMALIZATION_VERSION,
+    LOCAL_CATALOG_VERSION,
+    CLASSIFICATION_SCHEMA_VERSION,
+    MATCHING_POLICY_VERSION,
+)
 _VERSION_KEYS = (
     "normalization_version",
     "rules_version",
@@ -30,6 +40,12 @@ _ADMITTED_PROFILE_VERSIONS = frozenset(
         (
             NORMALIZATION_VERSION,
             PLAN_VERSION,
+            CLASSIFICATION_SCHEMA_VERSION,
+            MATCHING_POLICY_VERSION,
+        ),
+        (
+            NORMALIZATION_VERSION,
+            LOCAL_CATALOG_VERSION,
             CLASSIFICATION_SCHEMA_VERSION,
             MATCHING_POLICY_VERSION,
         ),

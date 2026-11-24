@@ -21,6 +21,20 @@ pytestmark = pytest.mark.unit
 
 HEAD = "a" * 40
 
+_INVENTORY_REVIEW_OWNERS = {
+    "tests/architecture/test_external_resource_inventory_catalog.py",
+    "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",
+}
+
+
+def _inventory_review_case(path: str) -> tuple[str, set[str], str]:
+    """Return one reviewed inventory path with its bounded owners."""
+    return (
+        path,
+        _INVENTORY_REVIEW_OWNERS,
+        "configs/quality/external_resource_inventory_pr0_unreviewed.json",
+    )
+
 
 def test_requirements_crosswalk_routes_to_traceability_guards() -> None:
     repo_root = Path(__file__).resolve().parents[5]
@@ -1833,6 +1847,7 @@ def test_shadow_compare_routes_codex_launchers_and_guidance(changed_file: str) -
                 "external_resource_inventory_pr13324_gold_writer_review.json",
                 "external_resource_inventory_pr13328_workflow_resume_review.json",
                 "external_resource_inventory_pr13328_review.json",
+                "external_resource_inventory_pr13344_fk_restoration_review.json",
                 "external_resource_inventory_pr13360_rf002_review.json",
                 "external_resource_inventory_pr13166_dq_data_dir_review.json",
                 "external_resource_inventory_pr13166_metrics_fold_review.json",

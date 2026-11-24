@@ -23,7 +23,13 @@ from iuphar_target_class.pipeline_acceptance import (
     load_admitted_cohort,
     run_admitted_volume,
 )
-from iuphar_target_class.policy import LOCAL_RULE_CATALOG_VERSION
+from iuphar_target_class.comparison import (
+    M_PARITY_REPORT_FILENAME,
+    PROOF_VERIFICATION_ARTIFACTS,
+    ParityPublication,
+    seal_difference_bases,
+)
+from iuphar_target_class.policy import LOCAL_CATALOG_VERSION
 from iuphar_target_class.pipeline_io import (
     publish_batch,
     read_legacy_batch,
@@ -97,7 +103,7 @@ def test_auxiliary_same_species_hit_stays_off_the_identity_channel():
 
 
 def test_current_rule_catalog_keeps_the_direct_iuphar_class():
-    provenance = replace(_provenance(), rules_version=LOCAL_RULE_CATALOG_VERSION)
+    provenance = replace(_provenance(), rules_version=LOCAL_CATALOG_VERSION)
     batch = pipeline.classify_batch(
         (
             RawTargetRow(
@@ -551,6 +557,75 @@ def test_unexpected_dangling_diagnostic_is_a_contract_defect(monkeypatch):
         _run(RawTargetRow("row", {"target_id": "1"}, "protein"))
 
 
+def test_csv_pipeline_writes_parity_outside_the_proof_package(tmp_path):
+    path = tmp_path / "source.csv"
+    content = b"input_row_id,target_kind,target_id\nr1,protein,1\n"
+    path.write_bytes(content)
+    seal = seal_difference_bases(())
+    result, output = run_csv_pipeline(
+        path,
+        root=tmp_path,
+        snapshot=_snapshot(),
+        provenance=_provenance(),
+        run_id="fixed",
+        parity=ParityPublication(
+            original_m=(
+                {
+                    "input_row_id": "r1",
+                    "target_id": "1",
+                    "target_kind": "protein",
+                    "iuphar_class": "Enzyme",
+                    "iuphar_subclass": "Hydrolase",
+                    "iuphar_family_ids": '["other"]',
+                    "iuphar_family_paths": json.dumps(
+                        [
+                            {
+                                "root_to_leaf": ["family"],
+                                "leaf_to_root": "family",
+                                "family_id": "family",
+                            }
+                        ],
+                        indent=2,
+                    ),
+                    "conflict_codes": '["review"]',
+                    "matched_target_id": "9",
+                },
+            ),
+            basis_seal=seal,
+        ),
+    )
+    assert output is not None and path.read_bytes() == content
+    package = json.loads(output.read_text(encoding="utf-8"))
+    assert M_PARITY_REPORT_FILENAME not in package["artifacts"]
+    assert set(package["artifacts"]) <= PROOF_VERIFICATION_ARTIFACTS
+    assert M_PARITY_REPORT_FILENAME not in render_batch(result)
+    report = json.loads(
+        (tmp_path / M_PARITY_REPORT_FILENAME).read_text(encoding="utf-8")
+    )
+    pair = next(
+        item
+        for item in report["comparisons"]
+        if item["pair"] == "original_m:new_result"
+    )
+    fields = {item["field"]: item for item in pair["differences"]}
+    assert fields["iuphar_class"]["old_value"] == "Enzyme"
+    assert fields["iuphar_class"]["new_value"] == "Receptor"
+    assert fields["iuphar_class"]["disposition"] == "unexplained"
+    assert fields["iuphar_subclass"]["old_value"] == "Hydrolase"
+    assert fields["iuphar_subclass"]["disposition"] == "new_unavailable"
+    assert fields["iuphar_family_ids"]["old_value"] == '["other"]'
+    assert fields["iuphar_family_ids"]["new_value"] == '["family"]'
+    assert "iuphar_family_paths" not in fields
+    assert fields["conflict_codes"]["old_value"] == '["review"]'
+    assert fields["conflict_codes"]["new_value"] == "[]"
+    assert fields["conflict_codes"]["disposition"] == "unexplained"
+    assert fields["matched_target_id"]["old_value"] == "9"
+    assert fields["matched_target_id"]["new_value"] == "1"
+    assert pair["class_agreement_count"] == 0
+    assert report["biological_accuracy"] is None
+    assert report["basis_set_sha256"] == seal.basis_set_sha256
+
+
 def test_same_chembl_id_does_not_drop_rows_and_io_keeps_source_fields(tmp_path):
     path = tmp_path / "source.csv"
     original = (
@@ -600,11 +675,167 @@ def test_approved_runtime_uses_exact_merged_mapping_release():
         pipeline.IndexedSnapshot.from_approved_gtopdb(release="stale", **args)
     ready = pipeline.IndexedSnapshot.from_approved_gtopdb(release="2026.3.1", **args)
     assert len(ready.family_to_class) == 744 and "694" not in ready.family_to_class
+    assert ready.family_to_subclass
     row = _run(RawTargetRow("r1", {"target_id": "1"}, "protein"), snapshot=ready).rows[
         0
     ]
     assert row.result.iuphar_class == "Receptor"
     assert row.result.iuphar_mapping_version == "2026.3.1"
+
+
+def test_approved_snapshot_blocks_a_graph_with_a_missing_parent(monkeypatch):
+    monkeypatch.setattr(pipeline, "FAMILY_ROWS", ((1, "gpcr", (9,)),))
+    raw = '{"id":"1","type":"gpcr"}'
+    annotation = ProviderAnnotation(
+        "1",
+        "gpcr",
+        ("1",),
+        hashlib.sha256(raw.encode()).hexdigest(),
+        None,
+        raw,
+    )
+    with pytest.raises(ValueError, match="отсутствующий родитель"):
+        pipeline.IndexedSnapshot.from_approved_gtopdb(
+            snapshot_id="fixture",
+            release="2026.3.1",
+            complete=False,
+            catalog=(CatalogTarget("1", (), None, None, None, (), ()),),
+            annotations={"1": annotation},
+        )
+
+
+def test_explicit_subclass_reaches_the_row_and_an_unrelated_cycle_blocks_it():
+    base = _snapshot()
+    classified = pipeline.IndexedSnapshot.build(
+        snapshot_id=base.snapshot_id,
+        mapping_version=base.mapping_version,
+        complete=base.complete,
+        catalog=base.catalog,
+        annotations=dict(base.annotations),
+        family_nodes=base.families["family"],
+        type_to_class=dict(base.type_to_class),
+        family_to_class={"family": "Receptor"},
+        family_to_subclass={"family": "Kinase"},
+    )
+    row = _run(
+        RawTargetRow("row-a", {"target_id": "1", "organism": "Human"}, "protein"),
+        snapshot=classified,
+    ).rows[0]
+    assert row.result.iuphar_class == "Receptor"
+    assert row.result.iuphar_subclass == "Kinase"
+    assert row.result.effective_class == "Receptor"
+    assert row.result.effective_source == "iuphar_normalized"
+    assert row.result.effective_subclasses == ("Kinase",)
+    assert "contract_error" not in row.result.conflict_codes
+    mutable = {"family": "Kinase"}
+    replaced = replace(classified, family_to_subclass=mutable)
+    mutable["family"] = "Other"
+    assert replaced.family_to_subclass["family"] == "Kinase"
+    blank_map = pipeline.IndexedSnapshot.build(
+        snapshot_id=base.snapshot_id,
+        mapping_version=base.mapping_version,
+        complete=base.complete,
+        catalog=base.catalog,
+        annotations=dict(base.annotations),
+        family_nodes=base.families["family"],
+        type_to_class=dict(base.type_to_class),
+        family_to_class=dict(base.family_to_class),
+        family_to_subclass={"family": " "},
+    )
+    blank_row = _run(
+        RawTargetRow("row-blank", {"target_id": "1", "organism": "Human"}, "protein"),
+        snapshot=blank_map,
+    ).rows[0]
+    assert blank_row.result.iuphar_subclass is None
+    assert blank_row.result.effective_subclasses == ()
+    assert row.direct is not None
+    partial = pipeline.IndexedSnapshot.build(
+        snapshot_id=base.snapshot_id,
+        mapping_version=base.mapping_version,
+        complete=base.complete,
+        catalog=base.catalog,
+        annotations=dict(base.annotations),
+        family_nodes=base.families["family"],
+        type_to_class={},
+        family_to_class={"family": "Receptor"},
+        family_to_subclass={"family": "Kinase"},
+    )
+    partial_row = _run(
+        RawTargetRow("row-b", {"target_id": "1", "organism": "Human"}, "protein"),
+        snapshot=partial,
+    ).rows[0]
+    assert partial_row.result.iuphar_annotation_status == "partial"
+    assert partial_row.result.iuphar_subclass == "Kinase"
+    assert partial_row.result.effective_subclasses == ("Kinase",)
+    assert partial_row.result.effective_source == "iuphar_normalized"
+    assert "contract_error" not in partial_row.result.conflict_codes
+    blocked = pipeline.IndexedSnapshot.build(
+        snapshot_id=base.snapshot_id,
+        mapping_version=base.mapping_version,
+        complete=base.complete,
+        catalog=base.catalog,
+        annotations=dict(base.annotations),
+        family_nodes=(
+            *base.families["family"],
+            FamilyNode("left", ("right",), "other"),
+            FamilyNode("right", ("left",), "other"),
+        ),
+        type_to_class=dict(base.type_to_class),
+        family_to_class=dict(base.family_to_class),
+        family_to_subclass={"family": "Kinase"},
+    )
+    bad = _run(
+        RawTargetRow("row-a", {"target_id": "1", "organism": "Human"}, "protein"),
+        snapshot=blocked,
+    ).rows[0]
+    assert bad.result.iuphar_subclass is None
+    assert any(item.message == "цикл" for item in bad.result.diagnostics)
+
+
+def test_padded_subclass_label_stays_allowed_and_keeps_the_class():
+    base = _snapshot()
+    classified = pipeline.IndexedSnapshot.build(
+        snapshot_id=base.snapshot_id,
+        mapping_version=base.mapping_version,
+        complete=base.complete,
+        catalog=base.catalog,
+        annotations=dict(base.annotations),
+        family_nodes=base.families["family"],
+        type_to_class=dict(base.type_to_class),
+        family_to_class={"family": "Receptor"},
+        family_to_subclass={"family": " Kinase "},
+    )
+    row = _run(
+        RawTargetRow("row-pad", {"target_id": "1", "organism": "Human"}, "protein"),
+        snapshot=classified,
+    ).rows[0]
+    assert row.result.iuphar_subclass == "Kinase"
+    assert row.result.effective_class == "Receptor"
+    assert row.result.effective_source == "iuphar_normalized"
+    assert row.result.effective_subclasses == ("Kinase",)
+    assert "contract_error" not in row.result.conflict_codes
+    partial = pipeline.IndexedSnapshot.build(
+        snapshot_id=base.snapshot_id,
+        mapping_version=base.mapping_version,
+        complete=base.complete,
+        catalog=base.catalog,
+        annotations=dict(base.annotations),
+        family_nodes=base.families["family"],
+        type_to_class={},
+        family_to_class={"family": "Receptor"},
+        family_to_subclass={"family": " Kinase ", "other": " "},
+    )
+    partial_row = _run(
+        RawTargetRow(
+            "row-pad-partial", {"target_id": "1", "organism": "Human"}, "protein"
+        ),
+        snapshot=partial,
+    ).rows[0]
+    assert partial_row.result.iuphar_annotation_status == "partial"
+    assert partial_row.result.iuphar_subclass == "Kinase"
+    assert partial_row.result.effective_subclasses == ("Kinase",)
+    assert partial_row.result.effective_source == "iuphar_normalized"
+    assert "contract_error" not in partial_row.result.conflict_codes
 
 
 def _stage0_fixture(tmp_path):

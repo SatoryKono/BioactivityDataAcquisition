@@ -456,3 +456,61 @@ def test_nested_scope_review_resolves_evidence_from_coverage_directory(tmp_path)
         "sources/coverage/reviews/review.json",
         "sources/coverage/eligibility.txt",
     }
+
+
+def test_validated_fk_restoration_bytes_enter_the_backup_closure(tmp_path):
+    source = tmp_path / "recovery/CHEMBL2237.json"
+    source.parent.mkdir()
+    source.write_bytes(b'{"target_id":"CHEMBL2237"}\n')
+    candidate = tmp_path / "candidate/gold/part.parquet"
+    candidate.parent.mkdir(parents=True)
+    candidate.write_bytes(b"pinned-candidate-bytes")
+    manifest = tmp_path / "fk-restoration.json"
+    write_fixture_json(
+        manifest,
+        {
+            "artifact": "bioetl_target_fk_restoration",
+            "schema_version": 1,
+            "status": "validated_candidate",
+            "sources": [
+                {
+                    "path": "recovery/CHEMBL2237.json",
+                    "sha256": _sha(source),
+                }
+            ],
+            "candidate_files": [
+                {
+                    "path": "candidate/gold/part.parquet",
+                    "sha256": _sha(candidate),
+                }
+            ],
+        },
+    )
+    dependencies = collect_target_dependencies(
+        workspace=tmp_path, configs=(), restoration_manifest=manifest
+    )
+    assert dependencies["recovery/CHEMBL2237.json"] == _sha(source)
+    assert dependencies["candidate/gold/part.parquet"] == _sha(candidate)
+    backup = tmp_path / "backup"
+    copied = backup_target_dependencies(
+        workspace=tmp_path, dependencies=dependencies, destination=backup
+    )
+    assert (backup / "recovery/CHEMBL2237.json").read_bytes() == source.read_bytes()
+    assert copied["backup/candidate/gold/part.parquet"] == _sha(candidate)
+    blocked = tmp_path / "blocked.json"
+    write_fixture_json(
+        blocked,
+        {
+            "artifact": "bioetl_target_fk_restoration",
+            "schema_version": 1,
+            "status": "blocked",
+            "sources": [{"path": "recovery/CHEMBL2237.json", "sha256": _sha(source)}],
+            "candidate_files": [
+                {"path": "candidate/gold/part.parquet", "sha256": _sha(candidate)}
+            ],
+        },
+    )
+    with pytest.raises(ValueError, match="blocked target FK restoration"):
+        collect_target_dependencies(
+            workspace=tmp_path, configs=(), restoration_manifest=blocked
+        )

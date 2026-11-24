@@ -966,6 +966,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "docs/04-reference/contracts/gold/chembl_target_v3.1.json": (
         "tests/architecture/test_gold_schema_contracts.py",
     ),
+    "docs/04-reference/contracts/gold/chembl_target_v3.2.json": (
+        "tests/architecture/test_gold_schema_contracts.py",
+    ),
     "configs/base/contract_registry.yaml": (
         "tests/unit/infrastructure/config/test_contract_registry_loader.py",
         "tests/integration/config/test_non_chembl_contract_registry_coverage.py",
@@ -1313,7 +1316,11 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
         ),
     ),
-    "configs/quality/external_resource_inventory_pr13341_rematch_review.json": (
+    "configs/quality/external_resource_inventory_pr13355_rematch_review.json": (
+        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
+        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
+    ),
+    "configs/quality/external_resource_inventory_pr13348_rematch_review.json": (
         EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
         EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
     ),
@@ -1377,22 +1384,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
         EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
     ),
-    "configs/quality/external_resource_inventory_pr13341_classification_review.json": (
-        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
-        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
-    ),
-    "configs/quality/external_resource_inventory_pr13341_main_merge_review.json": (
-        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
-        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
-    ),
-    "configs/quality/external_resource_inventory_pr13341_main_13327_review.json": (
-        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
-        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
-    ),
-    "configs/quality/external_resource_inventory_pr13341_main_13356_review.json": (
-        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
-        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
-    ),
     "configs/quality/external_resource_inventory_pr13328_workflow_resume_review.json": (
         EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
         EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
@@ -1401,19 +1392,15 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
         EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
     ),
+    "configs/quality/external_resource_inventory_pr13346_dq_alias_review.json": (
+        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
+        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
+    ),
+    "configs/quality/external_resource_inventory_pr13344_fk_restoration_review.json": (
+        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
+        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
+    ),
     "configs/quality/external_resource_inventory_pr13360_rf002_review.json": (
-        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
-        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
-    ),
-    "configs/quality/external_resource_inventory_pr13341_main_13360_review.json": (
-        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
-        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
-    ),
-    "configs/quality/external_resource_inventory_pr13341_loc_review.json": (
-        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
-        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
-    ),
-    "configs/quality/external_resource_inventory_pr13341_mypy_review.json": (
         EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
         EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
     ),
@@ -1524,6 +1511,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "docs/05-operations/runbooks/workflow-control-plane.md": (
         "tests/unit/application/services/test_selected_snapshot_resume_contracts.py",
         "tests/unit/application/services/test_workflow_child_archive_contract.py",
+    ),
+    "docs/05-operations/runbooks/checkpoint-debugging.md": (
+        "tests/unit/application/services/test_observability_workflow_service.py",
     ),
     # RF-008: run-id preflight + deployed replay readiness own this runbook.
     "docs/04-reference/domain/workflow-state-machine.md": (

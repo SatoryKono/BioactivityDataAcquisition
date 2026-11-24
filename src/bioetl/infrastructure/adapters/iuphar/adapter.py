@@ -10,9 +10,6 @@ from bioetl.domain.entities.target_classification_boundary import (
     TargetClassificationInput,
     TargetClassificationResult,
 )
-from bioetl.infrastructure.config.target_classification_profile import (
-    TARGET_CLASSIFICATION_DETAIL_FIELDS,
-)
 from iuphar_target_class.bioetl_input import (
     plain_target_value as _plain,
 )
@@ -47,12 +44,12 @@ def _unclassified(
     profile_hash: str,
     reason: str,
     *,
-    schema_version: str,
+    include_detail: bool,
 ) -> TargetClassificationResult:
     projection = dict.fromkeys(_FIELD_MAP)
     projection["target_class_profile_sha256"] = profile_hash
-    if schema_version == "3.2.0":
-        projection.update(dict.fromkeys(TARGET_CLASSIFICATION_DETAIL_FIELDS))
+    if include_detail:
+        projection.update(detail_projection(None, computed=False))
     payloads: dict[str, object] = {
         "classification.json": [
             {
@@ -82,15 +79,15 @@ def _unclassified(
 
 
 def _row_result(
-    batch: BatchResult, profile_hash: str, *, schema_version: str
+    batch: BatchResult, profile_hash: str, *, include_detail: bool
 ) -> TargetClassificationResult:
     output = batch.rows[0]
     projection = {
         key: getattr(output.result, source) for key, source in _FIELD_MAP.items()
     }
     projection["target_class_profile_sha256"] = profile_hash
-    if schema_version == "3.2.0":
-        projection.update(detail_projection(output))
+    if include_detail:
+        projection.update(detail_projection(output, computed=True))
     return TargetClassificationResult(
         output.result.input_row_id,
         projection,
@@ -121,7 +118,8 @@ def _request_identities(
 def _adapt_inputs(
     inputs: tuple[TargetClassificationInput, ...],
     profile: LoadedIupharProfile,
-    schema_version: str,
+    *,
+    include_detail: bool,
 ) -> tuple[list[RawTargetRow], dict[str, TargetClassificationResult]]:
     results: dict[str, TargetClassificationResult] = {}
     eligible: list[RawTargetRow] = []
@@ -131,7 +129,7 @@ def _adapt_inputs(
         )
         if reason is not None:
             results[row.input_row_id] = _unclassified(
-                row, profile.profile_sha256, reason, schema_version=schema_version
+                row, profile.profile_sha256, reason, include_detail=include_detail
             )
         else:
             eligible.append(
@@ -143,7 +141,7 @@ def _adapt_inputs(
 
 
 def _project_rows(
-    classified: BatchResult, profile_sha256: str, schema_version: str
+    classified: BatchResult, profile_sha256: str, *, include_detail: bool
 ) -> dict[str, TargetClassificationResult]:
     results: dict[str, TargetClassificationResult] = {}
     for row in classified.rows:
@@ -165,7 +163,7 @@ def _project_rows(
             status="rejected" if invalid else "processed",
         )
         results[row.result.input_row_id] = _row_result(
-            one, profile_sha256, schema_version=schema_version
+            one, profile_sha256, include_detail=include_detail
         )
     return results
 
@@ -173,8 +171,13 @@ def _project_rows(
 class IupharTargetClassificationAdapter:
     """Classify without HTTP or file writes after verified profile loading."""
 
-    def __init__(self, profile: LoadedIupharProfile) -> None:
+    def __init__(
+        self, profile: LoadedIupharProfile, *, table_contract: str = "3.1.0"
+    ) -> None:
+        if table_contract not in {"3.0.0", "3.1.0", "3.2.0"}:
+            raise ValueError("unknown target table contract")
         self._profile = profile
+        self._include_detail = table_contract == "3.2.0"
         self.profile_sha256 = profile.profile_sha256
         self.snapshot_id = profile.snapshot.snapshot.snapshot_id
         self.snapshot_manifest_sha256 = profile.snapshot.snapshot_manifest_sha256
@@ -204,8 +207,9 @@ class IupharTargetClassificationAdapter:
     ) -> TargetClassificationBatch:
         identities = _request_identities(inputs, run_id, run_started_at)
         profile = self._profile
-        schema_version = profile.classification_schema_version
-        eligible, results = _adapt_inputs(inputs, profile, schema_version)
+        eligible, results = _adapt_inputs(
+            inputs, profile, include_detail=self._include_detail
+        )
         classified = classify_batch(
             tuple(eligible),
             snapshot=profile.snapshot.snapshot,
@@ -220,7 +224,13 @@ class IupharTargetClassificationAdapter:
             ),
             run_id=run_id,
         )
-        results.update(_project_rows(classified, self.profile_sha256, schema_version))
+        results.update(
+            _project_rows(
+                classified,
+                self.profile_sha256,
+                include_detail=self._include_detail,
+            )
+        )
         metrics = dict(classified.metrics)
         metrics.update(rows=len(inputs), not_applicable=len(inputs) - len(eligible))
         return TargetClassificationBatch(

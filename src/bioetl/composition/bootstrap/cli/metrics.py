@@ -160,6 +160,20 @@ def _without_classification(document: EntityDocument) -> EntityDocument:
     return value
 
 
+def _require_enrich_v31(pipeline: EntityDocument) -> TargetClassificationYamlConfig:
+    classification = TargetClassificationYamlConfig.model_validate(
+        pipeline.get("target_classification")
+    )
+    if classification.mode != "enrich":
+        raise ValueError("deployment configuration must select enrich")
+    if classification.to_domain().contract_version != "3.1.0":
+        raise ValueError(
+            "target candidate migration writes physical contract 3.1.0 only; "
+            "3.2.0 requires a later migration"
+        )
+    return classification
+
+
 def bind_target_deployment(
     paths: TargetMigrationPaths,
     *,
@@ -177,11 +191,7 @@ def bind_target_deployment(
     if _without_classification(original) != _without_classification(deployment):
         raise ValueError("deployment YAML may change only target_classification")
     pipeline = cast(EntityDocument, deployment["pipeline"])
-    classification = TargetClassificationYamlConfig.model_validate(
-        pipeline.get("target_classification")
-    )
-    if classification.mode != "enrich":
-        raise ValueError("deployment configuration must select enrich")
+    classification = _require_enrich_v31(pipeline)
     baseline = load_pipeline_config_uncached("chembl_target", configs_root=root)
     future = baseline.model_copy(update={"target_classification": classification})
     future = resolve_target_classification_profile(future).resolved_yaml_config
@@ -259,11 +269,7 @@ def _rehearsal_future(
     if _without_classification(original) != _without_classification(deployment):
         raise ValueError("deployment YAML may change only target_classification")
     pipeline = cast(EntityDocument, deployment["pipeline"])
-    classification = TargetClassificationYamlConfig.model_validate(
-        pipeline.get("target_classification")
-    )
-    if classification.mode != "enrich":
-        raise ValueError("deployment configuration must select enrich")
+    classification = _require_enrich_v31(pipeline)
     baseline = load_pipeline_config_uncached("chembl_target", configs_root=configs_root)
     future = baseline.model_copy(update={"target_classification": classification})
     return resolve_target_classification_profile(future).resolved_yaml_config

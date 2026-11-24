@@ -1,4 +1,4 @@
-"""Additive target entity for the opt-in IUPHAR 3.1.0 contract."""
+"""Additive target entities for the opt-in IUPHAR 3.1.0 and 3.2.0 contracts."""
 
 from __future__ import annotations
 
@@ -24,19 +24,19 @@ class TargetV31(Target):
 
 @dataclass(frozen=True, kw_only=True)
 class TargetV32(TargetV31):
-    """Additive 3.2.0 entity. Physical migration of the main tables is separate."""
+    """Persist classifier detail without changing the nine V31 columns."""
 
     iuphar_type_raw: str | None = None
-    iuphar_annotation_capability: str | None = None
+    iuphar_source_completeness: str | None = None
     iuphar_family_ids: str | None = None
     iuphar_subclasses: str | None = None
-    iuphar_paths: str | None = None
+    iuphar_family_paths: str | None = None
     local_status: str | None = None
     local_subclasses: str | None = None
     local_rule_ids: str | None = None
     effective_subclasses: str | None = None
     conflict_codes: str | None = None
-    classification_evidence_ids: str | None = None
+    classification_evidence_refs: str | None = None
 
 
 __all__ = ["TargetV31", "TargetV32"]

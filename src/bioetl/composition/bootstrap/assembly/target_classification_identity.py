@@ -18,6 +18,7 @@ from bioetl.composition.bootstrap.assembly.target_classification_runtime import 
 from bioetl.domain.context import PipelineRunContext
 from bioetl.domain.control_plane import RunInputSnapshotRef, RunManifest, RunSourceRef
 from bioetl.domain.control_plane.effective_config_artifact import ConfigSourceRef
+from bioetl.domain.config.target_classification import resolve_physical_table_contract
 from bioetl.domain.normalization.profiles.chembl_target_classification import (
     target_v31_normalization_profile,
     target_v32_normalization_profile,
@@ -45,7 +46,11 @@ def target_classification_contract_schema_identity(
     classification = config.target_classification
     if classification.mode != "enrich":
         return None
-    if classification.table_contract == "3.2.0":
+    version = resolve_physical_table_contract(
+        config.target_classification.mode,
+        config.target_classification.table_contract,
+    )
+    if version == "3.2.0":
         return ("3.2.0", target_v32_schema_hash())
     return ("3.1.0", target_v31_schema_hash())
 
@@ -57,9 +62,10 @@ def target_classification_normalization_identity(
     schema_identity = target_classification_contract_schema_identity(config)
     if schema_identity is None:
         return None
+    version = target_classification_contract_schema_identity(config)
     profile = (
         target_v32_normalization_profile()
-        if schema_identity[0] == "3.2.0"
+        if version is not None and version[0] == "3.2.0"
         else target_v31_normalization_profile()
     )
     identity = profile.identity

@@ -17,6 +17,19 @@ from bioetl.infrastructure.adapters.iuphar.adapter import (
     IupharTargetClassificationAdapter,
 )
 from bioetl.infrastructure.adapters.iuphar.snapshot_models import LoadedIupharProfile
+from bioetl.infrastructure.storage.target_fk_restoration_plan import (
+    ADMISSIBLE_ABSENCE_REASONS,
+    ASSAY_TARGET_CLOSURE_ERROR,
+    BLOCKING_ABSENCE_REASONS,
+    TargetAbsenceFinding,
+    TargetFKRestorationPlan,
+    TargetRecoveryInput,
+    canonical_row_sha256,
+    classify_target_absence,
+    current_assay_target_ids,
+    current_target_ids,
+    plan_target_fk_restoration,
+)
 from bioetl.infrastructure.storage.target_migration_row_ops import (
     by_id,
     hash_input,
@@ -104,19 +117,9 @@ def assert_candidate_cohort_closure(
     paths: dict[str, Path], gold_rows: Sequence[Mapping[str, object]]
 ) -> None:
     """Require every final assay FK, preserving additional Gold targets."""
-    assay_targets = {
-        row["target_id"]
-        for row in read_delta(paths["assay"])
-        if row.get("target_id") is not None and row.get("_is_current", True)
-    }
-    current_target_ids = {
-        key[0] for key, row in by_id(gold_rows).items() if row.get("_is_current", True)
-    }
-    if not assay_targets.issubset(current_target_ids):
-        missing = sorted(str(item) for item in assay_targets - current_target_ids)
-        raise ValueError(
-            "baseline assay/target foreign-key closure failed: " + ",".join(missing)
-        )
+    assay_targets = current_assay_target_ids(read_delta(paths["assay"]))
+    if not assay_targets.issubset(current_target_ids(gold_rows)):
+        raise ValueError(ASSAY_TARGET_CLOSURE_ERROR)
 
 
 _ABSENCE_REASONS = frozenset(
@@ -136,9 +139,20 @@ def reject_unverified_fk_addition(record: Mapping[str, object]) -> None:
 
 
 __all__ = [
+    "ADMISSIBLE_ABSENCE_REASONS",
+    "ASSAY_TARGET_CLOSURE_ERROR",
+    "BLOCKING_ABSENCE_REASONS",
+    "TargetAbsenceFinding",
+    "TargetFKRestorationPlan",
+    "TargetRecoveryInput",
     "assert_candidate_cohort_closure",
     "assert_classification_projection",
     "candidate_input_row_id",
+    "canonical_row_sha256",
+    "classify_target_absence",
+    "current_assay_target_ids",
+    "current_target_ids",
+    "plan_target_fk_restoration",
     "reject_unverified_fk_addition",
     "verify_candidate_hashes",
     "verify_source_classifications",

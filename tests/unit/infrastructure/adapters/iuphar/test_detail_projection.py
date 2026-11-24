@@ -3,15 +3,21 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
+from unittest.mock import MagicMock
 
 from iuphar_target_class.hierarchy import FamilyPath
+from iuphar_target_class.pipeline import RowResult
 
 from bioetl.infrastructure.adapters.iuphar.detail_projection import detail_projection
 
 
 def _result() -> SimpleNamespace:
     return SimpleNamespace(
+        input_validation_status="valid",
+        iuphar_subclass="GPCR",
         iuphar_type_raw="gpcr",
+        iuphar_annotation_status="available",
+        match_status="matched",
         local_status="supported",
         local_subclasses=("GPCR",),
         local_rule_ids=(),
@@ -22,34 +28,60 @@ def _result() -> SimpleNamespace:
     )
 
 
+def _row(
+    result: SimpleNamespace,
+    direct: SimpleNamespace | None,
+    annotation: SimpleNamespace | None,
+) -> RowResult:
+    row = MagicMock(spec=RowResult)
+    row.result = result
+    row.direct = direct
+    row.annotation = annotation
+    return row
+
+
 def test_detail_projection_renders_paths_as_canonical_json() -> None:
     projected = detail_projection(
-        SimpleNamespace(
-            result=_result(),
-            direct=SimpleNamespace(
-                annotation_capability="family_only",
-                iuphar_subclasses=("GPCR",),
+        _row(
+            _result(),
+            SimpleNamespace(
                 paths=(FamilyPath("f", ("root", "leaf"), "leaf>root"),),
             ),
-            annotation=SimpleNamespace(family_ids=("f",)),
-        )
+            SimpleNamespace(family_ids=("f",)),
+        ),
+        computed=True,
     )
 
     assert projected["iuphar_type_raw"] == "gpcr"
-    assert projected["iuphar_annotation_capability"] == "family_only"
-    assert projected["iuphar_paths"] == (
-        '[{"family_id":"f","leaf_to_root":"leaf>root","root_to_leaf":["root","leaf"]}]'
+    assert projected["iuphar_subclasses"] == '["GPCR"]'
+    assert projected["iuphar_source_completeness"] == "typed"
+    assert projected["iuphar_family_paths"] == (
+        '[{"family_id":"f","root_to_leaf":["root","leaf"]}]'
     )
-    assert projected["classification_evidence_ids"] == '["l","m"]'
+    assert projected["classification_evidence_refs"] == (
+        '{"local_evidence_ids":["l"],"match_evidence_ids":["m"]}'
+    )
     assert projected["local_rule_ids"] == "[]"
 
 
 def test_detail_projection_without_a_direct_layer_keeps_empty_collections() -> None:
     projected = detail_projection(
-        SimpleNamespace(result=_result(), direct=None, annotation=None)
+        _row(_result(), None, None),
+        computed=True,
     )
 
-    assert projected["iuphar_annotation_capability"] is None
+    assert projected["iuphar_source_completeness"] == "typed"
     assert projected["iuphar_family_ids"] == "[]"
-    assert projected["iuphar_subclasses"] == "[]"
-    assert projected["iuphar_paths"] == "[]"
+    assert projected["iuphar_subclasses"] == '["GPCR"]'
+    assert projected["iuphar_family_paths"] == "[]"
+    assert projected["classification_evidence_refs"] == (
+        '{"local_evidence_ids":["l"],"match_evidence_ids":["m"]}'
+    )
+
+
+def test_detail_projection_without_computation_stays_null() -> None:
+    projected = detail_projection(None, computed=False)
+
+    assert projected["iuphar_type_raw"] is None
+    assert projected["iuphar_family_paths"] is None
+    assert projected["classification_evidence_refs"] is None

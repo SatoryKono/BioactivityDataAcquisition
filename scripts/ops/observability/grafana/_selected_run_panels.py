@@ -955,8 +955,7 @@ _NO_RUNS_LABEL = "NO RUNS"
 SELECTOR_ROWS = (
     "$exists(items) and $count(items) = 0 ? "
     f'[{{"text":"{_NO_RUNS_LABEL}","value":"-"}}] : '
-    '[$map(items, function($item) { $merge([$item, {"text": '
-    '$replace($item.text, " [STALE catalog]", "")}]) })]'
+    "[$map(items, function($item) { $item })]"
 )
 
 
@@ -984,9 +983,10 @@ def stamp_selector_columns(payload: dict[str, object]) -> None:
         if variable.get("name") == "run_id":
             variable["regex"] = ""
             variable["description"] = (
-                "Run ID from the catalog snapshot; run dates describe execution, "
-                "not catalog freshness. Catalog freshness is Not verified here. "
-                "Refresh the dashboard to request an updated list."
+                "Run ID from the control-plane catalog. A [STALE catalog] label "
+                "indicates a stale catalog snapshot; run dates describe execution, "
+                "not catalog or source-data freshness. Refresh the dashboard to "
+                "request an updated list."
             )
         query = variable.get("query")
         if not isinstance(query, dict):

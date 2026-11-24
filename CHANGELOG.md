@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **IUPHAR target contract 3.2.0:** explicit `table_contract` selects an additive
+  physical contract that keeps the nine V31 columns. IUPHAR source type,
+  completeness and local status are stored as plain text. Family IDs,
+  subclasses, structured paths, local subclasses, local rule IDs, effective
+  subclasses, conflict codes and evidence references are stored as canonical
+  JSON strings. Default `enrich` stays 3.1.0.
+  `off` and `shadow` stay 3.0.0. Incompatible profile and table combinations
+  are rejected. Existing tables are not migrated (#13314).
 - **IUPHAR target classification 3.2.0:** primary UniProt accessions stay separate from auxiliary xrefs; EC 1–7 local rules are versioned and hashed; family paths keep every parent and an explicit subclass dictionary; the additive target contract carries subclass, path and evidence fields. Contract `3.2.0` is opt-in. Default enrich remains `3.1.0`. Main tables are not migrated, and biological acceptance stays false.
 
 - **Run identifier resolution:** `resolve=unique` on control-plane identity scope

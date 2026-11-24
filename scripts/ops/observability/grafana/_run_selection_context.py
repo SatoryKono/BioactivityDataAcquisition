@@ -33,9 +33,9 @@ RUN_SELECTION_CONTEXT = (
     "and $encodeUrlComponent(pipeline) != $requestedPipeline; "
     "$savedAt := summary[0].evaluation_at; "
     + _TIMESTAMP_SECONDS
-    + "$savedMillis := $savedAt ? $secs($savedAt) * 1000 : null; "
-    "$savedAge := $savedMillis != null and $savedMillis <= $millis() "
-    "? $floor(($millis() - $savedMillis) / 1000) : null; "
+    + "$savedMillis := $type($savedAt) = 'string' ? ($savedAt != '' ? $secs($savedAt) * 1000 : null) : null; "
+    "$savedAge := $type($savedMillis) = 'number' ? ($savedMillis <= $millis() "
+    "? $floor(($millis() - $savedMillis) / 1000) : null) : null; "
     "[{'_bioetl_frame':'selection_context', "
     "'context': $auto ? ($hasRun ? 'AUTO · latest run in scope' : "
     "(reason = 'no_runs_in_scope' ? 'NO RUN · empty scope' : 'Context unavailable')) "

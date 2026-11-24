@@ -82,6 +82,57 @@ async def test_single_cancellation_preserves_meaning(stage, expected):
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("dual", [False, True])
+async def test_cancelled_writer_preserves_drained_worker_error(monkeypatch, dual):
+    host = writer()
+    entered = asyncio.Event()
+    release = asyncio.Event()
+    error = OSError("synthetic uncertain outcome")
+    calls = []
+
+    async def physical():
+        calls.append(1)
+        entered.set()
+        await release.wait()
+        raise error
+
+    async def dispatch(context):
+        await await_physical_commit(physical, receipt_for(context.request.table_name))
+
+    host._dispatch_write.side_effect = dispatch
+    if dual:
+        host._contract_rollout_policy = SimpleNamespace(
+            write_versions=["1.0.0", "2.0.0"], active_version="2.0.0"
+        )
+        host._write_single_target = lambda *, request: impl._write_single_target_impl(
+            host, request=request
+        )
+        monkeypatch.setattr(
+            impl, "_project_records_for_gold_schema", lambda records, schema: records
+        )
+        operation = impl._write_dual_targets_impl(
+            host,
+            request=request(),
+            schema_policy=SimpleNamespace(for_version=lambda _: MagicMock()),
+        )
+    else:
+        operation = impl._write_single_target_impl(host, request=request())
+
+    task = asyncio.create_task(operation)
+    await entered.wait()
+    task.cancel()
+    await asyncio.sleep(0)
+    release.set()
+    with pytest.raises(GoldWriteCancelled) as found:
+        await task
+    assert found.value.diagnostic_error is error
+    assert isinstance(found.value.__cause__, asyncio.CancelledError)
+    assert found.value.receipt.category == Category.UNKNOWN
+    assert found.value.receipt.committed_targets == ()
+    assert calls == [1]
+
+
+@pytest.mark.asyncio
 async def test_physical_cancellation_drains_without_repeating_commit():
     entered = asyncio.Event()
     finish = asyncio.Event()
@@ -103,6 +154,8 @@ async def test_physical_cancellation_drains_without_repeating_commit():
         await task
     assert task.cancelled()
     assert found.value.receipt.category == Category.COMMITTED_POSTWRITE_PENDING
+    assert found.value.diagnostic_error is None
+    assert isinstance(found.value.__cause__, asyncio.CancelledError)
     assert calls == ["started", "committed"]
 
 
@@ -309,11 +362,14 @@ async def test_self_cancelled_physical_task_has_unknown_outcome():
 async def test_outer_cancellation_with_failed_physical_drain_is_unknown():
     entered = asyncio.Event()
     release = asyncio.Event()
+    error = OSError("synthetic uncertain outcome")
+    calls = []
 
     async def physical():
+        calls.append(1)
         entered.set()
         await release.wait()
-        raise OSError("synthetic uncertain outcome")
+        raise error
 
     task = asyncio.create_task(
         await_physical_commit(physical, receipt_for("synthetic"))
@@ -326,6 +382,9 @@ async def test_outer_cancellation_with_failed_physical_drain_is_unknown():
         await task
     assert found.value.receipt.category == Category.UNKNOWN
     assert found.value.receipt.committed_targets == ()
+    assert found.value.diagnostic_error is error
+    assert isinstance(found.value.__cause__, asyncio.CancelledError)
+    assert calls == [1]
 
 
 @pytest.mark.asyncio
@@ -457,6 +516,66 @@ async def test_precommit_validation_preserves_error_classification(contract_erro
     assert found.value.receipt.category == Category.NOT_COMMITTED
     assert found.value.__cause__ is original
     host._dispatch_write.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("version", "stage", "expected"),
+    [
+        ("9.8.7", "prepare", "9.8.7"),
+        (None, "prepare", "0.0.0"),
+        ("9.8.7", "after_prepare", "9.8.7"),
+    ],
+)
+async def test_merged_cancellation_receipt_identifies_request(version, stage, expected):
+    from pandera.polars import Column, DataFrameSchema
+
+    from bioetl.infrastructure.storage.gold.io_mixin import (
+        _GoldWriterMergedDispatchMixin,
+    )
+
+    class Host(_GoldWriterMergedDispatchMixin):
+        def __init__(self):
+            self.logger = MagicMock()
+            self.csv_exporter = None
+            self._validate_schema_strict = MagicMock()
+            self._validate_records_against_schema = AsyncMock(
+                side_effect=asyncio.CancelledError() if stage == "prepare" else None
+            )
+            self._resolve_table_path = MagicMock(return_value="synthetic")
+            self._run_in_executor = AsyncMock()
+
+    host = Host()
+    if stage == "after_prepare":
+        host.logger.info.side_effect = asyncio.CancelledError()
+    schema = DataFrameSchema(
+        {"id": Column(int)}, strict=True, metadata={"contract_version": version}
+    )
+
+    with pytest.raises(GoldWriteCancelled) as found:
+        await host.write_gold_merged("synthetic", [{"id": 1}], schema=schema)
+    assert found.value.receipt.contract_version == expected
+    assert found.value.receipt.category == Category.NOT_COMMITTED
+    assert found.value.receipt.committed_targets == ()
+    host._run_in_executor.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_merged_version_resolution_failure_is_not_success(monkeypatch):
+    from bioetl.infrastructure.storage.gold import io_execution, io_preparation
+
+    error = ValueError("invalid schema version")
+    resolver = MagicMock(side_effect=error)
+    prepare = AsyncMock()
+    monkeypatch.setattr(io_execution, "resolve_gold_contract_version", resolver)
+    monkeypatch.setattr(io_preparation, "_prepare_gold_merged_write", prepare)
+
+    with pytest.raises(ValueError) as found:
+        await io_execution._execute_gold_merged_write(
+            writer(), SimpleNamespace(table_name="synthetic", schema=object())
+        )
+    assert found.value is error
+    prepare.assert_not_awaited()
 
 
 @pytest.mark.asyncio

@@ -34,15 +34,12 @@ from bioetl.infrastructure.storage.target_migration_classification_checks import
     reject_unverified_fk_addition,
 )
 from iuphar_target_class.bioetl_input import project_target_fields
-from iuphar_target_class.comparison import (
-    Stage0Reference,
-    _same_classification,
-    build_m_parity_report,
-)
+from iuphar_target_class.comparison import _same_classification
 from iuphar_target_class.enablement import contour_status
 from iuphar_target_class.policy import (
-    classification_local_rules,
-    local_rule_catalog_sha256,
+    local_rules,
+    local_rules_catalog_sha256,
+    validate_rules,
 )
 from iuphar_target_class.qualification import (
     DIAGNOSTIC_NOT_KPI,
@@ -82,17 +79,14 @@ def test_input_manifest_does_not_mutate_the_original() -> None:
     assert FIELD_ROLES["local_class"] == "local"
 
 
-def test_ec7_is_a_local_enzyme_subclass_and_the_catalog_hash_is_order_independent() -> (
-    None
-):
-    rules = classification_local_rules()
-    translocase = rules[-1]
-    assert translocase.output == "Translocase"
-    assert translocase.parent_class == "Enzyme"
+def test_ec7_stays_a_translocase_observation_and_the_catalog_hash_is_stable() -> None:
+    rules = local_rules()
+    validate_rules(rules)
+    translocase = next(rule for rule in rules if rule.rule_id == "ec:7")
+    assert translocase.output == "Translocases"
     assert translocase.output != "Transporter"
-    assert local_rule_catalog_sha256() == local_rule_catalog_sha256(
-        tuple(reversed(rules))
-    )
+    assert not [rule for rule in rules if rule.rule_id == "ec-class:7"]
+    assert local_rules_catalog_sha256() == local_rules_catalog_sha256()
 
 
 def test_enrich_defaults_to_v31_and_off_cannot_select_v32() -> None:
@@ -119,56 +113,6 @@ def test_v32_schema_keeps_detail_fields_nullable() -> None:
         assert name in columns
         assert columns[name].nullable
     target_v32_normalization_profile()
-
-
-def test_subclass_disagreement_is_not_class_agreement(tmp_path) -> None:
-    del tmp_path
-    shared = {
-        "input_row_id": "1",
-        "iuphar_class": "Enzyme",
-        "effective_class": "Enzyme",
-        "effective_source": "iuphar_normalized",
-        "decision_status": "resolved",
-        "match_status": "matched",
-        "local_class": "",
-        "local_status": "",
-        "iuphar_annotation_status": "available",
-    }
-    reference = Stage0Reference(
-        "fixture",
-        1,
-        ({**shared, "iuphar_subclasses": "Hydrolase"},),
-    )
-    report = build_m_parity_report(
-        reference,
-        ({**shared, "iuphar_subclasses": "Transferase", "basis_sha256": ""},),
-    )
-    assert report["biological_accuracy_metric"] is False
-    assert report["unexplained"] == ["input_row_id=1"]
-    assert report["qualified_changes"] == []
-    partial = build_m_parity_report(
-        reference,
-        (
-            {
-                **shared,
-                "iuphar_subclasses": "Transferase",
-                "effective_class": "Receptor",
-                "basis_sha256": "a" * 64,
-                "change_sign": "direct_local_separation",
-                "explanation": "recorded class split",
-            },
-        ),
-        allowed=(
-            {
-                "target_id": "1",
-                "field": "effective_class",
-                "category": "direct_local_separation",
-                "basis_sha256": "a" * 64,
-            },
-        ),
-    )
-    assert partial["qualified_changes"] == []
-    assert partial["unexplained"] == ["input_row_id=1"]
 
 
 def test_expectations_cannot_be_the_classifier_output() -> None:
@@ -253,7 +197,7 @@ def test_unverified_target_rows_and_live_v32_promotion_are_refused() -> None:
     assert_live_promotion_allowed({})
 
 
-def test_family_paths_count_only_when_both_rows_carry_them() -> None:
+def test_missing_path_is_not_invented_as_unchanged() -> None:
     shared = {"iuphar_class": "Enzyme", "iuphar_family_paths": '[["Enzyme"]]'}
     other = {"iuphar_class": "Enzyme", "iuphar_family_paths": '[["Receptor"]]'}
     missing = {"iuphar_class": "Enzyme"}
@@ -261,8 +205,8 @@ def test_family_paths_count_only_when_both_rows_carry_them() -> None:
     same_contract_name = {"iuphar_class": "Enzyme", "iuphar_paths": '[["Enzyme"]]'}
     assert not _same_classification(shared, other)
     assert not _same_classification(shared, contract_name)
-    assert _same_classification(shared, same_contract_name)
-    assert _same_classification(shared, missing)
+    assert not _same_classification(shared, same_contract_name)
+    assert not _same_classification(shared, missing)
 
 
 def test_missing_table_contract_matches_an_explicit_null() -> None:

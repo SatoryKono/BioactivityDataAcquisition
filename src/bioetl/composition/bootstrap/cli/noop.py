@@ -149,9 +149,10 @@ def _has_pending_writes(
 def _validate_upstream_profile(
     profile: str, risky: tuple[_PipelineIntent, ...]
 ) -> None:
-    if profile == "V31" and risky:
+    if profile in {"V31", "V32"} and risky:
         raise ValueError(
-            "bounded destructive upstream cannot replace the reference cohort of an existing V31 target"
+            "bounded destructive upstream cannot replace the reference cohort of an "
+            f"existing {profile} target"
         )
 
 

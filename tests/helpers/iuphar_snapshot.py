@@ -218,7 +218,7 @@ def synthetic_reference_receipt(
         "run_id": "synthetic-contract-run",
         "reviewer_reference": "synthetic contract fixture only",
         "normalization_version": "bioetl-iuphar-input-v1",
-        "rules_version": "plan-v1-r9",
+        "rules_version": "local-rules-2026.11.23",
         "classification_schema_version": "3.1.0",
         "matching_policy_version": "rf002-uniprot-roles-2026-11-23",
         "scope_declaration": scope,

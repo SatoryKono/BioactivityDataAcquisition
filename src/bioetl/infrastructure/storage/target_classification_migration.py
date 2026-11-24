@@ -62,6 +62,7 @@ class TargetMigrationJournal(TypedDict):
     dependencies: dict[str, str]
     dependency_backups: dict[str, str]
     restored_dependencies: NotRequired[list[str]]
+    fk_restoration: NotRequired[dict[str, str]]
 
 
 @dataclass(frozen=True, slots=True)
@@ -184,22 +185,39 @@ def _restore_pairs(paths: dict[str, Path], state: TargetMigrationJournal) -> Non
     _save(backup, state)
 
 
+def _recorded_restoration(
+    workspace: Path, state: TargetMigrationJournal
+) -> Path | None:
+    recorded = state.get("fk_restoration")
+    if not isinstance(recorded, dict):
+        return None
+    manifest = workspace / str(recorded["path"])
+    if sha256_file(manifest) != recorded["sha256"]:
+        raise ValueError("target FK restoration digest mismatch")
+    return manifest
+
+
 def prepare_target_migration(
     paths: TargetMigrationPaths,
     *,
     legacy_include_fields: tuple[str, ...],
     deployment: TargetDeploymentBinding | None = None,
+    restoration_manifest: Path | None = None,
 ) -> TargetMigrationJournal:
     """Validate complete cohorts and copy the entire recoverable old bundle."""
     checked = paths.checked()
     validate_deployment_binding(checked, deployment)
     with _lock(paths.workspace):
         validation = validate_target_candidate(
-            checked, legacy_include_fields, workspace=paths.workspace
+            checked,
+            legacy_include_fields,
+            workspace=paths.workspace,
+            restoration_manifest=restoration_manifest,
         )
         dependencies = collect_target_dependencies(
             workspace=paths.workspace,
             configs=(checked["config"], checked["candidate_config"]),
+            restoration_manifest=restoration_manifest,
         )
         checked["backup"].mkdir(parents=True, exist_ok=False)
         dependency_backups = backup_target_dependencies(
@@ -242,6 +260,14 @@ def prepare_target_migration(
             "dependencies": dependencies,
             "dependency_backups": dependency_backups,
         }
+        if restoration_manifest is not None:
+            relative = restoration_manifest.resolve().relative_to(
+                paths.workspace.resolve()
+            )
+            state["fk_restoration"] = {
+                "path": relative.as_posix(),
+                "sha256": sha256_file(restoration_manifest),
+            }
         _save(checked["backup"], state)
         return state
 
@@ -261,10 +287,13 @@ def promote_target_migration(
         verify_target_dependencies(paths.workspace, state["dependencies"])
         verify_target_dependencies(paths.workspace, state["dependency_backups"])
         _verify_prepared_bytes(checked, state)
+        if _tree_hashes(checked["assay"]) != state["assay_hashes"]:
+            raise ValueError("assay reference cohort changed since preparation")
         validate_target_candidate(
             checked,
             tuple(state["legacy_include_fields"]),
             workspace=paths.workspace,
+            restoration_manifest=_recorded_restoration(paths.workspace, state),
         )
         from bioetl.infrastructure.storage.target_contract_transition import (
             assert_live_promotion_allowed,
@@ -276,8 +305,6 @@ def promote_target_migration(
         plan = dict(state)
         plan["table_contract"] = _candidate_table_contract(checked)
         assert_live_promotion_allowed(plan)
-        if _tree_hashes(checked["assay"]) != state["assay_hashes"]:
-            raise ValueError("assay reference cohort changed since preparation")
         state["phase"] = "promoting"
         _save(checked["backup"], state)
         try:

@@ -114,7 +114,7 @@ def shadow_config(tmp_path: Path, monkeypatch) -> PipelineYamlConfig:
             "snapshot": snapshot,
             "acceptance": None,
             "normalization_version": "bioetl-iuphar-input-v1",
-            "rules_version": "plan-v1-r9",
+            "rules_version": "local-rules-2026.11.23",
             "classification_schema_version": "3.1.0",
             "matching_policy_version": "rf002-uniprot-roles-2026-11-23",
         },
@@ -524,6 +524,7 @@ def test_target_preflight_uses_actual_writer_paths_even_when_off(
         gold_path=tmp_path / "configured-gold",
         mode="off",
         destructive=False,
+        table_contract="3.0.0",
     )
     silver._resolve_table_path.assert_called_once_with("chembl.target")
     gold._resolve_table_path.assert_called_once_with("chembl.target")
