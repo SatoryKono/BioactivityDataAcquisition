@@ -93,17 +93,6 @@ def build_composite_merge_service(
         system_columns_to_drop=system_columns_to_drop,
     )
     gold_schema = resolve_gold_schema(config.name)
-    # RF-003 enrich Gold retains additive classification columns (V31).
-    # off/shadow keep the baseline CompositeTargetGoldSchema from the registry.
-    if (
-        config.name == "composite_target"
-        and getattr(target_classification_session, "mode", None) == "enrich"
-    ):
-        from bioetl.domain.contracts.gold.composite_bioassay import (
-            CompositeTargetGoldSchemaV31,
-        )
-
-        gold_schema = CompositeTargetGoldSchemaV31
     return MergeService(
         merge_config=config.merge,
         storage=storage,

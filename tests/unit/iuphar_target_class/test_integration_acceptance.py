@@ -335,10 +335,12 @@ def _stored_proof(tmp_path, snapshot, provenance, row_id="r1", *, rows=None):
         mode="shadow",
         snapshot_manifest_sha256="a" * 64,
         profile_sha256="b" * 64,
-        normalization_version=provenance.normalization_version,
-        rules_version=provenance.rules_version,
-        classification_schema_version=provenance.schema_version,
-        matching_policy_version=provenance.matching_policy_version,
+        versions={
+            "normalization_version": provenance.normalization_version,
+            "rules_version": provenance.rules_version,
+            "classification_schema_version": provenance.schema_version,
+            "matching_policy_version": provenance.matching_policy_version,
+        },
     )
     result = TargetClassificationResult(
         row_id,

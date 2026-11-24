@@ -9,7 +9,8 @@ from unittest.mock import MagicMock
 import polars as pl
 import pytest
 
-from bioetl.application.composite.post_join_classification import (
+from bioetl.application.composite.helpers import post_join_classification as post_join_mod
+from bioetl.application.composite.helpers.post_join_classification import (
     apply_post_join_target_classification,
     discard_post_join_classification,
     finalize_post_join_classification,
@@ -28,6 +29,11 @@ def test_enrich_gold_schema_v31_keeps_classification_fields() -> None:
     enrich = set(CompositeTargetGoldSchemaV31.to_schema().columns)
     assert set(TARGET_CLASSIFICATION_FIELDS).issubset(enrich)
     assert set(TARGET_CLASSIFICATION_FIELDS).isdisjoint(baseline)
+
+
+@pytest.mark.unit
+def test_projection_fields_match_domain_whitelist() -> None:
+    assert post_join_mod._PROJECTION_FIELDS == TARGET_CLASSIFICATION_FIELDS
 
 
 @pytest.mark.unit

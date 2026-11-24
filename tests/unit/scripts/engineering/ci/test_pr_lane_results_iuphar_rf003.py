@@ -20,7 +20,7 @@ def test_rf003_surfaces_select_their_owners() -> None:
         [
             "src/iuphar_target_class/composite_features.py",
             "data/iuphar_target_class/rf003/feature_whitelist.json",
-            "src/bioetl/application/composite/post_join_classification.py",
+            "src/bioetl/application/composite/helpers/post_join_classification.py",
             "src/bioetl/application/composite/merger_post_join.py",
         ],
         repo_root=root,

@@ -85,10 +85,12 @@ def test_canonical_cohort_roundtrip_uses_runtime_eligibility(
         mode="shadow",
         snapshot_manifest_sha256=classifier.snapshot_manifest_sha256,
         profile_sha256=classifier.profile_sha256,
-        normalization_version=profile.normalization_version,
-        rules_version=profile.rules_version,
-        classification_schema_version=profile.classification_schema_version,
-        matching_policy_version=profile.matching_policy_version,
+        versions={
+            "normalization_version": profile.normalization_version,
+            "rules_version": profile.rules_version,
+            "classification_schema_version": profile.classification_schema_version,
+            "matching_policy_version": profile.matching_policy_version,
+        },
     )
     provenance = RunProvenance(
         classifier.snapshot_id,

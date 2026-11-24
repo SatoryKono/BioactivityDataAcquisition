@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Mapping
 from pathlib import Path
 from threading import RLock
 
@@ -98,10 +99,7 @@ class LocalTargetClassificationEvidenceStore:
         mode: str = "shadow",
         snapshot_manifest_sha256: str,
         profile_sha256: str,
-        normalization_version: str | None = None,
-        rules_version: str | None = None,
-        classification_schema_version: str | None = None,
-        matching_policy_version: str | None = None,
+        versions: Mapping[str, str | None] | None = None,
         pipeline_name: str = "chembl_target",
     ) -> None:
         if mode not in {"shadow", "enrich"}:
@@ -111,11 +109,14 @@ class LocalTargetClassificationEvidenceStore:
         self._pipeline_name = pipeline_name
         self._snapshot_hash = require_sha256(snapshot_manifest_sha256)
         self._profile_hash = require_sha256(profile_sha256)
+        payload = dict(versions or {})
         self._versions = {
-            "normalization_version": normalization_version,
-            "rules_version": rules_version,
-            "classification_schema_version": classification_schema_version,
-            "matching_policy_version": matching_policy_version,
+            "normalization_version": payload.get("normalization_version"),
+            "rules_version": payload.get("rules_version"),
+            "classification_schema_version": payload.get(
+                "classification_schema_version"
+            ),
+            "matching_policy_version": payload.get("matching_policy_version"),
         }
         self._lock = RLock()
 

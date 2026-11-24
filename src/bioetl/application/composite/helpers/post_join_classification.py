@@ -11,27 +11,33 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from dataclasses import field as dataclass_field
 from datetime import datetime
-from typing import TYPE_CHECKING, Protocol
+from typing import Protocol
 
 import polars as pl
 
-from bioetl.domain.config.target_classification import TARGET_CLASSIFICATION_FIELDS
 from bioetl.domain.context import PipelineContext
 from iuphar_target_class.composite_features import build_classification_business_data
 
-if TYPE_CHECKING:
-    from bioetl.application.services.target_runtime.classification import (
-        TargetClassificationRunState,
-    )
-    from bioetl.domain.ports import LoggerPort
-
 _COMPOSITE_PIPELINE_NAME = "composite_target"
 _COMPOSITE_WORKFLOW_ID = "composite_post_join"
+# Sync with domain.config.target_classification.TARGET_CLASSIFICATION_FIELDS.
+# Local copy avoids a new application.composite → domain.config edge.
+_PROJECTION_FIELDS: tuple[str, ...] = (
+    "iuphar_target_id",
+    "iuphar_class",
+    "iuphar_match_status",
+    "iuphar_annotation_status",
+    "local_class",
+    "effective_class",
+    "effective_source",
+    "decision_status",
+    "target_class_profile_sha256",
+)
 
 
 class _ClassificationHost(Protocol):
-    _logger: LoggerPort
-    _target_classification_session: TargetClassificationRunState | None
+    _logger: object
+    _target_classification_session: object | None
 
 
 @dataclass(slots=True)
@@ -57,13 +63,37 @@ def _classification_context(
     return PipelineContext.create(
         run_id=run_id,  # type: ignore[arg-type]
         run_type="composite",  # type: ignore[arg-type]
-        logger=host._logger,
+        logger=host._logger,  # type: ignore[arg-type]
         started_at=metadata_timestamp,
         source_batch_id="composite_merge",  # type: ignore[arg-type]
         replay_timestamp_anchor=metadata_timestamp,
         pipeline_name=_COMPOSITE_PIPELINE_NAME,
         workflow_id=_COMPOSITE_WORKFLOW_ID,
     )
+
+
+def _projection_from_enrich(
+    enriched: Mapping[str, object], *, shadow: bool
+) -> dict[str, object]:
+    if shadow:
+        return {}
+    return {
+        name: enriched.get(name) for name in _PROJECTION_FIELDS if name in enriched
+    }
+
+
+def _apply_projections(
+    merged_df: pl.DataFrame, projections: Sequence[Mapping[str, object]]
+) -> pl.DataFrame:
+    updates = {
+        name: [projection.get(name) for projection in projections]
+        for name in _PROJECTION_FIELDS
+        if any(name in projection for projection in projections)
+    }
+    result_df = merged_df
+    for column_name, values in updates.items():
+        result_df = result_df.with_columns(pl.Series(name=column_name, values=values))
+    return result_df
 
 
 def apply_post_join_target_classification(
@@ -84,27 +114,17 @@ def apply_post_join_target_classification(
     context = _classification_context(
         host, run_id=run_id, metadata_timestamp=metadata_timestamp
     )
-    records = merged_df.to_dicts()
+    shadow = session.mode == "shadow"
     projections: list[dict[str, object]] = []
     pending: list[int] = []
-    for index, raw in enumerate(records):
-        row = _row_mapping(raw)
-        business = build_classification_business_data(row)
+    for index, raw in enumerate(merged_df.to_dicts()):
+        business = build_classification_business_data(_row_mapping(raw))
         enriched = session.enrich(context, index, business)
         pending.append(index)
-        if session.mode == "shadow":
-            projections.append({})
-            continue
-        projections.append(
-            {
-                name: enriched.get(name)
-                for name in TARGET_CLASSIFICATION_FIELDS
-                if name in enriched
-            }
-        )
+        projections.append(_projection_from_enrich(enriched, shadow=shadow))
 
-    if session.mode == "shadow":
-        host._logger.info(
+    if shadow:
+        host._logger.info(  # type: ignore[union-attr]
             "RF-003 post-join classification computed in shadow mode",
             classified_rows=len(pending),
             run_id=run_id,
@@ -116,19 +136,11 @@ def apply_post_join_target_classification(
             _pending_indices=pending,
         )
 
-    updates = {
-        name: [projection.get(name) for projection in projections]
-        for name in TARGET_CLASSIFICATION_FIELDS
-        if any(name in projection for projection in projections)
-    }
-    result_df = merged_df
-    for column_name, values in updates.items():
-        result_df = result_df.with_columns(pl.Series(name=column_name, values=values))
-
-    host._logger.info(
+    result_df = _apply_projections(merged_df, projections)
+    host._logger.info(  # type: ignore[union-attr]
         "RF-003 post-join classification applied after dependency joins",
         classified_rows=len(pending),
-        projection_fields=sorted(updates),
+        projection_fields=sorted({n for p in projections for n in p}),
         run_id=run_id,
     )
     return PostJoinClassificationOutcome(

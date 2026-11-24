@@ -22,6 +22,9 @@ from bioetl.composition.bootstrap.composite_infrastructure_context import (
 from bioetl.composition.bootstrap.runtime.composite_execution_support_builder import (
     build_execution_support_services,
 )
+from bioetl.composition.bootstrap.assembly.target_classification_runtime import (
+    resolve_composite_post_join_classification_session,
+)
 from bioetl.composition.bootstrap.runtime.composite_merge_service_builder import (
     SYSTEM_COLUMNS_TO_DROP,
     build_composite_merge_service,
@@ -36,6 +39,7 @@ from bioetl.composition.bootstrap.runtime.assay_replay_capture import (
     prepare_assay_replay,
 )
 from bioetl.composition.factories.storage import StorageBundle
+from bioetl.domain.contracts.gold import CompositeTargetGoldSchemaV31
 from bioetl.infrastructure.storage.composite_replay_bundle import SUPPORTED_COMPOSITES
 
 if TYPE_CHECKING:
@@ -142,14 +146,27 @@ class CompositeSupportServicesFactory:
                 logger=runtime_context.logger,
                 field_group_registry=runtime_context.field_group_registry,
             )
-        from bioetl.composition.bootstrap.assembly.target_classification_runtime import (
-            resolve_composite_post_join_classification_session,
+        classification_session = resolve_composite_post_join_classification_session(
+            composite_name=self._config.name,
+            settings=self._infra.settings,
         )
+        resolve_gold_schema = self._resolve_gold_schema
+        if (
+            self._config.name == "composite_target"
+            and getattr(classification_session, "mode", None) == "enrich"
+        ):
+            base_resolve = self._resolve_gold_schema
+
+            def resolve_gold_schema(name: str) -> type | None:
+                # RF-003 enrich Gold retains additive classification columns (V31).
+                if name == "composite_target":
+                    return CompositeTargetGoldSchemaV31
+                return base_resolve(name)
 
         merger = build_composite_merge_service(
             config=self._config,
             storage=storage,
-            resolve_gold_schema=self._resolve_gold_schema,
+            resolve_gold_schema=resolve_gold_schema,
             delta_reader=merge_reader,
             field_group_registry=runtime_context.field_group_registry,
             cross_validator=runtime_context.cross_validator,
@@ -158,10 +175,7 @@ class CompositeSupportServicesFactory:
             normalization_policies=self._JOIN_KEY_NORMALIZATION_POLICIES,
             clock=self._infra.clock,
             execution_hook=execution_hook,
-            target_classification_session=resolve_composite_post_join_classification_session(
-                composite_name=self._config.name,
-                settings=self._infra.settings,
-            ),
+            target_classification_session=classification_session,
         )
         runtime_management_services = build_runtime_management_services(
             config=self._config,

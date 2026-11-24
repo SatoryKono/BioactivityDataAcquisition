@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from dataclasses import dataclass
 from datetime import datetime
 from typing import Protocol
 
@@ -11,7 +10,11 @@ import polars as pl
 
 from bioetl.application.composite.column_service import ColumnOrderService
 from bioetl.application.composite.conflict_resolver import ConflictResolverService
-from bioetl.application.composite.post_join_classification import (
+from bioetl.application.composite.helpers.merger_post_join_types import (
+    MergePersistRequest,
+    MergePostJoinContext,
+)
+from bioetl.application.composite.helpers.post_join_classification import (
     apply_post_join_target_classification,
     discard_post_join_classification,
     finalize_post_join_classification,
@@ -27,36 +30,14 @@ from bioetl.domain.composite.result import (
 )
 from bioetl.domain.ports import LoggerPort
 
-
-@dataclass(frozen=True, slots=True)
-class MergePostJoinContext:
-    """Post-join merge state ready for persistence and result assembly."""
-
-    merged_df: pl.DataFrame
-    records_merged: int
-    records_enriched: int
-    cv_stats: CrossValidationStats | None
-    quarantine_payloads: list[dict[str, object]]
-    classification_pending_indices: tuple[int, ...] = ()
-
-
-@dataclass(frozen=True, slots=True)
-class MergePersistRequest:
-    """Bounded arguments for merge persistence and result assembly."""
-
-    merged_df: pl.DataFrame
-    enrichers: Sequence[EnricherConfig]
-    records_merged: int
-    records_from_seed: int
-    records_enriched: int
-    sources_used: list[str]
-    cv_stats: CrossValidationStats | None
-    quarantine_payloads: list[dict[str, object]]
-    metadata_timestamp: datetime | None
-    run_id: str
-    started_at: datetime
-    started_monotonic: float
-    classification_pending_indices: tuple[int, ...] = ()
+__all__ = [
+    "MergePersistRequest",
+    "MergePostJoinContext",
+    "MergePostJoinWorkflowContext",
+    "finalize_merged_dataframe",
+    "finalize_post_join_context",
+    "persist_and_build_result",
+]
 
 
 class MergePostJoinWorkflowContext(Protocol):
@@ -197,16 +178,12 @@ def finalize_post_join_context(
         metadata_timestamp=metadata_timestamp,
     )
     merged_df = classification.merged_df
-    records_merged = len(merged_df)
-    records_enriched = host._count_enriched_records(
-        merged_df,
-        enrichers,
-        effective_seed_pipeline,
-    )
     return MergePostJoinContext(
         merged_df=merged_df,
-        records_merged=records_merged,
-        records_enriched=records_enriched,
+        records_merged=len(merged_df),
+        records_enriched=host._count_enriched_records(
+            merged_df, enrichers, effective_seed_pipeline
+        ),
         cv_stats=cv_stats,
         quarantine_payloads=quarantine_payloads,
         classification_pending_indices=tuple(classification._pending_indices),
@@ -218,6 +195,7 @@ async def persist_and_build_result(
     request: MergePersistRequest,
 ) -> MergeResult:
     """Persist merge outputs and build the domain ``MergeResult``."""
+    persisted = False
     try:
         await host._write_outputs(
             request.merged_df,
@@ -225,14 +203,15 @@ async def persist_and_build_result(
             run_id=request.run_id,
             sources_used=request.sources_used,
         )
-    except Exception:
-        discard_post_join_classification(
-            host,  # type: ignore[arg-type]
-            run_id=request.run_id,
-            metadata_timestamp=request.metadata_timestamp,
-            indices=request.classification_pending_indices,
-        )
-        raise
+        persisted = True
+    finally:
+        if not persisted:
+            discard_post_join_classification(
+                host,  # type: ignore[arg-type]
+                run_id=request.run_id,
+                metadata_timestamp=request.metadata_timestamp,
+                indices=request.classification_pending_indices,
+            )
     publish_post_join_classification(
         host,  # type: ignore[arg-type]
         run_id=request.run_id,
@@ -248,7 +227,6 @@ async def persist_and_build_result(
         started_at=request.started_at,
         started_monotonic=request.started_monotonic,
     )
-
     host._logger.info(
         "Merge completed",
         records_merged=request.records_merged,

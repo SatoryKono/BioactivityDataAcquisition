@@ -19,6 +19,7 @@ from bioetl.composition.bootstrap.assembly.storage import (
 )
 from bioetl.composition.runtime_builders.config_access import get_settings
 from bioetl.domain.ports import ContractPolicyProtocol
+from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
 from bioetl.infrastructure.config.settings_api import Settings
 from bioetl.infrastructure.config.target_classification_profile import (
     TargetClassificationSchemaProfile,
@@ -137,8 +138,6 @@ def resolve_composite_post_join_classification_session(
     """
     if composite_name != "composite_target":
         return None
-    from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
-
     loader = load_seed_config or load_pipeline_config
     seed_config = loader("chembl_target")  # type: ignore[operator]
     if not isinstance(seed_config, PipelineYamlConfig):

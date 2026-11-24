@@ -276,25 +276,22 @@ def build_target_classification_session(
     if mode not in ("shadow", "enrich"):
         raise ValueError("enabled target classification requires shadow or enrich mode")
     classifier = IupharTargetClassificationAdapter(profile)
+    versions = {
+        "normalization_version": profile.normalization_version,
+        "rules_version": profile.rules_version,
+        "classification_schema_version": profile.classification_schema_version,
+        "matching_policy_version": profile.matching_policy_version,
+    }
     store = LocalTargetClassificationEvidenceStore(
         Path(settings.data_dir) / "output/control/target_classification",
         mode=mode,
         snapshot_manifest_sha256=classifier.snapshot_manifest_sha256,
         profile_sha256=classifier.profile_sha256,
-        normalization_version=profile.normalization_version,
-        rules_version=profile.rules_version,
-        classification_schema_version=profile.classification_schema_version,
-        matching_policy_version=profile.matching_policy_version,
+        versions=versions,
         pipeline_name=pipeline_name,
     )
     return TargetClassificationRunState(
-        classifier=classifier,
-        evidence=store,
-        mode=mode,
-        normalization_version=profile.normalization_version,
-        rules_version=profile.rules_version,
-        classification_schema_version=profile.classification_schema_version,
-        matching_policy_version=profile.matching_policy_version,
+        classifier=classifier, evidence=store, mode=mode, **versions
     )
 
 

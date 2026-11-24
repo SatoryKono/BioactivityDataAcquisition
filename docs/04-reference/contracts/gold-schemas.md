@@ -755,6 +755,7 @@ fields.
 | `CompositeActivityGoldSchema`    | `domain/contracts/gold/composite_bioassay.py`    |
 | `CompositeAssayGoldSchema`       | `domain/contracts/gold/composite_bioassay.py`    |
 | `CompositeTargetGoldSchema`      | `domain/contracts/gold/composite_bioassay.py`    |
+| `CompositeTargetGoldSchemaV31`   | `domain/contracts/gold/composite_bioassay.py`    |
 | `CompositeMoleculeGoldSchema`    | `domain/contracts/gold/composite_molecule.py`    |
 | `CompositePublicationGoldSchema` | `domain/contracts/gold/composite_publication.py` |
 
@@ -1602,6 +1603,59 @@ JSON exports для Gold-схем хранятся в `docs/04-reference/contrac
 - `multifunctional_origin`
 - `primary_top_level`
 - `protein_classifications`
+- `target_id`
+- `target_protein_class_desc_L1`
+- `target_protein_class_desc_L2`
+- `target_protein_class_desc_L3`
+- `target_protein_class_desc_L4`
+- `target_protein_class_desc_L5`
+- `target_protein_class_id_L1`
+- `target_protein_class_id_L2`
+- `target_protein_class_id_L3`
+- `target_protein_class_id_L4`
+- `target_protein_class_id_L5`
+- `target_protein_class_name_L1`
+- `target_protein_class_name_L2`
+- `target_protein_class_name_L3`
+- `target_protein_class_name_L4`
+- `target_protein_class_name_L5`
+- `target_protein_class_type`
+- `target_type_reason_code`
+- `target_type_rule_version`
+- `taxonomy_id`
+- `top_level_count`
+- `uniprot_accession`
+
+### CompositeTargetGoldSchemaV31
+
+- `_dq_error`
+- `_dq_warn`
+- `_enrichment_status`
+- `_index`
+- `_lookup_method`
+- `_original_id`
+- `_source`
+- `_source_providers`
+- `canonical_top_levels`
+- `counted_top_levels`
+- `decision_status`
+- `description`
+- `effective_class`
+- `effective_source`
+- `entity_id`
+- `ignored_top_levels`
+- `iuphar_annotation_status`
+- `iuphar_class`
+- `iuphar_match_status`
+- `iuphar_target_id`
+- `l1_mapping_version`
+- `local_class`
+- `major_family`
+- `major_family_rule_version`
+- `multifunctional_origin`
+- `primary_top_level`
+- `protein_classifications`
+- `target_class_profile_sha256`
 - `target_id`
 - `target_protein_class_desc_L1`
 - `target_protein_class_desc_L2`
