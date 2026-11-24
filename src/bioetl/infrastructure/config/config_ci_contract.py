@@ -167,6 +167,8 @@ FILTER_ALLOWED_KEYS: Final[frozenset[str]] = frozenset(
     }
 )
 
+# Entity contracts are owned by PipelineContractPolicy. SCD configuration and
+# Gold business rules have no consumer in this section and are not supported.
 CONTRACT_ALLOWED_KEYS: Final[frozenset[str]] = frozenset(
     {
         "primary_key",
@@ -178,8 +180,6 @@ CONTRACT_ALLOWED_KEYS: Final[frozenset[str]] = frozenset(
         "contract_ref",
         "active_version",
         "rollout",
-        "scd_type",
-        "gold_business_rules",
     }
 )
 
