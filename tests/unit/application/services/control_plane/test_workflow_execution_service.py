@@ -1090,6 +1090,18 @@ async def test_workflow_execution_service_incremental_offset_progression() -> No
     assert state2.last_start_offset == 1000
     assert state2.last_limit == 500
 
+    # A failed incremental execution does not persist its cursor. Successful
+    # resume must record the pinned window for the next incremental run.
+    state_port.save(
+        replace(state2, status="failed", last_start_offset=None, last_limit=None)
+    )
+    resumed = await service2.run_workflow(config_with_limit_2, resume_last=True)
+    assert resumed.status == "success"
+    resumed_state = state_port.get_latest("chembl_core")
+    assert resumed_state is not None
+    assert resumed_state.last_start_offset == 1000
+    assert resumed_state.last_limit == 500
+
     # Third incremental run
     service3 = WorkflowExecutionService(
         workflow_runner=_FakeWorkflowRunner(),  # type: ignore[arg-type]
