@@ -68,6 +68,9 @@ def _convert_for_json(obj: Any) -> Any:
 def serialize_config(config: PipelineConfig) -> dict[str, Any]:
     """Serialize PipelineConfig to a dictionary for snapshotting."""
     raw_dict = asdict(config)
+    target = raw_dict.get("target_classification")
+    if isinstance(target, dict) and target.get("table_contract") is None:
+        del target["table_contract"]
     return cast(dict[str, Any], _convert_for_json(raw_dict))
 
 
