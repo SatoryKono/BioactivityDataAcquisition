@@ -23,6 +23,10 @@ from bioetl.infrastructure.adapters.iuphar import (
     parse_target_payloads,
     validate_acceptance_receipt,
 )
+from iuphar_target_class.policy import (
+    LOCAL_CATALOG_VERSION,
+    LOCAL_RULE_CATALOG_VERSION,
+)
 from bioetl.infrastructure.adapters.iuphar.snapshot_loader import (
     OUTPUT_NAMES,
     REQUIRED_ACCEPTANCE_CHECKS,
@@ -70,6 +74,8 @@ def _profile(
     *,
     accepted: bool = False,
     target_changes: dict[str, object] | None = None,
+    rules_version: str = LOCAL_CATALOG_VERSION,
+    schema_version: str = "3.1.0",
     **snapshot_changes: object,
 ):
     if accepted:
@@ -132,8 +138,8 @@ def _profile(
         "snapshot": snapshot_ref,
         "acceptance": acceptance,
         "normalization_version": "bioetl-iuphar-input-v1",
-        "rules_version": "local-rules-2026.11.23",
-        "classification_schema_version": "3.1.0",
+        "rules_version": rules_version,
+        "classification_schema_version": schema_version,
         "matching_policy_version": "rf002-uniprot-roles-2026-11-23",
     }
     ref = _write(tmp_path, "profile.json", profile)
@@ -221,6 +227,74 @@ def test_receipt_from_another_execution_version_cannot_admit_enrich(field):
         validate_acceptance_receipt(receipt, snapshot_manifest_sha256="a" * 64)
 
 
+def test_receipt_cannot_admit_a_different_profile_version(tmp_path):
+    profile = _profile(tmp_path, accepted=True)
+    path = _profile_path(profile)
+    document = json.loads(path.read_bytes())
+    document["rules_version"] = LOCAL_RULE_CATALOG_VERSION
+    document["classification_schema_version"] = "3.2.0"
+    rewritten = _write(path.parent, "shifted-profile.json", document)
+    with pytest.raises(ValueError, match="selected IUPHAR profile"):
+        load_profile(path.parent / rewritten["path"], rewritten["sha256"])
+
+
+def test_candidate_reclassification_uses_the_stored_row_identity(tmp_path):
+    from bioetl.infrastructure.storage.target_migration_classification_checks import (
+        verify_source_classifications,
+    )
+
+    profile = _profile(
+        tmp_path,
+        target_changes={"type": "gpcr"},
+        required_target_types=["gpcr"],
+        rules_version=LOCAL_RULE_CATALOG_VERSION,
+        schema_version="3.2.0",
+    )
+    business = _business(target_ec_numbers="3.4.21.1")
+    result = IupharTargetClassificationAdapter(profile).classify_record(
+        business,
+        input_row_id="candidate:CHEMBL1",
+        run_id="run-a",
+        run_started_at="2026-11-16T00:01:00Z",
+    )
+    row = {**business, **result.projection, "target_id": "CHEMBL1"}
+    verify_source_classifications({"silver": [row], "gold": [row]}, profile)
+
+
+def test_candidate_reclassification_rejects_v32_detail_drift(tmp_path):
+    from bioetl.domain.config.target_classification import (
+        TARGET_CLASSIFICATION_DETAIL_FIELDS,
+    )
+    from bioetl.infrastructure.storage.target_migration_classification_checks import (
+        verify_source_classifications,
+    )
+
+    profile = _profile(
+        tmp_path,
+        target_changes={"type": "gpcr"},
+        required_target_types=["gpcr"],
+        rules_version=LOCAL_RULE_CATALOG_VERSION,
+        schema_version="3.2.0",
+    )
+    business = _business(target_ec_numbers="3.4.21.1")
+    result = IupharTargetClassificationAdapter(
+        profile, table_contract="3.2.0"
+    ).classify_record(
+        business,
+        input_row_id="candidate:CHEMBL1",
+        run_id="run-a",
+        run_started_at="2026-11-16T00:01:00Z",
+    )
+    row = {**business, **result.projection, "target_id": "CHEMBL1"}
+    verify_source_classifications({"silver": [row], "gold": [row]}, profile, "3.2.0")
+    field = TARGET_CLASSIFICATION_DETAIL_FIELDS[0]
+    corrupt = {**row, field: "incorrect"}
+    with pytest.raises(ValueError, match="candidate classification differs"):
+        verify_source_classifications(
+            {"silver": [corrupt], "gold": [row]}, profile, "3.2.0"
+        )
+
+
 def test_previous_plan_rules_version_cannot_admit_the_new_catalog():
     receipt = _receipt("a" * 64)
     receipt["rules_version"] = "plan-v1-r8"
@@ -302,6 +376,34 @@ def test_an_ec_input_does_not_replace_direct_iuphar(tmp_path):
     assert result.projection["effective_class"] == "Receptor"
     assert result.projection["effective_source"] == "iuphar_normalized"
     assert result.projection["decision_status"] == "requires_review"
+    output = json.loads(
+        next(a.payload for a in result.artifacts if a.name == "classification.json")
+    )[0]
+    assert output["iuphar_subclass"] == "G protein-coupled receptors"
+    assert output["iuphar_subclasses"] == ["G protein-coupled receptors"]
+
+
+def test_current_rule_catalog_records_the_enzyme_subclass(tmp_path):
+    profile = _profile(
+        tmp_path,
+        target_changes={"type": "gpcr"},
+        required_target_types=["gpcr"],
+        rules_version=LOCAL_RULE_CATALOG_VERSION,
+        schema_version="3.2.0",
+    )
+    adapter = IupharTargetClassificationAdapter(profile, table_contract="3.2.0")
+    result = _classify(adapter, target_ec_numbers="3.4.21.1")
+    assert profile.classification_schema_version == "3.2.0"
+    assert result.projection["iuphar_class"] == "Receptor"
+    assert result.projection["effective_class"] == "Receptor"
+    assert result.projection["local_class"] == "Enzyme"
+    assert result.projection["iuphar_subclasses"] == '["G protein-coupled receptors"]'
+    assert (
+        result.projection["effective_subclasses"] == '["G protein-coupled receptors"]'
+    )
+    # Local subclasses stay empty: local inference does not propagate EC
+    # subclasses into local_subclasses yet (open subclass-propagation gap).
+    assert result.projection["local_subclasses"] == "[]"
 
 
 @pytest.mark.parametrize(

@@ -29,6 +29,7 @@ from iuphar_target_class.comparison import (
     ParityPublication,
     seal_difference_bases,
 )
+from iuphar_target_class.policy import LOCAL_CATALOG_VERSION
 from iuphar_target_class.pipeline_io import (
     publish_batch,
     read_legacy_batch,
@@ -46,7 +47,7 @@ def _provenance() -> RunProvenance:
     )
 
 
-def _snapshot(*, complete=True, broken=False):
+def _snapshot(*, complete=True, broken=False, type_to_subclass=None):
     catalog = (
         CatalogTarget("1", ("P12345",), "R1", "10", "Human", ("receptor",), ()),
         CatalogTarget("2", ("Q12345",), "E2", "20", "Human", ("enzyme",), ("shared",)),
@@ -70,6 +71,7 @@ def _snapshot(*, complete=True, broken=False):
         family_nodes=(FamilyNode("family", ("missing",) if broken else (), "gpcr"),),
         type_to_class={"gpcr": "Receptor"},
         family_to_class={},
+        type_to_subclass=type_to_subclass,
     )
 
 
@@ -80,6 +82,46 @@ def _run(*rows, snapshot=None):
         provenance=_provenance(),
         run_id="fixed",
     )
+
+
+def test_auxiliary_same_species_hit_stays_off_the_identity_channel():
+    batch = _run(
+        RawTargetRow(
+            "aux",
+            {
+                "uniprot": "P12345",
+                "uniprot_xref": "Q12345",
+                "organism": "Human",
+            },
+            "protein",
+        )
+    )
+    result = batch.rows[0].result
+    assert result.match_status == "matched"
+    assert result.matched_target_id == "1"
+    assert "auxiliary_uniprot_divergence" in {item.code for item in result.diagnostics}
+
+
+def test_current_rule_catalog_keeps_the_direct_iuphar_class():
+    provenance = replace(_provenance(), rules_version=LOCAL_CATALOG_VERSION)
+    batch = pipeline.classify_batch(
+        (
+            RawTargetRow(
+                "ec",
+                {"target_id": "1", "organism": "Human", "ec": "3.4.21.1"},
+                "protein",
+            ),
+        ),
+        snapshot=_snapshot(type_to_subclass={"gpcr": "G protein-coupled receptors"}),
+        provenance=provenance,
+        run_id="fixed",
+    )
+    result = batch.rows[0].result
+    assert result.iuphar_class == "Receptor"
+    assert result.iuphar_subclass == "G protein-coupled receptors"
+    assert result.effective_subclasses == ("G protein-coupled receptors",)
+    assert result.local_class == "Enzyme"
+    assert result.effective_class == "Receptor"
 
 
 def test_indexed_pipeline__empty_batch__reports_empty():

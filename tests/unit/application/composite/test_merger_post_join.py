@@ -36,11 +36,18 @@ from unittest.mock import patch
 import polars as pl
 import pytest
 
+from bioetl.application.composite.helpers.merger_post_join_persist import (
+    persist_and_build_result,
+)
 from bioetl.application.composite.merger_post_join import (
     MergePostJoinContext,
     finalize_merged_dataframe,
     finalize_post_join_context,
-    persist_and_build_result,
+)
+from bioetl.application.services.target_runtime.post_join_classification import (
+    apply_post_join_classification,
+    attach_post_join_target_classifier,
+    project_enriched_features,
 )
 from bioetl.domain.composite.config import EnricherConfig
 from bioetl.domain.composite.result import EnrichmentResult, EnrichmentStatus
@@ -48,6 +55,47 @@ from bioetl.domain.composite.result import EnrichmentResult, EnrichmentStatus
 
 def _enricher_config(pipeline: str) -> EnricherConfig:
     return EnricherConfig(pipeline=pipeline, join_keys=("doi",))
+
+
+def test_qualified_target_features_reach_classifier_without_unlisted_columns() -> None:
+    row = {
+        "chembl.target.component_accessions": ["P00734"],
+        "chembl.target.taxonomy_id": "9606",
+        "chembl.target_component.protein_classifications": '[{"name":"Enzyme"}]',
+        "chembl.target.effective_class": "untrusted",
+    }
+    expected = {
+        "component_accessions": ["P00734"],
+        "taxonomy_id": "9606",
+        "protein_classifications": '[{"name":"Enzyme"}]',
+    }
+    seen = []
+
+    def classify(features, run_id, index):
+        seen.append((features, run_id, index))
+        return {"classification": "ok"}
+
+    result = apply_post_join_classification(pl.DataFrame([row]), "run-1", classify)
+    assert seen == [(expected, "run-1", 0)]
+    assert result["classification"].to_list() == ["ok"]
+
+
+def test_projection_prefers_unqualified_non_null_and_preserves_absence() -> None:
+    assert project_enriched_features(
+        {
+            "taxonomy_id": "10090",
+            "chembl.target.taxonomy_id": "9606",
+            "component_accessions": None,
+            "chembl.target.component_accessions": ["P00734"],
+        }
+    ) == {
+        "features": {"taxonomy_id": "10090", "component_accessions": ["P00734"]},
+        "feature_provenance": "post_join",
+    }
+    assert project_enriched_features({"chembl.target.taxonomy_id": None}) == {
+        "features": {},
+        "feature_provenance": "absent",
+    }
 
 
 def _enrichment_result(
@@ -70,6 +118,7 @@ def _make_host() -> MagicMock:
     host._apply_field_mappings = MagicMock(side_effect=lambda df: df)
     host._add_lineage = MagicMock(side_effect=lambda df, **kw: df)
     host._drop_excluded_fields = MagicMock(side_effect=lambda df: df)
+    host.target_post_join_classifier = None
     host._count_enriched_records = MagicMock(return_value=1)
     host._write_outputs = AsyncMock()
     host._build_merge_result = MagicMock()
@@ -121,6 +170,37 @@ class TestFinalizeMergedDataframe:
         host._drop_excluded_fields.assert_called_once()
         host._order_service.order_columns.assert_called_once()
         assert isinstance(result, pl.DataFrame)
+
+    def test_attached_classifier_runs_after_final_ordering(self) -> None:
+        host = _make_host()
+        observed: dict[str, bool] = {}
+
+        def classify(frame: pl.DataFrame, run_id: str) -> pl.DataFrame:
+            observed["after_conflicts"] = (
+                host._conflict_resolver.resolve_conflicts.called
+            )
+            observed["after_order"] = host._order_service.order_columns.called
+            return frame.with_columns(pl.lit(run_id).alias("effective_class"))
+
+        attach_post_join_target_classifier(host, classify)
+        result = finalize_merged_dataframe(
+            host,
+            merged_df=pl.DataFrame(
+                {"seed_priority": ["old"], "target_ec_numbers": ["1.1.1.1"]}
+            ),
+            enrichers=[_enricher_config("e1")],
+            enrichment_results={"e1": _enrichment_result("e1")},
+            effective_seed_pipeline="seed_target",
+            run_id="run-1",
+            metadata_timestamp=None,
+            sources_used=["seed"],
+            dependency_results=None,
+            enricher_dfs={"e1": pl.DataFrame()},
+        )
+
+        assert observed == {"after_conflicts": True, "after_order": True}
+        assert result["effective_class"].to_list() == ["run-1"]
+        assert result["seed_priority"].to_list() == ["old"]
 
 
 @pytest.mark.unit
@@ -194,7 +274,7 @@ class TestPersistAndBuildResult:
         started_at = datetime(2020, 1, 1, tzinfo=UTC)
 
         with patch(
-            "bioetl.application.composite.merger_post_join.derive_completion_timestamp",
+            "bioetl.application.composite.helpers.merger_post_join_persist.derive_completion_timestamp",
             return_value=(started_at, 3.5),
         ):
             await persist_and_build_result(

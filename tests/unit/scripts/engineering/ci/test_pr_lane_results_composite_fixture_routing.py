@@ -31,3 +31,15 @@ def test_composition_protocol_inventory_selects_its_contract_test() -> None:
         ["configs/quality/composition_protocol_inventory.yaml"],
         repo_root=repo_root,
     ) == ["tests/architecture/test_composition_protocol_inventory.py"]
+
+
+def test_shadow_compare_routes_composite_golden_snapshot() -> None:
+    repo_root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        ["tests/snapshots/composite_config_real_yaml_golden_master.json"],
+        repo_root=repo_root,
+    )
+    assert (
+        "tests/unit/infrastructure/schemas/test_composite_config_invariants_source_of_truth.py"
+        in report["selected"]
+    )
