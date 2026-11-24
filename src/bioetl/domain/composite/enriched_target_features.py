@@ -11,7 +11,10 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
-from bioetl.domain.config.target_classification import TARGET_CLASSIFICATION_FIELDS
+from bioetl.domain.config.target_classification import (
+    TARGET_CLASSIFICATION_DETAIL_FIELDS,
+    TARGET_CLASSIFICATION_FIELDS,
+)
 
 COMPOSITE_CLASSIFICATION_OWNER = "composite.target_classification"
 COMPOSITE_CLASSIFICATION_BATCH_ID = "composite-target-classification"
@@ -91,6 +94,7 @@ __all__ = [
     "HISTORICAL_M_HIERARCHY_COLUMNS",
     "MODERN_CHEMBL_HIERARCHY_COLUMNS",
     "OPTIONAL_ENRICHED_FEATURES",
+    "TARGET_CLASSIFICATION_DETAIL_FIELDS",
     "TARGET_CLASSIFICATION_FIELDS",
     "composite_classification_row_id",
     "composite_classification_run_id",

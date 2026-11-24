@@ -21,11 +21,9 @@ from bioetl.application.services.target_runtime.classification import (
 from bioetl.domain.composite.enriched_target_features import (
     COMPOSITE_CLASSIFICATION_BATCH_ID,
     COMPOSITE_CLASSIFICATION_OWNER,
+    TARGET_CLASSIFICATION_DETAIL_FIELDS,
     TARGET_CLASSIFICATION_FIELDS,
     composite_classification_row_id,
-)
-from bioetl.domain.config.target_classification import (
-    TARGET_CLASSIFICATION_DETAIL_FIELDS,
 )
 from bioetl.domain.types import JsonDict
 

@@ -64,7 +64,7 @@ from bioetl.application.composite.helpers.replay_context import (
 )
 
 
-def _bind_replay_classification(
+def _bind_target_replay(
     envelope: JsonDict,
     objects: JsonDict,
     verified_json: Callable[[str], JsonDict],
@@ -136,11 +136,9 @@ async def replay_assay(
             settings=settings,
         )
         observation_token = bind_run_observations()
-        classification_token = None
+        target_token = None
         try:
-            classification_token = _bind_replay_classification(
-                envelope, objects, verified_json
-            )
+            target_token = _bind_target_replay(envelope, objects, verified_json)
             merger = build_composite_merge_service(
                 config=config,
                 storage=cast(CompositeMergeStorageProtocol, storage),
@@ -182,8 +180,8 @@ async def replay_assay(
             try:
                 await storage.aclose()
             finally:
-                if classification_token is not None:
-                    reset_target_classification_dependency(classification_token)
+                if target_token is not None:
+                    reset_target_classification_dependency(target_token)
                 reset_run_observations(observation_token)
 
 
