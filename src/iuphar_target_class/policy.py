@@ -46,6 +46,7 @@ PLAN_SECTION_5 = "план v1 r9 §5"
 DOCUMENTARY_STATUS = "подтверждено документально"
 # RF-005 (#13313): subclass dictionary + multi-parent path persistence.
 PLAN_VERSION = "plan-v1-r9"
+LOCAL_RULE_CATALOG_VERSION = "iuphar-local-rules-20261123"
 BASE_MISSING_MARKERS: tuple[str, ...] = (
     "#n/a",
     "N/A",

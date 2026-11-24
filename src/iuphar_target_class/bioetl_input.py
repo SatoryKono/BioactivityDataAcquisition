@@ -17,11 +17,16 @@ _SOURCE_TAXA = {
 }
 
 
+_MISSING_MARKERS = frozenset({"n/a", "#n/a"})
+
+
 def _text(value: object) -> str | None:
     if not isinstance(value, str):
         return None
     text = value.strip()
-    return None if not text or text == "unknown" else text
+    if not text or text.casefold() in {"unknown", *_MISSING_MARKERS}:
+        return None
+    return text
 
 
 def _tokens(value: object) -> tuple[str, ...]:

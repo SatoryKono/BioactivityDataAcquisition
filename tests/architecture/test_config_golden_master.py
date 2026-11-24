@@ -65,13 +65,28 @@ def _convert_for_json(obj: Any) -> Any:
     return obj
 
 
+def _omit_unset_table_contract(value: object) -> object:
+    """Keep an unset table contract out of snapshots, matching config dumps."""
+    if isinstance(value, dict):
+        rendered = {
+            key: _omit_unset_table_contract(item) for key, item in value.items()
+        }
+        classification = rendered.get("target_classification")
+        if (
+            isinstance(classification, dict)
+            and classification.get("table_contract") is None
+        ):
+            classification.pop("table_contract")
+        return rendered
+    if isinstance(value, list):
+        return [_omit_unset_table_contract(item) for item in value]
+    return value
+
+
 def serialize_config(config: PipelineConfig) -> dict[str, Any]:
     """Serialize PipelineConfig to a dictionary for snapshotting."""
     raw_dict = asdict(config)
-    target = raw_dict.get("target_classification")
-    if isinstance(target, dict) and target.get("table_contract") is None:
-        del target["table_contract"]
-    return cast(dict[str, Any], _convert_for_json(raw_dict))
+    return cast(dict[str, Any], _omit_unset_table_contract(_convert_for_json(raw_dict)))
 
 
 def load_snapshots() -> dict[str, Any]:

@@ -38,6 +38,7 @@ from bioetl.infrastructure.validation.pandera_validator import (
 )
 from bioetl.application.services.target_runtime.classification import (
     TargetClassificationRunState,
+    equivalent_target_binding,
 )
 from bioetl.application.services.target_runtime.scope import (
     TARGET_CLASSIFICATION_DEPENDENCY_KEY,
@@ -337,6 +338,6 @@ def preflight_workflow_target_dependencies(
                 "snapshot_id": profile.snapshot.snapshot.snapshot_id,
             }
         )
-    if isinstance(stored, Mapping) and dict(stored) != binding:
+    if isinstance(stored, Mapping) and not equivalent_target_binding(stored, binding):
         raise ValueError("stored target classification dependency identity changed")
     return {TARGET_CLASSIFICATION_DEPENDENCY_KEY: binding}
