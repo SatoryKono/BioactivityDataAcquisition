@@ -13,9 +13,11 @@ from bioetl.application.composite.helpers.merger_orchestration_types import (
     MergeInputContext,
     MergeWorkflowContext,
 )
+from bioetl.application.composite.helpers.merger_post_join_persist import (
+    persist_and_build_result,
+)
 from bioetl.application.composite.merger_post_join import (
     finalize_post_join_context,
-    persist_and_build_result,
 )
 from bioetl.application.runtime_timestamps import capture_runtime_timing_anchor
 
@@ -212,6 +214,8 @@ async def execute_merge_execution_core(
         sources_used=loaded.sources_used,
         dependency_results=request.dependency_results,
         enricher_dfs=loaded.enricher_dfs,
+        dependency_dfs=loaded.dependency_dfs,
+        classification_started_at=request.metadata_timestamp,
     )
     return await persist_and_build_result(
         host,

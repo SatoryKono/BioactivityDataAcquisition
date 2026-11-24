@@ -16,6 +16,7 @@ __all__ = [
     "get_default_repo_root",
     "resolve_config_subdir",
     "resolve_configs_root",
+    "resolve_repo_relative_path",
 ]
 
 
@@ -77,6 +78,21 @@ def resolve_configs_root(
     return ConfigRootResolver(prefer_cwd_configs=prefer_cwd_configs).resolve(
         configs_root
     )
+
+
+def resolve_repo_relative_path(
+    reference: str, *, dependency_root: Path | None = None
+) -> Path:
+    """Resolve a dependency path relative to the repo or its restored input root."""
+    path = Path(reference)
+    if path.is_absolute():
+        return path.resolve()
+    base = (
+        dependency_root
+        if dependency_root is not None
+        else resolve_configs_root().parent
+    )
+    return (base / path).resolve()
 
 
 def resolve_config_subdir(

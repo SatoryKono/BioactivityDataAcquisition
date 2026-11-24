@@ -7,6 +7,7 @@ from dataclasses import replace
 
 import pytest
 
+from iuphar_target_class.identifier_roles import MATCHING_POLICY_VERSION
 from iuphar_target_class.integration_acceptance import (
     CHECKS,
     IntegrationAcceptanceRequest,
@@ -251,7 +252,7 @@ def acceptance_inputs(tmp_path):
         "3.1.0",
         "frozen",
         "frozen",
-        matching_policy_version="rf002-uniprot-roles-2026-11-23",
+        matching_policy_version=MATCHING_POLICY_VERSION,
     )
     proof = _stored_proof(tmp_path, snapshot, provenance)
     report = tmp_path / "pipeline-report.json"
