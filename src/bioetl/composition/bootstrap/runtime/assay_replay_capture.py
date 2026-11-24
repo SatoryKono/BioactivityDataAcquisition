@@ -39,9 +39,7 @@ from bioetl.infrastructure.storage.composite_replay_inputs import (
 )
 from bioetl.infrastructure.storage.delta_reader import DeltaReader
 from bioetl.infrastructure.time import SystemClock
-from bioetl.composition.bootstrap.assembly.storage import (
-    resolve_target_runtime_profile_path,
-)
+from bioetl.infrastructure.config.config_root import resolve_repo_relative_path
 from bioetl.composition.bootstrap.assembly.target_classification_runtime import (
     resolve_target_runtime_config,
 )
@@ -65,9 +63,7 @@ def _capture_target_classification(root: Path, objects: dict[str, str]) -> None:
     payload = config.model_dump(mode="json")
     classification = config.target_classification.to_domain()
     if classification.enabled:
-        profile = resolve_target_runtime_profile_path(
-            classification.snapshot_manifest or ""
-        )
+        profile = resolve_repo_relative_path(classification.snapshot_manifest or "")
         relative, files = publish_target_classifier(
             root, profile, classification.snapshot_manifest_sha256 or ""
         )

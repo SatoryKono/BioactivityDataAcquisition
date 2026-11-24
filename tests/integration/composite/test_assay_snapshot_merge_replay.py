@@ -80,6 +80,25 @@ def _activate_target_classifier(root, monkeypatch):
         monkeypatch.setattr(module, "load_pipeline_config", load_with_classifier)
 
 
+async def _assert_mapping_after_failed_replays(
+    root, digest, tmp_path, monkeypatch, default_mapping
+):
+    import asyncio
+    import bioetl.composition.bootstrap.runtime.assay_replay as replay_module
+    from bioetl.domain.mapping import protein_class_target_type as mapping
+
+    assert mapping.current_protein_class_target_type_mapping() is default_mapping
+    for failure in (ValueError, asyncio.CancelledError):
+        monkeypatch.setattr(
+            replay_module,
+            "verify_replay_outputs",
+            AsyncMock(side_effect=failure("replay verification failed")),
+        )
+        with pytest.raises(failure, match="replay verification failed"):
+            await replay_module.replay_assay(root, digest, tmp_path / failure.__name__)
+        assert mapping.current_protein_class_target_type_mapping() is default_mapping
+
+
 @pytest.mark.parametrize("family", ["activity", "molecule", "publication", "target"])
 @pytest.mark.parametrize(
     "relative_capture,relative_replay",
@@ -279,21 +298,9 @@ async def test_other_composite_families_replay_physical_outputs(
     assert receipt["silver_equal"] is True and receipt["gold_equal"] is True
     assert receipt["records"] == 1
     if family == "target":
-        import asyncio
-        import bioetl.composition.bootstrap.runtime.assay_replay as replay_module
-
-        assert mapping.current_protein_class_target_type_mapping() is default_mapping
-        for failure in (ValueError, asyncio.CancelledError):
-            monkeypatch.setattr(
-                replay_module,
-                "verify_replay_outputs",
-                AsyncMock(side_effect=failure("replay verification failed")),
-            )
-            with pytest.raises(failure, match="replay verification failed"):
-                await replay_assay(root, digest, tmp_path / failure.__name__)
-            assert (
-                mapping.current_protein_class_target_type_mapping() is default_mapping
-            )
+        await _assert_mapping_after_failed_replays(
+            root, digest, tmp_path, monkeypatch, default_mapping
+        )
 
 
 async def test_assay_merge_replays_nullable_foreign_keys_without_live_reads(tmp_path):
