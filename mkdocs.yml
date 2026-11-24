@@ -1070,6 +1070,7 @@ nav:
               - "Skills Catalog": 00-project/ai/skills/local/SKILLS-CATALOG.md
               - "Combined Skills Index (Unified)": 00-project/ai/skills/COMBINED-CATALOG.md
               - "Skill agent-debugging": 00-project/ai/skills/local/agent-debugging/SKILL.md
+              - "Skill grilling": 00-project/ai/skills/local/grilling/SKILL.md
               - "Skill new-pipeline": 00-project/ai/skills/local/new-pipeline/SKILL.md
               - "Skill observability-dashboard": 00-project/ai/skills/local/observability-dashboard/SKILL.md
               - "Skill observability-prometheus": 00-project/ai/skills/local/observability-prometheus/SKILL.md

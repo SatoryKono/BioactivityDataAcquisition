@@ -339,6 +339,22 @@
       "forbid_numbered_list": true
     },
     {
+      "id": "required-task-clarification",
+      "paths": [
+        "AGENTS.md",
+        ".junie/guidelines.md"
+      ],
+      "heading": "Required Task Clarification",
+      "required": [
+        "MUST apply the repository's `grilling` skill",
+        "`.codex/skills/grilling/SKILL.md`",
+        "`.junie/skills/grilling/SKILL.md`",
+        "`.devin/skills/grilling/SKILL.md`",
+        "MUST obtain confirmation of the shared understanding before implementation",
+        "If confirmation is needed and no authorized person can provide it, pause the implementation"
+      ]
+    },
+    {
       "id": "runtime-bootstrap",
       "paths": [
         "AGENTS.md",

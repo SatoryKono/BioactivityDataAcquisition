@@ -1,0 +1,4 @@
+interface:
+  display_name: "Grilling"
+  short_description: "Clarify scope before BioETL implementation"
+  default_prompt: "Use $grilling to clarify this BioETL request and confirm the agreed scope before implementation."

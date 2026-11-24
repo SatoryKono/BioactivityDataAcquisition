@@ -29,6 +29,7 @@ emits a machine-readable drift/sync report for owner review.
 | Skill | Primary modes |
 | --- | --- |
 | `agent-debugging` | deterministic agent diagnostics, advisory screening |
+| `grilling` | task clarification and confirmation before implementation |
 | `py-audit-bot` | baseline, final, targeted, review, debt, reproducibility |
 | `py-config-bot` | configuration, schema, contract |
 | `py-debug-bot` | reproduce, isolate, remediation guidance |
@@ -54,6 +55,7 @@ emits a machine-readable drift/sync report for owner review.
 ## Mirror Doc Index
 
 - [agent-debugging](./agent-debugging/SKILL.md)
+- [grilling](./grilling/SKILL.md)
 - [new-pipeline](./new-pipeline/SKILL.md)
 - [observability-dashboard](./observability-dashboard/SKILL.md)
 - [observability-prometheus](./observability-prometheus/SKILL.md)

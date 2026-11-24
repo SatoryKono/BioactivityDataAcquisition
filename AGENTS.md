@@ -311,3 +311,27 @@ does not relax the env guardrail or the full-tree commit gate.
 - Agents and contributors **MUST NOT** create, edit, rename, move, overwrite, or delete any `.env` file without explicit per-task user approval.
 - Reading `.env` files is permitted.
 - Если задача требует изменения `.env`, исполнитель должен остановиться и сначала запросить явное разрешение пользователя.
+
+## Required Task Clarification
+
+Before implementing any new request, the agent handling the user conversation
+MUST apply the repository's `grilling` skill. This applies to code, docs,
+configuration, data, and external actions. Read-only investigation may begin
+while clarification or confirmation is pending.
+
+Read the skill from the active runtime's project tree
+(`.codex/skills/grilling/SKILL.md`, `.junie/skills/grilling/SKILL.md`, or
+`.devin/skills/grilling/SKILL.md`). If the runtime has no project skill tree,
+read the Codex file as the shared procedure. Use the project file directly
+when the client cannot invoke it natively or lists a same-named personal
+skill. Treat an explicit `$grill-me` request as an alias for `$grilling`.
+
+The agent MUST obtain confirmation of the shared understanding before
+implementation. Explicit authorization covering the stated scope and
+acceptance criteria counts as confirmation. Read-only requests may proceed
+within their stated scope. A delegated agent uses the confirmed brief. An
+already approved task keeps its confirmation, and a scope change reopens
+only the decisions it affects. If confirmation is needed and no authorized
+person can provide it, pause the implementation. An explicit user instruction
+to proceed without questions applies within its scope and preserves all other
+approval and access requirements.

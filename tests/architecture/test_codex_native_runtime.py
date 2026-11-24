@@ -135,8 +135,8 @@ def test_native_agent_negative_fixture_identifies_missing_descriptor(
 def test_canonical_skills_are_the_only_project_discovery_surface() -> None:
     assert not native_runtime_contract.validate_canonical_skills(ROOT)
     canonical = native_runtime_contract.canonical_skills(ROOT)
-    assert len(canonical) == 14
-    assert "agent-debugging" in canonical
+    assert len(canonical) == 15
+    assert {"agent-debugging", "grilling"} <= canonical.keys()
 
 
 def test_skill_negative_fixture_identifies_invalid_canonical_metadata(

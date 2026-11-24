@@ -24,6 +24,7 @@ ______________________________________________________________________
 | Skill | Когда вызывать | Куда не сворачивать |
 | --- | --- | --- |
 | `agent-debugging` | Сбой траектории AI-агента | `py-debug-bot` |
+| `grilling` | Обязательное уточнение нового запроса перед реализацией | `py-plan-bot` |
 | `new-pipeline` | Новый provider/entity pipeline | `py-config-bot` |
 | `observability-dashboard` | Grafana dashboard и панели | `observability-prometheus` |
 | `observability-prometheus` | Prometheus alert и recording rules | `observability-dashboard` |
