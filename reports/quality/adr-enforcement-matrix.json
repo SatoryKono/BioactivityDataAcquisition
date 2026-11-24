@@ -1898,6 +1898,7 @@
         "tests/architecture/test_silver_filter_boundary_inventory.py",
         "tests/architecture/test_silver_filter_identity_surface.py",
         "tests/snapshots/pipeline_configs.json",
+        "tests/unit/domain/filtering/test_silver_filter_payload_guard.py",
         "tests/unit/infrastructure/config/test_filter_config_loader.py"
       ],
       "gap_reasons": [],
@@ -1925,6 +1926,7 @@
         "tests/architecture/test_silver_filter_boundary_inventory.py",
         "tests/architecture/test_silver_filter_identity_surface.py",
         "tests/snapshots/pipeline_configs.json",
+        "tests/unit/domain/filtering/test_silver_filter_payload_guard.py",
         "tests/unit/infrastructure/config/test_filter_config_loader.py"
       ],
       "manual_exception": null,
