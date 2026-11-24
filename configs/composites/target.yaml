@@ -281,6 +281,22 @@ composite:
       - protein_classification_id
       - protein_classification_ids
       provider_order: [chembl]
+      # === Post-join IUPHAR classification. Seed values do not own these fields. ===
+    - name: target_classification_outcome
+      fields:
+      - iuphar_target_id
+      - iuphar_class
+      - iuphar_match_status
+      - iuphar_annotation_status
+      - local_class
+      - effective_class
+      - effective_source
+      - decision_status
+      - target_class_profile_sha256
+      - target_classification_owner
+      - target_classification_completeness
+      - target_classification_absent_features
+      provider_order: [composite]
       # === Target-level protein classification summary ===
     - name: protein_classification_summary
       fields:
