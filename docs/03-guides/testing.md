@@ -163,6 +163,11 @@ For read-only architecture evidence collection, prefer:
 PYTHONDONTWRITEBYTECODE=1 python -m scripts.engineering.qa run-architecture-audit-read-only
 ```
 
+The named `run-tests --suite architecture-read-only-audit` lane invokes the same
+Python command. Pass its options before any `--` separator; pytest arguments and
+`--skip-preflight` are not supported. It propagates the diagnostic exit code and
+does not create test-health JUnit or JSON summary artifacts.
+
 This diagnostic lane runs import-linter, the runtime SCC guard, module coverage
 inventory drift, hotspot-family baseline, remote-main debt baseline, and
 debt-governance gates in check-only mode. It does not replace the normal
