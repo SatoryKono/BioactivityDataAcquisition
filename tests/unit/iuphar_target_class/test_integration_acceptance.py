@@ -7,6 +7,7 @@ from dataclasses import replace
 
 import pytest
 
+from iuphar_target_class.identifier_roles import MATCHING_POLICY_VERSION
 from iuphar_target_class.integration_acceptance import (
     CHECKS,
     IntegrationAcceptanceRequest,
@@ -17,6 +18,7 @@ from iuphar_target_class.integration_acceptance import (
 )
 from iuphar_target_class.matching import CatalogTarget
 from iuphar_target_class.models import ProviderAnnotation, RawTargetRow, RunProvenance
+from iuphar_target_class.policy import LOCAL_CATALOG_VERSION
 from iuphar_target_class.pipeline import IndexedSnapshot, classify_batch
 from iuphar_target_class.pipeline_io import (
     read_bioetl_target_kernel_csv_v1,
@@ -246,11 +248,11 @@ def acceptance_inputs(tmp_path):
     provenance = RunProvenance(
         "synthetic-fixture",
         "bioetl-iuphar-input-v1",
-        "plan-v1-r9",
+        LOCAL_CATALOG_VERSION,
         "3.1.0",
         "frozen",
         "frozen",
-        matching_policy_version="rf002-uniprot-roles-2026-11-23",
+        matching_policy_version=MATCHING_POLICY_VERSION,
     )
     proof = _stored_proof(tmp_path, snapshot, provenance)
     report = tmp_path / "pipeline-report.json"
