@@ -5,7 +5,7 @@
 - Kind: `workflow`
 - Typed identity: `workflow:uniprot_idmapping`
 - Schema: `1.0.0`
-- Source revision: `sha256:387f240c55071c7669d0e2373429eb0c94229c598811e37d4b2b4c2ad6950fa2`
+- Source revision: `sha256:7387cad849fb387330bca1a7b59c320eb6f3a7c339685ce047ae9d86944ff035`
 
 ## Evidence
 
@@ -75,7 +75,7 @@
   "provenance": {
     "projector_version": "1.0.0",
     "semantic_content_hash": "sha256:936e63203227f577e285dc725be4128ab9d582a950dd2ace418f7faf31ef2721",
-    "source_revision": "sha256:387f240c55071c7669d0e2373429eb0c94229c598811e37d4b2b4c2ad6950fa2"
+    "source_revision": "sha256:7387cad849fb387330bca1a7b59c320eb6f3a7c339685ce047ae9d86944ff035"
   },
   "source_references": [
     {
