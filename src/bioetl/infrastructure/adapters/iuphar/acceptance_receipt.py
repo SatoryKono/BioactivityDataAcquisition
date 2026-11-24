@@ -6,7 +6,11 @@ from collections.abc import Mapping
 from pathlib import Path
 
 from iuphar_target_class.identifier_roles import MATCHING_POLICY_VERSION
-from iuphar_target_class.policy import LOCAL_CATALOG_VERSION
+from iuphar_target_class.policy import (
+    LOCAL_CATALOG_VERSION,
+    LOCAL_RULE_CATALOG_VERSION,
+    PLAN_VERSION,
+)
 
 from ._manifest import checked_document, header, referenced_path, require_sha256, text
 from .snapshot_loader import load_snapshot_manifest
@@ -31,6 +35,28 @@ _VERSION_KEYS = (
     "classification_schema_version",
     "matching_policy_version",
 )
+_ADMITTED_PROFILE_VERSIONS = frozenset(
+    {
+        (
+            NORMALIZATION_VERSION,
+            PLAN_VERSION,
+            CLASSIFICATION_SCHEMA_VERSION,
+            MATCHING_POLICY_VERSION,
+        ),
+        (
+            NORMALIZATION_VERSION,
+            LOCAL_CATALOG_VERSION,
+            CLASSIFICATION_SCHEMA_VERSION,
+            MATCHING_POLICY_VERSION,
+        ),
+        (
+            NORMALIZATION_VERSION,
+            LOCAL_RULE_CATALOG_VERSION,
+            "3.2.0",
+            MATCHING_POLICY_VERSION,
+        ),
+    }
+)
 
 
 def validate_acceptance_receipt(
@@ -48,7 +74,7 @@ def validate_acceptance_receipt(
     if document.get("reference_cases_accepted") is not True:
         raise ValueError("independent IUPHAR reference cases are not accepted")
     versions = tuple(document.get(key) for key in _VERSION_KEYS)
-    if versions != _ADAPTER_VERSIONS:
+    if versions not in _ADMITTED_PROFILE_VERSIONS:
         raise ValueError("acceptance versions differ from the executing adapter")
     _executed_checks(document.get("checks"))
     _bound_acceptance_outputs(document)
@@ -84,7 +110,7 @@ def _load_acceptance(
     root: Path,
     snapshot: LoadedIupharSnapshot,
     required: bool,
-) -> str | None:
+) -> tuple[str, tuple[str, str, str, str]] | None:
     reference = document.get("acceptance")
     if reference is None:
         if required:
@@ -97,7 +123,13 @@ def _load_acceptance(
     validate_acceptance_receipt(
         receipt, snapshot_manifest_sha256=snapshot.snapshot_manifest_sha256
     )
-    return digest
+    versions = (
+        text(receipt, "normalization_version"),
+        text(receipt, "rules_version"),
+        text(receipt, "classification_schema_version"),
+        text(receipt, "matching_policy_version"),
+    )
+    return digest, versions
 
 
 def load_profile(
@@ -117,12 +149,19 @@ def load_profile(
         snapshot.completeness.complete and snapshot.completeness.publishable
     ):
         raise ValueError("enrich requires a complete, publishable IUPHAR snapshot")
-    acceptance_hash = _load_acceptance(
+    loaded_acceptance = _load_acceptance(
         document, path.parent, snapshot, require_acceptance
     )
     versions = tuple(text(document, key) for key in _VERSION_KEYS)
-    if versions != _ADAPTER_VERSIONS:
+    if versions not in _ADMITTED_PROFILE_VERSIONS:
         raise ValueError("IUPHAR profile versions differ from the executing adapter")
+    acceptance_hash = None
+    if loaded_acceptance is not None:
+        acceptance_hash, receipt_versions = loaded_acceptance
+        if receipt_versions != versions:
+            raise ValueError(
+                "acceptance versions differ from the selected IUPHAR profile"
+            )
     return LoadedIupharProfile(
         snapshot,
         require_sha256(expected_sha256),

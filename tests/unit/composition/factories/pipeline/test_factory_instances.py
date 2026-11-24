@@ -62,6 +62,7 @@ def _make_settings() -> MagicMock:
     settings.metrics = None
     settings.pipeline = MagicMock()
     settings.pipeline.heartbeat_interval = 30
+    settings.pipeline.relaxed_dq = False
     return settings
 
 
