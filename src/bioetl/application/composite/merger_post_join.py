@@ -11,7 +11,10 @@ import polars as pl
 
 from bioetl.application.composite.column_service import ColumnOrderService
 from bioetl.application.composite.conflict_resolver import ConflictResolverService
-from bioetl.application.runtime_timestamps import derive_completion_timestamp
+from bioetl.application.composite.helpers.target_classification_stage import (
+    CompositeTargetClassification,
+    apply_joined_classification,
+)
 from bioetl.domain.composite import EnricherConfig
 from bioetl.domain.composite.cross_validation import CrossValidationStats
 from bioetl.domain.composite.result import (
@@ -131,6 +134,15 @@ def finalize_merged_dataframe(
     return merged_df
 
 
+def _bound_classification_stage(
+    host: object,
+) -> CompositeTargetClassification | None:
+    stage = getattr(host, "_target_classification_stage", None)
+    if isinstance(stage, CompositeTargetClassification):
+        return stage
+    return None
+
+
 def finalize_post_join_context(
     host: MergePostJoinWorkflowContext,
     *,
@@ -143,6 +155,8 @@ def finalize_post_join_context(
     sources_used: list[str],
     dependency_results: dict[str, DependencyResult] | None,
     enricher_dfs: dict[str, pl.DataFrame],
+    dependency_dfs: dict[str, pl.DataFrame] | None = None,
+    classification_started_at: datetime | None = None,
 ) -> MergePostJoinContext:
     """Run post-join validation/finalization and derive merge result counters."""
     merged_df, cv_stats, quarantine_payloads = host._run_cross_validation(
@@ -151,75 +165,46 @@ def finalize_post_join_context(
         enricher_dfs=enricher_dfs,
         effective_seed_pipeline=effective_seed_pipeline,
     )
-    merged_df = finalize_merged_dataframe(
-        host,
-        merged_df=merged_df,
-        enrichers=enrichers,
-        enrichment_results=enrichment_results,
-        effective_seed_pipeline=effective_seed_pipeline,
-        run_id=run_id,
-        metadata_timestamp=metadata_timestamp,
-        sources_used=sources_used,
-        dependency_results=dependency_results,
-        enricher_dfs=enricher_dfs,
-    )
-    records_merged = len(merged_df)
-    records_enriched = host._count_enriched_records(
-        merged_df,
-        enrichers,
-        effective_seed_pipeline,
-    )
-    return MergePostJoinContext(
-        merged_df=merged_df,
-        records_merged=records_merged,
-        records_enriched=records_enriched,
-        cv_stats=cv_stats,
-        quarantine_payloads=quarantine_payloads,
-    )
-
-
-async def persist_and_build_result(
-    host: MergePostJoinWorkflowContext,
-    *,
-    merged_df: pl.DataFrame,
-    enrichers: Sequence[EnricherConfig],
-    records_merged: int,
-    records_from_seed: int,
-    records_enriched: int,
-    sources_used: list[str],
-    cv_stats: CrossValidationStats | None,
-    quarantine_payloads: list[dict[str, object]],
-    metadata_timestamp: datetime | None,
-    run_id: str,
-    started_at: datetime,
-    started_monotonic: float,
-) -> MergeResult:
-    """Persist merge outputs and build the domain ``MergeResult``."""
-    await host._write_outputs(
-        merged_df,
-        metadata_timestamp=metadata_timestamp,
-        run_id=run_id,
-        sources_used=sources_used,
-    )
-    _, duration = derive_completion_timestamp(
-        started_at=started_at,
-        started_monotonic=started_monotonic,
-    )
-
-    host._logger.info(
-        "Merge completed",
-        records_merged=records_merged,
-        sources_used=sources_used,
-        duration_seconds=duration,
-    )
-    return host._build_merge_result(
-        merged_df=merged_df,
-        enrichers=enrichers,
-        records_merged=records_merged,
-        records_from_seed=records_from_seed,
-        records_enriched=records_enriched,
-        sources_used=sources_used,
-        duration_seconds=duration,
-        cv_stats=cv_stats,
-        quarantine_payloads=quarantine_payloads,
-    )
+    stage = _bound_classification_stage(host)
+    ready = False
+    try:
+        merged_df = apply_joined_classification(
+            stage,
+            merged_df,
+            run_id=run_id,
+            started_at=classification_started_at or metadata_timestamp,
+            dependency_frames=dependency_dfs,
+        )
+        merged_df = finalize_merged_dataframe(
+            host,
+            merged_df=merged_df,
+            enrichers=enrichers,
+            enrichment_results=enrichment_results,
+            effective_seed_pipeline=effective_seed_pipeline,
+            run_id=run_id,
+            metadata_timestamp=metadata_timestamp,
+            sources_used=sources_used,
+            dependency_results=dependency_results,
+            enricher_dfs=enricher_dfs,
+        )
+        if stage is not None:
+            merged_df = stage.seal_decision(merged_df)
+            merged_df = stage.refresh_content_hash(merged_df)
+        records_merged = len(merged_df)
+        records_enriched = host._count_enriched_records(
+            merged_df,
+            enrichers,
+            effective_seed_pipeline,
+        )
+        context = MergePostJoinContext(
+            merged_df=merged_df,
+            records_merged=records_merged,
+            records_enriched=records_enriched,
+            cv_stats=cv_stats,
+            quarantine_payloads=quarantine_payloads,
+        )
+        ready = True
+        return context
+    finally:
+        if not ready and stage is not None:
+            stage.abandon(run_id)

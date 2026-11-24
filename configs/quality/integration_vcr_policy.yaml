@@ -292,6 +292,7 @@ tracked_suite_inventory:
     - tests/integration/composite/test_composite_config_schema_contract.py
     - tests/integration/composite/test_composite_cross_validation.py
     - tests/integration/composite/test_molecule_pipeline.py
+    - tests/integration/composite/test_target_classification_post_join.py
     config_and_storage_surfaces:
     - tests/integration/application/core/test_cf_medallion_strict_wiring.py
     - tests/integration/config/test_activity_raw_compound_units.py
