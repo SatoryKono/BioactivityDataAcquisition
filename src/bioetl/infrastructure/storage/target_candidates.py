@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from typing import cast
@@ -64,7 +65,11 @@ class TargetCandidateBuildRequest:
 
 
 def freeze_target_inputs(
-    paths: TargetMigrationPaths, *, legacy_include_fields: tuple[str, ...], output: Path
+    paths: TargetMigrationPaths,
+    *,
+    legacy_include_fields: tuple[str, ...],
+    output: Path,
+    restoration_manifest: Path | None = None,
 ) -> dict[str, object]:
     """Record stable table versions/files/cohorts without writing a source table."""
     checked = paths.checked()
@@ -80,7 +85,10 @@ def freeze_target_inputs(
         identity for (identity, _), _row in _by_id(silver).items()
     ):
         raise ValueError("original Gold targets have no persisted Silver source")
-    _assert_candidate_cohort_closure(checked, gold)
+    closure_gold, restoration_record = _frozen_restoration(
+        paths, checked, restoration_manifest
+    )
+    _assert_candidate_cohort_closure(checked, [*gold, *closure_gold])
     if _input_facts(checked) != before:
         raise ValueError("source changed during target input freeze")
     document: dict[str, object] = {
@@ -89,11 +97,71 @@ def freeze_target_inputs(
         "inputs": before,
         "cohorts": _cohort_keys(silver, gold),
         "legacy_include_fields": list(legacy_include_fields),
+        "fk_restoration": restoration_record,
     }
     safe_output.parent.mkdir(parents=True, exist_ok=True)
     with safe_output.open("xb") as handle:
         handle.write(canonical_json_bytes(document))
     return document
+
+
+def _frozen_restoration(
+    paths: TargetMigrationPaths,
+    checked: dict[str, Path],
+    manifest: Path | None,
+) -> tuple[list[dict[str, object]], dict[str, str] | None]:
+    """Read a validated additive cohort without copying it into canonical Gold."""
+    if manifest is None:
+        return [], None
+    from bioetl.infrastructure.storage.target_fk_restoration import (
+        load_published_restoration,
+    )
+
+    published = load_published_restoration(
+        manifest,
+        workspace=paths.workspace,
+        silver=checked["silver"],
+        gold=checked["gold"],
+        assay=checked["assay"],
+        config=checked["config"],
+    )
+    relative = manifest.resolve().relative_to(paths.workspace.resolve()).as_posix()
+    return list(published.additions["gold"]), {
+        "manifest": relative,
+        "sha256": sha256_file(manifest),
+    }
+
+
+def _append_frozen_restoration(
+    request: TargetCandidateBuildRequest,
+    frozen: Mapping[str, object],
+    silver: list[dict[str, object]],
+    gold: list[dict[str, object]],
+) -> tuple[Path | None, list[dict[str, object]], list[dict[str, object]]]:
+    """Add the frozen restored rows after the original cohort identity check."""
+    record = frozen.get("fk_restoration")
+    if not isinstance(record, dict):
+        return None, silver, gold
+    manifest = request.paths.workspace / str(record["manifest"])
+    if sha256_file(manifest) != record["sha256"]:
+        raise ValueError("target FK restoration digest mismatch")
+    from bioetl.infrastructure.storage.target_fk_restoration import (
+        load_published_restoration,
+    )
+
+    published = load_published_restoration(
+        manifest,
+        workspace=request.paths.workspace,
+        silver=request.paths.silver,
+        gold=request.paths.gold,
+        assay=request.paths.assay,
+        config=request.paths.config,
+    )
+    return (
+        manifest,
+        [*silver, *published.additions["silver"]],
+        [*gold, *published.additions["gold"]],
+    )
 
 
 def _cohort_keys(
@@ -241,6 +309,9 @@ def build_target_candidates(request: TargetCandidateBuildRequest) -> dict[str, o
     expected_cohorts = _cohort_keys(old_silver, old_gold)
     if frozen["cohorts"] != expected_cohorts:
         raise ValueError("target frozen cohort identity differs")
+    restoration_manifest, old_silver, old_gold = _append_frozen_restoration(
+        request, frozen, old_silver, old_gold
+    )
     request.output_dir.mkdir(parents=True, exist_ok=True)
     adapter = IupharTargetClassificationAdapter(profile)
     store = LocalTargetClassificationEvidenceStore(
@@ -282,7 +353,10 @@ def build_target_candidates(request: TargetCandidateBuildRequest) -> dict[str, o
     _write_layer(checked["candidate_silver"], checked["silver"], new_silver)
     _write_layer(checked["candidate_gold"], checked["gold"], new_gold)
     validation = validate_target_candidate(
-        checked, request.legacy_include_fields, workspace=request.paths.workspace
+        checked,
+        request.legacy_include_fields,
+        workspace=request.paths.workspace,
+        restoration_manifest=restoration_manifest,
     )
     _verified_inputs(request, checked)
     evidence = store.finalize_run(

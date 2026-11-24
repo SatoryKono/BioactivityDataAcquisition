@@ -133,6 +133,7 @@ class _DependencyCollector:
             "pipeline_proof": self.proof,
             "stage0_manifest": self.stage0,
             "row_manifest": self.row,
+            "fk_restoration": self.fk_restoration,
         }
         handlers[kind](path, document)
 
@@ -242,6 +243,21 @@ class _DependencyCollector:
             raise ValueError("target pipeline row needs all six artifact files")
         self.artifacts(path.parent, document.get("artifact_sha256"))
 
+    def fk_restoration(self, path: Path, document: Mapping[str, object]) -> None:
+        _header(document, "bioetl_target_fk_restoration", (1,))
+        if document.get("status") != "validated_candidate":
+            raise ValueError(
+                "blocked target FK restoration cannot enter migration input"
+            )
+        sources = document.get("sources")
+        files = document.get("candidate_files")
+        if not isinstance(sources, list) or not sources:
+            raise ValueError("target FK restoration needs source proofs")
+        if not isinstance(files, list) or not files:
+            raise ValueError("target FK restoration needs candidate bytes")
+        for item in (*sources, *files):
+            self.reference(self.workspace, item)
+
     def artifacts(self, root: Path, value: object, *, rows: bool = False) -> None:
         artifacts = _mapping(value)
         if not artifacts:
@@ -285,10 +301,15 @@ def _acceptance_kind(value: object) -> str:
 
 
 def collect_target_dependencies(
-    *, workspace: Path, configs: tuple[Path, ...]
+    *,
+    workspace: Path,
+    configs: tuple[Path, ...],
+    restoration_manifest: Path | None = None,
 ) -> dict[str, str]:
     """Bind config bytes and their typed IUPHAR closure, including old profiles."""
     collector = _DependencyCollector(_workspace(workspace))
+    if restoration_manifest is not None:
+        collector.document(restoration_manifest, "fk_restoration")
     profiles: list[tuple[Path, str, bool]] = []
     for config in configs:
         config_path = _safe_path(collector.workspace, config)
