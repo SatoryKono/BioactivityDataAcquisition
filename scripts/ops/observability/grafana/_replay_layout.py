@@ -1,5 +1,27 @@
 """Focused selected-run replay workspace; preserve diagnostics behind two rows."""
 
+_IDENTITY_SCOPE_COPY = (
+    "Exact Run ID selects evidence; the Workflow filter only narrows the run catalog. "
+    "Catalog freshness does not establish evidence freshness."
+)
+
+
+def _apply_exact_identity_scope(panel: dict) -> None:
+    """Keep catalog-only selection and freshness flags out of evidence requests."""
+    for target in panel["targets"]:
+        url = target.get("url", "")
+        if url.startswith("/ops/control-plane/identity-evidence?"):
+            endpoint, query = url.split("?", 1)
+            relevant = "&".join(
+                part
+                for part in query.split("&")
+                if part.partition("=")[0] not in {"workflow", "allow_stale"}
+            )
+            target["url"] = f"{endpoint}?{relevant}"
+    description = panel["description"]
+    if _IDENTITY_SCOPE_COPY not in description:
+        panel["description"] = f"{description} {_IDENTITY_SCOPE_COPY}"
+
 
 def apply_replay_layout(payload: dict) -> None:
     """Keep verdict, checks and evidence together without deleting backend checks."""
@@ -38,6 +60,8 @@ def apply_replay_layout(payload: dict) -> None:
         "Exact Replay Checks determines readiness. Inspect a value to copy it in full. "
         "No rows is not a pass; missing evidence is UNKNOWN and failed requests are QUERY ERROR."
     )
+    _apply_exact_identity_scope(evidence)
+    _apply_exact_identity_scope(by_id[9406])
     target = evidence["targets"][0]
     target["url"] = target["url"].replace("&priority=P1", "")
     target.update(
