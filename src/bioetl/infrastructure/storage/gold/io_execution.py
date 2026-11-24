@@ -122,7 +122,7 @@ async def _execute_gold_merged_write(
     host: _GoldMergedWriteHostProtocol,
     request: _GoldMergedWriteRequest,
 ) -> GoldWriteReceipt:
-    """Prepare, log, and execute one merged Gold write request."""
+    """Execute a merged write; receipt version identifies the unvalidated request."""
     from bioetl.infrastructure.storage.gold.io_preparation import (
         _log_prepared_gold_merged_write,
         _prepare_gold_merged_write,
@@ -131,16 +131,12 @@ async def _execute_gold_merged_write(
     started_at = perf_counter()
     terminal_status = "failure"
     prepared = None
+    request_version = resolve_gold_contract_version(request.schema)
     GOLD_WRITE_ATTEMPTS_TOTAL.labels(
         **_gold_merged_metric_labels(request.table_name)
     ).inc()
     with GoldOutcomeBoundary(
-        lambda _: receipt_for(
-            request.table_name,
-            resolve_gold_contract_version(request.schema)
-            if prepared is not None
-            else "0.0.0",
-        ),
+        receipt_for(request.table_name, request_version),
         preserve_outcome=True,
         translate_failure=False,
     ):
