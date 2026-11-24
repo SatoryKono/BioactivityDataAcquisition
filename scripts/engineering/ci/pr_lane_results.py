@@ -2303,6 +2303,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "tests/unit/interfaces/cli/__snapshots__/test_registry_consistency.ambr": (
         "tests/unit/interfaces/cli/test_registry_consistency.py",
     ),
+    "tests/snapshots/composite_config_real_yaml_golden_master.json": (
+        "tests/unit/infrastructure/schemas/test_composite_config_invariants_source_of_truth.py",
+    ),
     "tests/snapshots/pipeline_configs.json": (
         "tests/architecture/test_config_golden_master.py",
     ),
