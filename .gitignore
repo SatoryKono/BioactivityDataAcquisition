@@ -755,3 +755,4 @@ _fail_*.txt
 !/docs/99-archive/prompts-2026-09/**
 !/reports/quality/external-resource-inventory.md
 /data/wf20261122-153743
+reports/quality/test-fixture-asset-duplication.json
