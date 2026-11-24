@@ -1029,6 +1029,11 @@ JSON exports для Gold-схем хранятся в `docs/04-reference/contrac
 - `chembl_target_v3.1.json` — nullable IUPHAR fields for admitted `enrich` only;
   `off` and `shadow` retain 3.0.0. See the
   [IUPHAR operator procedure](../../05-operations/runbooks/iuphar-target-classification.md).
+- `chembl_target_v3.2.json` — additive detail for an explicit physical table
+  contract `3.2.0`: source type, completeness, family ids, subclasses, structured
+  paths, local status and rule ids, effective subclasses, conflict codes and
+  evidence refs. Arrays and structs are canonical JSON strings. Default `enrich`
+  remains 3.1.0. This file does not migrate existing tables.
 - `chembl_tissue_v1.0.json`
 - `composite_activity_v1.0.json`
 - `composite_assay_v1.0.json`

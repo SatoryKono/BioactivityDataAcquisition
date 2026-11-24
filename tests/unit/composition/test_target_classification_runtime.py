@@ -524,6 +524,7 @@ def test_target_preflight_uses_actual_writer_paths_even_when_off(
         gold_path=tmp_path / "configured-gold",
         mode="off",
         destructive=False,
+        table_contract="3.0.0",
     )
     silver._resolve_table_path.assert_called_once_with("chembl.target")
     gold._resolve_table_path.assert_called_once_with("chembl.target")
