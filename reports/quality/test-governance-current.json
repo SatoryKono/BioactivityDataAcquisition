@@ -230,7 +230,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "516",
+      "line": "466",
       "path": "tests/unit/infrastructure/audit/test_file_audit.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_file_audit_adapter__aclose_is_idempotent__cb75761c"
@@ -321,7 +321,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "1763",
+      "line": "1695",
       "path": "tests/unit/infrastructure/storage/test_gold_writer.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_write_gold_merged_empty_records_returns"
@@ -1224,7 +1224,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "516",
+        "line": "466",
         "path": "tests/unit/infrastructure/audit/test_file_audit.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_file_audit_adapter__aclose_is_idempotent__cb75761c"
@@ -1315,7 +1315,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "1763",
+        "line": "1695",
         "path": "tests/unit/infrastructure/storage/test_gold_writer.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_write_gold_merged_empty_records_returns"
@@ -1729,8 +1729,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 3405,
-      "test_python_file_count": 3660,
+      "test_glob_file_count": 3395,
+      "test_python_file_count": 3650,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -1738,12 +1738,14 @@
         "tests/e2e/",
         "tests/fakes/",
         "tests/fixtures/",
+        "tests/golden/",
         "tests/helpers/",
         "tests/integration/",
         "tests/performance/",
         "tests/prompts/",
         "tests/security/",
         "tests/smoke/",
+        "tests/snapshots/",
         "tests/testing_support/",
         "tests/unit/"
       ],
@@ -1754,26 +1756,28 @@
         "tests/e2e/",
         "tests/fakes/",
         "tests/fixtures/",
+        "tests/golden/",
         "tests/helpers/",
         "tests/integration/",
         "tests/performance/",
         "tests/prompts/",
         "tests/security/",
         "tests/smoke/",
+        "tests/snapshots/",
         "tests/testing_support/",
         "tests/unit/"
       ],
-      "top_level_directory_count": 14,
-      "top_level_directory_count_including_pycache": 14
+      "top_level_directory_count": 16,
+      "top_level_directory_count_including_pycache": 16
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 3405,
-    "total_test_functions": 34445,
+    "total_test_files": 3395,
+    "total_test_functions": 34239,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "a1c973bfea559102a72715ef9a27af96ebd43905801b8ea71dc6e76f726a10a4",
+  "source_tree_sha256": "a00031d1bf47efcab11af193cc5a43486f0c9ea1e52d508f8d9e60d302855ac3",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 68,
@@ -1793,8 +1797,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 3405,
-    "test_python_file_count": 3660,
+    "test_glob_file_count": 3395,
+    "test_python_file_count": 3650,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -1802,12 +1806,14 @@
       "tests/e2e/",
       "tests/fakes/",
       "tests/fixtures/",
+      "tests/golden/",
       "tests/helpers/",
       "tests/integration/",
       "tests/performance/",
       "tests/prompts/",
       "tests/security/",
       "tests/smoke/",
+      "tests/snapshots/",
       "tests/testing_support/",
       "tests/unit/"
     ],
@@ -1818,21 +1824,23 @@
       "tests/e2e/",
       "tests/fakes/",
       "tests/fixtures/",
+      "tests/golden/",
       "tests/helpers/",
       "tests/integration/",
       "tests/performance/",
       "tests/prompts/",
       "tests/security/",
       "tests/smoke/",
+      "tests/snapshots/",
       "tests/testing_support/",
       "tests/unit/"
     ],
-    "top_level_directory_count": 14,
-    "top_level_directory_count_including_pycache": 14
+    "top_level_directory_count": 16,
+    "top_level_directory_count_including_pycache": 16
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 3405,
-  "total_test_functions": 34445,
+  "total_test_files": 3395,
+  "total_test_functions": 34239,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
