@@ -13,6 +13,7 @@ from iuphar_target_class.models import ProviderAnnotation, RunProvenance
 from iuphar_target_class.matching import CatalogTarget
 from iuphar_target_class.pipeline import IndexedSnapshot, classify_batch
 from iuphar_target_class.pipeline_acceptance import load_admitted_cohort
+from iuphar_target_class.policy import LOCAL_CATALOG_VERSION
 from iuphar_target_class.reference_coverage import (
     REQUIRED_REFERENCE_CATEGORIES,
     REQUIRED_REFERENCE_FIELDS,
@@ -62,7 +63,7 @@ def reference_inputs(tmp_path: Path):
     provenance = RunProvenance(
         "synthetic-snapshot",
         "bioetl-iuphar-input-v1",
-        "plan-v1-r9",
+        LOCAL_CATALOG_VERSION,
         "3.1.0",
         "2026-11-16T00:00:00Z",
         "2026-11-16T00:01:00Z",
