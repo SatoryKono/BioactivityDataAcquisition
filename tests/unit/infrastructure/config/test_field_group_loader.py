@@ -121,6 +121,31 @@ class TestLoadFieldGroups:
         assert registry.is_gold_field("doi") is True
         assert registry.is_gold_field("content_hash") is False
 
+    @pytest.mark.parametrize("value", ["false", "true", None, 0, 1])
+    def test_rejects_non_boolean_gold_override(
+        self, tmp_config: Path, value: object
+    ) -> None:
+        config = yaml.safe_load(tmp_config.read_text(encoding="utf-8"))
+        config["groups"][0]["include_in_gold"] = value
+        tmp_config.write_text(yaml.safe_dump(config), encoding="utf-8")
+
+        with pytest.raises(
+            FieldGroupLoadError, match="include_in_gold must be a boolean"
+        ):
+            load_field_groups(tmp_config)
+
+    @pytest.mark.parametrize("value", [True, False])
+    def test_gold_override_is_boolean_and_controls_selection(
+        self, tmp_config: Path, value: bool
+    ) -> None:
+        config = yaml.safe_load(tmp_config.read_text(encoding="utf-8"))
+        config["groups"][0]["include_in_gold"] = value
+        tmp_config.write_text(yaml.safe_dump(config), encoding="utf-8")
+
+        registry = load_field_groups(tmp_config)
+        assert registry.is_gold_field("doi") is value
+        assert ("doi" in registry.get_gold_columns(["doi"])) is value
+
     def test_qualified_column_lookup(self, tmp_config: Path) -> None:
         registry = load_field_groups(tmp_config)
         assert (
