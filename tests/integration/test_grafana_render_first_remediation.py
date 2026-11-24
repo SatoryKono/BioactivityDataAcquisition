@@ -772,12 +772,8 @@ def test_incident_ranked_suspects_uses_one_comparable_value_column() -> None:
     assert "sortBy" in transform_ids
     assert "limit" not in transform_ids
     assert suspects["options"]["footer"]["enablePagination"] is True
-    sort = next(
-        transform for transform in transforms if transform.get("id") == "sortBy"
-    )
-    sort_field = (sort.get("options") or {}).get("sort", [{}])[0].get("field")
-    assert sort_field == "Value"
-    assert (sort.get("options") or {}).get("sort", [{}])[0].get("desc") is True
+    sorts = [transform for transform in transforms if transform.get("id") == "sortBy"]
+    assert sorts[-1]["options"]["sort"] == [{"desc": True, "field": "Value"}]
     # Complete ranked evidence remains available, not just the first two rows.
     assert not any(transform.get("id") == "limit" for transform in transforms)
     for field in ("Time", "Time 1", "Time 2"):
@@ -1219,14 +1215,16 @@ def test_selected_trust_reasons_link_preserves_multiple_run_types() -> None:
 
 def test_visible_trust_reason_count_opens_frozen_reason_details() -> None:
     trust = _panel(_load("bioetl-control-plane-v1.json"), 9418)
-    assert trust["targets"][0]["parser"] == "uql"
-    assert "presentation_trust" in trust["targets"][0]["uql"]
+    assert trust["targets"][0]["parser"] == "backend"
+    assert "uql" not in trust["targets"][0]
+    assert "presentation_trust" in trust["targets"][0]["root_selector"]
     assert "run_id=${run_id}" in trust["targets"][0]["url"]
     overrides = {
         o["matcher"]["options"]: o["properties"]
         for o in trust["fieldConfig"]["overrides"]
     }
-    assert {"id": "custom.hidden", "value": False} in overrides["reasons_count"]
+    assert {"id": "custom.hidden", "value": False} in overrides["Reason count"]
+    assert {"id": "custom.hidden", "value": False} in overrides["reasons_text"]
     assert {"id": "custom.inspect", "value": True} in overrides["reasons_text"]
 
 
