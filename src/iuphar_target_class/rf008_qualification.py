@@ -31,7 +31,7 @@ from .matching import CatalogTarget, MatchQuery, resolve_match
 from .normalization import normalize_missing, parse_ec_numbers
 from .policy import (
     BASE_MISSING_MARKERS,
-    PLAN_VERSION,
+    LOCAL_CATALOG_VERSION,
     UNSET,
     WORKING_CLASSES,
     all_rules,
@@ -468,12 +468,18 @@ def _ec_cases() -> list[dict[str, object]]:
             f"local-ec-{number}",
             "ec_category",
             "local_ec",
-            {"number": number, "source": "IUBMB EC class via policy.EC_CATEGORIES"},
+            {
+                "number": number,
+                "source": (
+                    "IUBMB EC class via policy.EC_CATEGORIES; EC 1-6 map to "
+                    "local Enzyme and EC 7 does not"
+                ),
+            },
             {"ec": f"{number}.-.-.-"},
             {
                 "direct_layer_rule_ids": [],
                 "ec_categories": [name],
-                "local_class": None,
+                "local_class": None if number == 7 else "Enzyme",
                 "not_an_iuphar_class": True,
                 "rule_family": "ec",
                 "rule_marks_direct_layer": False,
@@ -499,13 +505,16 @@ def _multiple_ec_case() -> dict[str, object]:
         "multiple_ec",
         "local_ec",
         {
-            "source": "IUBMB classes 1 and 3; multiple categories are not one IUPHAR class"
+            "source": (
+                "IUBMB classes 1 and 3 stay the local class Enzyme and do not "
+                "become one extra IUPHAR class"
+            )
         },
         {"ec": "1.-.-.-|3.-.-.-"},
         {
             "direct_layer_rule_ids": [],
             "ec_categories": ["Oxidoreductases", "Hydrolases"],
-            "local_class": None,
+            "local_class": "Enzyme",
             "multiple_ec_categories": True,
             "not_an_iuphar_class": True,
             "rule_marks_direct_layer": [False, False],
@@ -597,7 +606,8 @@ def _auxiliary_anchor_case() -> dict[str, object]:
             ],
             "organism": "human",
             "snapshot_complete": True,
-            "uniprot_ids": ["P35372", "Q99999"],
+            "uniprot_ids": ["P35372"],
+            "auxiliary_uniprot_ids": ["Q99999"],
         },
         {"match_status": "matched", "matched_target_id": "primary"},
         previous_policy={"match_status": "ambiguous", "matched_target_id": None},
@@ -622,9 +632,9 @@ def _projection_case() -> dict[str, object]:
             "taxon": "9606",
         },
         {
-            "auxiliary_uniprot": ["Q99999"],
-            "primary_uniprot": ["P35372"],
             "uniprot": "P35372",
+            "uniprot_equivalent": None,
+            "uniprot_xref": "Q99999",
         },
         previous_policy={"uniprot": "P35372|Q99999"},
         claim="engineering_rule",
@@ -941,6 +951,7 @@ def _rules_pin() -> dict[str, object]:
             "limits": rule.limits,
             "marks_direct_layer": rule.marks_direct_layer,
             "output": rule.output,
+            "priority": rule.priority,
             "rule_id": rule.rule_id,
             "version": rule.version,
         }
@@ -949,7 +960,7 @@ def _rules_pin() -> dict[str, object]:
     body = canonical_json_bytes(payload)
     return {
         "rules_sha256": sha256_bytes(body),
-        "rules_version": PLAN_VERSION,
+        "rules_version": LOCAL_CATALOG_VERSION,
         "working_classes": list(WORKING_CLASSES),
     }
 
@@ -1078,7 +1089,7 @@ def _execute_ec(fixture: Mapping[str, object]) -> dict[str, object]:
         "ec_categories": list(result.ec_categories),
         "local_class": result.local_class,
         "multiple_ec_categories": result.multiple_ec_categories,
-        "not_an_iuphar_class": not iuphar_fields and result.local_class is None,
+        "not_an_iuphar_class": not iuphar_fields,
     }
     if len(selected) == 1:
         observed["rule_family"] = selected[0].family
@@ -1139,6 +1150,9 @@ def _execute_match(fixture: Mapping[str, object]) -> dict[str, object]:
         _optional_str(fixture.get("organism")),
         _optional_str(fixture.get("name")),
         tuple(str(item) for item in _sequence(fixture.get("synonyms", []))),
+        tuple(
+            str(item) for item in _sequence(fixture.get("auxiliary_uniprot_ids", []))
+        ),
     )
     result = resolve_match(
         query, catalog, snapshot_complete=bool(fixture["snapshot_complete"])
@@ -1163,7 +1177,7 @@ def _execute_projection(fixture: Mapping[str, object]) -> dict[str, object]:
     )
     observed: dict[str, object] = {
         key: projected[key]
-        for key in ("auxiliary_uniprot", "primary_uniprot", "uniprot")
+        for key in ("uniprot", "uniprot_equivalent", "uniprot_xref")
         if key in projected
     }
     return observed

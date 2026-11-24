@@ -6,6 +6,9 @@ plan parameters stay null. EC, L1, and L2 rules stay on the local layer.
 
 RF-001 (#13309) embeds the field-layer / status / capability semantics contract
 without changing biological acceptance or rewriting historical artifacts.
+
+RF-002 (#13310) embeds the UniProt identifier-role / matching-policy contract
+(primary vs auxiliary xref) without relaxing trusted-anchor conflicts.
 """
 
 from __future__ import annotations
@@ -26,9 +29,10 @@ from .gtopdb_2026_3_1 import (
     TARGETS_CSV_URL,
     TYPE_SUBCLASS_PAIRS,
 )
+from .identifier_roles import identifier_roles_document
 from .iuphar_mapping import approved_class_mappings
 from .semantics import semantics_document
-from .stage0.io import atomic_write_bytes, canonical_json_bytes
+from .stage0.io import atomic_write_bytes, canonical_json_bytes, sha256_bytes
 
 WORKING_CLASSES: tuple[str, ...] = (
     "Receptor",
@@ -57,6 +61,47 @@ EC_CATEGORIES: tuple[tuple[int, str], ...] = (
     (6, "Ligases"),
     (7, "Translocases"),
 )
+EC_SINGULAR: tuple[tuple[int, str], ...] = (
+    (1, "Oxidoreductase"),
+    (2, "Transferase"),
+    (3, "Hydrolase"),
+    (4, "Lyase"),
+    (5, "Isomerase"),
+    (6, "Ligase"),
+    (7, "Translocase"),
+)
+# EC 7 is recorded as Translocase and does not become an IUPHAR class.
+EC_WORKING_CLASS: dict[int, str | None] = {
+    1: "Enzyme",
+    2: "Enzyme",
+    3: "Enzyme",
+    4: "Enzyme",
+    5: "Enzyme",
+    6: "Enzyme",
+    7: None,
+}
+LOCAL_CATALOG_VERSION = "local-rules-2026.11.23"
+CLASS_PRIORITY = 100
+EXCLUDED_NHR_KEYWORDS: tuple[str, ...] = ("KW-0804", "KW-0805", "KW-0863")
+_FORBIDDEN_CLASS_OUTPUTS = frozenset(
+    {"multifunctional", "multifunctional target", "nuclear hormone receptor"}
+)
+_CONTROLLED_ANNOTATIONS: tuple[tuple[str, str, str, str], ...] = (
+    ("KW-0378", "Hydrolase", "Enzyme", "UniProt KW-0378 Hydrolase"),
+    (
+        "KW-0418",
+        "Kinase",
+        "Enzyme",
+        "UniProt KW-0418 Kinase; не подстрока свободного текста",
+    ),
+    (
+        "KW-0675",
+        "Receptor",
+        "Receptor",
+        "UniProt KW-0675 Receptor; не zinc finger и не transcription",
+    ),
+    ("KW-0808", "Transferase", "Enzyme", "UniProt KW-0808 Transferase"),
+)
 UNSET = "не утверждено"
 VOLUME_TEST_SECONDS = 300
 VOLUME_TEST_TIME_STATUS = "утверждено"
@@ -82,6 +127,7 @@ class RuleRecord:
     version: str
     limits: str
     marks_direct_layer: bool
+    priority: int = CLASS_PRIORITY
 
 
 @dataclass(frozen=True, slots=True)
@@ -120,49 +166,164 @@ def class_rules() -> tuple[RuleRecord, ...]:
     return tuple(rules)
 
 
-def local_rules() -> tuple[RuleRecord, ...]:
-    """Plan step D rules. None of them write the direct layer."""
-    rules = [
-        RuleRecord(
-            rule_id=f"ec:{number}",
-            family="ec",
-            input_conditions=f"EC с подтверждённой категорией {number}",
-            output=name,
-            justification_source="план v1 r8 шаг D, справочник IUBMB",
-            version=PLAN_VERSION,
-            limits=(
-                "категория EC, не класс IUPHAR; EC 7 не становится "
-                "Transporter; слой local"
-            ),
-            marks_direct_layer=False,
-        )
-        for number, name in EC_CATEGORIES
-    ]
-    rules.append(
-        RuleRecord(
-            rule_id="predicted-l1-l2",
-            family="l1_l2",
-            input_conditions="predicted L1/L2 при неизвестном происхождении",
-            output="candidate_only",
-            justification_source="план v1 r8 шаг D; этап 0: происхождение не установлено",
-            version=PLAN_VERSION,
-            limits="не независимое подтверждение и не direct-слой",
-            marks_direct_layer=False,
-        ),
+def _local_rule(
+    rule_id: str,
+    family: str,
+    conditions: str,
+    output: str,
+    justification: str,
+    limits: str,
+    *,
+    priority: int = CLASS_PRIORITY,
+) -> RuleRecord:
+    return RuleRecord(
+        rule_id=rule_id,
+        family=family,
+        input_conditions=conditions,
+        output=output,
+        justification_source=justification,
+        version=LOCAL_CATALOG_VERSION,
+        limits=limits,
+        marks_direct_layer=False,
+        priority=priority,
     )
-    rules.append(
-        RuleRecord(
-            rule_id="free-text",
-            family="free_text",
-            input_conditions="свободный текст, подстроки kinase/channel/zinc finger",
-            output="кандидат ручного разбора",
-            justification_source="план v1 r8 шаг D",
-            version=PLAN_VERSION,
-            limits="класс автоматически не определяется",
-            marks_direct_layer=False,
-        ),
+
+
+def _ec_names_align() -> None:
+    singular = dict(EC_SINGULAR)
+    for number, plural in EC_CATEGORIES:
+        if plural != singular[number] + "s":
+            message = f"EC {number} singular and plural names disagree"
+            raise ValueError(message)
+        if number not in EC_WORKING_CLASS:
+            message = f"EC {number} has no fixed class mapping"
+            raise ValueError(message)
+
+
+def local_rules() -> tuple[RuleRecord, ...]:
+    """Versioned local catalog. None of these rules write the direct layer.
+
+    EC 1–6 map to Enzyme. EC 7 stays the IUBMB category Translocases and does
+    not assign Transporter. Equal class priorities do not break a tie.
+    """
+    _ec_names_align()
+    rules: list[RuleRecord] = []
+    for number, plural in EC_CATEGORIES:
+        singular = dict(EC_SINGULAR)[number]
+        rules.append(
+            _local_rule(
+                f"ec:{number}",
+                "ec",
+                f"ec_category={number}",
+                plural,
+                "план v1 r8 шаг D; справочник IUBMB",
+                (
+                    f"категория {singular} / {plural}, не идентификатор и не "
+                    "класс IUPHAR; EC 7 не становится Transporter; слой local"
+                ),
+                priority=0,
+            )
+        )
+    for number, class_name in EC_WORKING_CLASS.items():
+        if class_name is None:
+            continue
+        singular = dict(EC_SINGULAR)[number]
+        rules.append(
+            _local_rule(
+                f"ec-class:{number}",
+                "ec_class",
+                f"ec_category={number}",
+                class_name,
+                (
+                    f"IUBMB EC {number} {singular} входит в рабочий класс "
+                    f"{class_name}; несколько номеров этой категории не "
+                    "создают Multifunctional"
+                ),
+                (
+                    "не пишет iuphar_*; не выбирает первую строку; "
+                    "равный приоритет с другим классом оставляет конфликт"
+                ),
+            )
+        )
+    for keyword_id, _name, class_name, basis in _CONTROLLED_ANNOTATIONS:
+        rules.append(
+            _local_rule(
+                f"annotation:{keyword_id}",
+                "annotation",
+                f"keyword_id={keyword_id}",
+                class_name,
+                basis,
+                (
+                    "только точный идентификатор; свободный текст, zinc finger "
+                    "и transcription factor класс не назначают"
+                ),
+            )
+        )
+    rules.extend(
+        (
+            _local_rule(
+                "predicted-l1-l2-unknown",
+                "l1_l2",
+                "provenance missing",
+                "candidate_only",
+                "происхождение не подтверждено свидетельством и не берётся из константы True",
+                "не независимое подтверждение и не direct-слой",
+                priority=0,
+            ),
+            _local_rule(
+                "predicted-l1-l2-iuphar-derived",
+                "l1_l2",
+                "relation=iuphar",
+                "dependent_not_confirmation",
+                "предсказание, выведенное из IUPHAR, не подтверждает IUPHAR повторно",
+                "не независимое свидетельство direct-слоя",
+                priority=0,
+            ),
+            _local_rule(
+                "predicted-l1-l2-independent",
+                "l1_l2",
+                "provenance present and relation=independent",
+                "predicted working class",
+                "независимость допустима только при явном relation=independent и непустом provenance",
+                "значение True без такого свидетельства не принимается",
+            ),
+            _local_rule(
+                "free-text",
+                "free_text",
+                "свободный текст, подстроки kinase/channel/zinc finger/transcription factor",
+                "кандидат ручного разбора",
+                "план v1 r8 шаг D",
+                "класс автоматически не определяется",
+                priority=0,
+            ),
+            _local_rule(
+                "rejected:tf-zinc-finger-nhr",
+                "rejected",
+                "keyword KW-0863 or KW-0804 or KW-0805 or free text zinc finger/transcription factor",
+                "not_assigned",
+                "нет специфического основания назначать nuclear hormone receptor",
+                "правило не применяется; TF и zinc finger не становятся nuclear hormone receptor",
+                priority=0,
+            ),
+        )
     )
     return tuple(rules)
+
+
+def local_rules_catalog_sha256() -> str:
+    """Hash the catalog payload. The hash does not include itself."""
+    payload = [_rule_payload(rule) for rule in local_rules()]
+    return sha256_bytes(canonical_json_bytes(payload))
+
+
+def local_evidence_content(ref: str, rule_ids: tuple[str, ...]) -> str:
+    """Bind one local witness to its own rule ids and the catalog hash."""
+    rules = ",".join(sorted(rule_ids))
+    digest = local_rules_catalog_sha256()
+    return (
+        f"{ref}; rules={rules}; catalog={LOCAL_CATALOG_VERSION}; "
+        f"catalog_sha256={digest}"
+    )
 
 
 def all_rules() -> tuple[RuleRecord, ...]:
@@ -170,31 +331,85 @@ def all_rules() -> tuple[RuleRecord, ...]:
     return class_rules() + local_rules()
 
 
+_REQUIRED_RULE_FIELDS = (
+    "rule_id",
+    "family",
+    "input_conditions",
+    "output",
+    "justification_source",
+    "version",
+    "limits",
+)
+_LOCAL_FAMILIES = frozenset(
+    {"ec", "ec_class", "annotation", "l1_l2", "l2", "free_text", "rejected"}
+)
+
+
 def validate_rules(rules: tuple[RuleRecord, ...]) -> None:
     """Reject a rule config that omits a field or marks EC/L1/L2 as direct."""
-    required = (
-        "rule_id",
-        "family",
-        "input_conditions",
-        "output",
-        "justification_source",
-        "version",
-        "limits",
-    )
     for rule in rules:
-        for field_name in required:
-            if not getattr(rule, field_name):
-                message = f"rule {rule.rule_id} missing {field_name}"
-                raise ValueError(message)
-        if (
-            rule.family in {"ec", "ec_class", "annotation", "l1_l2", "l2"}
-            and rule.marks_direct_layer
-        ):
-            message = f"rule {rule.rule_id} must not be marked direct"
+        _reject_incomplete_rule(rule)
+        _reject_direct_local_rule(rule)
+        _reject_dictionary_output(rule)
+        _reject_negative_priority(rule)
+        _reject_forbidden_output(rule)
+        _reject_ec7_transporter(rule)
+        _reject_excluded_nhr_annotation(rule)
+
+
+def _reject_incomplete_rule(rule: RuleRecord) -> None:
+    for field_name in _REQUIRED_RULE_FIELDS:
+        if not getattr(rule, field_name):
+            message = f"rule {rule.rule_id} missing {field_name}"
             raise ValueError(message)
-        if rule.family == "dictionary" and rule.output not in WORKING_CLASSES:
-            message = f"rule {rule.rule_id} output is outside the class dictionary"
-            raise ValueError(message)
+
+
+def _reject_direct_local_rule(rule: RuleRecord) -> None:
+    if rule.family in _LOCAL_FAMILIES and rule.marks_direct_layer:
+        message = f"rule {rule.rule_id} must not be marked direct"
+        raise ValueError(message)
+
+
+def _reject_dictionary_output(rule: RuleRecord) -> None:
+    if rule.family == "dictionary" and rule.output not in WORKING_CLASSES:
+        message = f"rule {rule.rule_id} output is outside the class dictionary"
+        raise ValueError(message)
+
+
+def _reject_negative_priority(rule: RuleRecord) -> None:
+    if rule.priority < 0:
+        message = f"rule {rule.rule_id} priority must not be negative"
+        raise ValueError(message)
+
+
+def _reject_forbidden_output(rule: RuleRecord) -> None:
+    if rule.output.casefold() in _FORBIDDEN_CLASS_OUTPUTS:
+        message = (
+            f"rule {rule.rule_id} must not assign {rule.output}; "
+            "Multifunctional and nuclear hormone receptor are not inferred"
+        )
+        raise ValueError(message)
+
+
+def _reject_ec7_transporter(rule: RuleRecord) -> None:
+    if rule.family == "ec_class" and rule.input_conditions == "ec_category=7":
+        message = (
+            f"rule {rule.rule_id} must not map EC 7 to a working class; "
+            "EC 7 stays the Translocases observation"
+        )
+        raise ValueError(message)
+
+
+def _reject_excluded_nhr_annotation(rule: RuleRecord) -> None:
+    if rule.family == "annotation" and any(
+        rule.input_conditions == f"keyword_id={keyword_id}"
+        for keyword_id in EXCLUDED_NHR_KEYWORDS
+    ):
+        message = (
+            f"rule {rule.rule_id} must not map a transcription factor or "
+            "zinc finger keyword to a class"
+        )
+        raise ValueError(message)
 
 
 def assign_mapped_class(
@@ -390,6 +605,7 @@ def policy_document() -> dict[str, object]:
         "class_dictionary": [_rule_payload(rule) for rule in class_rules()],
         "direct_mappings": direct_mapping_document(),
         "rf001_semantics": semantics_document(),
+        "rf002_identifier_roles": identifier_roles_document(),
         "gold_cases": {
             "cases": [],
             "checker": "Cursor",
@@ -428,6 +644,8 @@ def policy_document() -> dict[str, object]:
             "role_assignment": ROLE_ASSIGNMENT,
             "usage": "candidate_only",
         },
+        "local_rule_catalog_sha256": local_rules_catalog_sha256(),
+        "local_rule_catalog_version": LOCAL_CATALOG_VERSION,
         "local_rules": [_rule_payload(rule) for rule in local_rules()],
         "parameters": {
             "graph_limits": {
@@ -495,6 +713,7 @@ def _rule_payload(rule: RuleRecord) -> dict[str, object]:
         "limits": rule.limits,
         "marks_direct_layer": rule.marks_direct_layer,
         "output": rule.output,
+        "priority": rule.priority,
         "rule_id": rule.rule_id,
         "version": rule.version,
     }

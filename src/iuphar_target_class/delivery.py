@@ -13,7 +13,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
-from .policy import PLAN_VERSION
+from .policy import LOCAL_CATALOG_VERSION
 from .stage0.io import canonical_json_bytes
 
 _FORBIDDEN = set('\\/:*?"<>|')
@@ -84,7 +84,7 @@ def contract_document() -> dict[str, object]:
         "mapping_status": "не утверждено",
         "mapping_version": None,
         "name_template": "<source>__targetclass_<snapshot_id>_<rules_version>_<run_id>.<ext>",
-        "rules_version": PLAN_VERSION,
+        "rules_version": LOCAL_CATALOG_VERSION,
         "schema_version": None,
     }
 
