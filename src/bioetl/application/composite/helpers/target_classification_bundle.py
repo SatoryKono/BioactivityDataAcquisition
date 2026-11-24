@@ -192,7 +192,11 @@ def _business(
     )
     put_value(business, "uniprot_accession", accession)
     put_value(business, "gene_symbol", first_text(row, _GENE_COLUMNS)[1])
-    for name in ("target_protein_synonyms", "target_gene_synonyms"):
+    for name in (
+        "target_protein_synonyms",
+        "target_gene_synonyms",
+        "target_xref_uniprot_ids",
+    ):
         put_value(
             business, name, first_present(row, (f"chembl.target.{name}", name))[1]
         )

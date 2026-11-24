@@ -505,6 +505,56 @@ def test_ec_fallback_uses_seed_provenance_and_keeps_synonyms(empty_ec: object) -
     assert ec["source_content_hash"] == seed_hash
 
 
+@pytest.mark.parametrize(
+    "xref_column",
+    ["target_xref_uniprot_ids", "chembl.target.target_xref_uniprot_ids"],
+)
+def test_seed_auxiliary_xrefs_remain_diagnostic_after_join(xref_column: str) -> None:
+    from iuphar_target_class.matching import CatalogTarget
+    from iuphar_target_class.models import RawTargetRow, RunProvenance
+    from iuphar_target_class.pipeline import IndexedSnapshot, classify_batch
+
+    bundle = feature_bundle(
+        {
+            "target_id": "CHEMBL1",
+            "chembl.target.component_accessions": ["P11111"],
+            xref_column: ["P11111", "Q88888"],
+        },
+        {},
+    )
+    fields = project_target_fields(bundle["business"], "9606")
+    snapshot = IndexedSnapshot.build(
+        snapshot_id="fixture",
+        mapping_version="fixture-release",
+        complete=True,
+        catalog=(
+            CatalogTarget("1", ("P11111",), None, None, "9606", (), ()),
+            CatalogTarget("2", ("Q88888",), None, None, "9606", (), ()),
+        ),
+        annotations={},
+        family_nodes=(),
+        type_to_class={},
+        family_to_class={},
+    )
+    result = (
+        classify_batch(
+            (RawTargetRow("joined", fields, "protein"),),
+            snapshot=snapshot,
+            provenance=RunProvenance("fixture", "base", "rules", "schema", "t", "t"),
+            run_id="fixture",
+        )
+        .rows[0]
+        .result
+    )
+    assert result.match_status == "matched"
+    assert result.matched_target_id == "1"
+    assert "auxiliary_uniprot_divergence" in {
+        entry.code for entry in result.diagnostics
+    }
+    assert fields["uniprot_equivalent"] == "P11111"
+    assert fields["uniprot"] == "P11111"
+
+
 def test_hierarchy_origins_use_level_columns_and_all_relation_hashes() -> None:
     pipeline = "chembl_target_protein_classification"
     frame = pl.DataFrame(
