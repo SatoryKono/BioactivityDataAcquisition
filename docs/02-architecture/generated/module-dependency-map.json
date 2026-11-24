@@ -1,36 +1,36 @@
 {
   "summary": {
-    "scanned_modules": 2659,
-    "total_internal_imports": 8813,
+    "scanned_modules": 2665,
+    "total_internal_imports": 8846,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
-    "cross_layer_group_edges_total": 330,
+    "cross_layer_group_edges_total": 331,
     "violations": 0,
-    "source_fingerprint": "514d7639a61867fbd8ad2302e61acbdeafbad14cb4b035f9b1d436edcf151457"
+    "source_fingerprint": "79c8f64e137383dfdb0e25dc4789a758ff56a2d8b47626625dfcfc3e773763b2"
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1687,
+      "imports": 1701,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 1156,
+      "imports": 1169,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "application",
-      "imports": 254,
+      "imports": 256,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "composition",
-      "imports": 688,
+      "imports": 691,
       "allowed": true
     },
     {
@@ -48,7 +48,7 @@
     {
       "source": "domain",
       "target": "domain",
-      "imports": 1336,
+      "imports": 1337,
       "allowed": true
     },
     {
@@ -102,7 +102,7 @@
     {
       "source": "application.composite",
       "target": "domain.composite",
-      "imports": 116
+      "imports": 122
     },
     {
       "source": "application.core",
@@ -137,7 +137,7 @@
     {
       "source": "composition.bootstrap",
       "target": "application.services",
-      "imports": 57
+      "imports": 58
     },
     {
       "source": "application.composite",
@@ -270,6 +270,11 @@
       "imports": 23
     },
     {
+      "source": "composition.bootstrap",
+      "target": "application.composite",
+      "imports": 23
+    },
+    {
       "source": "interfaces.cli",
       "target": "composition.runtime_builders",
       "imports": 23
@@ -282,11 +287,6 @@
     {
       "source": "application.services",
       "target": "domain.normalization",
-      "imports": 22
-    },
-    {
-      "source": "composition.bootstrap",
-      "target": "application.composite",
       "imports": 22
     },
     {
