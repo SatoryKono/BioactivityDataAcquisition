@@ -281,6 +281,7 @@ def build_target_classification_session(
         normalization_version=profile.normalization_version,
         rules_version=profile.rules_version,
         classification_schema_version=profile.classification_schema_version,
+        matching_policy_version=profile.matching_policy_version,
     )
     return TargetClassificationRunState(
         classifier=classifier,
@@ -289,6 +290,7 @@ def build_target_classification_session(
         normalization_version=profile.normalization_version,
         rules_version=profile.rules_version,
         classification_schema_version=profile.classification_schema_version,
+        matching_policy_version=profile.matching_policy_version,
     )
 
 

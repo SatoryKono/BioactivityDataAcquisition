@@ -88,6 +88,7 @@ def test_canonical_cohort_roundtrip_uses_runtime_eligibility(
         normalization_version=profile.normalization_version,
         rules_version=profile.rules_version,
         classification_schema_version=profile.classification_schema_version,
+        matching_policy_version=profile.matching_policy_version,
     )
     provenance = RunProvenance(
         classifier.snapshot_id,
@@ -96,6 +97,7 @@ def test_canonical_cohort_roundtrip_uses_runtime_eligibility(
         profile.classification_schema_version,
         profile.snapshot.retrieved_at,
         "fixed",
+        matching_policy_version=profile.matching_policy_version,
     )
     batch = classify_batch(
         rows,
@@ -132,6 +134,7 @@ def test_canonical_cohort_roundtrip_uses_runtime_eligibility(
             "normalization_version",
             "rules_version",
             "classification_schema_version",
+            "matching_policy_version",
             "row_count",
         )
     }
