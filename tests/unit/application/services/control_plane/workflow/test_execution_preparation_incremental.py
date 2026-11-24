@@ -29,11 +29,18 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
+from unittest.mock import Mock
 from uuid import UUID
 
 import pytest
 
+from bioetl.application.services.control_plane.workflow.manifest_service import (
+    WorkflowManifestService,
+)
+from bioetl.application.services.workflow.control_plane.execution_preparation import (
+    prepare_workflow_execution,
+)
 from bioetl.application.services.workflow.control_plane.execution_preparation_incremental import (
     _apply_incremental_offset,
     _next_incremental_start_offset,
@@ -229,3 +236,63 @@ def test_workflow_step_with_start_offset_preserves_other_run_options() -> None:
     assert updated.run_options.start_offset == 125
     assert updated.run_options.limit == 25
     assert updated.run_options.required_persistence_profile == "degraded_observable"
+
+
+def test_resume_restores_pinned_incremental_window_without_latest_state() -> None:
+    config = _incremental_workflow()
+    state_port = Mock()
+    state_port.get_latest.return_value = _workflow_state()
+    manifest_port = Mock()
+    service = WorkflowManifestService(
+        manifest_port=manifest_port,
+        created_at_factory=lambda: FIXED_TEST_TIME,
+        _manifest_id_factory=lambda: "manifest-75",
+    )
+    args = {
+        "launch_context": {},
+        "resume_last": False,
+        "resume_manifest_id": None,
+        "resume_run_id": None,
+        "force_steps": (),
+        "repair_steps": (),
+        "manifest_service": service,
+        "workflow_state_port": state_port,
+        "now_factory": lambda: FIXED_TEST_TIME,
+        "run_id_factory": lambda: RunID(UUID("00000000-0000-0000-0000-000000000594")),
+    }
+    created = prepare_workflow_execution(config=config, incremental=True, **args)
+    assert created.config.defaults.start_offset == 75
+    failed = replace(created.state, status="failed")
+    manifest_port.get.return_value = created.manifest
+    state_port.get_by_manifest_id.return_value = failed
+    state_port.get_latest.reset_mock()
+    args["resume_manifest_id"] = created.manifest.manifest_id
+
+    resumed = prepare_workflow_execution(config=config, **args)
+    assert resumed.config.defaults.start_offset == 75
+    assert resumed.config.steps[0].run_options.start_offset == 75
+    assert resumed.manifest.execution_fingerprint == failed.execution_fingerprint
+    state_port.get_latest.assert_not_called()
+
+    manual = prepare_workflow_execution(config=created.config, **args)
+    assert manual.config == created.config
+    original_offset = replace(
+        config, defaults=replace(config.defaults, start_offset=25)
+    )
+    assert (
+        prepare_workflow_execution(config=original_offset, **args).config
+        == created.config
+    )
+    changed = replace(config, defaults=replace(config.defaults, limit=76))
+    with pytest.raises(RuntimeError, match="same execution fingerprint"):
+        prepare_workflow_execution(config=changed, **args)
+    manifest_port.get.return_value = replace(created.manifest, defaults={})
+    with pytest.raises(RuntimeError, match="manifest has no pinned start_offset"):
+        prepare_workflow_execution(config=config, **args)
+    with pytest.raises(RuntimeError, match="manifest has no pinned start_offset"):
+        prepare_workflow_execution(config=created.config, **args)
+    manifest_port.get.return_value = replace(
+        created.manifest, defaults={"start_offset": -1}
+    )
+    with pytest.raises(RuntimeError, match="invalid pinned start_offset"):
+        prepare_workflow_execution(config=config, **args)

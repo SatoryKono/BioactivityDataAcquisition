@@ -1,36 +1,36 @@
 {
   "summary": {
-    "scanned_modules": 2665,
-    "total_internal_imports": 8846,
+    "scanned_modules": 2659,
+    "total_internal_imports": 8813,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 330,
     "violations": 0,
-    "source_fingerprint": "62e6416ddd1bdc4e576fff13da763338eaa4c7ed4005a088207a1cdeeba3364c"
+    "source_fingerprint": "cad922b1f86a84acbf41e0e0879c8347844f1a5e06cbf36a7b961cdddf9d98d3"
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1701,
+      "imports": 1687,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 1167,
+      "imports": 1156,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "application",
-      "imports": 256,
+      "imports": 254,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "composition",
-      "imports": 692,
+      "imports": 688,
       "allowed": true
     },
     {
@@ -48,7 +48,7 @@
     {
       "source": "domain",
       "target": "domain",
-      "imports": 1337,
+      "imports": 1336,
       "allowed": true
     },
     {
@@ -60,7 +60,7 @@
     {
       "source": "infrastructure",
       "target": "infrastructure",
-      "imports": 1416,
+      "imports": 1415,
       "allowed": true
     },
     {
@@ -102,7 +102,7 @@
     {
       "source": "application.composite",
       "target": "domain.composite",
-      "imports": 122
+      "imports": 116
     },
     {
       "source": "application.core",
@@ -137,7 +137,7 @@
     {
       "source": "composition.bootstrap",
       "target": "application.services",
-      "imports": 58
+      "imports": 57
     },
     {
       "source": "application.composite",
@@ -270,11 +270,6 @@
       "imports": 23
     },
     {
-      "source": "composition.bootstrap",
-      "target": "application.composite",
-      "imports": 23
-    },
-    {
       "source": "interfaces.cli",
       "target": "composition.runtime_builders",
       "imports": 23
@@ -287,6 +282,11 @@
     {
       "source": "application.services",
       "target": "domain.normalization",
+      "imports": 22
+    },
+    {
+      "source": "composition.bootstrap",
+      "target": "application.composite",
       "imports": 22
     },
     {
