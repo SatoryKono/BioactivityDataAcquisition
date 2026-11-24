@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+from typing import Any
 
 from bioetl.composition.bootstrap.cli.metrics import bind_target_deployment
 from bioetl.infrastructure.config.config_root import resolve_configs_root
@@ -14,9 +15,12 @@ from bioetl.infrastructure.storage.target_candidates import (
     freeze_target_inputs,
 )
 from bioetl.infrastructure.storage.target_classification_migration import (
+    TargetMigrationJournal,
     TargetMigrationPaths,
+    migration_status,
     prepare_target_migration,
     promote_target_migration,
+    resolve_target_migration_transition,
     rollback_target_migration,
 )
 from scripts.engineering.common.repo_paths import confined_io_path
@@ -36,16 +40,22 @@ _RESTORATION_ACTIONS = frozenset({"freeze-inputs", "prepare"})
 
 
 def _load_plan(
-    parser: argparse.ArgumentParser, plan: Path
-) -> tuple[Path, TargetMigrationPaths, tuple[str, ...]]:
+    parser: argparse.ArgumentParser, plan: Path, *, action: str
+) -> tuple[Path, TargetMigrationPaths, dict[str, Any], str, str]:
     active_root = resolve_configs_root().resolve().parent
     document = json.loads(confined_io_path(plan, root=active_root).read_bytes())
+    source_profile, destination_profile = _plan_profiles(parser, document)
+    if action == "promote" and document.get("cutover_authority") != "RF-013":
+        parser.error(
+            "canonical table promotion is reserved for RF-013; "
+            "plan has no cutover authority"
+        )
     paths = TargetMigrationPaths(
         **{key: Path(value) for key, value in document["paths"].items()}
     )
     if paths.workspace.resolve() != active_root:
         parser.error("plan workspace must be the active repository/configs root")
-    return active_root, paths, tuple(document["legacy_include_fields"])
+    return active_root, paths, document, source_profile, destination_profile
 
 
 def _restoration_manifest(
@@ -119,6 +129,8 @@ def _migrate(
     paths: TargetMigrationPaths,
     fields: tuple[str, ...],
     restoration: Path | None,
+    source_profile: str,
+    destination_profile: str,
 ) -> None:
     if args.action == "prepare":
         state = prepare_target_migration(
@@ -126,18 +138,29 @@ def _migrate(
             legacy_include_fields=fields,
             deployment=bind_target_deployment(paths),
             restoration_manifest=restoration,
+            source_profile=source_profile,
+            destination_profile=destination_profile,
         )
     elif args.action == "promote":
         state = promote_target_migration(
-            paths, deployment=bind_target_deployment(paths)
+            paths,
+            deployment=bind_target_deployment(paths),
+            source_profile=source_profile,
+            destination_profile=destination_profile,
+            cutover_authority="RF-013",
         )
     else:
-        state = rollback_target_migration(paths)
+        state = rollback_target_migration(
+            paths,
+            source_profile=source_profile,
+            destination_profile=destination_profile,
+        )
     print(
         json.dumps(
             {
                 "phase": state["phase"],
                 "journal": str(paths.backup / "journal.json"),
+                **migration_status(state),
             }
         )
     )
@@ -146,7 +169,10 @@ def _migrate(
 def _run_migration(parser: argparse.ArgumentParser, args: argparse.Namespace) -> None:
     if args.plan is None:
         parser.error("migration actions require --plan")
-    active_root, paths, fields = _load_plan(parser, args.plan)
+    active_root, paths, document, source_profile, destination_profile = _load_plan(
+        parser, args.plan, action=args.action
+    )
+    fields = tuple(document["legacy_include_fields"])
     restoration = _restoration_manifest(parser, args, active_root)
     if args.action == "freeze-inputs":
         _freeze_inputs(parser, args, paths, fields, restoration)
@@ -154,7 +180,7 @@ def _run_migration(parser: argparse.ArgumentParser, args: argparse.Namespace) ->
     if args.action == "build-candidates":
         _build_candidates(parser, args, paths, fields, restoration)
         return
-    _migrate(args, paths, fields, restoration)
+    _migrate(args, paths, fields, restoration, source_profile, destination_profile)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -183,7 +209,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--plan",
         type=Path,
-        help="JSON: explicit paths and frozen legacy_include_fields",
+        help=(
+            "JSON: explicit paths, source_profile, destination_profile "
+            "and frozen legacy_include_fields"
+        ),
     )
     parser.add_argument("--evidence", type=Path)
     parser.add_argument("--repo-root", type=Path)
@@ -267,6 +296,21 @@ def _contour_report(parser: argparse.ArgumentParser, args: argparse.Namespace) -
     if args.require_ready and decision not in {"READY", "LIVE_ACCEPTED"}:
         return 1
     return 0
+
+
+def _plan_profiles(
+    parser: argparse.ArgumentParser, document: dict[str, object]
+) -> tuple[str, str]:
+    """Require an explicit executable transition; do not infer 3.2.0."""
+    source = document.get("source_profile")
+    destination = document.get("destination_profile")
+    if not isinstance(source, str) or not isinstance(destination, str):
+        parser.error("plan requires explicit source_profile and destination_profile")
+    try:
+        resolve_target_migration_transition(source, destination)
+    except ValueError as error:
+        parser.error(str(error))
+    return source, destination
 
 
 if __name__ == "__main__":

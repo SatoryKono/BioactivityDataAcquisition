@@ -230,7 +230,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "516",
+      "line": "466",
       "path": "tests/unit/infrastructure/audit/test_file_audit.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_file_audit_adapter__aclose_is_idempotent__cb75761c"
@@ -1224,7 +1224,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "516",
+        "line": "466",
         "path": "tests/unit/infrastructure/audit/test_file_audit.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_file_audit_adapter__aclose_is_idempotent__cb75761c"
@@ -1772,12 +1772,12 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 3410,
-    "total_test_functions": 34508,
+    "total_test_functions": 34520,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "16f53f258d469026ecb3edf160fade0b766a5ffe2712f4d6dd52237be01dfd64",
+  "source_tree_sha256": "004d0a9600300c0a5e219a427a0fae491e9a5bdde7adfc0f8da541ea31928b65",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 68,
@@ -1840,7 +1840,7 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 3410,
-  "total_test_functions": 34508,
+  "total_test_functions": 34520,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
