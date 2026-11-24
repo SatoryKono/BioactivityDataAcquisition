@@ -15,13 +15,17 @@ from bioetl.domain.contracts.gold._strict_gold_contract_schema import (
     CONTENT_HASH_HEX64_PATTERN,
     StrictGoldContractSchema,
 )
+from bioetl.domain.schemas.chembl.target import (
+    build_target_classification_detail_model,
+    register_canonical_classification_detail,
+)
 from bioetl.domain.transformations import canonical_json_dumps
 from bioetl.domain.types import JsonDict
 
+register_canonical_classification_detail()
+
 
 class ChEMBLTargetGoldSchema(StrictGoldContractSchema):
-    """Schema for ChEMBL Target in Gold layer."""
-
     entity_id: Series[str] = pa.Field(nullable=False)
     content_hash: Series[str] = pa.Field(
         nullable=False,
@@ -270,13 +274,22 @@ class ChEMBLTargetGoldSchemaV31(ChEMBLTargetGoldSchema):
     )
 
 
+ChEMBLTargetGoldSchemaV32 = build_target_classification_detail_model(
+    ChEMBLTargetGoldSchemaV31,
+    "ChEMBLTargetGoldSchemaV32",
+    "Additive 3.2.0 detail. Existing V31 columns stay nullable strings.",
+    __name__,
+)
+
+
 def target_v31_schema_hash() -> str:
-    """Bind manifested identity to the actual canonical V31 schema model."""
-    render_schema = cast(
-        "Callable[[], JsonDict]", ChEMBLTargetGoldSchemaV31.to_json_schema
-    )
-    canonical = canonical_json_dumps(render_schema())
-    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+    rendered = cast("Callable[[], JsonDict]", ChEMBLTargetGoldSchemaV31.to_json_schema)
+    return hashlib.sha256(canonical_json_dumps(rendered()).encode("utf-8")).hexdigest()
+
+
+def target_v32_schema_hash() -> str:
+    rendered = cast("Callable[[], JsonDict]", ChEMBLTargetGoldSchemaV32.to_json_schema)
+    return hashlib.sha256(canonical_json_dumps(rendered()).encode("utf-8")).hexdigest()
 
 
 __all__ = [
@@ -284,7 +297,9 @@ __all__ = [
     "ChEMBLTargetComponentGoldSchema",
     "ChEMBLTargetGoldSchema",
     "ChEMBLTargetGoldSchemaV31",
+    "ChEMBLTargetGoldSchemaV32",
     "ChEMBLTargetProteinClassificationGoldSchema",
     "ChEMBLTissueGoldSchema",
     "target_v31_schema_hash",
+    "target_v32_schema_hash",
 ]

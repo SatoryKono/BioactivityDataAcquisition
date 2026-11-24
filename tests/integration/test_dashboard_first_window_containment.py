@@ -137,13 +137,14 @@ def test_trust_9418_keeps_verdict_and_reason_count_visible() -> None:
         o["matcher"]["options"]: {p["id"]: p["value"] for p in o["properties"]}
         for o in panel["fieldConfig"]["overrides"]
     }
-    assert props["reasons_text"]["custom.hidden"] is True
+    # Accepted audit model: reasons stay inspectable/visible; count column stays shown.
+    assert props["reasons_text"]["custom.hidden"] is False
     assert props["reasons_text"]["custom.inspect"] is True
-    assert props["evidence_observed_at"]["custom.hidden"] is False
-    assert props["evidence_observed_at"]["unit"].startswith("time:")
-    assert props["processing_status"]["displayName"] == "Processing result"
-    assert props["trust_status"]["displayName"] == "Saved trust verdict"
-    assert props["reasons_count"]["custom.hidden"] is False
+    assert props["Assessed at"]["custom.hidden"] is False
+    assert props["Assessed at"]["unit"].startswith("time:")
+    assert "Processing result" in props
+    assert "Saved trust verdict" in props
+    assert props["Reason count"]["custom.hidden"] is False
     assert panel_declared_row_cap(panel) == 1
     assert panel["gridPos"]["y"] >= FIRST_WINDOW_Y
     readiness = next(p for p in dashboard["panels"] if p["id"] == 9422)

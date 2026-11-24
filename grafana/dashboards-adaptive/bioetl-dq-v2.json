@@ -43,11 +43,11 @@
           "value": "$__all"
         },
         "datasource": {
-          "type": "prometheus",
-          "uid": "prometheus"
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "bioetl-ops-http"
         },
-        "definition": "label_values(bioetl_workflow_universe, workflow)",
-        "description": "Shared operator context: workflow evidence selector. This selector does not imply exact current-status intersection unless the dashboard explicitly documents that semantics.",
+        "definition": "/ops/control-plane/filter-options?dimension=workflow&response_shape=options&allow_stale=1",
+        "description": "Workflow values come from the shared control-plane run catalog. All includes every workflow. A [STALE catalog] label identifies an option served from a stale catalog snapshot; it does not describe source-data freshness.",
         "hide": 0,
         "includeAll": true,
         "label": "Workflow",
@@ -55,8 +55,32 @@
         "name": "workflow",
         "options": [],
         "query": {
-          "query": "label_values(bioetl_workflow_universe, workflow)",
-          "refId": "StandardVariableQuery"
+          "queryType": "infinity",
+          "refId": "variable",
+          "infinityQuery": {
+            "format": "table",
+            "parser": "backend",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO RUNS\",\"value\":\"-\"}] : [$map(items, function($item) { $item })]",
+            "type": "json",
+            "source": "url",
+            "url_options": {
+              "data": "",
+              "method": "GET"
+            },
+            "url": "/ops/control-plane/filter-options?dimension=workflow&response_shape=options&allow_stale=1",
+            "columns": [
+              {
+                "selector": "text",
+                "text": "__text",
+                "type": "string"
+              },
+              {
+                "selector": "value",
+                "text": "__value",
+                "type": "string"
+              }
+            ]
+          }
         },
         "refresh": 1,
         "regex": "",
@@ -92,7 +116,7 @@
           "infinityQuery": {
             "format": "table",
             "parser": "backend",
-            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO RUNS\",\"value\":\"-\"}] : [$map(items, function($item) { $merge([$item, {\"text\": $replace($item.text, \" [STALE catalog]\", \"\")}]) })]",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO RUNS\",\"value\":\"-\"}] : [$map(items, function($item) { $item })]",
             "type": "json",
             "source": "url",
             "url_options": {
@@ -123,7 +147,7 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false,
-        "description": "Core scope: pipeline option list from the local control-plane catalog (/ops/control-plane/filter-options?dimension=pipeline), not the Prometheus universe. PromQL current-state panels still match $pipeline against the shared universe metrics. Single-select unless this board documents All. Default selection is All pipelines until the operator narrows to a concrete pipeline. A pasted var-pipeline value that exists in the catalog remains selectable even when Prometheus has no series."
+        "description": "Core scope: pipeline option list from the local control-plane catalog (/ops/control-plane/filter-options?dimension=pipeline), not the Prometheus universe. PromQL current-state panels still match $pipeline against the shared universe metrics. Single-select unless this board documents All. Default selection is All pipelines until the operator narrows to a concrete pipeline. A pasted var-pipeline value that exists in the catalog remains selectable even when Prometheus has no series. A [STALE catalog] label indicates a stale catalog snapshot, not source-data freshness."
       },
       {
         "allValue": ".*",
@@ -149,7 +173,7 @@
           "infinityQuery": {
             "format": "table",
             "parser": "backend",
-            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO RUNS\",\"value\":\"-\"}] : [$map(items, function($item) { $merge([$item, {\"text\": $replace($item.text, \" [STALE catalog]\", \"\")}]) })]",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO RUNS\",\"value\":\"-\"}] : [$map(items, function($item) { $item })]",
             "type": "json",
             "source": "url",
             "url_options": {
@@ -180,7 +204,7 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false,
-        "description": "Browse scope from the local control-plane catalog. Default All includes every run type. Explicit URL selections take precedence."
+        "description": "Browse scope from the local control-plane catalog. Default All includes every run type. Explicit URL selections take precedence. A [STALE catalog] label indicates a stale catalog snapshot, not source-data freshness."
       },
       {
         "allValue": null,
@@ -194,7 +218,7 @@
           "uid": "bioetl-ops-http"
         },
         "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&timezone=${__timezone}&allow_stale=1",
-        "description": "Run ID from the catalog snapshot; run dates describe execution, not catalog freshness. Catalog freshness is Not verified here. Refresh the dashboard to request an updated list.",
+        "description": "Run ID from the control-plane catalog. A [STALE catalog] label indicates a stale catalog snapshot; run dates describe execution, not catalog or source-data freshness. Refresh the dashboard to request an updated list.",
         "hide": 0,
         "includeAll": false,
         "label": "Run ID",
@@ -213,7 +237,7 @@
           "infinityQuery": {
             "format": "table",
             "parser": "backend",
-            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO RUNS\",\"value\":\"-\"}] : [$map(items, function($item) { $merge([$item, {\"text\": $replace($item.text, \" [STALE catalog]\", \"\")}]) })]",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO RUNS\",\"value\":\"-\"}] : [$map(items, function($item) { $item })]",
             "type": "json",
             "source": "url",
             "url_options": {
@@ -477,7 +501,7 @@
         "type": "datasource",
         "uid": "-- Dashboard --"
       },
-      "description": "SELECTED RUN · AUTO shows the latest run by start time in the current scope, including unfinished runs. EXPLICIT keeps the requested Run ID and shows evidence for that run only. An explicit Run ID takes precedence over Pipeline; an overridden Pipeline filter is identified in Context. Context checked at is this Grafana query evaluation time, not run start, browser click, server cache load or catalog freshness. Refresh re-evaluates the displayed context. UNKNOWN is missing evidence; request failure is Source unavailable. This context assesses that run only, not a fleet verdict. TIME RANGE telemetry never proves this run. Empty is a coverage gap, not a pass. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response. Saved assessment at is the persisted assessment clock, and Saved age is elapsed time since that clock. No cadence or freshness threshold for the run's source data is provided by this endpoint: source freshness remains Not verified. The reader cache policy does not establish source freshness and is available only in raw context inspection.",
+      "description": "SELECTED RUN · AUTO shows the latest run by start time in the current scope, including unfinished runs. EXPLICIT keeps the requested Run ID and shows evidence for that run only. An explicit Run ID takes precedence over Pipeline; an overridden Pipeline filter is identified in Context. Context checked at is this Grafana query evaluation time, not run start, browser click, server cache load or catalog freshness. Refresh re-evaluates the displayed context. UNKNOWN is missing evidence; request failure is Source unavailable. This context assesses that run only, not a fleet verdict. TIME RANGE telemetry never proves this run. Empty is a coverage gap, not a pass. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response. Saved assessment at is the persisted assessment clock, and Saved age is elapsed time since that clock. No cadence or freshness threshold for the run's source data is provided by this endpoint: source freshness remains Not verified. The reader cache policy does not establish source freshness and is available only in raw context inspection. If this panel has no result, inspect Review Selected Run Status (panel 9406) and its query status. No result alone cannot distinguish a successful query without evidence from a source query error. AUTO is local to Run Overview and Data Quality; Replay Readiness and Incident Workspace request an explicit exact run.",
       "targets": [
         {
           "refId": "A",
@@ -498,7 +522,7 @@
       },
       "fieldConfig": {
         "defaults": {
-          "noValue": "Not verified",
+          "noValue": "No result · inspect source panel 9406",
           "custom": {
             "align": "left",
             "minWidth": 50,
@@ -700,7 +724,7 @@
         "type": "yesoreyeram-infinity-datasource",
         "uid": "bioetl-ops-http"
       },
-      "description": "SELECTED RUN · Overall verdict is the data quality assessment of this Run ID. Processing is the ETL outcome. Trust is the saved Trust verdict and does not authorize replay. Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is Source unavailable. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. Reason explains the saved assessment; missing archive evidence remains INCOMPLETE. Evidence completeness remains available in the saved report. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response.",
+      "description": "SELECTED RUN · Overall verdict is the data quality assessment of this Run ID. Processing is the ETL outcome. Trust is the saved Trust verdict and does not authorize replay. Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is Source unavailable. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. Reason explains the saved assessment; missing archive evidence remains INCOMPLETE. Evidence completeness remains available in the saved report. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response. QUERY ERROR means the request or query evaluation failed; use Query Inspector for the cause. A failed expression does not establish a backend outage.",
       "fieldConfig": {
         "defaults": {
           "noValue": "UNKNOWN",
@@ -729,25 +753,6 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "execution_state"
-            },
-            "properties": [
-              {
-                "id": "custom.wrapText",
-                "value": false
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": false
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
               "options": "Overall verdict"
             },
             "properties": [
@@ -770,21 +775,21 @@
                 "id": "mappings",
                 "value": [
                   {
-                    "type": "value",
                     "options": {
-                      "SELECT RUN": {
-                        "text": "—",
-                        "color": "text"
+                      "NO RUNS": {
+                        "color": "gray",
+                        "text": "NO RUNS"
                       },
                       "QUERY ERROR": {
-                        "text": "Source unavailable",
-                        "color": "red"
+                        "color": "red",
+                        "text": "Source unavailable"
                       },
-                      "NO RUNS": {
-                        "text": "NO RUNS",
-                        "color": "gray"
+                      "SELECT RUN": {
+                        "color": "text",
+                        "text": "—"
                       }
-                    }
+                    },
+                    "type": "value"
                   }
                 ]
               }
@@ -815,17 +820,17 @@
                 "id": "mappings",
                 "value": [
                   {
-                    "type": "value",
                     "options": {
-                      "SELECT RUN": {
-                        "text": "—",
-                        "color": "text"
-                      },
                       "NO RUNS": {
-                        "text": "NO RUNS",
-                        "color": "gray"
+                        "color": "gray",
+                        "text": "NO RUNS"
+                      },
+                      "SELECT RUN": {
+                        "color": "text",
+                        "text": "—"
                       }
-                    }
+                    },
+                    "type": "value"
                   }
                 ]
               }
@@ -856,19 +861,21 @@
                 "id": "mappings",
                 "value": [
                   {
-                    "type": "value",
                     "options": {
+                      "Archive missing": {
+                        "text": "No verified archive"
+                      },
+                      "archive_evidence_not_recorded": {
+                        "text": "No verified archive"
+                      },
                       "execution_success": {
                         "text": "Processing completed"
                       },
-                      "standalone_pipeline": {
-                        "text": "Standalone pipeline"
+                      "no_gold_candidates": {
+                        "text": "No Gold candidates"
                       },
                       "run_dq_threshold_evaluation": {
                         "text": "Data quality checks"
-                      },
-                      "run_preflight_provider_observation": {
-                        "text": "Provider preflight check"
                       },
                       "run_gold_schema_validation": {
                         "text": "Gold schema validation"
@@ -876,16 +883,14 @@
                       "run_observation_missing": {
                         "text": "Result not recorded"
                       },
-                      "no_gold_candidates": {
-                        "text": "No Gold candidates"
+                      "run_preflight_provider_observation": {
+                        "text": "Provider preflight check"
                       },
-                      "Archive missing": {
-                        "text": "No verified archive"
-                      },
-                      "archive_evidence_not_recorded": {
-                        "text": "No verified archive"
+                      "standalone_pipeline": {
+                        "text": "Standalone pipeline"
                       }
-                    }
+                    },
+                    "type": "value"
                   }
                 ]
               }
@@ -905,17 +910,17 @@
                 "id": "mappings",
                 "value": [
                   {
-                    "type": "value",
                     "options": {
-                      "SELECT RUN": {
-                        "text": "—",
-                        "color": "text"
-                      },
                       "NO RUNS": {
-                        "text": "NO RUNS",
-                        "color": "gray"
+                        "color": "gray",
+                        "text": "NO RUNS"
+                      },
+                      "SELECT RUN": {
+                        "color": "text",
+                        "text": "—"
                       }
-                    }
+                    },
+                    "type": "value"
                   }
                 ]
               }
@@ -943,7 +948,7 @@
           "source": "url",
           "parser": "backend",
           "format": "table",
-          "root_selector": "($schema := {'_bioetl_frame': null, 'domain': null, 'verdict': null, 'status': null, 'detail': null, 'reason': null, 'reason_display': null, 'domain_reason_brief': null, 'run_reason_brief': null, 'status_display': null, 'run_execution': null, 'run_verdict': null, 'saved_trust': null, 'run_reason': null, 'parameter': null, 'value': null, 'provider': null, 'data_source': null, 'check_performed': null, 'check_result': null, 'check_result_display': null, 'provider_check_note': null, 'evidence': null, 'observed_at': null, 'observed_display': null, 'report_label': null, 'stage_id': null, 'stage_name': null, 'tracking': null, 'records_in': null, 'records_out': null, 'removals': null, 'execution_state': null, 'workflow': null, 'pipeline': null, 'run_type': null, 'run_id': null, 'started_at': null, 'completed_at': null, 'reasons_count': null, 'reasons_display': null, 'trust_status': null, 'trust_reasons_action': null, 'trust_action_note': null, 'result': null, 'step_id': null, 'mode': null, 'scope': null, 'pins': null, 'limit': null, 'meaning': null, 'check_id': null, 'replay_ready': null, 'readiness': null, 'Run duration': null, 'trust': null, 'context': null, 'context_checked_at': null}; $map($append($append($append($append([$merge([presentation_summary[0], {'saved_trust': presentation_trust[0].trust_status, 'reason_display': ($issues := presentation_domains[verdict != 'OK' and verdict != 'N/A' and verdict != 'SELECT RUN' and verdict != 'NO RUNS']; $count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & ($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : ((presentation_summary[0].verdict = 'OK' or presentation_summary[0].verdict = 'SELECT RUN' or presentation_summary[0].verdict = 'NO RUNS') ? (presentation_trust[0].reasons_display ? presentation_trust[0].reasons_display : presentation_summary[0].reason) : presentation_summary[0].reason)), '_bioetl_frame': 'status'}])], $map(presentation_domains, function($row){$merge([$row, {'_bioetl_frame': 'domains'}])})), ($r := function($s,$o){$exists($s.removals[outcome=$o]) ? $sum($s.removals[outcome=$o].count) : ($s.tracking = 'full' ? 0 : null)}; $funnel := $exists(quality_evidence.funnel) ? quality_evidence.funnel : []; $diags := $exists(stage_diagnostics) ? stage_diagnostics : []; $map($diags, function($d){($s := $funnel[stage_id=$d.stage_id][0]; $merge([$d, {'quarantined': $exists($s) ? $r($s,'quarantined') : null, 'excluded': $exists($s) ? $r($s,'excluded_by_contract') : null, 'deduplicated': $exists($s) ? $r($s,'deduplicated') : null, 'filtered_out': $exists($s) ? $r($s,'filtered_out') : null, '_bioetl_frame': 'stages'}]))}))), ($f := $exists(quality_evidence.funnel) ? quality_evidence.funnel : []; $map(['01 bronze_records','02 silver_valid_records','03 silver_filtered_out_records','04 silver_quarantined_records','06 silver_deduplicated_records','07 gold_written_records','08 gold_excluded_by_contract_records','09 gold_quarantined_records','11 gold_deduplicated_records'], function($p) { ($layerName := $contains($p, 'bronze') ? 'bronze' : ($contains($p, 'silver') ? 'silver' : 'gold'); {'parameter': $p, 'count in': $f[stage_id = $layerName].records_in, '_bioetl_frame': 'stageinput'}) }))), ($requested := \"${run_id:percentencode}\"; $auto := $requested in ['', '-', 'All', '$__all', '%24__all', '__all', '*', '%2A']; $hasRun := $type(run_id) = 'string' and run_id != '' and run_id != '-'; $requestedPipeline := \"${pipeline:percentencode}\"; $pipelineAll := $requestedPipeline in ['', 'All', '$__all', '%24__all', '.*', '*', '%2A', '.%2A']; $pipelineMismatch := $hasRun and $type(pipeline) = 'string' and $not($pipelineAll) and $encodeUrlComponent(pipeline) != $requestedPipeline; $savedAt := summary[0].evaluation_at; $secs := function($t){( $tail := $substring($t, 19); $rest := $substring($tail, 0, 1) = '.' ? $substringAfter($tail, '.') : ''; $zone := $contains($rest, 'Z') ? 'Z' : ($contains($rest, 'z') ? 'z' : ($contains($rest, '+') ? '+' : '-')); $digits := $rest != '' ? $substringBefore($rest, $zone) : ''; $frac := $digits != '' ? $number('0.' & $digits) : 0; $sign := $contains($tail, '+') ? 1 : ($contains($tail, '-') ? -1 : 0); $off := $sign = 0 ? '' : ($contains($tail, '+') ? $substringAfter($tail, '+') : $substringAfter($tail, '-')); $oh := $off != '' ? $number($substring($off, 0, 2)) : 0; $om := $length($off) >= 4 ? $number($substring($off, $contains($off, ':') ? 3 : 2, 2)) : 0; $toMillis($substring($t, 0, 10))/1000 + $number($substring($t,11,2))*3600 + $number($substring($t,14,2))*60 + $number($substring($t,17,2)) + $frac - $sign * ($oh*3600 + $om*60) )}; $savedMillis := $savedAt ? $secs($savedAt) * 1000 : null; $savedAge := $savedMillis != null and $savedMillis <= $millis() ? $floor(($millis() - $savedMillis) / 1000) : null; [{'_bioetl_frame':'selection_context', 'context': $auto ? ($hasRun ? 'AUTO · latest run in scope' : (reason = 'no_runs_in_scope' ? 'NO RUN · empty scope' : 'Context unavailable')) : ($pipelineMismatch ? 'EXPLICIT · Run ID overrides Pipeline filter' : 'EXPLICIT · requested Run ID'), 'run_id': $type(run_id) = 'string' ? run_id : $requested, 'execution_state': $type(execution_state) = 'string' and execution_state != '' ? execution_state : 'UNKNOWN', 'verdict': $type(verdict) = 'string' and verdict != '' ? verdict : 'UNKNOWN', 'context_checked_at': $now(), 'saved_assessment_at': $savedAt, 'assessment_age_seconds': $savedAge, 'evidence_freshness': ($cache := status_cache; $saved := summary[0].evaluation_at; ($cache.state = 'fresh' ? 'Cache FRESH' : $cache.state = 'stale' ? 'Cache STALE' : 'Cache UNKNOWN') & ($type($cache.fresh_seconds)='number' ? ' (fresh < ' & $string($cache.fresh_seconds) & ' s)' : '') & '; saved ' & ($saved ? $substring($saved,0,10) & ' ' & $substring($saved,11,5) & ' ' & ($substring($saved,-1)='Z' ? 'UTC' : $substring($saved,-6)) : 'Not recorded'))}])), function($row){$merge([$schema, $row])}))",
+          "root_selector": "($schema := {'_bioetl_frame': null, 'domain': null, 'verdict': null, 'status': null, 'detail': null, 'reason': null, 'reason_display': null, 'domain_reason_brief': null, 'run_reason_brief': null, 'status_display': null, 'run_execution': null, 'run_verdict': null, 'saved_trust': null, 'run_reason': null, 'parameter': null, 'value': null, 'provider': null, 'data_source': null, 'check_performed': null, 'check_result': null, 'check_result_display': null, 'provider_check_note': null, 'evidence': null, 'observed_at': null, 'observed_display': null, 'report_label': null, 'stage_id': null, 'stage_name': null, 'tracking': null, 'records_in': null, 'records_out': null, 'removals': null, 'execution_state': null, 'workflow': null, 'pipeline': null, 'run_type': null, 'run_id': null, 'started_at': null, 'completed_at': null, 'reasons_count': null, 'reasons_display': null, 'trust_status': null, 'trust_reasons_action': null, 'trust_action_note': null, 'result': null, 'step_id': null, 'mode': null, 'scope': null, 'pins': null, 'limit': null, 'meaning': null, 'check_id': null, 'replay_ready': null, 'readiness': null, 'Run duration': null, 'trust': null, 'context': null, 'context_checked_at': null}; $map($append($append($append($append([$merge([presentation_summary[0], {'saved_trust': presentation_trust[0].trust_status, 'reason_display': ($issues := presentation_domains[verdict != 'OK' and verdict != 'N/A' and verdict != 'SELECT RUN' and verdict != 'NO RUNS']; $count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & ($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : ((presentation_summary[0].verdict = 'OK' or presentation_summary[0].verdict = 'SELECT RUN' or presentation_summary[0].verdict = 'NO RUNS') ? (presentation_trust[0].reasons_display ? presentation_trust[0].reasons_display : presentation_summary[0].reason) : presentation_summary[0].reason)), '_bioetl_frame': 'status'}])], $map(presentation_domains, function($row){$merge([$row, {'_bioetl_frame': 'domains'}])})), ($r := function($s,$o){$exists($s.removals[outcome=$o]) ? $sum($s.removals[outcome=$o].count) : ($s.tracking = 'full' ? 0 : null)}; $funnel := $exists(quality_evidence.funnel) ? quality_evidence.funnel : []; $diags := $exists(stage_diagnostics) ? stage_diagnostics : []; $map($diags, function($d){($s := $funnel[stage_id=$d.stage_id][0]; $merge([$d, {'quarantined': $exists($s) ? $r($s,'quarantined') : null, 'excluded': $exists($s) ? $r($s,'excluded_by_contract') : null, 'deduplicated': $exists($s) ? $r($s,'deduplicated') : null, 'filtered_out': $exists($s) ? $r($s,'filtered_out') : null, '_bioetl_frame': 'stages'}]))}))), ($f := $exists(quality_evidence.funnel) ? quality_evidence.funnel : []; $map(['01 bronze_records','02 silver_valid_records','03 silver_filtered_out_records','04 silver_quarantined_records','06 silver_deduplicated_records','07 gold_written_records','08 gold_excluded_by_contract_records','09 gold_quarantined_records','11 gold_deduplicated_records'], function($p) { ($layerName := $contains($p, 'bronze') ? 'bronze' : ($contains($p, 'silver') ? 'silver' : 'gold'); {'parameter': $p, 'count in': $f[stage_id = $layerName].records_in, '_bioetl_frame': 'stageinput'}) }))), ($requested := \"${run_id:percentencode}\"; $auto := $requested in ['', '-', 'All', '$__all', '%24__all', '__all', '*', '%2A']; $hasRun := $type(run_id) = 'string' and run_id != '' and run_id != '-'; $requestedPipeline := \"${pipeline:percentencode}\"; $pipelineAll := $requestedPipeline in ['', 'All', '$__all', '%24__all', '.*', '*', '%2A', '.%2A']; $pipelineMismatch := $hasRun and $type(pipeline) = 'string' and $not($pipelineAll) and $encodeUrlComponent(pipeline) != $requestedPipeline; $savedAt := summary[0].evaluation_at; $secs := function($t){( $tail := $substring($t, 19); $rest := $substring($tail, 0, 1) = '.' ? $substringAfter($tail, '.') : ''; $zone := $contains($rest, 'Z') ? 'Z' : ($contains($rest, 'z') ? 'z' : ($contains($rest, '+') ? '+' : '-')); $digits := $rest != '' ? $substringBefore($rest, $zone) : ''; $frac := $digits != '' ? $number('0.' & $digits) : 0; $sign := $contains($tail, '+') ? 1 : ($contains($tail, '-') ? -1 : 0); $off := $sign = 0 ? '' : ($contains($tail, '+') ? $substringAfter($tail, '+') : $substringAfter($tail, '-')); $oh := $off != '' ? $number($substring($off, 0, 2)) : 0; $om := $length($off) >= 4 ? $number($substring($off, $contains($off, ':') ? 3 : 2, 2)) : 0; $toMillis($substring($t, 0, 10))/1000 + $number($substring($t,11,2))*3600 + $number($substring($t,14,2))*60 + $number($substring($t,17,2)) + $frac - $sign * ($oh*3600 + $om*60) )}; $savedMillis := $type($savedAt) = 'string' ? ($savedAt != '' ? $secs($savedAt) * 1000 : null) : null; $savedAge := $type($savedMillis) = 'number' ? ($savedMillis <= $millis() ? $floor(($millis() - $savedMillis) / 1000) : null) : null; [{'_bioetl_frame':'selection_context', 'context': $auto ? ($hasRun ? 'AUTO · latest run in scope' : (reason = 'no_runs_in_scope' ? 'NO RUN · empty scope' : 'Context unavailable')) : ($pipelineMismatch ? 'EXPLICIT · Run ID overrides Pipeline filter' : 'EXPLICIT · requested Run ID'), 'run_id': $type(run_id) = 'string' ? run_id : $requested, 'execution_state': $type(execution_state) = 'string' and execution_state != '' ? execution_state : 'UNKNOWN', 'verdict': $type(verdict) = 'string' and verdict != '' ? verdict : 'UNKNOWN', 'context_checked_at': $now(), 'saved_assessment_at': $savedAt, 'assessment_age_seconds': $savedAge, 'evidence_freshness': ($cache := status_cache; $saved := summary[0].evaluation_at; ($cache.state = 'fresh' ? 'Cache FRESH' : $cache.state = 'stale' ? 'Cache STALE' : 'Cache UNKNOWN') & ($type($cache.fresh_seconds)='number' ? ' (fresh < ' & $string($cache.fresh_seconds) & ' s)' : '') & '; saved ' & ($saved ? $substring($saved,0,10) & ' ' & $substring($saved,11,5) & ' ' & ($substring($saved,-1)='Z' ? 'UTC' : $substring($saved,-6)) : 'Not recorded'))}])), function($row){$merge([$schema, $row])}))",
           "url": "/ops/observability/selected-run-status?pipeline=${selected_pipeline}&run_id=${selected_run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
           "url_options": {
             "method": "GET",
@@ -1570,7 +1575,6 @@
             "method": "GET",
             "data": ""
           },
-          "uql": "parse-json | jsonata \"($f := $exists(quality_evidence.funnel) ? quality_evidence.funnel : []; $map(['01 bronze_records','02 silver_valid_records','03 silver_filtered_out_records','04 silver_quarantined_records','06 silver_deduplicated_records','07 gold_written_records','08 gold_excluded_by_contract_records','09 gold_quarantined_records','11 gold_deduplicated_records'], function($p) { ($layerName := $contains($p, 'bronze') ? 'bronze' : ($contains($p, 'silver') ? 'silver' : 'gold'); {'parameter': $p, 'count in': $f[stage_id = $layerName].records_in}) }))\"",
           "datasource": {
             "type": "yesoreyeram-infinity-datasource",
             "uid": "bioetl-ops-http"
@@ -1660,7 +1664,7 @@
             "type": "datasource",
             "uid": "-- Dashboard --"
           },
-          "description": "SELECTED RUN · Saved stage rows for the exact Run ID; the table shows at most 12 stages. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table. Request failure is Source unavailable. Removal counters are per-stage saved funnel removals; untracked stages stay UNKNOWN. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is Source unavailable.",
+          "description": "SELECTED RUN · Saved stage rows for the exact Run ID; the table shows at most 12 stages. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table. Request failure is Source unavailable. Removal counters are per-stage saved funnel removals; untracked stages stay UNKNOWN. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is Source unavailable. If this panel has no result, inspect Review Selected Run Status (panel 9406) and its query status. No result alone cannot distinguish a successful query without evidence from a source query error.",
           "options": {
             "showHeader": true,
             "cellHeight": "sm",
@@ -1670,7 +1674,7 @@
           },
           "fieldConfig": {
             "defaults": {
-              "noValue": "UNKNOWN",
+              "noValue": "No result · inspect source panel 9406",
               "unit": "none",
               "custom": {
                 "align": "left",
@@ -1960,7 +1964,7 @@
             "type": "datasource",
             "uid": "-- Dashboard --"
           },
-          "description": "SELECTED RUN · Domain verdicts of this Run ID; this is not the page status. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response.",
+          "description": "SELECTED RUN · Domain verdicts of this Run ID; this is not the page status. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response. If this panel has no result, inspect Review Selected Run Status (panel 9406) and its query status. No result alone cannot distinguish a successful query without evidence from a source query error.",
           "options": {
             "showHeader": true,
             "cellHeight": "sm",
@@ -1971,7 +1975,7 @@
           },
           "fieldConfig": {
             "defaults": {
-              "noValue": "UNKNOWN",
+              "noValue": "No result · inspect source panel 9406",
               "unit": "none",
               "custom": {
                 "align": "left",

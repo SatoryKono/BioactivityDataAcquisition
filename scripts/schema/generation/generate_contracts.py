@@ -18,7 +18,12 @@ from urllib.parse import urlunsplit
 from bioetl.domain.contracts import gold as gold_contracts
 from bioetl.domain.contracts.gold.chembl_target_classification import (
     ChEMBLTargetGoldSchemaV31,
+    ChEMBLTargetGoldSchemaV32,
     target_v31_schema_hash,
+    target_v32_schema_hash,
+)
+from bioetl.domain.normalization.profiles.chembl_target_classification import (
+    target_v32_normalization_profile,
 )
 from bioetl.domain.normalization.profiles import (
     resolve_normalization_profile_identity,
@@ -32,6 +37,68 @@ ENTITY_CONTRACT_VERSIONS: dict[str, str] = {
     "chembl_target": "3.0.0",
     "chembl_target_protein_classification": "2.2.0",
 }
+
+
+def _detail_logical_contract() -> dict[str, dict[str, str]]:
+    """Logical array and struct annotations copied onto the 3.2.0 contract."""
+    string_set = {
+        "x-bioetl-logical-type": "set<string>",
+        "x-bioetl-serialization": "canonical-json-string",
+        "x-bioetl-order": "lexicographic",
+        "x-bioetl-null": "not-computed",
+        "x-bioetl-empty": "[]",
+        "x-bioetl-content-hash": "include",
+    }
+    scalar = {
+        "x-bioetl-null": "not-computed",
+        "x-bioetl-content-hash": "include",
+    }
+    contract = {
+        "iuphar_type_raw": {"x-bioetl-logical-type": "string", **scalar},
+        "iuphar_source_completeness": {
+            "x-bioetl-logical-type": "enum",
+            "x-bioetl-enum": "family_only|source_unavailable|typed|unannotated",
+            **scalar,
+        },
+        "iuphar_family_paths": {
+            "x-bioetl-logical-type": (
+                "set<struct<family_id:string,root_to_leaf:list<string>>>"
+            ),
+            "x-bioetl-serialization": "canonical-json-string",
+            "x-bioetl-order": "family_id,root_to_leaf",
+            "x-bioetl-path-order": "root-to-leaf",
+            "x-bioetl-null": "not-computed",
+            "x-bioetl-empty": "[]",
+            "x-bioetl-content-hash": "include",
+        },
+        "local_status": {
+            "x-bioetl-logical-type": "enum",
+            "x-bioetl-enum": "candidate_only|conflicting|not_supported|supported",
+            **scalar,
+        },
+        "classification_evidence_refs": {
+            "x-bioetl-logical-type": (
+                "struct<local_evidence_ids:set<string>,match_evidence_ids:set<string>>"
+            ),
+            "x-bioetl-serialization": "canonical-json-string",
+            "x-bioetl-order": "lexicographic-members",
+            "x-bioetl-null": "not-computed",
+            "x-bioetl-empty": '{"local_evidence_ids":[],"match_evidence_ids":[]}',
+            "x-bioetl-content-hash": "include",
+        },
+    }
+    for name in (
+        "iuphar_family_ids",
+        "iuphar_subclasses",
+        "local_subclasses",
+        "local_rule_ids",
+        "effective_subclasses",
+        "conflict_codes",
+    ):
+        contract[name] = dict(string_set)
+    return contract
+
+
 JSON_SCHEMA_DRAFT7_URI = urlunsplit(
     ("http", "json-schema.org", "/draft-07/schema", "", "")
 )
@@ -251,6 +318,24 @@ def _expected_artifacts() -> dict[Path, str]:
     target_v31["x-bioetl-schema-sha256"] = target_v31_schema_hash()
     artifacts[CONTRACTS_DIR / "chembl_target_v3.1.json"] = (
         json.dumps(target_v31, indent=2, ensure_ascii=False) + "\n"
+    )
+    # V32 is selected only by an explicit table contract. V30 and V31 stay stable.
+    target_v32 = _build_contract(ChEMBLTargetGoldSchemaV32, "chembl_target", "3.2.0")
+    profile_hash_v32 = target_v32["properties"]["target_class_profile_sha256"]
+    profile_hash_v32["pattern"] = "^[0-9a-f]{64}$"
+    for name, annotation in _detail_logical_contract().items():
+        target_v32["properties"][name].update(annotation)
+    detail_profile = target_v32_normalization_profile().identity
+    target_v32["normalization_profile"] = {
+        "ref": detail_profile.profile_name,
+        "version": detail_profile.profile_version,
+        "hash": detail_profile.profile_hash,
+    }
+    target_v32["x-bioetl-schema-sha256"] = target_v32_schema_hash()
+    target_v32["x-bioetl-physical-contract"] = "3.2.0"
+    target_v32["x-bioetl-computational-contract"] = "independent"
+    artifacts[CONTRACTS_DIR / "chembl_target_v3.2.json"] = (
+        json.dumps(target_v32, indent=2, ensure_ascii=False) + "\n"
     )
 
     return artifacts

@@ -1145,7 +1145,6 @@ def apply_overview(data: dict[str, Any]) -> None:
             "root_selector": _MERGED_PRR,
             "url": prr_url,
             "url_options": {"method": "GET", "data": ""},
-            "uql": f'parse-json | jsonata "{_MERGED_PRR}"',
             "datasource": dict(OPS),
         },
     ]
@@ -1374,7 +1373,11 @@ def apply_dq(data: dict[str, Any]) -> None:
 def apply_incident(data: dict[str, Any]) -> None:
     donor = _by_id(data, 2101)
     donor["datasource"] = dict(OPS)
-    donor["targets"] = [_infinity_uql(_INC_DONOR, parser="backend", url=RAW_SRS_URL)]
+    target = _infinity_uql(
+        _INC_DONOR, parser="backend", url=RAW_SRS_URL + "&require_exact_run=1"
+    )
+    target.pop("uql", None)
+    donor["targets"] = [target]
     donor["transformations"] = _status_donor_transforms()
     _align_status_donor_overrides(donor)
 

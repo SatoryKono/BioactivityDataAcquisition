@@ -6,6 +6,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.application.services.checkpoint.checkpoint_service import (
+    CheckpointInfo,
     CheckpointService,
 )
 from bioetl.application.services.control_plane.manifest.inspection_service import (
@@ -131,6 +132,25 @@ async def inspect_run_dossier(
     )
 
 
+def _resolve_selected_manifest(
+    service: RunManifestInspectionService | None,
+    manifest_id: str | None,
+    pipeline_name: str,
+    checkpoint: CheckpointInfo | None,
+) -> RunManifestInspectionResult | None:
+    if manifest_id is None or service is None:
+        return None
+    result = resolve_run_manifest(service, manifest_id)
+    if result is None:
+        return None
+    manifest = result.manifest
+    if manifest.manifest_id != manifest_id or manifest.pipeline_name != pipeline_name:
+        raise ValueError("manifest identity does not match checkpoint selector")
+    if checkpoint is not None and checkpoint.run_id != str(manifest.run_id):
+        raise ValueError("checkpoint and manifest run identity do not match")
+    return result
+
+
 async def inspect_checkpoint_workflow(
     *,
     audit_service: AuditInspectionService,
@@ -154,7 +174,12 @@ async def inspect_checkpoint_workflow(
         )
     else:
         checkpoint = await checkpoint_service.get_checkpoint(pipeline_name)
+    run_manifest = _resolve_selected_manifest(
+        run_manifest_service, manifest_id, pipeline_name, checkpoint
+    )
     resolved_run_id = run_id or (checkpoint.run_id if checkpoint is not None else None)
+    if run_manifest is not None:
+        resolved_run_id = str(run_manifest.manifest.run_id)
 
     if resolved_run_id is None:
         audit = AuditInspectionResult(
@@ -176,10 +201,8 @@ async def inspect_checkpoint_workflow(
         resolved_run_id,
         limit=audit_limit,
     )
-    run_manifest = resolve_run_manifest(
-        run_manifest_service,
-        resolved_run_id,
-    )
+    if manifest_id is None:
+        run_manifest = resolve_run_manifest(run_manifest_service, resolved_run_id)
     return CheckpointAuditWorkflowResult(
         pipeline_name=pipeline_name,
         checkpoint=checkpoint,
