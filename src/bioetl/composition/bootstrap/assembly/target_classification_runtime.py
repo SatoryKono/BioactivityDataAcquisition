@@ -94,8 +94,13 @@ def select_target_transformer(
         else None,
     )
     selected = transformer_class
-    if target_profile.config.mode == "enrich":
-        selected = TargetClassifiedTransformer
+    if (
+        target_profile.contract_version == "3.2.0"
+        or target_profile.config.mode == "enrich"
+    ):
+        selected = TargetClassifiedTransformer.for_physical_contract(
+            target_profile.contract_version
+        )
     return (
         selected,
         target_profile.resolved_yaml_config,
