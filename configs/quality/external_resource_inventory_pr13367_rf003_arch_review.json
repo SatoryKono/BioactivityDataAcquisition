@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "d0d25707e65759d6a9dfe66a7d2f09425a8e7606",
+  "source_ref": "d0d25707e65759d6a9dfe66a7d2f09425a8e7606",
+  "source_reviews": {
+    "src/bioetl/application/composite/helpers/merger_post_join_types.py": "RF-003 (#13311/#13367): extract MergePersistRequest/MergePostJoinContext helpers. Pure dataclasses; no acquisition calls.",
+    "src/bioetl/application/composite/helpers/post_join_classification.py": "RF-003 (#13311/#13367): whitelist projection and TargetClassificationRunState enrich/publish/finalize for composite merge under helpers/. Pure in-memory; no acquisition calls.",
+    "src/bioetl/application/composite/merge_service.py": "RF-003 (#13311): optional Composition-bound classification session attribute on MergeService. No new filesystem/network/process acquisition.",
+    "src/bioetl/application/composite/merger_orchestration.py": "RF-003 (#13311): pass post-join classification pending indices into persist. No new acquisition sites.",
+    "src/bioetl/application/composite/merger_post_join.py": "RF-003 (#13311/#13367): invoke post-join classification after conflicts; publish/finalize after write, discard via try/finally. Pure orchestration; no acquisition calls.",
+    "src/bioetl/composition/bootstrap/assembly/storage.py": "RF-003 (#13311/#13367): pack evidence-store version kwargs; pass pipeline_name for composite vs chembl_target manifests. No new acquisition sites.",
+    "src/bioetl/composition/bootstrap/assembly/target_classification_runtime.py": "RF-003 (#13311/#13367): resolve composite post-join classification session from chembl_target config; top-level load_pipeline_config. Reuses existing session builder; no new acquisition sites.",
+    "src/bioetl/composition/bootstrap/runtime/composite_merge_service_builder.py": "RF-003 (#13311/#13367): accept optional target_classification_session for MergeService; gold schema selection moved to factory. Wiring only; no acquisition calls.",
+    "src/bioetl/composition/factories/services/composite_support_services_factory.py": "RF-003 (#13311/#13367): Composition injects post-join classification session and selects CompositeTargetGoldSchemaV31 in enrich mode. No new acquisition sites.",
+    "src/bioetl/domain/contracts/__init__.py": "RF-003 (#13311): export CompositeTargetGoldSchemaV31. Pure schema surface; no acquisition calls.",
+    "src/bioetl/domain/contracts/gold/__init__.py": "RF-003 (#13311): export CompositeTargetGoldSchemaV31. Pure schema surface; no acquisition calls.",
+    "src/bioetl/domain/contracts/gold/composite.py": "RF-003 (#13311): re-export CompositeTargetGoldSchemaV31. Pure schema surface; no acquisition calls.",
+    "src/bioetl/domain/contracts/gold/composite_bioassay.py": "RF-003 (#13311): CompositeTargetGoldSchemaV31 additive classification columns for enrich Gold. Pure schema; no acquisition calls.",
+    "src/bioetl/infrastructure/adapters/iuphar/evidence_store.py": "RF-003 (#13311/#13367): pack version kwargs into versions mapping; pipeline_name on finalize manifest. Existing file/dir acquisitions retained; line anchors relocate only.",
+    "src/bioetl/infrastructure/storage/target_candidates.py": "RF-003 (#13311/#13367): pass versions mapping into evidence store construction. Existing delta/file acquisitions retained; line anchors relocate only."
+  },
+  "expression_updates": {},
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": [],
+  "segment_updates": {},
+  "reference_moves": [],
+  "line_updates": {},
+  "exclusion_moves": []
+}

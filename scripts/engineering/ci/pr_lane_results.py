@@ -1399,6 +1399,11 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         IUPHAR_COMPOSITE_FEATURES_RF003_TEST,
         IUPHAR_POST_JOIN_CLASSIFICATION_RF003_TEST,
     ),
+    "configs/quality/external_resource_inventory_pr13367_rf003_arch_review.json": (
+        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
+        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
+        IUPHAR_POST_JOIN_CLASSIFICATION_RF003_TEST,
+    ),
     "configs/quality/external_resource_inventory_pr13360_rf002_review.json": (
         EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
         EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
