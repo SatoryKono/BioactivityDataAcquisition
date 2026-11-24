@@ -447,7 +447,7 @@ def test_panel_types_are_allowlisted() -> None:
 
 
 def test_current_status_cards_fail_closed_no_value() -> None:
-    """Background severity cards must render missing data as UNKNOWN."""
+    """Missing data cannot masquerade as successful background severity."""
     for dashboard_path in get_dashboard_files():
         dashboard = load_dashboard(dashboard_path)
         for panel in get_dashboard_panels(dashboard):
@@ -459,9 +459,27 @@ def test_current_status_cards_fail_closed_no_value() -> None:
             assert no_value is not None, (
                 f"{ident} background verdict card must set fieldConfig.defaults.noValue"
             )
-            assert str(no_value).startswith("UNKNOWN"), (
-                f"{ident} verdict noValue must fail closed to UNKNOWN, got {no_value!r}"
-            )
+            if (
+                dashboard_path.name == "bioetl-control-plane-v1.json"
+                and panel.get("id") == 9422
+            ):
+                assert no_value == (
+                    "SELECT RUN if no Run ID is selected. "
+                    "Source unavailable if the request failed."
+                )
+                mappings = defaults["mappings"]
+                values = next(m["options"] for m in mappings if m["type"] == "value")
+                assert values["QUERY ERROR"] == {
+                    "text": "Source unavailable",
+                    "color": "red",
+                }
+                null = next(m["options"] for m in mappings if m["type"] == "special")
+                assert null["match"] == "null"
+                assert null["result"]["text"] == "UNKNOWN"
+            else:
+                assert str(no_value).startswith("UNKNOWN"), (
+                    f"{ident} verdict noValue must fail closed to UNKNOWN, got {no_value!r}"
+                )
 
 
 # --- 13. Current-status verdict cards carry interpretation guidance ---------
