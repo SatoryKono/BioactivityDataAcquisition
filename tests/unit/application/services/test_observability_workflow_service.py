@@ -202,6 +202,45 @@ async def test_observability_lookup_support_fail_closed_paths() -> None:
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("metadata_run_id", ["run-123", "other-run"])
+@pytest.mark.parametrize("by_run", [True, False])
+async def test_dossier_distinguishes_metadata_only_checkpoint_from_missing(
+    metadata_run_id: str, by_run: bool
+) -> None:
+    checkpoint_service = mock.AsyncMock()
+    checkpoint = CheckpointInfo(
+        pipeline_name="chembl_activity",
+        run_id=None,
+        metadata={"run_id": metadata_run_id},
+    )
+    checkpoint_service.get_checkpoint_for_run.return_value = (
+        checkpoint if by_run else None
+    )
+    checkpoint_service.get_checkpoint.return_value = None if by_run else checkpoint
+    audit_service = mock.AsyncMock()
+    audit_service.inspect_run.return_value = AuditInspectionResult(query={}, entries=())
+    manifest_service = mock.Mock()
+    manifest_service.show.return_value = _make_checkpoint_manifest_result()
+    service = ObservabilityWorkflowService(
+        audit_service=audit_service,
+        checkpoint_service=checkpoint_service,
+        run_manifest_service=manifest_service,
+    )
+
+    result = await service.inspect_run_dossier("run-123")
+
+    assert result.checkpoint is not None
+    assert result.checkpoint.metadata == {
+        "run_id": metadata_run_id,
+        "status": "missing_run_identity",
+    }
+    assert result.status["checkpoint_status"] == "missing_run_identity"
+    assert "checkpoint_missing_run_identity" in result.degraded_evidence
+    assert checkpoint.metadata == {"run_id": metadata_run_id}
+    assert checkpoint_service.get_checkpoint.await_count == (0 if by_run else 1)
+
+
+@pytest.mark.asyncio
 async def test_inspect_audit_run_returns_manifest_context() -> None:
     audit_result = AuditInspectionResult(query={"run_id": "abc"}, entries=())
     audit_service = mock.AsyncMock()
