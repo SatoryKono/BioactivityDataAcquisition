@@ -90,6 +90,20 @@ def _config(mode: str = "off", table_contract: str | None = None) -> PipelineYam
     )
 
 
+def test_unset_table_contract_survives_exclude_none_dump() -> None:
+    config = TargetClassificationYamlConfig()
+    assert "table_contract" not in config.model_dump()
+    assert "table_contract" not in config.model_dump(exclude_none=True)
+    assert "table_contract" not in config.model_dump(exclude_unset=True)
+    pinned = TargetClassificationYamlConfig(
+        mode="enrich",
+        snapshot_manifest="snapshot.json",
+        snapshot_manifest_sha256="a" * 64,
+        table_contract="3.1.0",
+    )
+    assert pinned.model_dump(exclude_none=True)["table_contract"] == "3.1.0"
+
+
 @pytest.mark.parametrize(
     "payload",
     [
@@ -262,6 +276,11 @@ def test_enrich_cannot_fall_back_to_an_unscoped_hash_policy() -> None:
     config = _config("enrich").model_copy(update={"content_hash_policy": None})
     with pytest.raises(ValueError, match="explicit V30/V31"):
         resolve_target_classification_profile(config)
+    selected = _config("enrich", table_contract="3.2.0").model_copy(
+        update={"content_hash_policy": None}
+    )
+    with pytest.raises(ValueError, match="explicit 3.0.0/3.1.0/3.2.0"):
+        resolve_target_classification_profile(selected)
 
 
 def test_switching_mode_does_not_silently_downgrade_a_v31_hash_binding() -> None:
