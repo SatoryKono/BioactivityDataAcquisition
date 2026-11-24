@@ -17,14 +17,21 @@ from bioetl.application.composite.conflict_resolver import ConflictResolverServi
 from bioetl.application.composite.helpers.merger_post_join_persist import (
     persist_and_build_result,
 )
+from bioetl.application.composite.helpers.target_classification_values import (
+    source_hashes,
+)
 from bioetl.application.composite.merger_post_join import (
     finalize_post_join_context,
+)
+from bioetl.application.composite.helpers.target_classification_bundle import (
+    feature_bundle,
 )
 from bioetl.application.composite.helpers.target_classification_features import (
     project_gold_classification_frame,
 )
 from bioetl.application.composite.helpers.target_classification_stage import (
     CompositeTargetClassification,
+    commit_joined_classification,
 )
 from bioetl.application.pipelines.chembl.target_protein_classification_summary import (
     agreed_chembl_release,
@@ -77,6 +84,7 @@ class _Classifier:
         projection["effective_source"] = "local" if local else None
         projection["decision_status"] = "resolved" if local else None
         projection["target_class_profile_sha256"] = self.profile_sha256
+        projection["local_status"] = "resolved" if local else None
         return TargetClassificationResult(input_row_id, projection)
 
 
@@ -103,6 +111,8 @@ class _Evidence:
 
 def _stage(
     mode: str = "enrich",
+    *,
+    table_contract: str = "3.1.0",
 ) -> tuple[CompositeTargetClassification, _Classifier, _Evidence]:
     classifier = _Classifier()
     evidence = _Evidence()
@@ -115,7 +125,11 @@ def _stage(
         classification_schema_version="3.1.0",
         matching_policy_version=MATCHING_POLICY_VERSION,
     )
-    return CompositeTargetClassification(session), classifier, evidence
+    return (
+        CompositeTargetClassification(session, table_contract=table_contract),
+        classifier,
+        evidence,
+    )
 
 
 def _resolver() -> ConflictResolverService:
@@ -459,3 +473,161 @@ def test_gold_projection_keeps_unknown_columns_fail_closed() -> None:
     assert "target_classification_owner" not in projected.columns
     assert projected["effective_class"][0] == "Enzyme"
     assert projected["other"][0] == "keep"
+
+
+@pytest.mark.parametrize("empty_ec", [[], "[]", '["  ", "unknown"]'])
+def test_ec_fallback_uses_seed_provenance_and_keeps_synonyms(empty_ec: object) -> None:
+    seed_hash, protein_hash = "a" * 64, "b" * 64
+    bundle = feature_bundle(
+        {
+            "target_id": "CHEMBL1",
+            "uniprot_accession": "P00734",
+            "uniprot.protein.protein_ec_numbers": empty_ec,
+            "chembl.target.target_ec_numbers": ["3.4.21.5"],
+            "chembl.target.target_protein_synonyms": "Protein alias",
+            "chembl.target.target_gene_synonyms": "Gene alias",
+        },
+        {
+            ("chembl_target", "CHEMBL1"): seed_hash,
+            ("uniprot_protein", "P00734"): protein_hash,
+        },
+    )
+    business = bundle["business"]
+    assert (
+        project_target_fields(business, None)["synonyms"] == "Protein alias|Gene alias"
+    )
+    assert project_target_fields(business, None)["ec"] == "3.4.21.5"
+    ec = next(
+        origin for origin in business["feature_origins"] if origin["feature_id"] == "ec"
+    )
+    assert ec["qualified_column"] == "chembl.target.target_ec_numbers"
+    assert ec["source_pipeline"] == "chembl_target"
+    assert ec["source_content_hash"] == seed_hash
+
+
+def test_hierarchy_origins_use_level_columns_and_all_relation_hashes() -> None:
+    pipeline = "chembl_target_protein_classification"
+    frame = pl.DataFrame(
+        {"target_id": ["CHEMBL1", "CHEMBL1"], "content_hash": ["a" * 64, "b" * 64]}
+    )
+    hashes = source_hashes({pipeline: frame})
+    assert hashes == source_hashes({pipeline: frame.reverse()})
+    assert hashes[(pipeline, "CHEMBL1")] not in ("a" * 64, "b" * 64)
+    prefix = "chembl.target_protein_classification.target_protein_class_"
+    columns = {prefix + "id_L2": "21", prefix + "desc_L2": "Class label"}
+    business = feature_bundle({"target_id": "CHEMBL1", **columns}, hashes)["business"]
+    hierarchy = [
+        origin
+        for origin in business["feature_origins"]
+        if origin["feature_id"] == "protein_hierarchy"
+    ]
+    assert {origin["qualified_column"] for origin in hierarchy} == set(columns)
+    assert {origin["source_content_hash"] for origin in hierarchy} == {
+        hashes[(pipeline, "CHEMBL1")]
+    }
+
+
+def test_enrich_v32_seals_detail_values_and_nulls() -> None:
+    stage, _classifier, _evidence = _stage(table_contract="3.2.0")
+    result = stage.apply(_joined_frame(), run_id="run-v32", started_at=_STARTED)
+    coalesced = result.with_columns(
+        pl.lit("seed-status").alias("local_status"),
+        pl.lit('["seed-rule"]').alias("local_rule_ids"),
+    )
+    sealed = stage.seal_decision(coalesced).row(0, named=True)
+    assert sealed["local_status"] == "resolved"
+    assert sealed["local_rule_ids"] is None
+
+
+@pytest.mark.asyncio
+async def test_evidence_publication_failure_keeps_failed_and_pending_rows() -> None:
+    stage, _classifier, evidence = _stage()
+    frame = pl.DataFrame({"target_id": ["CHEMBL1", "CHEMBL2", "CHEMBL3"]})
+    stage.apply(frame, run_id="partial", started_at=_STARTED)
+    original = evidence.publish_result
+
+    def fail_second(result: TargetClassificationResult, **kwargs: str):
+        if result.input_row_id == "composite.target:CHEMBL2":
+            raise OSError("evidence write error")
+        return original(result, **kwargs)
+
+    evidence.publish_result = fail_second
+    write = AsyncMock()
+    with pytest.raises(OSError, match="evidence write error"):
+        await commit_joined_classification(stage, "partial", write)
+    evidence.publish_result = original
+    stage.commit("partial")
+    write.assert_awaited_once()
+    assert [event[3] for event in evidence.events if event[0] == "publish"] == [
+        "composite.target:CHEMBL1",
+        "composite.target:CHEMBL2",
+        "composite.target:CHEMBL3",
+    ]
+
+
+def test_finalization_failure_discards_detached_evidence() -> None:
+    stage, _classifier, evidence = _stage()
+    host = _host(stage)
+    host._apply_field_mappings.side_effect = RuntimeError("finalization failed")
+    with pytest.raises(RuntimeError, match="finalization failed"):
+        finalize_post_join_context(
+            host,
+            merged_df=_joined_frame(),
+            enrichers=(),
+            enrichment_results={},
+            effective_seed_pipeline="chembl_target",
+            run_id="pre-write",
+            metadata_timestamp=_STARTED,
+            sources_used=[],
+            dependency_results={},
+            enricher_dfs={},
+        )
+    stage.commit("pre-write")
+    assert [event for event in evidence.events if event[0] == "publish"] == []
+
+
+def test_pinned_replay_classification_uses_supplied_settings(
+    monkeypatch: pytest.MonkeyPatch, tmp_path
+) -> None:
+    from bioetl.application.services.target_runtime.scope import (
+        bind_target_classification_dependency,
+        reset_target_classification_dependency,
+    )
+    from bioetl.composition.bootstrap.assembly import (
+        target_classification_runtime as runtime,
+    )
+    from bioetl.infrastructure.config.settings_api import Settings
+
+    stage, _classifier, _evidence = _stage()
+    settings = Settings(data_dir=tmp_path / "replay")
+    yaml_config = SimpleNamespace(
+        target_classification=SimpleNamespace(
+            mode="enrich", to_domain=lambda: SimpleNamespace(contract_version="3.2.0")
+        )
+    )
+    monkeypatch.setattr(runtime, "hydrate_target_runtime_config", lambda _: yaml_config)
+    monkeypatch.setattr(
+        runtime,
+        "resolve_target_classification_profile",
+        lambda _: SimpleNamespace(resolved_yaml_config=yaml_config),
+    )
+    monkeypatch.setattr(
+        runtime,
+        "get_settings",
+        MagicMock(side_effect=AssertionError("global settings")),
+    )
+    session = MagicMock(return_value=stage._session)
+    monkeypatch.setattr(runtime, "build_target_classification_session", session)
+    token = bind_target_classification_dependency(
+        {"target_config": {"pipeline_name": "chembl_target"}}
+    )
+    try:
+        assert (
+            runtime.build_composite_target_classification_stage(
+                SimpleNamespace(name="composite_target"), settings=settings
+            )
+            is not None
+        )
+    finally:
+        reset_target_classification_dependency(token)
+    session.assert_called_once_with(yaml_config, settings)

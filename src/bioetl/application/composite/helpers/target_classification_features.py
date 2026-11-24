@@ -24,6 +24,9 @@ from bioetl.domain.composite.enriched_target_features import (
     TARGET_CLASSIFICATION_FIELDS,
     composite_classification_row_id,
 )
+from bioetl.domain.config.target_classification import (
+    TARGET_CLASSIFICATION_DETAIL_FIELDS,
+)
 from bioetl.domain.types import JsonDict
 
 HASH_ANCHOR: Final = "1970-01-01T00:00:00+00:00"
@@ -33,7 +36,6 @@ METADATA_FIELDS: Final = (
     "target_classification_absent_features",
 )
 FRAME_FIELDS: Final = (*TARGET_CLASSIFICATION_FIELDS, *METADATA_FIELDS)
-HASH_FIELDS: Final = ("target_id", *FRAME_FIELDS)
 
 
 def schema_column_names(schema: object) -> frozenset[str] | None:
@@ -55,7 +57,7 @@ def project_gold_classification_frame(df: pl.DataFrame, schema: object) -> pl.Da
         return df
     hidden = [
         column
-        for column in FRAME_FIELDS
+        for column in (*FRAME_FIELDS, *TARGET_CLASSIFICATION_DETAIL_FIELDS)
         if column not in names and column in df.columns
     ]
     if not hidden:
@@ -68,6 +70,7 @@ def project_row(
     *,
     source_hashes_index: Mapping[tuple[str, str], str],
     session: TargetClassificationRunState,
+    classification_fields: tuple[str, ...],
     occurrence: str,
     started_at: str,
     seen: set[str],
@@ -77,10 +80,20 @@ def project_row(
     business = cast(JsonDict, features["business"])
     absent = cast(tuple[str, ...], features["absent"])
     output = empty_output(str(features["completeness"]), absent)
+    output.update(dict.fromkeys(classification_fields))
     target_id = text_value(business.get("target_id"))
     if target_id is None:
         return output
-    _classify(session, business, output, occurrence, started_at, seen, target_id)
+    _classify(
+        session,
+        business,
+        output,
+        occurrence,
+        started_at,
+        seen,
+        target_id,
+        classification_fields,
+    )
     return output
 
 
@@ -103,6 +116,7 @@ def _classify(
     started_at: str,
     seen: set[str],
     target_id: str,
+    classification_fields: tuple[str, ...],
 ) -> None:
     row_id = composite_classification_row_id(target_id)
     if row_id in seen:
@@ -115,16 +129,13 @@ def _classify(
         business_data=business,
         run_started_at=started_at,
     )
-    if session.mode != "enrich":
-        return
-    for field_name in TARGET_CLASSIFICATION_FIELDS:
+    for field_name in classification_fields:
         output[field_name] = text_value(result.projection.get(field_name))
 
 
 __all__ = [
     "FRAME_FIELDS",
     "HASH_ANCHOR",
-    "HASH_FIELDS",
     "METADATA_FIELDS",
     "TARGET_ID_COLUMNS",
     "empty_output",

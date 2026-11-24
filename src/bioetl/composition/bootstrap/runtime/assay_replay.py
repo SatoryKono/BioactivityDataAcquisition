@@ -136,15 +136,17 @@ async def replay_assay(
             settings=settings,
         )
         observation_token = bind_run_observations()
-        classification_token = _bind_replay_classification(
-            envelope, objects, verified_json
-        )
+        classification_token = None
         try:
+            classification_token = _bind_replay_classification(
+                envelope, objects, verified_json
+            )
             merger = build_composite_merge_service(
                 config=config,
                 storage=cast(CompositeMergeStorageProtocol, storage),
                 resolve_gold_schema=resolve_composite_gold_schema,
                 delta_reader=reader,
+                classification_settings=settings,
                 field_group_registry=restore_field_groups(verified_json(field_key))
                 if field_key in objects
                 else None,

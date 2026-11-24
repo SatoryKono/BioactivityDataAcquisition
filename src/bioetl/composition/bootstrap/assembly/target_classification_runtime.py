@@ -118,6 +118,8 @@ def select_target_transformer(
 
 def build_composite_target_classification_stage(
     config: object,
+    *,
+    settings: Settings | None = None,
 ) -> CompositeTargetClassification | None:
     """Wire post-join classification only for an enabled composite target."""
     if getattr(config, "name", None) != "composite_target":
@@ -136,10 +138,15 @@ def build_composite_target_classification_stage(
         )
     if yaml_config.target_classification.mode == "off":
         return None
-    session = build_target_classification_session(yaml_config, get_settings())
+    session = build_target_classification_session(
+        yaml_config, settings or get_settings()
+    )
     if session is None:
         return None
-    return CompositeTargetClassification(session)
+    return CompositeTargetClassification(
+        session,
+        table_contract=yaml_config.target_classification.to_domain().contract_version,
+    )
 
 
 def configure_target_transformer(

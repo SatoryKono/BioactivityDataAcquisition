@@ -85,6 +85,9 @@ schema:
     - protein_classification_ids
     provider_order:
     - chembl
+  # Post-join writes retain owner, completeness and absent-feature metadata
+  # as composite Silver extras. The generic projections keep their published
+  # columns; the strict composite Gold contract excludes these three fields.
   - name: target_classification_outcome
     fields:
     - iuphar_target_id

@@ -166,38 +166,45 @@ def finalize_post_join_context(
         effective_seed_pipeline=effective_seed_pipeline,
     )
     stage = _bound_classification_stage(host)
-    merged_df = apply_joined_classification(
-        stage,
-        merged_df,
-        run_id=run_id,
-        started_at=classification_started_at or metadata_timestamp,
-        dependency_frames=dependency_dfs,
-    )
-    merged_df = finalize_merged_dataframe(
-        host,
-        merged_df=merged_df,
-        enrichers=enrichers,
-        enrichment_results=enrichment_results,
-        effective_seed_pipeline=effective_seed_pipeline,
-        run_id=run_id,
-        metadata_timestamp=metadata_timestamp,
-        sources_used=sources_used,
-        dependency_results=dependency_results,
-        enricher_dfs=enricher_dfs,
-    )
-    if stage is not None:
-        merged_df = stage.seal_decision(merged_df)
-        merged_df = stage.refresh_content_hash(merged_df)
-    records_merged = len(merged_df)
-    records_enriched = host._count_enriched_records(
-        merged_df,
-        enrichers,
-        effective_seed_pipeline,
-    )
-    return MergePostJoinContext(
-        merged_df=merged_df,
-        records_merged=records_merged,
-        records_enriched=records_enriched,
-        cv_stats=cv_stats,
-        quarantine_payloads=quarantine_payloads,
-    )
+    ready = False
+    try:
+        merged_df = apply_joined_classification(
+            stage,
+            merged_df,
+            run_id=run_id,
+            started_at=classification_started_at or metadata_timestamp,
+            dependency_frames=dependency_dfs,
+        )
+        merged_df = finalize_merged_dataframe(
+            host,
+            merged_df=merged_df,
+            enrichers=enrichers,
+            enrichment_results=enrichment_results,
+            effective_seed_pipeline=effective_seed_pipeline,
+            run_id=run_id,
+            metadata_timestamp=metadata_timestamp,
+            sources_used=sources_used,
+            dependency_results=dependency_results,
+            enricher_dfs=enricher_dfs,
+        )
+        if stage is not None:
+            merged_df = stage.seal_decision(merged_df)
+            merged_df = stage.refresh_content_hash(merged_df)
+        records_merged = len(merged_df)
+        records_enriched = host._count_enriched_records(
+            merged_df,
+            enrichers,
+            effective_seed_pipeline,
+        )
+        context = MergePostJoinContext(
+            merged_df=merged_df,
+            records_merged=records_merged,
+            records_enriched=records_enriched,
+            cv_stats=cv_stats,
+            quarantine_payloads=quarantine_payloads,
+        )
+        ready = True
+        return context
+    finally:
+        if not ready and stage is not None:
+            stage.abandon(run_id)

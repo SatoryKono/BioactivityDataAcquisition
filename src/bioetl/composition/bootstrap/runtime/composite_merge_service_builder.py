@@ -29,6 +29,7 @@ if TYPE_CHECKING:
     from bioetl.domain.composite import CompositeConfig
     from bioetl.domain.composite.field_groups import FieldGroupRegistry
     from bioetl.domain.ports import ClockPort, DeltaReaderPort, LoggerPort
+    from bioetl.infrastructure.config.settings_api import Settings
 
 from bioetl.application.ports.storage import (
     CompositeMergeStorageProtocol as _CompositeMergeStorage,
@@ -77,6 +78,7 @@ def build_composite_merge_service(
     system_columns_to_drop: frozenset[str],
     normalization_policies: Mapping[str, JoinKeyNormalizationPolicy],
     clock: ClockPort | None = None,
+    classification_settings: Settings | None = None,
     execution_hook: Callable[
         [
             MergeExecutionRequest,
@@ -116,7 +118,9 @@ def build_composite_merge_service(
         ),
     )
     service.bind_post_join_target_classification(
-        build_composite_target_classification_stage(config)
+        build_composite_target_classification_stage(
+            config, settings=classification_settings
+        )
     )
     return service
 

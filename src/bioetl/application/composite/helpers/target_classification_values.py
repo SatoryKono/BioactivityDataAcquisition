@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 from collections.abc import Mapping, Sequence
@@ -53,6 +54,27 @@ def first_present(
     return None, None
 
 
+def first_ec(
+    row: Mapping[str, object], columns: Sequence[str]
+) -> tuple[str | None, object]:
+    """Skip empty token sequences and preserve the selected source value."""
+    for column in columns:
+        value = row.get(column)
+        if _has_ec_tokens(value):
+            return column, value
+    return None, None
+
+
+def _has_ec_tokens(value: object) -> bool:
+    if isinstance(value, (list, tuple)):
+        return any(_has_ec_tokens(item) for item in value)
+    if not isinstance(value, str):
+        return False
+    if value.lstrip().startswith("["):
+        return _has_ec_tokens(_json_items(value))
+    return any(text_value(item) not in (None, "unknown") for item in _json_items(value))
+
+
 def first_text(
     row: Mapping[str, object], columns: Sequence[str]
 ) -> tuple[str | None, str | None]:
@@ -83,13 +105,18 @@ def keyword_status(value: object, keyword_ids: tuple[str, ...]) -> str:
     return "uncontrolled_ignored"
 
 
-def hierarchy_levels(row: Mapping[str, object]) -> list[dict[str, object]]:
-    """Read present protein-classification levels without equating M columns."""
-    return [
-        entry
-        for level in _HIERARCHY_LEVELS
-        if (entry := _hierarchy_level(row, level)) is not None
-    ]
+def hierarchy_levels(
+    row: Mapping[str, object],
+) -> tuple[list[dict[str, object]], tuple[str, ...]]:
+    """Read present levels and the exact columns used to build them."""
+    levels: list[dict[str, object]] = []
+    columns: list[str] = []
+    for level in _HIERARCHY_LEVELS:
+        entry, level_columns = _hierarchy_level(row, level)
+        if level_columns:
+            levels.append(entry)
+            columns.extend(level_columns)
+    return levels, tuple(columns)
 
 
 def source_hashes(
@@ -104,9 +131,11 @@ def source_hashes(
     return index
 
 
-def _hierarchy_level(row: Mapping[str, object], level: int) -> dict[str, object] | None:
+def _hierarchy_level(
+    row: Mapping[str, object], level: int
+) -> tuple[dict[str, object], list[str]]:
     entry: dict[str, object] = {"level": level}
-    found = False
+    columns: list[str] = []
     for part in _HIERARCHY_PARTS:
         qualified = (
             f"chembl.target_protein_classification.target_protein_class_{part}_L{level}"
@@ -118,11 +147,9 @@ def _hierarchy_level(row: Mapping[str, object], level: int) -> dict[str, object]
             continue
         entry[part] = value
         entry["qualified_column"] = column or qualified
-        found = True
-    if not found:
-        return None
+        columns.append(column or qualified)
     entry["equivalent_to_historical_m_column"] = False
-    return entry
+    return entry, columns
 
 
 def _index_frame(
@@ -140,11 +167,19 @@ def _index_frame(
     )
     if key_field is None:
         return
+    digests_by_key: dict[str, set[str]] = {}
     for row in frame.iter_rows(named=True):
         key = text_value(row.get(key_field))
         digest = sha256_text(row.get("content_hash"))
         if key is not None and digest is not None:
-            index[(pipeline, key)] = digest
+            digests_by_key.setdefault(key, set()).add(digest)
+    for key, digests in digests_by_key.items():
+        ordered = sorted(digests)
+        index[(pipeline, key)] = (
+            ordered[0]
+            if len(ordered) == 1
+            else hashlib.sha256("".join(ordered).encode("ascii")).hexdigest()
+        )
 
 
 def _json_items(value: object) -> tuple[object, ...]:

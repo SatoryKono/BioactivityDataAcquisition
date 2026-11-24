@@ -8,9 +8,7 @@ from datetime import datetime
 import polars as pl
 
 from bioetl.application.composite.helpers.target_classification_features import (
-    FRAME_FIELDS,
     HASH_ANCHOR,
-    HASH_FIELDS,
     METADATA_FIELDS,
     TARGET_ID_COLUMNS,
     project_row,
@@ -27,14 +25,28 @@ from bioetl.domain.composite.enriched_target_features import (
     COMPOSITE_CLASSIFICATION_OWNER,
     composite_classification_run_id,
 )
+from bioetl.domain.config.target_classification import (
+    TARGET_CLASSIFICATION_DETAIL_FIELDS,
+    TARGET_CLASSIFICATION_FIELDS,
+)
 from bioetl.domain.types import JsonDict
 
 
 class CompositeTargetClassification:
     """Apply one pure classification pass and retain its evidence until commit."""
 
-    def __init__(self, session: TargetClassificationRunState) -> None:
+    def __init__(
+        self, session: TargetClassificationRunState, *, table_contract: str = "3.1.0"
+    ) -> None:
         self._session = session
+        fields = TARGET_CLASSIFICATION_FIELDS if session.mode == "enrich" else ()
+        if fields and table_contract == "3.2.0":
+            fields = (*fields, *TARGET_CLASSIFICATION_DETAIL_FIELDS)
+        self._classification_fields = fields
+        self._write_fields = (*fields, *METADATA_FIELDS)
+        self._hash_fields = tuple(
+            dict.fromkeys((*TARGET_CLASSIFICATION_FIELDS, *self._write_fields))
+        )
         self._decisions: dict[str, dict[str, str | None]] = {}
 
     def apply(
@@ -55,6 +67,7 @@ class CompositeTargetClassification:
             occurrence=composite_classification_run_id(run_id),
             started_at=_started_at(started_at),
             hashes=source_hashes(dependency_frames),
+            classification_fields=self._classification_fields,
         )
         self._decisions = decisions
         return _write_columns(df, updates)
@@ -63,7 +76,9 @@ class CompositeTargetClassification:
         """Rewrite the decision after seed coalesce, including explicit nulls."""
         if not _can_seal(df, self._decisions):
             return df
-        return _write_columns(df, _sealed_columns(df, self._decisions, _fields(self)))
+        return _write_columns(
+            df, _sealed_columns(df, self._decisions, self._write_fields)
+        )
 
     def refresh_content_hash(self, df: pl.DataFrame) -> pl.DataFrame:
         """Bind the surviving classification fields into ``content_hash``."""
@@ -72,7 +87,10 @@ class CompositeTargetClassification:
         return df.with_columns(
             pl.Series(
                 name="content_hash",
-                values=[_row_hash(row) for row in df.iter_rows(named=True)],
+                values=[
+                    _row_hash(row, self._hash_fields)
+                    for row in df.iter_rows(named=True)
+                ],
                 dtype=pl.Utf8,
             )
         )
@@ -94,22 +112,15 @@ def apply_joined_classification(
     started_at: datetime | None,
     dependency_frames: Mapping[str, pl.DataFrame] | None,
 ) -> pl.DataFrame:
-    """Classify, and drop detached evidence when classification itself fails."""
+    """Classify when a post-join stage is bound."""
     if stage is None:
         return df
-    applied = False
-    try:
-        result = stage.apply(
-            df,
-            run_id=run_id,
-            started_at=started_at,
-            dependency_frames=dependency_frames,
-        )
-        applied = True
-        return result
-    finally:
-        if not applied:
-            stage.abandon(run_id)
+    return stage.apply(
+        df,
+        run_id=run_id,
+        started_at=started_at,
+        dependency_frames=dependency_frames,
+    )
 
 
 async def commit_joined_classification(
@@ -118,15 +129,15 @@ async def commit_joined_classification(
     write: Callable[[], Awaitable[None]],
 ) -> None:
     """Commit evidence only after ``write`` returns."""
-    committed = False
+    written = False
     try:
         await write()
-        if stage is not None:
-            stage.commit(run_id)
-        committed = True
+        written = True
     finally:
-        if not committed and stage is not None:
+        if not written and stage is not None:
             stage.abandon(run_id)
+    if stage is not None:
+        stage.commit(run_id)
 
 
 def _has_targets(df: pl.DataFrame) -> bool:
@@ -139,12 +150,6 @@ def _can_seal(df: pl.DataFrame, decisions: Mapping[str, object]) -> bool:
     if df.is_empty() or not decisions:
         return False
     return "target_id" in df.columns
-
-
-def _fields(stage: CompositeTargetClassification) -> tuple[str, ...]:
-    if stage._session.mode == "enrich":
-        return FRAME_FIELDS
-    return METADATA_FIELDS
 
 
 def _started_at(value: datetime | None) -> str:
@@ -160,8 +165,9 @@ def _collect(
     occurrence: str,
     started_at: str,
     hashes: Mapping[tuple[str, str], str],
+    classification_fields: tuple[str, ...],
 ) -> tuple[dict[str, list[str | None]], dict[str, dict[str, str | None]]]:
-    write_fields = FRAME_FIELDS if session.mode == "enrich" else METADATA_FIELDS
+    write_fields = (*classification_fields, *METADATA_FIELDS)
     updates: dict[str, list[str | None]] = {name: [] for name in write_fields}
     decisions: dict[str, dict[str, str | None]] = {}
     seen: set[str] = set()
@@ -170,6 +176,7 @@ def _collect(
             row,
             source_hashes_index=hashes,
             session=session,
+            classification_fields=classification_fields,
             occurrence=occurrence,
             started_at=started_at,
             seen=seen,
@@ -209,11 +216,11 @@ def _write_columns(
     return result
 
 
-def _row_hash(row: Mapping[str, object]) -> str | None:
+def _row_hash(row: Mapping[str, object], fields: tuple[str, ...]) -> str | None:
     if row.get("target_classification_owner") != COMPOSITE_CLASSIFICATION_OWNER:
         return text_value(row.get("content_hash"))
     payload: JsonDict = {"prior_content_hash": text_value(row.get("content_hash"))}
-    for field_name in HASH_FIELDS:
+    for field_name in ("target_id", *fields):
         if field_name in row:
             payload[field_name] = row.get(field_name)
     return str(generate_content_hash(payload, "composite_target"))

@@ -85,9 +85,10 @@ class TargetClassificationRunState:
         """Publish every detached row for ``run_id``, then complete the run."""
         pending = sorted(key for key in self._detached if key[0] == run_id)
         for key in pending:
-            result = self._detached.pop(key)
+            result = self._detached[key]
             self.evidence.publish_result(result, run_id=key[0], batch_id=key[1])
             self._published.setdefault(key[0], set()).add(result.input_row_id)
+            del self._detached[key]
         return self.finalize_run_id(run_id)
 
     def abandon_detached(self, run_id: str) -> None:

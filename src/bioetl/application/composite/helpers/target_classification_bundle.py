@@ -7,11 +7,13 @@ from typing import Final
 
 from bioetl.application.composite.helpers.target_classification_values import (
     controlled_keyword_ids,
+    first_ec,
     first_present,
     first_text,
     hierarchy_levels,
     keyword_status,
     put_value,
+    sha256_text,
 )
 from bioetl.application.composite.target_protein_classification_summary import (
     agreed_chembl_release,
@@ -29,9 +31,8 @@ _RELEASE_COLUMNS: Final = (
 _EC_COLUMNS: Final = (
     "uniprot.protein.protein_ec_numbers",
     "protein_ec_numbers",
-    "chembl.target.target_ec_numbers",
-    "target_ec_numbers",
 )
+_CHEMBL_EC_COLUMNS: Final = ("chembl.target.target_ec_numbers", "target_ec_numbers")
 _KEYWORD_COLUMNS: Final = ("uniprot.protein.keywords", "keywords")
 _ACCESSION_COLUMNS: Final = (
     "uniprot.idmapping.uniprot_accession",
@@ -48,9 +49,6 @@ _ACCESSION_LIST_COLUMNS: Final = (
     "component_accessions",
 )
 _GENE_COLUMNS: Final = ("chembl.target.gene_symbol", "gene_symbol")
-_HIERARCHY_COLUMN: Final = (
-    "chembl.target_protein_classification.target_protein_class_name_L1"
-)
 
 
 def feature_bundle(
@@ -60,10 +58,10 @@ def feature_bundle(
     """Build the whitelist, its origins, and the completeness flag."""
     _target_column, target_id = first_text(row, TARGET_ID_COLUMNS)
     accession_column, accession = first_text(row, _ACCESSION_COLUMNS)
-    ec_column, ec_value = first_present(row, _EC_COLUMNS)
+    ec_column, ec_value = first_ec(row, (*_EC_COLUMNS, *_CHEMBL_EC_COLUMNS))
     keyword_column, keyword_value = first_present(row, _KEYWORD_COLUMNS)
     keyword_ids = controlled_keyword_ids(keyword_value)
-    hierarchy = hierarchy_levels(row)
+    hierarchy, hierarchy_columns = hierarchy_levels(row)
     release, release_status = agreed_chembl_release(
         row.get(column) for column in _RELEASE_COLUMNS if column in row
     )
@@ -74,11 +72,10 @@ def feature_bundle(
         accession=accession,
         accession_column=accession_column,
         ec_column=ec_column,
-        ec_value=ec_value,
         keyword_column=keyword_column,
         keyword_value=keyword_value,
         keyword_ids=keyword_ids,
-        hierarchy=hierarchy,
+        hierarchy_columns=hierarchy_columns,
     )
     absent = _absent(origins)
     business = _business(
@@ -114,36 +111,43 @@ def _origins(
     accession: str | None,
     accession_column: str | None,
     ec_column: str | None,
-    ec_value: object,
     keyword_column: str | None,
     keyword_value: object,
     keyword_ids: tuple[str, ...],
-    hierarchy: list[dict[str, object]],
+    hierarchy_columns: tuple[str, ...],
 ) -> tuple[dict[str, object], ...]:
     taxon_column, taxon_value = first_present(row, _TAXON_COLUMNS)
+    seed_hash = hashes.get(("chembl_target", target_id or "")) or sha256_text(
+        row.get("chembl.target.content_hash")
+    )
+    protein_hash = hashes.get(("uniprot_protein", accession or ""))
+    chembl_ec = ec_column in _CHEMBL_EC_COLUMNS
     return (
         _origin(
             "ec",
-            present=ec_value is not None,
+            present=ec_column is not None,
             column=ec_column,
-            pipeline="uniprot_protein",
-            source_hash=hashes.get(("uniprot_protein", accession or "")),
+            pipeline="chembl_target" if chembl_ec else "uniprot_protein",
+            source_hash=seed_hash if chembl_ec else protein_hash,
         ),
-        _origin(
-            "protein_hierarchy",
-            present=bool(hierarchy),
-            column=_HIERARCHY_COLUMN if hierarchy else None,
-            pipeline="chembl_target_protein_classification",
-            source_hash=hashes.get(
-                ("chembl_target_protein_classification", target_id or "")
-            ),
+        *(
+            _origin(
+                "protein_hierarchy",
+                present=column is not None,
+                column=column,
+                pipeline="chembl_target_protein_classification",
+                source_hash=hashes.get(
+                    ("chembl_target_protein_classification", target_id or "")
+                ),
+            )
+            for column in hierarchy_columns or (None,)
         ),
         _origin(
             "keywords",
             present=bool(keyword_ids),
             column=keyword_column,
             pipeline="uniprot_protein",
-            source_hash=hashes.get(("uniprot_protein", accession or "")),
+            source_hash=protein_hash,
             status=keyword_status(keyword_value, keyword_ids),
         ),
         _origin(
@@ -158,7 +162,7 @@ def _origins(
             present=taxon_value is not None,
             column=taxon_column,
             pipeline="chembl_target",
-            source_hash=hashes.get(("chembl_target", target_id or "")),
+            source_hash=seed_hash,
         ),
     )
 
@@ -188,6 +192,10 @@ def _business(
     )
     put_value(business, "uniprot_accession", accession)
     put_value(business, "gene_symbol", first_text(row, _GENE_COLUMNS)[1])
+    for name in ("target_protein_synonyms", "target_gene_synonyms"):
+        put_value(
+            business, name, first_present(row, (f"chembl.target.{name}", name))[1]
+        )
     if ec_value is not None:
         business["target_ec_numbers"] = ec_value
     if keyword_ids:
@@ -222,6 +230,6 @@ def _origin(
     }
     if column is not None and present:
         origin["qualified_column"] = column
-    if source_hash is not None:
+    if present and source_hash is not None:
         origin["source_content_hash"] = source_hash
     return origin
