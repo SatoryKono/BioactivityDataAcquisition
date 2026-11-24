@@ -58,6 +58,47 @@ def _successful_publication_enricher_inputs(config, tables, record):
     return results
 
 
+def _activate_target_classifier(root, monkeypatch):
+    from bioetl.composition.bootstrap.assembly import target_classification_runtime
+    from bioetl.composition.bootstrap.runtime import assay_replay_capture
+    from tests.helpers.iuphar_snapshot import synthetic_snapshot_bundle
+
+    snapshot, bundle = synthetic_snapshot_bundle(root)
+    load = target_classification_runtime.load_pipeline_config
+
+    def load_with_classifier(name):
+        config = load(name)
+        payload = config.model_dump(exclude_defaults=True)
+        payload["target_classification"] = {
+            "mode": "shadow",
+            "snapshot_manifest": str(snapshot / "profile.json"),
+            "snapshot_manifest_sha256": bundle.profile_sha256,
+        }
+        return type(config).model_validate(payload)
+
+    for module in (target_classification_runtime, assay_replay_capture):
+        monkeypatch.setattr(module, "load_pipeline_config", load_with_classifier)
+
+
+async def _assert_mapping_after_failed_replays(
+    root, digest, tmp_path, monkeypatch, default_mapping
+):
+    import asyncio
+    import bioetl.composition.bootstrap.runtime.assay_replay as replay_module
+    from bioetl.domain.mapping import protein_class_target_type as mapping
+
+    assert mapping.current_protein_class_target_type_mapping() is default_mapping
+    for failure in (ValueError, asyncio.CancelledError):
+        monkeypatch.setattr(
+            replay_module,
+            "verify_replay_outputs",
+            AsyncMock(side_effect=failure("replay verification failed")),
+        )
+        with pytest.raises(failure, match="replay verification failed"):
+            await replay_module.replay_assay(root, digest, tmp_path / failure.__name__)
+        assert mapping.current_protein_class_target_type_mapping() is default_mapping
+
+
 @pytest.mark.parametrize("family", ["activity", "molecule", "publication", "target"])
 @pytest.mark.parametrize(
     "relative_capture,relative_replay",
@@ -88,6 +129,10 @@ async def test_other_composite_families_replay_physical_outputs(
     from bioetl.infrastructure.storage.composite_replay_bundle import digest_bytes
 
     config = load_composite_config(family)
+    classifier_root = tmp_path / "original-classifier"
+    classify_target = family == "target" and not (relative_capture or relative_replay)
+    if classify_target:
+        _activate_target_classifier(classifier_root, monkeypatch)
     monkeypatch.setattr(
         httpx.AsyncClient,
         "request",
@@ -202,6 +247,7 @@ async def test_other_composite_families_replay_physical_outputs(
         storage=storage,
         resolve_gold_schema=resolve_composite_gold_schema,
         delta_reader=reader,
+        classification_settings=settings,
         field_group_registry=registry,
         cross_validator=EnrichmentCrossValidator(
             config=config.cross_validation, logger=logger
@@ -231,6 +277,10 @@ async def test_other_composite_families_replay_physical_outputs(
         await storage.aclose()
     root = settings.report_root / "pipeline" / config.name / run_id / "replay"
     digest = digest_bytes((root / "parent.json").read_bytes())
+    if classify_target:
+        assert (root / "target-classifier" / "profile.json").is_file()
+        classifier_root.rename(tmp_path / "unavailable-at-original-path")
+        root = root.rename(tmp_path / "relocated-replay")
     assert {call.args[0] for call in live.read_table.await_args_list} == set(tables)
     tables.clear()
     live.read_table.side_effect = AssertionError("Live input during replay")
@@ -248,21 +298,9 @@ async def test_other_composite_families_replay_physical_outputs(
     assert receipt["silver_equal"] is True and receipt["gold_equal"] is True
     assert receipt["records"] == 1
     if family == "target":
-        import asyncio
-        import bioetl.composition.bootstrap.runtime.assay_replay as replay_module
-
-        assert mapping.current_protein_class_target_type_mapping() is default_mapping
-        for failure in (ValueError, asyncio.CancelledError):
-            monkeypatch.setattr(
-                replay_module,
-                "verify_replay_outputs",
-                AsyncMock(side_effect=failure("replay verification failed")),
-            )
-            with pytest.raises(failure, match="replay verification failed"):
-                await replay_assay(root, digest, tmp_path / failure.__name__)
-            assert (
-                mapping.current_protein_class_target_type_mapping() is default_mapping
-            )
+        await _assert_mapping_after_failed_replays(
+            root, digest, tmp_path, monkeypatch, default_mapping
+        )
 
 
 async def test_assay_merge_replays_nullable_foreign_keys_without_live_reads(tmp_path):

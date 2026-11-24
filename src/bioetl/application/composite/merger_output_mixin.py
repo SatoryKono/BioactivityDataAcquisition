@@ -5,6 +5,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Protocol, cast
 
+from bioetl.application.composite.helpers.target_classification_features import (
+    project_gold_classification_frame,
+)
 from bioetl.application.services.run_reports.observations import observe_gold_write
 from bioetl.domain.exceptions import DataQualityError
 from bioetl.domain.exceptions.gold_write import GoldWriteFailure
@@ -115,6 +118,7 @@ class MergeOutputWriterMixin:
                 df = df.drop(trash_cols)
 
         df = self._coerce_null_columns(df)
+        df = project_gold_classification_frame(df, host._gold_schema)
         table_name = self._path_to_table_name(host._config.output_gold_path)
         if host._gold_schema is None:
             raise DataQualityError(
