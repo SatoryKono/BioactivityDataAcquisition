@@ -39,6 +39,12 @@ def build_checkpoint_compatibility_section(
             replay_context=replay_context,
             missing_anchor="checkpoint",
         )
+    if not checkpoint.run_id:
+        return _checkpoint_compatibility_missing(
+            taxonomy="missing_checkpoint_run_identity",
+            replay_context=replay_context,
+            missing_anchor="run_id",
+        )
     if _checkpoint_payload_is_corrupt(checkpoint):
         replay_context = _with_compatibility_verdict(
             replay_context,
@@ -140,7 +146,7 @@ def _checkpoint_payload_is_corrupt(checkpoint: CheckpointInfo) -> bool:
 def _checkpoint_anchors(checkpoint: CheckpointInfo) -> dict[str, object]:
     metadata = checkpoint.metadata
     return {
-        "run_id": checkpoint.run_id or metadata.get("run_id"),
+        "run_id": checkpoint.run_id,
         "manifest_id": metadata.get("manifest_id"),
         "execution_fingerprint": metadata.get("execution_fingerprint"),
         "effective_config_hash": metadata.get("effective_config_hash"),
