@@ -109,7 +109,12 @@ class GoldOutcomeBoundary:
         receipt = self._receipt(original) if callable(self._receipt) else self._receipt
         cause = _failure_cause(original, self._flatten_cause)
         if isinstance(original, asyncio.CancelledError):
-            raise GoldWriteCancelled(receipt) from cause
+            diagnostic = (
+                original.diagnostic_error
+                if isinstance(original, GoldWriteCancelled)
+                else None
+            )
+            raise GoldWriteCancelled(receipt, diagnostic_error=diagnostic) from cause
         raise _failure_for(receipt, cause) from cause
 
     def _should_propagate(self, original: BaseException) -> bool:

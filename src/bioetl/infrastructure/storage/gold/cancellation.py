@@ -73,11 +73,10 @@ class _PhysicalCancellationBoundary:
             if not entered
             else GoldWriteCategory.UNKNOWN
         )
-        if (
-            self.task.done()
-            and not self.task.cancelled()
-            and self.task.exception() is None
-        ):
+        diagnostic_error = None
+        if self.task.done() and not self.task.cancelled():
+            diagnostic_error = self.task.exception()
+        if self.task.done() and not self.task.cancelled() and diagnostic_error is None:
             category = GoldWriteCategory.COMMITTED_POSTWRITE_PENDING
         targets = (
             (self.receipt.physical_table,)
@@ -85,7 +84,8 @@ class _PhysicalCancellationBoundary:
             else ()
         )
         raise GoldWriteCancelled(
-            replace(self.receipt, category=category, committed_targets=targets)
+            replace(self.receipt, category=category, committed_targets=targets),
+            diagnostic_error=diagnostic_error,
         ) from original
 
 

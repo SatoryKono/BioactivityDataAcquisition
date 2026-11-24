@@ -118,7 +118,9 @@ async def _write_single_target_impl(
                         )
                         else (),
                     )
-                    raise type(outcome)(bound) from (outcome.__cause__ or outcome)
+                    raise type(outcome)(
+                        bound, diagnostic_error=outcome.diagnostic_error
+                    ) from (outcome.__cause__ or outcome)
             receipt = replace(
                 receipt,
                 category=GoldWriteCategory.COMMITTED_POSTWRITE_PENDING,
