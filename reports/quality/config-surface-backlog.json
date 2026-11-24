@@ -46,6 +46,35 @@
       },
       {
         "block_path": "composite.merge.column_groups",
+        "fingerprint": "95c73d2be0f4",
+        "governance": {
+          "decision": "retain_shared_composite_policy",
+          "linked_issue": "#5568",
+          "owner": "@bioetl-composite",
+          "rationale": "Composite column_groups are intentionally mirrored between runtime composite configs and entity contract surfaces so merge field sets stay deterministic across providers.",
+          "review_date": "2026-09-30"
+        },
+        "occurrence_count": 2,
+        "occurrences": [
+          {
+            "block_path": "composite.merge.column_groups",
+            "path": "configs/composites/target.yaml",
+            "surface_kind": "composite_config"
+          },
+          {
+            "block_path": "schema.column_groups",
+            "path": "configs/entities/composite/target.yaml",
+            "surface_kind": "entity_config"
+          }
+        ],
+        "serialized_bytes": 3221,
+        "surface_kind_counts": {
+          "composite_config": 1,
+          "entity_config": 1
+        }
+      },
+      {
+        "block_path": "composite.merge.column_groups",
         "fingerprint": "4be2a0f66fdc",
         "governance": {
           "decision": "retain_shared_composite_policy",
@@ -68,35 +97,6 @@
           }
         ],
         "serialized_bytes": 2895,
-        "surface_kind_counts": {
-          "composite_config": 1,
-          "entity_config": 1
-        }
-      },
-      {
-        "block_path": "composite.merge.column_groups",
-        "fingerprint": "bb932a6ea906",
-        "governance": {
-          "decision": "retain_shared_composite_policy",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-composite",
-          "rationale": "Composite column_groups are intentionally mirrored between runtime composite configs and entity contract surfaces so merge field sets stay deterministic across providers.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 2,
-        "occurrences": [
-          {
-            "block_path": "composite.merge.column_groups",
-            "path": "configs/composites/target.yaml",
-            "surface_kind": "composite_config"
-          },
-          {
-            "block_path": "schema.column_groups",
-            "path": "configs/entities/composite/target.yaml",
-            "surface_kind": "entity_config"
-          }
-        ],
-        "serialized_bytes": 2641,
         "surface_kind_counts": {
           "composite_config": 1,
           "entity_config": 1
@@ -283,5 +283,5 @@
     "composite_runtime family is at zero inconsistent keys as of Stream B plateau.",
     "Residual entity drift is limited to intentional entity-specific filters, metadata policy blocks, schema field-alias surfaces, and pipeline overrides."
   ],
-  "snapshot_date": "2026-11-18"
+  "snapshot_date": "2026-11-24"
 }
