@@ -110,9 +110,9 @@ Use the smallest existing skill that matches the request:
 | Request template                            | Mutation default                         | Route                                                      | Minimum validation                                 |
 | ------------------------------------------- | ---------------------------------------- | ---------------------------------------------------------- | -------------------------------------------------- |
 | Diagnose without fixing                     | read-only                                | `py-debug-bot`                                             | reproduction and evidence only                     |
-| Implement a focused fix                     | write in requested scope                 | direct implementation; `py-config-bot` when configs change | targeted lint/tests                                |
+| Implement a focused fix | write in requested scope | direct implementation with `py-config-bot` for existing config or schema work | targeted lint/tests |
 | Review the current diff                     | read-only                                | `py-audit-bot` (`review`)                                  | diff inspection; no external writes                |
-| Diagnose CI failure                         | read-only                                | `py-debug-bot`                                             | reproduction, root cause, remediation guidance     |
+| Diagnose CI failure | read-only | parent retrieves the CI log and applies `.junie/agents/py-debug-bot.md` directly while native registration is NOT_PROVEN | requested head SHA, run, attempt, job, and root cause or blocker |
 | Implement diagnosed CI remediation          | write in requested scope                 | direct parent implementation                               | failed check plus targeted regression              |
 | Hash-only / date-stamp / remote-main rebind | write generated artifacts only           | parent in the existing worktree; no extra `implementer`    | matching `--check` after `--update`                |
 | Prepare a PR                                | branch/commit/push authorized by request | direct parent workflow                                     | repository quality gates for touched scope         |
@@ -127,7 +127,7 @@ default.
 
 | Tier | Typical scope                | Minimum checks                                                     |
 | ---- | ---------------------------- | ------------------------------------------------------------------ |
-| V1   | docs-only                    | targeted links/drift, cleanup-inventory `--check`, and mirror sync |
+| V1 | docs-only | full documentation link check, required drift and mirror checks, and cleanup inventory refresh and check as specified in `POST_CHANGE_VALIDATION.md` |
 | V2   | focused Python/tooling       | targeted Ruff plus related unit tests                              |
 | V3   | config/runtime contract      | schema/contract checks plus related tests                          |
 | V4   | architecture or broad change | architecture gates, lint/type checks, and relevant broad tests     |
