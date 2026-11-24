@@ -3,17 +3,28 @@
 *Status: internal-published (AI runtime guidance mirror)*
 
 The canonical behavior source is `.codex/agents/CODEX-RUNTIME.md`, sections
-`Common Task Routing` and `Risk-Based Validation`. This contributor-facing
-mirror does not redefine runtime behavior.
+`Common Task Routing`, `CI Evidence and PR Feedback`, and `Risk-Based Validation`.
+This contributor-facing mirror does not redefine runtime behavior.
 
 ## Common requests
 
 - Diagnose without fixing: use `py-debug-bot`; remain read-only.
 - Implement a focused fix: implement directly and add `py-config-bot` only for
-  config impact; run targeted lint and tests.
+  existing config or schema work and run targeted lint and tests.
+- Scaffold a pipeline for a new provider or entity with `new-pipeline`.
 - Review the current diff: use `py-audit-bot` (`review`); perform no write action.
-- Diagnose CI: use `py-debug-bot` (read-only). Implement the remediations in
-  the parent workflow, then rerun failed checks and a targeted regression.
+- For CI diagnosis, the parent retrieves the run, attempt, job, head SHA, and
+  relevant log. Apply `py-debug-bot` to that evidence in read-only mode. The
+  parent implements authorized remediations and reruns the failed check and a
+  targeted regression.
+- For existing PR feedback, use `github-pr-comments` when available. Record head,
+  base, and review-thread state through authorized GitHub tools.
+  For explicitly requested Qodo feedback, use the external
+  `qodo-review-resolver` skill only when installed and available. Otherwise,
+  the parent reads Qodo comments through authorized GitHub tools and applies
+  the selected local diagnosis or review profile directly, without claiming
+  Qodo execution or broader write authority. Use `gh-review-loop` for an
+  authorized complete review cycle.
 - Prepare a PR: use the parent workflow after the request authorizes publish
   actions. There is no live `create-pr` skill in `.codex/skills/`.
 - Audit architecture debt: use `py-audit-bot` (`debt`); never increase debt
@@ -23,7 +34,7 @@ mirror does not redefine runtime behavior.
 
 | Tier | Scope | Minimum |
 | --- | --- | --- |
-| V1 | documentation | targeted links/drift and required mirror sync |
+| V1 | documentation | full documentation link check, required drift and mirror checks, and cleanup inventory refresh and check as specified in `POST_CHANGE_VALIDATION.md` |
 | V2 | focused code/tooling | targeted Ruff and related unit tests |
 | V3 | configuration/runtime contract | schema/contract checks and related tests |
 | V4 | broad/architecture | architecture gates, lint/type checks, relevant broad tests |

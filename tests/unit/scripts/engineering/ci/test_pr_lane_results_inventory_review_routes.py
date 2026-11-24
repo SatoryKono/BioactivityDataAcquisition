@@ -54,8 +54,14 @@ def test_pr13166_inventory_review_snapshots_keep_bounded_owners(path: str) -> No
         build_shadow_compare([path, UNKNOWN], repo_root=ROOT)
 
 
-def test_pr13346_review_receipt_routes_only_to_inventory_owners() -> None:
-    path = "configs/quality/external_resource_inventory_pr13346_dq_alias_review.json"
+@pytest.mark.parametrize(
+    "path",
+    [
+        "configs/quality/external_resource_inventory_pr13346_dq_alias_review.json",
+        "configs/quality/external_resource_inventory_pr13342_sync_review.json",
+    ],
+)
+def test_review_receipts_route_only_to_inventory_owners(path: str) -> None:
     assert set(affected_pytest_targets([path], repo_root=ROOT)) == OWNERS
     assert build_shadow_compare([path], repo_root=ROOT)["covers_full_suite"] is False
     with pytest.raises(ValueError, match="unmapped"):

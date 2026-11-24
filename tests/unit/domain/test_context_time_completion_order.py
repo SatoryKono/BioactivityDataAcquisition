@@ -24,7 +24,10 @@ class TestUtcInstant:
     def test_utc_instant__aware_timestamp__converts_to_utc(self) -> None:
         value = datetime(2026, 11, 24, 14, 0, 0, tzinfo=_OFFSET_TWO_HOURS)
 
-        assert utc_instant(value) == datetime(2026, 11, 24, 12, 0, 0, tzinfo=UTC)
+        result = utc_instant(value)
+
+        assert result == datetime(2026, 11, 24, 12, 0, 0, tzinfo=UTC)
+        assert result.tzinfo is UTC
 
     def test_utc_instant__already_utc_timestamp__keeps_same_instant(self) -> None:
         value = datetime(2026, 11, 24, 12, 0, 0, tzinfo=UTC)

@@ -130,7 +130,7 @@ After write-capable work:
 
 1. Re-scan touched and related surfaces.
 1. Run proportionate validation and required mirror/generator checks.
-1. Run the canonical `post-task` workflow.
+1. Run the canonical `post-task` workflow only in authorized `read-write` mode. Record it as skipped in `off` or `read-only` mode.
 1. Report commands/results, exact skips, mirror status, and debt outcome as
    `improved`, `unchanged`, or `worsened`.
 
