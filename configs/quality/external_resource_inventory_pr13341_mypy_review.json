@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "44978ee2b0b818c6d111ee0e32af0520c980d5aa",
+  "source_ref": "bbdcb2ca901da0cb4b4d51b827d9b479e63445d9",
+  "source_reviews": {
+    "src/bioetl/infrastructure/adapters/iuphar/acceptance_receipt.py": "Receipt loader now returns the four version strings as a fixed tuple for mypy. No new acquisition site."
+  },
+  "expression_updates": {},
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": [],
+  "segment_updates": {},
+  "reference_moves": [],
+  "exclusion_moves": [],
+  "line_updates": {}
+}
