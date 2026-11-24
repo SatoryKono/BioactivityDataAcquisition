@@ -9,6 +9,7 @@ separately and must not rewrite originals.
 
 from __future__ import annotations
 
+import hashlib
 from collections.abc import Mapping
 from types import MappingProxyType
 
@@ -382,7 +383,64 @@ def semantics_document() -> dict[str, object]:
     }
 
 
+FIELD_ROLES: dict[str, str] = {
+    "iuphar_target_id": "iuphar",
+    "iuphar_class": "iuphar",
+    "iuphar_match_status": "iuphar",
+    "iuphar_annotation_status": "iuphar",
+    "iuphar_type_raw": "iuphar",
+    "iuphar_annotation_capability": "iuphar",
+    "iuphar_family_ids": "iuphar",
+    "iuphar_subclasses": "iuphar",
+    "iuphar_paths": "iuphar",
+    "local_class": "local",
+    "local_status": "local",
+    "local_subclasses": "local",
+    "local_rule_ids": "local",
+    "effective_class": "effective",
+    "effective_source": "effective",
+    "effective_subclasses": "effective",
+    "decision_status": "effective",
+    "conflict_codes": "effective",
+    "classification_evidence_ids": "effective",
+    "target_class_profile_sha256": "profile",
+    "target_type": "chembl",
+}
+
+UNCERTAINTY_STATUSES = (
+    "unknown",
+    "partial",
+    "ambiguous",
+    "conflict",
+    "source_unavailable",
+    "not_found",
+    "insufficient_input",
+    "identity_conflict",
+)
+
+PATH_DIRECTION = "root_to_leaf"
+ANNOTATION_CAPABILITY = "family_only"
+
+VERSIONS = {
+    "normalization": "bioetl-iuphar-input-v2",
+    "rules": "iuphar-local-rules-20261123",
+    "classifier": "iuphar-classifier-20261123",
+    "table_contracts": ("3.0.0", "3.1.0", "3.2.0"),
+}
+
+
+def build_input_manifest(payload: bytes) -> dict[str, object]:
+    """Hash supplied bytes. The original payload is not rewritten."""
+    return {
+        "sha256": hashlib.sha256(payload).hexdigest(),
+        "byte_length": len(payload),
+        "mutated": False,
+        "normalization_version": VERSIONS["normalization"],
+    }
+
+
 __all__ = [
+    "ANNOTATION_CAPABILITY",
     "ANNOTATION_STATUSES",
     "AUDIT_COUNTEREXAMPLES",
     "CAPABILITY_MATRIX",
@@ -391,11 +449,13 @@ __all__ = [
     "COMPLETENESS_STATUSES",
     "DECISION_STATUSES",
     "FIELD_LAYERS",
+    "FIELD_ROLES",
     "LEGACY_OTHER_POLICY",
     "LOCAL_STATUSES",
     "MATCH_STATUSES",
     "MISSING_MARKER_POLICY",
     "NORMALIZATION_VERSION_APPROVED",
+    "PATH_DIRECTION",
     "PATH_POLICY",
     "PROFILE_CHANGE_RULES",
     "RF001_CONTRACT_VERSION",
@@ -404,6 +464,9 @@ __all__ = [
     "RULES_VERSION",
     "TABLE_CONTRACT_V30",
     "TABLE_CONTRACT_V31",
+    "UNCERTAINTY_STATUSES",
     "UNCERTAINTY_TOKENS",
+    "VERSIONS",
+    "build_input_manifest",
     "semantics_document",
 ]

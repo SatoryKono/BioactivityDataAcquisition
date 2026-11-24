@@ -43,7 +43,8 @@ def target_classification_contract_schema_identity(
         config.entity_type,
     ) != ("chembl", "target"):
         return None
-    if config.target_classification.mode != "enrich":
+    classification = config.target_classification
+    if classification.mode != "enrich":
         return None
     version = resolve_physical_table_contract(
         config.target_classification.mode,
@@ -57,10 +58,10 @@ def target_classification_contract_schema_identity(
 def target_classification_normalization_identity(
     config: object,
 ) -> tuple[str, str, str] | None:
-    """Bind the actual additive V31 normalization profile to execution metadata."""
-    if target_classification_contract_schema_identity(config) is None:
+    """Bind the selected additive normalization profile to execution metadata."""
+    schema_identity = target_classification_contract_schema_identity(config)
+    if schema_identity is None:
         return None
-
     version = target_classification_contract_schema_identity(config)
     profile = (
         target_v32_normalization_profile()

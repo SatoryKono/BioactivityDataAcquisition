@@ -131,6 +131,9 @@ def finalize_merged_dataframe(
             "Ordered columns by semantic groups",
             total_columns=len(merged_df.columns),
         )
+    classifier = getattr(host, "target_post_join_classifier", None)
+    if classifier is not None and _bound_classification_stage(host) is None:
+        merged_df = classifier(merged_df, run_id)
     return merged_df
 
 

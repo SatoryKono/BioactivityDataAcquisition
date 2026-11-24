@@ -150,6 +150,9 @@ def _host(stage: CompositeTargetClassification) -> MagicMock:
     host = MagicMock()
     resolver = _resolver()
     host._target_classification_stage = stage
+    host.target_post_join_classifier.side_effect = AssertionError(
+        "duplicate classification"
+    )
     host._logger = MagicMock()
     host._conflict_resolver.resolve_conflicts.side_effect = (
         lambda df, _enricher_dfs, enrichers, seed_pipeline=None: (

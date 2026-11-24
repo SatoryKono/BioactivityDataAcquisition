@@ -14,7 +14,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from functools import cache
 
-from .gtopdb_2026_3_1 import FAMILY_ROWS
+from .gtopdb_2026_3_1 import ANNOTATION_CAPABILITY, FAMILY_ROWS
 from .iuphar_mapping import approved_class_mappings, approved_subclass_mappings
 from .models import Diagnostic
 from .policy import (
@@ -62,7 +62,9 @@ class HierarchyResult:
     annotation_status: str
     iuphar_class: str | None
     iuphar_subclass: str | None
+    iuphar_subclasses: tuple[str, ...]
     iuphar_class_candidates: tuple[str, ...]
+    annotation_capability: str
     proof: str | None
     source: str | None
     paths: tuple[FamilyPath, ...]
@@ -368,11 +370,14 @@ def normalize_provider_class(
                 message=_SYNTHETIC_MIXED,
             )
         )
+    recorded = subclass if assigned.iuphar_class else None
     return HierarchyResult(
         annotation_status=assigned.status,
         iuphar_class=assigned.iuphar_class,
-        iuphar_subclass=subclass if assigned.iuphar_class else None,
+        iuphar_subclass=recorded,
+        iuphar_subclasses=(recorded,) if recorded else (),
         iuphar_class_candidates=assigned.candidates,
+        annotation_capability=ANNOTATION_CAPABILITY,
         proof=proof,
         source=source,
         paths=built,
@@ -530,7 +535,9 @@ def _graph_error_result(
         annotation_status="partial" if mapped else "not_available",
         iuphar_class=mapped,
         iuphar_subclass=subclass,
+        iuphar_subclasses=(subclass,) if subclass else (),
         iuphar_class_candidates=(mapped,) if mapped else (),
+        annotation_capability=ANNOTATION_CAPABILITY,
         proof="type" if mapped else None,
         source="iuphar_normalized" if mapped else None,
         paths=(),

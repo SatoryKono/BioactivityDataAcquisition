@@ -116,6 +116,7 @@ TARGET_CLASSIFICATION_FIELDS: tuple[str, ...] = (
     "decision_status",
     "target_class_profile_sha256",
 )
+# Additive 3.2.0 detail. Arrays are canonical JSON text; null means not computed.
 TARGET_CLASSIFICATION_DETAIL_FIELDS: tuple[str, ...] = (
     "iuphar_type_raw",
     "iuphar_source_completeness",
