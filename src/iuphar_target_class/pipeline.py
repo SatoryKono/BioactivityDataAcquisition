@@ -771,13 +771,14 @@ def _resolution_input(
         iuphar_annotation_status=annotation_status,
         local_status=local.local_status or "not_supported",
         iuphar_class=direct_class,
-        local_class=local.local_class,
         iuphar_subclass=subclass,
+        local_class=local.local_class,
+        local_subclasses=local.local_subclasses,
         # family_only / partial reads confirmed_subclasses, not iuphar_subclass.
         confirmed_subclasses=(subclass,)
         if subclass and annotation_status == "partial"
         else (),
-        local_subclasses=local.local_subclasses,
+        direct_vocabulary=direct_vocabulary,
         partial_basis=_partial_basis(direct, annotation_status),
         target_kind=row.target_kind or "protein",
         complex_direct_match=match.matched_target_id in snapshot.complex_ids,
@@ -786,7 +787,6 @@ def _resolution_input(
         raw_type=annotation.type_raw if annotation else None,
         matched_target_id=match.matched_target_id,
         candidate_target_ids=candidate_ids,
-        direct_vocabulary=direct_vocabulary,
     )
 
 
@@ -799,9 +799,10 @@ def _complete(
     annotation: ProviderAnnotation | None,
     direct: HierarchyResult | None,
 ) -> RowResult:
+    rules = local_rules()
     local = apply_local(
         row.ec_numbers,
-        rules=local_rules(),
+        rules=rules,
         keyword_ids=row.keywords,
         free_text=row.name,
         organism=row.taxon,
