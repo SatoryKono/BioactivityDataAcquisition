@@ -999,6 +999,26 @@ def test_shadow_compare_routes_rf001_semantics_contract(path: str) -> None:
 @pytest.mark.parametrize(
     "path",
     [
+        "data/iuphar_target_class/rf002/matching_policy.json",
+        "data/iuphar_target_class/rf002/matching_policy.sha256.json",
+        "docs/04-reference/pipelines/chembl/17-iuphar-uniprot-identifier-roles.md",
+        "src/iuphar_target_class/identifier_roles.py",
+    ],
+)
+def test_shadow_compare_routes_rf002_identifier_roles_contract(path: str) -> None:
+    """RF-002 UniProt role surfaces keep an explicit Class-lane shadow route."""
+    repo_root = Path(__file__).resolve().parents[5]
+    selection = build_shadow_compare([path], repo_root=repo_root)
+    assert (
+        "tests/unit/iuphar_target_class/test_identifier_roles_rf002.py"
+        in selection["selected"]
+    )
+    assert selection["covers_full_suite"] is False
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
         "data/iuphar_target_class/rf005/coverage_matrix.json",
         "data/iuphar_target_class/rf005/coverage_matrix.sha256.json",
     ],

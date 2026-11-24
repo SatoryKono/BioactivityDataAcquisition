@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from types import MappingProxyType
 
-from iuphar_target_class.policy import PLAN_VERSION
+from iuphar_target_class.policy import LOCAL_CATALOG_VERSION
 from iuphar_target_class.stage0.io import canonical_json_bytes
 
 from ._manifest import referenced_path, sha256
@@ -75,14 +75,17 @@ def compile_snapshot_bundle(evidence: SourceEvidence) -> SnapshotBundle:
         ),
     }
     files[_SNAPSHOT_JSON] = canonical_json_bytes(snapshot)
+    from iuphar_target_class.identifier_roles import MATCHING_POLICY_VERSION
+
     profile = {
         "artifact": "bioetl_iuphar_profile",
         "schema_version": 2,
         "snapshot": _reference(_SNAPSHOT_JSON, files[_SNAPSHOT_JSON]),
         "acceptance": None,
         "normalization_version": "bioetl-iuphar-input-v1",
-        "rules_version": PLAN_VERSION,
+        "rules_version": LOCAL_CATALOG_VERSION,
         "classification_schema_version": "3.1.0",
+        "matching_policy_version": MATCHING_POLICY_VERSION,
     }
     files["profile.json"] = canonical_json_bytes(profile)
     return SnapshotBundle(

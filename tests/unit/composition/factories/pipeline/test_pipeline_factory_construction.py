@@ -50,7 +50,7 @@ from bioetl.infrastructure.config.domain_config_resolver import (
     DomainConfigResolver,
 )
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
-from bioetl.infrastructure.schemas.pipeline_config_common import DQYamlConfig
+from bioetl.infrastructure.schemas.pipeline_config_dq import DQYamlConfig
 
 
 def _make_yaml_config(**overrides: object) -> PipelineYamlConfig:
@@ -64,7 +64,10 @@ def _make_yaml_config(**overrides: object) -> PipelineYamlConfig:
         ),
         "silver_filters": None,
         "gold_filters": None,
+        # Default DQYamlConfig keeps model_fields_set empty so DomainConfigResolver
+        # treats inline overrides as absent (#13326 / Class selection of composition).
         "dq_overrides": DQYamlConfig(),
+        "dq_config_file": None,
     }
     defaults.update(overrides)
     return cast(PipelineYamlConfig, SimpleNamespace(**defaults))

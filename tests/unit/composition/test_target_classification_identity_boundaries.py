@@ -29,6 +29,12 @@ from bioetl.domain.normalization.profiles.chembl_target_classification import (
 from bioetl.infrastructure.config.contract_identity_resolution import (
     resolve_contract_identity,
 )
+from iuphar_target_class.bioetl_input import project_target_fields
+from iuphar_target_class.identifier_roles import (
+    LEGACY_MATCHING_POLICY_VERSION,
+    MATCHING_POLICY_VERSION,
+)
+from iuphar_target_class.matching import CatalogTarget, MatchQuery, resolve_match
 from tests.helpers.iuphar_snapshot import synthetic_snapshot_bundle
 
 pytestmark = pytest.mark.unit
@@ -109,3 +115,54 @@ def test_relative_profile_uses_actual_configs_parent_and_checks_frozen_bytes(
     (root / "profile.json").write_bytes(b"{}")
     with pytest.raises(ValueError, match="digest mismatch"):
         load_target_runtime_profile(config)
+
+
+def test_rf002_projection_keeps_primary_and_auxiliary_roles_distinct() -> None:
+    """RF-002 (#13310): unknown xref must not merge into mandatory primary anchors."""
+    fields = project_target_fields(
+        {
+            "target_id": "CHEMBL1",
+            "component_accessions": '["P11111"]',
+            "target_xref_uniprot_ids": "Q99999",
+            "pref_name": "Example",
+        },
+        "9606",
+    )
+    assert fields["uniprot"] == "P11111"
+    assert fields["uniprot_xref"] == "Q99999"
+    catalog = (
+        CatalogTarget(
+            "1",
+            ("P11111",),
+            None,
+            None,
+            "human",
+            (),
+            (),
+        ),
+    )
+    matched = resolve_match(
+        MatchQuery(
+            None,
+            ("P11111",),
+            None,
+            None,
+            "human",
+            None,
+            (),
+            auxiliary_uniprot_ids=("Q99999",),
+        ),
+        catalog,
+        snapshot_complete=True,
+    )
+    conflict = resolve_match(
+        MatchQuery("1", ("P22222",), None, None, "human", None, ()),
+        (
+            CatalogTarget("1", ("P11111",), None, None, "human", (), ()),
+            CatalogTarget("2", ("P22222",), None, None, "human", (), ()),
+        ),
+        snapshot_complete=True,
+    )
+    assert matched.match_status == "matched"
+    assert conflict.match_status == "identity_conflict"
+    assert MATCHING_POLICY_VERSION != LEGACY_MATCHING_POLICY_VERSION
