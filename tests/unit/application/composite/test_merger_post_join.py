@@ -52,6 +52,8 @@ from bioetl.application.services.target_runtime.post_join_classification import 
 from bioetl.domain.composite.config import EnricherConfig
 from bioetl.domain.composite.result import EnrichmentResult, EnrichmentStatus
 
+pytestmark = pytest.mark.unit
+
 
 def _enricher_config(pipeline: str) -> EnricherConfig:
     return EnricherConfig(pipeline=pipeline, join_keys=("doi",))

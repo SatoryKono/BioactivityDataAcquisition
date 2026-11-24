@@ -5,10 +5,14 @@ from __future__ import annotations
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
+import pytest
+
 from iuphar_target_class.hierarchy import FamilyPath
 from iuphar_target_class.pipeline import RowResult
 
 from bioetl.infrastructure.adapters.iuphar.detail_projection import detail_projection
+
+pytestmark = pytest.mark.unit
 
 
 def _result() -> SimpleNamespace:
