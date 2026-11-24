@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "d141e673ff67bc1da49d230c2f756bafed405b5f",
+  "source_ref": "418ec0700456430394700442d73f85c06f5f3b00",
+  "source_reviews": {
+    "src/bioetl/application/services/workflow/_observability_workflow_checkpoint_support.py": "Issue #13285: distinguish missing checkpoint run identity in compatibility evidence; no resource acquisition changes.",
+    "src/bioetl/application/services/workflow/_observability_workflow_evidence_support.py": "Issue #13285: classify missing checkpoint run identity as degraded evidence; no resource acquisition changes.",
+    "src/bioetl/application/services/workflow/_observability_workflow_lookup_support.py": "Issue #13285: require top-level checkpoint run identity during lookup; no resource acquisition changes."
+  },
+  "expression_updates": {},
+  "resource_updates": {},
+  "additional_bindings": {},
+  "new_resources": [],
+  "new_exclusions": [],
+  "segment_updates": {},
+  "reference_moves": []
+}

@@ -13,6 +13,7 @@ from bioetl.application.core.lifecycle.checkpoint_load_validation import (
     _handle_missing_compatibility_context_result,
 )
 from bioetl.application.observability.replay_write_risk import _has_explicit_clear
+from bioetl.application.services.checkpoint.checkpoint_models import CheckpointInfo
 from bioetl.application.services.control_plane.forensic.diagnostics_support import (
     coerce_int,
     inspection_service_factory_from_ports,
@@ -94,8 +95,12 @@ def test_workflow_replay_and_diagnostics_leftovers() -> None:
         )
     )
     assert details is None or isinstance(details, dict)
-    info = SimpleNamespace(metadata={"status": "mismatched_run_context"})
-    assert classify_checkpoint_status(info) == ["checkpoint_mismatched_run"]  # type: ignore[arg-type]
+    info = CheckpointInfo(
+        pipeline_name="chembl_activity",
+        run_id="other-run",
+        metadata={"status": "mismatched_run_context"},
+    )
+    assert classify_checkpoint_status(info) == ["checkpoint_mismatched_run"]
     assert has_composite_correlation_policy_gap(
         {"composite_projection": {"composite_run_id_consistent": False}}
     )
