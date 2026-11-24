@@ -5,7 +5,7 @@
 - Kind: `workflow`
 - Typed identity: `workflow:crossref_publication`
 - Schema: `1.0.0`
-- Source revision: `sha256:038a6f32dde69a04fe9db7bb22d6216d097a7181346347b742d3cacaea3c7346`
+- Source revision: `sha256:4724fc51d329db1e3512217967589499efa4e9eeee37e97ba58bd0dff3d17554`
 
 ## Evidence
 
@@ -75,7 +75,7 @@
   "provenance": {
     "projector_version": "1.0.0",
     "semantic_content_hash": "sha256:5a0fb10c9e3632d23d6818012eb4959a7f7d8e067162cc7fe03bc3d4f2574a78",
-    "source_revision": "sha256:038a6f32dde69a04fe9db7bb22d6216d097a7181346347b742d3cacaea3c7346"
+    "source_revision": "sha256:4724fc51d329db1e3512217967589499efa4e9eeee37e97ba58bd0dff3d17554"
   },
   "source_references": [
     {
