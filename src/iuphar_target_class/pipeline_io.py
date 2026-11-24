@@ -3,12 +3,19 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import re
 from collections.abc import Mapping, Sequence
 from dataclasses import asdict
 from pathlib import Path
 from types import MappingProxyType
 
+from .comparison import (
+    ParityInputs,
+    ParityPublication,
+    build_m_parity_report,
+    write_m_parity_report,
+)
 from .csv_io import read_csv_records
 from .delivery import _create_new, _path_inside_root, result_names
 from .models import RawTargetRow, RunProvenance
@@ -306,8 +313,14 @@ def run_csv_pipeline(
     snapshot: IndexedSnapshot,
     provenance: RunProvenance,
     run_id: str,
+    parity: ParityPublication | None = None,
 ) -> tuple[BatchResult, Path | None]:
-    """Read the legacy CSV, run the indexed pipeline, publish its bytes once."""
+    """Read the legacy CSV, run the indexed pipeline, publish its bytes once.
+
+    ``parity`` is optional. When it is present the seal and historical rows
+    were fixed before this call, and the M parity report is written beside the
+    source. It is not a member of the proof package.
+    """
     source_path = _path_inside_root(source, root)
     if not provenance.rules_version:
         raise ValueError("the export needs a named rules version")
@@ -317,7 +330,7 @@ def run_csv_pipeline(
         provenance=provenance,
         run_id=run_id,
     )
-    return result, publish_batch(
+    published = publish_batch(
         source_path,
         root=root,
         snapshot_id=snapshot.snapshot_id,
@@ -325,6 +338,155 @@ def run_csv_pipeline(
         run_id=run_id,
         result=result,
     )
+    if parity is not None:
+        publish_m_parity(result, parity, directory=source_path.parent, root=root)
+    return result, published
+
+
+def publish_m_parity(
+    result: BatchResult,
+    publication: ParityPublication,
+    *,
+    directory: Path,
+    root: Path,
+) -> Path:
+    """Write ``m-parity-report.json`` from a sealed request and this batch."""
+    report = build_m_parity_report(
+        ParityInputs(
+            original_m=publication.original_m,
+            new_result=parity_rows_from_batch(result),
+            saved_excel=publication.saved_excel,
+            independent_reference=publication.independent_reference,
+            control_run=publication.control_run,
+            basis_seal=publication.basis_seal,
+        )
+    )
+    return write_m_parity_report(report, _path_inside_root(directory, root))
+
+
+def parity_rows_from_batch(result: BatchResult) -> tuple[dict[str, str], ...]:
+    """Project classified rows onto the string fields the parity report compares."""
+    return tuple(_parity_row(_classification_row(output)) for output in result.rows)
+
+
+_PARITY_SCALAR_FIELDS = (
+    "capability",
+    "decision_status",
+    "effective_class",
+    "effective_source",
+    "gene_id",
+    "gene_symbol",
+    "input_row_id",
+    "input_validation_status",
+    "isoform_id",
+    "isoform_suffix",
+    "iuphar_annotation_status",
+    "iuphar_class",
+    "iuphar_mapping_rule_id",
+    "iuphar_mapping_version",
+    "iuphar_subclass",
+    "iuphar_type_raw",
+    "legacy_iuphar_class",
+    "local_class",
+    "local_status",
+    "match_status",
+    "matched_target_id",
+    "normalization_version",
+    "organism",
+    "rules_version",
+    "schema_version",
+    "snapshot_id",
+    "target_id",
+    "target_kind",
+    "uniprot",
+)
+_PARITY_SEQUENCE_FIELDS = (
+    "candidate_target_ids",
+    "conflict_codes",
+    "effective_subclasses",
+    "family_ids",
+    "iuphar_class_candidates",
+    "iuphar_family_ids",
+    "iuphar_family_paths",
+    "input_errors",
+    "local_candidates",
+    "local_rule_ids",
+    "local_subclasses",
+)
+_PARITY_IDENTITY_FROM_RAW = (
+    "gene_id",
+    "gene_symbol",
+    "organism",
+    "target_id",
+    "uniprot",
+)
+_PARITY_VERSION_FIELDS = (
+    "normalization_version",
+    "rules_version",
+    "schema_version",
+)
+
+
+def _parity_row(entry: Mapping[str, object]) -> dict[str, str]:
+    flat = _parity_flat(entry)
+    row: dict[str, str] = {}
+    for field in _PARITY_SCALAR_FIELDS:
+        text = _parity_scalar(flat.get(field))
+        if text is not None:
+            row[field] = text
+    for field in _PARITY_SEQUENCE_FIELDS:
+        text = _parity_sequence(flat.get(field))
+        if text is not None:
+            row[field] = text
+    provenance = flat.get("provenance")
+    if isinstance(provenance, str):
+        row["provenance"] = provenance
+    return row
+
+
+def _parity_flat(entry: Mapping[str, object]) -> dict[str, object]:
+    flat = dict(entry)
+    raw = entry.get("raw_fields")
+    if isinstance(raw, Mapping):
+        for key in _PARITY_IDENTITY_FROM_RAW:
+            if flat.get(key) is None:
+                flat[key] = raw.get(key)
+    provenance = entry.get("provenance")
+    if isinstance(provenance, Mapping):
+        for key in _PARITY_VERSION_FIELDS:
+            if flat.get(key) is None:
+                flat[key] = provenance.get(key)
+        flat["provenance"] = _parity_json(dict(provenance))
+    return flat
+
+
+def _parity_scalar(value: object) -> str | None:
+    if isinstance(value, str):
+        return value
+    return None
+
+
+def _parity_sequence(value: object) -> str | None:
+    if not isinstance(value, list | tuple):
+        return None
+    return _parity_json(list(value))
+
+
+def _parity_json(value: object) -> str:
+    return json.dumps(
+        _json_ready(value),
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+
+
+def _json_ready(value: object) -> object:
+    if isinstance(value, list | tuple):
+        return [_json_ready(item) for item in value]
+    if isinstance(value, Mapping):
+        return {str(key): _json_ready(item) for key, item in value.items()}
+    return value
 
 
 def publish_batch(
