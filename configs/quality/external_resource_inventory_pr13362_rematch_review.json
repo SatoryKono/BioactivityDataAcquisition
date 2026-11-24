@@ -1,0 +1,8 @@
+{
+  "catalog_ref": "396e7499cfec95cbdb198048effd4f85dfc318c5",
+  "schema_version": 1,
+  "source_ref": "7d0bf5b9fcd68adb2f00cf44121ffa48ae395803",
+  "source_reviews": {
+    "src/bioetl/infrastructure/config/staged_enforcement_policy_loader.py": "Reject duplicate active check names after excluding domain_engine false rows. Registry file read, scope, and construction keep their existing static acquisition/exclusion identity; no new resource or lifecycle operation."
+  }
+}
