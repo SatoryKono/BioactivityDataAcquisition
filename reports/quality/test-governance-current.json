@@ -229,6 +229,13 @@
       "test_name": "test_aclose_delegated"
     },
     {
+      "category": "helper_asserted",
+      "line": "241",
+      "path": "tests/unit/infrastructure/adapters/iuphar/test_target_classification.py",
+      "rationale": "tests that delegate verification to check/validate/verify helper calls",
+      "test_name": "test_candidate_reclassification_uses_the_stored_row_identity"
+    },
+    {
       "category": "intentional_no_exception_contract",
       "line": "466",
       "path": "tests/unit/infrastructure/audit/test_file_audit.py",
@@ -512,7 +519,7 @@
   "assertless_category_counts": {
     "architecture_helper_guard": 0,
     "benchmark_or_performance": 0,
-    "helper_asserted": 1,
+    "helper_asserted": 2,
     "intentional_no_exception_contract": 67,
     "weak_no_value": 0
   },
@@ -639,6 +646,12 @@
       "assertless_tests": 1,
       "categories": {
         "intentional_no_exception_contract": 1
+      }
+    },
+    "tests/unit/infrastructure/adapters/iuphar/test_target_classification.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "helper_asserted": 1
       }
     },
     "tests/unit/infrastructure/adapters/test_cached_bronze_support.py": {
@@ -804,7 +817,7 @@
       }
     }
   },
-  "assertless_total_candidates": 68,
+  "assertless_total_candidates": 69,
   "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
@@ -1223,6 +1236,13 @@
         "test_name": "test_aclose_delegated"
       },
       {
+        "category": "helper_asserted",
+        "line": "241",
+        "path": "tests/unit/infrastructure/adapters/iuphar/test_target_classification.py",
+        "rationale": "tests that delegate verification to check/validate/verify helper calls",
+        "test_name": "test_candidate_reclassification_uses_the_stored_row_identity"
+      },
+      {
         "category": "intentional_no_exception_contract",
         "line": "466",
         "path": "tests/unit/infrastructure/audit/test_file_audit.py",
@@ -1506,7 +1526,7 @@
     "assertless_category_counts": {
       "architecture_helper_guard": 0,
       "benchmark_or_performance": 0,
-      "helper_asserted": 1,
+      "helper_asserted": 2,
       "intentional_no_exception_contract": 67,
       "weak_no_value": 0
     },
@@ -1537,7 +1557,7 @@
       "tests/unit/infrastructure/test_issue_10469_stream_a_infra_twenty_one.py:507",
       "tests/unit/infrastructure/test_storage_factory.py:820"
     ],
-    "assertless_total_candidates": 68,
+    "assertless_total_candidates": 69,
     "compatibility_examples": [],
     "compatibility_files": [],
     "compatibility_test_files": 0,
@@ -1729,8 +1749,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 3410,
-      "test_python_file_count": 3665,
+      "test_glob_file_count": 3413,
+      "test_python_file_count": 3668,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -1771,16 +1791,16 @@
       "top_level_directory_count_including_pycache": 16
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 3410,
-    "total_test_functions": 34520,
+    "total_test_files": 3413,
+    "total_test_functions": 34578,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "004d0a9600300c0a5e219a427a0fae491e9a5bdde7adfc0f8da541ea31928b65",
+  "source_tree_sha256": "12cd446ef097db516e4631689c573027881fa8edc902b5542c085182b62baa0d",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
-    "assertless_total_candidates": 68,
+    "assertless_total_candidates": 69,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
     "duplicate_test_name_occurrences": 0,
@@ -1797,8 +1817,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 3410,
-    "test_python_file_count": 3665,
+    "test_glob_file_count": 3413,
+    "test_python_file_count": 3668,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -1839,8 +1859,8 @@
     "top_level_directory_count_including_pycache": 16
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 3410,
-  "total_test_functions": 34520,
+  "total_test_files": 3413,
+  "total_test_functions": 34578,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
