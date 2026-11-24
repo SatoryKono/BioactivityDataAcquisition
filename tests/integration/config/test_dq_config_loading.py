@@ -901,3 +901,65 @@ class TestBackwardCompatibility:
         # Resolved config should have validations from hierarchy
         # (inline dq_overrides in pipeline configs typically don't have validations)
         assert len(resolved_dq.field_validations) > 0
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize(
+    "lower_flat,upper_flat", [(True, False), (False, True), (False, False)]
+)
+@pytest.mark.parametrize("relaxed", [False, True])
+def test_threshold_aliases_follow_layer_precedence(
+    tmp_path: Path, lower_flat: bool, upper_flat: bool, relaxed: bool
+) -> None:
+    def shape(flat: bool, soft: float, hard: float) -> dict:
+        if flat:
+            return {"soft_fail_threshold": soft, "hard_fail_threshold": hard}
+        return {"thresholds": {"soft_fail": soft, "hard_fail": hard}}
+
+    (tmp_path / "base").mkdir()
+    (tmp_path / "providers").mkdir()
+    (tmp_path / "base" / "quality.yaml").write_text(
+        yaml.safe_dump(shape(lower_flat, 0.04, 0.2)), encoding="utf-8"
+    )
+    (tmp_path / "providers" / "example.yaml").write_text(
+        yaml.safe_dump({"quality": shape(upper_flat, 0.1, 0.4)}), encoding="utf-8"
+    )
+    result = DQConfigLoader(tmp_path, relaxed_dq=relaxed).load("example", "item")
+    expected = (0.99, 1.0) if relaxed else (0.1, 0.4)
+    assert (result.soft_fail_threshold, result.hard_fail_threshold) == pytest.approx(
+        expected
+    )
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize(
+    ("flat_value", "nested_value", "conflict"),
+    [
+        (0.04, 0.04, False),
+        ("0.04", 0.04, False),
+        (0.04, "0.040", False),
+        ("0.04", 0.1, True),
+    ],
+)
+def test_threshold_aliases_in_same_layer(
+    tmp_path: Path, flat_value: float | str, nested_value: float | str, conflict: bool
+) -> None:
+    (tmp_path / "base").mkdir()
+    (tmp_path / "base" / "quality.yaml").write_text(
+        yaml.safe_dump(
+            {
+                "soft_fail_threshold": flat_value,
+                "thresholds": {
+                    "soft_fail": nested_value,
+                    "hard_fail": 0.2,
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    loader = DQConfigLoader(tmp_path)
+    if conflict:
+        with pytest.raises(ValueError, match="Conflicting DQ threshold aliases"):
+            loader.load("example", "item")
+    else:
+        assert loader.load("example", "item").soft_fail_threshold == pytest.approx(0.04)
