@@ -42,7 +42,7 @@
           "uid": "prometheus"
         },
         "definition": "label_values(bioetl_workflow_universe, workflow)",
-        "description": "Optional workflow evidence context and workflow-dashboard handoff selector. Overview remains pipeline-summary-first: workflow does not yet drive exact intersection filtering for the current-status PromQL surfaces.",
+        "description": "Workflow names from Prometheus include expected workflows before the first saved run. This selector scopes the current-status panels.",
         "hide": 0,
         "includeAll": true,
         "label": "Workflow",
@@ -87,7 +87,7 @@
           "infinityQuery": {
             "format": "table",
             "parser": "backend",
-            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO RUNS\",\"value\":\"-\"}] : [$map(items, function($item) { $merge([$item, {\"text\": $replace($item.text, \" [STALE catalog]\", \"\")}]) })]",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO RUNS\",\"value\":\"-\"}] : [$map(items, function($item) { $item })]",
             "type": "json",
             "source": "url",
             "url_options": {
@@ -118,7 +118,7 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false,
-        "description": "Core scope: pipeline option list from the local control-plane catalog (/ops/control-plane/filter-options?dimension=pipeline), not the Prometheus universe. PromQL current-state panels still match $pipeline against the shared universe metrics. Single-select unless this board documents All. Default selection is All pipelines until the operator narrows to a concrete pipeline. A pasted var-pipeline value that exists in the catalog remains selectable even when Prometheus has no series."
+        "description": "Core scope: pipeline option list from the local control-plane catalog (/ops/control-plane/filter-options?dimension=pipeline), not the Prometheus universe. PromQL current-state panels still match $pipeline against the shared universe metrics. Single-select unless this board documents All. Default selection is All pipelines until the operator narrows to a concrete pipeline. A pasted var-pipeline value that exists in the catalog remains selectable even when Prometheus has no series. A [STALE catalog] label indicates a stale catalog snapshot, not source-data freshness."
       },
       {
         "allValue": ".*",
@@ -144,7 +144,7 @@
           "infinityQuery": {
             "format": "table",
             "parser": "backend",
-            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO RUNS\",\"value\":\"-\"}] : [$map(items, function($item) { $merge([$item, {\"text\": $replace($item.text, \" [STALE catalog]\", \"\")}]) })]",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO RUNS\",\"value\":\"-\"}] : [$map(items, function($item) { $item })]",
             "type": "json",
             "source": "url",
             "url_options": {
@@ -175,7 +175,7 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false,
-        "description": "Browse scope from the local control-plane catalog. Default All includes every run type. Explicit URL selections take precedence."
+        "description": "Browse scope from the local control-plane catalog. Default All includes every run type. Explicit URL selections take precedence. A [STALE catalog] label indicates a stale catalog snapshot, not source-data freshness."
       },
       {
         "allValue": null,
@@ -189,7 +189,7 @@
           "uid": "bioetl-ops-http"
         },
         "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&timezone=${__timezone}&allow_stale=1",
-        "description": "Run ID from the catalog snapshot; run dates describe execution, not catalog freshness. Catalog freshness is Not verified here. Refresh the dashboard to request an updated list.",
+        "description": "Run ID from the control-plane catalog. A [STALE catalog] label indicates a stale catalog snapshot; run dates describe execution, not catalog or source-data freshness. Refresh the dashboard to request an updated list.",
         "hide": 0,
         "includeAll": false,
         "label": "Run ID",
@@ -208,7 +208,7 @@
           "infinityQuery": {
             "format": "table",
             "parser": "backend",
-            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO RUNS\",\"value\":\"-\"}] : [$map(items, function($item) { $merge([$item, {\"text\": $replace($item.text, \" [STALE catalog]\", \"\")}]) })]",
+            "root_selector": "$exists(items) and $count(items) = 0 ? [{\"text\":\"NO RUNS\",\"value\":\"-\"}] : [$map(items, function($item) { $item })]",
             "type": "json",
             "source": "url",
             "url_options": {
@@ -271,7 +271,7 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false,
-        "description": "Provider scope: derived from Pipeline when set (first name segment, same heuristic as runtime $provider_hint), else from Workflow when set; fail-closed default is unknown when neither Pipeline nor Workflow is set. Operators may still open handoffs that pass an explicit provider value."
+        "description": "Provider scope: derived from Pipeline when set (first name segment, same heuristic as runtime $provider_hint), else from Workflow when set; fail-closed default is unknown when neither Pipeline nor Workflow is set. Operators may still open handoffs that pass an explicit provider value. This name-prefix hint is for current telemetry only, not an authoritative provider for a saved run; unknown remains unknown."
       },
       {
         "current": {
@@ -1207,26 +1207,26 @@
               "options": {
                 "filters": [
                   {
-                    "fieldName": "Value",
                     "config": {
                       "id": "greater",
                       "options": {
                         "value": 0
                       }
-                    }
+                    },
+                    "fieldName": "Value"
                   },
                   {
-                    "fieldName": "signal",
                     "config": {
                       "id": "equal",
                       "options": {
                         "value": "telemetry_gap"
                       }
-                    }
+                    },
+                    "fieldName": "signal"
                   }
                 ],
-                "type": "include",
-                "match": "any"
+                "match": "any",
+                "type": "include"
               }
             },
             {
@@ -1235,8 +1235,44 @@
                 "fields": {},
                 "sort": [
                   {
-                    "field": "Value",
-                    "desc": true
+                    "desc": false,
+                    "field": "domain"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "sortBy",
+              "options": {
+                "fields": {},
+                "sort": [
+                  {
+                    "desc": false,
+                    "field": "signal"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "sortBy",
+              "options": {
+                "fields": {},
+                "sort": [
+                  {
+                    "desc": false,
+                    "field": "object"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "sortBy",
+              "options": {
+                "fields": {},
+                "sort": [
+                  {
+                    "desc": true,
+                    "field": "Value"
                   }
                 ]
               }
@@ -1244,20 +1280,20 @@
             {
               "id": "calculateField",
               "options": {
-                "mode": "index",
-                "alias": "row_index"
+                "alias": "row_index",
+                "mode": "index"
               }
             },
             {
               "id": "calculateField",
               "options": {
-                "mode": "binary",
+                "alias": "Rank",
                 "binary": {
                   "left": "row_index",
                   "operator": "+",
                   "right": "1"
                 },
-                "alias": "Rank"
+                "mode": "binary"
               }
             },
             {
@@ -1276,16 +1312,16 @@
                   "Time": true,
                   "Time 1": true,
                   "Time 2": true,
-                  "reason": true,
+                  "__name__": true,
+                  "action_target": true,
                   "cause": true,
+                  "confidence": false,
+                  "job": true,
+                  "object": false,
+                  "reason": true,
+                  "row_index": true,
                   "run_type": true,
                   "severity": true,
-                  "action_target": true,
-                  "__name__": true,
-                  "row_index": true,
-                  "confidence": false,
-                  "object": false,
-                  "job": true,
                   "action_dashboard_uid": false
                 },
                 "indexByName": {
@@ -1302,16 +1338,16 @@
                   "object": 10
                 },
                 "renameByName": {
-                  "domain": "Domain",
-                  "signal": "Signal",
                   "Value": "Severity",
                   "action": "Action",
+                  "action_detail": "Details",
                   "confidence": "Confidence",
+                  "domain": "Domain",
+                  "freshness": "Event freshness",
                   "object": "Object",
                   "pipeline": "Pipeline",
                   "provider": "Provider",
-                  "action_detail": "Details",
-                  "freshness": "Event freshness"
+                  "signal": "Signal"
                 }
               }
             }
@@ -2987,7 +3023,7 @@
             "type": "yesoreyeram-infinity-datasource",
             "uid": "bioetl-ops-http"
           },
-          "description": "SELECTED RUN · Overall verdict is the data quality assessment of this Run ID. Processing is the ETL outcome. Trust is the saved Trust verdict and does not authorize replay. Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is Source unavailable. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response.",
+          "description": "SELECTED RUN · Overall verdict is the data quality assessment of this Run ID. Processing is the ETL outcome. Trust is the saved Trust verdict and does not authorize replay. Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is Source unavailable. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure indicates an unavailable source and must not be interpreted as an empty successful response. Requires an exact Run ID; '-' prompts selection and does not request AUTO. The Provider selector is not an input for this saved-run request.",
           "fieldConfig": {
             "defaults": {
               "noValue": "UNKNOWN",
@@ -3192,12 +3228,11 @@
               "parser": "backend",
               "format": "table",
               "root_selector": "($schema := {'_bioetl_frame': null, 'domain': null, 'verdict': null, 'status': null, 'detail': null, 'reason': null, 'reason_display': null, 'domain_reason_brief': null, 'run_reason_brief': null, 'status_display': null, 'run_execution': null, 'run_verdict': null, 'saved_trust': null, 'run_reason': null, 'parameter': null, 'value': null, 'provider': null, 'data_source': null, 'check_performed': null, 'check_result': null, 'check_result_display': null, 'provider_check_note': null, 'evidence': null, 'observed_at': null, 'observed_display': null, 'report_label': null, 'stage_id': null, 'stage_name': null, 'tracking': null, 'records_in': null, 'records_out': null, 'removals': null, 'execution_state': null, 'workflow': null, 'pipeline': null, 'run_type': null, 'run_id': null, 'started_at': null, 'completed_at': null, 'reasons_count': null, 'reasons_display': null, 'trust_status': null, 'trust_reasons_action': null, 'trust_action_note': null, 'result': null, 'step_id': null, 'mode': null, 'scope': null, 'pins': null, 'limit': null, 'meaning': null, 'check_id': null, 'replay_ready': null, 'readiness': null, 'Run duration': null, 'trust': null}; $map($append($append(($issues := presentation_domains[verdict != 'OK' and verdict != 'N/A' and verdict != 'SELECT RUN' and verdict != 'NO RUNS']; [$merge([presentation_summary[0], {'saved_trust': presentation_trust[0].trust_status, 'reason_display': $count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & ($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : ((presentation_summary[0].verdict = 'OK' or presentation_summary[0].verdict = 'SELECT RUN' or presentation_summary[0].verdict = 'NO RUNS') ? (presentation_trust[0].reasons_display ? presentation_trust[0].reasons_display : presentation_summary[0].reason) : presentation_summary[0].reason), '_bioetl_frame': 'status'}])]), $map(presentation_domains, function($row){$merge([$row, {'_bioetl_frame': 'domains'}])})), ($s := summary[0]; $a := $s.started_at; $b := $s.completed_at; $secs := function($t){( $tail := $substring($t, 19); $rest := $substring($tail, 0, 1) = '.' ? $substringAfter($tail, '.') : ''; $zone := $contains($rest, 'Z') ? 'Z' : ($contains($rest, 'z') ? 'z' : ($contains($rest, '+') ? '+' : '-')); $digits := $rest != '' ? $substringBefore($rest, $zone) : ''; $frac := $digits != '' ? $number('0.' & $digits) : 0; $sign := $contains($tail, '+') ? 1 : ($contains($tail, '-') ? -1 : 0); $off := $sign = 0 ? '' : ($contains($tail, '+') ? $substringAfter($tail, '+') : $substringAfter($tail, '-')); $oh := $off != '' ? $number($substring($off, 0, 2)) : 0; $om := $length($off) >= 4 ? $number($substring($off, $contains($off, ':') ? 3 : 2, 2)) : 0; $toMillis($substring($t, 0, 10))/1000 + $number($substring($t,11,2))*3600 + $number($substring($t,14,2))*60 + $number($substring($t,17,2)) + $frac - $sign * ($oh*3600 + $om*60) )}; $start := $a ? $secs($a) : null; $end := $b ? $secs($b) : null; [{'Run duration': $start != null and $end != null ? ($end >= $start ? $end - $start : null) : null, '_bioetl_frame': 'duration'}])), function($row){$merge([$schema, $row])}))",
-              "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
+              "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}&require_exact_run=1",
               "url_options": {
                 "method": "GET",
                 "data": ""
               },
-              "uql": "parse-json | jsonata \"($schema := {'_bioetl_frame': null, 'domain': null, 'verdict': null, 'status': null, 'detail': null, 'reason': null, 'reason_display': null, 'domain_reason_brief': null, 'run_reason_brief': null, 'status_display': null, 'run_execution': null, 'run_verdict': null, 'saved_trust': null, 'run_reason': null, 'parameter': null, 'value': null, 'provider': null, 'data_source': null, 'check_performed': null, 'check_result': null, 'check_result_display': null, 'provider_check_note': null, 'evidence': null, 'observed_at': null, 'observed_display': null, 'report_label': null, 'stage_id': null, 'stage_name': null, 'tracking': null, 'records_in': null, 'records_out': null, 'removals': null, 'execution_state': null, 'workflow': null, 'pipeline': null, 'run_type': null, 'run_id': null, 'started_at': null, 'completed_at': null, 'reasons_count': null, 'reasons_display': null, 'trust_status': null, 'trust_reasons_action': null, 'trust_action_note': null, 'result': null, 'step_id': null, 'mode': null, 'scope': null, 'pins': null, 'limit': null, 'meaning': null, 'check_id': null, 'replay_ready': null, 'readiness': null, 'Run duration': null, 'trust': null}; $map($append($append(($issues := presentation_domains[verdict != 'OK' and verdict != 'N/A' and verdict != 'SELECT RUN' and verdict != 'NO RUNS']; [$merge([presentation_summary[0], {'saved_trust': presentation_trust[0].trust_status, 'reason_display': $count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & ($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : ((presentation_summary[0].verdict = 'OK' or presentation_summary[0].verdict = 'SELECT RUN' or presentation_summary[0].verdict = 'NO RUNS') ? (presentation_trust[0].reasons_display ? presentation_trust[0].reasons_display : presentation_summary[0].reason) : presentation_summary[0].reason), '_bioetl_frame': 'status'}])]), $map(presentation_domains, function($row){$merge([$row, {'_bioetl_frame': 'domains'}])})), ($s := summary[0]; $a := $s.started_at; $b := $s.completed_at; $secs := function($t){( $tail := $substring($t, 19); $rest := $substring($tail, 0, 1) = '.' ? $substringAfter($tail, '.') : ''; $zone := $contains($rest, 'Z') ? 'Z' : ($contains($rest, 'z') ? 'z' : ($contains($rest, '+') ? '+' : '-')); $digits := $rest != '' ? $substringBefore($rest, $zone) : ''; $frac := $digits != '' ? $number('0.' & $digits) : 0; $sign := $contains($tail, '+') ? 1 : ($contains($tail, '-') ? -1 : 0); $off := $sign = 0 ? '' : ($contains($tail, '+') ? $substringAfter($tail, '+') : $substringAfter($tail, '-')); $oh := $off != '' ? $number($substring($off, 0, 2)) : 0; $om := $length($off) >= 4 ? $number($substring($off, $contains($off, ':') ? 3 : 2, 2)) : 0; $toMillis($substring($t, 0, 10))/1000 + $number($substring($t,11,2))*3600 + $number($substring($t,14,2))*60 + $number($substring($t,17,2)) + $frac - $sign * ($oh*3600 + $om*60) )}; $start := $a ? $secs($a) : null; $end := $b ? $secs($b) : null; [{'Run duration': $start != null and $end != null ? ($end >= $start ? $end - $start : null) : null, '_bioetl_frame': 'duration'}])), function($row){$merge([$schema, $row])}))\"",
               "datasource": {
                 "type": "yesoreyeram-infinity-datasource",
                 "uid": "bioetl-ops-http"
@@ -3963,10 +3998,10 @@
               "unit": "none",
               "links": [
                 {
-                  "title": "Inspect current workflow evidence and publication time",
-                  "url": "/d/bioetl-incident-v1/?viewPanel=9701&var-workflow=${__field.labels.workflow:percentencode}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+                  "includeVars": false,
                   "targetBlank": false,
-                  "includeVars": false
+                  "title": "Inspect current workflow evidence and publication time",
+                  "url": "/d/bioetl-incident-v1/5-incident-workspace?viewPanel=9701&var-workflow=${__field.labels.workflow:percentencode}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}"
                 }
               ]
             },
@@ -5255,7 +5290,18 @@
                       "color": "text"
                     },
                     "1": {
-                      "text": "CRIT",
+                      "text": "1 blocker · CRIT",
+                      "color": "red"
+                    }
+                  }
+                },
+                {
+                  "type": "range",
+                  "options": {
+                    "from": 2,
+                    "to": 9007199254740991,
+                    "result": {
+                      "text": "2+ blockers · CRIT",
                       "color": "red"
                     }
                   }
@@ -5873,7 +5919,7 @@
                   }
                 ]
               },
-              "unit": "bool",
+              "unit": "none",
               "displayName": "Monitor Memory Pressure Active"
             },
             "overrides": []
@@ -6128,7 +6174,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Observed selected-range processed-record counter increases by Stage and Run Type for the selected Pipeline and Stage. Run ID does not filter this query. Prometheus increase estimates changes between scraped samples; the initial counter value is not an observed increase. These values can differ from persisted selected-run totals. Use Run Explorer for exact-run counts. An empty chart means no matching samples or unavailable telemetry, not successful processing. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "TIME RANGE · Observed selected-range processed-record counter increases by Stage and Run Type for the selected Pipeline. Stages matching \"none.*\" are always excluded. Run ID does not filter this query. Prometheus increase estimates changes between scraped samples; the initial counter value is not an observed increase. These values can differ from persisted selected-run totals. Use Run Explorer for exact-run counts. An empty chart means no matching samples or unavailable telemetry, not successful processing. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -6187,7 +6233,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "stage"
+                  "options": "Stage"
                 },
                 "properties": [
                   {
@@ -6199,14 +6245,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "Value"
-                },
-                "properties": []
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Value"
+                  "options": "Count"
                 },
                 "properties": [
                   {
@@ -6657,7 +6696,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Shows selected-range processed records by Stage for Pipeline and Run Type. An empty chart means no matching samples or unavailable telemetry; it does not prove successful delivery. Run ID never filters Prometheus TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "TIME RANGE · Maximum observed processed-record counter sample in each interval, by Stage for the selected Pipeline and Run Type. This series shows the scraped snapshots, which can repeat across CLI runs. Overlapping points and values from panel 241 cannot be added to derive a run total. Panel 241 also excludes stages matching none.*. For exact counts, inspect the saved run in Run Explorer. Run ID does not filter this query. An empty chart means no matching samples or unavailable telemetry, not successful processing.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -7533,6 +7572,23 @@
               ],
               "mappings": [
                 {
+                  "type": "value",
+                  "options": {
+                    "0": {
+                      "text": "OK",
+                      "color": "green"
+                    },
+                    "1": {
+                      "text": "WARN",
+                      "color": "orange"
+                    },
+                    "2": {
+                      "text": "CRIT",
+                      "color": "red"
+                    }
+                  }
+                },
+                {
                   "type": "special",
                   "options": {
                     "match": "null",
@@ -7547,7 +7603,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -9114,6 +9170,23 @@
               ],
               "mappings": [
                 {
+                  "type": "value",
+                  "options": {
+                    "0": {
+                      "text": "OK",
+                      "color": "green"
+                    },
+                    "1": {
+                      "text": "WARN",
+                      "color": "orange"
+                    },
+                    "2": {
+                      "text": "CRIT",
+                      "color": "red"
+                    }
+                  }
+                },
+                {
                   "type": "special",
                   "options": {
                     "match": "null",
@@ -9128,7 +9201,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -9182,7 +9255,7 @@
           "pluginVersion": "9.5.0",
           "targets": [
             {
-              "expr": "sum(bioetl_control_plane_manifest_fail_severity_30m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
+              "expr": "max(bioetl_control_plane_manifest_fail_severity_30m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
               "instant": true,
               "refId": "A",
               "datasource": {
@@ -9398,6 +9471,23 @@
               ],
               "mappings": [
                 {
+                  "type": "value",
+                  "options": {
+                    "0": {
+                      "text": "OK",
+                      "color": "green"
+                    },
+                    "1": {
+                      "text": "WARN",
+                      "color": "orange"
+                    },
+                    "2": {
+                      "text": "CRIT",
+                      "color": "red"
+                    }
+                  }
+                },
+                {
                   "type": "special",
                   "options": {
                     "match": "null",
@@ -9412,7 +9502,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
+                    "color": "text",
                     "value": null
                   },
                   {
@@ -9466,7 +9556,7 @@
           "pluginVersion": "9.5.0",
           "targets": [
             {
-              "expr": "sum(bioetl_control_plane_ledger_fail_severity_30m{pipeline=~\"$pipeline\"})",
+              "expr": "max(bioetl_control_plane_ledger_fail_severity_30m{pipeline=~\"$pipeline\"})",
               "instant": true,
               "refId": "A",
               "datasource": {
@@ -9824,7 +9914,7 @@
           },
           "targets": [
             {
-              "expr": "(histogram_quantile($read_latency_quantile, (sum by (le, store, operation) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])) unless on (store, operation) (sum by (store, operation) (changes(bioetl_control_plane_read_duration_seconds_created{status!=\"failed\"}[$__range]) > 0))))) >= 0",
+              "expr": "(histogram_quantile($read_latency_quantile, (sum by (le, store, operation) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__rate_interval])) unless on (store, operation) (sum by (store, operation) (changes(bioetl_control_plane_read_duration_seconds_created{status!=\"failed\"}[$__rate_interval]) > 0))))) >= 0",
               "legendFormat": "{{store}} / {{operation}}",
               "refId": "A",
               "datasource": {
@@ -10561,23 +10651,7 @@
                 "minWidth": 50,
                 "wrapHeaderText": true
               },
-              "mappings": [
-                {
-                  "type": "value",
-                  "options": {
-                    "0": {
-                      "color": "blue",
-                      "index": 1,
-                      "text": "disabled"
-                    },
-                    "1": {
-                      "color": "green",
-                      "index": 0,
-                      "text": "expected"
-                    }
-                  }
-                }
-              ],
+              "mappings": [],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -10954,7 +11028,7 @@
           },
           "targets": [
             {
-              "expr": "(histogram_quantile(0.50, (sum by (le, pipeline, operation) (increase(bioetl_checkpoint_save_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__range])) unless on (pipeline, operation) (sum by (pipeline, operation) (changes(bioetl_checkpoint_save_duration_seconds_created{pipeline=~\"$pipeline\"}[$__range]) > 0))))) >= 0",
+              "expr": "(histogram_quantile(0.50, (sum by (le, pipeline, operation) (increase(bioetl_checkpoint_save_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__rate_interval])) unless on (pipeline, operation) (sum by (pipeline, operation) (changes(bioetl_checkpoint_save_duration_seconds_created{pipeline=~\"$pipeline\"}[$__rate_interval]) > 0))))) >= 0",
               "legendFormat": "p50 {{pipeline}} / {{operation}}",
               "refId": "A",
               "datasource": {
@@ -10963,7 +11037,7 @@
               }
             },
             {
-              "expr": "(histogram_quantile(0.95, (sum by (le, pipeline, operation) (increase(bioetl_checkpoint_save_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__range])) unless on (pipeline, operation) (sum by (pipeline, operation) (changes(bioetl_checkpoint_save_duration_seconds_created{pipeline=~\"$pipeline\"}[$__range]) > 0))))) >= 0",
+              "expr": "(histogram_quantile(0.95, (sum by (le, pipeline, operation) (increase(bioetl_checkpoint_save_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__rate_interval])) unless on (pipeline, operation) (sum by (pipeline, operation) (changes(bioetl_checkpoint_save_duration_seconds_created{pipeline=~\"$pipeline\"}[$__rate_interval]) > 0))))) >= 0",
               "legendFormat": "p95 {{pipeline}} / {{operation}}",
               "refId": "B",
               "datasource": {
@@ -10972,7 +11046,7 @@
               }
             },
             {
-              "expr": "(histogram_quantile(0.99, (sum by (le, pipeline, operation) (increase(bioetl_checkpoint_save_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__range])) unless on (pipeline, operation) (sum by (pipeline, operation) (changes(bioetl_checkpoint_save_duration_seconds_created{pipeline=~\"$pipeline\"}[$__range]) > 0))))) >= 0",
+              "expr": "(histogram_quantile(0.99, (sum by (le, pipeline, operation) (increase(bioetl_checkpoint_save_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__rate_interval])) unless on (pipeline, operation) (sum by (pipeline, operation) (changes(bioetl_checkpoint_save_duration_seconds_created{pipeline=~\"$pipeline\"}[$__rate_interval]) > 0))))) >= 0",
               "legendFormat": "p99 {{pipeline}} / {{operation}}",
               "refId": "C",
               "datasource": {
@@ -11050,7 +11124,7 @@
           },
           "targets": [
             {
-              "expr": "(histogram_quantile(0.50, (sum by (le) (increase(bioetl_audit_write_duration_seconds_bucket[$__range])) unless on () (sum (changes(bioetl_audit_write_duration_seconds_created[$__range]) > 0))))) >= 0",
+              "expr": "(histogram_quantile(0.50, (sum by (le) (increase(bioetl_audit_write_duration_seconds_bucket[$__rate_interval])) unless on () (sum (changes(bioetl_audit_write_duration_seconds_created[$__rate_interval]) > 0))))) >= 0",
               "legendFormat": "p50",
               "refId": "A",
               "datasource": {
@@ -11059,7 +11133,7 @@
               }
             },
             {
-              "expr": "(histogram_quantile(0.95, (sum by (le) (increase(bioetl_audit_write_duration_seconds_bucket[$__range])) unless on () (sum (changes(bioetl_audit_write_duration_seconds_created[$__range]) > 0))))) >= 0",
+              "expr": "(histogram_quantile(0.95, (sum by (le) (increase(bioetl_audit_write_duration_seconds_bucket[$__rate_interval])) unless on () (sum (changes(bioetl_audit_write_duration_seconds_created[$__rate_interval]) > 0))))) >= 0",
               "legendFormat": "p95",
               "refId": "B",
               "datasource": {
@@ -11068,7 +11142,7 @@
               }
             },
             {
-              "expr": "(histogram_quantile(0.99, (sum by (le) (increase(bioetl_audit_write_duration_seconds_bucket[$__range])) unless on () (sum (changes(bioetl_audit_write_duration_seconds_created[$__range]) > 0))))) >= 0",
+              "expr": "(histogram_quantile(0.99, (sum by (le) (increase(bioetl_audit_write_duration_seconds_bucket[$__rate_interval])) unless on () (sum (changes(bioetl_audit_write_duration_seconds_created[$__rate_interval]) > 0))))) >= 0",
               "legendFormat": "p99",
               "refId": "C",
               "datasource": {
@@ -11147,7 +11221,7 @@
           },
           "targets": [
             {
-              "expr": "(histogram_quantile(0.50, (sum by (le, operation) (increase(bioetl_checkpoint_operator_duration_seconds_bucket[$__range])) unless on (operation) (sum by (operation) (changes(bioetl_checkpoint_operator_duration_seconds_created[$__range]) > 0))))) >= 0",
+              "expr": "(histogram_quantile(0.50, (sum by (le, operation) (increase(bioetl_checkpoint_operator_duration_seconds_bucket[$__rate_interval])) unless on (operation) (sum by (operation) (changes(bioetl_checkpoint_operator_duration_seconds_created[$__rate_interval]) > 0))))) >= 0",
               "legendFormat": "p50 {{operation}}",
               "refId": "A",
               "datasource": {
@@ -11156,7 +11230,7 @@
               }
             },
             {
-              "expr": "(histogram_quantile(0.95, (sum by (le, operation) (increase(bioetl_checkpoint_operator_duration_seconds_bucket[$__range])) unless on (operation) (sum by (operation) (changes(bioetl_checkpoint_operator_duration_seconds_created[$__range]) > 0))))) >= 0",
+              "expr": "(histogram_quantile(0.95, (sum by (le, operation) (increase(bioetl_checkpoint_operator_duration_seconds_bucket[$__rate_interval])) unless on (operation) (sum by (operation) (changes(bioetl_checkpoint_operator_duration_seconds_created[$__rate_interval]) > 0))))) >= 0",
               "legendFormat": "p95 {{operation}}",
               "refId": "B",
               "datasource": {
@@ -11165,7 +11239,7 @@
               }
             },
             {
-              "expr": "(histogram_quantile(0.99, (sum by (le, operation) (increase(bioetl_checkpoint_operator_duration_seconds_bucket[$__range])) unless on (operation) (sum by (operation) (changes(bioetl_checkpoint_operator_duration_seconds_created[$__range]) > 0))))) >= 0",
+              "expr": "(histogram_quantile(0.99, (sum by (le, operation) (increase(bioetl_checkpoint_operator_duration_seconds_bucket[$__rate_interval])) unless on (operation) (sum by (operation) (changes(bioetl_checkpoint_operator_duration_seconds_created[$__rate_interval]) > 0))))) >= 0",
               "legendFormat": "p99 {{operation}}",
               "refId": "C",
               "datasource": {
@@ -11243,7 +11317,7 @@
           },
           "targets": [
             {
-              "expr": "(histogram_quantile(0.50, (sum by (le) (increase(bioetl_audit_query_duration_seconds_bucket[$__range])) unless on () (sum (changes(bioetl_audit_query_duration_seconds_created[$__range]) > 0))))) >= 0",
+              "expr": "(histogram_quantile(0.50, (sum by (le) (increase(bioetl_audit_query_duration_seconds_bucket[$__rate_interval])) unless on () (sum (changes(bioetl_audit_query_duration_seconds_created[$__rate_interval]) > 0))))) >= 0",
               "legendFormat": "p50",
               "refId": "A",
               "datasource": {
@@ -11252,7 +11326,7 @@
               }
             },
             {
-              "expr": "(histogram_quantile(0.95, (sum by (le) (increase(bioetl_audit_query_duration_seconds_bucket[$__range])) unless on () (sum (changes(bioetl_audit_query_duration_seconds_created[$__range]) > 0))))) >= 0",
+              "expr": "(histogram_quantile(0.95, (sum by (le) (increase(bioetl_audit_query_duration_seconds_bucket[$__rate_interval])) unless on () (sum (changes(bioetl_audit_query_duration_seconds_created[$__rate_interval]) > 0))))) >= 0",
               "legendFormat": "p95",
               "refId": "B",
               "datasource": {
@@ -11261,7 +11335,7 @@
               }
             },
             {
-              "expr": "(histogram_quantile(0.99, (sum by (le) (increase(bioetl_audit_query_duration_seconds_bucket[$__range])) unless on () (sum (changes(bioetl_audit_query_duration_seconds_created[$__range]) > 0))))) >= 0",
+              "expr": "(histogram_quantile(0.99, (sum by (le) (increase(bioetl_audit_query_duration_seconds_bucket[$__rate_interval])) unless on () (sum (changes(bioetl_audit_query_duration_seconds_created[$__rate_interval]) > 0))))) >= 0",
               "legendFormat": "p99",
               "refId": "C",
               "datasource": {
@@ -12082,26 +12156,26 @@
                   "options": {
                     "filters": [
                       {
-                        "fieldName": "Value",
                         "config": {
                           "id": "greater",
                           "options": {
                             "value": 0
                           }
-                        }
+                        },
+                        "fieldName": "Value"
                       },
                       {
-                        "fieldName": "signal",
                         "config": {
                           "id": "equal",
                           "options": {
                             "value": "telemetry_gap"
                           }
-                        }
+                        },
+                        "fieldName": "signal"
                       }
                     ],
-                    "type": "include",
-                    "match": "any"
+                    "match": "any",
+                    "type": "include"
                   }
                 },
                 {
@@ -12110,8 +12184,44 @@
                     "fields": {},
                     "sort": [
                       {
-                        "field": "Value",
-                        "desc": true
+                        "desc": false,
+                        "field": "domain"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "sortBy",
+                  "options": {
+                    "fields": {},
+                    "sort": [
+                      {
+                        "desc": false,
+                        "field": "signal"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "sortBy",
+                  "options": {
+                    "fields": {},
+                    "sort": [
+                      {
+                        "desc": false,
+                        "field": "object"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "sortBy",
+                  "options": {
+                    "fields": {},
+                    "sort": [
+                      {
+                        "desc": true,
+                        "field": "Value"
                       }
                     ]
                   }
@@ -12119,29 +12229,29 @@
                 {
                   "id": "calculateField",
                   "options": {
-                    "mode": "index",
-                    "alias": "row_index"
+                    "alias": "row_index",
+                    "mode": "index"
                   }
                 },
                 {
                   "id": "calculateField",
                   "options": {
-                    "mode": "binary",
+                    "alias": "Rank",
                     "binary": {
                       "left": "row_index",
                       "operator": "+",
                       "right": "1"
                     },
-                    "alias": "Rank"
+                    "mode": "binary"
                   }
                 },
                 {
                   "id": "extractFields",
                   "options": {
-                    "source": "signal",
                     "format": "regexp",
                     "regExp": "/(?<action_detail>.*)/",
-                    "replace": false
+                    "replace": false,
+                    "source": "signal"
                   }
                 },
                 {
@@ -12151,17 +12261,17 @@
                       "Time": true,
                       "Time 1": true,
                       "Time 2": true,
-                      "reason": true,
-                      "cause": true,
-                      "run_type": true,
-                      "severity": true,
-                      "action_target": true,
                       "__name__": true,
-                      "row_index": true,
+                      "action_dashboard_uid": false,
+                      "action_target": true,
+                      "cause": true,
                       "confidence": false,
-                      "object": false,
                       "job": true,
-                      "action_dashboard_uid": false
+                      "object": false,
+                      "reason": true,
+                      "row_index": true,
+                      "run_type": true,
+                      "severity": true
                     },
                     "indexByName": {
                       "Rank": 0,
@@ -12177,16 +12287,16 @@
                       "object": 10
                     },
                     "renameByName": {
-                      "domain": "Domain",
-                      "signal": "Signal",
                       "Value": "Severity",
                       "action": "Action",
+                      "action_detail": "Details",
                       "confidence": "Confidence",
+                      "domain": "Domain",
+                      "freshness": "Event freshness",
                       "object": "Object",
                       "pipeline": "Pipeline",
                       "provider": "Provider",
-                      "action_detail": "Details",
-                      "freshness": "Event freshness"
+                      "signal": "Signal"
                     }
                   }
                 }
