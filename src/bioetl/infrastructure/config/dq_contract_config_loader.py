@@ -6,10 +6,11 @@ import json
 from pathlib import Path
 from typing import Any, Literal, TypeGuard
 
+import yaml
+
 from bioetl.domain.config import DQConfig
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.dq_contracts import DQDisposition
-from bioetl.infrastructure.config.base_config_loader import _load_yaml_file
 from bioetl.infrastructure.config.contract_registry_loader import (
     load_contract_registry_entries,
     load_contract_registry_entry,
@@ -140,11 +141,9 @@ def _build_contract_patterns(
 
 def _load_contract_payload(path: Path) -> JsonDict:
     """Load single contract payload from YAML/JSON."""
-    if path.suffix == ".json":
-        with open(path, encoding="utf-8") as file:
-            data = json.load(file)
-        return data if isinstance(data, dict) else {}
-    return _load_yaml_file(path)
+    with open(path, encoding="utf-8") as file:
+        data = json.load(file) if path.suffix == ".json" else yaml.safe_load(file)
+    return data if isinstance(data, dict) else {}
 
 
 class DQContractConfigLoader:

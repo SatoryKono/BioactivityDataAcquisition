@@ -29,7 +29,9 @@
 
 from __future__ import annotations
 
+import builtins
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 import yaml
@@ -99,6 +101,39 @@ def test_loader_aligns_identity_from_registry(temp_contract_root: Path) -> None:
     assert dq_config.default_disposition_policy == DQDisposition.WARN
     assert dq_config.soft_fail_threshold == pytest.approx(0.03)
     assert dq_config.hard_fail_threshold == pytest.approx(0.25)
+
+
+@pytest.mark.parametrize("error_type", [PermissionError, OSError, FileNotFoundError])
+def test_required_contract_read_failure_does_not_use_defaults(
+    error_type: type[OSError],
+) -> None:
+    """An unreadable selected contract must not silently discard real policy settings."""
+    configs_root = Path(__file__).resolve().parents[4] / "configs"
+    contract = configs_root / "contracts" / "chembl" / "activity.yaml"
+    loader = DQContractConfigLoader(configs_root)
+    baseline = loader.load_dq_config_for_pipeline("chembl_activity")
+    assert len(baseline.disposition_overrides) == 10
+    assert baseline.report.sample_size == 1000
+
+    original_open = builtins.open
+
+    def fail_contract(file: object, *args: object, **kwargs: object):
+        if file == contract:
+            raise error_type("injected contract read failure")
+        return original_open(file, *args, **kwargs)
+
+    with patch("builtins.open", side_effect=fail_contract):
+        with pytest.raises(error_type, match="injected contract read failure"):
+            loader.load_dq_config_for_pipeline("chembl_activity")
+
+
+def test_required_contract_rejects_malformed_yaml(temp_contract_root: Path) -> None:
+    contract = temp_contract_root / "contracts" / "chembl" / "activity.yaml"
+    contract.write_text("invalid: [yaml", encoding="utf-8")
+    with pytest.raises(yaml.YAMLError):
+        DQContractConfigLoader(temp_contract_root).load_dq_config_for_pipeline(
+            "chembl_activity"
+        )
 
 
 def test_loader_rejects_registry_identity_mismatch(temp_contract_root: Path) -> None:
