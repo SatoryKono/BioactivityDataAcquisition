@@ -60,6 +60,9 @@ from bioetl.infrastructure.config.contract_policy_loader import (
 from bioetl.infrastructure.config.pipeline_config_api import (
     load_pipeline_config_from_root,
 )
+from bioetl.infrastructure.schemas.pipeline_contract_policy import (
+    PipelineContractPolicy,
+)
 from scripts.schema.validation import (
     audit_effective_optionality as optionality_audit_script,
 )
@@ -1035,6 +1038,49 @@ class TestNoUnknownKeys:
     def test_check_inv_005_script_passes(self) -> None:
         errors = invariant_script.check_inv_005(verbose=False)
         assert errors == []
+
+    def test_contract_allowed_keys_match_policy_fields(self) -> None:
+        assert CONTRACT_ALLOWED_KEYS == set(PipelineContractPolicy.model_fields)
+
+    @pytest.mark.parametrize("key", ["scd_type", "gold_business_rules", "unknown_key"])
+    def test_contract_policy_rejects_unsupported_keys(
+        self, key: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        contracts = {
+            "primary_key": ["id"],
+            "merge_keys": ["id"],
+            "contract_ref": "test.entity",
+            "active_version": "1.0.0",
+            "rollout": {
+                "mode": "single",
+                "read_order": ["1.0.0"],
+                "write_versions": ["1.0.0"],
+            },
+        }
+        entity_path = tmp_path / "configs/entities/test/entity.yaml"
+        entity_path.parent.mkdir(parents=True)
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setattr(invariant_script, "_entity_configs", lambda: [entity_path])
+        monkeypatch.setattr(invariant_script, "_provider_configs", lambda: [])
+        monkeypatch.setattr(invariant_script, "_composite_configs", lambda: [])
+
+        entity_path.write_text(
+            yaml.safe_dump({"contracts": contracts}), encoding="utf-8"
+        )
+        assert invariant_script.check_inv_005(verbose=False) == []
+        load_pipeline_contract_policy.cache_clear()
+        assert load_pipeline_contract_policy("test", "entity").primary_key == ["id"]
+
+        contracts[key] = 2 if key == "scd_type" else []
+        entity_path.write_text(
+            yaml.safe_dump({"contracts": contracts}), encoding="utf-8"
+        )
+        assert any(
+            key in error for error in invariant_script.check_inv_005(verbose=False)
+        )
+        load_pipeline_contract_policy.cache_clear()
+        with pytest.raises(ValueError, match="Extra inputs are not permitted"):
+            load_pipeline_contract_policy("test", "entity")
 
     @pytest.mark.parametrize("config_path", _collect_pipeline_configs(), ids=_rel)
     def test_entity_top_level_keys(self, config_path: Path) -> None:
