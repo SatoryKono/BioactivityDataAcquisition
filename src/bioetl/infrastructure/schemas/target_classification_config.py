@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import Self
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_serializer, model_validator
 
 from bioetl.domain.config.target_classification import (
     TargetClassificationConfig,
     TargetClassificationMode,
+    TargetTableContract,
 )
 
 
@@ -44,7 +46,24 @@ class TargetClassificationYamlConfig(BaseModel):
                             },
                         },
                     },
-                }
+                },
+                {
+                    # Missing mode also matches: the runtime defaults to off.
+                    "if": {"properties": {"mode": {"enum": ["off", "shadow"]}}},
+                    "then": {
+                        "properties": {"table_contract": {"enum": ["3.0.0", None]}}
+                    },
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "mode": {"const": "enrich"},
+                            "table_contract": {"const": "3.0.0"},
+                        },
+                        "required": ["mode", "table_contract"],
+                    },
+                    "then": {"not": {}},
+                },
             ],
         },
     )
@@ -54,6 +73,21 @@ class TargetClassificationYamlConfig(BaseModel):
     snapshot_manifest_sha256: str | None = Field(
         default=None, pattern=r"^[0-9a-f]{64}$"
     )
+    table_contract: TargetTableContract | None = None
+
+    @model_serializer(mode="wrap")
+    def _omit_absent_table_contract(
+        self, handler: Callable[[TargetClassificationYamlConfig], object]
+    ) -> object:
+        """Omit a null selector so manifests written before the field still match."""
+        payload = handler(self)
+        if (
+            isinstance(payload, dict)
+            and "table_contract" in payload
+            and payload["table_contract"] is None
+        ):
+            payload.pop("table_contract")
+        return payload
 
     @model_validator(mode="after")
     def validate_profile(self) -> Self:
@@ -65,6 +99,7 @@ class TargetClassificationYamlConfig(BaseModel):
             mode=self.mode,
             snapshot_manifest=self.snapshot_manifest,
             snapshot_manifest_sha256=self.snapshot_manifest_sha256,
+            table_contract=self.table_contract,
         )
 
 
