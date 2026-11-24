@@ -29,6 +29,7 @@ from iuphar_target_class.pipeline_proof import (
     _classification_input_projection,
     execution_semantics,
 )
+from iuphar_target_class.policy import LOCAL_CATALOG_VERSION
 from iuphar_target_class.stage0.io import (
     canonical_json_bytes,
     sha256_bytes,

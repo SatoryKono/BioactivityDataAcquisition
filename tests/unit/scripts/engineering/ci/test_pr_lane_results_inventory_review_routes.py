@@ -1,4 +1,4 @@
-"""Keep pr13166 inventory review snapshots on their bounded impact owners."""
+"""Keep inventory review snapshots on their bounded impact owners."""
 
 from __future__ import annotations
 
@@ -40,6 +40,14 @@ UNKNOWN = "configs/quality/external_resource_inventory_pr0_unreviewed.json"
 def test_pr13166_inventory_review_snapshots_keep_bounded_owners(path: str) -> None:
     selected = affected_pytest_targets([path], repo_root=ROOT)
     assert OWNERS.issubset(selected)
+    assert build_shadow_compare([path], repo_root=ROOT)["covers_full_suite"] is False
+    with pytest.raises(ValueError, match="unmapped"):
+        build_shadow_compare([path, UNKNOWN], repo_root=ROOT)
+
+
+def test_pr13346_review_receipt_routes_only_to_inventory_owners() -> None:
+    path = "configs/quality/external_resource_inventory_pr13346_dq_alias_review.json"
+    assert set(affected_pytest_targets([path], repo_root=ROOT)) == OWNERS
     assert build_shadow_compare([path], repo_root=ROOT)["covers_full_suite"] is False
     with pytest.raises(ValueError, match="unmapped"):
         build_shadow_compare([path, UNKNOWN], repo_root=ROOT)

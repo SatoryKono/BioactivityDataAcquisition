@@ -479,6 +479,108 @@ async def test_checkpoint_workflow_to_dict_blocks_identity_mismatch() -> None:
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("with_checkpoint", [False, True])
+async def test_manifest_checkpoint_diagnostics_binds_context(
+    with_checkpoint: bool,
+) -> None:
+    checkpoint = (
+        CheckpointInfo(pipeline_name="chembl_activity", run_id="run-123", metadata={})
+        if with_checkpoint
+        else None
+    )
+    checkpoints = mock.AsyncMock()
+    checkpoints.get_checkpoint_for_manifest_id.return_value = checkpoint
+    audits = mock.AsyncMock()
+    audits.inspect_run.return_value = AuditInspectionResult(query={}, entries=())
+    manifests = mock.Mock()
+    manifests.show.return_value = manifest = _make_checkpoint_manifest_result()
+    service = ObservabilityWorkflowService(
+        audit_service=audits,
+        checkpoint_service=checkpoints,
+        run_manifest_service=manifests,
+    )
+
+    result = await service.inspect_checkpoint_workflow(
+        "chembl_activity", manifest_id="manifest-1", audit_limit=9
+    )
+
+    assert result.checkpoint is checkpoint
+    assert result.run_manifest is manifest
+    manifests.show.assert_called_once_with("manifest-1")
+    audits.inspect_run.assert_awaited_once_with("run-123", limit=9)
+    if not with_checkpoint:
+        compatibility = result.to_dict()["compatibility"]
+        assert compatibility["taxonomy"] == "missing_checkpoint"
+        assert compatibility["compatible"] is False
+        assert "checkpoint" in compatibility["missing_anchors"]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("field", ["manifest_id", "pipeline_name"])
+async def test_manifest_checkpoint_diagnostics_rejects_wrong_manifest_identity(
+    field: str,
+) -> None:
+    checkpoints = mock.AsyncMock()
+    checkpoints.get_checkpoint_for_manifest_id.return_value = None
+    audits = mock.AsyncMock()
+    manifests = mock.Mock()
+    manifests.show.return_value = manifest = _make_checkpoint_manifest_result()
+    setattr(manifest.manifest, field, "wrong")
+    service = ObservabilityWorkflowService(
+        audit_service=audits,
+        checkpoint_service=checkpoints,
+        run_manifest_service=manifests,
+    )
+
+    with pytest.raises(ValueError, match="manifest identity"):
+        await service.inspect_checkpoint_workflow(
+            "chembl_activity", manifest_id="manifest-1"
+        )
+    audits.inspect_run.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_manifest_checkpoint_diagnostics_rejects_unbound_context() -> None:
+    checkpoints = mock.AsyncMock()
+    checkpoints.get_checkpoint_for_manifest_id.return_value = CheckpointInfo(
+        pipeline_name="chembl_activity", run_id="other-run", metadata={}
+    )
+    audits = mock.AsyncMock()
+    manifests = mock.Mock()
+    manifests.show.return_value = _make_checkpoint_manifest_result()
+    service = ObservabilityWorkflowService(
+        audit_service=audits,
+        checkpoint_service=checkpoints,
+        run_manifest_service=manifests,
+    )
+
+    with pytest.raises(ValueError, match="run identity"):
+        await service.inspect_checkpoint_workflow(
+            "chembl_activity", manifest_id="manifest-1"
+        )
+    audits.inspect_run.assert_not_awaited()
+
+    checkpoints.get_checkpoint_for_manifest_id.return_value = None
+    manifests.show.side_effect = ValueError("unknown manifest")
+    result = await service.inspect_checkpoint_workflow(
+        "chembl_activity", manifest_id="unknown"
+    )
+    assert result.run_manifest is None
+    assert result.checkpoint is None
+    audits.inspect_run.assert_not_awaited()
+
+    checkpoints.get_checkpoint_for_manifest_id.return_value = CheckpointInfo(
+        pipeline_name="chembl_activity", run_id="run-123", metadata={}
+    )
+    audits.inspect_run.return_value = AuditInspectionResult(query={}, entries=())
+    result = await service.inspect_checkpoint_workflow(
+        "chembl_activity", manifest_id="manifest-1"
+    )
+    assert result.run_manifest is None
+    audits.inspect_run.assert_awaited_once_with("run-123", limit=100)
+
+
+@pytest.mark.asyncio
 async def test_checkpoint_workflow_returns_empty_audit_without_run_context() -> None:
     checkpoint_service = mock.AsyncMock()
     checkpoint_service.get_checkpoint.return_value = CheckpointInfo(
