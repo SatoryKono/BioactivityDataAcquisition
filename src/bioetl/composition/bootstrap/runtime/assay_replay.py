@@ -2,14 +2,20 @@
 
 from __future__ import annotations
 
+
+from contextvars import Token
 from pathlib import Path
-from uuid import UUID
 from typing import Literal, cast
+from uuid import UUID
 
 from bioetl.application.ports.storage import CompositeMergeStorageProtocol
 from bioetl.application.services.run_reports.observations import (
     bind_run_observations,
     reset_run_observations,
+)
+from bioetl.application.services.target_runtime.scope import (
+    bind_target_classification_dependency,
+    reset_target_classification_dependency,
 )
 from bioetl.application.composite.runtime_wiring_api import (
     JOIN_KEY_NORMALIZATION_POLICIES,
@@ -40,6 +46,7 @@ from bioetl.infrastructure.storage.composite_replay_bundle import (
     digest_bytes,
     load_verified_json,
     publish_json,
+    restore_target_classification_config,
     verify_bundle,
 )
 from bioetl.infrastructure.storage.composite_replay_evidence import (
@@ -56,6 +63,20 @@ from bioetl.application.composite.helpers.replay_context import (
     restore_field_groups,
     restore_merge_request,
 )
+
+
+def _bind_target_replay(
+    root: Path, envelope: JsonDict
+) -> Token[dict[str, object] | None] | None:
+    if envelope["pipeline"] != "composite_target":
+        return None
+    pinned = restore_target_classification_config(root, envelope["objects"])
+    payload: dict[str, object] = (
+        {"target_config": pinned}
+        if pinned is not None
+        else {"replay_mode": "historical"}
+    )
+    return bind_target_classification_dependency(payload)
 
 
 async def replay_assay(
@@ -110,12 +131,15 @@ async def replay_assay(
             settings=settings,
         )
         observation_token = bind_run_observations()
+        target_token = None
         try:
+            target_token = _bind_target_replay(root, envelope)
             merger = build_composite_merge_service(
                 config=config,
                 storage=cast(CompositeMergeStorageProtocol, storage),
                 resolve_gold_schema=resolve_composite_gold_schema,
                 delta_reader=reader,
+                classification_settings=settings,
                 field_group_registry=restore_field_groups(verified_json(field_key))
                 if field_key in objects
                 else None,
@@ -151,6 +175,8 @@ async def replay_assay(
             try:
                 await storage.aclose()
             finally:
+                if target_token is not None:
+                    reset_target_classification_dependency(target_token)
                 reset_run_observations(observation_token)
 
 
