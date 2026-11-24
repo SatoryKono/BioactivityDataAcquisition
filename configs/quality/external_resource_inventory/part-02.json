@@ -6545,7 +6545,7 @@
         "atomic_csv_write"
       ],
       "owner": "append_to_csv; atomic_csv_write owning operation (see exact source sites)",
-      "closer": "os.close at src/bioetl/infrastructure/export/csv_exporter_io_ops.py:85; temp_path.unlink at src/bioetl/infrastructure/export/csv_exporter_io_ops.py:102; os.close at src/bioetl/infrastructure/export/csv_exporter_io_ops.py:120; temp_path.unlink at src/bioetl/infrastructure/export/csv_exporter_io_ops.py:144; temp_path.unlink at src/bioetl/infrastructure/export/csv_exporter_io_ops.py:140",
+      "closer": "os.close at src/bioetl/infrastructure/export/csv_exporter_io_ops.py:210; temp_path.unlink at src/bioetl/infrastructure/export/csv_exporter_io_ops.py:220; temp_path.unlink at src/bioetl/infrastructure/export/csv_exporter_io_ops.py:234; os.close at src/bioetl/infrastructure/export/csv_exporter_io_ops.py:263; temp_path.unlink at src/bioetl/infrastructure/export/csv_exporter_io_ops.py:275; temp_path.unlink at src/bioetl/infrastructure/export/csv_exporter_io_ops.py:290; temp_path.unlink at src/bioetl/infrastructure/export/csv_exporter_io_ops.py:294",
       "shutdown_contract": "Actual normal-path close/descriptor-to-stream transfer points are listed explicitly. Raw descriptor ownership starts at successful allocation; failed fdopen/open construction has not transferred ownership to a stream. No cleanup guarantee is inferred from a later with-block. Temp-path unlink and descriptor close are separate obligations.",
       "production_entrypoint": "pipeline/workflow runtime -> StorageFactory -> configured layer writer",
       "production_binding": [
@@ -6779,20 +6779,44 @@
           "line": 290,
           "expression": "temp_path.unlink()",
           "cleanup_relation": "actual close/transfer in enclosing implementation"
+        },
+        {
+          "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
+          "source_commit": "af59e1d7e2f979039876c690b4262c840a453e34",
+          "source_blob": "549d8a4e1e000461f32aa1a7dd4811de1c27875a",
+          "content_sha256": "fc717096400eaacd74b6606fa1b56e5f04e4d959ce35c9475586a50e901fe4f0",
+          "line": 220,
+          "expression": "temp_path.unlink()"
+        },
+        {
+          "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
+          "source_commit": "af59e1d7e2f979039876c690b4262c840a453e34",
+          "source_blob": "549d8a4e1e000461f32aa1a7dd4811de1c27875a",
+          "content_sha256": "fc717096400eaacd74b6606fa1b56e5f04e4d959ce35c9475586a50e901fe4f0",
+          "line": 275,
+          "expression": "temp_path.unlink()"
+        },
+        {
+          "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
+          "source_commit": "af59e1d7e2f979039876c690b4262c840a453e34",
+          "source_blob": "549d8a4e1e000461f32aa1a7dd4811de1c27875a",
+          "content_sha256": "fc717096400eaacd74b6606fa1b56e5f04e4d959ce35c9475586a50e901fe4f0",
+          "line": 294,
+          "expression": "temp_path.unlink()"
         }
       ],
       "configuration_predicates": [],
       "shutdown_by_site": [
         {
           "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
-          "line": 78,
-          "closer": "os.close at src/bioetl/infrastructure/export/csv_exporter_io_ops.py:85; temp_path.unlink at src/bioetl/infrastructure/export/csv_exporter_io_ops.py:102",
+          "line": 203,
+          "closer": "os.close at src/bioetl/infrastructure/export/csv_exporter_io_ops.py:210; temp_path.unlink at src/bioetl/infrastructure/export/csv_exporter_io_ops.py:220; temp_path.unlink at src/bioetl/infrastructure/export/csv_exporter_io_ops.py:234",
           "contract": "Actual normal-path close/descriptor-to-stream transfer points are listed explicitly. Raw descriptor ownership starts at successful allocation; failed fdopen/open construction has not transferred ownership to a stream. No cleanup guarantee is inferred from a later with-block. Temp-path unlink and descriptor close are separate obligations."
         },
         {
           "file": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
-          "line": 113,
-          "closer": "os.close at src/bioetl/infrastructure/export/csv_exporter_io_ops.py:120; temp_path.unlink at src/bioetl/infrastructure/export/csv_exporter_io_ops.py:144; temp_path.unlink at src/bioetl/infrastructure/export/csv_exporter_io_ops.py:140",
+          "line": 256,
+          "closer": "os.close at src/bioetl/infrastructure/export/csv_exporter_io_ops.py:263; temp_path.unlink at src/bioetl/infrastructure/export/csv_exporter_io_ops.py:275; temp_path.unlink at src/bioetl/infrastructure/export/csv_exporter_io_ops.py:290; temp_path.unlink at src/bioetl/infrastructure/export/csv_exporter_io_ops.py:294",
           "contract": "Actual normal-path close/descriptor-to-stream transfer points are listed explicitly. Raw descriptor ownership starts at successful allocation; failed fdopen/open construction has not transferred ownership to a stream. No cleanup guarantee is inferred from a later with-block. Temp-path unlink and descriptor close are separate obligations."
         }
       ]
