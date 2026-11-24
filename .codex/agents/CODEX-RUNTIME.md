@@ -95,9 +95,11 @@ Use the smallest existing skill that matches the request:
 | Diagnose without fixing                     | read-only                                | `py-debug-bot`                                             | reproduction and evidence only                     |
 | Implement a focused fix                     | write in requested scope                 | direct implementation; `py-config-bot` when configs change | targeted lint/tests                                |
 | Review the current diff                     | read-only                                | `py-audit-bot` (`review`)                                  | diff inspection; no external writes                |
-| Diagnose CI failure                         | read-only                                | `py-debug-bot`                                             | reproduction, root cause, remediation guidance     |
+| Diagnose CI failure                         | read-only                                | parent collects CI evidence; `py-debug-bot` diagnoses     | requested SHA, failing job/attempt and first causal error |
 | Implement diagnosed CI remediation          | write in requested scope                 | direct parent implementation                               | failed check plus targeted regression              |
 | Hash-only / date-stamp / remote-main rebind | write generated artifacts only           | parent in the existing worktree; no extra `implementer`    | matching `--check` after `--update`                |
+| Inspect or address GitHub PR feedback       | read-only by default                     | `github-pr-comments`; `qodo-pr-resolver` for explicit Qodo feedback requests | current head/base and review-thread state |
+| Run a complete PR review loop               | explicitly authorized loop               | `gh-review-loop`                                           | current head, reviewer, cycle limit, scope of writes |
 | Prepare a PR                                | branch/commit/push authorized by request | direct parent workflow                                     | repository quality gates for touched scope         |
 | Audit architecture debt                     | read-only                                | `py-audit-bot` (`debt`)                                    | architecture/debt gates; budgets MUST NOT increase |
 
@@ -105,6 +107,17 @@ Templates do not broaden user authority. Diagnosis and review stay read-only
 unless the user also asks for implementation. Load the selected skill and
 relevant sources/tests; do not load every ADR or the whole repository by
 default.
+
+For CI diagnosis, the parent reads GitHub run and job metadata and retrieves the
+relevant log before handing off to `py-debug-bot`. Pass the requested head SHA,
+run, attempt, job, and the first relevant failure with enough context to
+reproduce it. GitHub access stays with the parent.
+
+Use `github-pr-comments` for ordinary review feedback and `qodo-pr-resolver`
+when the request explicitly selects Qodo feedback. Use `gh-review-loop` only
+for an explicitly authorized complete loop. Limit comments, thread resolution,
+commits, pushes, and re-review requests to the authorized scope. Check required
+CI against the current head when acceptance is requested.
 
 ## Risk-Based Validation
 

@@ -12,8 +12,14 @@ mirror does not redefine runtime behavior.
 - Implement a focused fix: implement directly and add `py-config-bot` only for
   config impact; run targeted lint and tests.
 - Review the current diff: use `py-audit-bot` (`review`); perform no write action.
-- Diagnose CI: use `py-debug-bot` (read-only). Implement the remediations in
-  the parent workflow, then rerun failed checks and a targeted regression.
+- Diagnose CI: the parent obtains the requested head SHA, run, attempt, job,
+  and relevant log. Use `py-debug-bot` for read-only diagnosis. Implement
+  authorized remediation in the parent workflow, then rerun the failed check
+  and a targeted regression.
+- Inspect or address PR feedback: use `github-pr-comments` with the current
+  head/base and thread state. Use `qodo-pr-resolver` for an explicit request
+  about Qodo feedback. Use `gh-review-loop` only for an explicitly authorized
+  complete loop, with a named reviewer, a cycle limit, and scoped writes.
 - Prepare a PR: use the parent workflow after the request authorizes publish
   actions. There is no live `create-pr` skill in `.codex/skills/`.
 - Audit architecture debt: use `py-audit-bot` (`debt`); never increase debt
