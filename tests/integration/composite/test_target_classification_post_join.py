@@ -50,8 +50,6 @@ from bioetl.domain.entities.target_classification_boundary import (
     TargetClassificationResult,
 )
 
-pytestmark = pytest.mark.integration
-
 _PROFILE = "a" * 64
 _SOURCE_HASH = "b" * 64
 _STARTED = datetime(2026, 11, 23, tzinfo=UTC)
