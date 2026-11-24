@@ -259,8 +259,15 @@ def test_compact_selected_run_summary_uses_shared_projection() -> None:
             ((panel.get("fieldConfig") or {}).get("defaults") or {}).get("noValue")
             or ""
         )
-        if no_value != "UNKNOWN":
-            missing.append(f"{name}:{panel_id} missing UNKNOWN no-value state")
+        expected_no_value = (
+            "No result · inspect source panel 9002"
+            if name == "bioetl-overview-v2.json"
+            else "UNKNOWN"
+        )
+        if no_value != expected_no_value:
+            missing.append(
+                f"{name}:{panel_id} missing {expected_no_value!r} no-value state"
+            )
         if "SELECT RUN" not in panel["description"]:
             missing.append(f"{name}:{panel_id} missing SELECT RUN explanation")
     assert not missing, "selected-run summary:\n" + "\n".join(missing)

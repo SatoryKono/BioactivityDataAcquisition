@@ -173,7 +173,9 @@ def test_empty_state_classes_are_declared_and_visible_copy_differs() -> None:
 def test_provider_freshness_is_not_present_ok_on_missing_health_status() -> None:
     dashboard = load_dashboard(DASHBOARD_DIR / "bioetl-overview-v2.json")
     panel = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 9480)
-    assert panel["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"
+    assert panel["fieldConfig"]["defaults"]["noValue"] == (
+        "No result · inspect source panel 9002"
+    )
     assert "saved" in panel["description"].lower()
     assert "provider API was not called" in panel["description"]
     panels = {p["id"]: p for p in get_dashboard_panels(dashboard)}
