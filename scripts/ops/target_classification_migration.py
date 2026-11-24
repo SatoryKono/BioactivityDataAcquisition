@@ -40,16 +40,22 @@ _RESTORATION_ACTIONS = frozenset({"freeze-inputs", "prepare"})
 
 
 def _load_plan(
-    parser: argparse.ArgumentParser, plan: Path
-) -> tuple[Path, TargetMigrationPaths, dict[str, Any]]:
+    parser: argparse.ArgumentParser, plan: Path, *, action: str
+) -> tuple[Path, TargetMigrationPaths, dict[str, Any], str, str]:
     active_root = resolve_configs_root().resolve().parent
     document = json.loads(confined_io_path(plan, root=active_root).read_bytes())
+    source_profile, destination_profile = _plan_profiles(parser, document)
+    if action == "promote" and document.get("cutover_authority") != "RF-013":
+        parser.error(
+            "canonical table promotion is reserved for RF-013; "
+            "plan has no cutover authority"
+        )
     paths = TargetMigrationPaths(
         **{key: Path(value) for key, value in document["paths"].items()}
     )
     if paths.workspace.resolve() != active_root:
         parser.error("plan workspace must be the active repository/configs root")
-    return active_root, paths, document
+    return active_root, paths, document, source_profile, destination_profile
 
 
 def _restoration_manifest(
@@ -163,13 +169,9 @@ def _migrate(
 def _run_migration(parser: argparse.ArgumentParser, args: argparse.Namespace) -> None:
     if args.plan is None:
         parser.error("migration actions require --plan")
-    active_root, paths, document = _load_plan(parser, args.plan)
-    source_profile, destination_profile = _plan_profiles(parser, document)
-    if args.action == "promote" and document.get("cutover_authority") != "RF-013":
-        parser.error(
-            "canonical table promotion is reserved for RF-013; "
-            "plan has no cutover authority"
-        )
+    active_root, paths, document, source_profile, destination_profile = _load_plan(
+        parser, args.plan, action=args.action
+    )
     fields = tuple(document["legacy_include_fields"])
     restoration = _restoration_manifest(parser, args, active_root)
     if args.action == "freeze-inputs":
