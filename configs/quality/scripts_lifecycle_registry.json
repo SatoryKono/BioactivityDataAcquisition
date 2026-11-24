@@ -1,12 +1,6 @@
 {
   "description": "Lifecycle and supporting-taxonomy decisions for non-active scripts.",
   "entries": {
-    "scripts/ai/mcp/amp_memory_wrapper.sh": {
-      "decision": "mcp_compatibility_wrapper",
-      "next_step": "Retain as the Amp-specific MCP environment compatibility adapter before the shared memory wrapper; it is not a standalone operator entrypoint.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-12-20"
-    },
     "scripts/ai/codex/helper/check-env.ps1": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the Windows-side environment-check helper invoked by Codex launcher and setup flows; keep it supporting unless it becomes a standalone documented entrypoint.",
@@ -240,6 +234,12 @@
       "next_step": "Retain only as a bounded one-time Grok MCP config migration helper for Ref headers and startup timeouts; do not use it for Codex configuration and remove it after supported Grok configs no longer require migration.",
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
+    },
+    "scripts/ai/mcp/amp_memory_wrapper.sh": {
+      "decision": "mcp_compatibility_wrapper",
+      "next_step": "Retain as the Amp-specific MCP environment compatibility adapter before the shared memory wrapper; it is not a standalone operator entrypoint.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-20"
     },
     "scripts/ai/mcp/check.sh": {
       "decision": "shared_helper_module",
@@ -2583,9 +2583,9 @@
     },
     "scripts/ops/target_classification_contour.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the import-only acceptance/report helper used by scripts.ops.target_classification_migration and its owning unit tests. The migration module owns the CLI; this module has no standalone command surface.",
+      "next_step": "Retain as the contour evidence and measurement library imported by target_classification_migration.py; route operator execution through that CLI. This module has no standalone command entrypoint.",
       "owner": "@bioetl-platform",
-      "review_by": "2027-02-24"
+      "review_by": "2026-12-24"
     },
     "scripts/ops/target_classification_migration.py": {
       "decision": "shared_helper_module",

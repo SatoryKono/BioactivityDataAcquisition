@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `9c4625cfc2587f014e066feed5c84093640c9914`
 
-Evidence surface SHA-256: `e823538499606e9d544ea093d35a6f097ef39c43dde54fc056874e1715c4a58d`
+Evidence surface SHA-256: `0d98f30e1aa8064d99dc8dcb437a2e1e884e51faf9ec8fbb8945d871a864179b`
 
 ## Current evidence summary
 
@@ -39,11 +39,11 @@ Debt-governance gates: **47 pass / 0 fail**
 
 Architecture quality integral score: **10.0** (`excellent`)
 
-source_module_count: **2661**
+source_module_count: **2664**
 
 fully_covered: **2537**
 
-partially_covered: **120**
+partially_covered: **123**
 
 no_executable_lines: **1**
 
@@ -53,7 +53,7 @@ unmeasured: **0**
 
 coverage_xml_missing: **3**
 
-= 2661 == source_module_count
+= 2664 == source_module_count
 
 Contract coverage matrix schema: **contract-coverage-matrix-v3**
 
@@ -71,7 +71,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "9c4625cfc2587f014e066feed5c84093640c9914",
-  "evidence_surface_sha256": "e823538499606e9d544ea093d35a6f097ef39c43dde54fc056874e1715c4a58d",
+  "evidence_surface_sha256": "0d98f30e1aa8064d99dc8dcb437a2e1e884e51faf9ec8fbb8945d871a864179b",
   "metrics": {
     "architecture_integral_score": 10.0,
     "architecture_interpretation": "excellent",
@@ -86,8 +86,8 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
     "fully_covered_module_count": 2537,
     "layer_violation_count": 0,
     "no_executable_lines_module_count": 1,
-    "partially_covered_module_count": 120,
-    "source_module_count": 2661,
+    "partially_covered_module_count": 123,
+    "source_module_count": 2664,
     "sunset_compat_count": 0,
     "transition_compat_count": 0,
     "twin_pair_count": 0,

@@ -701,6 +701,126 @@ def test_historical_scd_iso8601_text_remains_exactly_preserved(admitted_candidat
     assert tables[paths["candidate_gold"]][0]["_valid_from"] == value
 
 
+def test_supported_transition_is_only_v30_to_v31():
+    from bioetl.infrastructure.storage.target_classification_migration import (
+        require_rf009_fk_restoration,
+        resolve_target_migration_transition,
+    )
+
+    transition = resolve_target_migration_transition("V30", "V31")
+    assert transition.source_contract_version == "3.0.0"
+    assert transition.destination_contract_version == "3.1.0"
+    assert (
+        require_rf009_fk_restoration({"CHEMBL1"}, {"CHEMBL1", "CHEMBL2"})["status"]
+        == "closed"
+    )
+
+
+@pytest.mark.parametrize(
+    ("source", "destination", "message"),
+    [
+        ("V30", "V32", "3.2.0 is not installed"),
+        ("V31", "V32", "3.2.0 is not installed"),
+        ("V31", "V30", "unsupported target migration transition"),
+        ("V31", "V31", "unsupported target migration transition"),
+        ("V30", "V30", "unsupported target migration transition"),
+        ("empty", "V31", "unsupported target migration transition"),
+        ("V32", "V31", "unsupported target migration transition"),
+    ],
+)
+def test_unsupported_transitions_are_rejected(source, destination, message):
+    from bioetl.infrastructure.storage.target_classification_migration import (
+        resolve_target_migration_transition,
+    )
+
+    with pytest.raises(ValueError, match=message):
+        resolve_target_migration_transition(source, destination)
+
+
+def test_open_assay_fk_requires_rf009_before_promotion():
+    from bioetl.infrastructure.storage.target_classification_migration import (
+        require_rf009_fk_restoration,
+    )
+
+    with pytest.raises(ValueError, match="RF-009"):
+        require_rf009_fk_restoration({"CHEMBL1", "CHEMBL9"}, {"CHEMBL1"})
+
+
+def test_cli_plan_requires_profiles_and_refuses_canonical_promote(
+    tmp_path, monkeypatch, capsys
+):
+    import json
+
+    from scripts.ops import target_classification_migration as cli
+
+    paths = {
+        name: str(tmp_path / name)
+        for name in (
+            "silver",
+            "gold",
+            "assay",
+            "config",
+            "candidate_silver",
+            "candidate_gold",
+            "candidate_config",
+            "backup",
+        )
+    }
+    paths["workspace"] = str(tmp_path)
+    plan = tmp_path / "plan.json"
+    plan.write_text(
+        json.dumps({"paths": paths, "legacy_include_fields": ["target_id"]}),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(cli, "confined_io_path", lambda path, root: Path(path))
+    monkeypatch.setattr(cli, "resolve_configs_root", lambda: tmp_path / "configs")
+    with pytest.raises(SystemExit) as missing_profiles:
+        cli.main(
+            [
+                "freeze-inputs",
+                "--plan",
+                str(plan),
+                "--output",
+                str(tmp_path / "out.json"),
+            ]
+        )
+    assert missing_profiles.value.code == 2
+    assert (
+        "plan requires explicit source_profile and destination_profile"
+        in capsys.readouterr().err
+    )
+    plan.write_text(
+        json.dumps(
+            {
+                "paths": paths,
+                "legacy_include_fields": ["target_id"],
+                "source_profile": "V30",
+                "destination_profile": "V32",
+            }
+        ),
+        encoding="utf-8",
+    )
+    with pytest.raises(SystemExit) as unsupported_profile:
+        cli.main(["prepare", "--plan", str(plan)])
+    assert unsupported_profile.value.code == 2
+    assert "3.2.0 is not installed" in capsys.readouterr().err
+    plan.write_text(
+        json.dumps(
+            {
+                "paths": paths,
+                "legacy_include_fields": ["target_id"],
+                "source_profile": "V30",
+                "destination_profile": "V31",
+            }
+        ),
+        encoding="utf-8",
+    )
+    with pytest.raises(SystemExit) as missing_authority:
+        cli.main(["promote", "--plan", str(plan)])
+    assert missing_authority.value.code == 2
+    assert "canonical table promotion is reserved for RF-013" in capsys.readouterr().err
+
+
 @pytest.mark.parametrize("field,value", [("_version", True), ("_is_current", 1)])
 def test_equal_numeric_value_cannot_hide_technical_type_drift(
     admitted_candidate, field, value
