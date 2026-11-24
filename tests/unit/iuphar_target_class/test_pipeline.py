@@ -23,6 +23,12 @@ from iuphar_target_class.pipeline_acceptance import (
     load_admitted_cohort,
     run_admitted_volume,
 )
+from iuphar_target_class.comparison import (
+    M_PARITY_REPORT_FILENAME,
+    PROOF_VERIFICATION_ARTIFACTS,
+    ParityPublication,
+    seal_difference_bases,
+)
 from iuphar_target_class.pipeline_io import (
     publish_batch,
     read_legacy_batch,
@@ -507,6 +513,75 @@ def test_unexpected_dangling_diagnostic_is_a_contract_defect(monkeypatch):
     monkeypatch.setattr(pipeline, "apply_local", broken)
     with pytest.raises(ContractDefect, match="unresolvable diagnostic"):
         _run(RawTargetRow("row", {"target_id": "1"}, "protein"))
+
+
+def test_csv_pipeline_writes_parity_outside_the_proof_package(tmp_path):
+    path = tmp_path / "source.csv"
+    content = b"input_row_id,target_kind,target_id\nr1,protein,1\n"
+    path.write_bytes(content)
+    seal = seal_difference_bases(())
+    result, output = run_csv_pipeline(
+        path,
+        root=tmp_path,
+        snapshot=_snapshot(),
+        provenance=_provenance(),
+        run_id="fixed",
+        parity=ParityPublication(
+            original_m=(
+                {
+                    "input_row_id": "r1",
+                    "target_id": "1",
+                    "target_kind": "protein",
+                    "iuphar_class": "Enzyme",
+                    "iuphar_subclass": "Hydrolase",
+                    "iuphar_family_ids": '["other"]',
+                    "iuphar_family_paths": json.dumps(
+                        [
+                            {
+                                "root_to_leaf": ["family"],
+                                "leaf_to_root": "family",
+                                "family_id": "family",
+                            }
+                        ],
+                        indent=2,
+                    ),
+                    "conflict_codes": '["review"]',
+                    "matched_target_id": "9",
+                },
+            ),
+            basis_seal=seal,
+        ),
+    )
+    assert output is not None and path.read_bytes() == content
+    package = json.loads(output.read_text(encoding="utf-8"))
+    assert M_PARITY_REPORT_FILENAME not in package["artifacts"]
+    assert set(package["artifacts"]) <= PROOF_VERIFICATION_ARTIFACTS
+    assert M_PARITY_REPORT_FILENAME not in render_batch(result)
+    report = json.loads(
+        (tmp_path / M_PARITY_REPORT_FILENAME).read_text(encoding="utf-8")
+    )
+    pair = next(
+        item
+        for item in report["comparisons"]
+        if item["pair"] == "original_m:new_result"
+    )
+    fields = {item["field"]: item for item in pair["differences"]}
+    assert fields["iuphar_class"]["old_value"] == "Enzyme"
+    assert fields["iuphar_class"]["new_value"] == "Receptor"
+    assert fields["iuphar_class"]["disposition"] == "unexplained"
+    assert fields["iuphar_subclass"]["old_value"] == "Hydrolase"
+    assert fields["iuphar_subclass"]["disposition"] == "new_unavailable"
+    assert fields["iuphar_family_ids"]["old_value"] == '["other"]'
+    assert fields["iuphar_family_ids"]["new_value"] == '["family"]'
+    assert "iuphar_family_paths" not in fields
+    assert fields["conflict_codes"]["old_value"] == '["review"]'
+    assert fields["conflict_codes"]["new_value"] == "[]"
+    assert fields["conflict_codes"]["disposition"] == "unexplained"
+    assert fields["matched_target_id"]["old_value"] == "9"
+    assert fields["matched_target_id"]["new_value"] == "1"
+    assert pair["class_agreement_count"] == 0
+    assert report["biological_accuracy"] is None
+    assert report["basis_set_sha256"] == seal.basis_set_sha256
 
 
 def test_same_chembl_id_does_not_drop_rows_and_io_keeps_source_fields(tmp_path):
