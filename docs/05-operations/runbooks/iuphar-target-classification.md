@@ -523,13 +523,20 @@ YAML. Neither file is the isolated shadow/build routing configuration.
     "candidate_config": "ABSOLUTE_CANDIDATE_ENTITY_YAML_PATH",
     "backup": "ABSOLUTE_NEW_BACKUP_DIRECTORY"
   },
+  "source_profile": "V30",
+  "destination_profile": "V31",
   "legacy_include_fields": ["REPLACE_WITH_THE_COMPLETE_FROZEN_V30_INCLUDE_LIST"]
 }
 ```
 
 Copy the full explicit V30 `hash_policy.hash_policy.include_fields` list from the canonical
 target entity configuration into `legacy_include_fields`. Keep it frozen
-through preparation, promotion, and recovery.
+through preparation, promotion, and recovery. `source_profile` and
+`destination_profile` are required. The executable pair is `V30` → `V31`
+(contracts `3.0.0` → `3.1.0`). `V30`/`V31` → `V32` (contract `3.2.0`) is
+declared and rejected until that field contract is installed; enrich mode does
+not select it. Canonical `promote` also requires `"cutover_authority": "RF-013"`.
+Copy rehearsal does not use that authority and does not switch the active tables.
 
 ```powershell
 .\.venv-win\Scripts\python.exe -m scripts.ops target-classification-migration freeze-inputs `

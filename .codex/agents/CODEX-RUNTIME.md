@@ -88,14 +88,14 @@ a native adapter.
 
 ## Common Task Routing
 
-Use the smallest existing skill that matches the request:
+Use the smallest existing skill that matches the request. See CI evidence and PR feedback below.
 
 | Request template                            | Mutation default                         | Route                                                      | Minimum validation                                 |
 | ------------------------------------------- | ---------------------------------------- | ---------------------------------------------------------- | -------------------------------------------------- |
 | Diagnose without fixing                     | read-only                                | `py-debug-bot`                                             | reproduction and evidence only                     |
-| Implement a focused fix                     | write in requested scope                 | direct implementation; `py-config-bot` when configs change | targeted lint/tests                                |
+| Implement a focused fix | write in requested scope | direct implementation with `py-config-bot` for existing config or schema work | targeted lint/tests |
 | Review the current diff                     | read-only                                | `py-audit-bot` (`review`)                                  | diff inspection; no external writes                |
-| Diagnose CI failure                         | read-only                                | `py-debug-bot`                                             | reproduction, root cause, remediation guidance     |
+| Diagnose CI failure | read-only | parent obtains the relevant CI log and passes the evidence to `py-debug-bot` | requested head SHA, run, attempt, job, and root cause or blocker |
 | Implement diagnosed CI remediation          | write in requested scope                 | direct parent implementation                               | failed check plus targeted regression              |
 | Hash-only / date-stamp / remote-main rebind | write generated artifacts only           | parent in the existing worktree; no extra `implementer`    | matching `--check` after `--update`                |
 | Prepare a PR                                | branch/commit/push authorized by request | direct parent workflow                                     | repository quality gates for touched scope         |
@@ -110,7 +110,7 @@ default.
 
 | Tier | Typical scope                | Minimum checks                                                     |
 | ---- | ---------------------------- | ------------------------------------------------------------------ |
-| V1   | docs-only                    | targeted links/drift, cleanup-inventory `--check`, and mirror sync |
+| V1 | docs-only | full documentation link check, required drift and mirror checks, and cleanup inventory refresh and check as specified in `POST_CHANGE_VALIDATION.md` |
 | V2   | focused Python/tooling       | targeted Ruff plus related unit tests                              |
 | V3   | config/runtime contract      | schema/contract checks plus related tests                          |
 | V4   | architecture or broad change | architecture gates, lint/type checks, and relevant broad tests     |
@@ -181,6 +181,24 @@ for supported arguments, limitations and rollback.
 - `.codex/config.toml`
 - `.codex/agents/py-*.toml`
 - `.codex/skills/`
+
+## CI Evidence and PR Feedback
+
+For CI diagnosis from a URL or PR identifier, the parent retrieves the
+requested head SHA, run, attempt, job, and relevant log through authorized
+GitHub tools. Pass that evidence and any missing inputs to `py-debug-bot` for
+read-only diagnosis. GitHub access stays with the parent.
+
+For an existing PR, use `github-pr-comments` when available. Record the current
+head, base, and review-thread state through authorized GitHub tools. For
+explicitly requested Qodo feedback, use the external `qodo-review-resolver`
+skill only when it is installed and available. If it is unavailable, the
+parent reads the Qodo comments through authorized GitHub tools and applies
+the selected local diagnosis or review profile directly. This fallback does
+not claim Qodo execution or expand write authority.
+Use `gh-review-loop` only for an authorized complete review cycle. Keep
+comments, thread resolution, commits, pushes, and re-review within the
+authorized scope. Merge requires separate explicit authorization.
 
 ## Env File Guardrail
 

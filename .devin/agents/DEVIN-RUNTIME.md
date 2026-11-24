@@ -215,9 +215,9 @@ Use the smallest existing skill that matches the request:
 | Request template                   | Mutation default                         | Route                                                                  | Minimum validation                                 |
 | ---------------------------------- | ---------------------------------------- | ---------------------------------------------------------------------- | -------------------------------------------------- |
 | Diagnose without fixing            | read-only                                | `py-debug-bot` (foreground)                                            | reproduction and evidence only                     |
-| Implement a focused fix            | write in requested scope                 | direct implementation; `py-config-bot` when configs change             | targeted lint/tests                                |
+| Implement a focused fix | write in requested scope | direct implementation with `py-config-bot` for existing config or schema work | targeted lint/tests |
 | Review the current diff            | read-only                                | `py-audit-bot` (`review`; background when authorized)                  | diff inspection; no external writes                |
-| Diagnose CI failure                | read-only                                | `py-debug-bot` (foreground)                                            | reproduction, root cause, remediation guidance     |
+| Diagnose CI failure | read-only | parent obtains CI evidence and follows the `py-debug-bot` foreground route | requested head SHA, run, attempt, job, and root cause or blocker |
 | Implement diagnosed CI remediation | write in requested scope                 | parent / orchestrator                                                  | failed checks plus targeted regression             |
 | Prepare a PR                       | branch/commit/push authorized by request | parent PR workflow; optional external `create-pr` skill when installed | repository quality gates for touched scope         |
 | Audit architecture debt            | read-only                                | `py-audit-bot` (foreground)                                            | architecture/debt gates; budgets MUST NOT increase |
@@ -232,7 +232,7 @@ All restricted-profile routes in the table are logical parent-guide routes while
 
 | Tier | Typical scope                | Minimum checks                                                     |
 | ---- | ---------------------------- | ------------------------------------------------------------------ |
-| V1   | docs-only                    | targeted links/drift, cleanup-inventory `--check`, and mirror sync |
+| V1 | docs-only | full documentation link check, required drift and mirror checks, and cleanup inventory refresh and check as specified in `POST_CHANGE_VALIDATION.md` |
 | V2   | focused Python/tooling       | targeted Ruff plus related unit tests                              |
 | V3   | config/runtime contract      | schema/contract checks plus related tests                          |
 | V4   | architecture or broad change | architecture gates, lint/type checks, and relevant broad tests     |

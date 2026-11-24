@@ -240,7 +240,7 @@ def test_source_identity_alone_does_not_prove_a_restored_row(tmp_path: Path):
 
 
 def test_cli_forwards_restoration_manifest_only_to_freeze_and_prepare(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ):
     from scripts.ops import target_classification_migration as cli
 
@@ -253,8 +253,17 @@ def test_cli_forwards_restoration_manifest_only_to_freeze_and_prepare(
         del paths, legacy_include_fields, output
         seen["freeze"] = restoration_manifest
 
-    def prepare(paths, *, legacy_include_fields, deployment, restoration_manifest=None):
+    def prepare(
+        paths,
+        *,
+        legacy_include_fields,
+        deployment,
+        source_profile,
+        destination_profile,
+        restoration_manifest=None,
+    ):
         del paths, legacy_include_fields, deployment
+        assert (source_profile, destination_profile) == ("V30", "V31")
         seen["prepare"] = restoration_manifest
         return {"phase": "prepared"}
 
@@ -280,6 +289,8 @@ def test_cli_forwards_restoration_manifest_only_to_freeze_and_prepare(
                     **{name: str(tmp_path / name) for name in names},
                 },
                 "legacy_include_fields": ["pref_name"],
+                "source_profile": "V30",
+                "destination_profile": "V31",
             }
         ),
         encoding="utf-8",
@@ -309,7 +320,7 @@ def test_cli_forwards_restoration_manifest_only_to_freeze_and_prepare(
     )
     assert seen["freeze"] == manifest.resolve()
     assert seen["prepare"] == manifest.resolve()
-    with pytest.raises(SystemExit):
+    with pytest.raises(SystemExit) as unsupported_action:
         cli.main(
             [
                 "build-candidates",
@@ -319,3 +330,8 @@ def test_cli_forwards_restoration_manifest_only_to_freeze_and_prepare(
                 str(manifest),
             ]
         )
+    assert unsupported_action.value.code == 2
+    assert (
+        "--restoration-manifest applies to freeze-inputs and prepare"
+        in capsys.readouterr().err
+    )

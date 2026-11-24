@@ -9,11 +9,10 @@ from __future__ import annotations
 
 import shutil
 import sys
-from collections.abc import Iterator, Mapping
+from collections.abc import Iterator
 from contextlib import contextmanager
-from dataclasses import dataclass
 from pathlib import Path
-from typing import NotRequired, TypedDict, cast
+from typing import cast
 
 import orjson
 
@@ -22,8 +21,34 @@ if sys.platform == "win32":
 else:
     import fcntl
 
-from bioetl.infrastructure.control_plane.evidence_location_publish import (
-    publish_bytes_if_absent,
+from bioetl.infrastructure.storage.target_classification_migration_bundle import (
+    _JOURNAL_JSON,
+    TargetMigrationPaths,
+    _restore_dependencies,
+    _restore_pairs,
+    _save,
+    _tree_hashes,
+)
+from bioetl.infrastructure.storage.target_classification_migration_pins import (
+    _active_contract_version,
+    _assert_plan_profiles,
+    _assert_recorded_candidates,
+    _assert_recorded_contracts,
+    _assert_recorded_versions,
+    _assert_source_profiles,
+    _candidate_profiles,
+    _dependency_schema_versions,
+    _fk_restoration,
+    _public_pins,
+    _source_pins,
+    _target_ids,
+)
+from bioetl.infrastructure.storage.target_classification_migration_state import (
+    TargetMigrationJournal,
+    _assert_canonical_cutover,
+    migration_status,
+    require_rf009_fk_restoration,
+    resolve_target_migration_transition,
 )
 from bioetl.infrastructure.storage.target_deployment_binding import (
     TargetDeploymentBinding,
@@ -38,102 +63,24 @@ from bioetl.infrastructure.storage.target_migration_validation import (
     assert_no_managed_writers,
     validate_target_candidate,
 )
-from iuphar_target_class.stage0.io import canonical_json_bytes, sha256_file
+from iuphar_target_class.stage0.io import sha256_file
 
-_JOURNAL_JSON = "journal.json"
-
-
-class TargetMigrationJournal(TypedDict):
-    """Persisted occurrence state used by paired promotion and recovery."""
-
-    artifact: str
-    schema_version: int
-    phase: str
-    paths: dict[str, str]
-    original_hashes: dict[str, dict[str, str]]
-    candidate_hashes: dict[str, dict[str, str]]
-    validation: dict[str, object]
-    moved: list[str]
-    activated: list[str]
-    legacy_include_fields: list[str]
-    assay_hashes: dict[str, str]
-    restored: NotRequired[list[str]]
-    deployment_binding: dict[str, str]
-    dependencies: dict[str, str]
-    dependency_backups: dict[str, str]
-    restored_dependencies: NotRequired[list[str]]
-    fk_restoration: NotRequired[dict[str, str]]
-
-
-@dataclass(frozen=True, slots=True)
-class TargetMigrationPaths:
-    """Explicit approved workspace and disjoint physical table/config paths."""
-
-    workspace: Path
-    silver: Path
-    gold: Path
-    assay: Path
-    config: Path
-    candidate_silver: Path
-    candidate_gold: Path
-    candidate_config: Path
-    backup: Path
-
-    def checked(self) -> dict[str, Path]:
-        root = self.workspace.resolve(strict=True)
-        paths = {
-            name: getattr(self, name).absolute()
-            for name in (
-                "silver",
-                "gold",
-                "assay",
-                "config",
-                "candidate_silver",
-                "candidate_gold",
-                "candidate_config",
-                "backup",
-            )
-        }
-        for path in paths.values():
-            _check_path(path, root)
-        # Canonicalize only after inspecting the caller's path and ancestors.
-        # Otherwise lexical '..' aliases can hide a backup nested in a table.
-        paths = {name: path.resolve() for name, path in paths.items()}
-        for name, path in paths.items():
-            if any(
-                path == other or path.is_relative_to(other)
-                for key, other in paths.items()
-                if key != name
-            ):
-                raise ValueError("migration paths must be disjoint")
-        return paths
-
-
-def _check_path(path: Path, root: Path) -> None:
-    if path.resolve() == root or not path.resolve().is_relative_to(root):
-        raise ValueError("migration path escapes the approved workspace")
-    for part in (path, *path.parents):
-        if part == root.parent:
-            break
-        if part.is_symlink() or part.is_junction():
-            raise ValueError("migration refuses symlink/junction paths")
-    if (
-        path.name == ".env"
-        or path.name.startswith(".env.")
-        or path.name.endswith(".env")
-    ):
-        raise ValueError("environment files cannot enter a migration bundle")
-
-
-def _tree_hashes(path: Path) -> dict[str, str]:
-    if path.is_file():
-        return {".": sha256_file(path)}
-    result = {}
-    for item in sorted(path.rglob("*")):
-        _check_path(item, path.resolve())
-        if item.is_file():
-            result[item.relative_to(path).as_posix()] = sha256_file(item)
-    return result
+# Re-exported for the existing caller and test surface.
+__all__ = [
+    "TargetMigrationJournal",
+    "TargetMigrationPaths",
+    "_lock",
+    "_target_ids",
+    "_tree_hashes",
+    "assert_no_managed_writers",
+    "migration_status",
+    "prepare_target_migration",
+    "promote_target_migration",
+    "require_rf009_fk_restoration",
+    "resolve_target_migration_transition",
+    "rollback_target_migration",
+    "sha256_file",
+]
 
 
 @contextmanager
@@ -154,42 +101,11 @@ def _lock(root: Path) -> Iterator[None]:
         yield
 
 
-def _save(backup: Path, state: Mapping[str, object]) -> None:
-    temporary = backup / "journal.tmp"
-    temporary.write_bytes(canonical_json_bytes(state))
-    temporary.replace(backup / _JOURNAL_JSON)
-
-
-def _restore_pairs(paths: dict[str, Path], state: TargetMigrationJournal) -> None:
-    """Move original directories back; preserve every displaced candidate."""
-    backup = paths["backup"]
-    restored = state.setdefault("restored", [])
-    for name in reversed(state["moved"]):
-        if name in restored:
-            continue
-        live = paths[name]
-        original = backup / ("original-" + name)
-        if not original.exists():
-            if (
-                not live.exists()
-                or _tree_hashes(live) != state["original_hashes"][name]
-            ):
-                raise ValueError("cannot identify original tables during recovery")
-        else:
-            if live.exists():
-                live.rename(backup / ("failed-" + name))
-            original.rename(live)
-        restored.append(name)
-        _save(backup, state)
-    state["phase"] = "rolled_back"
-    _save(backup, state)
-
-
 def _recorded_restoration(
     workspace: Path, state: TargetMigrationJournal
 ) -> Path | None:
     recorded = state.get("fk_restoration")
-    if not isinstance(recorded, dict):
+    if not isinstance(recorded, dict) or "path" not in recorded:
         return None
     manifest = workspace / str(recorded["path"])
     if sha256_file(manifest) != recorded["sha256"]:
@@ -202,17 +118,29 @@ def prepare_target_migration(
     *,
     legacy_include_fields: tuple[str, ...],
     deployment: TargetDeploymentBinding | None = None,
+    source_profile: str = "V30",
+    destination_profile: str = "V31",
     restoration_manifest: Path | None = None,
 ) -> TargetMigrationJournal:
     """Validate complete cohorts and copy the entire recoverable old bundle."""
+    transition = resolve_target_migration_transition(
+        source_profile, destination_profile
+    )
     checked = paths.checked()
     validate_deployment_binding(checked, deployment)
     with _lock(paths.workspace):
+        pins = _source_pins(checked)
+        _assert_source_profiles(pins, transition)
+        candidate_profiles = _candidate_profiles(checked, transition)
         validation = validate_target_candidate(
             checked,
             legacy_include_fields,
             workspace=paths.workspace,
             restoration_manifest=restoration_manifest,
+        )
+        fk_restoration = _fk_restoration(
+            pins,
+            restored_gold=checked["candidate_gold"] if restoration_manifest else None,
         )
         dependencies = collect_target_dependencies(
             workspace=paths.workspace,
@@ -243,7 +171,7 @@ def prepare_target_migration(
             raise ValueError("canonical target changed during backup; refuse promotion")
         state: TargetMigrationJournal = {
             "artifact": "bioetl_target_migration",
-            "schema_version": 1,
+            "schema_version": 2,
             "phase": "prepared",
             "paths": {k: str(v) for k, v in checked.items()},
             "original_hashes": before,
@@ -259,23 +187,44 @@ def prepare_target_migration(
             "deployment_binding": deployment.document() if deployment else {},
             "dependencies": dependencies,
             "dependency_backups": dependency_backups,
+            "source_profile": transition.source_profile,
+            "destination_profile": transition.destination_profile,
+            "source_contract_version": transition.source_contract_version,
+            "destination_contract_version": transition.destination_contract_version,
+            "table_versions": _public_pins(pins),
+            "candidate_profiles": candidate_profiles,
+            "config_contract_version": _active_contract_version(checked["config"]),
+            # On-disk YAML active_version. The effective enrich contract is
+            # destination_contract_version, not this declared document version.
+            "destination_config_contract_version": _active_contract_version(
+                checked["candidate_config"]
+            ),
+            "dependency_schema_versions": _dependency_schema_versions(
+                paths.workspace, dependencies
+            ),
+            "fk_restoration": fk_restoration,
         }
         if restoration_manifest is not None:
             relative = restoration_manifest.resolve().relative_to(
                 paths.workspace.resolve()
             )
-            state["fk_restoration"] = {
-                "path": relative.as_posix(),
-                "sha256": sha256_file(restoration_manifest),
-            }
+            state["fk_restoration"].update(
+                path=relative.as_posix(), sha256=sha256_file(restoration_manifest)
+            )
         _save(checked["backup"], state)
         return state
 
 
 def promote_target_migration(
-    paths: TargetMigrationPaths, *, deployment: TargetDeploymentBinding | None = None
+    paths: TargetMigrationPaths,
+    *,
+    deployment: TargetDeploymentBinding | None = None,
+    source_profile: str | None = None,
+    destination_profile: str | None = None,
+    cutover_authority: str = "",
 ) -> TargetMigrationJournal:
     """Cut over a validated complete bundle, retaining originals for rollback."""
+    _assert_canonical_cutover(deployment, cutover_authority)
     checked = paths.checked()
     validate_deployment_binding(checked, deployment)
     with _lock(paths.workspace):
@@ -284,6 +233,17 @@ def promote_target_migration(
             orjson.loads((checked["backup"] / _JOURNAL_JSON).read_bytes()),
         )
         _assert_prepared_identity(checked, state, deployment)
+        _assert_plan_profiles(state, source_profile, destination_profile)
+        transition = resolve_target_migration_transition(
+            str(state.get("source_profile", "V30")),
+            str(state.get("destination_profile", "V31")),
+        )
+        restoration_manifest = _recorded_restoration(paths.workspace, state)
+        _assert_recorded_versions(
+            checked, state, restoration_manifest=restoration_manifest
+        )
+        _assert_recorded_contracts(checked, state, paths.workspace)
+        _assert_recorded_candidates(checked, transition, state)
         verify_target_dependencies(paths.workspace, state["dependencies"])
         verify_target_dependencies(paths.workspace, state["dependency_backups"])
         _verify_prepared_bytes(checked, state)
@@ -293,7 +253,7 @@ def promote_target_migration(
             checked,
             tuple(state["legacy_include_fields"]),
             workspace=paths.workspace,
-            restoration_manifest=_recorded_restoration(paths.workspace, state),
+            restoration_manifest=restoration_manifest,
         )
         from bioetl.infrastructure.storage.target_contract_transition import (
             assert_live_promotion_allowed,
@@ -333,6 +293,8 @@ def _assert_prepared_identity(
     state: TargetMigrationJournal,
     deployment: TargetDeploymentBinding | None,
 ) -> None:
+    if state.get("schema_version") not in {1, 2}:
+        raise ValueError("unsupported target migration journal")
     if state["phase"] != "prepared" or state["paths"] != {
         key: str(value) for key, value in checked.items()
     }:
@@ -354,7 +316,12 @@ def _verify_prepared_bytes(
             raise ValueError("candidate bytes changed since validation")
 
 
-def rollback_target_migration(paths: TargetMigrationPaths) -> TargetMigrationJournal:
+def rollback_target_migration(
+    paths: TargetMigrationPaths,
+    *,
+    source_profile: str | None = None,
+    destination_profile: str | None = None,
+) -> TargetMigrationJournal:
     """Restore paired physical tables plus original configuration, never clear."""
     checked = paths.checked()
     with _lock(paths.workspace):
@@ -362,6 +329,7 @@ def rollback_target_migration(paths: TargetMigrationPaths) -> TargetMigrationJou
             "TargetMigrationJournal",
             orjson.loads((checked["backup"] / _JOURNAL_JSON).read_bytes()),
         )
+        _assert_plan_profiles(state, source_profile, destination_profile)
         if state["phase"] not in {"promoted", "promoting"}:
             raise ValueError("migration has no activated bundle to restore")
         if state["paths"] != {k: str(v) for k, v in checked.items()}:
@@ -382,37 +350,3 @@ def rollback_target_migration(paths: TargetMigrationPaths) -> TargetMigrationJou
                 raise ValueError("original rollback bytes changed")
         _restore_pairs(checked, state)
         return state
-
-
-def _restore_dependencies(
-    paths: TargetMigrationPaths, state: TargetMigrationJournal
-) -> None:
-    """Restore pinned dependency bytes before reactivating their configuration."""
-    restored = state.setdefault("restored_dependencies", [])
-    workspace = paths.workspace.resolve(strict=True)
-    for relative, digest in state["dependencies"].items():
-        destination = workspace / relative
-        if destination == paths.config.resolve():
-            # The promoted config legitimately differs; its verified original
-            # is restored by the journaled pair operation below.
-            continue
-        source = paths.backup / "dependencies" / relative
-        if (
-            state["dependency_backups"].get(source.relative_to(workspace).as_posix())
-            != digest
-        ):
-            raise ValueError("dependency backup identity differs from the original")
-        verify_target_dependencies(
-            workspace, {source.relative_to(workspace).as_posix(): digest}
-        )
-        if destination.exists():
-            verify_target_dependencies(workspace, {relative: digest})
-        else:
-            # Exclusive publication never overwrites a concurrent replacement.
-            if not publish_bytes_if_absent(
-                destination, source.read_bytes(), trusted_base=workspace
-            ):
-                verify_target_dependencies(workspace, {relative: digest})
-        if relative not in restored:
-            restored.append(relative)
-            _save(paths.backup, state)

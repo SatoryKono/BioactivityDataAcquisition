@@ -120,6 +120,107 @@ def test_second_table_activation_failure_restores_first_table(paths, monkeypatch
     assert yaml.safe_load(paths.config.read_bytes())["fixture"] == "config"
 
 
+def test_assay_cohort_change_after_prepare_blocks_promotion(paths):
+    migration.prepare_target_migration(paths, legacy_include_fields=("target_id",))
+    (paths.assay / "part.parquet").write_bytes(b"replacement-cohort")
+    with pytest.raises(ValueError, match="assay reference cohort changed"):
+        migration.promote_target_migration(paths)
+    assert (paths.silver / "part.parquet").read_bytes() == b"silver"
+    assert not (paths.backup / "original-silver").exists()
+
+
+def test_uninstalled_v32_transition_writes_nothing(paths):
+    with pytest.raises(ValueError, match="3.2.0 is not installed"):
+        migration.prepare_target_migration(
+            paths,
+            legacy_include_fields=("target_id",),
+            destination_profile="V32",
+        )
+    assert not paths.backup.exists()
+
+
+def test_target_id_pin_uses_the_windows_safe_delta_reader(monkeypatch):
+    from types import SimpleNamespace
+
+    def scan(_table, columns=None):
+        assert columns == ["target_id", "_is_current"]
+        return [
+            {"target_id": "CHEMBL1", "_is_current": True},
+            {"target_id": None, "_is_current": True},
+            {"target_id": "CHEMBL2", "_is_current": False},
+        ]
+
+    monkeypatch.setattr(
+        "bioetl.infrastructure.storage.delta.table_ops.read_delta_records",
+        scan,
+    )
+    table = SimpleNamespace(
+        schema=lambda: SimpleNamespace(
+            fields=[
+                SimpleNamespace(name="target_id"),
+                SimpleNamespace(name="_is_current"),
+            ]
+        ),
+        to_pyarrow_table=lambda **_kwargs: (_ for _ in ()).throw(
+            AssertionError("native delta scan")
+        ),
+    )
+
+    assert migration._target_ids(table) == {"CHEMBL1"}
+
+
+def test_schema_v1_journal_promotes_and_reports_without_v2_fields(paths):
+    import orjson
+
+    migration.prepare_target_migration(paths, legacy_include_fields=("target_id",))
+    journal = orjson.loads((paths.backup / "journal.json").read_bytes())
+    journal["schema_version"] = 1
+    for key in (
+        "source_profile",
+        "destination_profile",
+        "source_contract_version",
+        "destination_contract_version",
+        "table_versions",
+        "candidate_profiles",
+        "config_contract_version",
+        "destination_config_contract_version",
+        "dependency_schema_versions",
+        "fk_restoration",
+    ):
+        journal.pop(key, None)
+    (paths.backup / "journal.json").write_bytes(orjson.dumps(journal))
+    state = migration.promote_target_migration(paths)
+    assert state["phase"] == "promoted"
+    assert migration.migration_status(state) == {
+        "source_profile": "V30",
+        "destination_profile": "V31",
+        "source_contract_version": "3.0.0",
+        "destination_contract_version": "3.1.0",
+        "fk_restoration": "unrecorded",
+    }
+    migration.rollback_target_migration(paths)
+    assert (paths.silver / "part.parquet").read_bytes() == b"silver"
+
+
+def test_deployment_role_cannot_promote_without_rf013(paths):
+    from bioetl.infrastructure.storage.target_deployment_binding import (
+        TargetDeploymentBinding,
+    )
+
+    binding = TargetDeploymentBinding(
+        str(paths.config),
+        "a" * 64,
+        "b" * 64,
+        str(paths.silver),
+        str(paths.gold),
+        "c" * 64,
+        "d" * 64,
+    )
+    with pytest.raises(ValueError, match="reserved for RF-013"):
+        migration.promote_target_migration(paths, deployment=binding)
+    assert not paths.backup.exists()
+
+
 def test_canonical_change_after_backup_is_not_overwritten(paths):
     migration.prepare_target_migration(paths, legacy_include_fields=("target_id",))
     (paths.gold / "part.parquet").write_bytes(b"new legitimate writer")

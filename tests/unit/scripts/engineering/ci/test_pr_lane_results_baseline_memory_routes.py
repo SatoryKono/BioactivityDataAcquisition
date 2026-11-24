@@ -115,3 +115,48 @@ def test_memory_recovery_plan_executes_structural_and_documentation_checks() -> 
     shadow = build_shadow_compare([path], repo_root=ROOT)
     assert shadow["selected"] == targets
     assert shadow["covers_full_suite"] is False
+
+
+@pytest.mark.parametrize(
+    ("path", "owner"),
+    (
+        (
+            "docs/00-project/ai/agents/guides/CODEX_TASK_ROUTING.md",
+            "tests/architecture/test_ai_runtime_governance_links.py",
+        ),
+        (
+            "docs/00-project/ai/memory/agent-memory.md",
+            "tests/architecture/test_ai_memory_program_contracts.py",
+        ),
+    ),
+)
+def test_runtime_guidance_docs_have_explicit_routes(path: str, owner: str) -> None:
+    expected = {
+        owner,
+        "tests/architecture/test_codex_task_routing.py",
+        "tests/architecture/test_runtime_agent_docs_drift.py",
+    }
+    targets = affected_pytest_targets([path], repo_root=ROOT)
+    assert set(targets) == expected
+    shadow = build_shadow_compare([path], repo_root=ROOT)
+    assert shadow["selected"] == targets
+    assert shadow["activation"] == "not_applied"
+    assert shadow["covers_full_suite"] is False
+
+
+@pytest.mark.parametrize(
+    "unknown",
+    (
+        "docs/00-project/ai/agents/guides/CODEX_TASK_ROUTING-unreviewed.md",
+        "docs/00-project/ai/memory/agent-memory-unreviewed.md",
+    ),
+)
+def test_runtime_guidance_doc_routes_stay_fail_closed(unknown: str) -> None:
+    reviewed = (
+        "docs/00-project/ai/agents/guides/CODEX_TASK_ROUTING.md",
+        "docs/00-project/ai/memory/agent-memory.md",
+    )
+    with pytest.raises(ValueError, match="unmapped paths"):
+        build_shadow_compare([unknown], repo_root=ROOT)
+    with pytest.raises(ValueError, match="unmapped paths"):
+        build_shadow_compare([*reviewed, unknown], repo_root=ROOT)
