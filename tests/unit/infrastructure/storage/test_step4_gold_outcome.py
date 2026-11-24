@@ -519,6 +519,66 @@ async def test_precommit_validation_preserves_error_classification(contract_erro
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("version", "stage", "expected"),
+    [
+        ("9.8.7", "prepare", "9.8.7"),
+        (None, "prepare", "0.0.0"),
+        ("9.8.7", "after_prepare", "9.8.7"),
+    ],
+)
+async def test_merged_cancellation_receipt_identifies_request(version, stage, expected):
+    from pandera.polars import Column, DataFrameSchema
+
+    from bioetl.infrastructure.storage.gold.io_mixin import (
+        _GoldWriterMergedDispatchMixin,
+    )
+
+    class Host(_GoldWriterMergedDispatchMixin):
+        def __init__(self):
+            self.logger = MagicMock()
+            self.csv_exporter = None
+            self._validate_schema_strict = MagicMock()
+            self._validate_records_against_schema = AsyncMock(
+                side_effect=asyncio.CancelledError() if stage == "prepare" else None
+            )
+            self._resolve_table_path = MagicMock(return_value="synthetic")
+            self._run_in_executor = AsyncMock()
+
+    host = Host()
+    if stage == "after_prepare":
+        host.logger.info.side_effect = asyncio.CancelledError()
+    schema = DataFrameSchema(
+        {"id": Column(int)}, strict=True, metadata={"contract_version": version}
+    )
+
+    with pytest.raises(GoldWriteCancelled) as found:
+        await host.write_gold_merged("synthetic", [{"id": 1}], schema=schema)
+    assert found.value.receipt.contract_version == expected
+    assert found.value.receipt.category == Category.NOT_COMMITTED
+    assert found.value.receipt.committed_targets == ()
+    host._run_in_executor.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_merged_version_resolution_failure_is_not_success(monkeypatch):
+    from bioetl.infrastructure.storage.gold import io_execution, io_preparation
+
+    error = ValueError("invalid schema version")
+    resolver = MagicMock(side_effect=error)
+    prepare = AsyncMock()
+    monkeypatch.setattr(io_execution, "resolve_gold_contract_version", resolver)
+    monkeypatch.setattr(io_preparation, "_prepare_gold_merged_write", prepare)
+
+    with pytest.raises(ValueError) as found:
+        await io_execution._execute_gold_merged_write(
+            writer(), SimpleNamespace(table_name="synthetic", schema=object())
+        )
+    assert found.value is error
+    prepare.assert_not_awaited()
+
+
+@pytest.mark.asyncio
 @pytest.mark.parametrize("postwrite", [None, ValueError, asyncio.CancelledError])
 async def test_merged_outcome_binds_schema_contract_version(monkeypatch, postwrite):
     from bioetl.infrastructure.storage.gold import io_execution

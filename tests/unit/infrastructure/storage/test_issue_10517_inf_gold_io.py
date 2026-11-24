@@ -130,7 +130,7 @@ async def test_execute_gold_merged_write_success_and_validation(
         table_name="chembl/activity",
         records=[{"id": 1}],
         primary_keys=["id"],
-        schema=MagicMock(),
+        schema=SimpleNamespace(metadata={}),
         completed_at=None,
         run_id="r1",
         sources_used=None,
