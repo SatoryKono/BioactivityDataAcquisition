@@ -29,6 +29,8 @@ from scripts.ops.target_classification_contour import (
 )
 from scripts.ops.target_classification_migration import main
 
+pytestmark = pytest.mark.unit
+
 _PROFILE = "a" * 64
 _CONFIG = "b" * 64
 _CANONICAL = "c" * 64

@@ -69,11 +69,16 @@ configuration and contract during a deployment.
 | --- | --- | --- |
 | `"off"` | Unchanged V30, contract 3.0.0 | None |
 | `shadow` | Unchanged V30, contract 3.0.0; separate classification evidence | Pinned profile envelope and snapshot |
-| `enrich` | V31, contract 3.1.0; nine additional nullable business columns enter the explicit hash scope | Admitted, publishable scoped snapshot and executed V2 reference acceptance; compatible physical tables |
+| `enrich` | V31, contract 3.1.0, unless `table_contract` explicitly selects `3.2.0`; nine additional nullable business columns enter the explicit hash scope. `3.2.0` also persists source type, completeness, family ids, subclasses, structured paths, local status and rule ids, effective subclasses, conflict codes and evidence refs | Admitted, publishable scoped snapshot and executed V2 reference acceptance; compatible physical tables |
 
 The registry's current identity remains 3.0.0. Publishing the
 [V31 contract](../../04-reference/contracts/gold/chembl_target_v3.1.json) does
-not promote production or enable generic dual writing.
+not promote production or enable generic dual writing. Physical contract
+`3.2.0` is selected only by an explicit `table_contract`. It keeps the nine
+V31 columns and adds canonical JSON detail. Computational
+`classification_schema_version` stays on the loaded profile and may remain
+`3.1.0`. Existing V30 and V31 tables are not migrated by selecting `3.2.0`.
+`off` and `shadow` reject `3.1.0` and `3.2.0`. `enrich` rejects `3.0.0`.
 
 ## Delivery boundaries
 

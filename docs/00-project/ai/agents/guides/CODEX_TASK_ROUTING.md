@@ -19,8 +19,12 @@ This contributor-facing mirror does not redefine runtime behavior.
   targeted regression.
 - For existing PR feedback, use `github-pr-comments` when available. Record head,
   base, and review-thread state through authorized GitHub tools.
-  Use `qodo-pr-resolver` for explicitly requested Qodo feedback and
-  `gh-review-loop` for an authorized complete review cycle.
+  For explicitly requested Qodo feedback, use the external
+  `qodo-review-resolver` skill only when installed and available. Otherwise,
+  the parent reads Qodo comments through authorized GitHub tools and applies
+  the selected local diagnosis or review profile directly, without claiming
+  Qodo execution or broader write authority. Use `gh-review-loop` for an
+  authorized complete review cycle.
 - Prepare a PR: use the parent workflow after the request authorizes publish
   actions. There is no live `create-pr` skill in `.codex/skills/`.
 - Audit architecture debt: use `py-audit-bot` (`debt`); never increase debt

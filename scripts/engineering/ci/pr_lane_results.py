@@ -861,6 +861,16 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
         ),
     ),
+    "docs/00-project/ai/agents/guides/CODEX_TASK_ROUTING.md": (
+        "tests/architecture/test_codex_task_routing.py",
+        AI_RUNTIME_GOVERNANCE_LINKS_TEST,
+        RUNTIME_AGENT_DOCS_DRIFT_TEST,
+    ),
+    "docs/00-project/ai/memory/agent-memory.md": (
+        "tests/architecture/test_ai_memory_program_contracts.py",
+        "tests/architecture/test_codex_task_routing.py",
+        RUNTIME_AGENT_DOCS_DRIFT_TEST,
+    ),
     "scripts/memory/run_workflow.sh": (
         "tests/architecture/test_ai_memory_program_contracts.py",
         "tests/integration/memory/test_workflow_tooling.py",
@@ -956,6 +966,9 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
     "docs/04-reference/contracts/gold/chembl_target_v3.1.json": (
+        "tests/architecture/test_gold_schema_contracts.py",
+    ),
+    "docs/04-reference/contracts/gold/chembl_target_v3.2.json": (
         "tests/architecture/test_gold_schema_contracts.py",
     ),
     "configs/base/contract_registry.yaml": (
@@ -1304,6 +1317,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
             EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
         ),
+    ),
+    "configs/quality/external_resource_inventory_pr13355_rematch_review.json": (
+        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
+        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
     ),
     "configs/quality/external_resource_inventory_pr13348_rematch_review.json": (
         EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,

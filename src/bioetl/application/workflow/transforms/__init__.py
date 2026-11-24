@@ -78,7 +78,14 @@ __all__ = [
 
 @dataclass(slots=True)
 class WorkflowTransformRegistry:
-    """In-memory registry for named workflow transform executors."""
+    """In-memory registry for named workflow transform executors.
+
+    Executors accept (spec, upstream_outputs), optionally followed by a third
+    positional runtime context or a keyword-only ``runtime_context``. The
+    latter two receive the current WorkflowTransformRuntimeContext; the
+    two-argument form receives no context. Other required parameters are not
+    supported. Executors may return a value or an awaitable.
+    """
 
     _executors: dict[str, WorkflowTransformCallable] = field(default_factory=dict)
     snapshot_reader: (

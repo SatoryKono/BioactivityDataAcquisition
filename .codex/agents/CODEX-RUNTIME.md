@@ -190,7 +190,12 @@ GitHub tools. Pass that evidence and any missing inputs to `py-debug-bot` for
 read-only diagnosis. GitHub access stays with the parent.
 
 For an existing PR, use `github-pr-comments` when available. Record the current
-head, base, and review-thread state through authorized GitHub tools. Use `qodo-pr-resolver` for explicitly requested Qodo feedback.
+head, base, and review-thread state through authorized GitHub tools. For
+explicitly requested Qodo feedback, use the external `qodo-review-resolver`
+skill only when it is installed and available. If it is unavailable, the
+parent reads the Qodo comments through authorized GitHub tools and applies
+the selected local diagnosis or review profile directly. This fallback does
+not claim Qodo execution or expand write authority.
 Use `gh-review-loop` only for an authorized complete review cycle. Keep
 comments, thread resolution, commits, pushes, and re-review within the
 authorized scope. Merge requires separate explicit authorization.

@@ -89,6 +89,7 @@ def _validate_target_dependencies(
         gold_path=Path(_table_path(gold, pipeline.config.effective_gold_table)),
         mode=config.target_classification.mode,
         destructive=pipeline.runtime.run_type.value in {"backfill", "rebuild"},
+        table_contract=config.target_classification.to_domain().contract_version,
     )
 
 

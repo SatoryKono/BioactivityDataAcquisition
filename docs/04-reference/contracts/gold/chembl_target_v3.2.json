@@ -1,0 +1,484 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$version": "3.2.0",
+  "title": "ChEMBLTargetGoldSchemaV32 Contract",
+  "description": "Gold layer data contract for chembl_target. Auto-generated from Pandera schema ChEMBLTargetGoldSchemaV32.",
+  "type": "object",
+  "properties": {
+    "_dq_warn": {
+      "type": "boolean",
+      "nullable": false,
+      "description": "Soft data-quality warning flag."
+    },
+    "_dq_error": {
+      "type": "boolean",
+      "nullable": false,
+      "description": "Hard data-quality error flag."
+    },
+    "_index": {
+      "type": "integer",
+      "nullable": false,
+      "description": ""
+    },
+    "entity_id": {
+      "type": "string",
+      "nullable": false,
+      "description": ""
+    },
+    "content_hash": {
+      "type": "string",
+      "nullable": false,
+      "description": ""
+    },
+    "target_id": {
+      "type": "string",
+      "nullable": false,
+      "description": ""
+    },
+    "target_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "pref_name": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "taxonomy_id": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "organism": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "organism_class": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "species_group_flag": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "description": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "target_protein_synonyms": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "target_gene_synonyms": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "target_ec_numbers": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "target_xref_pdb_ids": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "target_xref_go_component": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "target_xref_go_function": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "target_xref_go_process": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "target_xref_hgnc_ids": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "target_xref_reactome_ids": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "target_xref_uniprot_ids": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "primary_component_id": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "component_accessions": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "component_descriptions": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "component_ids": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "component_types": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "component_relationships": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "target_components": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "cross_references": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "target_component_synonyms": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "iuphar_target_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "iuphar_class": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "iuphar_match_status": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "iuphar_annotation_status": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "local_class": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "effective_class": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "effective_source": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "decision_status": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "target_class_profile_sha256": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "iuphar_type_raw": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Raw IUPHAR source type. Null means not computed.",
+      "x-bioetl-logical-type": "string",
+      "x-bioetl-null": "not-computed",
+      "x-bioetl-content-hash": "include"
+    },
+    "iuphar_source_completeness": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "typed, family_only, source_unavailable or unannotated.",
+      "x-bioetl-logical-type": "enum",
+      "x-bioetl-enum": "family_only|source_unavailable|typed|unannotated",
+      "x-bioetl-null": "not-computed",
+      "x-bioetl-content-hash": "include"
+    },
+    "iuphar_family_ids": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Canonical JSON set of IUPHAR family ids.",
+      "x-bioetl-logical-type": "set<string>",
+      "x-bioetl-serialization": "canonical-json-string",
+      "x-bioetl-order": "lexicographic",
+      "x-bioetl-null": "not-computed",
+      "x-bioetl-empty": "[]",
+      "x-bioetl-content-hash": "include"
+    },
+    "iuphar_subclasses": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Canonical JSON set of IUPHAR subclasses.",
+      "x-bioetl-logical-type": "set<string>",
+      "x-bioetl-serialization": "canonical-json-string",
+      "x-bioetl-order": "lexicographic",
+      "x-bioetl-null": "not-computed",
+      "x-bioetl-empty": "[]",
+      "x-bioetl-content-hash": "include"
+    },
+    "iuphar_family_paths": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Canonical JSON set of {family_id, root_to_leaf}.",
+      "x-bioetl-logical-type": "set<struct<family_id:string,root_to_leaf:list<string>>>",
+      "x-bioetl-serialization": "canonical-json-string",
+      "x-bioetl-order": "family_id,root_to_leaf",
+      "x-bioetl-path-order": "root-to-leaf",
+      "x-bioetl-null": "not-computed",
+      "x-bioetl-empty": "[]",
+      "x-bioetl-content-hash": "include"
+    },
+    "local_status": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Local-rule status. Null means not computed.",
+      "x-bioetl-logical-type": "enum",
+      "x-bioetl-enum": "candidate_only|conflicting|not_supported|supported",
+      "x-bioetl-null": "not-computed",
+      "x-bioetl-content-hash": "include"
+    },
+    "local_subclasses": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Canonical JSON set of local subclasses.",
+      "x-bioetl-logical-type": "set<string>",
+      "x-bioetl-serialization": "canonical-json-string",
+      "x-bioetl-order": "lexicographic",
+      "x-bioetl-null": "not-computed",
+      "x-bioetl-empty": "[]",
+      "x-bioetl-content-hash": "include"
+    },
+    "local_rule_ids": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Canonical JSON set of local rule ids.",
+      "x-bioetl-logical-type": "set<string>",
+      "x-bioetl-serialization": "canonical-json-string",
+      "x-bioetl-order": "lexicographic",
+      "x-bioetl-null": "not-computed",
+      "x-bioetl-empty": "[]",
+      "x-bioetl-content-hash": "include"
+    },
+    "effective_subclasses": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Canonical JSON set of effective subclasses.",
+      "x-bioetl-logical-type": "set<string>",
+      "x-bioetl-serialization": "canonical-json-string",
+      "x-bioetl-order": "lexicographic",
+      "x-bioetl-null": "not-computed",
+      "x-bioetl-empty": "[]",
+      "x-bioetl-content-hash": "include"
+    },
+    "conflict_codes": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Canonical JSON set of conflict codes.",
+      "x-bioetl-logical-type": "set<string>",
+      "x-bioetl-serialization": "canonical-json-string",
+      "x-bioetl-order": "lexicographic",
+      "x-bioetl-null": "not-computed",
+      "x-bioetl-empty": "[]",
+      "x-bioetl-content-hash": "include"
+    },
+    "classification_evidence_refs": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Canonical JSON struct of evidence id sets.",
+      "x-bioetl-logical-type": "struct<local_evidence_ids:set<string>,match_evidence_ids:set<string>>",
+      "x-bioetl-serialization": "canonical-json-string",
+      "x-bioetl-order": "lexicographic-members",
+      "x-bioetl-null": "not-computed",
+      "x-bioetl-empty": "{\"local_evidence_ids\":[],\"match_evidence_ids\":[]}",
+      "x-bioetl-content-hash": "include"
+    }
+  },
+  "required": [
+    "_dq_error",
+    "_dq_warn",
+    "_index",
+    "content_hash",
+    "entity_id",
+    "target_id"
+  ],
+  "normalization_profile": {
+    "ref": "chembl.target",
+    "version": "1.0.0",
+    "hash": "1c43187c0d3d958f85c3f7d0d39306610752ab82f35899e4e8c575662873a598"
+  },
+  "x-bioetl-schema-sha256": "8339d5b219317f3dbfd56531e02a3415e1785eae2e5fb484f04bbab432c2ad06",
+  "x-bioetl-physical-contract": "3.2.0",
+  "x-bioetl-computational-contract": "independent"
+}
