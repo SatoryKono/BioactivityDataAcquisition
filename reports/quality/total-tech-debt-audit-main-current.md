@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `9c4625cfc2587f014e066feed5c84093640c9914`
 
-Evidence surface SHA-256: `419054cca04a9f18bcd80fb3f0aeae049c5537acfe3f04c225ae34221c0a3d68`
+Evidence surface SHA-256: `b2fc765fa1dde621b99100180387ce39ad3ec97c4dae6034c25d9a0ccdbda96c`
 
 ## Current evidence summary
 
@@ -24,8 +24,10 @@ This is a metadata rebind, not a new repository-wide audit. The audited SHA
 and audit date above remain historical. Earlier conflicting headline values
 are retained in Git history, not presented as current conclusions here.
 
-Current result: debt-governance gates passing. The current architecture score `10.00`
-replaces the historical score `9.47`; the audited SHA and date remain historical.
+Current result: debt-governance gates are failing, as shown in the generated summary
+below. The earlier statement "debt-governance gates passing" no longer applies.
+The current architecture score `10.00` replaces the historical score `9.47`;
+the audited SHA and date remain historical.
 
 Coverage measurements require the complete local 17-shard producer (#11745).
 A hash-only refresh preserves historical measurements and cannot prove full
@@ -35,7 +37,7 @@ reported separately in the issue closeout evidence.
 
 <!-- current-audit-headlines:start -->
 
-Debt-governance gates: **45 pass / 2 fail**
+Debt-governance gates: **44 pass / 3 fail**
 
 Architecture quality integral score: **10.0** (`excellent`)
 
@@ -71,7 +73,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "9c4625cfc2587f014e066feed5c84093640c9914",
-  "evidence_surface_sha256": "419054cca04a9f18bcd80fb3f0aeae049c5537acfe3f04c225ae34221c0a3d68",
+  "evidence_surface_sha256": "b2fc765fa1dde621b99100180387ce39ad3ec97c4dae6034c25d9a0ccdbda96c",
   "metrics": {
     "architecture_integral_score": 10.0,
     "architecture_interpretation": "excellent",
@@ -79,8 +81,8 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
     "contract_coverage_schema": "contract-coverage-matrix-v3",
     "coverage_xml_missing_module_count": 12,
     "debt_gate_count": 47,
-    "debt_gate_fail_count": 2,
-    "debt_gate_pass_count": 45,
+    "debt_gate_fail_count": 3,
+    "debt_gate_pass_count": 44,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
     "fully_covered_module_count": 2537,
