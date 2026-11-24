@@ -36,6 +36,151 @@ from scripts.ops.target_classification_contour import (
 )
 
 
+_RESTORATION_ACTIONS = frozenset({"freeze-inputs", "prepare"})
+
+
+def _load_plan(
+    parser: argparse.ArgumentParser, plan: Path
+) -> tuple[Path, TargetMigrationPaths, dict[str, Any]]:
+    active_root = resolve_configs_root().resolve().parent
+    document = json.loads(confined_io_path(plan, root=active_root).read_bytes())
+    paths = TargetMigrationPaths(
+        **{key: Path(value) for key, value in document["paths"].items()}
+    )
+    if paths.workspace.resolve() != active_root:
+        parser.error("plan workspace must be the active repository/configs root")
+    return active_root, paths, document
+
+
+def _restoration_manifest(
+    parser: argparse.ArgumentParser,
+    args: argparse.Namespace,
+    active_root: Path,
+) -> Path | None:
+    manifest = args.restoration_manifest
+    if manifest is None:
+        return None
+    if args.action not in _RESTORATION_ACTIONS:
+        parser.error("--restoration-manifest applies to freeze-inputs and prepare")
+    return confined_io_path(manifest, root=active_root)
+
+
+def _freeze_inputs(
+    parser: argparse.ArgumentParser,
+    args: argparse.Namespace,
+    paths: TargetMigrationPaths,
+    fields: tuple[str, ...],
+    restoration: Path | None,
+) -> None:
+    if args.output is None:
+        parser.error("freeze-inputs requires --output NEW_MANIFEST_PATH")
+    freeze_target_inputs(
+        paths,
+        legacy_include_fields=fields,
+        output=args.output,
+        restoration_manifest=restoration,
+    )
+    print(json.dumps({"status": "frozen", "manifest": str(args.output)}))
+
+
+def _build_candidates(
+    parser: argparse.ArgumentParser,
+    args: argparse.Namespace,
+    paths: TargetMigrationPaths,
+    fields: tuple[str, ...],
+    restoration: Path | None,
+) -> None:
+    del restoration
+    if not all(
+        (
+            args.input_manifest,
+            args.input_manifest_sha256,
+            args.output,
+            args.run_id,
+            args.run_started_at,
+        )
+    ):
+        parser.error(
+            "build-candidates requires pinned input manifest, output directory and run identity"
+        )
+    build_target_candidates(
+        TargetCandidateBuildRequest(
+            paths,
+            args.input_manifest,
+            args.input_manifest_sha256,
+            args.output,
+            fields,
+            args.run_id,
+            args.run_started_at,
+            bind_target_deployment(paths),
+        )
+    )
+    print(json.dumps({"status": "complete", "output": str(args.output)}))
+
+
+def _migrate(
+    args: argparse.Namespace,
+    paths: TargetMigrationPaths,
+    fields: tuple[str, ...],
+    restoration: Path | None,
+    source_profile: str,
+    destination_profile: str,
+) -> None:
+    if args.action == "prepare":
+        state = prepare_target_migration(
+            paths,
+            legacy_include_fields=fields,
+            deployment=bind_target_deployment(paths),
+            restoration_manifest=restoration,
+            source_profile=source_profile,
+            destination_profile=destination_profile,
+        )
+    elif args.action == "promote":
+        state = promote_target_migration(
+            paths,
+            deployment=bind_target_deployment(paths),
+            source_profile=source_profile,
+            destination_profile=destination_profile,
+            cutover_authority="RF-013",
+        )
+    else:
+        state = rollback_target_migration(
+            paths,
+            source_profile=source_profile,
+            destination_profile=destination_profile,
+        )
+    print(
+        json.dumps(
+            {
+                "phase": state["phase"],
+                "journal": str(paths.backup / "journal.json"),
+                **migration_status(state),
+            }
+        )
+    )
+
+
+def _run_migration(parser: argparse.ArgumentParser, args: argparse.Namespace) -> None:
+    if args.plan is None:
+        parser.error("migration actions require --plan")
+    active_root, paths, document = _load_plan(parser, args.plan)
+    source_profile, destination_profile = _plan_profiles(parser, document)
+    if args.action == "promote" and document.get("cutover_authority") != "RF-013":
+        parser.error(
+            "canonical table promotion is reserved for RF-013; "
+            "plan has no cutover authority"
+        )
+    fields = tuple(document["legacy_include_fields"])
+    restoration = _restoration_manifest(parser, args, active_root)
+    if args.action == "freeze-inputs":
+        _freeze_inputs(parser, args, paths, fields, restoration)
+        return
+    if args.action == "build-candidates":
+        _build_candidates(parser, args, paths, fields, restoration)
+        return
+    _migrate(args, paths, fields, restoration, source_profile, destination_profile)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -54,6 +199,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--output", type=Path)
     parser.add_argument("--run-id")
     parser.add_argument("--run-started-at")
+    parser.add_argument(
+        "--restoration-manifest",
+        type=Path,
+        help="Validated assay/target FK restoration manifest",
+    )
     parser.add_argument(
         "--plan",
         type=Path,
@@ -84,124 +234,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.action == "contour-report":
         return _contour_report(parser, args)
-    if args.plan is None:
-        parser.error("migration actions require --plan")
-    active_root = resolve_configs_root().resolve().parent
-    document = json.loads(confined_io_path(args.plan, root=active_root).read_bytes())
-    source_profile, destination_profile = _plan_profiles(parser, document)
-    if args.action == "promote" and document.get("cutover_authority") != "RF-013":
-        parser.error(
-            "canonical table promotion is reserved for RF-013; "
-            "plan has no cutover authority"
-        )
-    paths = TargetMigrationPaths(
-        **{key: Path(value) for key, value in document["paths"].items()}
-    )
-    if paths.workspace.resolve() != active_root:
-        parser.error("plan workspace must be the active repository/configs root")
-    _execute_plan(parser, args, paths, document, source_profile, destination_profile)
+    _run_migration(parser, args)
     return 0
-
-
-def _execute_plan(
-    parser: argparse.ArgumentParser,
-    args: argparse.Namespace,
-    paths: TargetMigrationPaths,
-    document: dict[str, Any],
-    source_profile: str,
-    destination_profile: str,
-) -> None:
-    """Run one planned migration action after the shared plan checks."""
-    fields = tuple(document["legacy_include_fields"])
-    if args.action == "freeze-inputs":
-        _freeze_inputs(parser, args, paths, fields)
-    elif args.action == "build-candidates":
-        _build_candidates(parser, args, paths, fields)
-    elif args.action == "prepare":
-        state = prepare_target_migration(
-            paths,
-            legacy_include_fields=fields,
-            deployment=bind_target_deployment(paths),
-            source_profile=source_profile,
-            destination_profile=destination_profile,
-        )
-        _print_migration_state(paths, state)
-    elif args.action == "promote":
-        state = promote_target_migration(
-            paths,
-            deployment=bind_target_deployment(paths),
-            source_profile=source_profile,
-            destination_profile=destination_profile,
-            cutover_authority="RF-013",
-        )
-        _print_migration_state(paths, state)
-    else:
-        state = rollback_target_migration(
-            paths,
-            source_profile=source_profile,
-            destination_profile=destination_profile,
-        )
-        _print_migration_state(paths, state)
-
-
-def _freeze_inputs(
-    parser: argparse.ArgumentParser,
-    args: argparse.Namespace,
-    paths: TargetMigrationPaths,
-    fields: tuple[Any, ...],
-) -> None:
-    if args.output is None:
-        parser.error("freeze-inputs requires --output NEW_MANIFEST_PATH")
-    freeze_target_inputs(paths, legacy_include_fields=fields, output=args.output)
-    print(json.dumps({"status": "frozen", "manifest": str(args.output)}))
-
-
-def _build_candidates(
-    parser: argparse.ArgumentParser,
-    args: argparse.Namespace,
-    paths: TargetMigrationPaths,
-    fields: tuple[Any, ...],
-) -> None:
-    if not all(
-        (
-            args.input_manifest,
-            args.input_manifest_sha256,
-            args.output,
-            args.run_id,
-            args.run_started_at,
-        )
-    ):
-        parser.error(
-            "build-candidates requires pinned input manifest, output directory and run identity"
-        )
-    build_target_candidates(
-        TargetCandidateBuildRequest(
-            paths,
-            args.input_manifest,
-            args.input_manifest_sha256,
-            args.output,
-            fields,
-            args.run_id,
-            args.run_started_at,
-            bind_target_deployment(paths),
-        )
-    )
-    print(json.dumps({"status": "complete", "output": str(args.output)}))
-
-
-def _print_migration_state(
-    paths: TargetMigrationPaths, state: TargetMigrationJournal
-) -> None:
-    reported = migration_status(state)
-    print(
-        json.dumps(
-            {
-                "phase": state["phase"],
-                "journal": str(paths.backup / "journal.json"),
-                **reported,
-            }
-        )
-    )
 
 
 def _contour_report(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:

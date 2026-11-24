@@ -897,6 +897,8 @@ def _correct_control_plane_trust(uid: str, panels: dict[int, dict[str, Any]]) ->
         "wrapText": False,
     }
     _organize_trust_reasons(trust)
+    _override(trust, "reasons_text", _HIDDEN, False)
+    _override(trust, "reasons_text", "displayName", "Reasons")
     for field, width in (
         ("Processing result", 110),
         ("Saved trust verdict", 110),

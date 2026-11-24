@@ -101,6 +101,18 @@ def _lock(root: Path) -> Iterator[None]:
         yield
 
 
+def _recorded_restoration(
+    workspace: Path, state: TargetMigrationJournal
+) -> Path | None:
+    recorded = state.get("fk_restoration")
+    if not isinstance(recorded, dict) or "path" not in recorded:
+        return None
+    manifest = workspace / str(recorded["path"])
+    if sha256_file(manifest) != recorded["sha256"]:
+        raise ValueError("target FK restoration digest mismatch")
+    return manifest
+
+
 def prepare_target_migration(
     paths: TargetMigrationPaths,
     *,
@@ -108,6 +120,7 @@ def prepare_target_migration(
     deployment: TargetDeploymentBinding | None = None,
     source_profile: str = "V30",
     destination_profile: str = "V31",
+    restoration_manifest: Path | None = None,
 ) -> TargetMigrationJournal:
     """Validate complete cohorts and copy the entire recoverable old bundle."""
     transition = resolve_target_migration_transition(
@@ -118,14 +131,21 @@ def prepare_target_migration(
     with _lock(paths.workspace):
         pins = _source_pins(checked)
         _assert_source_profiles(pins, transition)
-        fk_restoration = _fk_restoration(pins)
         candidate_profiles = _candidate_profiles(checked, transition)
         validation = validate_target_candidate(
-            checked, legacy_include_fields, workspace=paths.workspace
+            checked,
+            legacy_include_fields,
+            workspace=paths.workspace,
+            restoration_manifest=restoration_manifest,
+        )
+        fk_restoration = _fk_restoration(
+            pins,
+            restored_gold=checked["candidate_gold"] if restoration_manifest else None,
         )
         dependencies = collect_target_dependencies(
             workspace=paths.workspace,
             configs=(checked["config"], checked["candidate_config"]),
+            restoration_manifest=restoration_manifest,
         )
         checked["backup"].mkdir(parents=True, exist_ok=False)
         dependency_backups = backup_target_dependencies(
@@ -184,6 +204,13 @@ def prepare_target_migration(
             ),
             "fk_restoration": fk_restoration,
         }
+        if restoration_manifest is not None:
+            relative = restoration_manifest.resolve().relative_to(
+                paths.workspace.resolve()
+            )
+            state["fk_restoration"].update(
+                path=relative.as_posix(), sha256=sha256_file(restoration_manifest)
+            )
         _save(checked["backup"], state)
         return state
 
@@ -211,19 +238,23 @@ def promote_target_migration(
             str(state.get("source_profile", "V30")),
             str(state.get("destination_profile", "V31")),
         )
-        _assert_recorded_versions(checked, state)
+        restoration_manifest = _recorded_restoration(paths.workspace, state)
+        _assert_recorded_versions(
+            checked, state, restoration_manifest=restoration_manifest
+        )
         _assert_recorded_contracts(checked, state, paths.workspace)
         _assert_recorded_candidates(checked, transition, state)
         verify_target_dependencies(paths.workspace, state["dependencies"])
         verify_target_dependencies(paths.workspace, state["dependency_backups"])
         _verify_prepared_bytes(checked, state)
+        if _tree_hashes(checked["assay"]) != state["assay_hashes"]:
+            raise ValueError("assay reference cohort changed since preparation")
         validate_target_candidate(
             checked,
             tuple(state["legacy_include_fields"]),
             workspace=paths.workspace,
+            restoration_manifest=restoration_manifest,
         )
-        if _tree_hashes(checked["assay"]) != state["assay_hashes"]:
-            raise ValueError("assay reference cohort changed since preparation")
         state["phase"] = "promoting"
         _save(checked["backup"], state)
         try:

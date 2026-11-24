@@ -114,6 +114,8 @@ def _assert_source_profiles(
 
 def _fk_restoration(
     pins: dict[str, dict[str, object]] | None,
+    *,
+    restored_gold: Path | None = None,
 ) -> dict[str, object]:
     if pins is None:
         return {
@@ -125,7 +127,13 @@ def _fk_restoration(
             "gold_target_id_sha256": "",
         }
     assay_ids = pins["assay"]["target_ids"]
-    gold_ids = pins["gold"]["target_ids"]
+    gold = pins["gold"]
+    if restored_gold is not None:
+        candidate = _delta_pin(restored_gold, classify=False)
+        if candidate is None:
+            raise ValueError("restored target candidate is unreadable")
+        gold = candidate
+    gold_ids = gold["target_ids"]
     if not isinstance(assay_ids, set) or not isinstance(gold_ids, set):
         raise ValueError(_INVALID_TARGET_ID)
     return require_rf009_fk_restoration(assay_ids, gold_ids)
@@ -200,7 +208,10 @@ def _assert_plan_profiles(
 
 
 def _assert_recorded_versions(
-    checked: dict[str, Path], state: TargetMigrationJournal
+    checked: dict[str, Path],
+    state: TargetMigrationJournal,
+    *,
+    restoration_manifest: Path | None = None,
 ) -> None:
     recorded = state.get("table_versions") or {}
     if not recorded:
@@ -211,7 +222,11 @@ def _assert_recorded_versions(
     live = _public_pins(current)
     for name, previous in recorded.items():
         _assert_one_pin(name, live[name], previous)
-    _assert_closed_fk(current, state)
+    if (state.get("fk_restoration") or {}).get("status") == "closed":
+        _fk_restoration(
+            current,
+            restored_gold=checked["candidate_gold"] if restoration_manifest else None,
+        )
 
 
 def _assert_one_pin(
@@ -233,19 +248,6 @@ def _assert_one_pin(
     if name == "gold":
         raise ValueError("baseline target cohort changed since preparation")
     raise ValueError("source cohort changed since preparation")
-
-
-def _assert_closed_fk(
-    current: dict[str, dict[str, object]], state: TargetMigrationJournal
-) -> None:
-    restoration = state.get("fk_restoration") or {}
-    if restoration.get("status") != "closed":
-        return
-    assay_ids = current["assay"]["target_ids"]
-    gold_ids = current["gold"]["target_ids"]
-    if not isinstance(assay_ids, set) or not isinstance(gold_ids, set):
-        raise ValueError(_INVALID_TARGET_ID)
-    require_rf009_fk_restoration(assay_ids, gold_ids)
 
 
 def _assert_recorded_contracts(

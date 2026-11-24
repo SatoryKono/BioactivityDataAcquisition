@@ -8,7 +8,10 @@ import pyarrow as pa
 import pytest
 from deltalake import write_deltalake
 
-from bioetl.domain.config.target_classification import TARGET_CLASSIFICATION_FIELDS
+from bioetl.domain.config.target_classification import (
+    TARGET_CLASSIFICATION_DETAIL_FIELDS,
+    TARGET_CLASSIFICATION_FIELDS,
+)
 from bioetl.infrastructure.storage import target_classification_guard as guard
 from bioetl.infrastructure.storage.target_classification_guard import (
     assert_target_table_compatibility,
@@ -86,9 +89,8 @@ def test_v32_fields_do_not_become_an_implicit_v31_profile(
     silver, gold = tmp_path / "silver", tmp_path / "gold"
     _table(silver, (*TARGET_CLASSIFICATION_FIELDS, "iuphar_subclass"))
     _table(gold, (*TARGET_CLASSIFICATION_FIELDS, "iuphar_subclass"))
-    with pytest.raises(ValueError, match="explicit migration profile"):
-        get_target_table_profile(silver_path=silver, gold_path=gold)
-    with pytest.raises(ValueError, match="explicit migration profile"):
+    assert get_target_table_profile(silver_path=silver, gold_path=gold) == "V32"
+    with pytest.raises(ValueError, match="cannot write an existing V32"):
         assert_target_table_compatibility(
             silver_path=silver, gold_path=gold, mode="enrich"
         )
@@ -122,3 +124,45 @@ def test_partial_schema_and_unrecognised_directory_require_recovery(
     with pytest.raises(ValueError, match="unrecognised target directory"):
         assert_target_table_compatibility(silver_path=other, gold_path=gold, mode="off")
     assert (other / "precious.bin").read_bytes() == b"preserve"
+
+
+def test_v32_contract_refuses_existing_v30_and_v31_tables(tmp_path: Path) -> None:
+    legacy = tmp_path / "legacy"
+    current = tmp_path / "current"
+    detailed_root = tmp_path / "detailed"
+    for root, fields in (
+        (legacy, ()),
+        (current, TARGET_CLASSIFICATION_FIELDS),
+        (
+            detailed_root,
+            (*TARGET_CLASSIFICATION_FIELDS, *TARGET_CLASSIFICATION_DETAIL_FIELDS),
+        ),
+    ):
+        _table(root / "silver", fields)
+        _table(root / "gold", fields)
+    for root in (legacy, current):
+        with pytest.raises(ValueError, match="migration is a later task"):
+            assert_target_table_compatibility(
+                silver_path=root / "silver",
+                gold_path=root / "gold",
+                mode="enrich",
+                table_contract="3.2.0",
+            )
+    assert_target_table_compatibility(
+        silver_path=detailed_root / "silver",
+        gold_path=detailed_root / "gold",
+        mode="enrich",
+        table_contract="3.2.0",
+    )
+    with pytest.raises(ValueError, match="cannot write an existing V32"):
+        assert_target_table_compatibility(
+            silver_path=detailed_root / "silver",
+            gold_path=detailed_root / "gold",
+            mode="enrich",
+        )
+    with pytest.raises(ValueError, match="physical rollback"):
+        assert_target_table_compatibility(
+            silver_path=detailed_root / "silver",
+            gold_path=detailed_root / "gold",
+            mode="off",
+        )
