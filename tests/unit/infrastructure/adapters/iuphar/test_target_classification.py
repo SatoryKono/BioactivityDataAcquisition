@@ -59,7 +59,7 @@ def _receipt(snapshot_hash: str) -> dict[str, object]:
         "run_id": "contract-run",
         "reviewer_reference": "synthetic-unit-test-expectations",
         "normalization_version": "bioetl-iuphar-input-v1",
-        "rules_version": "plan-v1-r9",
+        "rules_version": "local-rules-2026.11.23",
         "classification_schema_version": "3.1.0",
         "matching_policy_version": "rf002-uniprot-roles-2026-11-23",
     }
@@ -132,7 +132,7 @@ def _profile(
         "snapshot": snapshot_ref,
         "acceptance": acceptance,
         "normalization_version": "bioetl-iuphar-input-v1",
-        "rules_version": "plan-v1-r9",
+        "rules_version": "local-rules-2026.11.23",
         "classification_schema_version": "3.1.0",
         "matching_policy_version": "rf002-uniprot-roles-2026-11-23",
     }
@@ -221,12 +221,18 @@ def test_receipt_from_another_execution_version_cannot_admit_enrich(field):
         validate_acceptance_receipt(receipt, snapshot_manifest_sha256="a" * 64)
 
 
+def test_previous_plan_rules_version_cannot_admit_the_new_catalog():
+    receipt = _receipt("a" * 64)
+    receipt["rules_version"] = "plan-v1-r8"
+    with pytest.raises(ValueError, match="acceptance versions"):
+        validate_acceptance_receipt(receipt, snapshot_manifest_sha256="a" * 64)
+
+
 def test_pre_rf002_receipt_format_is_rejected_for_new_matching():
     """Real prior receipt shape (schema 2, no matching_policy_version) cannot admit."""
     receipt = _receipt("a" * 64)
     assert "matching_policy_version" in receipt
     del receipt["matching_policy_version"]
-    # Prior enrich receipts carried these three pins only.
     assert {
         "normalization_version",
         "rules_version",
@@ -290,9 +296,12 @@ def test_an_ec_input_does_not_replace_direct_iuphar(tmp_path):
         IupharTargetClassificationAdapter(profile), target_ec_numbers="3.4.21.1"
     )
     assert result.projection["iuphar_class"] == "Receptor"
-    # EC text alone does not supply the independent rule evidence needed for a
-    # supported local class. The adapter must not manufacture a local override.
-    assert result.projection["local_class"] is None
+    # EC 3 is a local Enzyme witness. It stays in local_class and does not
+    # replace the official IUPHAR class.
+    assert result.projection["local_class"] == "Enzyme"
+    assert result.projection["effective_class"] == "Receptor"
+    assert result.projection["effective_source"] == "iuphar_normalized"
+    assert result.projection["decision_status"] == "requires_review"
 
 
 @pytest.mark.parametrize(

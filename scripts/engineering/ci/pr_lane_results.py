@@ -1305,10 +1305,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
         ),
     ),
-    "configs/quality/external_resource_inventory_pr13342_rematch_review.json": (
-        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
-        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
-    ),
     "configs/quality/external_resource_inventory_pr12751_review.json": (
         EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
         EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
@@ -1374,22 +1370,6 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
     ),
     "configs/quality/external_resource_inventory_pr13328_workflow_resume_review.json": (
-        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
-        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
-    ),
-    "configs/quality/external_resource_inventory_pr13342_merge_review.json": (
-        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
-        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
-    ),
-    "configs/quality/external_resource_inventory_pr13342_dq_resume_review.json": (
-        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
-        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
-    ),
-    "configs/quality/external_resource_inventory_pr13342_rf002_review.json": (
-        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
-        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
-    ),
-    "configs/quality/external_resource_inventory_pr13342_delta_pin_review.json": (
         EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
         EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
     ),
