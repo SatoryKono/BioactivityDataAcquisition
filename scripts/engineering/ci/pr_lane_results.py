@@ -844,6 +844,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     **dict.fromkeys(
         (
             "AGENTS.md",
+            "docs/00-project/ai/agents/guides/CODEX_TASK_ROUTING.md",
             "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
             "docs/00-project/ai/agents/guides/grok-operator-runbook.md",
             "docs/00-project/ai/prompts/library/session/bootstrap.md",
