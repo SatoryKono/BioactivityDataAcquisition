@@ -1763,16 +1763,14 @@
                   "shadow"
                 ]
               }
-            },
-            "required": [
-              "mode"
-            ]
+            }
           },
           "then": {
             "properties": {
               "table_contract": {
                 "enum": [
-                  "3.0.0"
+                  "3.0.0",
+                  null
                 ]
               }
             }

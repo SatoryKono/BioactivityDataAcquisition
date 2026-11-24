@@ -48,11 +48,11 @@ class TargetClassificationYamlConfig(BaseModel):
                     },
                 },
                 {
-                    "if": {
-                        "properties": {"mode": {"enum": ["off", "shadow"]}},
-                        "required": ["mode"],
+                    # Missing mode also matches: the runtime defaults to off.
+                    "if": {"properties": {"mode": {"enum": ["off", "shadow"]}}},
+                    "then": {
+                        "properties": {"table_contract": {"enum": ["3.0.0", None]}}
                     },
-                    "then": {"properties": {"table_contract": {"enum": ["3.0.0"]}}},
                 },
                 {
                     "if": {

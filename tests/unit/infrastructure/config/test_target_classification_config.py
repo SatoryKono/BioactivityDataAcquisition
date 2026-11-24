@@ -135,6 +135,48 @@ def test_generated_json_schema_also_rejects_unpinned_profiles(
     )
 
 
+@pytest.mark.parametrize(
+    ("mode", "compatible_contracts"),
+    [
+        (None, {"3.0.0", None}),
+        ("off", {"3.0.0", None}),
+        ("shadow", {"3.0.0", None}),
+        ("enrich", {"3.1.0", "3.2.0", None}),
+    ],
+)
+@pytest.mark.parametrize("table_contract", [None, "3.0.0", "3.1.0", "3.2.0"])
+def test_table_contract_selector_agrees_with_json_schemas(
+    mode: str | None,
+    compatible_contracts: set[str | None],
+    table_contract: str | None,
+) -> None:
+    payload: dict[str, str | None] = {"table_contract": table_contract}
+    if mode is not None:
+        payload["mode"] = mode
+    if mode in {"shadow", "enrich"}:
+        payload.update(
+            snapshot_manifest="snapshot.json", snapshot_manifest_sha256="a" * 64
+        )
+
+    expected = table_contract in compatible_contracts
+    if expected:
+        domain = TargetClassificationYamlConfig.model_validate(payload).to_domain()
+        default = "3.1.0" if mode == "enrich" else "3.0.0"
+        assert domain.contract_version == (table_contract or default)
+    else:
+        with pytest.raises(ValidationError):
+            TargetClassificationYamlConfig.model_validate(payload)
+
+    schema = TargetClassificationYamlConfig.model_json_schema()
+    assert Draft202012Validator(schema).is_valid(payload) is expected
+
+    generated = json.loads(
+        (ROOT / "configs/_schema/pipeline.json").read_text(encoding="utf-8")
+    )
+    selector = generated["$defs"]["TargetClassificationYamlConfig"]
+    assert Draft202012Validator(selector).is_valid(payload) is expected
+
+
 def test_yaml_profile_roundtrips_to_immutable_domain_config() -> None:
     config = _config("shadow")
     domain = yaml_config_to_domain(config)
