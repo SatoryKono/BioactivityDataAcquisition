@@ -71,7 +71,9 @@ def _load_yaml(path: Path) -> dict[str, Any]:
     return deepcopy(_parse_policy_yaml(path.read_text(encoding="utf-8")))
 
 
-def test_yaml_loader_uses_current_content_without_sharing_mutations(tmp_path: Path) -> None:
+def test_yaml_loader_uses_current_content_without_sharing_mutations(
+    tmp_path: Path,
+) -> None:
     path = tmp_path / "workflow.yml"
     path.write_text("jobs: [first]\n", encoding="utf-8")
 
