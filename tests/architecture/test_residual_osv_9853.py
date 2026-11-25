@@ -171,6 +171,7 @@ def test_grafana_plugins_do_not_force_router_or_uuid_majors() -> None:
     )
     assert scenes_pkg["dependencies"]["react-router-dom-v5-compat"] == bridge_ref
     assert selector_pkg["dependencies"]["react-router-dom-v5-compat"] == bridge_ref
+    # PR #13385 overrides i18next-pseudo's vulnerable dependency for CVE-2026-63402.
     assert scenes_pkg["overrides"] == {
         **audited_overrides,
         "@grafana/scenes": {"react-router-dom": "7.18.4"},
@@ -190,6 +191,7 @@ def test_grafana_plugins_do_not_force_router_or_uuid_majors() -> None:
     assert bridge["dependencies"]["react-router-dom-v5"] == "npm:react-router-dom@5.3.4"
     assert (bridge_root / "bioetl-grafana-router-v7-bridge-0.3.0.tgz").is_file()
     scenes = _lock_packages(SCENES_LOCK)
+    assert scenes["node_modules/i18next-pseudo/node_modules/i18next"]["version"] == "26.3.4"
     locked_bridge = scenes["node_modules/react-router-dom-v5-compat"]
     assert locked_bridge["name"] == bridge["name"]
     assert locked_bridge["version"] == bridge["version"]
