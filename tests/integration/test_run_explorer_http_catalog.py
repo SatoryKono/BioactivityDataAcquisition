@@ -12,6 +12,7 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
@@ -185,6 +186,27 @@ def test_run_explorer_http_catalog_matches_live_dashboard() -> None:
         for forbidden in _FORBIDDEN_NOVALUE_VARS:
             assert forbidden not in no_value, (
                 f"panel {panel_id} noValue still interpolates {forbidden}"
+            )
+
+
+@pytest.mark.parametrize("profile", ["dashboards", "dashboards-adaptive"])
+def test_run_explorer_jsonata_avoids_dashboard_variable_interpolation(
+    profile: str,
+) -> None:
+    path = Path("grafana") / profile / "bioetl-run-explorer-v1.json"
+    dashboard = load_dashboard(path)
+    dashboard_variables = {
+        variable["name"] for variable in dashboard["templating"]["list"]
+    }
+    for panel in get_dashboard_panels(dashboard):
+        for target in _http_targets(panel):
+            # Infinity interpolates dashboard variables inside JSONata selectors.
+            selector = target.get("root_selector", "")
+            references = set(re.findall(r"\$([a-zA-Z_][a-zA-Z0-9_]*)", selector))
+            collisions = references & dashboard_variables
+            assert not collisions, (
+                f"{profile} panel {panel['id']} JSONata references Grafana "
+                f"variables: {sorted(collisions)}"
             )
 
 
