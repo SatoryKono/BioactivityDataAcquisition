@@ -567,6 +567,27 @@ workspace, the same root used by the runtime loader and dependency collector.
 It validates the full candidates and publishes a completed build manifest and
 per-row classification evidence. Preserve the input manifest and build evidence.
 
+#### RF-013 candidate validation on 2026-11-25
+
+The isolated V30 → V31 candidate build processed every row in the frozen
+shared target snapshot and added 37 verified targets referenced by assay Gold.
+Silver grew from 1,000 to 1,037 rows and Gold from 922 to 959. The unchanged
+assay Gold contained 983 rows and had zero unresolved target references
+against the candidate. Readback confirmed the nine classification fields
+and the admitted profile on every candidate row. The shared tables and
+canonical configuration passed the before-and-after identity checks.
+
+| Local evidence | SHA-256 |
+| --- | --- |
+| Frozen V30 inputs | `2f9ec88a5cf07279a2ad6c40e5b73063e4b496065273b3d75a66e0212436e22e` |
+| Validated FK restoration | `c638ee9856c60ea1953ed66f4af3d4abc27f4d6b8a750850e99bf9c75f1fa1e7` |
+| V31 candidate build | `c8e84e96ae265a63f0f37f407c8f8834fcfdf3b06647febfbf71cf22d078308d` |
+| Classification evidence | `974a5682bd6563aed16ed5da434aefb3850d24ca4acccfac42e87f662ca5929e` |
+| Admitted profile | `2d96b292124aa14aa47fa60c7bbdf2f5d04003a1998a8d004383e50a0c059aa3` |
+
+Candidate run `845a0367-d099-46aa-a5a0-62df4e8cdfcc` supplies the inputs for the copy rehearsal.
+Rehearsal and production deployment each need their own evidence.
+
 Historical tables use the migration-only physical contract
 `legacy_physical_target_v30_to_v31_v1`: candidates must contain exactly the old
 physical columns plus the nine classification fields. Preserve every old value,
