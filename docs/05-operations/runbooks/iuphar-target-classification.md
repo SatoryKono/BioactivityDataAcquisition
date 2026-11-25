@@ -918,6 +918,15 @@ local deployment is `enrich` on 3.1.0. This operational acceptance
 uses the bounded RF-008 receipt and carries the accepted cutover PR
 #13392 CI at `35befda97a6857fe479c5e1caff94a1d0ec848e0`.
 
+The local deployment workspace retains the acceptance files under
+`reports/local/iuphar-v31-rf013-live-20261125-v2/`. For a repeat report, use
+`live-evidence.json`, `live-measurement-paths.json`, and
+`--repo-root` pointing to `contour-source-bindings/` in that directory.
+The pipeline report is under `reports/run-reports/pipeline/chembl_target/`
+and the classification manifest under
+`data/output/control/target_classification/`, each in the pipeline run ID
+directory.
+
 | Local evidence | SHA-256 |
 | --- | --- |
 | Live contour | `4df2caca933bc81eca0372df344f8cd0241e1553dc2f4d5fe79729b2bf94776c` |
