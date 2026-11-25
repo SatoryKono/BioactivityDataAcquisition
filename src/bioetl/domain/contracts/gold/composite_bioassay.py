@@ -235,3 +235,15 @@ class CompositeTargetGoldSchema(CompositeLookupLineageSchema):
         nullable=True,
         description="Version of the canonical L1 mapping used for aggregation.",
     )
+
+    iuphar_target_id: Series[str] | None = pa.Field(nullable=True)
+    iuphar_class: Series[str] | None = pa.Field(nullable=True)
+    iuphar_match_status: Series[str] | None = pa.Field(nullable=True)
+    iuphar_annotation_status: Series[str] | None = pa.Field(nullable=True)
+    local_class: Series[str] | None = pa.Field(nullable=True)
+    effective_class: Series[str] | None = pa.Field(nullable=True)
+    effective_source: Series[str] | None = pa.Field(nullable=True)
+    decision_status: Series[str] | None = pa.Field(nullable=True)
+    target_class_profile_sha256: Series[str] | None = pa.Field(
+        nullable=True, str_matches=r"^[0-9a-f]{64}$"
+    )

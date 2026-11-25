@@ -45,6 +45,7 @@ from bioetl.domain.composite.enriched_target_features import (
     COMPOSITE_CLASSIFICATION_OWNER,
     hierarchy_fields_are_equivalent,
 )
+from bioetl.domain.contracts.gold.composite import CompositeTargetGoldSchema
 from bioetl.domain.entities.target_classification_boundary import (
     TargetClassificationArtifactReference,
     TargetClassificationResult,
@@ -464,19 +465,25 @@ def test_gold_projection_keeps_unknown_columns_fail_closed() -> None:
     frame = pl.DataFrame(
         {
             "target_id": ["CHEMBL1"],
-            "effective_class": ["Enzyme"],
+            **{column: ["value"] for column in TARGET_CLASSIFICATION_FIELDS},
+            "target_class_profile_sha256": [_PROFILE],
             "target_classification_owner": [COMPOSITE_CLASSIFICATION_OWNER],
             "other": ["keep"],
         }
     )
 
-    schema = SimpleNamespace(
-        columns={"target_id": object(), "effective_class": object()}
-    )
-    schema.to_schema = lambda: schema
-    projected = project_gold_classification_frame(frame, schema)
+    schema = CompositeTargetGoldSchema.to_schema()
+    projected = project_gold_classification_frame(frame, CompositeTargetGoldSchema)
+
     assert "target_classification_owner" not in projected.columns
-    assert projected["effective_class"][0] == "Enzyme"
+    assert projected.select(TARGET_CLASSIFICATION_FIELDS).equals(
+        frame.select(TARGET_CLASSIFICATION_FIELDS)
+    )
+    assert all(
+        schema.columns[column].nullable and not schema.columns[column].required
+        for column in TARGET_CLASSIFICATION_FIELDS
+    )
+    assert schema.strict
     assert projected["other"][0] == "keep"
 
 
