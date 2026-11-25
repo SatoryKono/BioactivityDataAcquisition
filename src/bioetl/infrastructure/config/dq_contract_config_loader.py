@@ -143,6 +143,8 @@ def _load_contract_payload(path: Path) -> JsonDict:
     """Load single contract payload from YAML/JSON."""
     with open(path, encoding="utf-8") as file:
         data = json.load(file) if path.suffix == ".json" else yaml.safe_load(file)
+    if path.suffix != ".json" and data is not None and not isinstance(data, dict):
+        raise ValueError(f"DQ contract config must be a mapping: {path}")
     return data if isinstance(data, dict) else {}
 
 

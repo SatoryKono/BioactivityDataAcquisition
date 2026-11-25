@@ -30,6 +30,7 @@
 from __future__ import annotations
 
 import builtins
+import shutil
 from pathlib import Path
 from unittest.mock import patch
 
@@ -134,6 +135,21 @@ def test_required_contract_rejects_malformed_yaml(temp_contract_root: Path) -> N
         DQContractConfigLoader(temp_contract_root).load_dq_config_for_pipeline(
             "chembl_activity"
         )
+
+
+@pytest.mark.parametrize(
+    "payload", ["- disposition_overrides\n- report\n", "warn\n", "[]\n"]
+)
+def test_real_contract_rejects_non_mapping_yaml(tmp_path: Path, payload: str) -> None:
+    configs_root = Path(__file__).resolve().parents[4] / "configs"
+    contract = tmp_path / "contracts" / "chembl" / "activity.yaml"
+    contract.parent.mkdir(parents=True)
+    contract.write_text(payload, encoding="utf-8")
+    (tmp_path / "base").mkdir()
+    shutil.copy(configs_root / "base" / "contract_registry.yaml", tmp_path / "base")
+    loader = DQContractConfigLoader(tmp_path)
+    with pytest.raises(ValueError, match="DQ contract config must be a mapping"):
+        loader.load_dq_config_for_pipeline("chembl_activity")
 
 
 def test_loader_rejects_registry_identity_mismatch(temp_contract_root: Path) -> None:
