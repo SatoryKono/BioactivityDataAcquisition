@@ -1059,6 +1059,13 @@ def test_config_dq_helpers_cover_lazy_import_and_error_branches(
     )
 
     messages.clear()
+    service.get_dq_config.side_effect = PermissionError("denied")
+    with pytest.raises(SystemExit) as exit_info:
+        config_dq.show_dq_config_command.callback("chembl_activity", "yaml")
+    assert exit_info.value.code == int(ExitCode.FAIL)
+    assert any(kind == "error" and "denied" in str(args) for kind, args in messages)
+
+    messages.clear()
     bad_yaml = tmp_path / "bad.yaml"
     bad_yaml.write_text(":\n", encoding="utf-8")
     with pytest.raises(SystemExit) as exit_info:
@@ -1100,6 +1107,13 @@ def test_config_dq_helpers_cover_lazy_import_and_error_branches(
         kind == "error" and args[0] == "Config file not found"
         for kind, args in messages
     )
+
+    messages.clear()
+    service.get_effective_config_artifact.side_effect = PermissionError("denied")
+    with pytest.raises(SystemExit) as exit_info:
+        config_dq.show_effective_config_command.callback("chembl_activity", "yaml", ())
+    assert exit_info.value.code == int(ExitCode.FAIL)
+    assert any(kind == "error" and "denied" in str(args) for kind, args in messages)
 
     messages.clear()
     service.get_effective_config_artifact.side_effect = TypeError("artifact failed")
