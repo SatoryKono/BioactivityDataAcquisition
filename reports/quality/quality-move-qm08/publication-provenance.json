@@ -2637,6 +2637,54 @@
       "schema_version": 1,
       "trust_statement": "Operator reviewed live GitHub publication lineage; Git ancestry and tree equality are independently checked. Not a runtime qualification or CI execution receipt.",
       "verification_mode": "live_github"
+    },
+    {
+      "github_pull_request": {
+        "base": {
+          "repo": {
+            "full_name": "SatoryKono/BioactivityDataAcquisition"
+          }
+        },
+        "head": {
+          "sha": "d03aabea8d36181f51712a5df120128682988096"
+        },
+        "merge_commit_sha": "ba998bdf96c99cf22320d774fe3d011e2bbc34aa",
+        "merged": true,
+        "merged_at": "2026-11-25T07:41:34Z",
+        "number": 13375
+      },
+      "retrieved_at_utc": "2026-11-25T09:28:37.228804+00:00",
+      "retrieved_from": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/pulls/13375",
+      "reviewed_source_commits": [
+        "6d97521b00794797bf07bcbf0e5891f4b75d5a96"
+      ],
+      "schema_version": 1,
+      "trust_statement": "Reviewed live GitHub publication mapping and verified matching Git trees and source ancestry. Scope is source publication lineage.",
+      "verification_mode": "live_github"
+    },
+    {
+      "github_pull_request": {
+        "base": {
+          "repo": {
+            "full_name": "SatoryKono/BioactivityDataAcquisition"
+          }
+        },
+        "head": {
+          "sha": "c13f34298132b9e45a888b62e306e33ef4d51aef"
+        },
+        "merge_commit_sha": "e93b6022e1857b61bdba2b3d6d02c666736258f4",
+        "merged": true,
+        "merged_at": "2026-11-25T10:43:29Z",
+        "number": 13387
+      },
+      "retrieved_at_utc": "2026-11-25T10:48:34.442244+00:00",
+      "retrieved_from": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/pulls/13387",
+      "reviewed_source_commits": [
+        "eb91ef5c6c0ac386a0918b484a8fa4255138fdf4"
+      ],
+      "schema_version": 1,
+      "trust_statement": "Reviewed live GitHub publication mapping and verified matching Git trees and source ancestry. Scope is source publication lineage.",
+      "verification_mode": "live_github"
     }
   ],
   "schema_version": 1,

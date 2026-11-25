@@ -53,7 +53,7 @@ ______________________________________________________________________
 | Artifact             | Link                                                                                     |
 | -------------------- | ---------------------------------------------------------------------------------------- |
 | Canonical guide      | [pipeline-configuration.md](../../../03-guides/pipeline-configuration.md)                |
-| Gold contract export | [composite_target_v1.0.json](../../contracts/gold/composite_target_v1.0.json)            |
+| Gold contract export | [composite_target_v1.1.json](../../contracts/gold/composite_target_v1.1.json)            |
 | Gold schemas index   | [gold-schemas.md](../../contracts/gold-schemas.md)                                       |
 | Versioning policy    | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
 
@@ -63,5 +63,5 @@ ______________________________________________________________________
 | ----------------------------- | ------ | ---------------------------------------------------------------------------------------- |
 | Metadata                      | Pass   | YAML header contains `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified` |
 | Canonical source traceability | Pass   | Page delegates current contract to the linked canonical source and active config surface |
-| Contract linkage              | Pass   | [composite_target_v1.0.json](../../contracts/gold/composite_target_v1.0.json)            |
+| Contract linkage              | Pass   | [composite_target_v1.1.json](../../contracts/gold/composite_target_v1.1.json)            |
 | Published-page role           | Pass   | Canonical compact summary is explicitly bounded by current canonical sources             |

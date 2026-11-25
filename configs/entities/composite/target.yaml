@@ -1,6 +1,6 @@
 # Composite entity contract for composite_target.
 # column_groups mirrors configs/composites/target.yaml::composite.merge.column_groups.
-version: 1.0.0
+version: 1.1.0
 provider: composite
 entity: target
 pipeline:
@@ -243,20 +243,20 @@ contracts:
   hash_include: []
   hash_exclude: []
   contract_ref: composite.target
-  active_version: 1.0.0
+  active_version: 1.1.0
   rollout:
     mode: single
     read_order:
-    - 1.0.0
+    - 1.1.0
     write_versions:
-    - 1.0.0
+    - 1.1.0
     affects_hash: false
 status: active
 hash_policy:
   provider: composite
   entity: target
   contract:
-    version: 1.0.0
+    version: 1.1.0
     migration_note: Explicit composite contract identity for composite.target (#5509).
   hash_policy:
     algorithm: sha256

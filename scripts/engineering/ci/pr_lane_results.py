@@ -142,6 +142,8 @@ GRAFANA_CONTEXT_LINKS_TEST = (
     "tests/unit/scripts/ops/observability/test_dashboard_context_links.py"
 )
 
+GOLD_SCHEMA_CONTRACTS_TEST = "tests/architecture/test_gold_schema_contracts.py"
+DOC_CROSSREF_INTEGRITY_TEST = "tests/architecture/test_doc_crossref_integrity.py"
 DOCUMENTATION_CLEANUP_INVENTORY_TESTS: tuple[str, ...] = (
     DOCUMENTATION_CLEANUP_INVENTORY_TEST,
 )
@@ -974,24 +976,42 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
     "docs/04-reference/contracts/gold/chembl_target_v3.1.json": (
-        "tests/architecture/test_gold_schema_contracts.py",
+        GOLD_SCHEMA_CONTRACTS_TEST,
     ),
     "docs/04-reference/contracts/gold/chembl_target_v3.2.json": (
-        "tests/architecture/test_gold_schema_contracts.py",
+        GOLD_SCHEMA_CONTRACTS_TEST,
+    ),
+    "configs/contracts/composite/target.yaml": (
+        "tests/integration/config/test_contract_registry_active_surface_coverage.py",
+        "tests/integration/composite/test_target_classification_post_join.py",
+    ),
+    "docs/04-reference/contracts/gold/composite_target_v1.1.json": (
+        GOLD_SCHEMA_CONTRACTS_TEST,
+        "tests/contract/test_gold_schema_snapshot_registry.py",
+    ),
+    "docs/04-reference/pipelines/composite/03-target-spec.md": (
+        DOC_CROSSREF_INTEGRITY_TEST,
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    "tests/fixtures/golden/gold/schema_registry.v1.json": (
+        "tests/contract/test_gold_schema_snapshot_registry.py",
     ),
     "configs/base/contract_registry.yaml": (
         "tests/unit/infrastructure/config/test_contract_registry_loader.py",
         "tests/integration/config/test_non_chembl_contract_registry_coverage.py",
     ),
+    "configs/field_registry/semantic_governance_authority_registry.yaml": (
+        "tests/integration/config/test_semantic_governance_policy.py",
+    ),
     "configs/field_registry/generic_field_ownership.yaml": (
         "tests/integration/config/test_generic_field_ownership.py",
     ),
     "docs/05-operations/runbooks/index.md": (
-        "tests/architecture/test_doc_crossref_integrity.py",
+        DOC_CROSSREF_INTEGRITY_TEST,
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
     "docs/05-operations/runbooks/iuphar-target-classification.md": (
-        "tests/architecture/test_doc_crossref_integrity.py",
+        DOC_CROSSREF_INTEGRITY_TEST,
         IUPHAR_IDENTIFIER_ROLES_RF002_TEST,
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
@@ -1325,6 +1345,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
             EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
         ),
+    ),
+    "configs/quality/external_resource_inventory_pr13387_composite_gold_review.json": (
+        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
+        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
     ),
     "configs/quality/external_resource_inventory_pr13355_rematch_review.json": (
         EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,

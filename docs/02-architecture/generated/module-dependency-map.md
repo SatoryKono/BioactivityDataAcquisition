@@ -6,7 +6,7 @@
 ## Summary
 
 - Scanned modules: `2671`
-- Internal import edges (raw): `8864`
+- Internal import edges (raw): `8866`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `330`
@@ -24,9 +24,9 @@ flowchart LR
     application -->|1701 OK| application
     application -->|1167 OK| domain
     composition -->|256 OK| application
-    composition -->|691 OK| composition
+    composition -->|692 OK| composition
     composition -->|337 OK| domain
-    composition -->|363 OK| infrastructure
+    composition -->|364 OK| infrastructure
     domain -->|1337 OK| domain
     infrastructure -->|833 OK| domain
     infrastructure -->|1432 OK| infrastructure
@@ -43,9 +43,9 @@ flowchart LR
 | `application`    | `application`    |    1701 | allowed |
 | `application`    | `domain`         |    1167 | allowed |
 | `composition`    | `application`    |     256 | allowed |
-| `composition`    | `composition`    |     691 | allowed |
+| `composition`    | `composition`    |     692 | allowed |
 | `composition`    | `domain`         |     337 | allowed |
-| `composition`    | `infrastructure` |     363 | allowed |
+| `composition`    | `infrastructure` |     364 | allowed |
 | `domain`         | `domain`         |    1337 | allowed |
 | `infrastructure` | `domain`         |     833 | allowed |
 | `infrastructure` | `infrastructure` |    1432 | allowed |
@@ -72,8 +72,8 @@ flowchart LR
 | `composition.factories`        | `application.core`             |      50 |
 | `infrastructure.storage`       | `domain.value_objects`         |      44 |
 | `composition.runtime_builders` | `domain.control_plane`         |      42 |
+| `composition.bootstrap`        | `infrastructure.config`        |      38 |
 | `composition.bootstrap`        | `domain.ports`                 |      37 |
-| `composition.bootstrap`        | `infrastructure.config`        |      37 |
 | `composition.factories`        | `domain.ports`                 |      37 |
 | `application.composite`        | `domain.exceptions`            |      36 |
 | `infrastructure.storage`       | `domain.models`                |      36 |
