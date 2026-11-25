@@ -12,13 +12,14 @@ import pandera.pandas as pa
 import pytest
 
 from iuphar_target_class.stage0.build import build_artifacts, publish_stage0
+from iuphar_target_class.stage0.__main__ import main as stage0_main
 from iuphar_target_class.stage0.constants import (
     PROVENANCE_ESTABLISHED,
     PROVENANCE_UNESTABLISHED,
     USAGE_CANDIDATE_ONLY,
     USAGE_LEGACY,
 )
-from iuphar_target_class.stage0.io import atomic_write_bytes, sha256_bytes
+from iuphar_target_class.stage0.io import atomic_write_bytes, sha256_bytes, sha256_file
 from iuphar_target_class.stage0.survey import survey_from_object
 
 pytestmark = pytest.mark.unit
@@ -400,6 +401,139 @@ def test_publish_rejects_output_outside_repo(tmp_path: Path) -> None:
         publish_stage0(repo, survey_path, tmp_path / "outside")
 
 
+def test_sha256_file_accepts_paths_outside_cwd(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root = tmp_path / "root"
+    root.mkdir()
+    outside = tmp_path / "outside.txt"
+    outside.write_text("outside", encoding="utf-8")
+    inside = root / "inside.txt"
+    inside.write_text("inside", encoding="utf-8")
+    monkeypatch.chdir(root)
+    assert sha256_file(Path("inside.txt")) == hashlib.sha256(b"inside").hexdigest()
+    assert sha256_file(outside) == hashlib.sha256(b"outside").hexdigest()
+
+
+def test_cli_rejects_repo_root_outside_cwd(tmp_path: Path) -> None:
+    with pytest.raises(SystemExit) as error:
+        stage0_main(
+            [
+                "--repo-root",
+                str(tmp_path.parent),
+                "--survey",
+                "survey.json",
+                "--output-dir",
+                "out",
+            ]
+        )
+    assert error.value.code == 2
+
+
+def test_publish_rejects_selected_symlink_outside_repo(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    outside = tmp_path / "outside.csv"
+    outside.write_text("target_all\nsecret\n", encoding="utf-8")
+    (repo / "link.csv").symlink_to(outside)
+    survey_path = repo / "survey.json"
+    survey_path.write_text(
+        json.dumps(
+            _base_survey(
+                candidate_files=[
+                    {"relative_path": "link.csv", "select_as_source": True},
+                ]
+            )
+        ),
+        encoding="utf-8",
+    )
+
+    def unexpected_hash(path: Path, *, root: Path | None = None) -> str:
+        raise AssertionError(f"hash called before path validation: {path}")
+
+    monkeypatch.setattr("iuphar_target_class.stage0.build.sha256_file", unexpected_hash)
+    with pytest.raises(ValueError, match="path escapes repo"):
+        publish_stage0(repo, survey_path, repo / "out")
+
+
+def test_confined_hash_checks_opened_file(tmp_path: Path) -> None:
+    root = tmp_path / "root"
+    root.mkdir()
+    outside = tmp_path / "outside.txt"
+    outside.write_bytes(b"secret")
+    with pytest.raises(ValueError, match="outside allowed root"):
+        sha256_file(outside, root=root)
+
+
+def test_confined_hash_reads_opened_file_after_path_replacement(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import os
+
+    source = tmp_path / "source.txt"
+    source.write_bytes(b"original")
+    outside = tmp_path.parent / f"{tmp_path.name}-outside.txt"
+    outside.write_bytes(b"outside")
+    original_open = os.open
+
+    def replace_after_open(
+        path: object, flags: int, *, dir_fd: int | None = None
+    ) -> int:
+        fd = original_open(path, flags, dir_fd=dir_fd)
+        if dir_fd is not None:
+            source.unlink()
+            source.symlink_to(outside)
+        return fd
+
+    monkeypatch.setattr(os, "supports_dir_fd", {replace_after_open})
+    monkeypatch.setattr(os, "open", replace_after_open)
+    assert sha256_file(source, root=tmp_path) == hashlib.sha256(b"original").hexdigest()
+
+
+def test_confined_hash_uses_pinned_root_after_replacement(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import os
+
+    root = tmp_path / "root"
+    root.mkdir()
+    (root / "source.txt").write_bytes(b"original")
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    (outside / "source.txt").write_bytes(b"outside")
+    original_open = os.open
+
+    def replace_root(path: object, flags: int, *, dir_fd: int | None = None) -> int:
+        fd = original_open(path, flags, dir_fd=dir_fd)
+        if dir_fd is None:
+            root.rename(tmp_path / "original-root")
+            root.symlink_to(outside, target_is_directory=True)
+        return fd
+
+    monkeypatch.setattr(os, "supports_dir_fd", {replace_root})
+    monkeypatch.setattr(os, "open", replace_root)
+    assert (
+        sha256_file(root / "source.txt", root=root)
+        == hashlib.sha256(b"original").hexdigest()
+    )
+
+
+def test_confined_hash_fails_closed_without_descriptor_path(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    source = tmp_path / "source.txt"
+    source.write_bytes(b"data")
+
+    def unavailable(path: object) -> str:
+        raise OSError("unavailable")
+
+    monkeypatch.setattr(Path, "readlink", unavailable)
+    with pytest.raises(OSError, match="requires a final file descriptor path"):
+        sha256_file(source, root=tmp_path)
+
+
 def test_publish_rejects_output_that_replaces_a_source(tmp_path: Path) -> None:
     repo = tmp_path / "repo"
     tables = repo / "tables"
@@ -430,3 +564,64 @@ def test_publish_rejects_output_that_replaces_a_source(tmp_path: Path) -> None:
         publish_stage0(repo, survey_path, tables)
     assert source.read_bytes() == original
     assert not (tables / "manifest.json").exists()
+
+
+@pytest.mark.parametrize("case", ["traversal", "symlink"])
+def test_unconfined_hash_rejects_path_escape_before_open(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, case: str
+) -> None:
+    import os
+
+    root = tmp_path / "root"
+    root.mkdir()
+    outside = tmp_path / "outside.txt"
+    outside.write_bytes(b"outside")
+    if case == "traversal":
+        selected = root / ".." / "outside.txt"
+    else:
+        selected = root / "linked.txt"
+        try:
+            selected.symlink_to(outside)
+        except OSError as error:
+            pytest.skip(f"symlinks unavailable: {error}")
+
+    def unexpected_open(*args: object, **kwargs: object) -> int:
+        raise AssertionError("rejected input must not be opened")
+
+    monkeypatch.setattr(os, "open", unexpected_open)
+    with pytest.raises(ValueError, match="path traversal|outside selected parent"):
+        sha256_file(selected)
+
+
+@pytest.mark.parametrize("replace_ancestor", [False, True])
+def test_confined_hash_rejects_root_replacement_before_open(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, replace_ancestor: bool
+) -> None:
+    import os
+
+    parent = tmp_path / "parent"
+    root = parent / "root"
+    root.mkdir(parents=True)
+    (root / "source.txt").write_bytes(b"original")
+    outside = tmp_path / "outside"
+    (outside / "root").mkdir(parents=True)
+    (outside / "root" / "source.txt").write_bytes(b"outside")
+    original_open = os.open
+
+    def replace_before_open(
+        path: object, flags: int, *, dir_fd: int | None = None
+    ) -> int:
+        if dir_fd is not None:
+            raise AssertionError("file must not be opened through a replaced root")
+        if replace_ancestor:
+            parent.rename(tmp_path / "original-parent")
+            parent.symlink_to(outside, target_is_directory=True)
+        else:
+            root.rename(tmp_path / "original-root")
+            root.symlink_to(outside / "root", target_is_directory=True)
+        return original_open(path, flags, dir_fd=dir_fd)
+
+    monkeypatch.setattr(os, "supports_dir_fd", {replace_before_open})
+    monkeypatch.setattr(os, "open", replace_before_open)
+    with pytest.raises((OSError, ValueError)):
+        sha256_file(root / "source.txt", root=root)

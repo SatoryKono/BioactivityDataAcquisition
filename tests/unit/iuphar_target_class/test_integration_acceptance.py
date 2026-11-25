@@ -375,6 +375,30 @@ def test_acceptance_executes_references_and_keeps_accuracy_unaccepted(
     )
 
 
+def test_acceptance_keeps_external_inputs_and_output(
+    tmp_path, acceptance_inputs, monkeypatch
+):
+    request, snapshot = acceptance_inputs
+    cwd = tmp_path / "separate-working-directory"
+    cwd.mkdir()
+    monkeypatch.chdir(cwd)
+    output = tmp_path / "external-result"
+    assert not request.stage0_manifest.is_relative_to(cwd)
+    assert not request.expected_labels.is_relative_to(cwd)
+    assert not output.is_relative_to(cwd)
+
+    report = run_integration_acceptance(request, snapshot=snapshot, output_dir=output)
+
+    assert report["status"] == "PASS"
+    assert report["checks"] == dict.fromkeys(CHECKS, "PASS")
+    assert (output / "execution-config.json").is_file()
+    from bioetl.infrastructure.adapters.iuphar import validate_acceptance_receipt
+
+    validate_acceptance_receipt(
+        report, snapshot_manifest_sha256=request.snapshot_manifest_sha256
+    )
+
+
 def test_unversioned_species_names_cannot_enter_reference_acceptance(
     tmp_path, acceptance_inputs
 ):
