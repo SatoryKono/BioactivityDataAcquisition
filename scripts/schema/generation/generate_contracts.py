@@ -34,6 +34,7 @@ from bioetl.domain.normalization.profiles import (
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_CONTRACT_VERSION = "1.0.0"
+_TARGET_PROFILE_SHA256_PATTERN = "^[0-9a-f]{64}$"
 ENTITY_CONTRACT_VERSIONS: dict[str, str] = {
     "chembl_assay_parameters": "2.0.0",
     "chembl_publication_similarity": "2.0.0",
@@ -314,7 +315,7 @@ def _expected_artifacts() -> dict[Path, str]:
         current_contract = _build_contract(schema_cls, entity, contract_version)
         if entity == "composite_target":
             profile_hash = current_contract["properties"]["target_class_profile_sha256"]
-            profile_hash["pattern"] = "^[0-9a-f]{64}$"
+            profile_hash["pattern"] = _TARGET_PROFILE_SHA256_PATTERN
         artifacts[output_path] = (
             json.dumps(current_contract, indent=2, ensure_ascii=False) + "\n"
         )
@@ -322,7 +323,7 @@ def _expected_artifacts() -> dict[Path, str]:
     # The active V30 export remains byte-for-byte stable while V31 is opt-in.
     target_v31 = _build_contract(ChEMBLTargetGoldSchemaV31, "chembl_target", "3.1.0")
     profile_hash = target_v31["properties"]["target_class_profile_sha256"]
-    profile_hash["pattern"] = "^[0-9a-f]{64}$"
+    profile_hash["pattern"] = _TARGET_PROFILE_SHA256_PATTERN
     target_v31["x-bioetl-schema-sha256"] = target_v31_schema_hash()
     artifacts[CONTRACTS_DIR / "chembl_target_v3.1.json"] = (
         json.dumps(target_v31, indent=2, ensure_ascii=False) + "\n"
@@ -330,7 +331,7 @@ def _expected_artifacts() -> dict[Path, str]:
     # V32 is selected only by an explicit table contract. V30 and V31 stay stable.
     target_v32 = _build_contract(ChEMBLTargetGoldSchemaV32, "chembl_target", "3.2.0")
     profile_hash_v32 = target_v32["properties"]["target_class_profile_sha256"]
-    profile_hash_v32["pattern"] = "^[0-9a-f]{64}$"
+    profile_hash_v32["pattern"] = _TARGET_PROFILE_SHA256_PATTERN
     for name, annotation in _detail_logical_contract().items():
         target_v32["properties"][name].update(annotation)
     detail_profile = target_v32_normalization_profile().identity
