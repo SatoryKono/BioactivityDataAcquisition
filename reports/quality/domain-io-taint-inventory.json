@@ -444,21 +444,21 @@
     },
     {
       "kind": "import:pandas",
-      "line": 8,
+      "line": 11,
       "path": "src/bioetl/domain/schemas/chembl/target.py",
       "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
       "symbol": "<module>"
     },
     {
       "kind": "import:pandera",
-      "line": 9,
+      "line": 12,
       "path": "src/bioetl/domain/schemas/chembl/target.py",
       "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
       "symbol": "<module>"
     },
     {
       "kind": "import:pandera",
-      "line": 10,
+      "line": 13,
       "path": "src/bioetl/domain/schemas/chembl/target.py",
       "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
       "symbol": "<module>"
@@ -816,7 +816,7 @@
   ],
   "domain_root": "src/bioetl/domain",
   "generated_by": "scripts.engineering.qa.report_domain_io_taint_inventory",
-  "scanned_file_count": 646,
+  "scanned_file_count": 648,
   "schema_version": 1,
   "violation_count": 0,
   "violations": []
