@@ -567,6 +567,27 @@ workspace, the same root used by the runtime loader and dependency collector.
 It validates the full candidates and publishes a completed build manifest and
 per-row classification evidence. Preserve the input manifest and build evidence.
 
+#### RF-013 candidate validation on 2026-11-25
+
+The isolated V30 → V31 candidate build processed every row in the frozen
+shared target snapshot and added 37 verified targets referenced by assay Gold.
+Silver grew from 1,000 to 1,037 rows and Gold from 922 to 959. The unchanged
+assay Gold contained 983 rows and had zero unresolved target references
+against the candidate. Readback confirmed the nine classification fields
+and the admitted profile on every candidate row. The shared tables and
+canonical configuration passed the before-and-after identity checks.
+
+| Local evidence | SHA-256 |
+| --- | --- |
+| Frozen V30 inputs | `2f9ec88a5cf07279a2ad6c40e5b73063e4b496065273b3d75a66e0212436e22e` |
+| Validated FK restoration | `c638ee9856c60ea1953ed66f4af3d4abc27f4d6b8a750850e99bf9c75f1fa1e7` |
+| V31 candidate build | `c8e84e96ae265a63f0f37f407c8f8834fcfdf3b06647febfbf71cf22d078308d` |
+| Classification evidence | `974a5682bd6563aed16ed5da434aefb3850d24ca4acccfac42e87f662ca5929e` |
+| Admitted profile | `2d96b292124aa14aa47fa60c7bbdf2f5d04003a1998a8d004383e50a0c059aa3` |
+
+Candidate run `845a0367-d099-46aa-a5a0-62df4e8cdfcc` supplies the inputs for the copy rehearsal.
+Rehearsal and production deployment each need their own evidence.
+
 Historical tables use the migration-only physical contract
 `legacy_physical_target_v30_to_v31_v1`: candidates must contain exactly the old
 physical columns plus the nine classification fields. Preserve every old value,
@@ -604,6 +625,32 @@ resolution, validation, backup, and recovery remain active. Pinned dependencies
 may be read from the approved repository; migration resources may not overlap
 active tables or configuration. Verify complete copied table/configuration byte
 identity after rollback and unchanged canonical resources throughout the rehearsal.
+
+#### RF-013 promotion and rollback rehearsal on 2026-11-25
+
+The rehearsal promoted full copies of the frozen V30 inputs and the validated
+V31 candidate from the preceding build. Physical readback measured 1,037
+Silver rows, 959 Gold rows, and zero unresolved target references from the
+983 assay Gold rows. Every target row carried the admitted profile.
+
+The native rollback resumed after a Windows file-sharing error while replacing
+the journal and reached `rolled_back`. The restored target Silver, target Gold,
+and configuration matched the original bytes. Assay Gold stayed in place and
+its file digests matched before and after. Original backups and displaced V31
+copies were retained. The shared configuration and tables matched their
+pre-rehearsal bytes throughout.
+
+| Local evidence | SHA-256 |
+| --- | --- |
+| Rehearsal summary | `7fd62157baf13fdde0b67fcb53966ad1972e789eebf6831b86fb30079a2ae298` |
+| Final rollback journal | `7b61b4e8f6bc0999a7084da13d6593abc18d4de7e0750e0f80fa17d02aed95bf` |
+| `contour-report --require-ready` result | `fe8377e164e612fa509d9ed496f7171b71a90591e53404bfa85b852f99baa9b8` |
+
+The contour returned `READY` with the canonical mode still `off`. It admitted
+the bounded RF-008 receipt and recorded live readback as `NOT_RUN`.
+The rehearsal report used the passing PR Gate for the candidate build at
+`b682ec32bc86c4c960c30a9731ef6b77ac6a174f` (PR #13389). Refresh the CI
+attestation with the accepted rehearsal PR head before cutover.
 
 Before the real `prepare`, stop and quiesce every canonical writer and hold the maintenance
 window through backup, promotion, verification, or rollback. A stable freeze
