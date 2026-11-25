@@ -174,6 +174,7 @@ def test_grafana_plugins_do_not_force_router_or_uuid_majors() -> None:
     assert scenes_pkg["overrides"] == {
         **audited_overrides,
         "@grafana/scenes": {"react-router-dom": "7.18.4"},
+        "i18next-pseudo": {"i18next": "26.3.4"},
         "braces": "$braces",
         "picomatch": "$picomatch",
         "react-router-dom-v5-compat": "$react-router-dom-v5-compat",
