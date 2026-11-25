@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
 
 import polars as pl
+from deltalake import DeltaTable
 import pytest
 
 from iuphar_target_class.bioetl_input import project_target_fields
@@ -45,10 +47,15 @@ from bioetl.domain.composite.enriched_target_features import (
     COMPOSITE_CLASSIFICATION_OWNER,
     hierarchy_fields_are_equivalent,
 )
+from bioetl.domain.contracts.gold.composite import CompositeTargetGoldSchema
 from bioetl.domain.entities.target_classification_boundary import (
     TargetClassificationArtifactReference,
     TargetClassificationResult,
 )
+
+from bioetl.domain.types.gold_contracts import GoldWriteCategory
+from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+from bioetl.infrastructure.storage.gold_writer import GoldWriter
 
 pytestmark = pytest.mark.integration
 
@@ -463,21 +470,65 @@ def test_historical_replay_binding_skips_live_profile(
 def test_gold_projection_keeps_unknown_columns_fail_closed() -> None:
     frame = pl.DataFrame(
         {
-            "target_id": ["CHEMBL1"],
-            "effective_class": ["Enzyme"],
+            "chembl.target.target_id": ["CHEMBL1"],
+            **{column: ["value"] for column in TARGET_CLASSIFICATION_FIELDS},
+            "target_class_profile_sha256": [_PROFILE],
             "target_classification_owner": [COMPOSITE_CLASSIFICATION_OWNER],
             "other": ["keep"],
         }
     )
 
-    schema = SimpleNamespace(
-        columns={"target_id": object(), "effective_class": object()}
-    )
-    schema.to_schema = lambda: schema
-    projected = project_gold_classification_frame(frame, schema)
+    schema = CompositeTargetGoldSchema.to_schema()
+    projected = project_gold_classification_frame(frame, CompositeTargetGoldSchema)
+
     assert "target_classification_owner" not in projected.columns
-    assert projected["effective_class"][0] == "Enzyme"
+    assert projected["target_id"][0] == "CHEMBL1"
+    assert projected.select(TARGET_CLASSIFICATION_FIELDS).equals(
+        frame.select(TARGET_CLASSIFICATION_FIELDS)
+    )
+    assert all(
+        schema.columns[column].nullable and not schema.columns[column].required
+        for column in TARGET_CLASSIFICATION_FIELDS
+    )
+    assert schema.strict
     assert projected["other"][0] == "keep"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("classified", [False, True])
+async def test_composite_gold_persists_target_and_nullable_classification(
+    tmp_path: Path, classified: bool
+) -> None:
+    classification = (
+        dict.fromkeys(TARGET_CLASSIFICATION_FIELDS, "value") if classified else {}
+    )
+    if classified:
+        classification["target_class_profile_sha256"] = _PROFILE
+    row = {
+        "entity_id": "chembl:CHEMBL1",
+        "chembl.target.target_id": "CHEMBL1",
+        "_source_providers": '["chembl"]',
+        "_enrichment_status": "complete",
+        **classification,
+    }
+    schema = CompositeTargetGoldSchema.to_schema()
+    projected = project_gold_classification_frame(pl.DataFrame([row]), schema)
+    writer = GoldWriter(base_path=tmp_path, logger=NoOpLogger())
+
+    receipt = await writer.write_gold_merged(
+        "composite/target", projected.to_dicts(), schema=schema
+    )
+
+    assert receipt.category == GoldWriteCategory.COMPLETE
+    assert receipt.contract_version == "1.1.0"
+    persisted = (
+        DeltaTable(str(tmp_path / "composite/target")).to_pyarrow_table().to_pylist()
+    )
+    assert len(persisted) == 1
+    assert persisted[0]["target_id"] == "CHEMBL1"
+    assert {field: persisted[0][field] for field in TARGET_CLASSIFICATION_FIELDS} == {
+        field: classification.get(field) for field in TARGET_CLASSIFICATION_FIELDS
+    }
 
 
 @pytest.mark.parametrize("empty_ec", [[], "[]", '["  ", "unknown"]'])

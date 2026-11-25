@@ -54,6 +54,7 @@ REQUIRED_SCHEMAS = (
     "composite_molecule_v1.0.json",
     "composite_publication_v1.0.json",
     "composite_target_v1.0.json",
+    "composite_target_v1.1.json",
     "crossref_publication_v1.0.json",
     "openalex_publication_v1.0.json",
     "pubchem_compound_v1.0.json",

@@ -336,13 +336,15 @@ def test_repository_contour_stays_blocked_and_keeps_mode_off() -> None:
     assert set(TARGET_CLASSIFICATION_FIELDS).issubset(
         observations.composite_classification_fields
     )
-    assert "iuphar_target_id" not in observations.composite_contract_properties
+    assert set(TARGET_CLASSIFICATION_FIELDS).issubset(
+        observations.composite_contract_properties
+    )
     assert report["promotion_decision"] == "BLOCKED"
     assert report["biological_accuracy_accepted"] is False
     assert report["matched_count_substitutes_biological_qualification"] is False
     assert _phase(report, "shadow") == "NOT_RUN"
     assert _phase(report, "isolated_enrich") == "NOT_RUN"
-    assert _phase(report, "composite_enrich") == "BLOCKED"
+    assert _phase(report, "composite_enrich") == "NOT_RUN"
     assert _phase(report, "migration") == "NOT_RUN"
     assert _phase(report, "live") == "NOT_RUN"
     axes = report["axes"]

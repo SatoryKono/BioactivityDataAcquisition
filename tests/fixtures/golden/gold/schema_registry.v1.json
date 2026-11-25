@@ -2622,7 +2622,7 @@
       "strict": true
     },
     "composite_target": {
-      "contract_version": "1.0.0",
+      "contract_version": "1.1.0",
       "fields": {
         "_dq_error": {
           "description": "Hard data-quality error flag.",
@@ -2674,8 +2674,23 @@
           "dtype": "str",
           "nullable": true
         },
+        "decision_status": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
         "description": {
           "description": "Target description retained as source-scoped metadata.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "effective_class": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "effective_source": {
+          "description": "",
           "dtype": "str",
           "nullable": true
         },
@@ -2689,8 +2704,33 @@
           "dtype": "str",
           "nullable": true
         },
+        "iuphar_annotation_status": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "iuphar_class": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "iuphar_match_status": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "iuphar_target_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
         "l1_mapping_version": {
           "description": "Version of the canonical L1 mapping used for aggregation.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "local_class": {
+          "description": "",
           "dtype": "str",
           "nullable": true
         },
@@ -2716,6 +2756,11 @@
         },
         "protein_classifications": {
           "description": "Deterministic JSON provenance for target protein classifications.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "target_class_profile_sha256": {
+          "description": "",
           "dtype": "str",
           "nullable": true
         },
@@ -2830,7 +2875,7 @@
           "nullable": true
         }
       },
-      "published_contract_path": "docs/04-reference/contracts/gold/composite_target_v1.0.json",
+      "published_contract_path": "docs/04-reference/contracts/gold/composite_target_v1.1.json",
       "schema_class": "CompositeTargetGoldSchema",
       "strict": true
     },

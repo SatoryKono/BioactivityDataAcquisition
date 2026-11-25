@@ -50,6 +50,7 @@ authorities:
       - docs/04-reference/contracts/gold/composite_activity_v1.0.json
       - docs/04-reference/contracts/gold/composite_assay_v1.0.json
       - docs/04-reference/contracts/gold/composite_target_v1.0.json
+      - docs/04-reference/contracts/gold/composite_target_v1.1.json
     governed_outputs:
       - reports/semantic_pipeline_audit/semantic_pair_matrix_2026-07-01.csv
     rationale: >

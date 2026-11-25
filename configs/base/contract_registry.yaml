@@ -633,9 +633,9 @@ entries:
 
   composite.target:
     identity:
-      contract_version: "1.0.0"
-      compatibility_level: "major"
-      schema_hash: "0ec1052105617c504180be079b0087b8bfff3eea1a24bb8643756dc7e0a8d89a"
+      contract_version: "1.1.0"
+      compatibility_level: "minor"
+      schema_hash: "42a1787e7c5b51310e4ff44c347564cd223286700d02611741cab4999baa5074"
       dq_policy_ref: "composite.dq.v1"
       rule_bundle_version: "dq-rules.v1.0"
       normalization_profile_ref: "composite.target"
@@ -644,8 +644,9 @@ entries:
     status: "active"
     source_path: "../../src/bioetl/domain/contracts/gold/composite_bioassay.py"
     published_artifacts:
+      - "../../docs/04-reference/contracts/gold/composite_target_v1.1.json"
       - "../../docs/04-reference/contracts/gold/composite_target_v1.0.json"
-    supported_versions: ["1.0.0"]
+    supported_versions: ["1.0.0", "1.1.0"]
     migration_guides: {}
     last_updated: "2026-05-12T00:00:00Z"
     owners: ["platform-team"]
