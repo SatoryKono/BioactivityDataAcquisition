@@ -77,6 +77,19 @@ def handler(tmp_path, monkeypatch):
     return instance
 
 
+@pytest.mark.parametrize(
+    "suffix", ["\rInjected: yes", "\nInjected: yes", "\r\nInjected: yes"]
+)
+def test_response_rejects_session_header_injection_before_sending(handler, suffix):
+    handler.send_response = Mock()
+    handler.send_header = Mock()
+    session = handler._sessions.issue()
+    with pytest.raises(ValueError, match="Invalid session identifier"):
+        markdownify._MarkdownifyHandler.reply(handler, 200, session=session + suffix)
+    handler.send_response.assert_not_called()
+    handler.send_header.assert_not_called()
+
+
 def test_protocol_initialization_and_tool_visibility_remain_session_bound(handler):
     handler._dispatch_request({"id": 1, "method": "initialize"})
     status, response, session = handler.reply.call_args.args
