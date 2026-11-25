@@ -699,10 +699,9 @@ pinned dependency and deployment configuration.
 | Promotion journal | `e912c12b637e443cc2d04f4f663d634adfcd519b85a827ed9aa869b3b4810b8b` |
 | Ready evidence for PR #13390 at `bec891d8ce017ee8001e854320eccb3d245ff537` | `e7199b77e379f4a3fb520c3c9189c0ab7ad273e72cb6f489d05b982758d3c38e` |
 
-The next shared-table acceptance run uses
-`bioetl workflow run chembl_target --run-type incremental`; the workflow's
-checked-in default selects backfill. Record its own run and readback
-evidence before claiming `LIVE_ACCEPTED`.
+For a post-cutover workflow on these tables, select `--run-type incremental`
+explicitly. The checked-in workflow default selects backfill. Record the
+post-cutover run and readback evidence before claiming `LIVE_ACCEPTED`.
 
 ### Record main-contour acceptance
 
@@ -893,6 +892,48 @@ the report with the occurrence; do not commit it.
   `latest` alias or substitute a newly available snapshot. Workflow resume
   retains the stored target configuration/dependency rather than taking the
   current default.
+
+### RF-013 live acceptance on 2026-11-25
+
+The shared `chembl_target` workflow completed at 12:34 UTC using fresh ChEMBL
+input. It ran in `incremental` mode with `--no-cached-bronze` and the per-run
+`--required-persistence-profile degraded_observable`. The first invocation
+exited during configuration validation because the default `replay_ready`
+requires an immutable Bronze snapshot. The final run retained its workflow,
+pipeline, and classification manifests.
+
+- Workflow run `d2fb7a28-e29e-5d4e-a2ff-c0cd2f904ad3`
+- Pipeline run `4d8b54c7-763f-5598-abd5-bf48ddf7567c`
+- 11,055 Bronze records, 365 Silver quarantines and 1,572 Gold exclusions
+  under the active contract.
+- 10,690 current Silver rows at Delta version 23 and 9,118 current Gold rows
+  at Delta version 11. Each of the 10,690 stored Silver classifications
+  matched its run evidence. All nine fields agreed between current Gold and
+  Silver for every current Gold key.
+- Zero unresolved target references from the 983 assay Gold rows. All
+  promoted target identities are still present in their respective layers.
+
+`contour-report --require-ready` returned `LIVE_ACCEPTED`. The active
+local deployment is `enrich` on 3.1.0. This operational acceptance
+uses the bounded RF-008 receipt and carries the accepted cutover PR
+#13392 CI at `35befda97a6857fe479c5e1caff94a1d0ec848e0`.
+
+The local deployment workspace retains the acceptance files under
+`reports/local/iuphar-v31-rf013-live-20261125-v2/`. For a repeat report, use
+`live-evidence.json`, `live-measurement-paths.json`, and
+`--repo-root` pointing to `contour-source-bindings/` in that directory.
+The pipeline report is under `reports/run-reports/pipeline/chembl_target/`
+and the classification manifest under
+`data/output/control/target_classification/`, each in the pipeline run ID
+directory.
+
+| Local evidence | SHA-256 |
+| --- | --- |
+| Live contour | `4df2caca933bc81eca0372df344f8cd0241e1553dc2f4d5fe79729b2bf94776c` |
+| Live evidence | `4c20b88de2987d7304d0e682c7f4ead849913f8a3cda2e2e8772c7f9eee8dfc4` |
+| Live measurements | `6eb75566770e8e9c17947fe3256509981998b33891e5118f907f2273733f664d` |
+| Pipeline report | `f002e1fe9f3cbb6c5d213550b528336cc33511299f5d7359910ef287a51d305d` |
+| Classification manifest | `e7a8c0c2e0b37ca1b20d05995840922e69faa4611c96da93c397967ab712e339` |
 
 ## Compliance
 
