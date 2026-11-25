@@ -7,9 +7,9 @@ Rewrites the five provisioned dashboard JSON files in place:
   (presentation enrichment stays in Infinity JSONata; Grafana transforms cannot
   express that JSONata). Consumers use ``-- Dashboard --`` and filter
   ``_bioetl_frame``.
-- Overview, DQ and Incident donors use the backend parser. UQL leaves the HTTP body in
+- Overview, DQ, Incident and Control Plane donors use the backend parser. UQL leaves the HTTP body in
   ``meta.custom.data`` with zero fields, so Dashboard datasource children
-  (stages, domains, duration) see an empty frame. Control Plane keeps UQL.
+  (stages, domains, duration) see an empty frame.
 - Identity / stages copies become markdown handoffs per §2.4.
 - Control Plane 9418 indexByName / hideFrom / self-link fixes (F-11/F-12).
 
@@ -1627,9 +1627,11 @@ def _stamp_overview_empty_reasons(data: dict[str, Any]) -> None:
 def apply_control_plane(data: dict[str, Any]) -> None:
     donor = _by_id(data, 9418)
     donor["datasource"] = dict(OPS)
-    donor["targets"] = [
-        _infinity_uql(_CP_DONOR, url=RAW_SRS_URL + "&require_exact_run=1")
-    ]
+    target = _infinity_uql(
+        _CP_DONOR, parser="backend", url=RAW_SRS_URL + "&require_exact_run=1"
+    )
+    target.pop("uql", None)
+    donor["targets"] = [target]
     donor["transformations"] = _cp_trust_donor_transforms()
 
     overrides = donor.setdefault("fieldConfig", {}).setdefault("overrides", [])
