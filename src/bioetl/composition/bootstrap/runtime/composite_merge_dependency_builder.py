@@ -27,11 +27,16 @@ from bioetl.composition.bootstrap.runtime.composite_merge_dependencies_bundle im
     MergeDependenciesBundle,
 )
 from bioetl.composition.factories.services.polars_join_adapter import PolarsJoinBridge
+from bioetl.composition.runtime_builders.config_access import resolve_configs_root
 from bioetl.domain.composite.strategy import MergeStrategy
 from bioetl.domain.mapping.protein_class_target_type import (
     ProteinClassTargetTypeMappingData,
     current_protein_class_target_type_mapping,
     is_protein_class_target_type_mapping_initialized,
+)
+
+from bioetl.infrastructure.config.protein_class_target_type_loader import (
+    ProteinClassTargetTypeMappingLoader,
 )
 
 if TYPE_CHECKING:
@@ -81,8 +86,13 @@ def build_merge_dependencies(
     )
     join_executor = PolarsJoinBridge(join_service)
     resolved_mapping = target_type_mapping_data
-    if resolved_mapping is None and is_protein_class_target_type_mapping_initialized():
-        resolved_mapping = current_protein_class_target_type_mapping()
+    if resolved_mapping is None:
+        if is_protein_class_target_type_mapping_initialized():
+            resolved_mapping = current_protein_class_target_type_mapping()
+        elif config.name == "composite_target":
+            resolved_mapping = ProteinClassTargetTypeMappingLoader(
+                resolve_configs_root()
+            ).load()
     dependency_joiner = DependencyJoinerService(
         logger=logger,
         deduplicator=deduplicator,

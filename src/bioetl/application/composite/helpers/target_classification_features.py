@@ -49,10 +49,17 @@ def schema_column_names(schema: object) -> frozenset[str] | None:
 
 
 def project_gold_classification_frame(df: pl.DataFrame, schema: object) -> pl.DataFrame:
-    """Drop classification columns that a strict Gold schema does not declare."""
+    """Keep target lineage and only the classification fields declared in Gold."""
     names = schema_column_names(schema)
     if names is None:
         return df
+    seed_target_id = "chembl.target.target_id"
+    if (
+        "target_class_profile_sha256" in names
+        and "target_id" not in df.columns
+        and seed_target_id in df.columns
+    ):
+        df = df.with_columns(pl.col(seed_target_id).alias("target_id"))
     hidden = [
         column
         for column in (*FRAME_FIELDS, *TARGET_CLASSIFICATION_DETAIL_FIELDS)

@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 4211 |
-| Tracked doc-like files | 4211 |
+| Doc-like files | 4212 |
+| Tracked doc-like files | 4212 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 80 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 4211 |
+| tracked | 4212 |
 
 ## Lifecycle Counts
 
@@ -52,7 +52,7 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 781 |
+| Active | 782 |
 | Archived | 1554 |
 | Canonical | 77 |
 | Generated | 1071 |
@@ -62,7 +62,7 @@
 
 | Surface | Count |
 | --- | --- |
-| active | 781 |
+| active | 782 |
 | archive | 1554 |
 | canonical | 77 |
 | generated | 1071 |
@@ -74,7 +74,7 @@
 | --- | --- |
 | archive-after-migration | 434 |
 | generate-automatically | 1071 |
-| keep | 2706 |
+| keep | 2707 |
 
 ## Cleanup Candidates
 

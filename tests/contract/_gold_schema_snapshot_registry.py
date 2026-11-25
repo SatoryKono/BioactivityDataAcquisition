@@ -36,6 +36,9 @@ import re
 from typing import Any, cast
 
 from bioetl.domain.contracts import gold as gold_contracts
+from bioetl.domain.contracts.gold.composite_bioassay import (
+    COMPOSITE_TARGET_GOLD_VERSION,
+)
 
 ROOT = Path(__file__).resolve().parents[2]
 GOLD_SNAPSHOT_REGISTRY_PATH = (
@@ -45,6 +48,7 @@ DEFAULT_CONTRACT_VERSION = "1.0.0"
 ENTITY_CONTRACT_VERSIONS: dict[str, str] = {
     "chembl_target": "3.0.0",
     "chembl_target_protein_classification": "2.2.0",
+    "composite_target": COMPOSITE_TARGET_GOLD_VERSION,
 }
 _ALLOWED_TYPE_NAMES = frozenset({"bool", "float64", "int64", "str"})
 _DQ_BUNDLE_POLICY: dict[str, Any] = {
