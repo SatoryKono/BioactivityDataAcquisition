@@ -22,6 +22,9 @@ from bioetl.domain.contracts.gold.chembl_target_classification import (
     target_v31_schema_hash,
     target_v32_schema_hash,
 )
+from bioetl.domain.contracts.gold.composite_bioassay import (
+    COMPOSITE_TARGET_GOLD_VERSION,
+)
 from bioetl.domain.normalization.profiles.chembl_target_classification import (
     target_v32_normalization_profile,
 )
@@ -36,6 +39,7 @@ ENTITY_CONTRACT_VERSIONS: dict[str, str] = {
     "chembl_publication_similarity": "2.0.0",
     "chembl_target": "3.0.0",
     "chembl_target_protein_classification": "2.2.0",
+    "composite_target": COMPOSITE_TARGET_GOLD_VERSION,
 }
 
 
@@ -123,6 +127,7 @@ RETAINED_LEGACY_CONTRACT_FILENAMES: frozenset[str] = frozenset(
     {
         "chembl_assay_parameters_v1.0.json",
         "chembl_publication_similarity_v1.0.json",
+        "composite_target_v1.0.json",
     }
 )
 

@@ -8,7 +8,7 @@
 | --- | --- |
 | Typed identity `[type:composite]` | `composite:composite_target` |
 | Status | `active` |
-| Gold contract | `composite.target v1.0.0` |
+| Gold contract | `composite.target v1.1.0` |
 
 ## Назначение и обработка данных
 
@@ -34,7 +34,7 @@ Join keys, cardinality и source tables берутся из composite configurat
 
 ## Gold
 
-- Contract: `composite.target v1.0.0`; strict validation: `True`.
+- Contract: `composite.target v1.1.0`; strict validation: `True`.
 - Write mode: `configured`.
 
 ## Операторские команды

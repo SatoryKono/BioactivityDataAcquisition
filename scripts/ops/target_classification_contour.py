@@ -310,7 +310,7 @@ def inspect_repository(root: Path = REPO_ROOT) -> ContourObservations:
         / "04-reference"
         / "contracts"
         / "gold"
-        / "composite_target_v1.0.json"
+        / "composite_target_v1.1.json"
     )
     mode, digest = _canonical_identity(config_path)
     return ContourObservations(

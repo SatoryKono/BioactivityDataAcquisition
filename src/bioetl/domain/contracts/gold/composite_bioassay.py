@@ -12,6 +12,8 @@ from bioetl.domain.contracts.gold._composite_gold_common_schema import (
     CompositeLookupLineageSchema,
 )
 
+COMPOSITE_TARGET_GOLD_VERSION = "1.1.0"
+
 
 class CompositeActivityGoldSchema(CompositeLookupLineageSchema):
     """Schema for Composite Activity in Gold layer."""
@@ -112,6 +114,13 @@ class CompositeAssayGoldSchema(CompositeLookupLineageSchema):
 
 class CompositeTargetGoldSchema(CompositeLookupLineageSchema):
     """Schema for Composite Target in Gold layer."""
+
+    @classmethod
+    def build_schema_(cls, **kwargs: object) -> pa.DataFrameSchema:
+        """Publish the contract version in the runtime schema metadata."""
+        schema = super().build_schema_(**kwargs)
+        schema.metadata = {"contract_version": COMPOSITE_TARGET_GOLD_VERSION}
+        return schema
 
     target_id: Series[str] = pa.Field(
         nullable=True,
