@@ -90,6 +90,8 @@ def show_dq_config_command(pipeline: str, output_format: str) -> None:
         _fail_dq("DQ Configuration error", str(e))
     except FileNotFoundError as e:
         _fail_dq("DQ Config file not found", str(e), ExitCode.EX_NOINPUT)
+    except (OSError, yaml.YAMLError) as e:
+        _fail_dq("DQ Configuration error", str(e), ExitCode.FAIL)
 
     if output_format == "json":
         echo_info(json.dumps(dq_config, indent=2, default=str))
@@ -215,7 +217,7 @@ def show_effective_config_command(
         _fail_dq("Effective config error", str(e))
     except FileNotFoundError as e:
         _fail_dq("Config file not found", str(e), ExitCode.EX_NOINPUT)
-    except TypeError as e:
+    except (OSError, TypeError, yaml.YAMLError) as e:
         _fail_dq("Failed to create effective config artifact", str(e), ExitCode.FAIL)
 
 
