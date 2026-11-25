@@ -6,6 +6,7 @@ import re
 from dataclasses import dataclass, replace
 from typing import cast
 
+from .identifier_roles import RANKED_CLASS_POLICY_VERSION
 from .models import (
     ClassificationResult,
     Diagnostic,
@@ -79,12 +80,17 @@ def _glue_subjects(value: str | None, field: str) -> tuple[str, ...]:
     return (value, *_split_multi(value))
 
 
-def parse_ec_numbers(raw: str | None) -> tuple[EcNumber, ...]:
+def parse_ec_numbers(
+    raw: str | None, *, allow_preliminary: bool = False
+) -> tuple[EcNumber, ...]:
     """Parse one EC field. Invalid tokens stay, with a diagnostic message."""
     normalized = normalize_missing(raw)
     if normalized is None:
         return ()
-    return tuple(_parse_ec_token(token) for token in _split_multi(normalized))
+    return tuple(
+        _parse_ec_token(token, allow_preliminary=allow_preliminary)
+        for token in _split_multi(normalized)
+    )
 
 
 def _normalized_input_fields(
@@ -141,7 +147,11 @@ def validate_input(
             tuple(errors),
             row_hash,
         )
-    ec_numbers = parse_ec_numbers(row.fields.get("ec"))
+    ec_numbers = parse_ec_numbers(
+        row.fields.get("ec"),
+        allow_preliminary=provenance.matching_policy_version
+        == RANKED_CLASS_POLICY_VERSION,
+    )
     diagnostics = _ec_diagnostics(ec_numbers)
     taxon, taxon_diagnostic = _taxon(
         normalized.get("organism"),
@@ -358,7 +368,7 @@ def _invalid(
     )
 
 
-def _parse_ec_token(token: str) -> EcNumber:
+def _parse_ec_token(token: str, *, allow_preliminary: bool) -> EcNumber:
     parts = token.split(".")
     if not 1 <= len(parts) <= 4 or not _ascii_digits(parts[0]):
         return _bad_ec(token)
@@ -372,7 +382,15 @@ def _parse_ec_token(token: str) -> EcNumber:
     depth = 0
     levels: list[str] = []
     prefix: list[str] = []
-    for part in parts:
+    for index, part in enumerate(parts):
+        if (
+            allow_preliminary
+            and index == 3
+            and not seen_dash
+            and re.fullmatch(r"n[1-9][0-9]*", part, re.IGNORECASE)
+        ):
+            # A preliminary entry confirms the numeric hierarchy through level three.
+            break
         if part == "-":
             seen_dash = True
             continue

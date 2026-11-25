@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 from collections.abc import Mapping
-from pathlib import Path, PurePosixPath
+from pathlib import Path, PurePosixPath, PureWindowsPath
 
 from bioetl.application.services.run_reports.artifact_digest import (
     canonical_report_sha256,
@@ -366,14 +366,49 @@ def _probe_named_artifact(
     )
 
 
+def _bound_bronze_reference(item: object, context: object | None) -> object:
+    """Resolve a Windows Bronze reference only inside the attested run data root."""
+    if not isinstance(item, dict) or item.get("kind") != "bronze_batch":
+        return item
+    reference = item.get("path") or item.get("relative_path") or item.get("ref")
+    data_root = getattr(context, "data_root", None)
+    alias = getattr(context, "trusted_alias_base", None)
+    if (
+        not isinstance(reference, str)
+        or not isinstance(data_root, Path)
+        or not isinstance(alias, Path)
+    ):
+        return item
+    windows_path = PureWindowsPath(reference)
+    if not windows_path.is_absolute() or ".." in windows_path.parts:
+        return item
+    try:
+        trusted_base = alias.resolve()
+        bound_root = data_root.resolve()
+        relative_root = bound_root.relative_to(trusted_base)
+        prefix = (trusted_base.name, *relative_root.parts, "output", "bronze")
+        directory = windows_path.parts[:-4]
+        if directory[-len(prefix) :] != prefix:
+            return item
+        bronze_root = (bound_root / "output" / "bronze").resolve()
+        candidate = bronze_root.joinpath(*windows_path.parts[-4:]).resolve()
+    except (OSError, ValueError):
+        return item
+    if not bronze_root.is_relative_to(bound_root) or not candidate.is_relative_to(
+        bronze_root
+    ):
+        return item
+    return {**item, "path": str(candidate)}
+
+
 def _artifact_probes(
-    report: Mapping[str, object], run_root: Path
+    report: Mapping[str, object], run_root: Path, *, context: object | None = None
 ) -> tuple[list[Mapping[str, object]], bool]:
     artifacts = report.get("artifacts")
     if not isinstance(artifacts, list) or not artifacts:
         return [], False
     root = run_root.resolve()
     return [
-        _probe_listed_artifact(item, root, index)
+        _probe_listed_artifact(_bound_bronze_reference(item, context), root, index)
         for index, item in enumerate(artifacts)
     ], True

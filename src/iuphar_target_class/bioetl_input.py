@@ -7,6 +7,12 @@ import math
 import re
 from collections.abc import Mapping
 
+from iuphar_target_class.effective_policy import name_keyword_class
+from iuphar_target_class.identifier_roles import (
+    EC_EFFECTIVE_POLICIES,
+    RANKED_CLASS_POLICY_VERSION,
+)
+from iuphar_target_class.normalization import parse_ec_numbers
 from iuphar_target_class.stage0.io import canonical_json_bytes
 
 _TAXONOMY_ERROR = "taxonomy_id must be a positive integer"
@@ -29,19 +35,28 @@ def _text(value: object) -> str | None:
     return text
 
 
-def _tokens(value: object) -> tuple[str, ...]:
+def _tokens(value: object, *, allow_bracket_text: bool = False) -> tuple[str, ...]:
     if value is None:
         return ()
     if isinstance(value, (list, tuple)):
-        return tuple(part for item in value for part in _tokens(item))
+        return tuple(
+            part
+            for item in value
+            for part in _tokens(item, allow_bracket_text=allow_bracket_text)
+        )
     text = _text(value)
     if text is None:
         return ()
     if text.startswith("["):
-        loaded = json.loads(text)
-        if not isinstance(loaded, list):
-            raise ValueError("expected a JSON identifier array")
-        return _tokens(loaded)
+        try:
+            loaded = json.loads(text)
+        except json.JSONDecodeError:
+            if not allow_bracket_text:
+                raise
+        else:
+            if not isinstance(loaded, list):
+                raise ValueError("expected a JSON identifier array")
+            return _tokens(loaded, allow_bracket_text=allow_bracket_text)
     return tuple(part for raw in re.split(r"[|;]", text) if (part := _text(raw)))
 
 
@@ -78,6 +93,10 @@ def plain_target_value(value: object) -> object:
     return value
 
 
+def target_gene_aliases(data: Mapping[str, object]) -> tuple[str, ...]:
+    return _tokens(data.get("target_gene_synonyms"), allow_bracket_text=True)
+
+
 def project_target_fields(
     data: Mapping[str, object], taxon: str | None
 ) -> dict[str, str | None]:
@@ -106,8 +125,8 @@ def project_target_fields(
     synonyms = tuple(
         dict.fromkeys(
             (
-                *_tokens(data.get("target_protein_synonyms")),
-                *_tokens(data.get("target_gene_synonyms")),
+                *_tokens(data.get("target_protein_synonyms"), allow_bracket_text=True),
+                *target_gene_aliases(data),
             )
         )
     )
@@ -136,7 +155,10 @@ def project_target_fields(
 
 
 def target_input_eligibility(
-    data: Mapping[str, object], species: frozenset[str]
+    data: Mapping[str, object],
+    species: frozenset[str],
+    *,
+    policy: str | None = None,
 ) -> tuple[str | None, str | None]:
     if data.get("target_type") != "SINGLE PROTEIN":
         return None, "unsupported_target_type"
@@ -145,7 +167,20 @@ def target_input_eligibility(
     except ValueError:
         return None, "invalid_taxonomy_id"
     if taxon is not None and taxon not in species:
-        return taxon, "unsupported_taxon"
+        if policy not in EC_EFFECTIVE_POLICIES:
+            return taxon, "unsupported_taxon"
+        reason = _taxonomy_name_ineligibility(taxon, data.get("organism"))
+        if reason is not None:
+            return taxon, reason
+        ec = "|".join(_tokens(data.get("target_ec_numbers")))
+        ranked = policy == RANKED_CLASS_POLICY_VERSION
+        valid_ec = any(
+            number.valid for number in parse_ec_numbers(ec, allow_preliminary=ranked)
+        )
+        if not valid_ec and not (
+            ranked and name_keyword_class(_text(data.get("pref_name")))
+        ):
+            return taxon, "unsupported_taxon"
     return taxon, _taxonomy_name_ineligibility(taxon, data.get("organism"))
 
 

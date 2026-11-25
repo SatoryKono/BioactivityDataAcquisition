@@ -1355,8 +1355,7 @@ def apply_dq(data: dict[str, Any]) -> None:
         ),
         content=(
             "**Canonical identity:** [Open Review Run Identity on Overview]"
-            f"({OV_IDENTITY})\n\n"
-            "DQ no longer duplicates identity tables (F-16)."
+            f"({OV_IDENTITY})"
         ),
     )
     _replace_with_handoff(

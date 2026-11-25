@@ -5,6 +5,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
+from .effective_policy import CHANNEL_PRIORITY_RULE, EC_CLASS_RULE, KEYWORD_CLASS_RULE
+from .identifier_roles import EC_EFFECTIVE_POLICIES, RANKED_CLASS_POLICY_VERSION
 from .models import ClassificationResult, Evidence, ProviderAnnotation, RunProvenance
 
 EVIDENCE_TYPE_ORDER: tuple[str, ...] = (
@@ -207,6 +209,15 @@ def _require_row_evidence(
         _require_direct_evidence_types(row, table, records)
     _require_match_list_evidence(row, table, records)
     _require_local_list_evidence(row, table, records)
+    rule = _EFFECTIVE_POLICY_RULES.get(row.effective_source or "")
+    if rule and not any(
+        records[key].source_id == rule
+        and records[key].content.startswith(
+            f"{row.provenance.matching_policy_version}:{row.effective_class}:"
+        )
+        for key in row.local_evidence_ids
+    ):
+        raise ContractDefect("effective class has no policy evidence")
 
 
 def _require_match_list_evidence(
@@ -319,10 +330,14 @@ def trace_violation(
     *,
     annotation: ProviderAnnotation | None = None,
 ) -> bool:
-    """Invariant 2. A class needs a matched id and a non-name method."""
+    """Invariant 2. A direct class needs an identity accepted by its policy."""
     if not row.iuphar_class:
         return False
-    name_only = bool(methods) and set(methods) <= _NAME_ONLY
+    name_only = (
+        row.provenance.matching_policy_version != RANKED_CLASS_POLICY_VERSION
+        and bool(methods)
+        and set(methods) <= _NAME_ONLY
+    )
     return (
         row.match_status != "matched"
         or not row.matched_target_id
@@ -330,6 +345,13 @@ def trace_violation(
         or name_only
         or bool(class_chain_defects(row, annotation=annotation))
     )
+
+
+_EFFECTIVE_POLICY_RULES = {
+    "ec_rule": EC_CLASS_RULE,
+    "channel_priority": CHANNEL_PRIORITY_RULE,
+    "keyword_rule": KEYWORD_CLASS_RULE,
+}
 
 
 def unsupported_class(row: ClassificationResult) -> bool:
@@ -344,7 +366,17 @@ def unsupported_class(row: ClassificationResult) -> bool:
         "local_rule": local_supported,
         "iuphar_normalized": direct_supported,
     }
-    selected_supported = support_by_source.get(row.effective_source, False)
+    policy_rule = _EFFECTIVE_POLICY_RULES.get(row.effective_source or "")
+    selected_supported = support_by_source.get(row.effective_source, False) or (
+        policy_rule is not None
+        and row.provenance.matching_policy_version in EC_EFFECTIVE_POLICIES
+        and (
+            policy_rule != KEYWORD_CLASS_RULE
+            or row.provenance.matching_policy_version == RANKED_CLASS_POLICY_VERSION
+        )
+        and policy_rule in row.local_rule_ids
+        and bool(row.local_evidence_ids)
+    )
     return bool(row.effective_class) and not selected_supported
 
 

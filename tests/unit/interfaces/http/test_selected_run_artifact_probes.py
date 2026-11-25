@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -75,6 +76,43 @@ def test_existing_self_report_needs_no_impossible_self_hash(tmp_path):
     )
     assert probes[0]["result"] == "pass"
     assert probes[0]["reason"] == "object_available"
+
+
+@pytest.mark.parametrize(
+    ("source_root", "digest_matches", "expected"),
+    [
+        ("attempt", True, "digest_matches"),
+        ("attempt", False, "digest_mismatch"),
+        ("foreign", True, None),
+        ("foreign/../attempt", True, None),
+    ],
+)
+def test_windows_bronze_reference_uses_the_bound_data_root(
+    tmp_path, source_root, digest_matches, expected
+):
+    alias = tmp_path / "data"
+    data_root = alias / "attempt"
+    suffix = "chembl/target/2026-11-25/batch.jsonl.zst"
+    artifact = data_root / "output/bronze" / suffix
+    artifact.parent.mkdir(parents=True)
+    artifact.write_bytes(b"saved-bronze")
+    digest = hashlib.sha256(artifact.read_bytes()).hexdigest()
+    report = {
+        "artifacts": [
+            {
+                "kind": "bronze_batch",
+                "ref": f"D:/repo/data/{source_root}/output/bronze/{suffix}",
+                "sha256": digest if digest_matches else "0" * 64,
+            }
+        ]
+    }
+    context = SimpleNamespace(data_root=data_root, trusted_alias_base=alias)
+    probes, present = _artifact_probes(report, tmp_path, context=context)
+    assert present
+    if expected is None:
+        assert probes[0]["result"] == "fail"
+    else:
+        assert probes[0]["reason"] == expected
 
 
 @pytest.mark.parametrize("digest", ["a" * 64, "actual"])

@@ -1,3 +1,11 @@
+## Full data and presentation audit — 2026-11-25
+
+The [dated UX report](../../reports/dashboard-ux-checks/2026-11-25.md)
+records the live inventory, query coverage, corrected selector/passport gates
+and the selected-root identity binding defect. Runtime deployment and the
+three requested control workflow launches remain pending; no full acceptance
+is claimed by this note.
+
 ## CI contract corrections — 2026-11-17
 
 Alert completeness, missing-sample semantics, repeatable CURRENT evidence and

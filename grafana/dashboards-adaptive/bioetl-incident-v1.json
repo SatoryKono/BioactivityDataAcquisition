@@ -12248,10 +12248,10 @@
                 {
                   "id": "extractFields",
                   "options": {
+                    "source": "signal",
                     "format": "regexp",
                     "regExp": "/(?<action_detail>.*)/",
-                    "replace": false,
-                    "source": "signal"
+                    "replace": false
                   }
                 },
                 {
@@ -12262,7 +12262,6 @@
                       "Time 1": true,
                       "Time 2": true,
                       "__name__": true,
-                      "action_dashboard_uid": false,
                       "action_target": true,
                       "cause": true,
                       "confidence": false,
@@ -12271,7 +12270,8 @@
                       "reason": true,
                       "row_index": true,
                       "run_type": true,
-                      "severity": true
+                      "severity": true,
+                      "action_dashboard_uid": false
                     },
                     "indexByName": {
                       "Rank": 0,
@@ -13014,7 +13014,7 @@
           "id": 9701,
           "type": "bioetl-selectorshell-panel",
           "title": "Review Current Workflow Evidence · threshold 24h",
-          "description": "CURRENT · Workflow/pipeline/run-type scope, independent of Selected Run. Published at is the gateway publication clock, not the Prometheus evaluation clock. Retained publications do not expire after 15 minutes. Reason unavailable means no diagnostic cause is exposed by this metric. Publication age is measured at query evaluation. Display threshold: 24h (86400 seconds); STALE means age > threshold, not workflow failure. Within threshold does not prove health. Missing/invalid publication time is Not verified. The heading uses the oldest scoped publication; any known stale row takes precedence over missing coverage. Retention and health status are unchanged. Refresh the dashboard to re-evaluate. Managed CURRENT queries use an independent clock and refresh every 30s. The timestamp is query evaluation time, not publication or event time. The historical dashboard interval does not set the current query end; current trends retain the selected duration and end at now. Timeouts, failed queries and unverified response time remain unavailable.",
+          "description": "CURRENT · Workflow/pipeline/run-type scope, independent of Selected Run. Workflow processing describes the workflow execution input only; it does not summarize Control Plane or other domain inputs. Published at is the gateway publication clock, not the Prometheus evaluation clock. Retained publications do not expire after 15 minutes. Reason unavailable means no diagnostic cause is exposed by this metric. Publication age is measured at query evaluation. Display threshold: 24h (86400 seconds); STALE means age > threshold, not workflow failure. Within threshold does not prove health. Missing/invalid publication time is Not verified. The heading uses the oldest scoped publication; any known stale row takes precedence over missing coverage. Retention and health status are unchanged. Refresh the dashboard to re-evaluate. Managed CURRENT queries use an independent clock and refresh every 30s. The timestamp is query evaluation time, not publication or event time. The historical dashboard interval does not set the current query end; current trends retain the selected duration and end at now. Timeouts, failed queries and unverified response time remain unavailable.",
           "gridPos": {
             "x": 0,
             "y": 63,
@@ -13049,6 +13049,10 @@
                   "options": "Status"
                 },
                 "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Workflow processing"
+                  },
                   {
                     "id": "mappings",
                     "value": [

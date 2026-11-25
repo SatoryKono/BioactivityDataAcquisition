@@ -168,7 +168,11 @@ class SelectorOptionsCache:
         items = payload.get("items")
         if status["state"] == "stale" and isinstance(items, list):
             for item in items:
-                if isinstance(item, dict) and "text" in item:
+                if (
+                    isinstance(item, dict)
+                    and "text" in item
+                    and item.get("value") != "-"
+                ):
                     item["text"] = f"{item['text']} [STALE catalog]"
         return payload
 

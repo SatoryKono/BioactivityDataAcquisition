@@ -916,7 +916,7 @@ def _correct_control_plane_trust(uid: str, panels: dict[int, dict[str, Any]]) ->
         trust,
         "Reason count",
         "mappings",
-        [{"type": "value", "options": {"0": {"text": "no"}}}],
+        [{"type": "value", "options": {"0": {"text": "0"}}}],
     )
     _override(trust, "Action", "noValue", "")
     _override(
@@ -1019,6 +1019,18 @@ _PROCESSED_RECORDS_DESCRIPTION = "SELECTED RUN · Saved accounting: count in is 
 
 def _dq_processed_records(panel: dict[str, Any]) -> None:
     """Join saved stage inputs to the existing outcome accounting rows."""
+    title = "Inspect all processed-record counters"
+    panel["links"] = [
+        link for link in panel.get("links", []) if link.get("title") != title
+    ]
+    panel["links"].append(
+        {
+            "title": title,
+            "url": "/d/bioetl-dq-v2/4-data-quality?viewPanel=9403&${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+            "includeVars": False,
+            "targetBlank": False,
+        }
+    )
     names = [
         "01 bronze_records",
         "02 silver_valid_records",

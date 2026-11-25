@@ -11577,10 +11577,10 @@
             {
               "id": "extractFields",
               "options": {
+                "source": "signal",
                 "format": "regexp",
                 "regExp": "/(?<action_detail>.*)/",
-                "replace": false,
-                "source": "signal"
+                "replace": false
               }
             },
             {
@@ -11591,7 +11591,6 @@
                   "Time 1": true,
                   "Time 2": true,
                   "__name__": true,
-                  "action_dashboard_uid": false,
                   "action_target": true,
                   "cause": true,
                   "confidence": false,
@@ -11600,7 +11599,8 @@
                   "reason": true,
                   "row_index": true,
                   "run_type": true,
-                  "severity": true
+                  "severity": true,
+                  "action_dashboard_uid": false
                 },
                 "indexByName": {
                   "Rank": 0,
@@ -12949,7 +12949,7 @@
           "id": 9701,
           "type": "table",
           "title": "Review Snapshot Workflow Evidence · ${workflow_evidence_freshness} · threshold 24h",
-          "description": "TIME RANGE SNAPSHOT · Evaluated at the selected period end, including absolute historical periods; not live data. Independent CURRENT clocks and the live-clock instructions below apply only in the managed adaptive profile. CURRENT · Workflow/pipeline/run-type scope, independent of Selected Run. Published at is the gateway publication clock, not the Prometheus evaluation clock. Retained publications do not expire after 15 minutes. Reason unavailable means no diagnostic cause is exposed by this metric. Publication age is measured at query evaluation. Display threshold: 24h (86400 seconds); STALE means age > threshold, not workflow failure. Within threshold does not prove health. Missing/invalid publication time is Not verified. The heading uses the oldest scoped publication; any known stale row takes precedence over missing coverage. Retention and health status are unchanged. Refresh the dashboard to re-evaluate.",
+          "description": "TIME RANGE SNAPSHOT · Evaluated at the selected period end, including absolute historical periods; not live data. Independent CURRENT clocks and the live-clock instructions below apply only in the managed adaptive profile. CURRENT · Workflow/pipeline/run-type scope, independent of Selected Run. Workflow processing describes the workflow execution input only; it does not summarize Control Plane or other domain inputs. Published at is the gateway publication clock, not the Prometheus evaluation clock. Retained publications do not expire after 15 minutes. Reason unavailable means no diagnostic cause is exposed by this metric. Publication age is measured at query evaluation. Display threshold: 24h (86400 seconds); STALE means age > threshold, not workflow failure. Within threshold does not prove health. Missing/invalid publication time is Not verified. The heading uses the oldest scoped publication; any known stale row takes precedence over missing coverage. Retention and health status are unchanged. Refresh the dashboard to re-evaluate.",
           "gridPos": {
             "x": 0,
             "y": 63,
@@ -13077,6 +13077,10 @@
                   "options": "Status"
                 },
                 "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Workflow processing"
+                  },
                   {
                     "id": "mappings",
                     "value": [
@@ -13211,7 +13215,7 @@
             },
             "bioetlCurrentPresentation": {
               "title": "Review Current Workflow Evidence · ${workflow_evidence_freshness} · threshold 24h",
-              "description": "CURRENT · Workflow/pipeline/run-type scope, independent of Selected Run. Published at is the gateway publication clock, not the Prometheus evaluation clock. Retained publications do not expire after 15 minutes. Reason unavailable means no diagnostic cause is exposed by this metric. Publication age is measured at query evaluation. Display threshold: 24h (86400 seconds); STALE means age > threshold, not workflow failure. Within threshold does not prove health. Missing/invalid publication time is Not verified. The heading uses the oldest scoped publication; any known stale row takes precedence over missing coverage. Retention and health status are unchanged. Refresh the dashboard to re-evaluate."
+              "description": "CURRENT · Workflow/pipeline/run-type scope, independent of Selected Run. Workflow processing describes the workflow execution input only; it does not summarize Control Plane or other domain inputs. Published at is the gateway publication clock, not the Prometheus evaluation clock. Retained publications do not expire after 15 minutes. Reason unavailable means no diagnostic cause is exposed by this metric. Publication age is measured at query evaluation. Display threshold: 24h (86400 seconds); STALE means age > threshold, not workflow failure. Within threshold does not prove health. Missing/invalid publication time is Not verified. The heading uses the oldest scoped publication; any known stale row takes precedence over missing coverage. Retention and health status are unchanged. Refresh the dashboard to re-evaluate."
             }
           },
           "links": [

@@ -5,7 +5,10 @@ from __future__ import annotations
 from collections.abc import Mapping
 from pathlib import Path
 
-from iuphar_target_class.identifier_roles import MATCHING_POLICY_VERSION
+from iuphar_target_class.identifier_roles import (
+    ANCHOR_PRIORITY_POLICIES,
+    MATCHING_POLICY_VERSION,
+)
 from iuphar_target_class.policy import (
     LOCAL_CATALOG_VERSION,
     LOCAL_RULE_CATALOG_VERSION,
@@ -48,6 +51,15 @@ _ADMITTED_PROFILE_VERSIONS = frozenset(
             LOCAL_CATALOG_VERSION,
             CLASSIFICATION_SCHEMA_VERSION,
             MATCHING_POLICY_VERSION,
+        ),
+        *(
+            (
+                NORMALIZATION_VERSION,
+                LOCAL_CATALOG_VERSION,
+                CLASSIFICATION_SCHEMA_VERSION,
+                policy,
+            )
+            for policy in ANCHOR_PRIORITY_POLICIES
         ),
         (
             NORMALIZATION_VERSION,
@@ -153,6 +165,13 @@ def load_profile(
         document, path.parent, snapshot, require_acceptance
     )
     versions = tuple(text(document, key) for key in _VERSION_KEYS)
+    if (
+        versions[-1] in ANCHOR_PRIORITY_POLICIES
+        and snapshot.manifest.get("schema_version") != 2
+    ):
+        raise ValueError(
+            "HGNC anchor priority requires source-verified snapshot schema 2"
+        )
     if versions not in _ADMITTED_PROFILE_VERSIONS:
         raise ValueError("IUPHAR profile versions differ from the executing adapter")
     acceptance_hash = None

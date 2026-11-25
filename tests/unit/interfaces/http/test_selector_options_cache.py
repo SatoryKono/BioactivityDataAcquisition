@@ -82,6 +82,33 @@ async def test_stale_is_immediate_under_saturation_and_expires(monkeypatch):
     assert loader.await_count == 1
 
 
+@pytest.mark.parametrize("placeholder", ["SELECT RUN", "NO RUNS"])
+async def test_stale_placeholder_preserves_label_and_catalog_state(
+    monkeypatch, placeholder
+):
+    now = [0.0]
+    monkeypatch.setattr(module, "monotonic", lambda: now[0])
+    payload = {
+        "items": [
+            {"text": placeholder, "value": "-"},
+            {"text": "assay", "value": "chembl_assay"},
+        ]
+    }
+    cache = module.SelectorOptionsCache()
+    await read(cache, AsyncMock(return_value=payload))
+    now[0] = module.FRESH_SECONDS + 1
+    result = await read(
+        cache, AsyncMock(return_value=payload), limiter=asyncio.Semaphore(0)
+    )
+    assert result["catalog"]["state"] == "stale"
+    assert result["items"] == [
+        {"text": placeholder, "value": "-"},
+        {"text": "assay [STALE catalog]", "value": "chembl_assay"},
+    ]
+    assert payload["items"][1]["text"] == "assay"
+    await asyncio.gather(*cache._tasks.values())
+
+
 async def test_scope_timezone_policy_isolation_and_no_io_for_ready_options():
     cache = module.SelectorOptionsCache()
     loader = AsyncMock(return_value=PAYLOAD)

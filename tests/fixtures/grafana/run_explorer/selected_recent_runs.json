@@ -2,12 +2,12 @@
   "contract": "run_explorer_request_snapshot_v1",
   "endpoint": "pipeline_run_reports",
   "expected_empty_copy_tokens": [
-    "UNKNOWN"
+    "N/A"
   ],
   "method": "GET",
   "panel_id": 3010,
   "response_state": "ok",
-  "root_selector": "index_state = \"valid_empty\" and $exists(items) and $count(items) = 0 ? [{\"pipeline\": \"VALID EMPTY\", \"pipeline_label\": \"VALID EMPTY\"}] : items.($merge([$, {\"workflow_id\": workflow_id != \"\" ? workflow_id : \"N/A\", \"run_label\": $substring(run_id,0,8) & \"\u2026\", \"pipeline_label\": $substringAfter(pipeline, provider & \"_\") ? $substringAfter(pipeline, provider & \"_\") : pipeline, \"workflow_passport_path\": $substringAfter(workflow_passport_url, \"https://github.com/SatoryKono/BioactivityDataAcquisition/\"), \"pipeline_passport_path\": $substringAfter(pipeline_passport_url, \"https://github.com/SatoryKono/BioactivityDataAcquisition/\")}]))",
+  "root_selector": "(\n  $text := function($value) {\n    $type($value) = \"string\" ? ($value != \"\" ? $value : \"N/A\") : \"N/A\"\n  };\n  $passport := function($url, $kind) {\n    $type($url) = \"string\" ?\n      ($contains($url, /^https:\\/\\/github\\.com\\/SatoryKono\\/BioactivityDataAcquisition\\/blob\\/main\\/docs\\/04-reference\\/passports\\/(workflows|pipelines)\\/[A-Za-z0-9%._-]+\\.md$/)\n        and $contains($url, \"/passports/\" & $kind & \"/\") ?\n          $substringAfter($url, \"https://github.com/SatoryKono/BioactivityDataAcquisition/\") : \"\") : \"\"\n  };\n  index_state = \"valid_empty\" and $exists(items) and $count(items) = 0 ?\n    [{\n      \"pipeline\": \"VALID EMPTY\", \"pipeline_label\": \"VALID EMPTY\",\n      \"workflow_id\": \"N/A\", \"provider\": \"N/A\", \"run_id\": \"\", \"run_label\": \"\u2014\",\n      \"run_type\": \"\", \"workflow_scope\": \"\", \"started_at\": null,\n      \"duration_display\": \"N/A\", \"status\": \"N/A\", \"saved_evidence_status\": \"N/A\",\n      \"data_quality_status\": \"N/A\", \"replay_readiness_status\": \"N/A\",\n      \"report_label\": \"\", \"report_url\": \"\", \"workflow_passport_url\": \"\",\n      \"workflow_passport_path\": \"\", \"pipeline_passport_url\": \"\", \"pipeline_passport_path\": \"\"\n    }] :\n    items.(\n      $provider := $type(provider) = \"string\" ? provider : \"\";\n      $pipelineValue := $text(pipeline);\n      $run := $type(run_id) = \"string\" ? run_id : \"\";\n      $prefix := $provider & \"_\";\n      $pipelinePath := $passport(pipeline_passport_url, \"pipelines\");\n      $merge([$, {\n        \"workflow_id\": $text(workflow_id),\n        \"run_label\": $run != \"\" ? ($length($run) > 8 ? $substring($run, 0, 8) & \"\u2026\" : $run) : \"N/A\",\n        \"pipeline_label\": $provider != \"\" ?\n          ($substring($pipelineValue, 0, $length($prefix)) = $prefix ?\n            $substring($pipelineValue, $length($prefix)) : $pipelineValue) : $pipelineValue,\n        \"workflow_passport_path\": $passport(workflow_passport_url, \"workflows\"),\n        \"pipeline_passport_path\": $pipelinePath,\n        \"pipeline_passport_url\": $pipelinePath != \"\" ?\n          \"https://github.com/SatoryKono/BioactivityDataAcquisition/\" & $pipelinePath : \"\"\n      }])\n    )\n)",
   "scenario": "selected_recent_runs",
   "selectors": {
     "__timezone": "utc",
@@ -19,5 +19,5 @@
   },
   "title": "Inspect Recent Runs (last 20)",
   "url": "/ops/observability/pipeline-run-reports?pipeline=chembl_assay&limit=20&run_id=00000000-0000-4000-8000-000000000942&view=recent&workflow=chembl_baseline&run_type=backfill&lookup_run_id=",
-  "url_template": "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=20&run_id=${run_id}&view=recent&workflow=${workflow}&run_type=${run_type:csv}&lookup_run_id=${lookup_run_id:percentencode}"
+  "url_template": "/ops/observability/pipeline-run-reports?pipeline=${pipeline:percentencode}&limit=20&run_id=${run_id:percentencode}&view=recent&workflow=${workflow:percentencode}&run_type=${run_type:percentencode}&lookup_run_id=${lookup_run_id:percentencode}"
 }

@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
+import re
 from urllib.parse import parse_qs, urlparse
 
 import pytest
@@ -33,6 +34,19 @@ def _load_catalog() -> dict[str, object]:
     payload = yaml.safe_load(_CATALOG_PATH.read_text(encoding="utf-8"))
     assert isinstance(payload, dict)
     return payload
+
+
+@pytest.mark.parametrize("profile", ["dashboards", "dashboards-adaptive"])
+def test_catalog_jsonata_names_do_not_collide_with_dashboard_selectors(profile: str) -> None:
+    """Infinity interpolates selector names inside JSONata before backend parsing."""
+    dashboard = load_dashboard(Path(f"grafana/{profile}/bioetl-run-explorer-v1.json"))
+    selector_names = {item["name"] for item in dashboard["templating"]["list"]}
+    panel = next(p for p in get_dashboard_panels(dashboard) if p["id"] == 3010)
+    expression = panel["targets"][0]["root_selector"]
+    jsonata_names = set(re.findall(r"\$([A-Za-z_]\w*)\b", expression))
+    assert not selector_names.intersection(jsonata_names), (
+        "Grafana would substitute a selector into the JSONata expression"
+    )
 
 
 def test_recent_report_link_preserves_row_url_through_transforms() -> None:
@@ -250,7 +264,7 @@ def test_recent_timing_null_does_not_inherit_empty_catalog_message() -> None:
         for o in panel["fieldConfig"]["overrides"]
     }
     assert properties["Duration"]["noValue"] == "UNKNOWN"
-    assert panel["fieldConfig"]["defaults"]["noValue"].startswith("UNKNOWN")
+    assert panel["fieldConfig"]["defaults"]["noValue"].startswith("N/A")
 
 
 def test_run_explorer_visible_selectors_use_ops_http_catalog() -> None:

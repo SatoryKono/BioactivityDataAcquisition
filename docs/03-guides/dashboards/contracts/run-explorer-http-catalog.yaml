@@ -48,7 +48,46 @@ panels:
   - id: 3010
     title: Inspect Recent Runs (last 20)
     endpoint: pipeline_run_reports
-    url: /ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=20&run_id=${run_id}&view=recent&workflow=${workflow}&run_type=${run_type:csv}&lookup_run_id=${lookup_run_id:percentencode}
-    root_selector: 'index_state = "valid_empty" and $exists(items) and $count(items) = 0 ? [{"pipeline": "VALID EMPTY", "pipeline_label": "VALID EMPTY"}] : items.($merge([$, {"workflow_id": workflow_id != "" ? workflow_id : "N/A", "run_label": $substring(run_id,0,8) & "…", "pipeline_label": $substringAfter(pipeline, provider & "_") ? $substringAfter(pipeline, provider & "_") : pipeline, "workflow_passport_path": $substringAfter(workflow_passport_url, "https://github.com/SatoryKono/BioactivityDataAcquisition/"), "pipeline_passport_path": $substringAfter(pipeline_passport_url, "https://github.com/SatoryKono/BioactivityDataAcquisition/")}]))'
-    no_value_tokens: [UNKNOWN]
+    url: /ops/observability/pipeline-run-reports?pipeline=${pipeline:percentencode}&limit=20&run_id=${run_id:percentencode}&view=recent&workflow=${workflow:percentencode}&run_type=${run_type:percentencode}&lookup_run_id=${lookup_run_id:percentencode}
+    root_selector: >-
+      (
+        $text := function($value) {
+          $type($value) = "string" ? ($value != "" ? $value : "N/A") : "N/A"
+        };
+        $passport := function($url, $kind) {
+          $type($url) = "string" ?
+            ($contains($url, /^https:\/\/github\.com\/SatoryKono\/BioactivityDataAcquisition\/blob\/main\/docs\/04-reference\/passports\/(workflows|pipelines)\/[A-Za-z0-9%._-]+\.md$/)
+              and $contains($url, "/passports/" & $kind & "/") ?
+                $substringAfter($url, "https://github.com/SatoryKono/BioactivityDataAcquisition/") : "") : ""
+        };
+        index_state = "valid_empty" and $exists(items) and $count(items) = 0 ?
+          [{
+            "pipeline": "VALID EMPTY", "pipeline_label": "VALID EMPTY",
+            "workflow_id": "N/A", "provider": "N/A", "run_id": "", "run_label": "—",
+            "run_type": "", "workflow_scope": "", "started_at": null,
+            "duration_display": "N/A", "status": "N/A", "saved_evidence_status": "N/A",
+            "data_quality_status": "N/A", "replay_readiness_status": "N/A",
+            "report_label": "", "report_url": "", "workflow_passport_url": "",
+            "workflow_passport_path": "", "pipeline_passport_url": "", "pipeline_passport_path": ""
+          }] :
+          items.(
+            $provider := $type(provider) = "string" ? provider : "";
+            $pipelineValue := $text(pipeline);
+            $run := $type(run_id) = "string" ? run_id : "";
+            $prefix := $provider & "_";
+            $pipelinePath := $passport(pipeline_passport_url, "pipelines");
+            $merge([$, {
+              "workflow_id": $text(workflow_id),
+              "run_label": $run != "" ? ($length($run) > 8 ? $substring($run, 0, 8) & "…" : $run) : "N/A",
+              "pipeline_label": $provider != "" ?
+                ($substring($pipelineValue, 0, $length($prefix)) = $prefix ?
+                  $substring($pipelineValue, $length($prefix)) : $pipelineValue) : $pipelineValue,
+              "workflow_passport_path": $passport(workflow_passport_url, "workflows"),
+              "pipeline_passport_path": $pipelinePath,
+              "pipeline_passport_url": $pipelinePath != "" ?
+                "https://github.com/SatoryKono/BioactivityDataAcquisition/" & $pipelinePath : ""
+            }])
+          )
+      )
+    no_value_tokens: [N/A]
     copy_tokens: [VALID EMPTY, QUERY ERROR, tree_missing]

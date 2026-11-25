@@ -83,6 +83,9 @@ async def test_transform_preserves_shaped_relation_row_identity(
         "root_id": "1",
         "is_leaf": "true",
         "l1_id": "1",
+        "l2_id": "2",
+        "l3_id": "3",
+        "l4_id": "4",
         "l1_name": "Membrane receptor",
         "canonical_l1": "membrane_receptor",
         "l1_counts_for_target_type": "true",
@@ -126,6 +129,14 @@ async def test_transform_preserves_shaped_relation_row_identity(
     assert result["target_component_snapshot_row_count"] == 1
     assert result["protein_class_snapshot_row_count"] == 3
     assert result["classification_status"] == "resolved"
+
+    gold = transformer.transform_for_gold(mock_context, result)
+    for field in ("leaf_id", "root_id", "l1_id", "l2_id", "l3_id", "l4_id"):
+        assert isinstance(result[field], str)
+        assert gold[field] == int(result[field])
+        assert type(gold[field]) is int
+    assert gold["l5_id"] is None
+    assert gold["content_hash"] == result["content_hash"]
 
 
 @pytest.mark.asyncio

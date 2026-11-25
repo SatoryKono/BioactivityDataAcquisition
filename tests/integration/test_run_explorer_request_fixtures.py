@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from urllib.parse import parse_qs, urlsplit
 
 import pytest
 
@@ -94,3 +95,21 @@ def test_default_browse_url_is_the_unscoped_recent_page() -> None:
         "?pipeline=.*&limit=20&run_id=-&view=recent"
         "&workflow=.*&run_type=.*&lookup_run_id="
     )
+
+
+@pytest.mark.parametrize(
+    "value", ["a&pipeline=other", "a=b+c%", "value space", "данные"]
+)
+def test_catalog_parameters_round_trip_without_scope_injection(value: str) -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-run-explorer-v1.json"))
+    panel = next(item for item in dashboard["panels"] if item["id"] == 3010)
+    selectors = dict.fromkeys(
+        ("workflow", "pipeline", "run_type", "run_id", "lookup_run_id"), value
+    )
+    query = parse_qs(
+        urlsplit(materialize_ops_url(panel["targets"][0]["url"], selectors)).query
+    )
+    for name in selectors:
+        assert query[name] == [value]
+    assert query["limit"] == ["20"]
+    assert query["view"] == ["recent"]

@@ -18,7 +18,9 @@ pipeline:
     # until contour-report is READY and a maintenance-window migration promotes
     # a separate enrich document. shadow|enrich require a paired profile
     # envelope + sha256; enrich alone does not admit biological accuracy.
-    mode: "off"
+    mode: "enrich"
+    snapshot_manifest: "reports/local/iuphar-v31-rf008-0bb36c9/profile-enrich-v31/profile.json"
+    snapshot_manifest_sha256: "2d96b292124aa14aa47fa60c7bbdf2f5d04003a1998a8d004383e50a0c059aa3"
   field_policy: {}
   business_primary_keys:
     - target_id

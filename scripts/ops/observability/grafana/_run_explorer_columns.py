@@ -79,6 +79,18 @@ _FILTER_ROOT = (
 )
 
 
+def _status_options() -> dict[str, dict[str, str]]:
+    """Accept recorded case variants without merging status vocabularies."""
+    return {
+        alias: {
+            "text": state if state in {"OK", "N/A", "ERROR"} else state.lower(),
+            "color": color,
+        }
+        for state, color in _COLORS.items()
+        for alias in dict.fromkeys((state, state.lower(), state.upper()))
+    }
+
+
 def apply_overall_verdict(payload: dict) -> None:
     """Keep the headline and status table bound to the same saved assessment."""
     if payload.get("uid") != "bioetl-overview-v2":
@@ -267,7 +279,12 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
         "Saved Evidence, Data Quality and Replay Readiness use exact-run verified evidence. "
         "N/A means unsupported/legacy assessment. INCOMPLETE means missing required evidence. "
         "IN PROGRESS requires an explicit assessment queue/running signal and is never inferred. "
-        "QUERY ERROR is a source failure; VALID EMPTY means no matching launches. "
+        "VALID EMPTY means no matching launches and offers no exact-run actions. "
+        "A failed request shows the Grafana query error state, not an empty catalog. "
+        "QUERY ERROR is also supported when explicitly returned as a status. "
+        "An absent cell value is N/A; an explicit unknown status stays unknown. "
+        "Started renders the catalog start time in the dashboard timezone "
+        "(browser local time); the time picker does not filter this catalog. "
         "Rows are artifact-backed: a tree_missing index means saved run artifacts are absent; "
         "verify backing with verify_report_bind.py. "
         "Running is a recorded state, not proof of current liveness. Missing reports have no link."
@@ -288,16 +305,7 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
     # Phase 4.3 / F-29: drop unused overview/diagnostics/provider/quality_handoff
     # JSONata fields — they were filtered out by filterFieldsByName and polluted
     # the Infinity payload for no UI gain.
-    panel["targets"][0]["root_selector"] = (
-        'index_state = "valid_empty" and $exists(items) and $count(items) = 0 '
-        '? [{"pipeline": "VALID EMPTY", "pipeline_label": "VALID EMPTY"}] : items.($merge([$, '
-        '{"workflow_id": workflow_id != "" ? workflow_id : "N/A", "run_label": $substring(run_id,0,8) & "…", '
-        '"pipeline_label": $substringAfter(pipeline, provider & "_") ? $substringAfter(pipeline, provider & "_") : pipeline, '
-        '"workflow_passport_path": $substringAfter(workflow_passport_url, '
-        '"https://github.com/SatoryKono/BioactivityDataAcquisition/"), '
-        '"pipeline_passport_path": $substringAfter(pipeline_passport_url, '
-        '"https://github.com/SatoryKono/BioactivityDataAcquisition/")}]))'
-    )
+    panel["targets"][0]["root_selector"] = recent["root_selector"]
     panel["transformations"] = [
         {
             "id": "convertFieldType",
@@ -324,10 +332,7 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
     ]
     defaults = panel["fieldConfig"]["defaults"]
     defaults.update(
-        noValue=(
-            "UNKNOWN — required launch evidence is unavailable. "
-            "QUERY ERROR means the backend request failed, not an empty fleet."
-        ),
+        noValue=("N/A — no value in the launch catalog for this cell."),
         color={"mode": "fixed", "fixedColor": "#E5E7EB"},
     )
     defaults["custom"].update(
@@ -341,8 +346,7 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
         ),
         "Pipeline": (
             "Pipeline passport",
-            "https://github.com/SatoryKono/BioactivityDataAcquisition/"
-            "${__data.fields.pipeline_passport_path:raw}",
+            "${__data.fields.pipeline_passport_url:raw}",
         ),
         _RUN_ID_LABEL: (
             "Report \u00b7 ${__data.fields.run_id}",
@@ -430,15 +434,7 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
                         "value": [
                             {
                                 "type": "value",
-                                "options": {
-                                    s: {
-                                        "text": s
-                                        if s in {"OK", "N/A", "ERROR"}
-                                        else s.lower(),
-                                        "color": c,
-                                    }
-                                    for s, c in _COLORS.items()
-                                },
+                                "options": _status_options(),
                             }
                         ],
                     },
@@ -463,10 +459,14 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
             {"matcher": {"id": "byName", "options": name}, "properties": properties}
         )
     for name in hidden:
+        properties = [{"id": "custom.hidden", "value": True}]
+        if name.endswith("passport_url"):
+            # Empty validated URLs must not interpolate the panel's noValue copy.
+            properties.append({"id": "noValue", "value": ""})
         overrides.append(
             {
                 "matcher": {"id": "byName", "options": name},
-                "properties": [{"id": "custom.hidden", "value": True}],
+                "properties": properties,
             }
         )
     overrides.append(
@@ -478,9 +478,7 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
                     "value": [
                         {
                             "type": "value",
-                            "options": {
-                                s: {"text": s, "color": c} for s, c in _COLORS.items()
-                            },
+                            "options": _status_options(),
                         }
                     ],
                 }
@@ -568,6 +566,21 @@ def _apply_run_explorer_templating(payload: dict[str, Any]) -> None:
     variables["run_type"]["multi"] = False
     variables["run_type"]["query"] = _infinity_filter_query(
         str(variables["run_type"]["definition"])
+    )
+    for name in ("workflow", "pipeline", "run_type", "run_id"):
+        variable = variables[name]
+        url = str(variable["definition"])
+        for key in ("workflow", "pipeline", "run_type", "run_id", "__timezone"):
+            url = url.replace("${" + key + "}", "${" + key + ":percentencode}")
+            url = url.replace("${" + key + ":csv}", "${" + key + ":percentencode}")
+        variable["definition"] = url
+        variable["query"] = _infinity_filter_query(url)
+    variables["run_id"]["description"] = (
+        "Select an exact Run ID from the catalog. SELECT RUN means no selection; "
+        "NO RUNS means the filtered catalog has no runs. Catalog freshness is "
+        "separate from launch time. The list reloads on dashboard load/reload "
+        "and Workflow/Pipeline/Run Type changes; the 1m table auto-refresh "
+        "does not reload the variable list."
     )
     variables["lookup_run_id"]["description"] = (
         "Exact UUID within the current Workflow/Pipeline/Run Type, including "

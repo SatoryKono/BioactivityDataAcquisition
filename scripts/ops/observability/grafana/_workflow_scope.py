@@ -77,6 +77,8 @@ def _evidence_row(payload: dict, source: dict) -> None:
     )
     evidence["description"] = (
         "CURRENT · Workflow/pipeline/run-type scope, independent of Selected Run. "
+        "Workflow processing describes the workflow execution input only; "
+        "it does not summarize Control Plane or other domain inputs. "
         "Published at is the gateway publication clock, not the Prometheus evaluation clock. "
         "Retained publications do not expire after 15 minutes. "
         "Reason unavailable means no diagnostic cause is exposed by this metric."
@@ -145,6 +147,7 @@ def _evidence_row(payload: dict, source: dict) -> None:
             {
                 "matcher": {"id": "byName", "options": "Status"},
                 "properties": [
+                    {"id": "displayName", "value": "Workflow processing"},
                     {
                         "id": "mappings",
                         "value": [

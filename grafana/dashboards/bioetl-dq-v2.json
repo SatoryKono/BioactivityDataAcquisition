@@ -753,6 +753,25 @@
           {
             "matcher": {
               "id": "byName",
+              "options": "execution_state"
+            },
+            "properties": [
+              {
+                "id": "custom.wrapText",
+                "value": false
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
               "options": "Overall verdict"
             },
             "properties": [
@@ -775,21 +794,21 @@
                 "id": "mappings",
                 "value": [
                   {
+                    "type": "value",
                     "options": {
-                      "NO RUNS": {
-                        "color": "gray",
-                        "text": "NO RUNS"
+                      "SELECT RUN": {
+                        "text": "—",
+                        "color": "text"
                       },
                       "QUERY ERROR": {
-                        "color": "red",
-                        "text": "Source unavailable"
+                        "text": "Source unavailable",
+                        "color": "red"
                       },
-                      "SELECT RUN": {
-                        "color": "text",
-                        "text": "—"
+                      "NO RUNS": {
+                        "text": "NO RUNS",
+                        "color": "gray"
                       }
-                    },
-                    "type": "value"
+                    }
                   }
                 ]
               }
@@ -820,17 +839,17 @@
                 "id": "mappings",
                 "value": [
                   {
+                    "type": "value",
                     "options": {
-                      "NO RUNS": {
-                        "color": "gray",
-                        "text": "NO RUNS"
-                      },
                       "SELECT RUN": {
-                        "color": "text",
-                        "text": "—"
+                        "text": "—",
+                        "color": "text"
+                      },
+                      "NO RUNS": {
+                        "text": "NO RUNS",
+                        "color": "gray"
                       }
-                    },
-                    "type": "value"
+                    }
                   }
                 ]
               }
@@ -861,21 +880,19 @@
                 "id": "mappings",
                 "value": [
                   {
+                    "type": "value",
                     "options": {
-                      "Archive missing": {
-                        "text": "No verified archive"
-                      },
-                      "archive_evidence_not_recorded": {
-                        "text": "No verified archive"
-                      },
                       "execution_success": {
                         "text": "Processing completed"
                       },
-                      "no_gold_candidates": {
-                        "text": "No Gold candidates"
+                      "standalone_pipeline": {
+                        "text": "Standalone pipeline"
                       },
                       "run_dq_threshold_evaluation": {
                         "text": "Data quality checks"
+                      },
+                      "run_preflight_provider_observation": {
+                        "text": "Provider preflight check"
                       },
                       "run_gold_schema_validation": {
                         "text": "Gold schema validation"
@@ -883,14 +900,16 @@
                       "run_observation_missing": {
                         "text": "Result not recorded"
                       },
-                      "run_preflight_provider_observation": {
-                        "text": "Provider preflight check"
+                      "no_gold_candidates": {
+                        "text": "No Gold candidates"
                       },
-                      "standalone_pipeline": {
-                        "text": "Standalone pipeline"
+                      "Archive missing": {
+                        "text": "No verified archive"
+                      },
+                      "archive_evidence_not_recorded": {
+                        "text": "No verified archive"
                       }
-                    },
-                    "type": "value"
+                    }
                   }
                 ]
               }
@@ -910,17 +929,17 @@
                 "id": "mappings",
                 "value": [
                   {
+                    "type": "value",
                     "options": {
-                      "NO RUNS": {
-                        "color": "gray",
-                        "text": "NO RUNS"
-                      },
                       "SELECT RUN": {
-                        "color": "text",
-                        "text": "—"
+                        "text": "—",
+                        "color": "text"
+                      },
+                      "NO RUNS": {
+                        "text": "NO RUNS",
+                        "color": "gray"
                       }
-                    },
-                    "type": "value"
+                    }
                   }
                 ]
               }
@@ -1034,7 +1053,7 @@
       "transparent": true,
       "options": {
         "mode": "html",
-        "content": "<div style=\"font-size:16px;line-height:1.5\"><strong>Canonical identity:</strong> <a href=\"/d/bioetl-overview-v2/3-run-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9300&${__url_time_range}\">Open Review Run Identity on Overview</a><br>DQ no longer duplicates identity tables (F-16).</div>"
+        "content": "<div style=\"font-size:16px;line-height:1.5\"><strong>Canonical identity:</strong> <a href=\"/d/bioetl-overview-v2/3-run-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9300&${__url_time_range}\">Open Review Run Identity on Overview</a></div>"
       }
     },
     {
@@ -1628,6 +1647,14 @@
               "count in StageInput": "count in"
             }
           }
+        }
+      ],
+      "links": [
+        {
+          "title": "Inspect all processed-record counters",
+          "url": "/d/bioetl-dq-v2/4-data-quality?viewPanel=9403&${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
+          "includeVars": false,
+          "targetBlank": false
         }
       ]
     },

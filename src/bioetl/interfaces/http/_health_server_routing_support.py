@@ -18,6 +18,7 @@ from bioetl.interfaces.http._health_server_control_plane_evidence_routing import
     dispatch_control_plane_evidence_request,
 )
 from bioetl.interfaces.http._health_server_control_plane_scope import (
+    _get_manifest_by_selected_run_id,
     read_selected_run_id,
 )
 from bioetl.interfaces.http._health_server_filter_options_payload import (
@@ -315,8 +316,26 @@ async def _selector_context_bounded_payload(
 ) -> dict[str, object]:
     """Build selector-context under the caller's forensic deadline."""
     assert host._run_manifest_port is not None
-    manifests = await asyncio.to_thread(host._run_manifest_port.list_all)
-    workflow_manifests = await _list_workflow_manifests(host)
+    selected_run_id = read_selected_run_id(host, query)
+    if selected_run_id is None:
+        manifests = await asyncio.to_thread(host._run_manifest_port.list_all)
+        workflow_manifests = await _list_workflow_manifests(host)
+    else:
+        manifest = await asyncio.to_thread(
+            _get_manifest_by_selected_run_id, host._run_manifest_port, selected_run_id
+        )
+        manifests = (manifest,) if manifest is not None else ()
+        workflow_port = getattr(host, "_workflow_manifest_port", None)
+        parent = (
+            await asyncio.to_thread(
+                workflow_port.get_by_run_id, manifest.workflow_run_id
+            )
+            if manifest is not None
+            and manifest.workflow_run_id is not None
+            and workflow_port is not None
+            else None
+        )
+        workflow_manifests = (parent,) if parent is not None else ()
     return await asyncio.to_thread(
         _selector_context_payload_with_a2,
         host,

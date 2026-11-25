@@ -588,16 +588,22 @@ def _assert_run_id_filter_options_url(query_url: str) -> None:
     assert "/ops/control-plane/filter-options" in query_url
     assert "dimension=run_id" in query_url
     assert "response_shape=options" in query_url
-    assert "workflow=${workflow}" in query_url
-    assert "pipeline=${pipeline}" in query_url
-    assert "run_type=${run_type:csv}" in query_url
+    encoded = "workflow=${workflow:percentencode}" in query_url
+    scope_format = ":percentencode" if encoded else ""
+    run_type_format = ":percentencode" if encoded else ":csv"
+    assert "workflow=${workflow" + scope_format + "}" in query_url
+    assert "pipeline=${pipeline" + scope_format + "}" in query_url
+    assert "run_type=${run_type" + run_type_format + "}" in query_url
 
 
 def _assert_pipeline_filter_options_url(query_url: str) -> None:
     assert "/ops/control-plane/filter-options" in query_url
     assert "dimension=pipeline" in query_url
     assert "response_shape=options" in query_url
-    assert "workflow=${workflow}" in query_url
+    assert any(
+        token in query_url
+        for token in ("workflow=${workflow}", "workflow=${workflow:percentencode}")
+    )
 
 
 def _assert_pipeline_filter_options_shell(

@@ -814,7 +814,8 @@ def test_run_explorer_workflow_passport_is_conditional_in_one_column() -> None:
         item for item in get_dashboard_panels(dashboard) if item.get("id") == 3010
     )
     selector = panel["targets"][0]["root_selector"]
-    assert '"workflow_id": workflow_id != "" ? workflow_id : "N/A"' in selector
+    assert '"workflow_id": $text(workflow_id)' in selector
+    assert '$type($value) = "string"' in selector
     assert "workflow_passport_url" in selector
 
     organize = next(
@@ -857,12 +858,16 @@ def test_run_explorer_pipeline_passport_uses_a_fixed_allowed_origin() -> None:
     link = next(prop for prop in pipeline["properties"] if prop["id"] == "links")[
         "value"
     ][0]
-    assert link["url"] == (
-        "https://github.com/SatoryKono/BioactivityDataAcquisition/"
-        "${__data.fields.pipeline_passport_path:raw}"
+    assert link["url"] == "${__data.fields.pipeline_passport_url:raw}"
+    assert '$pipelinePath != "" ?' in panel["targets"][0]["root_selector"]
+    url_field = next(
+        item
+        for item in panel["fieldConfig"]["overrides"]
+        if item["matcher"].get("options") == "pipeline_passport_url"
     )
+    assert {"id": "noValue", "value": ""} in url_field["properties"]
     assert (
-        '"pipeline_passport_path": $substringAfter(pipeline_passport_url, '
+        '$pipelinePath := $passport(pipeline_passport_url, "pipelines")'
         in panel["targets"][0]["root_selector"]
     )
 
@@ -891,3 +896,28 @@ def test_incident_suspect_rank_uses_stable_tie_breakers() -> None:
             if transform["id"] == "sortBy"
         ]
         assert keys == [[key] for key in expected]
+
+
+def test_replay_trust_count_and_action_headers_preserve_their_meaning() -> None:
+    """A zero count stays numeric; an unlinked note has its own column."""
+    for profile in ("dashboards", "dashboards-adaptive"):
+        dashboard = load_dashboard(
+            Path("grafana") / profile / "bioetl-control-plane-v1.json"
+        )
+        panel = next(
+            item for item in get_dashboard_panels(dashboard) if item.get("id") == 9418
+        )
+        overrides = {
+            item["matcher"]["options"]: {
+                prop["id"]: prop["value"] for prop in item["properties"]
+            }
+            for item in panel["fieldConfig"]["overrides"]
+        }
+        zero = overrides["Reason count"]["mappings"][0]["options"]["0"]
+        assert zero["text"] == "0"
+        action = overrides["trust_reasons_action"]
+        note = overrides["trust_action_note"]
+        assert action["displayName"] != note["displayName"]
+        assert action["noValue"] == note["noValue"] == ""
+        assert note["links"] == []
+        assert "viewPanel=9414" in action["links"][0]["url"]

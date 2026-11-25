@@ -1,6 +1,100 @@
 """Compact replay verdict with a separate, readable evidence table."""
 
 from copy import deepcopy
+import json
+
+
+def _replay_guard_payload(status: str, message: str) -> str:
+    """Project a guarded response through the same donor schema as API data."""
+    return json.dumps(
+        {
+            "presentation_trust": {
+                "processing_status": status,
+                "trust_status": status,
+                "reasons_count": None,
+                "reasons_text": message,
+                "reasons_display": message,
+                "evidence_observed_at": None,
+                "evidence_freshness": None,
+            },
+            "replay_readiness": [
+                {"verdict": status, "status": status, "detail": message}
+            ],
+            "replay_checks": [
+                {
+                    "code": status,
+                    "result": status,
+                    "reason": message,
+                    "evidence_ref": None,
+                }
+            ],
+        }
+    )
+
+
+def stamp_exact_replay_queries(payload: dict) -> None:
+    """Retain approved backend exact-run guards after legacy layout passes."""
+    if payload.get("uid") != "bioetl-control-plane-v1":
+        return
+    from scripts.ops.observability.grafana.apply_phase25_srs_prr_budget import _CP_DONOR
+
+    guard_prefix = (
+        '($requested := "${run_id:percentencode}"; '
+        "$unselected := $requested in ['', '-', 'All', '$__all', '%24__all', "
+        "'__all', '*', '%2A'] or summary.overall_status = 'SELECT RUN'; "
+        "$failed := status in ['scope_resolve_timeout', 'evidence_build_timeout', "
+        "'QUERY ERROR'] or summary.overall_status = 'QUERY ERROR'; "
+    )
+    panels = {panel["id"]: panel for panel in payload["panels"]}
+    evidence = panels[9408]
+    evidence["description"] = (
+        "SELECTED RUN · Identity anchors, missing first. Presence is not verification. "
+        "SELECT RUN requests an explicit Run ID; UNKNOWN means the reply lacks required "
+        "anchor evidence. A valid empty response (no required anchors returned) is not "
+        "verification. QUERY ERROR means the source reported a query failure or Grafana "
+        "could not complete the query; inspect the query for details. Exact Replay "
+        "Checks determines readiness. Inspect a value to copy it in full. Exact Run ID "
+        "selects evidence; the Workflow filter only narrows the run catalog. Catalog "
+        "freshness does not establish evidence freshness."
+    )
+    evidence["fieldConfig"]["defaults"]["noValue"] = "No result · inspect this query"
+    evidence_target = evidence["targets"][0]
+    evidence_target.update(
+        parser="backend",
+        root_selector=(
+            guard_prefix + "$failed ? "
+            "[{'status':'QUERY ERROR','label':'Run selection',"
+            "'value_full':'Exact-run evidence unavailable','present':false}] : "
+            "($unselected ? "
+            "[{'status':'SELECT RUN','label':'Run selection',"
+            "'value_full':'Choose a Run ID','present':false}] : "
+            "($count(rows) > 0 ? [rows^(present ? 1 : 0, priority, name)] : "
+            "[{'status':'UNKNOWN','label':'Run selection',"
+            "'value_full':'No anchor evidence returned','present':false}])))"
+        ),
+    )
+    evidence_target.pop("uql", None)
+    trust_target = panels[9418]["targets"][0]
+    # Normalize guarded replies through the shared donor so Dashboard datasource
+    # consumers retain the same fields as successful exact-run responses.
+    unavailable = _replay_guard_payload(
+        "QUERY ERROR", "The selected-run status request failed"
+    )
+    unselected = _replay_guard_payload("SELECT RUN", "No exact Run ID is selected")
+    trust_target.update(
+        parser="backend",
+        root_selector=(
+            guard_prefix
+            + "$payload := $failed ? "
+            + unavailable
+            + " : ($unselected ? "
+            + unselected
+            + " : $); $payload.("
+            + _CP_DONOR
+            + "))"
+        ),
+    )
+    trust_target.pop("uql", None)
 
 
 def apply_trust_action_display(payload: dict) -> None:
@@ -45,8 +139,9 @@ def apply_trust_action_display(payload: dict) -> None:
         {
             "matcher": {"id": "byName", "options": "trust_action_note"},
             "properties": [
-                {"id": "displayName", "value": "Action"},
+                {"id": "displayName", "value": "Assessment note"},
                 {"id": "links", "value": []},
+                {"id": "noValue", "value": ""},
             ],
         }
     )

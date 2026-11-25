@@ -26,6 +26,7 @@ from bioetl.interfaces.http._health_server_identity_support import (
     build_control_plane_identity_payload,
 )
 from bioetl.interfaces.http._identity_display_rows import identity_display_rows
+from bioetl.interfaces.http._identity_evidence_binding import bind_identity_evidence
 from bioetl.interfaces.http.run_report_ops import load_pipeline_run_report_payload
 
 if TYPE_CHECKING:
@@ -136,14 +137,15 @@ async def handle_control_plane_identity_evidence(
     checkpoint_metadata = await _load_identity_checkpoint_metadata(host, scope)
 
     def _build_evidence() -> dict[str, object]:
+        bound_scope, ledger = bind_identity_evidence(host, scope)
         return build_control_plane_identity_evidence_payload(
-            requested_pipeline=scope.requested_pipeline,
-            resolved_manifest=scope.resolved_manifest,
-            selected_pipelines=scope.selected_pipelines,
-            selected_run_id=scope.selected_run_id,
-            selected_run_types=scope.selected_run_types,
-            resolved_via=scope.resolved_via,
-            ledger_port=host._run_ledger_port,
+            requested_pipeline=bound_scope.requested_pipeline,
+            resolved_manifest=bound_scope.resolved_manifest,
+            selected_pipelines=bound_scope.selected_pipelines,
+            selected_run_id=bound_scope.selected_run_id,
+            selected_run_types=bound_scope.selected_run_types,
+            resolved_via=bound_scope.resolved_via,
+            ledger_port=ledger,
             checkpoint_metadata=checkpoint_metadata,
             view=view,
             priority=priority,
@@ -233,14 +235,15 @@ async def _build_identity_evidence_summary(
     """
 
     def _build() -> dict[str, object] | None:
+        bound_scope, ledger = bind_identity_evidence(host, scope)
         identity_evidence_summary = build_control_plane_identity_evidence_payload(
-            requested_pipeline=scope.requested_pipeline,
-            resolved_manifest=scope.resolved_manifest,
-            selected_pipelines=scope.selected_pipelines,
-            selected_run_id=scope.selected_run_id,
-            selected_run_types=scope.selected_run_types,
-            resolved_via=scope.resolved_via,
-            ledger_port=host._run_ledger_port,
+            requested_pipeline=bound_scope.requested_pipeline,
+            resolved_manifest=bound_scope.resolved_manifest,
+            selected_pipelines=bound_scope.selected_pipelines,
+            selected_run_id=bound_scope.selected_run_id,
+            selected_run_types=bound_scope.selected_run_types,
+            resolved_via=bound_scope.resolved_via,
+            ledger_port=ledger,
             checkpoint_metadata=checkpoint_metadata,
             view="overview",
         ).get("summary")

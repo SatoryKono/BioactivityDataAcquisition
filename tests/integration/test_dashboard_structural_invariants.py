@@ -285,6 +285,14 @@ def test_link_urls_use_allowlisted_schemes() -> None:
             url = str(link.get("url") or "")
             if not url:
                 continue
+            if url == "${__data.fields.pipeline_passport_url:raw}":
+                assert dashboard_path.name == "bioetl-run-explorer-v1.json"
+                panel = next(p for p in dashboard["panels"] if p["id"] == 3010)
+                selector = panel["targets"][0]["root_selector"]
+                assert '$pipelinePath := $passport(pipeline_passport_url, "pipelines")' in selector
+                assert "https://github.com/SatoryKono/BioactivityDataAcquisition/" in selector
+                assert '$pipelinePath != "" ?' in selector
+                continue
             if url == "${__data.fields.report_url:raw}":
                 # This field is produced by the bounded Ops report index, whose
                 # unit contract fixes the proxy endpoint and encodes row identity.

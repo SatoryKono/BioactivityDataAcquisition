@@ -1032,7 +1032,7 @@ def test_run_explorer_recent_runs_bind_run_id_via_data_link() -> None:
     assert "Pipeline" not in hidden
     assert "run_type" in hidden
     target_url = str((first_screen.get("targets") or [{}])[0].get("url") or "")
-    assert "run_id=${run_id}" in target_url
+    assert "run_id=${run_id:percentencode}" in target_url
     assert all(
         panel.get("id") != 3021 for panel in _iter_panels(explorer.get("panels") or [])
     )

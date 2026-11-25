@@ -310,7 +310,7 @@ _RECOVERY_ACTION_HTML = (
     '<div style="padding:4px 10px;border-left:4px solid #6b7280;line-height:1.2;'
     'font-size:16px;white-space:normal;overflow-wrap:anywhere;max-width:96ch">'
     '${pipeline:text} | <code style="font:inherit;background:none;border:0;padding:0">${run_id}</code><br>'
-    "Blockers: <em>Review Exact Replay Checks</em>.</div>"
+    "Diagnostics: <em>Review Exact Replay Checks</em>.</div>"
 )
 _RUN_EXPLORER_UID = "bioetl-run-explorer-v1"
 CHIP_BASE = (
@@ -1377,7 +1377,7 @@ def _stamp_aggregate_trust(by_id: dict[object, dict[str, Any]]) -> None:
     panel["description"] = (
         "SELECTED RUN · processing_status is the saved ETL outcome. "
         "trust_status is the historical Trust assessment and does not "
-        "authorize replay. Reason count is the number of saved remarks: 0 is no, "
+        "authorize replay. Reason count is the number of saved remarks: 0 means none, "
         "and missing data stays —. Assessed at is when that assessment was recorded, "
         "not manifest creation time, and is unavailable when the query fails. "
         "View trust reasons opens the full remark list for this Run ID only when "
@@ -1471,7 +1471,7 @@ def _stamp_trust_override(override: dict[str, Any]) -> None:
         _set_override_value(
             override,
             "mappings",
-            [{"type": "value", "options": {"0": {"text": "no"}}}],
+            [{"type": "value", "options": {"0": {"text": "0"}}}],
         )
     if field == "Action":
         _set_override_value(override, "noValue", "No trust issues")
@@ -1824,7 +1824,7 @@ def _stamp_trust_operator_surfaces(panels: list[object]) -> None:
         trust["description"] = (
             "SELECTED RUN · Processing result is the saved ETL outcome. "
             "Saved trust verdict is the historical Trust assessment and does not "
-            "authorize replay. Reason count is the number of saved remarks: 0 is no, "
+            "authorize replay. Reason count is the number of saved remarks: 0 means none, "
             "and missing data stays —. Assessed at is when that assessment was recorded. "
             "View trust reasons opens the remark list for this Run ID only when the count "
             "is positive."
@@ -2921,6 +2921,11 @@ def apply_to_dashboard(
 
     mark_native_snapshot_clocks(payload)
     stamp_overview_query_diagnostics(payload)
+    from scripts.ops.observability.grafana._replay_readiness_design import (
+        stamp_exact_replay_queries,
+    )
+
+    stamp_exact_replay_queries(payload)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     current = safe_path.read_text(encoding="utf-8")
     if check:

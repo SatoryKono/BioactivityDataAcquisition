@@ -10,6 +10,7 @@ from .models import Diagnostic, MatchResult
 
 EXPLICIT = "explicit_target_id"
 UNIPROT = "uniprot_xref"
+HGNC = "hgnc"
 GENE_ID = "gene_id"
 GENE_SYMBOL = "gene_symbol"
 EXACT_NAME = "exact_name"
@@ -17,6 +18,7 @@ EXACT_SYNONYM = "exact_synonym"
 METHOD_ORDER = (
     EXPLICIT,
     UNIPROT,
+    HGNC,
     GENE_ID,
     GENE_SYMBOL,
     EXACT_NAME,
@@ -37,6 +39,8 @@ class CatalogTarget:
     species: str | None
     names: tuple[str, ...]
     synonyms: tuple[str, ...]
+    hgnc_ids: tuple[str, ...] = ()
+    full_names: tuple[str, ...] | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -56,6 +60,11 @@ class MatchQuery:
     name: str | None
     synonyms: tuple[str, ...]
     auxiliary_uniprot_ids: tuple[str, ...] = ()
+    hgnc_ids: tuple[str, ...] = ()
+    prioritize_anchors: bool = False
+    ranked_text: bool = False
+    use_synonyms: bool = True
+    gene_aliases: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -110,8 +119,8 @@ def collect_candidates(
     Returns
     -------
     tuple[Candidate, ...]
-        All channel hits in canonical order. Text hits identify the provider
-        field that matched and cannot confirm identity on their own.
+        All channel hits in canonical order. The applicable policy determines
+        whether a unique same-species text hit can confirm identity.
     """
     found = (
         *_identifier_candidates(query, catalog),
@@ -160,7 +169,13 @@ def _gene_candidates(
     if query.organism is None:
         return ()
     targets = _species_targets(query, catalog)
+    hgnc_ids = set(query.hgnc_ids) if query.organism == "9606" else set()
     return (
+        *(
+            Candidate(target.target_id, HGNC)
+            for target in targets
+            if hgnc_ids.intersection(target.hgnc_ids)
+        ),
         *(
             Candidate(target.target_id, GENE_ID)
             for target in targets
@@ -182,9 +197,23 @@ def _name_candidates(
     if query.name is not None:
         wanted.add(query.name)
     for target in _species_targets(query, catalog):
-        if set(target.names) & wanted:
+        names = set(target.names)
+        full_names = target.names if target.full_names is None else target.full_names
+        exact_name = (
+            query.name in full_names if query.ranked_text else bool(names & wanted)
+        )
+        if exact_name:
             found.append(Candidate(target.target_id, EXACT_NAME))
-        if set(target.synonyms) & wanted:
+        if query.use_synonyms and (
+            set(target.synonyms) & wanted
+            or (
+                query.ranked_text
+                and (
+                    names.intersection(query.synonyms)
+                    or (query.name in names and not exact_name)
+                )
+            )
+        ):
             found.append(Candidate(target.target_id, EXACT_SYNONYM))
     return tuple(found)
 
@@ -271,6 +300,10 @@ def _decide(
     snapshot_complete: bool,
 ) -> MatchResult:
     """Choose one status from every channel. Catalog order is ignored."""
+    if query.prioritize_anchors and query.organism is not None:
+        preferred = _preferred_identity(candidates)
+        if preferred is not None:
+            return preferred
     explicit = _ids_of(candidates, EXPLICIT)
     uniprot = _ids_of(candidates, UNIPROT)
     gene_id = _ids_of(candidates, GENE_ID)
@@ -297,11 +330,29 @@ def _decide(
             ("insufficient_input",),
         )
 
+    if query.ranked_text:
+        text_match = _ranked_text_identity(query, catalog, candidates)
+        if text_match is not None:
+            return text_match
+        exact_channels = [
+            (method, ids)
+            for method, ids in exact_channels
+            if method in {EXPLICIT, UNIPROT}
+        ]
+
     agreed = _single_agreement(exact_channels)
     if (
         agreed is not None
         and set(everyone) == {agreed}
         and _matches_requested_species(query, catalog, agreed)
+        and (
+            not query.ranked_text
+            or any(
+                _compatible_text_variant(query, t)
+                for t in _species_targets(query, catalog)
+                if t.target_id == agreed
+            )
+        )
     ):
         return _result(
             "matched",
@@ -321,6 +372,76 @@ def _decide(
     if not snapshot_complete:
         return _result("source_unavailable", None, (), (), ("source_unavailable",))
     return _result("not_found", None, (), (), ())
+
+
+def _ranked_text_identity(
+    query: MatchQuery,
+    catalog: tuple[CatalogTarget, ...],
+    candidates: tuple[Candidate, ...],
+) -> MatchResult | None:
+    if query.organism is None or query.target_id is not None:
+        return None
+    for method in (EXACT_NAME, EXACT_SYNONYM):
+        ids = _ids_of(candidates, method)
+        if not ids:
+            continue
+        if len(ids) != 1:
+            return None
+        variants = tuple(
+            t for t in _species_targets(query, catalog) if t.target_id == ids[0]
+        )
+        if variants and all(
+            _compatible_text_variant(query, target)
+            and (method == EXACT_NAME or _corroborates_synonym(query, target))
+            for target in variants
+        ):
+            return _result("matched", ids[0], ids, (method,), ())
+        return None
+    return None
+
+
+def _compatible_text_variant(query: MatchQuery, target: CatalogTarget) -> bool:
+    pairs = (
+        (query.uniprot_ids, target.uniprot_ids),
+        (query.hgnc_ids, target.hgnc_ids),
+        (
+            (query.gene_id,) if query.gene_id else (),
+            (target.gene_id,) if target.gene_id else (),
+        ),
+    )
+    return all(
+        not supplied or not recorded or not set(supplied).isdisjoint(recorded)
+        for supplied, recorded in pairs
+    )
+
+
+def _corroborates_synonym(query: MatchQuery, target: CatalogTarget) -> bool:
+    """A shared alias alone cannot identify a variant with sparse provider IDs."""
+    gene_names = {value.casefold() for value in query.gene_aliases}
+    if query.gene_symbol:
+        gene_names.add(query.gene_symbol.casefold())
+    return bool(
+        (query.gene_id and query.gene_id == target.gene_id)
+        or (target.gene_symbol and target.gene_symbol.casefold() in gene_names)
+    )
+
+
+def _preferred_identity(candidates: tuple[Candidate, ...]) -> MatchResult | None:
+    """Choose a same-species anchor before consulting lower-priority channels."""
+    hgnc = set(_ids_of(candidates, HGNC))
+    uniprot = set(_ids_of(candidates, UNIPROT))
+    targets = hgnc | uniprot
+    if not targets:
+        return None
+    target_ids = _ids(targets)
+    methods = tuple(method for method, ids in ((UNIPROT, uniprot), (HGNC, hgnc)) if ids)
+    if len(target_ids) == 1:
+        return _result("matched", target_ids[0], target_ids, methods, ())
+    if hgnc and uniprot and hgnc.isdisjoint(uniprot):
+        return _result(
+            "identity_conflict", None, target_ids, methods, ("identity_conflict",)
+        )
+    return _result("ambiguous", None, target_ids, methods, ("ambiguous_match",))
 
 
 def _identity_conflict(

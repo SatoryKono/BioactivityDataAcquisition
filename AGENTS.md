@@ -230,6 +230,12 @@ does not relax the env guardrail or the full-tree commit gate.
 
 ## Dashboard Skill Routing
 
+- For BioETL launches that must appear in the shared Grafana instance, pipeline
+  and workflow run reports MUST use `D:\github\BioactivityDataAcquisition\reports\run-reports`
+  on the host (`/app/reports/run-reports` in the Ops HTTP container).
+  Do not redirect `BIOETL_REPORT_ROOT`, the report writer, or the shared reports
+  mount to a campaign, checkout, or temporary directory for those launches.
+  Confirm the new run by its exact Run ID in Ops HTTP and Grafana.
 - Monitoring/Grafana is **optional** (ADR-010). Do **not** start
   `docker-compose.monitoring.yml` unless the user explicitly requests
   dashboard/render work. Default Docker surface is **main only** (health on

@@ -21,6 +21,7 @@ import json
 import re
 from pathlib import Path
 from typing import Any
+from urllib.parse import quote
 
 import yaml
 
@@ -30,7 +31,7 @@ CATALOG_PATH = Path(
 )
 DEFAULT_OUT = Path("tests/fixtures/grafana/run_explorer")
 FIRST_SCREEN_IDS = (3010,)
-_VAR_RE = re.compile(r"\$\{([A-Za-z_][A-Za-z0-9_]*)(?::(?:csv|percentencode))?\}")
+_VAR_RE = re.compile(r"\$\{([A-Za-z_][A-Za-z0-9_]*)(?::(csv|percentencode))?\}")
 
 SELECTED = {
     "workflow": "chembl_baseline",
@@ -54,13 +55,18 @@ def load_catalog(path: Path = CATALOG_PATH) -> dict[str, Any]:
 
 
 def materialize_ops_url(template: str, selectors: dict[str, str]) -> str:
-    """Expand Grafana ${var} / ${var:csv} into a host-free Ops path."""
+    """Expand supported Grafana variables into a host-free, encoded Ops path."""
 
     def _replace(match: re.Match[str]) -> str:
         key = match.group(1)
         if key not in selectors:
             raise KeyError(f"selector {key!r} missing for {template}")
-        return selectors[key]
+        value = selectors[key]
+        return (
+            quote(value, safe="~()*!.'-")
+            if match.group(2) == "percentencode"
+            else value
+        )
 
     url = _VAR_RE.sub(_replace, template)
     if "$" in url:
