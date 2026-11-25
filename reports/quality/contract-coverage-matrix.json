@@ -1007,6 +1007,7 @@
         "tests/contract/test_gold_schema_strict_violations.py",
         "tests/e2e/test_chembl_target_e2e.py",
         "tests/integration/chembl/test_target_extraction_params.py",
+        "tests/integration/composite/test_target_classification_post_join.py",
         "tests/integration/pipelines/test_chembl_target_component.py",
         "tests/integration/test_grafana_action_target_coverage.py",
         "tests/unit/application/composite/test_target_protein_classification_summary.py",
@@ -1029,9 +1030,12 @@
         "tests/unit/infrastructure/storage/test_target_classification_guard.py",
         "tests/unit/infrastructure/storage/test_target_classification_migration.py",
         "tests/unit/infrastructure/storage/test_target_fk_repair.py",
+        "tests/unit/infrastructure/storage/test_target_fk_restoration.py",
         "tests/unit/infrastructure/storage/test_target_migration_admission.py",
         "tests/unit/infrastructure/storage/test_target_migration_dependencies.py",
+        "tests/unit/infrastructure/storage/test_target_migration_scd_types.py",
         "tests/unit/infrastructure/validation/test_chembl_target_protein_classification_bool.py",
+        "tests/unit/iuphar_target_class/test_rf000_target_classification.py",
         "tests/unit/memory/test_issue_10526_add_claim_target_relation_slice.py",
         "tests/unit/memory/test_issue_10526_add_claim_token_targets_slice.py",
         "tests/unit/memory/test_issue_10526_alert_target_context_slice.py",
@@ -1067,6 +1071,7 @@
         "tests/unit/repo_backed/scripts/engineering/ci/test_makefile_benchmark_target.py",
         "tests/unit/scripts/engineering/quality/test_quarterly_targets_validation.py",
         "tests/unit/scripts/ops/observability/test_action_target_routes.py",
+        "tests/unit/scripts/ops/test_target_classification_contour.py",
         "tests/unit/scripts/qa/test_iuphar_target_acceptance_cli.py"
       ],
       "contract_yaml_contract_ref": "chembl.target",
@@ -1104,13 +1109,14 @@
       "published_artifact_missing_paths": [],
       "published_artifact_paths": [
         "../../docs/04-reference/contracts/gold/chembl_target_v3.0.json",
-        "../../docs/04-reference/contracts/gold/chembl_target_v3.1.json"
+        "../../docs/04-reference/contracts/gold/chembl_target_v3.1.json",
+        "../../docs/04-reference/contracts/gold/chembl_target_v3.2.json"
       ],
       "published_contract_check_constraint_count": 1,
       "published_contract_non_nullable_count": 6,
-      "published_contract_nullable_count": 35,
+      "published_contract_nullable_count": 46,
       "published_contract_nullable_policy_declared": true,
-      "published_contract_property_count": 41,
+      "published_contract_property_count": 52,
       "published_contract_required_count": 6,
       "published_contract_required_fields": [
         "_dq_error",
@@ -1120,7 +1126,7 @@
         "entity_id",
         "target_id"
       ],
-      "published_contract_schema_version": "3.0.0,3.1.0",
+      "published_contract_schema_version": "3.0.0,3.1.0,3.2.0",
       "registry_contract_version": "3.0.0",
       "registry_entry_exists": true,
       "registry_status": "active",
@@ -1786,6 +1792,7 @@
         "tests/contract/test_gold_schema_strict_violations.py",
         "tests/e2e/test_chembl_target_e2e.py",
         "tests/integration/chembl/test_target_extraction_params.py",
+        "tests/integration/composite/test_target_classification_post_join.py",
         "tests/integration/pipelines/test_chembl_target_component.py",
         "tests/integration/test_grafana_action_target_coverage.py",
         "tests/unit/application/composite/test_target_protein_classification_summary.py",
@@ -1808,9 +1815,12 @@
         "tests/unit/infrastructure/storage/test_target_classification_guard.py",
         "tests/unit/infrastructure/storage/test_target_classification_migration.py",
         "tests/unit/infrastructure/storage/test_target_fk_repair.py",
+        "tests/unit/infrastructure/storage/test_target_fk_restoration.py",
         "tests/unit/infrastructure/storage/test_target_migration_admission.py",
         "tests/unit/infrastructure/storage/test_target_migration_dependencies.py",
+        "tests/unit/infrastructure/storage/test_target_migration_scd_types.py",
         "tests/unit/infrastructure/validation/test_chembl_target_protein_classification_bool.py",
+        "tests/unit/iuphar_target_class/test_rf000_target_classification.py",
         "tests/unit/memory/test_issue_10526_add_claim_target_relation_slice.py",
         "tests/unit/memory/test_issue_10526_add_claim_token_targets_slice.py",
         "tests/unit/memory/test_issue_10526_alert_target_context_slice.py",
@@ -1846,6 +1856,7 @@
         "tests/unit/repo_backed/scripts/engineering/ci/test_makefile_benchmark_target.py",
         "tests/unit/scripts/engineering/quality/test_quarterly_targets_validation.py",
         "tests/unit/scripts/ops/observability/test_action_target_routes.py",
+        "tests/unit/scripts/ops/test_target_classification_contour.py",
         "tests/unit/scripts/qa/test_iuphar_target_acceptance_cli.py"
       ],
       "contract_yaml_contract_ref": "composite.target",
@@ -2757,5 +2768,5 @@
     "gold_enabled": "Effective runtime state of pipeline.sink.gold.enabled after hierarchical config resolution; omitted enabled defaults to true. Never infer this from contract/Pandera availability or from unrelated flags such as filters.input_filter.enabled.",
     "missing_gold_enabled_count": "Runtime-enabled Gold rows whose contract parity_status is not covered."
   },
-  "snapshot_date": "2026-11-20"
+  "snapshot_date": "2026-11-25"
 }
