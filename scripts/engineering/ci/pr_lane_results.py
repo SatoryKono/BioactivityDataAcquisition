@@ -979,9 +979,27 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "docs/04-reference/contracts/gold/chembl_target_v3.2.json": (
         "tests/architecture/test_gold_schema_contracts.py",
     ),
+    "configs/contracts/composite/target.yaml": (
+        "tests/integration/config/test_contract_registry_active_surface_coverage.py",
+        "tests/integration/composite/test_target_classification_post_join.py",
+    ),
+    "docs/04-reference/contracts/gold/composite_target_v1.1.json": (
+        "tests/architecture/test_gold_schema_contracts.py",
+        "tests/contract/test_gold_schema_snapshot_registry.py",
+    ),
+    "docs/04-reference/pipelines/composite/03-target-spec.md": (
+        "tests/architecture/test_doc_crossref_integrity.py",
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
+    "tests/fixtures/golden/gold/schema_registry.v1.json": (
+        "tests/contract/test_gold_schema_snapshot_registry.py",
+    ),
     "configs/base/contract_registry.yaml": (
         "tests/unit/infrastructure/config/test_contract_registry_loader.py",
         "tests/integration/config/test_non_chembl_contract_registry_coverage.py",
+    ),
+    "configs/field_registry/semantic_governance_authority_registry.yaml": (
+        "tests/integration/config/test_semantic_governance_policy.py",
     ),
     "configs/field_registry/generic_field_ownership.yaml": (
         "tests/integration/config/test_generic_field_ownership.py",
@@ -1325,6 +1343,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
             EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
         ),
+    ),
+    "configs/quality/external_resource_inventory_pr13387_composite_gold_review.json": (
+        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
+        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
     ),
     "configs/quality/external_resource_inventory_pr13355_rematch_review.json": (
         EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,

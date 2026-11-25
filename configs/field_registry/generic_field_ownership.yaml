@@ -103,6 +103,15 @@ entries:
     rationale: Composite target Gold publishes source-specific target description as scoped metadata, not a global description alias.
 
   - surface: gold_json_property
+    path: docs/04-reference/contracts/gold/composite_target_v1.1.json
+    context: properties
+    fields:
+      - description
+    owner: BioETL Team
+    semantic_role: chembl_target_descriptive_metadata
+    rationale: Composite target Gold publishes source-specific target description as scoped metadata, not a global description alias.
+
+  - surface: gold_json_property
     path: docs/04-reference/contracts/gold/chembl_target_component_v1.0.json
     context: properties
     fields:
