@@ -195,19 +195,32 @@ def test_run_explorer_jsonata_avoids_dashboard_variable_interpolation(
 ) -> None:
     path = Path("grafana") / profile / "bioetl-run-explorer-v1.json"
     dashboard = load_dashboard(path)
-    dashboard_variables = {
-        variable["name"] for variable in dashboard["templating"]["list"]
-    }
-    for panel in get_dashboard_panels(dashboard):
-        for target in _http_targets(panel):
-            # Infinity interpolates dashboard variables inside JSONata selectors.
-            selector = target.get("root_selector", "")
-            references = set(re.findall(r"\$([a-zA-Z_][a-zA-Z0-9_]*)", selector))
-            collisions = references & dashboard_variables
-            assert not collisions, (
-                f"{profile} panel {panel['id']} JSONata references Grafana "
-                f"variables: {sorted(collisions)}"
-            )
+    variables = dashboard["templating"]["list"]
+    dashboard_variables = {variable["name"] for variable in variables}
+    selectors = [
+        (f"panel {panel['id']}", target.get("root_selector", ""))
+        for panel in get_dashboard_panels(dashboard)
+        for target in _http_targets(panel)
+    ]
+    selectors.extend(
+        (
+            f"filter {variable['name']}",
+            variable["query"]["infinityQuery"].get("root_selector", ""),
+        )
+        for variable in variables
+        if isinstance(variable.get("query"), dict)
+        and "infinityQuery" in variable["query"]
+    )
+    for source, selector in selectors:
+        # Infinity interpolates dashboard variables inside JSONata selectors.
+        references = set(
+            re.findall(r"(?:\$\{?|\[\[)([a-zA-Z_][a-zA-Z0-9_]*)", selector)
+        )
+        collisions = references & dashboard_variables
+        assert not collisions, (
+            f"{profile} {source} JSONata references Grafana variables: "
+            f"{sorted(collisions)}"
+        )
 
 
 def test_run_explorer_duplicate_http_targets_share_endpoint_id() -> None:
