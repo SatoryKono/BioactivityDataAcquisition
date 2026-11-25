@@ -237,7 +237,7 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
         "var-workflow=.*&amp;var-pipeline=.*&amp;var-run_type=.*"
         '&amp;var-run_id=-&amp;var-lookup_run_id=&amp;${__url_time_range}">'
         "<strong>Reset filters</strong></a><br>"
-        "Last 20 launches · independent of the time range"
+        "Last 20 pipeline runs · independent of the time range"
         "</div>"
     )
     panel = panels[3010]
@@ -255,7 +255,7 @@ def apply_run_explorer_columns(payload: dict[str, Any]) -> None:
     panel["options"].setdefault("footer", {})["enablePagination"] = False
     panel["description"] = (
         "GLOBAL · BROWSE the launch catalog filtered by Workflow/Pipeline/Run Type. "
-        "Last 20 launches, newest Started first, independent of the time range. "
+        "Last 20 pipeline runs, newest Started first, independent of the time range. "
         "All twenty rows fit the wide table without pagination or internal scrolling; "
         "scroll the page to see the complete catalog. "
         "Workflow and Pipeline open passports. Run ID opens the persisted Report. "

@@ -65,15 +65,11 @@ def apply_replay_layout(payload: dict) -> None:
     target = evidence["targets"][0]
     target["url"] = target["url"].replace("&priority=P1", "")
     target.update(
-        parser="uql",
-        root_selector="",
-        uql=(
-            "parse-json | jsonata \"summary.overall_status='SELECT RUN' ? "
-            "[{'label':'Run selection','priority':'—','present':false,"
-            "'status':'SELECT RUN','value_full':'Choose a Run ID',"
-            "'why':'No exact-run evidence has been requested.'}] : "
-            '[rows^(present ? 1 : 0, priority, name)]"'
-        ),
+        parser="backend",
+        # The endpoint owns SELECT RUN, missing-run and query-error rows.
+        # Keep its state instead of wrapping the shared rows in client guards.
+        root_selector="rows^(present ? 1 : 0, priority, name)",
+        uql="",
     )
     names = ["label", "priority", "present", "status", "value_full", "why"]
     evidence["transformations"] = [

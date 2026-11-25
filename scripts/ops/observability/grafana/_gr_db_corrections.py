@@ -1011,9 +1011,9 @@ def _correct_runtime(uid: str, panels: dict[int, dict[str, Any]]) -> None:
 
 
 _BRONZE_PERCENTAGE_DISPLAY = "percentage of Bronze"
-_PROCESSED_RECORDS_NOVALUE = (
-    "SELECT RUN — no exact Run ID selected. Choose this run in Run Explorer."
-)
+# Missing cells can also occur for an explicitly selected run. Selection and
+# source failures have their own endpoint rows; a blank value is only unknown.
+_PROCESSED_RECORDS_NOVALUE = "UNKNOWN"
 _PROCESSED_RECORDS_DESCRIPTION = "SELECTED RUN · Saved accounting: count in is the input of each stage, repeated across its outcome rows. count out is the outcome count. Percentages retain their original denominator and display one decimal place. Gold/Silver % are of Bronze count; missing denominator stays UNKNOWN. UNKNOWN means the value was not recorded. Skipped outcomes are hidden. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is Source unavailable."
 
 

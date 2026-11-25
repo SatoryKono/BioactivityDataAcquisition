@@ -1040,7 +1040,7 @@
       "transparent": true,
       "options": {
         "mode": "html",
-        "content": "<div style=\"font-size:16px;line-height:1.5\"><strong>Canonical identity:</strong> <a href=\"/d/bioetl-overview-v2/3-run-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9300&${__url_time_range}\">Open Review Run Identity on Overview</a><br>DQ no longer duplicates identity tables (F-16).</div>"
+        "content": "<div style=\"font-size:16px;line-height:1.5\"><strong>Canonical identity:</strong> <a href=\"/d/bioetl-overview-v2/3-run-overview?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=9300&${__url_time_range}\">Open Review Run Identity on Overview</a><br>Review the selected run identifiers on Run Overview.</div>"
       }
     },
     {
@@ -1073,7 +1073,7 @@
           },
           "decimals": 0,
           "unit": "none",
-          "noValue": "SELECT RUN — no exact Run ID selected. Choose this run in Run Explorer.",
+          "noValue": "UNKNOWN",
           "links": [
             {
               "title": "Check BioETL Ops HTTP health",
@@ -1569,7 +1569,7 @@
           "source": "url",
           "parser": "backend",
           "format": "table",
-          "root_selector": "($f := $exists(quality_evidence.funnel) ? quality_evidence.funnel : []; $map(['01 bronze_records','02 silver_valid_records','03 silver_filtered_out_records','04 silver_quarantined_records','06 silver_deduplicated_records','07 gold_written_records','08 gold_excluded_by_contract_records','09 gold_quarantined_records','11 gold_deduplicated_records'], function($p) { ($layerName := $contains($p, 'bronze') ? 'bronze' : ($contains($p, 'silver') ? 'silver' : 'gold'); {'parameter': $p, 'count in': $f[stage_id = $layerName].records_in}) }))",
+          "root_selector": "($f := $exists(quality_evidence.funnel) ? quality_evidence.funnel : []; $map($count($f) > 0 ? ['01 bronze_records','02 silver_valid_records','03 silver_filtered_out_records','04 silver_quarantined_records','06 silver_deduplicated_records','07 gold_written_records','08 gold_excluded_by_contract_records','09 gold_quarantined_records','11 gold_deduplicated_records'] : ['Evidence unavailable'], function($p) { ($layerName := $contains($p, 'bronze') ? 'bronze' : ($contains($p, 'silver') ? 'silver' : 'gold'); {'parameter': $p, 'count in': $f[stage_id = $layerName].records_in, 'Input evidence': $count($f) > 0 ? 'Saved run report inputs' : ($exists(quality_evidence) ? 'Not recorded' : 'Source unavailable')}) }))",
           "url": "/ops/observability/selected-run-status?pipeline=${selected_pipeline}&run_id=${selected_run_id}",
           "url_options": {
             "method": "GET",

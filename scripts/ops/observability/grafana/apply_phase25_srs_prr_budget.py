@@ -1300,18 +1300,20 @@ def apply_dq(data: dict[str, Any]) -> None:
                     "root_selector": (
                         "($f := $exists(quality_evidence.funnel) ? "
                         "quality_evidence.funnel : []; "
-                        "$map(['01 bronze_records','02 silver_valid_records',"
+                        "$map($count($f) > 0 ? ['01 bronze_records','02 silver_valid_records',"
                         "'03 silver_filtered_out_records',"
                         "'04 silver_quarantined_records',"
                         "'06 silver_deduplicated_records',"
                         "'07 gold_written_records',"
                         "'08 gold_excluded_by_contract_records',"
                         "'09 gold_quarantined_records',"
-                        "'11 gold_deduplicated_records'], function($p) { "
+                        "'11 gold_deduplicated_records'] : ['Evidence unavailable'], function($p) { "
                         "($layerName := $contains($p, 'bronze') ? 'bronze' : "
                         "($contains($p, 'silver') ? 'silver' : 'gold'); "
                         "{'parameter': $p, "
-                        "'count in': $f[stage_id = $layerName].records_in}) }))"
+                        "'count in': $f[stage_id = $layerName].records_in, "
+                        "'Input evidence': $count($f) > 0 ? 'Saved run report inputs' : "
+                        "($exists(quality_evidence) ? 'Not recorded' : 'Source unavailable')}) }))"
                     ),
                     "url": (
                         "/ops/observability/selected-run-status"
@@ -1322,18 +1324,20 @@ def apply_dq(data: dict[str, Any]) -> None:
                         'parse-json | jsonata "'
                         "($f := $exists(quality_evidence.funnel) ? "
                         "quality_evidence.funnel : []; "
-                        "$map(['01 bronze_records','02 silver_valid_records',"
+                        "$map($count($f) > 0 ? ['01 bronze_records','02 silver_valid_records',"
                         "'03 silver_filtered_out_records',"
                         "'04 silver_quarantined_records',"
                         "'06 silver_deduplicated_records',"
                         "'07 gold_written_records',"
                         "'08 gold_excluded_by_contract_records',"
                         "'09 gold_quarantined_records',"
-                        "'11 gold_deduplicated_records'], function($p) { "
+                        "'11 gold_deduplicated_records'] : ['Evidence unavailable'], function($p) { "
                         "($layerName := $contains($p, 'bronze') ? 'bronze' : "
                         "($contains($p, 'silver') ? 'silver' : 'gold'); "
                         "{'parameter': $p, "
-                        "'count in': $f[stage_id = $layerName].records_in}) }))"
+                        "'count in': $f[stage_id = $layerName].records_in, "
+                        "'Input evidence': $count($f) > 0 ? 'Saved run report inputs' : "
+                        "($exists(quality_evidence) ? 'Not recorded' : 'Source unavailable')}) }))"
                         '"'
                     ),
                     "datasource": dict(OPS),
@@ -1342,6 +1346,9 @@ def apply_dq(data: dict[str, Any]) -> None:
         else:
             new_targets.append(target)
     processed["targets"] = new_targets
+    processed.setdefault("fieldConfig", {}).setdefault("defaults", {})["noValue"] = (
+        "UNKNOWN"
+    )
     # Drop unused stageinput section from donor budget narrative; keep in donor
     # for optional future DS reuse without a third HTTP.
 
@@ -1356,7 +1363,7 @@ def apply_dq(data: dict[str, Any]) -> None:
         content=(
             "**Canonical identity:** [Open Review Run Identity on Overview]"
             f"({OV_IDENTITY})\n\n"
-            "DQ no longer duplicates identity tables (F-16)."
+            "Review the selected run identifiers on Run Overview."
         ),
     )
     _replace_with_handoff(

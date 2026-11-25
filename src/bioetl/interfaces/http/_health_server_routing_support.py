@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import asyncio
 import time
+from uuid import UUID
 
 from bioetl.domain.control_plane import RunManifest, WorkflowManifest
+from bioetl.domain.types import RunID
 from bioetl.interfaces.http._forensic_request_budget import (
     ForensicEndpointUnavailable,
     forensic_unavailable_payload,
@@ -18,6 +20,7 @@ from bioetl.interfaces.http._health_server_control_plane_evidence_routing import
     dispatch_control_plane_evidence_request,
 )
 from bioetl.interfaces.http._health_server_control_plane_scope import (
+    _get_manifest_by_selected_run_id,
     read_selected_run_id,
 )
 from bioetl.interfaces.http._health_server_filter_options_payload import (
@@ -315,8 +318,28 @@ async def _selector_context_bounded_payload(
 ) -> dict[str, object]:
     """Build selector-context under the caller's forensic deadline."""
     assert host._run_manifest_port is not None
-    manifests = await asyncio.to_thread(host._run_manifest_port.list_all)
-    workflow_manifests = await _list_workflow_manifests(host)
+    explicit_run_id = read_selected_run_id(host, query)
+    if explicit_run_id is None:
+        manifests = await asyncio.to_thread(host._run_manifest_port.list_all)
+        workflow_manifests = await _list_workflow_manifests(host)
+    else:
+        # An exact UUID needs its indexed manifest and parent, never a full
+        # filesystem catalog scan for each of the two Grafana variables.
+        manifest = await asyncio.to_thread(
+            _get_manifest_by_selected_run_id,
+            host._run_manifest_port,
+            explicit_run_id,
+        )
+        manifests = (manifest,) if manifest is not None else ()
+        workflow_manifests = ()
+        parent_id = manifest.workflow_run_id if manifest is not None else None
+        parent_port = getattr(host, "_workflow_manifest_port", None)
+        if parent_id is not None and parent_port is not None:
+            parent = await asyncio.to_thread(
+                parent_port.get_by_run_id, RunID(UUID(str(parent_id)))
+            )
+            if parent is not None:
+                workflow_manifests = (parent,)
     return await asyncio.to_thread(
         _selector_context_payload_with_a2,
         host,
