@@ -13,6 +13,7 @@ import importlib.util
 import json
 import math
 import os
+import re
 import secrets
 import socket
 import subprocess
@@ -906,6 +907,8 @@ class _MarkdownifyHandler(BaseHTTPRequestHandler):
         pass
 
     def reply(self, status, value=None, session=None):
+        if session is not None and not re.fullmatch(r"[0-9a-f]{32}", session):
+            raise ValueError("Invalid session identifier")
         raw = _response_bytes(value)
         self.send_response(status)
         self.send_header("Content-Type", "application/json")
