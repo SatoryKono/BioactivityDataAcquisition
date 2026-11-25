@@ -13,6 +13,8 @@
 from __future__ import annotations
 
 from collections.abc import Iterator
+from copy import deepcopy
+from functools import lru_cache
 from pathlib import Path
 import re
 import subprocess
@@ -58,8 +60,27 @@ UPLOAD_ARTIFACT_PREFIX = "actions/upload-artifact@"
 MAX_ARTIFACT_RETENTION_DAYS = 90
 
 
+@lru_cache(maxsize=128)
+def _parse_policy_yaml(text: str) -> dict[str, Any]:
+    return cast(dict[str, Any], yaml.safe_load(text))
+
+
 def _load_yaml(path: Path) -> dict[str, Any]:
-    return cast(dict[str, Any], yaml.safe_load(path.read_text(encoding="utf-8")))
+    # The current bytes, not the path or its timestamp, invalidate the cache.
+    # Give each check its own mutable copy of the parsed document.
+    return deepcopy(_parse_policy_yaml(path.read_text(encoding="utf-8")))
+
+
+def test_yaml_loader_uses_current_content_without_sharing_mutations(tmp_path: Path) -> None:
+    path = tmp_path / "workflow.yml"
+    path.write_text("jobs: [first]\n", encoding="utf-8")
+
+    first = _load_yaml(path)
+    first["jobs"].append("mutated")
+    assert _load_yaml(path) == {"jobs": ["first"]}
+
+    path.write_text("jobs: [other]\n", encoding="utf-8")
+    assert _load_yaml(path) == {"jobs": ["other"]}
 
 
 def _iter_upload_artifact_steps(node: object) -> Iterator[dict[str, Any]]:
