@@ -22,18 +22,35 @@ def sha256_file(path: Path, *, root: Path | None = None) -> str:
     digest = hashlib.sha256()
     flags = os.O_RDONLY | getattr(os, "O_BINARY", 0)
     if root is not None:
+        if os.open not in os.supports_dir_fd or not hasattr(os, "O_DIRECTORY"):
+            raise OSError("confined hashing requires directory descriptor support")
+        resolved_root = root.resolve()
+        absolute_path = path.absolute()
+        if ".." in absolute_path.parts or not absolute_path.is_relative_to(
+            resolved_root
+        ):
+            raise ValueError(f"path outside allowed root: {path}")
+        relative_path = absolute_path.relative_to(resolved_root)
         flags |= getattr(os, "O_NOFOLLOW", 0)
-    fd = os.open(path, flags)
-    with os.fdopen(fd, "rb") as handle:
-        if root is not None:
+        root_fd = os.open(resolved_root, os.O_RDONLY | os.O_DIRECTORY)
+        try:
+            fd = os.open(relative_path, flags, dir_fd=root_fd)
             try:
-                opened = Path(f"/proc/self/fd/{handle.fileno()}").readlink()
+                opened = Path(f"/proc/self/fd/{fd}").readlink()
+                opened_root = Path(f"/proc/self/fd/{root_fd}").readlink()
             except OSError as error:
+                os.close(fd)
                 raise OSError(
                     "confined hashing requires a final file descriptor path"
                 ) from error
-            if not opened.is_absolute() or not opened.is_relative_to(root.resolve()):
+            if not opened.is_absolute() or not opened.is_relative_to(opened_root):
+                os.close(fd)
                 raise ValueError(f"opened file outside allowed root: {path}")
+        finally:
+            os.close(root_fd)
+    else:
+        fd = os.open(path, flags)
+    with os.fdopen(fd, "rb") as handle:
         while True:
             chunk = handle.read(1024 * 1024)
             if not chunk:

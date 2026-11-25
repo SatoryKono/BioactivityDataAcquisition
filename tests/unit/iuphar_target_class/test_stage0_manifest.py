@@ -478,14 +478,46 @@ def test_confined_hash_reads_opened_file_after_path_replacement(
     outside.write_bytes(b"outside")
     original_open = os.open
 
-    def replace_after_open(path: object, flags: int) -> int:
-        fd = original_open(path, flags)
-        source.unlink()
-        source.symlink_to(outside)
+    def replace_after_open(
+        path: object, flags: int, *, dir_fd: int | None = None
+    ) -> int:
+        fd = original_open(path, flags, dir_fd=dir_fd)
+        if dir_fd is not None:
+            source.unlink()
+            source.symlink_to(outside)
         return fd
 
+    monkeypatch.setattr(os, "supports_dir_fd", {replace_after_open})
     monkeypatch.setattr(os, "open", replace_after_open)
     assert sha256_file(source, root=tmp_path) == hashlib.sha256(b"original").hexdigest()
+
+
+def test_confined_hash_uses_pinned_root_after_replacement(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import os
+
+    root = tmp_path / "root"
+    root.mkdir()
+    (root / "source.txt").write_bytes(b"original")
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    (outside / "source.txt").write_bytes(b"outside")
+    original_open = os.open
+
+    def replace_root(path: object, flags: int, *, dir_fd: int | None = None) -> int:
+        fd = original_open(path, flags, dir_fd=dir_fd)
+        if dir_fd is None:
+            root.rename(tmp_path / "original-root")
+            root.symlink_to(outside, target_is_directory=True)
+        return fd
+
+    monkeypatch.setattr(os, "supports_dir_fd", {replace_root})
+    monkeypatch.setattr(os, "open", replace_root)
+    assert (
+        sha256_file(root / "source.txt", root=root)
+        == hashlib.sha256(b"original").hexdigest()
+    )
 
 
 def test_confined_hash_fails_closed_without_descriptor_path(
