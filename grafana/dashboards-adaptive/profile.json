@@ -3,9 +3,9 @@
   "selection": "explicit_local_only",
   "native_fallback": "grafana/dashboards",
   "canonical_sha256": {
-    "bioetl-control-plane-v1.json": "34882b415bfcdd1397ca666001d296b5cd1b74b2248f145307e1654851a5a7c7",
+    "bioetl-control-plane-v1.json": "c29003b7c3652947b7e832c4f7246b06e5b606fe5ecea821d5d4fd23c62d7587",
     "bioetl-dq-v2.json": "ede31b2375e896f1d6cdd93019d465e04a258aa8069170d550e29be98d3446cc",
-    "bioetl-incident-v1.json": "6e840b6193912d5017fbd6dee9809d053eead5dfa952d33848b7c5b71322721c",
+    "bioetl-incident-v1.json": "b81f2f069dafd7e65b6d3c9c028baba3b2035638dabe849fcd210433c9722a91",
     "bioetl-overview-v2.json": "025d4ca4ce92539ebd1f51841e271d672f96183db6c542af59f5fa85b401894f",
     "bioetl-run-explorer-v1.json": "5589d2b3debe6741db84537130c69fbfcf248d23437b98621b4e42489d6be9b1"
   },

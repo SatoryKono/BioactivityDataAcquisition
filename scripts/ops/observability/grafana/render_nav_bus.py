@@ -2921,6 +2921,11 @@ def apply_to_dashboard(
 
     mark_native_snapshot_clocks(payload)
     stamp_overview_query_diagnostics(payload)
+    from scripts.ops.observability.grafana._replay_readiness_design import (
+        stamp_exact_replay_queries,
+    )
+
+    stamp_exact_replay_queries(payload)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     current = safe_path.read_text(encoding="utf-8")
     if check:
