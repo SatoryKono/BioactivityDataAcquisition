@@ -180,15 +180,13 @@ def test_cached_bronze_note_does_not_invent_a_probe_time_from_completion():
     assert "08:00" not in row["provider_check_note"]
 
 
-def test_replay_evidence_collapses_unselected_anchors_without_inventing_a_pass():
-    from scripts.ops.observability.grafana._replay_layout import apply_replay_layout
-
-    dashboard = json.loads(
-        Path("grafana/dashboards/bioetl-control-plane-v1.json").read_text()
-    )
-    apply_replay_layout(dashboard)
+@pytest.mark.parametrize("profile", ["dashboards", "dashboards-adaptive"])
+def test_replay_evidence_collapses_unselected_anchors_without_inventing_a_pass(profile):
+    path = Path("grafana") / profile / "bioetl-control-plane-v1.json"
+    dashboard = json.loads(path.read_text(encoding="utf-8"))
     target = next(p for p in dashboard["panels"] if p["id"] == 9408)["targets"][0]
-    expression = target["uql"].removeprefix('parse-json | jsonata "')[:-1]
+    assert target["parser"] == "backend"
+    expression = target["root_selector"]
     anchors = [{"label": "Config", "present": True, "status": "PRESENT"}]
     rows = evaluate_donor(
         {"summary": {"overall_status": "SELECT RUN"}, "rows": anchors * 44}, expression
@@ -199,15 +197,23 @@ def test_replay_evidence_collapses_unselected_anchors_without_inventing_a_pass()
         {"summary": {"overall_status": "OK"}, "rows": anchors}, expression
     )
     assert selected == anchors
+    error = evaluate_donor({"status": "scope_resolve_timeout"}, expression)
+    assert len(error) == 1 and error[0]["status"] == "QUERY ERROR"
 
 
 @pytest.mark.parametrize("state", ["SELECT RUN", "NO RUNS", "QUERY ERROR"])
-def test_full_replay_donor_preserves_gap_and_error_frames_with_null_reason_count(state):
+@pytest.mark.parametrize("profile", ["dashboards", "dashboards-adaptive"])
+def test_full_replay_donor_preserves_gap_and_error_frames_with_null_reason_count(
+    state, profile
+):
     from bioetl.interfaces.http.selected_run_status import unavailable_status
-    from scripts.ops.observability.grafana.apply_phase25_srs_prr_budget import _CP_DONOR
 
+    path = Path("grafana") / profile / "bioetl-control-plane-v1.json"
+    dashboard = json.loads(path.read_text(encoding="utf-8"))
+    target = next(p for p in dashboard["panels"] if p["id"] == 9418)["targets"][0]
+    assert target["parser"] == "backend"
     payload = unavailable_status(".*", "-", state, "exact_run_required")
-    rows = evaluate_donor(payload, _CP_DONOR)
+    rows = evaluate_donor(payload, target["root_selector"])
     readiness = next(row for row in rows if row["_bioetl_frame"] == "replay_readiness")
     trust = next(row for row in rows if row["_bioetl_frame"] == "trust")
     assert readiness["verdict"] == state

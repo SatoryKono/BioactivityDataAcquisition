@@ -3,6 +3,49 @@
 from copy import deepcopy
 
 
+def stamp_exact_replay_queries(payload: dict) -> None:
+    """Retain approved backend exact-run guards after legacy layout passes."""
+    if payload.get("uid") != "bioetl-control-plane-v1":
+        return
+    from scripts.ops.observability.grafana.apply_phase25_srs_prr_budget import _CP_DONOR
+
+    panels = {panel["id"]: panel for panel in payload["panels"]}
+    evidence = panels[9408]
+    evidence["description"] = (
+        "SELECTED RUN · Identity anchors, missing first. Presence is not verification. "
+        "SELECT RUN requests an explicit Run ID; UNKNOWN means the reply lacks required "
+        "anchor evidence. A valid empty response (no required anchors returned) is not "
+        "verification. QUERY ERROR means the source reported a query failure or Grafana "
+        "could not complete the query; inspect the query for details. Exact Replay "
+        "Checks determines readiness. Inspect a value to copy it in full. Exact Run ID "
+        "selects evidence; the Workflow filter only narrows the run catalog. Catalog "
+        "freshness does not establish evidence freshness."
+    )
+    evidence["fieldConfig"]["defaults"]["noValue"] = "No result · inspect this query"
+    evidence_target = evidence["targets"][0]
+    evidence_target.update(
+        parser="backend",
+        root_selector=(
+            "(status = 'scope_resolve_timeout' or status = 'evidence_build_timeout' "
+            "or status = 'QUERY ERROR' or summary.overall_status = 'QUERY ERROR') ? "
+            "[{'status':'QUERY ERROR','label':'Run selection',"
+            "'value_full':'Exact-run evidence unavailable','present':false}] : "
+            "(summary.overall_status = 'SELECT RUN' ? "
+            "[{'status':'SELECT RUN','label':'Run selection',"
+            "'value_full':'Choose a Run ID','present':false}] : "
+            "($count(rows) > 0 ? [rows^(present ? 1 : 0, priority, name)] : "
+            "[{'status':'UNKNOWN','label':'Run selection',"
+            "'value_full':'No anchor evidence returned','present':false}]))"
+        ),
+    )
+    evidence_target.pop("uql", None)
+    trust_target = panels[9418]["targets"][0]
+    # The exact-run endpoint emits donor rows for SELECT RUN and unavailable states.
+    # Reuse them so Dashboard datasource consumers receive the same frame types.
+    trust_target.update(parser="backend", root_selector=_CP_DONOR)
+    trust_target.pop("uql", None)
+
+
 def apply_trust_action_display(payload: dict) -> None:
     """Only materialize a linked Action field when a saved reason exists."""
     trust = next(p for p in payload["panels"] if p.get("id") == 9418)
