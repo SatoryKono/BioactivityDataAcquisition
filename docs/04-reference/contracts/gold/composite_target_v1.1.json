@@ -385,7 +385,8 @@
         "null"
       ],
       "nullable": true,
-      "description": ""
+      "description": "",
+      "pattern": "^[0-9a-f]{64}$"
     }
   },
   "required": [

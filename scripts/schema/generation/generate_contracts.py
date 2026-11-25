@@ -312,6 +312,9 @@ def _expected_artifacts() -> dict[Path, str]:
         output_path = CONTRACTS_DIR / filename
 
         current_contract = _build_contract(schema_cls, entity, contract_version)
+        if entity == "composite_target":
+            profile_hash = current_contract["properties"]["target_class_profile_sha256"]
+            profile_hash["pattern"] = "^[0-9a-f]{64}$"
         artifacts[output_path] = (
             json.dumps(current_contract, indent=2, ensure_ascii=False) + "\n"
         )
