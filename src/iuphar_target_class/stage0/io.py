@@ -13,48 +13,69 @@ from pathlib import Path
 from .constants import SHA256_PATTERN
 
 
+def _open_confined_hash_input(path: Path, root: Path, flags: int) -> int:
+    """Pin the root and validate the final descriptor before any byte is read."""
+    if os.open not in os.supports_dir_fd or not hasattr(os, "O_DIRECTORY"):
+        raise OSError("confined hashing requires directory descriptor support")
+    resolved_root = root.resolve()
+    absolute_path = path.absolute()
+    if ".." in absolute_path.parts or not absolute_path.is_relative_to(resolved_root):
+        raise ValueError(f"path outside allowed root: {path}")
+    relative_path = absolute_path.relative_to(resolved_root)
+    flags |= getattr(os, "O_NOFOLLOW", 0)
+    root_fd = os.open(resolved_root, os.O_RDONLY | os.O_DIRECTORY)
+    try:
+        fd = os.open(relative_path, flags, dir_fd=root_fd)
+        try:
+            opened = Path(f"/proc/self/fd/{fd}").readlink()
+            opened_root = Path(f"/proc/self/fd/{root_fd}").readlink()
+            if not opened.is_absolute() or not opened.is_relative_to(opened_root):
+                raise ValueError(f"opened file outside allowed root: {path}")
+        except OSError as error:
+            os.close(fd)
+            raise OSError(
+                "confined hashing requires a final file descriptor path"
+            ) from error
+        except ValueError:
+            os.close(fd)
+            raise
+        return fd
+    finally:
+        os.close(root_fd)
+
+
+def _checked_hash_input(path: Path) -> Path:
+    """Accept an explicitly selected file, rejecting traversal and sibling links.
+
+    Acceptance and migration callers may select files outside CWD. Their selected
+    parent is the default boundary; stage zero supplies its repository root.
+    """
+    absolute_path = path.absolute()
+    if ".." in absolute_path.parts:
+        raise ValueError(f"path traversal is not allowed: {path}")
+    allowed_root = absolute_path.parent.resolve()
+    resolved = absolute_path.resolve()
+    if not resolved.is_relative_to(allowed_root):
+        raise ValueError(f"path outside selected parent: {path}")
+    return resolved
+
+
 def sha256_file(path: Path, *, root: Path | None = None) -> str:
-    """Hash a file; when root is provided, verify the opened file is inside it.
+    """Hash a selected file, using descriptor confinement for an explicit root.
 
     Confined hashing requires Linux procfs. Other platforms fail closed rather
-    than validating a pathname and reopening it.
+    than validating a pathname and reopening it. Without root, callers retain
+    their explicit external-file selection; traversal and sibling links fail.
     """
     digest = hashlib.sha256()
     flags = os.O_RDONLY | getattr(os, "O_BINARY", 0)
-    if root is not None:
-        if os.open not in os.supports_dir_fd or not hasattr(os, "O_DIRECTORY"):
-            raise OSError("confined hashing requires directory descriptor support")
-        resolved_root = root.resolve()
-        absolute_path = path.absolute()
-        if ".." in absolute_path.parts or not absolute_path.is_relative_to(
-            resolved_root
-        ):
-            raise ValueError(f"path outside allowed root: {path}")
-        relative_path = absolute_path.relative_to(resolved_root)
-        flags |= getattr(os, "O_NOFOLLOW", 0)
-        root_fd = os.open(resolved_root, os.O_RDONLY | os.O_DIRECTORY)
-        try:
-            fd = os.open(relative_path, flags, dir_fd=root_fd)
-            try:
-                opened = Path(f"/proc/self/fd/{fd}").readlink()
-                opened_root = Path(f"/proc/self/fd/{root_fd}").readlink()
-            except OSError as error:
-                os.close(fd)
-                raise OSError(
-                    "confined hashing requires a final file descriptor path"
-                ) from error
-            if not opened.is_absolute() or not opened.is_relative_to(opened_root):
-                os.close(fd)
-                raise ValueError(f"opened file outside allowed root: {path}")
-        finally:
-            os.close(root_fd)
-    else:
-        fd = os.open(path, flags)
+    fd = (
+        _open_confined_hash_input(path, root, flags)
+        if root is not None
+        else os.open(_checked_hash_input(path), flags)
+    )
     with os.fdopen(fd, "rb") as handle:
-        while True:
-            chunk = handle.read(1024 * 1024)
-            if not chunk:
-                break
+        while chunk := handle.read(1024 * 1024):
             digest.update(chunk)
     return digest.hexdigest()
 

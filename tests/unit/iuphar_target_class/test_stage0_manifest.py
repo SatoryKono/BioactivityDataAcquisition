@@ -564,3 +564,30 @@ def test_publish_rejects_output_that_replaces_a_source(tmp_path: Path) -> None:
         publish_stage0(repo, survey_path, tables)
     assert source.read_bytes() == original
     assert not (tables / "manifest.json").exists()
+
+
+@pytest.mark.parametrize("case", ["traversal", "symlink"])
+def test_unconfined_hash_rejects_path_escape_before_open(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, case: str
+) -> None:
+    import os
+
+    root = tmp_path / "root"
+    root.mkdir()
+    outside = tmp_path / "outside.txt"
+    outside.write_bytes(b"outside")
+    if case == "traversal":
+        selected = root / ".." / "outside.txt"
+    else:
+        selected = root / "linked.txt"
+        try:
+            selected.symlink_to(outside)
+        except OSError as error:
+            pytest.skip(f"symlinks unavailable: {error}")
+
+    def unexpected_open(*args: object, **kwargs: object) -> int:
+        raise AssertionError("rejected input must not be opened")
+
+    monkeypatch.setattr(os, "open", unexpected_open)
+    with pytest.raises(ValueError, match="path traversal|outside selected parent"):
+        sha256_file(selected)
