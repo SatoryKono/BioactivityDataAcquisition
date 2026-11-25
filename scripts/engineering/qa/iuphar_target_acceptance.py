@@ -38,6 +38,7 @@ def main(argv: list[str] | None = None) -> int:
         profile.classification_schema_version,
         profile.snapshot.retrieved_at,
         args.run_started_at,
+        matching_policy_version=profile.matching_policy_version,
     )
     request = IntegrationAcceptanceRequest(
         args.stage0_manifest,
