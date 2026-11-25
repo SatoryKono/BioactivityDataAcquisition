@@ -160,6 +160,7 @@ def test_grafana_plugins_do_not_force_router_or_uuid_majors() -> None:
     selector_pkg = _json(SELECTOR_PKG)
     assert selector_pkg["overrides"] == {
         **audited_overrides,
+        "i18next-pseudo": {"i18next": "26.7.2"},
         "react-router-dom-v5-compat": "$react-router-dom-v5-compat",
         "braces": "$braces",
         "picomatch": "$picomatch",
@@ -207,6 +208,8 @@ def test_grafana_plugins_do_not_force_router_or_uuid_majors() -> None:
     assert "uuid" not in scenes_pkg["overrides"]
     assert scenes["node_modules/uuid"]["version"] == "11.1.1"
     selector = _lock_packages(SELECTOR_LOCK)
+    assert selector["node_modules/i18next"]["version"] == "26.7.2"
+    assert "node_modules/i18next-pseudo/node_modules/i18next" not in selector
     # NYC consumes only YAML's load API. Its compatibility/security fixtures
     # run in each installed plugin graph; the removed formatter must stay absent.
     for package, locked in ((scenes_pkg, scenes), (selector_pkg, selector)):
