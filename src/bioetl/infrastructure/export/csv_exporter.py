@@ -86,6 +86,14 @@ def _resolve_table_csv_path(base_path: Path, table_name: str) -> Path:
     name = table_name.strip() if isinstance(table_name, str) else ""
     if not name:
         raise ValueError("CSV export table name must be a non-empty string")
+    provider, separator, entity = name.partition("/")
+    if (
+        separator
+        and provider == "composite"
+        and entity.isascii()
+        and entity.isidentifier()
+    ):
+        name = f"{provider}.{entity}"
     candidate = Path(name)
     # Reject separators explicitly: on POSIX a backslash is a legal name
     # character and would otherwise pass Path.parts checks.

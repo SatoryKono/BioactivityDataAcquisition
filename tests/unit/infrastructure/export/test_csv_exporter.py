@@ -1063,6 +1063,24 @@ class TestCsvExporterPathConfinement:
         # Published path remains spreadsheet-safe for newly appended rows.
         assert set(pv.read_csv(published).column("id").to_pylist()) == {1, 2}
 
+    @pytest.mark.asyncio
+    async def test_composite_table_exports_and_clears_a_flat_pair(
+        self, tmp_path: Path, mock_logger: MagicMock
+    ) -> None:
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
+        table_name = "composite/target"
+        csv_path = await exporter.export(
+            table_name, pa.Table.from_pydict({"id": [1]}), append=False
+        )
+
+        expected = tmp_path / "composite.target.csv"
+        assert csv_path == expected
+        assert expected.is_file()
+        assert set(exporter.clear(table_name)) == {
+            expected,
+            expected.with_name(f"{expected.name}.raw"),
+        }
+
     def test_resolve_table_export_paths_allows_dotted_table_names(
         self, tmp_path: Path, mock_logger: MagicMock
     ) -> None:
