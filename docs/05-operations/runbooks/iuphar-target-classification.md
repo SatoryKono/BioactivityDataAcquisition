@@ -626,6 +626,32 @@ may be read from the approved repository; migration resources may not overlap
 active tables or configuration. Verify complete copied table/configuration byte
 identity after rollback and unchanged canonical resources throughout the rehearsal.
 
+#### RF-013 promotion and rollback rehearsal on 2026-11-25
+
+The rehearsal promoted full copies of the frozen V30 inputs and the validated
+V31 candidate from the preceding build. Physical readback measured 1,037
+Silver rows, 959 Gold rows, and zero unresolved target references from the
+983 assay Gold rows. Every target row carried the admitted profile.
+
+The native rollback resumed after a Windows file-sharing error while replacing
+the journal and reached `rolled_back`. The restored target Silver, target Gold,
+and configuration matched the original bytes. Assay Gold stayed in place and
+its file digests matched before and after. Original backups and displaced V31
+copies were retained. The shared configuration and tables matched their
+pre-rehearsal bytes throughout.
+
+| Local evidence | SHA-256 |
+| --- | --- |
+| Rehearsal summary | `7fd62157baf13fdde0b67fcb53966ad1972e789eebf6831b86fb30079a2ae298` |
+| Final rollback journal | `7b61b4e8f6bc0999a7084da13d6593abc18d4de7e0750e0f80fa17d02aed95bf` |
+| `contour-report --require-ready` result | `fe8377e164e612fa509d9ed496f7171b71a90591e53404bfa85b852f99baa9b8` |
+
+The contour returned `READY` with the canonical mode still `off`. It admitted
+the bounded RF-008 receipt and recorded live readback as `NOT_RUN`.
+The rehearsal report used the passing PR Gate for the candidate build at
+`b682ec32bc86c4c960c30a9731ef6b77ac6a174f` (PR #13389). Refresh the CI
+attestation with the accepted rehearsal PR head before cutover.
+
 Before the real `prepare`, stop and quiesce every canonical writer and hold the maintenance
 window through backup, promotion, verification, or rollback. A stable freeze
 does not itself prevent a later writer. Do not start preparation while a
