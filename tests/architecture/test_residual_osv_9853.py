@@ -191,7 +191,10 @@ def test_grafana_plugins_do_not_force_router_or_uuid_majors() -> None:
     assert bridge["dependencies"]["react-router-dom-v5"] == "npm:react-router-dom@5.3.4"
     assert (bridge_root / "bioetl-grafana-router-v7-bridge-0.3.0.tgz").is_file()
     scenes = _lock_packages(SCENES_LOCK)
-    assert scenes["node_modules/i18next-pseudo/node_modules/i18next"]["version"] == "26.3.4"
+    assert (
+        scenes["node_modules/i18next-pseudo/node_modules/i18next"]["version"]
+        == "26.3.4"
+    )
     locked_bridge = scenes["node_modules/react-router-dom-v5-compat"]
     assert locked_bridge["name"] == bridge["name"]
     assert locked_bridge["version"] == bridge["version"]
