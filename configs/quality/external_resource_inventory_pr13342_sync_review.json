@@ -1,9 +1,0 @@
-{
-  "schema_version": 1,
-  "catalog_ref": "c9c091002b4d5977b86dcb26ae51d82ce8857701",
-  "source_ref": "1ff00ab80c461782b42ab1e9520e55e6c5ef07df",
-  "source_reviews": {
-    "src/bioetl/application/services/workflow/control_plane/execution_preparation.py": "Preserve PR 13353 restoration of pinned offsets before fingerprint validation. Dataclass replacement and manifest validation add no resource acquisition or cleanup owner.",
-    "src/bioetl/application/services/workflow/control_plane/execution_service.py": "Preserve PR 13353 incremental flag on resume. Existing execution and resource ownership remain unchanged; references relocate only."
-  }
-}

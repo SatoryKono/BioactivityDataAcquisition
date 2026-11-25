@@ -58,13 +58,22 @@ coverage refresh:
 ## Freshness note
 
 Re-verified on 2026-11-25 at main commit
-`bf83a0cf5da2858c90722eff33c5a62341b9e353`: the tracked tree contains
+`0bb36c9d641a3ce36b2254c84fb2a227132948ea`: the tracked tree contains
 3,413 `test_*.py` modules under `tests/`, counted by filtering basenames from
-`git ls-tree -r --name-only bf83a0cf5da2858c90722eff33c5a62341b9e353 -- tests`.
+`git ls-tree -r --name-only 0bb36c9d641a3ce36b2254c84fb2a227132948ea -- tests`.
 The canonical test matrix, test-health reporting policy, fixture governance
 ledger, tests workflow, and historical shard registry remain present. This is
 an inventory verification only, not a new test run or coverage measurement;
 the historical capture retains its original source commit and provenance.
+
+Re-verified on 2026-11-25 at source commit
+`bf83a0cf5da2858c90722eff33c5a62341b9e353`: `git ls-tree -r --name-only bf83a0cf5da2858c90722eff33c5a62341b9e353 -- tests`
+contains **3,413 tracked `test_*.py` modules** after filtering file basenames.
+The three canonical configuration sources listed above remain present and readable.
+This verification covers only `verification_scope: tracked_test_module_inventory`;
+it records no new test execution, coverage measurement, or release admission.
+The historical 2026-10-08 coverage capture and its remote artifact verification
+dates remain unchanged.
 
 The PR branch also recorded a source-only census at
 `eed011c2eafb64694b184b99b4746e4a64abd25b`: 3,362 tracked `test_*.py`
