@@ -1,6 +1,6 @@
 ---
 status: active-non-canonical
-last_verified: "2026-11-17"
+last_verified: "2026-11-25"
 freshness_window_days: 7
 owner: quality
 canonical_sources:
@@ -56,6 +56,15 @@ coverage refresh:
 2. Add security regression coverage for HTML output and recursive redaction.
 
 ## Freshness note
+
+Re-verified on 2026-11-25 at source commit
+`bf83a0cf5da2858c90722eff33c5a62341b9e353`: `git ls-tree -r --name-only bf83a0cf5da2858c90722eff33c5a62341b9e353 -- tests`
+contains **3,413 tracked `test_*.py` modules** after filtering file basenames.
+The three canonical configuration sources listed above remain present and readable.
+This verification covers only `verification_scope: tracked_test_module_inventory`;
+it records no new test execution, coverage measurement, or release admission.
+The historical 2026-10-08 coverage capture and its remote artifact verification
+dates remain unchanged.
 
 The PR branch also recorded a source-only census at
 `eed011c2eafb64694b184b99b4746e4a64abd25b`: 3,362 tracked `test_*.py`
