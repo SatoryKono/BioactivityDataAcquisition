@@ -6,20 +6,34 @@ import csv
 import hashlib
 import io
 import json
+import os
 import tempfile
 from pathlib import Path
 
 from .constants import SHA256_PATTERN
 
 
-def sha256_file(path: Path) -> str:
-    """Return the digest of a file contained in the current working directory."""
-    root = Path.cwd().resolve()
-    resolved = path.resolve()
-    if not resolved.is_relative_to(root):
-        raise ValueError(f"path outside current working directory: {path}")
+def sha256_file(path: Path, *, root: Path | None = None) -> str:
+    """Hash a file; when root is provided, verify the opened file is inside it.
+
+    Confined hashing requires Linux procfs. Other platforms fail closed rather
+    than validating a pathname and reopening it.
+    """
     digest = hashlib.sha256()
-    with resolved.open("rb") as handle:
+    flags = os.O_RDONLY | getattr(os, "O_BINARY", 0)
+    if root is not None:
+        flags |= getattr(os, "O_NOFOLLOW", 0)
+    fd = os.open(path, flags)
+    with os.fdopen(fd, "rb") as handle:
+        if root is not None:
+            try:
+                opened = Path(f"/proc/self/fd/{handle.fileno()}").readlink()
+            except OSError as error:
+                raise OSError(
+                    "confined hashing requires a final file descriptor path"
+                ) from error
+            if not opened.is_absolute() or not opened.is_relative_to(root.resolve()):
+                raise ValueError(f"opened file outside allowed root: {path}")
         while True:
             chunk = handle.read(1024 * 1024)
             if not chunk:

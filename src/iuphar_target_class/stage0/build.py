@@ -121,7 +121,7 @@ def _planned_copy_paths(root: Path, output: Path, survey: Stage0Survey) -> set[P
     for candidate in survey.candidate_files:
         source = _within_repo(root, candidate.relative_path)
         if candidate.select_as_source and source.is_file():
-            digest = sha256_file(source)
+            digest = sha256_file(source, root=root)
             planned.add((output / "copies" / f"{digest}.bin").resolve())
     return planned
 
@@ -230,7 +230,10 @@ def copy_selected_sources(
         copy_path = output_dir / "copies" / f"{inspection.sha256}.bin"
         atomic_write_bytes(copy_path, before, root=output_dir)
         after = source.read_bytes()
-        if after != before or sha256_file(copy_path) != inspection.sha256:
+        if (
+            after != before
+            or sha256_file(copy_path, root=output_dir) != inspection.sha256
+        ):
             message = f"copy diverged from original: {candidate.relative_path}"
             raise RuntimeError(message)
         copies.append(
@@ -281,7 +284,7 @@ def _inspect_path(
             selected_as_stage0_source=False,
             note=_join_notes(note, "directory; not a table"),
         )
-    return _inspect_file(path, check_id, subject, select_as_source, note)
+    return _inspect_file(path, check_id, subject, select_as_source, note, repo_root)
 
 
 def _inspect_file(
@@ -290,8 +293,9 @@ def _inspect_file(
     subject: str,
     select_as_source: bool,
     note: str,
+    repo_root: Path,
 ) -> FileInspection:
-    payload_sha = sha256_file(path)
+    payload_sha = sha256_file(path, root=repo_root)
     byte_count = path.stat().st_size
     columns: tuple[str, ...] = ()
     row_count: int | None = None
@@ -399,7 +403,7 @@ def _verify_m_code_sources(repo_root: Path, survey: Stage0Survey) -> None:
         if not source.is_relative_to(root) or not source.is_file():
             message = f"M-code source is unavailable inside root: {item.source_ref}"
             raise ValueError(message)
-        if sha256_file(source) != item.source_sha256:
+        if sha256_file(source, root=root) != item.source_sha256:
             message = f"M-code source SHA-256 mismatch: {item.source_ref}"
             raise ValueError(message)
 
