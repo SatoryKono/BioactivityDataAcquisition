@@ -2,8 +2,8 @@ version: 1
 policy_scope: project_test_health_evidence_shards
 owner: "@bioetl-quality"
 last_reviewed: "2026-04-30"
-last_inventory_rebaseline: "2026-11-17"
-inventory_source_ref: 4837b8207d1676a7c70a8627662e968e2409a212
+last_inventory_rebaseline: "2026-11-25"
+inventory_source_ref: bf83a0cf5da2858c90722eff33c5a62341b9e353
 inventory_scope: tracked_test_module_inventory
 summary_path: docs/reports/evidence/project-test-health/SUMMARY.md
 shards:
