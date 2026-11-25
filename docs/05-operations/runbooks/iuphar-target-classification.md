@@ -697,7 +697,7 @@ pinned dependency and deployment configuration.
 | --- | --- |
 | Cutover summary | `69b51fa5cdfe1bcca6d3da42db2163d1c6a78fb0e2bd3166108a7628f1b3f279` |
 | Promotion journal | `e912c12b637e443cc2d04f4f663d634adfcd519b85a827ed9aa869b3b4810b8b` |
-| Ready evidence at the accepted rehearsal head | `e7199b77e379f4a3fb520c3c9189c0ab7ad273e72cb6f489d05b982758d3c38e` |
+| Ready evidence for PR #13390 at `bec891d8ce017ee8001e854320eccb3d245ff537` | `e7199b77e379f4a3fb520c3c9189c0ab7ad273e72cb6f489d05b982758d3c38e` |
 
 The next shared-table acceptance run uses
 `bioetl workflow run chembl_target --run-type incremental`; the workflow's
