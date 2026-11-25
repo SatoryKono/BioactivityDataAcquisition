@@ -51,7 +51,7 @@ no dedicated workflow or pipeline CLI flag.
 
 ## Impact
 
-The production configuration remains `mode: "off"`. The historical dictionary
+The checked-in configuration defaults to `mode: "off"`. The historical dictionary
 is an unqualified legacy source with unresolved classification disagreements.
 Retrieving official export bytes and passing software tests does not approve a
 snapshot's coverage or reference cases. Require the actual acquisition,
@@ -680,6 +680,29 @@ configuration, then writes `journal.json`.
 moving both candidates and the configuration into place. It journals each
 move, retains originals, and restores already moved pairs on an activation
 error. Keep the maintenance window open through verification.
+
+#### RF-013 shared-table cutover on 2026-11-25
+
+The local shared `chembl.target` Silver and Gold tables and their active
+entity configuration were cut over at 11:47 UTC. The active mode is
+`enrich`, with effective table contract 3.1.0 and profile
+`2d96b292124aa14aa47fa60c7bbdf2f5d04003a1998a8d004383e50a0c059aa3`.
+Both target tables were read back at Delta version 0. Silver had 1,037 rows,
+Gold had 959 rows, and there were zero unresolved target references from the
+983 unchanged assay Gold rows. The original V30 target tables and entity
+configuration were verified in the backup. This occurrence uses a local
+pinned dependency and deployment configuration.
+
+| Local evidence | SHA-256 |
+| --- | --- |
+| Cutover summary | `69b51fa5cdfe1bcca6d3da42db2163d1c6a78fb0e2bd3166108a7628f1b3f279` |
+| Promotion journal | `e912c12b637e443cc2d04f4f663d634adfcd519b85a827ed9aa869b3b4810b8b` |
+| Ready evidence for PR #13390 at `bec891d8ce017ee8001e854320eccb3d245ff537` | `e7199b77e379f4a3fb520c3c9189c0ab7ad273e72cb6f489d05b982758d3c38e` |
+
+The next shared-table acceptance run uses
+`bioetl workflow run chembl_target --run-type incremental`; the workflow's
+checked-in default selects backfill. Record its own run and readback
+evidence before claiming `LIVE_ACCEPTED`.
 
 ### Record main-contour acceptance
 
