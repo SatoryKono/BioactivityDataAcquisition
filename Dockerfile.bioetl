@@ -23,6 +23,7 @@ RUN echo 'https://storage.googleapis.com/wolfi-production-registry-destination/o
         glibc-2.44=2.44-r16 \
         ld-linux-2.44=2.44-r16 \
         libcrypt1-2.44=2.44-r16 \
+        libexpat1=2.11.0-r0 \
         py3-pip-wheel=26.2.2-r2 \
         python-3.13=3.13.18_git20261030-r0 \
         uv=0.11.26-r0 \
@@ -71,6 +72,7 @@ RUN echo 'https://storage.googleapis.com/wolfi-production-registry-destination/o
         glibc-2.44=2.44-r16 \
         ld-linux-2.44=2.44-r16 \
         libcrypt1-2.44=2.44-r16 \
+        libexpat1=2.11.0-r0 \
         py3-pip-wheel=26.2.2-r2 \
         python-3.13=3.13.18_git20261030-r0 \
         tzdata=2026c-r0 \
