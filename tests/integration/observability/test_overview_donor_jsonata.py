@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
 from datetime import UTC, datetime, timedelta
 import json
 import os
@@ -187,7 +188,12 @@ def test_replay_evidence_collapses_unselected_anchors_without_inventing_a_pass(p
     target = next(p for p in dashboard["panels"] if p["id"] == 9408)["targets"][0]
     assert target["parser"] == "backend"
     expression = target["root_selector"]
-    anchors = [{"label": "Config", "present": True, "status": "PRESENT"}]
+    anchors = [
+        {"name": "present", "priority": 0, "present": True},
+        {"name": "later", "priority": 2, "present": False},
+        {"name": "zeta", "priority": 1, "present": False},
+        {"name": "alpha", "priority": 1, "present": False},
+    ]
     rows = evaluate_donor(
         {"summary": {"overall_status": "SELECT RUN"}, "rows": anchors * 44}, expression
     )
@@ -196,7 +202,7 @@ def test_replay_evidence_collapses_unselected_anchors_without_inventing_a_pass(p
     selected = evaluate_donor(
         {"summary": {"overall_status": "OK"}, "rows": anchors}, expression
     )
-    assert selected == anchors
+    assert [row["name"] for row in selected] == ["alpha", "zeta", "later", "present"]
     error = evaluate_donor({"status": "scope_resolve_timeout"}, expression)
     assert len(error) == 1 and error[0]["status"] == "QUERY ERROR"
 
@@ -219,6 +225,44 @@ def test_full_replay_donor_preserves_gap_and_error_frames_with_null_reason_count
     assert readiness["verdict"] == state
     assert trust["trust_status"] == state
     assert trust["trust_action_note"] == "Not assessed"
+    checks = [row for row in rows if row["_bioetl_frame"] == "replay_checks"]
+    assert len(checks) == 1
+    assert checks[0]["code"] == "selection"
+    assert checks[0]["result"] == "n/a"
+    assert checks[0]["reason"] == "exact_run_required"
+
+
+@pytest.mark.parametrize("profile", ["dashboards", "dashboards-adaptive"])
+@pytest.mark.parametrize("generator", ["phase25", "exact_replay"])
+def test_replay_generators_preserve_backend_donor_and_dashboard_children(
+    profile, generator
+):
+    from scripts.ops.observability.grafana._replay_readiness_design import (
+        stamp_exact_replay_queries,
+    )
+    from scripts.ops.observability.grafana.apply_phase25_srs_prr_budget import (
+        apply_control_plane,
+    )
+
+    path = Path("grafana") / profile / "bioetl-control-plane-v1.json"
+    dashboard = json.loads(path.read_text(encoding="utf-8"))
+    shipped = deepcopy(
+        next(p for p in dashboard["panels"] if p["id"] == 9418)["targets"]
+    )
+    apply_control_plane(dashboard)
+    if generator == "exact_replay":
+        stamp_exact_replay_queries(dashboard)
+    panels = {panel["id"]: panel for panel in dashboard["panels"]}
+    target = panels[9418]["targets"][0]
+    assert target["parser"] == "backend"
+    assert "uql" not in target
+    assert target["root_selector"] == shipped[0]["root_selector"]
+    assert target["url"] == shipped[0]["url"]
+    for pid, frame in ((9422, "replay_readiness"), (9423, "replay_checks")):
+        child = panels[pid]
+        assert child["datasource"]["uid"] == "-- Dashboard --"
+        assert child["targets"][0]["panelId"] == 9418
+        assert frame in json.dumps(child["transformations"])
 
 
 @pytest.mark.parametrize(
