@@ -464,7 +464,7 @@ def test_historical_replay_binding_skips_live_profile(
 def test_gold_projection_keeps_unknown_columns_fail_closed() -> None:
     frame = pl.DataFrame(
         {
-            "target_id": ["CHEMBL1"],
+            "chembl.target.target_id": ["CHEMBL1"],
             **{column: ["value"] for column in TARGET_CLASSIFICATION_FIELDS},
             "target_class_profile_sha256": [_PROFILE],
             "target_classification_owner": [COMPOSITE_CLASSIFICATION_OWNER],
@@ -476,6 +476,7 @@ def test_gold_projection_keeps_unknown_columns_fail_closed() -> None:
     projected = project_gold_classification_frame(frame, CompositeTargetGoldSchema)
 
     assert "target_classification_owner" not in projected.columns
+    assert projected["target_id"][0] == "CHEMBL1"
     assert projected.select(TARGET_CLASSIFICATION_FIELDS).equals(
         frame.select(TARGET_CLASSIFICATION_FIELDS)
     )
