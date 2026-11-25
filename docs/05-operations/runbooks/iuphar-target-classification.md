@@ -634,8 +634,9 @@ Silver rows, 959 Gold rows, and zero unresolved target references from the
 983 assay Gold rows. Every target row carried the admitted profile.
 
 The native rollback resumed after a Windows file-sharing error while replacing
-the journal and reached `rolled_back`. The restored Silver, Gold, assay, and
-configuration matched the original bytes. Original backups and displaced V31
+the journal and reached `rolled_back`. The restored target Silver, target Gold,
+and configuration matched the original bytes. Assay Gold stayed in place and
+its file digests matched before and after. Original backups and displaced V31
 copies were retained. The shared configuration and tables matched their
 pre-rehearsal bytes throughout.
 
@@ -647,6 +648,9 @@ pre-rehearsal bytes throughout.
 
 The contour returned `READY` with the canonical mode still `off`. It admitted
 the bounded RF-008 receipt and recorded live readback as `NOT_RUN`.
+The rehearsal report used the passing PR Gate for the candidate build at
+`b682ec32bc86c4c960c30a9731ef6b77ac6a174f` (PR #13389). Refresh the CI
+attestation with the accepted rehearsal PR head before cutover.
 
 Before the real `prepare`, stop and quiesce every canonical writer and hold the maintenance
 window through backup, promotion, verification, or rollback. A stable freeze
