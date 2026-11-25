@@ -455,3 +455,31 @@ def test_build_merge_dependencies_creates_required_services() -> None:
     assert result.conflict_resolver is not None
     assert result.join_planner is not None
     assert result.order_service is not None
+
+
+@pytest.mark.unit
+def test_target_merge_binds_canonical_mapping_on_cold_start(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    builder_path = (
+        "bioetl.composition.bootstrap.runtime.composite_merge_dependency_builder"
+    )
+    monkeypatch.setattr(
+        f"{builder_path}.is_protein_class_target_type_mapping_initialized",
+        lambda: False,
+    )
+    config = _make_config()
+    config.name = "composite_target"
+
+    with patch(f"{builder_path}.DependencyJoinerService") as dependency_joiner:
+        build_merge_dependencies(
+            config=config,
+            logger=MagicMock(),
+            resolve_join_how=lambda _strategy: "left",
+            normalization_policies=JOIN_KEY_NORMALIZATION_POLICIES,
+            system_columns_to_drop=frozenset(),
+        )
+
+    mapping = dependency_joiner.return_value.bind_target_type_mapping.call_args.args[0]
+    assert mapping.mapping_version
+    assert mapping.entries
