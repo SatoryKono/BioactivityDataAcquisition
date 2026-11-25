@@ -119,7 +119,7 @@ def _protected_source_paths(
 def _planned_copy_paths(root: Path, output: Path, survey: Stage0Survey) -> set[Path]:
     planned: set[Path] = set()
     for candidate in survey.candidate_files:
-        source = (root / candidate.relative_path).resolve()
+        source = _within_repo(root, candidate.relative_path)
         if candidate.select_as_source and source.is_file():
             digest = sha256_file(source)
             planned.add((output / "copies" / f"{digest}.bin").resolve())

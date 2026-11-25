@@ -13,9 +13,13 @@ from .constants import SHA256_PATTERN
 
 
 def sha256_file(path: Path) -> str:
-    """Return the lowercase SHA-256 hex digest of a file."""
+    """Return the digest of a file contained in the current working directory."""
+    root = Path.cwd().resolve()
+    resolved = path.resolve()
+    if not resolved.is_relative_to(root):
+        raise ValueError(f"path outside current working directory: {path}")
     digest = hashlib.sha256()
-    with path.open("rb") as handle:
+    with resolved.open("rb") as handle:
         while True:
             chunk = handle.read(1024 * 1024)
             if not chunk:

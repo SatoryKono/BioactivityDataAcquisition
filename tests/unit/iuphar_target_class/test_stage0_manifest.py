@@ -12,13 +12,14 @@ import pandera.pandas as pa
 import pytest
 
 from iuphar_target_class.stage0.build import build_artifacts, publish_stage0
+from iuphar_target_class.stage0.__main__ import main as stage0_main
 from iuphar_target_class.stage0.constants import (
     PROVENANCE_ESTABLISHED,
     PROVENANCE_UNESTABLISHED,
     USAGE_CANDIDATE_ONLY,
     USAGE_LEGACY,
 )
-from iuphar_target_class.stage0.io import atomic_write_bytes, sha256_bytes
+from iuphar_target_class.stage0.io import atomic_write_bytes, sha256_bytes, sha256_file
 from iuphar_target_class.stage0.survey import survey_from_object
 
 pytestmark = pytest.mark.unit
@@ -398,6 +399,59 @@ def test_publish_rejects_output_outside_repo(tmp_path: Path) -> None:
     )
     with pytest.raises(ValueError, match="escapes repo"):
         publish_stage0(repo, survey_path, tmp_path / "outside")
+
+
+def test_sha256_file_rejects_paths_outside_cwd(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root = tmp_path / "root"
+    root.mkdir()
+    outside = tmp_path / "outside.txt"
+    outside.write_text("outside", encoding="utf-8")
+    inside = root / "inside.txt"
+    inside.write_text("inside", encoding="utf-8")
+    (root / "link").symlink_to(outside)
+    monkeypatch.chdir(root)
+    assert sha256_file(Path("inside.txt")) == hashlib.sha256(b"inside").hexdigest()
+    for path in (Path("../outside.txt"), outside, Path("link")):
+        with pytest.raises(ValueError, match="outside current working directory"):
+            sha256_file(path)
+
+
+def test_cli_rejects_repo_root_outside_cwd(tmp_path: Path) -> None:
+    with pytest.raises(SystemExit) as error:
+        stage0_main(
+            [
+                "--repo-root",
+                str(tmp_path.parent),
+                "--survey",
+                "survey.json",
+                "--output-dir",
+                "out",
+            ]
+        )
+    assert error.value.code == 2
+
+
+def test_publish_rejects_selected_symlink_outside_repo(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    outside = tmp_path / "outside.csv"
+    outside.write_text("target_all\nsecret\n", encoding="utf-8")
+    (repo / "link.csv").symlink_to(outside)
+    survey_path = repo / "survey.json"
+    survey_path.write_text(
+        json.dumps(
+            _base_survey(
+                candidate_files=[
+                    {"relative_path": "link.csv", "select_as_source": True},
+                ]
+            )
+        ),
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="path escapes repo"):
+        publish_stage0(repo, survey_path, repo / "out")
 
 
 def test_publish_rejects_output_that_replaces_a_source(tmp_path: Path) -> None:

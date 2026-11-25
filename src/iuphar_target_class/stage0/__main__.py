@@ -15,6 +15,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--survey", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     args = parser.parse_args(argv)
+    if not args.repo_root.resolve().is_relative_to(Path.cwd().resolve()):
+        parser.error("--repo-root must be inside the current working directory")
     publish_stage0(args.repo_root, args.survey, args.output_dir)
     return 0
 
