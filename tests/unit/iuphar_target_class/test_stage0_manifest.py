@@ -591,3 +591,37 @@ def test_unconfined_hash_rejects_path_escape_before_open(
     monkeypatch.setattr(os, "open", unexpected_open)
     with pytest.raises(ValueError, match="path traversal|outside selected parent"):
         sha256_file(selected)
+
+
+@pytest.mark.parametrize("replace_ancestor", [False, True])
+def test_confined_hash_rejects_root_replacement_before_open(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, replace_ancestor: bool
+) -> None:
+    import os
+
+    parent = tmp_path / "parent"
+    root = parent / "root"
+    root.mkdir(parents=True)
+    (root / "source.txt").write_bytes(b"original")
+    outside = tmp_path / "outside"
+    (outside / "root").mkdir(parents=True)
+    (outside / "root" / "source.txt").write_bytes(b"outside")
+    original_open = os.open
+
+    def replace_before_open(
+        path: object, flags: int, *, dir_fd: int | None = None
+    ) -> int:
+        if dir_fd is not None:
+            raise AssertionError("file must not be opened through a replaced root")
+        if replace_ancestor:
+            parent.rename(tmp_path / "original-parent")
+            parent.symlink_to(outside, target_is_directory=True)
+        else:
+            root.rename(tmp_path / "original-root")
+            root.symlink_to(outside / "root", target_is_directory=True)
+        return original_open(path, flags, dir_fd=dir_fd)
+
+    monkeypatch.setattr(os, "supports_dir_fd", {replace_before_open})
+    monkeypatch.setattr(os, "open", replace_before_open)
+    with pytest.raises((OSError, ValueError)):
+        sha256_file(root / "source.txt", root=root)

@@ -22,9 +22,18 @@ def _open_confined_hash_input(path: Path, root: Path, flags: int) -> int:
     if ".." in absolute_path.parts or not absolute_path.is_relative_to(resolved_root):
         raise ValueError(f"path outside allowed root: {path}")
     relative_path = absolute_path.relative_to(resolved_root)
+    root_identity = resolved_root.stat()
     flags |= getattr(os, "O_NOFOLLOW", 0)
-    root_fd = os.open(resolved_root, os.O_RDONLY | os.O_DIRECTORY)
+    root_fd = os.open(
+        resolved_root, os.O_RDONLY | os.O_DIRECTORY | getattr(os, "O_NOFOLLOW", 0)
+    )
     try:
+        pinned_identity = os.fstat(root_fd)
+        if (pinned_identity.st_dev, pinned_identity.st_ino) != (
+            root_identity.st_dev,
+            root_identity.st_ino,
+        ):
+            raise ValueError("allowed root changed before opening")
         fd = os.open(relative_path, flags, dir_fd=root_fd)
         try:
             opened = Path(f"/proc/self/fd/{fd}").readlink()
