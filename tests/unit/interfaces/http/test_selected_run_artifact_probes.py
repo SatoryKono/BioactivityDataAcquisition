@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import sys
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -164,6 +165,75 @@ def test_windows_bronze_reference_prefers_recorded_file_over_bound_copy(tmp_path
     stale = data_root / "output" / "bronze" / suffix
     stale.parent.mkdir(parents=True)
     stale.write_bytes(b"stale-bound-copy")
+    report = {
+        "artifacts": [{"kind": "bronze_batch", "ref": str(recorded), "sha256": digest}]
+    }
+    context = SimpleNamespace(data_root=data_root, trusted_alias_base=alias)
+    probes, present = _artifact_probes(report, tmp_path, context=context)
+    assert present
+    assert probes[0]["reason"] == "digest_matches"
+
+
+@pytest.mark.skipif(
+    sys.platform != "win32", reason="native Windows drive-letter binding"
+)
+def test_windows_bronze_reference_uses_native_branch(tmp_path):
+    """On Windows the recorded file must win before any binding rewrite.
+
+    The POSIX run of the sibling test never reaches the native branch:
+    ``PureWindowsPath`` treats ``tmp_path`` as relative. Without native
+    priority this scenario binds to the stale copy and reports
+    ``digest_mismatch`` instead.
+    """
+    alias = tmp_path / "data"
+    data_root = alias / "attempt"
+    suffix = "chembl/target/2026-11-25/batch.jsonl.zst"
+    recorded = tmp_path / "other" / "data" / "attempt" / "output" / "bronze" / suffix
+    recorded.parent.mkdir(parents=True)
+    recorded.write_bytes(b"recorded-bronze")
+    digest = hashlib.sha256(recorded.read_bytes()).hexdigest()
+    stale = data_root / "output" / "bronze" / suffix
+    stale.parent.mkdir(parents=True)
+    stale.write_bytes(b"stale-bound-copy")
+    report = {
+        "artifacts": [{"kind": "bronze_batch", "ref": str(recorded), "sha256": digest}]
+    }
+    context = SimpleNamespace(data_root=data_root, trusted_alias_base=alias)
+    probes, present = _artifact_probes(report, tmp_path, context=context)
+    assert present
+    assert probes[0]["reason"] == "digest_matches"
+
+
+@pytest.mark.skipif(
+    sys.platform != "win32", reason="native Windows drive-letter binding"
+)
+def test_windows_bronze_reference_falls_back_when_recorded_unreadable(
+    tmp_path, monkeypatch
+):
+    """An unreadable recorded file must fall back to the bound copy.
+
+    A ``PermissionError`` from the native readability check is an
+    unavailability signal, not a probe failure: binding still verifies the
+    attested copy by digest.
+    """
+    alias = tmp_path / "data"
+    data_root = alias / "attempt"
+    suffix = "chembl/target/2026-11-25/batch.jsonl.zst"
+    recorded = tmp_path / "other" / "data" / "attempt" / "output" / "bronze" / suffix
+    recorded.parent.mkdir(parents=True)
+    recorded.write_bytes(b"recorded-bronze")
+    bound = data_root / "output" / "bronze" / suffix
+    bound.parent.mkdir(parents=True)
+    bound.write_bytes(b"recorded-bronze")
+    digest = hashlib.sha256(bound.read_bytes()).hexdigest()
+    real_is_file = Path.is_file
+
+    def raising_is_file(self):
+        if self == recorded:
+            raise PermissionError("denied")
+        return real_is_file(self)
+
+    monkeypatch.setattr(Path, "is_file", raising_is_file)
     report = {
         "artifacts": [{"kind": "bronze_batch", "ref": str(recorded), "sha256": digest}]
     }

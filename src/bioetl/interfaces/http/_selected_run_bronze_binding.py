@@ -40,7 +40,11 @@ def _bound_bronze_reference(item: object, context: object | None) -> object | No
     if not windows_path.is_absolute() or ".." in windows_path.parts:
         return item
     native = _native_absolute_artifact(reference)
-    if native is not None and native.is_file():
+    try:
+        native_available = native is not None and native.is_file()
+    except OSError:
+        native_available = False
+    if native_available:
         return item
     try:
         trusted_base = alias.resolve()
