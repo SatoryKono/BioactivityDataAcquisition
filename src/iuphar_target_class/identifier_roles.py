@@ -30,7 +30,7 @@ ANCHOR_PRIORITY_POLICIES = EC_EFFECTIVE_POLICIES | {ANCHOR_PRIORITY_POLICY_VERSI
 def normalize_hgnc_ids(value: str | None) -> tuple[str, ...]:
     """Normalize explicit HGNC identifiers without interpreting other namespaces."""
     identifiers = (
-        re.fullmatch(r"(?:HGNC:\s*)?([1-9][0-9]*)", token.strip(), re.IGNORECASE)
+        re.fullmatch(r"(?:HGNC:\s*)?((?a:[1-9]\d*))", token.strip(), re.IGNORECASE)
         for token in re.split(r"[|,;]", value or "")
     )
     return tuple(dict.fromkeys(match[1] for match in identifiers if match))

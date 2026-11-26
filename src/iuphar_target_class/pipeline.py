@@ -900,35 +900,46 @@ def _fallback_effective_class(
 ) -> tuple[Resolution, str] | None:
     categories = ec_categories(row.ec_numbers)
     if not categories:
-        if ranked and not outcome.effective_class:
-            keyword = name_keyword_class(
-                row.name,
-                allow_transcription_factor=(
-                    row.provenance.matching_policy_version
-                    == TRANSCRIPTION_FACTOR_POLICY_VERSION
-                ),
-            )
-            if keyword is not None:
-                label, term = keyword
-                if (
-                    match.matched_target_id is None
-                    or label == TRANSCRIPTION_FACTOR_CLASS
-                ):
-                    return select_keyword_class(outcome, label), f"{term}: {row.name}"
-        return None
+        return _fallback_keyword_class(row, match, outcome, ranked=ranked)
     if outcome.effective_class == ION_CHANNEL or outcome.iuphar_class == ION_CHANNEL:
         return None
     if _has_channel_candidate(row, snapshot, outcome):
         return None
-    if ranked:
-        if len(categories) == 1 and outcome.iuphar_class is not None:
-            return None
-    else:
-        outside_scope = any(d.code == "unsupported_taxon" for d in match.diagnostics)
-        if len(categories) == 1 and outcome.effective_class and not outside_scope:
-            return None
+    if _keeps_effective_class(categories, outcome, match, ranked=ranked):
+        return None
     content = "|".join(sorted({item.raw for item in row.ec_numbers if item.valid}))
     return select_ec_class(outcome, categories), content
+
+
+def _fallback_keyword_class(
+    row: ValidatedInput, match: MatchResult, outcome: Resolution, *, ranked: bool
+) -> tuple[Resolution, str] | None:
+    if not ranked or outcome.effective_class:
+        return None
+    keyword = name_keyword_class(
+        row.name,
+        allow_transcription_factor=(
+            row.provenance.matching_policy_version
+            == TRANSCRIPTION_FACTOR_POLICY_VERSION
+        ),
+    )
+    if keyword is None:
+        return None
+    label, term = keyword
+    if match.matched_target_id is None or label == TRANSCRIPTION_FACTOR_CLASS:
+        return select_keyword_class(outcome, label), f"{term}: {row.name}"
+    return None
+
+
+def _keeps_effective_class(
+    categories: frozenset[int], outcome: Resolution, match: MatchResult, *, ranked: bool
+) -> bool:
+    if len(categories) != 1:
+        return False
+    if ranked:
+        return outcome.iuphar_class is not None
+    outside_scope = any(d.code == "unsupported_taxon" for d in match.diagnostics)
+    return bool(outcome.effective_class) and not outside_scope
 
 
 def _effective_policy(

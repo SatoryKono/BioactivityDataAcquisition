@@ -402,7 +402,7 @@ def _parse_ec_token(token: str, *, allow_preliminary: bool) -> EcNumber:
             allow_preliminary
             and index == 3
             and not seen_dash
-            and re.fullmatch(r"n[1-9][0-9]*", part, re.IGNORECASE)
+            and re.fullmatch(r"n[1-9]\d*", part, re.IGNORECASE | re.ASCII)
         ):
             # A preliminary entry confirms the numeric hierarchy through level three.
             break

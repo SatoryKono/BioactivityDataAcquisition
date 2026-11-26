@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 
 from .models import Diagnostic, MatchResult
 
@@ -302,18 +302,9 @@ def _decide(
     species_conflict = _variant_species_conflict(query, catalog)
     if species_conflict is not None:
         return species_conflict
-    if query.prioritize_anchors and query.organism is not None:
-        trusted_conflict = _identity_conflict(
-            [
-                *_exact_channels(query, catalog, candidates, unfiltered=True),
-                (HGNC, _ids_of(candidates, HGNC)),
-            ]
-        )
-        if trusted_conflict is not None:
-            return trusted_conflict
-        preferred = _preferred_identity(candidates, explicit_target_id=query.target_id)
-        if preferred is not None:
-            return preferred
+    anchor = _anchor_identity(query, catalog, candidates)
+    if anchor is not None:
+        return anchor
     explicit = _ids_of(candidates, EXPLICIT)
     uniprot = _ids_of(candidates, UNIPROT)
     gene_id = _ids_of(candidates, GENE_ID)
@@ -379,6 +370,39 @@ def _decide(
     if not snapshot_complete:
         return _result("source_unavailable", None, (), (), ("source_unavailable",))
     return _result("not_found", None, (), (), ())
+
+
+def _anchor_identity(
+    query: MatchQuery,
+    catalog: tuple[CatalogTarget, ...],
+    candidates: tuple[Candidate, ...],
+) -> MatchResult | None:
+    """Apply anchor priority only after checking every trusted identity channel."""
+    if not query.prioritize_anchors or query.organism is None:
+        return None
+    conflict = _identity_conflict(
+        [
+            *_exact_channels(query, catalog, candidates, unfiltered=True),
+            (HGNC, _ids_of(candidates, HGNC)),
+        ]
+    )
+    if conflict is not None:
+        return conflict
+    if any(
+        method == UNIPROT and not ids
+        for method, ids in _exact_channels(query, catalog, candidates)
+    ):
+        everyone = _ids(candidate.target_id for candidate in candidates)
+        if everyone:
+            return _result(
+                "ambiguous",
+                None,
+                everyone,
+                _methods(candidates, set(everyone)),
+                ("ambiguous_match",),
+            )
+        return None
+    return _preferred_identity(candidates, explicit_target_id=query.target_id)
 
 
 def _ranked_text_identity(
@@ -727,4 +751,11 @@ def _attach_auxiliary_diagnostics(
             )
     if not extras:
         return result
-    return replace(result, diagnostics=(*result.diagnostics, *extras))
+    return MatchResult(
+        match_status=result.match_status,
+        matched_target_id=result.matched_target_id,
+        candidate_target_ids=result.candidate_target_ids,
+        match_method=result.match_method,
+        match_evidence_ids=result.match_evidence_ids,
+        diagnostics=(*result.diagnostics, *extras),
+    )

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import re
-from dataclasses import replace
 
 from .models import EcNumber
 from .policy import EC_SINGULAR
@@ -55,7 +54,7 @@ _TRANSCRIPTION_FACTOR_RELATED = re.compile(
 )
 _TRANSCRIPTION_FACTOR_PREFIX = re.compile(
     r"\b(?:(?:inhibitor|activator|regulator|subunit|protease|peptidase|cofactor|coactivator|corepressor)s?"
-    r"\s+of|(?:binding|bound)\s+to|(?:interacting|associated)\s+with)\s+(?:the\s+)?$",
+    r"\s+of|(?:binding|bound)\s+to|(?:interacting|associated)\s+with)\b[^,;()]*$",
     re.IGNORECASE,
 )
 
@@ -80,12 +79,12 @@ def select_channel_priority(outcome: Resolution) -> Resolution:
         or outcome.effective_class == ION_CHANNEL
     ):
         return outcome
-    return replace(
+    return _with_effective_class(
         outcome,
-        effective_class=ION_CHANNEL,
-        effective_source="channel_priority",
-        effective_subclasses=(),
-        rule_id=CHANNEL_PRIORITY_RULE,
+        ION_CHANNEL,
+        "channel_priority",
+        CHANNEL_PRIORITY_RULE,
+        decision_status=outcome.decision_status,
     )
 
 
@@ -140,15 +139,41 @@ def select_keyword_class(outcome: Resolution, label: str) -> Resolution:
 def _select_local_class(
     outcome: Resolution, label: str, source: str, rule: str
 ) -> Resolution:
-    return replace(
+    return _with_effective_class(
         outcome,
-        effective_class=label,
-        effective_source=source,
-        effective_subclasses=(),
+        label,
+        source,
+        rule,
         decision_status=(
             "resolved"
             if outcome.decision_status == "unresolved"
             else outcome.decision_status
         ),
+    )
+
+
+def _with_effective_class(
+    outcome: Resolution, label: str, source: str, rule: str, *, decision_status: str
+) -> Resolution:
+    """Retain provider evidence and conflicts when selecting a local class."""
+    return Resolution(
+        effective_class=label,
+        effective_source=source,
+        effective_subclasses=(),
+        decision_status=decision_status,
         rule_id=rule,
+        conflict_codes=outcome.conflict_codes,
+        run_incomplete=outcome.run_incomplete,
+        iuphar_class=outcome.iuphar_class,
+        iuphar_subclass=outcome.iuphar_subclass,
+        local_class=outcome.local_class,
+        local_subclasses=outcome.local_subclasses,
+        iuphar_class_candidates=outcome.iuphar_class_candidates,
+        local_candidates=outcome.local_candidates,
+        evidence_ids=outcome.evidence_ids,
+        raw_type=outcome.raw_type,
+        matched_target_id=outcome.matched_target_id,
+        candidate_target_ids=outcome.candidate_target_ids,
+        component_results=outcome.component_results,
+        partial_basis=outcome.partial_basis,
     )

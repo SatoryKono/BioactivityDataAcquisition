@@ -1215,9 +1215,15 @@ def test_ranked_full_name_is_indexed_outside_names_and_synonyms():
         "hgnc-uniprot-name-ec-keyword-tf-v1",
     ],
 )
-def test_primary_conflict_across_distinct_species_ids_never_yields_direct_class(policy):
+@pytest.mark.parametrize(
+    ("accession", "status"),
+    [("P22222", "identity_conflict"), ("Q99999", "ambiguous")],
+)
+def test_conflicting_or_unknown_primary_never_yields_direct_class(
+    policy, accession, status
+):
     catalog = (
-        CatalogTarget("1", ("P11111",), None, None, "9606", (), ()),
+        CatalogTarget("1", ("P11111",), None, None, "9606", ("Known protein",), ()),
         CatalogTarget("2", ("P22222",), None, None, "10090", (), ()),
     )
     raw = '{"targetId":"1","type":"gpcr","taxonId":"9606"}'
@@ -1238,7 +1244,13 @@ def test_primary_conflict_across_distinct_species_ids_never_yields_direct_class(
     batch = pipeline.classify_batch(
         (
             RawTargetRow(
-                "mixed", {"uniprot": "P11111|P22222", "organism": "9606"}, "protein"
+                "mixed",
+                {
+                    "uniprot": f"P11111|{accession}",
+                    "organism": "9606",
+                    "name": "Known protein",
+                },
+                "protein",
             ),
         ),
         snapshot=snapshot,
@@ -1246,7 +1258,7 @@ def test_primary_conflict_across_distinct_species_ids_never_yields_direct_class(
         run_id="fixed",
     )
     result = batch.rows[0].result
-    assert result.match_status == "identity_conflict"
+    assert result.match_status == status
     assert result.matched_target_id is None
     assert result.iuphar_class is None
     assert result.effective_class is None
