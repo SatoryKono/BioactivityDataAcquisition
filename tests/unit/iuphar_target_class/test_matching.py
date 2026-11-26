@@ -14,11 +14,11 @@ from iuphar_target_class.matching import (
     resolve_match,
     select_uniprot_accessions,
 )
+from iuphar_target_class.models import MatchResult
 from iuphar_target_class.rf008_qualification import (
     _execute_projection,
     evaluate_categories,
 )
-from iuphar_target_class.models import MatchResult
 
 pytestmark = pytest.mark.unit
 
@@ -592,3 +592,51 @@ def test_ranked_matching_without_taxon_keeps_a_unique_uniprot_match():
     result = resolve_match(query, catalog, snapshot_complete=True)
     assert result.match_status == "matched"
     assert result.matched_target_id == "1"
+
+
+@pytest.mark.parametrize("ranked_text", [False, True])
+@pytest.mark.parametrize("hgnc_ids", [(), ("101",)])
+def test_priority_rejects_missing_primary_accession(ranked_text, hgnc_ids):
+    catalog = (
+        replace(
+            _target("1", uniprot="P11111", species="9606", name="First protein"),
+            hgnc_ids=("101",),
+        ),
+    )
+    query = replace(
+        _query(uniprot_ids=("P11111", "Q22222"), organism="9606", name="First protein"),
+        hgnc_ids=hgnc_ids,
+        prioritize_anchors=True,
+        ranked_text=ranked_text,
+    )
+    result = resolve_match(query, catalog, snapshot_complete=True)
+    assert result.match_status == "ambiguous"
+    assert result.matched_target_id is None
+    assert result.candidate_target_ids == ("1",)
+
+
+@pytest.mark.parametrize(
+    ("gene_symbol", "gene_aliases", "status", "target_id"),
+    [
+        ("GENE2", (), "ambiguous", None),
+        ("GENE2", ("gene1",), "ambiguous", None),
+        ("UNKNOWN", (), "ambiguous", None),
+        ("LEGACY", ("gene1",), "matched", "1"),
+        ("GENE1", (), "matched", "1"),
+    ],
+)
+def test_ranked_name_checks_explicit_gene_symbol_and_aliases(
+    gene_symbol, gene_aliases, status, target_id
+):
+    catalog = (
+        _target("1", gene="GENE1", species="9606", name="First protein"),
+        _target("2", gene="GENE2", species="9606", name="Second protein"),
+    )
+    query = replace(
+        _query(gene_symbol=gene_symbol, organism="9606", name="First protein"),
+        gene_aliases=gene_aliases,
+        ranked_text=True,
+    )
+    result = resolve_match(query, catalog, snapshot_complete=True)
+    assert result.match_status == status
+    assert result.matched_target_id == target_id

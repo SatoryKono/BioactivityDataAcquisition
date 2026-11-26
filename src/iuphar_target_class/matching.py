@@ -372,11 +372,12 @@ def _ranked_text_identity(
 ) -> MatchResult | None:
     if query.organism is None or query.target_id is not None:
         return None
+    gene_ids = _ids_of(candidates, GENE_SYMBOL)
     for method in (EXACT_NAME, EXACT_SYNONYM):
         ids = _ids_of(candidates, method)
         if not ids:
             continue
-        if len(ids) != 1:
+        if len(ids) != 1 or (gene_ids and ids[0] not in gene_ids):
             return None
         variants = tuple(
             t for t in _species_targets(query, catalog) if t.target_id == ids[0]
@@ -396,6 +397,10 @@ def _compatible_text_variant(query: MatchQuery, target: CatalogTarget) -> bool:
         (query.uniprot_ids, target.uniprot_ids),
         (query.hgnc_ids, target.hgnc_ids),
         (
+            _gene_names(query) if query.gene_symbol else (),
+            (target.gene_symbol.casefold(),) if target.gene_symbol else (),
+        ),
+        (
             (query.gene_id,) if query.gene_id else (),
             (target.gene_id,) if target.gene_id else (),
         ),
@@ -406,14 +411,17 @@ def _compatible_text_variant(query: MatchQuery, target: CatalogTarget) -> bool:
     )
 
 
+def _gene_names(query: MatchQuery) -> set[str]:
+    return {
+        value.casefold() for value in (*query.gene_aliases, query.gene_symbol) if value
+    }
+
+
 def _corroborates_synonym(query: MatchQuery, target: CatalogTarget) -> bool:
     """A shared alias alone cannot identify a variant with sparse provider IDs."""
-    gene_names = {value.casefold() for value in query.gene_aliases}
-    if query.gene_symbol:
-        gene_names.add(query.gene_symbol.casefold())
     return bool(
         (query.gene_id and query.gene_id == target.gene_id)
-        or (target.gene_symbol and target.gene_symbol.casefold() in gene_names)
+        or (target.gene_symbol and target.gene_symbol.casefold() in _gene_names(query))
     )
 
 
@@ -446,7 +454,14 @@ def _preferred_identity(
     if identity_conflict is not None:
         return identity_conflict
     methods = tuple(method for method, ids in anchor_channels if ids)
-    if len(target_ids) == 1:
+    if len(target_ids) == 1 and (
+        len(query.uniprot_ids) < 2
+        or all(
+            target_ids[0] in ids
+            for method, ids in _exact_channels(query, catalog, candidates)
+            if method == UNIPROT
+        )
+    ):
         return _result("matched", target_ids[0], target_ids, methods, ())
     return _result("ambiguous", None, target_ids, methods, ("ambiguous_match",))
 
