@@ -43,9 +43,11 @@ _TRANSCRIPTION_FACTOR_RELATED = re.compile(
     r"substrates?|proteases?|peptidases?|subunits?|polypeptides?|cofactors?|coactivators?|corepressors?)\b",
     re.IGNORECASE,
 )
-_TRANSCRIPTION_FACTOR_PREFIX = re.compile(
-    r"\b(?:(?:inhibitor|activator|regulator|subunit|protease|peptidase|cofactor|coactivator|corepressor)s?"
-    r"\s+of|(?:binding|bound)\s+to|(?:interacting|associated)\s+with)\s+(?:the\s+)?$",
+_FUNCTIONAL_PARTNER_PREFIX = re.compile(
+    r"\b(?:(?:inhibitor|blocker|activator|agonist|antagonist|ligand|regulator|substrate|"
+    r"partner|subunit|protease|peptidase|cofactor|coactivator|corepressor)s?"
+    r"\s+(?:of|for)|(?:binding|bound)\s+to|(?:interacting|associated)\s+with)"
+    r"\s+(?:[\w-]+\s+)*$",
     re.IGNORECASE,
 )
 
@@ -82,14 +84,22 @@ def select_channel_priority(outcome: Resolution) -> Resolution:
     )
 
 
+def _assigned_name_term(name: str, expression: re.Pattern[str]) -> str | None:
+    """Ignore terms that name a functional partner rather than the target."""
+    for hit in expression.finditer(name):
+        if not _FUNCTIONAL_PARTNER_PREFIX.search(name[: hit.start()]):
+            return hit.group().lower()
+    return None
+
+
 def name_keyword_class(
     name: str | None, *, allow_transcription_factor: bool = False
 ) -> tuple[str, str] | None:
     """Use standalone functional terms in the target name as local evidence."""
     matches = {
-        label: hit.group().lower()
+        label: term
         for label, expression in _ASSIGNED_NAME_WORDS.items()
-        if (hit := expression.search(name or "")) is not None
+        if (term := _assigned_name_term(name or "", expression)) is not None
     }
     if ION_CHANNEL in matches and all(
         label == ION_CHANNEL or label.startswith("Enzyme.") for label in matches
@@ -99,7 +109,7 @@ def name_keyword_class(
         hit = _TRANSCRIPTION_FACTOR.search(name)
         if (
             hit
-            and not _TRANSCRIPTION_FACTOR_PREFIX.search(name[: hit.start()])
+            and not _FUNCTIONAL_PARTNER_PREFIX.search(name[: hit.start()])
             and not _TRANSCRIPTION_FACTOR_RELATED.search(name[hit.end() :])
         ):
             return TRANSCRIPTION_FACTOR_CLASS, hit.group().lower()

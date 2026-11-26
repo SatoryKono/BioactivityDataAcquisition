@@ -687,6 +687,20 @@ def test_ranked_text_match_does_not_override_incompatible_uniprot(tmp_path, name
         ),
         ("Cyclin-dependent kinase inhibitor", 9606, "Homo sapiens", "unknown", None),
         (
+            "ATP-binding cassette transporter",
+            9606,
+            "Homo sapiens",
+            "unknown",
+            "Transporter",
+        ),
+        (
+            "Inhibitor-resistant protein kinase",
+            9606,
+            "Homo sapiens",
+            "unknown",
+            "Enzyme.Transferase",
+        ),
+        (
             "Transmembrane sodium channel and receptor",
             9606,
             "Homo sapiens",
@@ -777,6 +791,35 @@ def test_global_transcription_factor_fallback(
     if expected_class == "Receptor.Nuclear receptor":
         assert result.projection["local_class"] == expected_class
         assert result.projection["effective_source"] == "keyword_rule"
+
+
+@pytest.mark.parametrize(
+    "policy", [RANKED_CLASS_POLICY_VERSION, TRANSCRIPTION_FACTOR_POLICY_VERSION]
+)
+@pytest.mark.parametrize(
+    "name",
+    [
+        "Inhibitor of protein kinase",
+        "Protein binding to receptor",
+        "Protein interacting with sodium channel",
+        "Protein associated with the membrane transporter",
+        "Activator of alcohol dehydrogenase",
+        "Ligand for receptor",
+    ],
+)
+def test_keyword_fallback_does_not_classify_a_functional_partner(
+    tmp_path, policy, name
+):
+    adapter = _channel_ec_adapter(_profile(tmp_path), policy)
+    result = _classify(
+        adapter,
+        pref_name=name,
+        component_accessions=None,
+        target_protein_synonyms=None,
+    )
+    assert result.projection["iuphar_target_id"] is None
+    assert result.projection["effective_class"] is None
+    assert result.projection["effective_source"] != "keyword_rule"
 
 
 def test_older_ranked_policy_keeps_transcription_factor_outcome(tmp_path):
