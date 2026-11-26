@@ -974,3 +974,30 @@ def test_hgnc_anchor_runtime_and_canonical_fields_match(tmp_path):
     )
     assert batch.rows[0].result.matched_target_id == "1"
     assert runtime.projection["iuphar_target_id"] == "1"
+
+
+@pytest.mark.parametrize("ec", [None, "3.1.26.n2"])
+def test_ranked_ec_preempts_an_otherwise_corroborated_synonym(tmp_path, ec):
+    profile = _profile(
+        tmp_path,
+        target_changes={"type": "vgic", "geneSymbol": "SSC1", "synonyms": ["SSC1"]},
+    )
+    result = _classify(
+        _channel_ec_adapter(profile, RANKED_CLASS_POLICY_VERSION),
+        pref_name="alternate label",
+        component_accessions=None,
+        target_gene_synonyms="SSC1",
+        target_ec_numbers=ec,
+    )
+    artifacts = {a.name: json.loads(a.payload) for a in result.artifacts}
+    if ec is None:
+        assert result.projection["iuphar_target_id"] == "1"
+        assert result.projection["effective_class"] == "Ion Channel"
+        assert "exact_synonym" in {
+            row["match_method"] for row in artifacts["candidates.json"]
+        }
+    else:
+        assert result.projection["iuphar_target_id"] is None
+        assert result.projection["effective_class"] == "Enzyme.Hydrolase"
+        assert result.projection["effective_source"] == "ec_rule"
+        assert artifacts["candidates.json"] == []
