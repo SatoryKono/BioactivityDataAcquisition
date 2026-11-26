@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from urllib.error import HTTPError
-from urllib.parse import urlencode
+from urllib.parse import quote, urlencode, urlsplit
 
 from bioetl.application.services.run_reports.paths import (
     inspect_report_root_marker,
@@ -30,6 +30,22 @@ _DASHBOARD = "/api/dashboards/uid/bioetl-run-explorer-v1"
 _DATASOURCE = "bioetl-ops-http"
 
 
+def _lookup_url(query: dict, pipeline: str, run_id: str) -> str:
+    url = query["url"]
+    prefix = "${"
+    for key, value in {
+        "pipeline": pipeline,
+        "workflow": ".*",
+        "run_type:csv": ".*",
+        "run_id": "-",
+        "lookup_run_id:percentencode": run_id,
+    }.items():
+        url = url.replace(prefix + key + "}", quote(value, safe=""))
+    if prefix in url or "$__" in url:
+        raise ValueError("Run Explorer lookup contains unresolved Grafana variables")
+    return url
+
+
 class _NoRedirect(urllib.request.HTTPRedirectHandler):
     def redirect_request(self, _req, _fp, _code, _msg, _headers, _newurl):
         return None
@@ -48,6 +64,13 @@ class DashboardAccess:
         url = ensure_local_http_url(base.rstrip("/") + path)
         headers = {"Accept": "application/json"}
         if grafana:
+            parsed = urlsplit(url)
+            if parsed.scheme != "https" and parsed.hostname not in {
+                "127.0.0.1",
+                "::1",
+                "localhost",
+            }:
+                raise ValueError("Grafana credentials require HTTPS outside loopback")
             password = resolve_grafana_password()
             if not password:
                 raise ValueError(
@@ -114,10 +137,11 @@ class DashboardAccess:
             raise ValueError(
                 "Grafana Run Explorer does not have an active Ops HTTP lookup target"
             )
-        return source_id, {
-            **query,
-            "datasource": query.get("datasource") or panel["datasource"],
-        }
+        query = {**query, "datasource": query.get("datasource") or panel["datasource"]}
+        self._grafana_frames(
+            query, _lookup_url(query, ".*", "00000000-0000-0000-0000-000000000000")
+        )
+        return source_id, query
 
     def visible(self, run: RunReport, *, source_id: str, query: dict) -> bool:
         try:
@@ -137,28 +161,35 @@ class DashboardAccess:
                 run.run_id,
             )
 
-        url = query["url"]
-        for key, value in {
-            "pipeline": run.owner,
-            "workflow": ".*",
-            "run_type:csv": ".*",
-            "run_id": "-",
-            "lookup_run_id:percentencode": run.run_id,
-        }.items():
-            url = url.replace("${" + key + "}", value)
-        if "${" in url or "$__" in url:
-            raise ValueError(
-                "Run Explorer lookup contains unresolved Grafana variables"
-            )
+        url = _lookup_url(query, run.owner, run.run_id)
         index = self.request(url)
         if (
             index.get("index_state") != "ok"
             or index.get("source_identity_actual") != source_id
             or not any(
-                row.get("run_id") == run.run_id for row in index.get("items", [])
+                (row.get("pipeline"), row.get("run_id"), row.get("report_state"))
+                == (run.owner, run.run_id, "AVAILABLE")
+                for row in index.get("items", [])
             )
         ):
             return False
+        params = urlencode({"pipeline": run.owner, "run_id": run.run_id})
+        payload = self.request(f"/ops/observability/pipeline-run-report?{params}")
+        identity = payload.get("identity", {})
+        if (identity.get("pipeline_name"), identity.get("run_id")) != (
+            run.owner,
+            run.run_id,
+        ):
+            return False
+        return any(
+            field.get("name") == "run_id" and run.run_id in column
+            for frame in self._grafana_frames(query, url)
+            for field, column in zip(
+                frame["schema"]["fields"], frame["data"]["values"], strict=True
+            )
+        )
+
+    def _grafana_frames(self, query: dict, url: str) -> list[dict]:
         end = datetime.now(UTC)
         body = {
             "from": str(int((end - timedelta(hours=12)).timestamp() * 1000)),
@@ -168,12 +199,13 @@ class DashboardAccess:
         result = self.request("/api/ds/query", grafana=True, body=body)["results"][
             query["refId"]
         ]
-        if result.get("error") or result.get("status", 200) != 200:
-            return False
-        return any(
-            field.get("name") == "run_id" and run.run_id in column
-            for frame in result.get("frames", [])
-            for field, column in zip(
-                frame["schema"]["fields"], frame["data"]["values"], strict=True
-            )
-        )
+        if (
+            not isinstance(result, dict)
+            or result.get("error")
+            or result.get("status", 200) != 200
+        ):
+            raise ValueError("Grafana Run Explorer datasource query failed")
+        frames = result.get("frames", [])
+        if not isinstance(frames, list):
+            raise ValueError("Grafana Run Explorer returned invalid data frames")
+        return frames

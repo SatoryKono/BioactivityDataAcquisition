@@ -11,11 +11,13 @@ import pytest
 from bioetl.domain.control_plane.run_evidence_location import (
     build_run_evidence_location,
 )
+from bioetl.domain.run_reports.selected_status import build_snapshot
 from bioetl.infrastructure.control_plane.file_evidence_location_store import (
     FileEvidenceLocationStore,
 )
 
 from scripts.ops.__main__ import main as ops_main
+from scripts.ops.observability import campaign_report_visibility as visibility
 from scripts.ops.observability import run_report_campaign as campaign
 from scripts.ops.observability.campaign_report_artifacts import (
     RunReport,
@@ -43,22 +45,22 @@ def _write_json(path: Path, value: dict) -> None:
 
 
 def _stage(root: Path, *, relative_data_root: str = "batch") -> None:
-    snapshot = {"revision": REVISION}
+    payload = {
+        "schema_version": "pipeline_run_report_v2",
+        "identity": {
+            "pipeline_name": PIPELINE.owner,
+            "run_id": PIPELINE.run_id,
+            "workflow_run_id": WORKFLOW.run_id,
+            "status": "success",
+        },
+    }
+    snapshot = build_snapshot(payload)
     _write_json(
-        root / PIPELINE.directory / "status-revisions" / f"{REVISION}.json", snapshot
+        root / PIPELINE.directory / "status-revisions" / f"{snapshot['revision']}.json",
+        snapshot,
     )
     _write_json(
-        root / PIPELINE.commit_file,
-        {
-            "schema_version": "pipeline_run_report_v2",
-            "identity": {
-                "pipeline_name": PIPELINE.owner,
-                "run_id": PIPELINE.run_id,
-                "workflow_run_id": WORKFLOW.run_id,
-                "status": "success",
-            },
-            "selected_run_snapshot": snapshot,
-        },
+        root / PIPELINE.commit_file, {**payload, "selected_run_snapshot": snapshot}
     )
     _write_json(
         root / WORKFLOW.commit_file,
@@ -116,7 +118,12 @@ def test_campaign_retries_publication_after_grafana_misses_exact_run(
     def launch(cmd, *, env, cwd, check):
         nonlocal launch_count
         launch_count += 1
-        assert cmd[1:6] == ["-m", "bioetl", "workflow", "run", "chembl_assay"]
+        assert cmd[1:] == ["-m", "scripts.ops.observability.run_report_campaign"]
+        assert json.loads(env[campaign._CHILD_REQUEST]) == {
+            "kind": "workflow",
+            "owner": WORKFLOW.owner,
+            "options": ["--limit", "1000"],
+        }
         assert env["BIOETL_DASHBOARD_DATA_ROOT"] == str(data.parent)
         assert env["BIOETL_RUNTIME_SOURCE_ID"] == SOURCE_ID
         assert not (target / PIPELINE.commit_file).exists()
@@ -126,12 +133,20 @@ def test_campaign_retries_publication_after_grafana_misses_exact_run(
     def request(self, path, *, grafana=False, body=None):
         if path.startswith("/ops/observability/workflow-run-report?"):
             return read_json(target / WORKFLOW.commit_file)
+        if path.startswith("/ops/observability/pipeline-run-report?"):
+            return read_json(target / PIPELINE.commit_file)
         if path.startswith("/ops/observability/pipeline-run-reports?"):
             assert parse_qs(urlsplit(path).query)["lookup_run_id"] == [PIPELINE.run_id]
             return {
                 "index_state": "ok",
                 "source_identity_actual": SOURCE_ID,
-                "items": [{"run_id": PIPELINE.run_id}]
+                "items": [
+                    {
+                        "pipeline": PIPELINE.owner,
+                        "run_id": PIPELINE.run_id,
+                        "report_state": "AVAILABLE",
+                    }
+                ]
                 if (target / PIPELINE.commit_file).is_file()
                 else [],
             }
@@ -193,8 +208,10 @@ def test_campaign_retries_publication_after_grafana_misses_exact_run(
 
 def test_isolated_mode_does_not_contact_dashboard_or_publish(monkeypatch, attempt):
     output, data, target = attempt
+    monkeypatch.setenv("BIOETL_DASHBOARD_DATA_ROOT", str(data.parent))
 
     def launch(cmd, *, env, cwd, check):
+        assert env["BIOETL_DASHBOARD_DATA_ROOT"] == ""
         _stage(Path(env["BIOETL_REPORT_ROOT"]))
         return CompletedProcess(cmd, 0)
 
@@ -292,3 +309,181 @@ def test_missing_referenced_markdown_leaves_index_empty(tmp_path):
             source, target, reports, source_id=SOURCE_ID, relative_data_root="batch"
         )
     assert not (target / PIPELINE.commit_file).exists()
+
+
+def test_child_dispatches_validated_options_to_bioetl(monkeypatch):
+    request = {
+        "kind": "pipeline",
+        "owner": PIPELINE.owner,
+        "options": ["--limit", "1000"],
+    }
+    monkeypatch.setenv(campaign._CHILD_REQUEST, json.dumps(request))
+    monkeypatch.setattr(campaign.sys, "argv", [])
+
+    def launch(module, *, run_name, alter_sys):
+        assert module == "bioetl" and run_name == "__main__" and alter_sys
+        assert campaign.sys.argv == [
+            "bioetl",
+            "run",
+            "--pipeline",
+            PIPELINE.owner,
+            "--limit",
+            "1000",
+        ]
+
+    monkeypatch.setattr(campaign.runpy, "run_module", launch)
+    campaign._launch_child()
+
+
+def test_campaign_options_cannot_override_selected_pipeline():
+    with pytest.raises(ValueError, match="cannot change the selected owner"):
+        campaign._bioetl_arguments(
+            "pipeline", PIPELINE.owner, ["--pipeline=chembl_target"]
+        )
+
+
+@pytest.mark.parametrize("state", ["MISSING", "AVAILABLE"])
+def test_catalog_match_alone_does_not_verify_publication(monkeypatch, state):
+    def request(self, path, **kwargs):
+        if path.startswith("/ops/observability/pipeline-run-reports?"):
+            return {
+                "index_state": "ok",
+                "source_identity_actual": SOURCE_ID,
+                "items": [
+                    {
+                        "pipeline": PIPELINE.owner,
+                        "run_id": PIPELINE.run_id,
+                        "report_state": state,
+                    }
+                ],
+            }
+        if state == "AVAILABLE" and path.startswith(
+            "/ops/observability/pipeline-run-report?"
+        ):
+            return {"status": "not_found"}
+        pytest.fail(f"Unexpected query: {path}")
+
+    monkeypatch.setattr(DashboardAccess, "request", request)
+    assert (
+        DashboardAccess("", "", 1).visible(PIPELINE, source_id=SOURCE_ID, query=QUERY)
+        is False
+    )
+
+
+@pytest.mark.parametrize("status", [200, 502])
+def test_preflight_queries_grafana_before_launch(monkeypatch, attempt, status):
+    output, data, _ = attempt
+    ready = {
+        "status": "healthy",
+        "source_identity_state": "aligned",
+        "source_identity_actual": SOURCE_ID,
+        "source_identity_expected": SOURCE_ID,
+    }
+    monkeypatch.setattr(visibility, "inspect_report_root_marker", lambda **_: ready)
+    monkeypatch.setattr(
+        visibility, "inspect_report_root_source_identity", lambda **_: ready
+    )
+
+    def request(self, path, *, grafana=False, body=None):
+        if path == "/health/ready":
+            return {"checks": {"report_root": ready}}
+        if path.startswith("/api/dashboards/uid/"):
+            return {
+                "dashboard": {
+                    "panels": [
+                        {
+                            "id": 3010,
+                            "datasource": {"uid": "bioetl-ops-http"},
+                            "targets": [QUERY],
+                        }
+                    ]
+                }
+            }
+        assert grafana and path == "/api/ds/query"
+        assert (
+            "lookup_run_id=00000000-0000-0000-0000-000000000000"
+            in body["queries"][0]["url"]
+        )
+        return {"results": {"A": {"status": status, "frames": []}}}
+
+    monkeypatch.setattr(DashboardAccess, "request", request)
+    if status == 200:
+        assert DashboardAccess("", "", 1).preflight(attempt[2])[0] == SOURCE_ID
+    else:
+        monkeypatch.setattr(
+            campaign.subprocess, "run", lambda *_, **__: pytest.fail("launch")
+        )
+        assert (
+            campaign.main(
+                [
+                    "run",
+                    "pipeline",
+                    PIPELINE.owner,
+                    "--mode",
+                    "publish",
+                    "--data-root",
+                    str(data),
+                    "--output",
+                    str(output),
+                ]
+            )
+            == 1
+        )
+        assert not output.exists()
+
+
+def test_later_locator_conflict_leaves_earlier_report_unpublished(tmp_path):
+    source = tmp_path / "isolated"
+    target = tmp_path / "shared"
+    target.mkdir()
+    _stage(source)
+    FileEvidenceLocationStore(target).register(
+        build_run_evidence_location(
+            kind=WORKFLOW.kind,
+            owner=WORKFLOW.owner,
+            run_id=WORKFLOW.run_id,
+            runtime_source_id=SOURCE_ID,
+            relative_data_root="other",
+        )
+    )
+    reports = collect_reports(source, kind="workflow", owner=WORKFLOW.owner)
+    with pytest.raises(ValueError, match="locator conflicts"):
+        publish_reports(
+            source, target, reports, source_id=SOURCE_ID, relative_data_root="batch"
+        )
+    assert not (target / PIPELINE.commit_file).exists()
+
+
+def test_tampered_copies_of_status_revision_are_rejected(tmp_path):
+    source = tmp_path / "isolated"
+    target = tmp_path / "shared"
+    target.mkdir()
+    _stage(source)
+    report = read_json(source / PIPELINE.commit_file)
+    snapshot = report["selected_run_snapshot"]
+    snapshot["assessment"]["verdict"] = "tampered"
+    _write_json(source / PIPELINE.commit_file, report)
+    _write_json(
+        source
+        / PIPELINE.directory
+        / "status-revisions"
+        / f"{snapshot['revision']}.json",
+        snapshot,
+    )
+    reports = collect_reports(source, kind="workflow", owner=WORKFLOW.owner)
+    with pytest.raises(ValueError, match="Invalid committed status snapshot"):
+        publish_reports(
+            source, target, reports, source_id=SOURCE_ID, relative_data_root="batch"
+        )
+    assert not (target / PIPELINE.commit_file).exists()
+
+
+def test_grafana_http_outside_loopback_stops_before_reading_credentials(monkeypatch):
+    monkeypatch.setattr(
+        visibility, "resolve_grafana_password", lambda: pytest.fail("credentials")
+    )
+    access = DashboardAccess(
+        "http://127.0.0.1:8000", "http://host.docker.internal:3000", 1
+    )
+    with pytest.raises(ValueError, match="HTTPS outside loopback"):
+        access.request("/api/ds/query", grafana=True)
