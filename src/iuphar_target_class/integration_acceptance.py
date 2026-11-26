@@ -471,7 +471,11 @@ def _execution_bindings(
             business = json.loads(business_json)
             if not isinstance(business, dict):
                 raise ValueError("canonical source business data must be an object")
-            _, reason = target_input_eligibility(business, species_taxon_ids)
+            _, reason = target_input_eligibility(
+                business,
+                species_taxon_ids,
+                policy=result.provenance.matching_policy_version,
+            )
             if reason is not None:
                 raw_fields = business
                 semantic = dict.fromkeys(semantic)

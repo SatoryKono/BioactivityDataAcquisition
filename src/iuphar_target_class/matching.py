@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
-from dataclasses import dataclass, replace
-from typing import cast
+from dataclasses import dataclass
 
 from .models import Diagnostic, MatchResult
 
 EXPLICIT = "explicit_target_id"
 UNIPROT = "uniprot_xref"
+HGNC = "hgnc"
 GENE_ID = "gene_id"
 GENE_SYMBOL = "gene_symbol"
 EXACT_NAME = "exact_name"
@@ -17,6 +17,7 @@ EXACT_SYNONYM = "exact_synonym"
 METHOD_ORDER = (
     EXPLICIT,
     UNIPROT,
+    HGNC,
     GENE_ID,
     GENE_SYMBOL,
     EXACT_NAME,
@@ -37,6 +38,8 @@ class CatalogTarget:
     species: str | None
     names: tuple[str, ...]
     synonyms: tuple[str, ...]
+    hgnc_ids: tuple[str, ...] = ()
+    full_names: tuple[str, ...] | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -56,6 +59,11 @@ class MatchQuery:
     name: str | None
     synonyms: tuple[str, ...]
     auxiliary_uniprot_ids: tuple[str, ...] = ()
+    hgnc_ids: tuple[str, ...] = ()
+    prioritize_anchors: bool = False
+    ranked_text: bool = False
+    use_synonyms: bool = True
+    gene_aliases: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -110,8 +118,8 @@ def collect_candidates(
     Returns
     -------
     tuple[Candidate, ...]
-        All channel hits in canonical order. Text hits identify the provider
-        field that matched and cannot confirm identity on their own.
+        All channel hits in canonical order. The applicable policy determines
+        whether a unique same-species text hit can confirm identity.
     """
     found = (
         *_identifier_candidates(query, catalog),
@@ -160,7 +168,13 @@ def _gene_candidates(
     if query.organism is None:
         return ()
     targets = _species_targets(query, catalog)
+    hgnc_ids = set(query.hgnc_ids) if query.organism == "9606" else set()
     return (
+        *(
+            Candidate(target.target_id, HGNC)
+            for target in targets
+            if hgnc_ids.intersection(target.hgnc_ids)
+        ),
         *(
             Candidate(target.target_id, GENE_ID)
             for target in targets
@@ -182,9 +196,23 @@ def _name_candidates(
     if query.name is not None:
         wanted.add(query.name)
     for target in _species_targets(query, catalog):
-        if set(target.names) & wanted:
+        names = set(target.names)
+        full_names = target.names if target.full_names is None else target.full_names
+        exact_name = (
+            query.name in full_names if query.ranked_text else bool(names & wanted)
+        )
+        if exact_name:
             found.append(Candidate(target.target_id, EXACT_NAME))
-        if set(target.synonyms) & wanted:
+        if query.use_synonyms and (
+            set(target.synonyms) & wanted
+            or (
+                query.ranked_text
+                and (
+                    names.intersection(query.synonyms)
+                    or (query.name in names and not exact_name)
+                )
+            )
+        ):
             found.append(Candidate(target.target_id, EXACT_SYNONYM))
     return tuple(found)
 
@@ -271,6 +299,12 @@ def _decide(
     snapshot_complete: bool,
 ) -> MatchResult:
     """Choose one status from every channel. Catalog order is ignored."""
+    species_conflict = _variant_species_conflict(query, catalog)
+    if species_conflict is not None:
+        return species_conflict
+    anchor = _anchor_identity(query, catalog, candidates)
+    if anchor is not None:
+        return anchor
     explicit = _ids_of(candidates, EXPLICIT)
     uniprot = _ids_of(candidates, UNIPROT)
     gene_id = _ids_of(candidates, GENE_ID)
@@ -283,9 +317,6 @@ def _decide(
     conflict = _identity_conflict(conflict_channels)
     if conflict is not None:
         return conflict
-    species_conflict = _variant_species_conflict(query, catalog)
-    if species_conflict is not None:
-        return species_conflict
     if _missing_identity_input(query, uniprot_species_gap) or _explicit_species_gap(
         query, catalog
     ):
@@ -297,11 +328,29 @@ def _decide(
             ("insufficient_input",),
         )
 
+    if query.ranked_text:
+        text_match = _ranked_text_identity(query, catalog, candidates)
+        if text_match is not None:
+            return text_match
+        exact_channels = [
+            (method, ids)
+            for method, ids in exact_channels
+            if method in {EXPLICIT, UNIPROT}
+        ]
+
     agreed = _single_agreement(exact_channels)
     if (
         agreed is not None
         and set(everyone) == {agreed}
         and _matches_requested_species(query, catalog, agreed)
+        and (
+            not query.ranked_text
+            or any(
+                _compatible_text_variant(query, t)
+                for t in _species_targets(query, catalog)
+                if t.target_id == agreed
+            )
+        )
     ):
         return _result(
             "matched",
@@ -321,6 +370,129 @@ def _decide(
     if not snapshot_complete:
         return _result("source_unavailable", None, (), (), ("source_unavailable",))
     return _result("not_found", None, (), (), ())
+
+
+def _anchor_identity(
+    query: MatchQuery,
+    catalog: tuple[CatalogTarget, ...],
+    candidates: tuple[Candidate, ...],
+) -> MatchResult | None:
+    """Apply anchor priority only after checking every trusted identity channel."""
+    if not query.prioritize_anchors or query.organism is None:
+        return None
+    conflict = _identity_conflict(
+        [
+            *_exact_channels(query, catalog, candidates, unfiltered=True),
+            (HGNC, _ids_of(candidates, HGNC)),
+        ]
+    )
+    if conflict is not None:
+        return conflict
+    if any(
+        method == UNIPROT and not ids
+        for method, ids in _exact_channels(query, catalog, candidates)
+    ):
+        everyone = _ids(candidate.target_id for candidate in candidates)
+        if everyone:
+            return _result(
+                "ambiguous",
+                None,
+                everyone,
+                _methods(candidates, set(everyone)),
+                ("ambiguous_match",),
+            )
+        return None
+    return _preferred_identity(candidates, explicit_target_id=query.target_id)
+
+
+def _ranked_text_identity(
+    query: MatchQuery,
+    catalog: tuple[CatalogTarget, ...],
+    candidates: tuple[Candidate, ...],
+) -> MatchResult | None:
+    if query.organism is None or query.target_id is not None:
+        return None
+    for method in (EXACT_NAME, EXACT_SYNONYM):
+        ids = _ids_of(candidates, method)
+        if not ids:
+            continue
+        if len(ids) != 1:
+            return None
+        if any(
+            known_ids and ids[0] not in known_ids
+            for _, known_ids in _exact_channels(query, catalog, candidates)
+        ):
+            return None
+        variants = tuple(
+            t for t in _species_targets(query, catalog) if t.target_id == ids[0]
+        )
+        if variants and all(
+            _compatible_text_variant(query, target)
+            and (method == EXACT_NAME or _corroborates_synonym(query, target))
+            for target in variants
+        ):
+            return _result("matched", ids[0], ids, (method,), ())
+        return None
+    return None
+
+
+def _compatible_text_variant(query: MatchQuery, target: CatalogTarget) -> bool:
+    pairs = (
+        (query.uniprot_ids, target.uniprot_ids),
+        (query.hgnc_ids, target.hgnc_ids),
+        (
+            (query.gene_symbol.casefold(),) if query.gene_symbol else (),
+            (target.gene_symbol.casefold(),) if target.gene_symbol else (),
+        ),
+        (
+            (query.gene_id,) if query.gene_id else (),
+            (target.gene_id,) if target.gene_id else (),
+        ),
+    )
+    return all(
+        not supplied or not recorded or not set(supplied).isdisjoint(recorded)
+        for supplied, recorded in pairs
+    )
+
+
+def _corroborates_synonym(query: MatchQuery, target: CatalogTarget) -> bool:
+    """A shared alias alone cannot identify a variant with sparse provider IDs."""
+    gene_names = {value.casefold() for value in query.gene_aliases}
+    if query.gene_symbol:
+        gene_names.add(query.gene_symbol.casefold())
+    return bool(
+        (query.gene_id and query.gene_id == target.gene_id)
+        or (target.gene_symbol and target.gene_symbol.casefold() in gene_names)
+    )
+
+
+def _preferred_identity(
+    candidates: tuple[Candidate, ...], *, explicit_target_id: str | None = None
+) -> MatchResult | None:
+    """Choose a same-species anchor before consulting lower-priority channels."""
+    hgnc = set(_ids_of(candidates, HGNC))
+    uniprot = set(_ids_of(candidates, UNIPROT))
+    targets = hgnc | uniprot
+    if not targets:
+        return None
+    if explicit_target_id is not None:
+        explicit = _ids_of(candidates, EXPLICIT)
+        if not explicit:
+            return None
+        conflict = _identity_conflict(
+            [(EXPLICIT, explicit), (UNIPROT, _ids(uniprot)), (HGNC, _ids(hgnc))]
+        )
+        if conflict is not None:
+            return conflict
+    target_ids = _ids(targets)
+    methods = tuple(method for method, ids in ((UNIPROT, uniprot), (HGNC, hgnc)) if ids)
+    if len(target_ids) == 1:
+        return _result("matched", target_ids[0], target_ids, methods, ())
+    if hgnc and uniprot and hgnc.isdisjoint(uniprot):
+        return _result(
+            "identity_conflict", None, target_ids, methods, ("identity_conflict",)
+        )
+    return _result("ambiguous", None, target_ids, methods, ("ambiguous_match",))
 
 
 def _identity_conflict(
@@ -579,6 +751,11 @@ def _attach_auxiliary_diagnostics(
             )
     if not extras:
         return result
-    return cast(
-        MatchResult, replace(result, diagnostics=(*result.diagnostics, *extras))
+    return MatchResult(
+        match_status=result.match_status,
+        matched_target_id=result.matched_target_id,
+        candidate_target_ids=result.candidate_target_ids,
+        match_method=result.match_method,
+        match_evidence_ids=result.match_evidence_ids,
+        diagnostics=(*result.diagnostics, *extras),
     )

@@ -23,6 +23,12 @@ from bioetl.infrastructure.adapters.iuphar import (
     parse_target_payloads,
     validate_acceptance_receipt,
 )
+from iuphar_target_class.identifier_roles import (
+    ANCHOR_PRIORITY_POLICY_VERSION,
+    CHANNEL_EC_POLICY_VERSION,
+    RANKED_CLASS_POLICY_VERSION,
+    TRANSCRIPTION_FACTOR_POLICY_VERSION,
+)
 from iuphar_target_class.policy import (
     LOCAL_CATALOG_VERSION,
     LOCAL_RULE_CATALOG_VERSION,
@@ -383,6 +389,383 @@ def test_an_ec_input_does_not_replace_direct_iuphar(tmp_path):
     assert output["iuphar_subclasses"] == ["G protein-coupled receptors"]
 
 
+def _channel_ec_adapter(profile, policy=CHANNEL_EC_POLICY_VERSION):
+    snapshot = profile.snapshot.snapshot
+    snapshot = replace(
+        snapshot,
+        species_annotations={
+            (key, annotation.taxon): annotation
+            for key, annotation in snapshot.annotations.items()
+        },
+    )
+    return IupharTargetClassificationAdapter(
+        replace(
+            profile,
+            matching_policy_version=policy,
+            snapshot=replace(profile.snapshot, snapshot=snapshot),
+        )
+    )
+
+
+@pytest.mark.parametrize(
+    ("ec", "expected", "source"),
+    [
+        ("3.4.21.1", "Receptor", "iuphar_normalized"),
+        (
+            "2.3.1.-|2.3.2.13|3.4.-.-|3.5.1.44",
+            "Enzyme.Multitarget",
+            "ec_rule",
+        ),
+    ],
+)
+def test_channel_ec_policy_layers_ec_over_existing_nonchannel_class(
+    tmp_path, ec, expected, source
+):
+    adapter = _channel_ec_adapter(
+        _profile(
+            tmp_path, target_changes={"type": "gpcr"}, required_target_types=["gpcr"]
+        )
+    )
+    result = _classify(adapter, target_ec_numbers=ec)
+    assert result.projection["iuphar_target_id"] == "1"
+    assert result.projection["iuphar_class"] == "Receptor"
+    assert result.projection["effective_class"] == expected
+    assert result.projection["effective_source"] == source
+
+
+def test_channel_wins_against_both_enzyme_and_multiple_ec_categories(tmp_path):
+    adapter = _channel_ec_adapter(
+        _profile(tmp_path, target_changes={"type": "vgic", "familyIds": [78, 471]})
+    )
+    result = _classify(adapter, target_ec_numbers="2.7.11.1|3.4.21.1")
+    assert result.projection["iuphar_target_id"] == "1"
+    assert result.projection["iuphar_annotation_status"] == "conflicting"
+    assert result.projection["iuphar_class"] is None
+    assert result.projection["effective_class"] == "Ion Channel"
+    assert result.projection["effective_source"] == "channel_priority"
+    assert "ion_channel_over_enzyme" in result.diagnostic_codes
+
+
+def test_unconfirmed_channel_candidate_blocks_ec_override(tmp_path):
+    adapter = _channel_ec_adapter(_profile(tmp_path, target_changes={"type": "vgic"}))
+    result = _classify(
+        adapter, component_accessions=None, target_ec_numbers="2.7.11.1|3.4.21.1"
+    )
+    assert result.projection["iuphar_target_id"] is None
+    assert result.projection["effective_class"] is None
+    output = {a.name: json.loads(a.payload) for a in result.artifacts}
+    assert output["candidates.json"]
+
+
+@pytest.mark.parametrize(
+    ("ec", "expected"),
+    [
+        ("2.3.1.-|2.3.2.13|invalid", "Enzyme.Transferase"),
+        ("7.1.-.-", "Enzyme.Translocase"),
+        ("2.3.1.-|3.4.-.-", "Enzyme.Multitarget"),
+        ("2.-.1.-|8.4.-.-", None),
+    ],
+)
+def test_channel_ec_policy_classifies_proteins_outside_provider_species(
+    tmp_path, ec, expected
+):
+    adapter = _channel_ec_adapter(_profile(tmp_path))
+    result = _classify(
+        adapter,
+        taxonomy_id=9823,
+        organism="Sus scrofa",
+        target_ec_numbers=ec,
+        target_protein_synonyms="[tau protein] kinase",
+    )
+    assert result.projection["iuphar_target_id"] is None
+    assert result.projection["effective_class"] == expected
+    assert "unsupported_taxon" in result.diagnostic_codes
+    if expected:
+        assert result.projection["iuphar_match_status"] == "source_unavailable"
+        assert result.projection["effective_source"] == "ec_rule"
+        output = {a.name: json.loads(a.payload) for a in result.artifacts}
+        assert any(
+            item["source_id"] == "ec_effective_class"
+            for item in output["evidence.json"]
+        )
+
+
+@pytest.mark.parametrize(
+    ("ec", "label"),
+    [
+        ("2.3.1.199", "Enzyme.Transferase"),
+        ("3.1.26.n2", "Enzyme.Hydrolase"),
+        ("3.1.26.N2|2.3.1.-", "Enzyme.Multitarget"),
+    ],
+)
+def test_ranked_policy_uses_ec_before_synonyms(tmp_path, ec, label):
+    adapter = _channel_ec_adapter(
+        _profile(tmp_path, target_changes={"type": "vgic", "synonyms": ["SSC1"]}),
+        RANKED_CLASS_POLICY_VERSION,
+    )
+    result = _classify(
+        adapter,
+        pref_name="Another protein",
+        component_accessions="Q9BW60",
+        target_gene_synonyms="SSC1",
+        target_ec_numbers=ec,
+    )
+    assert result.projection["iuphar_target_id"] is None
+    assert result.projection["effective_class"] == label
+    assert result.projection["effective_source"] == "ec_rule"
+    assert "invalid_ec" not in result.diagnostic_codes
+    artifacts = {a.name: json.loads(a.payload) for a in result.artifacts}
+    assert artifacts["candidates.json"] == []
+    assert any(
+        ec.split("|")[0] in item["content"] for item in artifacts["evidence.json"]
+    )
+
+
+@pytest.mark.parametrize(
+    ("fields", "method"),
+    [
+        ({"target_ec_numbers": "3.1.26.n2"}, "exact_name"),
+        (
+            {"pref_name": "alternate label", "target_gene_synonyms": "TARGET1"},
+            "exact_synonym",
+        ),
+    ],
+)
+def test_ranked_policy_accepts_exact_name_or_safe_synonym(tmp_path, fields, method):
+    adapter = _channel_ec_adapter(
+        _profile(tmp_path, target_changes={"type": "gpcr", "geneSymbol": "TARGET1"}),
+        RANKED_CLASS_POLICY_VERSION,
+    )
+    result = _classify(adapter, component_accessions=None, **fields)
+    assert result.projection["iuphar_target_id"] == "1"
+    assert result.projection["iuphar_class"] == "Receptor"
+    assert result.projection["effective_class"] == "Receptor"
+    outputs = {a.name: json.loads(a.payload) for a in result.artifacts}
+    assert method in {row["match_method"] for row in outputs["candidates.json"]}
+
+
+def test_ranked_synonym_needs_corroboration_when_provider_lacks_anchors(tmp_path):
+    adapter = _channel_ec_adapter(
+        _profile(
+            tmp_path,
+            target_changes={
+                "uniprotIds": [],
+                "geneSymbol": "RIPK2",
+                "synonyms": ["CCK"],
+            },
+        ),
+        RANKED_CLASS_POLICY_VERSION,
+    )
+    result = _classify(adapter, pref_name="Cholecystokinin", target_gene_synonyms="CCK")
+    assert result.projection["iuphar_target_id"] is None
+    assert result.projection["effective_class"] is None
+    rows = json.loads(
+        next(a.payload for a in result.artifacts if a.name == "candidates.json")
+    )
+    assert [row["match_method"] for row in rows] == ["exact_synonym"]
+
+
+@pytest.mark.parametrize("name", ["known enzyme", "alternate label"])
+def test_ranked_text_match_does_not_override_incompatible_uniprot(tmp_path, name):
+    target = _profile(tmp_path)
+    adapter = _channel_ec_adapter(target, RANKED_CLASS_POLICY_VERSION)
+    result = _classify(adapter, pref_name=name, component_accessions="Q9BW60")
+    assert result.projection["iuphar_target_id"] is None
+    assert result.projection["effective_class"] is None
+
+
+@pytest.mark.parametrize(
+    ("name", "taxonomy_id", "organism", "ec", "label"),
+    [
+        (
+            "Sodium channel protein type 7",
+            9606,
+            "Homo sapiens",
+            "unknown",
+            "Ion Channel",
+        ),
+        (
+            "Acetylcholine receptor alpha chain",
+            9823,
+            "Sus scrofa",
+            "unknown",
+            "Receptor",
+        ),
+        (
+            "Long chain fatty acid elongase",
+            9606,
+            "Homo sapiens",
+            "3.n2.26.9",
+            "Enzyme.Transferase",
+        ),
+        (
+            "Alcohol dehydrogenase",
+            9606,
+            "Homo sapiens",
+            "unknown",
+            "Enzyme.Oxidoreductase",
+        ),
+        ("Cyclin-dependent kinase inhibitor", 9606, "Homo sapiens", "unknown", None),
+        ("Protein kinase C inhibitor protein 1", 9606, "Homo sapiens", "unknown", None),
+        ("Inhibitor of protein kinase", 9606, "Homo sapiens", "unknown", None),
+        (
+            "ATP-binding cassette transporter",
+            9606,
+            "Homo sapiens",
+            "unknown",
+            "Transporter",
+        ),
+        (
+            "ATP-binding cassette transporter",
+            9823,
+            "Sus scrofa",
+            "unknown",
+            "Transporter",
+        ),
+        (
+            "Calcium-binding protein kinase",
+            9606,
+            "Homo sapiens",
+            "unknown",
+            "Enzyme.Transferase",
+        ),
+        (
+            "ATP-binding cassette transporter inhibitor",
+            9606,
+            "Homo sapiens",
+            "unknown",
+            None,
+        ),
+        ("Sodium channel beta blocker", 9606, "Homo sapiens", "unknown", None),
+        (
+            "Transmembrane sodium channel and receptor",
+            9606,
+            "Homo sapiens",
+            "unknown",
+            None,
+        ),
+    ],
+)
+def test_ranked_policy_uses_unambiguous_name_keywords_as_last_fallback(
+    tmp_path, name, taxonomy_id, organism, ec, label
+):
+    adapter = _channel_ec_adapter(_profile(tmp_path), RANKED_CLASS_POLICY_VERSION)
+    result = _classify(
+        adapter,
+        pref_name=name,
+        taxonomy_id=taxonomy_id,
+        organism=organism,
+        target_ec_numbers=ec,
+        component_accessions=None,
+        target_protein_synonyms=None,
+    )
+    assert result.projection["iuphar_target_id"] is None
+    assert result.projection["effective_class"] == label
+    if label:
+        assert result.projection["effective_source"] == "keyword_rule"
+        assert result.projection["local_class"] == label
+
+
+@pytest.mark.parametrize(
+    ("kwargs", "expected_class", "expected_id"),
+    [
+        ({"pref_name": "Transcription factor MafG"}, "Receptor.Nuclear receptor", None),
+        (
+            {
+                "pref_name": "Transcription-factor Jun",
+                "taxonomy_id": 9913,
+                "organism": "Bos taurus",
+            },
+            "Receptor.Nuclear receptor",
+            None,
+        ),
+        ({"pref_name": "General transcription factor IIF subunit 2"}, None, None),
+        ({"pref_name": "Inhibitor of transcription factor Jun"}, None, None),
+        (
+            {"pref_name": "Inhibitor of DNA-binding transcription factor Jun"},
+            None,
+            None,
+        ),
+        (
+            {"pref_name": "Protein bound to the DNA-binding transcription factor Jun"},
+            None,
+            None,
+        ),
+        (
+            {"pref_name": "Protein associated with activated transcription factor Jun"},
+            None,
+            None,
+        ),
+        (
+            {"pref_name": "Coactivator of DNA-binding transcription factor Jun"},
+            None,
+            None,
+        ),
+        (
+            {"pref_name": "DNA-binding transcription factor Jun"},
+            "Receptor.Nuclear receptor",
+            None,
+        ),
+        ({"pref_name": "Protein binding to transcription factor Jun"}, None, None),
+        ({"pref_name": "Protein bound to the transcription factor Jun"}, None, None),
+        (
+            {"pref_name": "Protein interacting with transcription factor Jun"},
+            None,
+            None,
+        ),
+        ({"pref_name": "Protein associated with transcription factor Jun"}, None, None),
+        ({"pref_name": "Transcription factor Jun coactivator"}, None, None),
+        (
+            {"pref_name": "Membrane-bound transcription factor site-1 protease"},
+            "Enzyme.Hydrolase",
+            None,
+        ),
+        (
+            {
+                "pref_name": "Transcription factor MafG",
+                "component_accessions": "P12345",
+            },
+            "Enzyme",
+            "1",
+        ),
+        (
+            {
+                "pref_name": "Transcription factor MafG",
+                "target_ec_numbers": "3.1.26.n2",
+            },
+            "Enzyme.Hydrolase",
+            None,
+        ),
+    ],
+)
+def test_global_transcription_factor_fallback(
+    tmp_path, kwargs, expected_class, expected_id
+):
+    adapter = _channel_ec_adapter(
+        _profile(tmp_path), TRANSCRIPTION_FACTOR_POLICY_VERSION
+    )
+    result = _classify(
+        adapter,
+        **({"component_accessions": None, "target_protein_synonyms": None} | kwargs),
+    )
+    assert result.projection["effective_class"] == expected_class
+    assert result.projection["iuphar_target_id"] == expected_id
+    if expected_class == "Receptor.Nuclear receptor":
+        assert result.projection["local_class"] == expected_class
+        assert result.projection["effective_source"] == "keyword_rule"
+
+
+def test_older_ranked_policy_keeps_transcription_factor_outcome(tmp_path):
+    adapter = _channel_ec_adapter(_profile(tmp_path), RANKED_CLASS_POLICY_VERSION)
+    result = _classify(
+        adapter,
+        pref_name="Transcription factor MafG",
+        component_accessions=None,
+        target_protein_synonyms=None,
+    )
+    assert result.projection["effective_class"] is None
+
+
 def test_current_rule_catalog_records_the_enzyme_subclass(tmp_path):
     profile = _profile(
         tmp_path,
@@ -551,3 +934,123 @@ def test_profile_cannot_claim_an_unexecuted_normalization_version(tmp_path):
         load_profile(
             tmp_path / "profile.json", reference["sha256"], require_acceptance=False
         )
+
+
+@pytest.mark.parametrize(
+    "policy",
+    [
+        CHANNEL_EC_POLICY_VERSION,
+        RANKED_CLASS_POLICY_VERSION,
+        TRANSCRIPTION_FACTOR_POLICY_VERSION,
+    ],
+)
+def test_ambiguous_channel_anchor_blocks_every_ec_fallback(tmp_path, policy):
+    from iuphar_target_class.pipeline import IndexedSnapshot
+
+    profile = _profile(tmp_path, target_changes={"type": "vgic"})
+    old = profile.snapshot.snapshot
+    second = replace(old.catalog[0], target_id="2", uniprot_ids=("Q12345",))
+    snapshot = IndexedSnapshot.from_approved_gtopdb(
+        snapshot_id=old.snapshot_id,
+        release=old.mapping_version,
+        complete=True,
+        catalog=(*old.catalog, second),
+        annotations={
+            **old.annotations,
+            "2": replace(old.annotations["1"], target_id="2"),
+        },
+    )
+    profile = replace(profile, snapshot=replace(profile.snapshot, snapshot=snapshot))
+    result = _classify(
+        _channel_ec_adapter(profile, policy),
+        component_accessions="P12345|Q12345",
+        target_ec_numbers="2.7.11.1|3.4.21.1",
+    )
+    assert result.projection["iuphar_target_id"] is None
+    assert result.projection["effective_class"] is None
+
+
+def test_hgnc_anchor_runtime_and_canonical_fields_match(tmp_path):
+    from bioetl.infrastructure.adapters.iuphar.adapter import _adapt_inputs
+    from iuphar_target_class.bioetl_input import project_target_fields
+    from iuphar_target_class.models import RawTargetRow, RunProvenance
+    from iuphar_target_class.pipeline import IndexedSnapshot, classify_batch
+
+    profile = _profile(tmp_path)
+    old = profile.snapshot.snapshot
+    snapshot = IndexedSnapshot.from_approved_gtopdb(
+        snapshot_id=old.snapshot_id,
+        release=old.mapping_version,
+        complete=True,
+        catalog=(replace(old.catalog[0], hgnc_ids=("101",)),),
+        annotations=old.annotations,
+    )
+    profile = replace(
+        profile,
+        matching_policy_version=ANCHOR_PRIORITY_POLICY_VERSION,
+        snapshot=replace(profile.snapshot, snapshot=snapshot),
+    )
+    business = _business(
+        component_accessions=None,
+        target_xref_hgnc_ids="HGNC:101",
+        pref_name="unseen protein",
+        target_protein_synonyms=None,
+    )
+    inputs, rejected = _adapt_inputs(
+        (TargetClassificationInput("target:1", business),),
+        profile,
+        include_detail=False,
+    )
+    canonical = project_target_fields(business, "9606")
+    assert not rejected
+    assert inputs[0].fields == canonical
+    assert "hgnc" not in canonical
+    batch = classify_batch(
+        (RawTargetRow("target:1", canonical, "protein"),),
+        snapshot=snapshot,
+        provenance=RunProvenance(
+            snapshot.snapshot_id,
+            profile.normalization_version,
+            profile.rules_version,
+            profile.classification_schema_version,
+            "2026-11-16T00:00:00Z",
+            "2026-11-16T00:01:00Z",
+            ANCHOR_PRIORITY_POLICY_VERSION,
+        ),
+        run_id="run-a",
+    )
+    runtime = IupharTargetClassificationAdapter(profile).classify_record(
+        business,
+        input_row_id="target:1",
+        run_id="run-a",
+        run_started_at="2026-11-16T00:01:00Z",
+    )
+    assert batch.rows[0].result.matched_target_id == "1"
+    assert runtime.projection["iuphar_target_id"] == "1"
+
+
+@pytest.mark.parametrize("ec", [None, "3.1.26.n2"])
+def test_ranked_ec_preempts_an_otherwise_corroborated_synonym(tmp_path, ec):
+    profile = _profile(
+        tmp_path,
+        target_changes={"type": "vgic", "geneSymbol": "SSC1", "synonyms": ["SSC1"]},
+    )
+    result = _classify(
+        _channel_ec_adapter(profile, RANKED_CLASS_POLICY_VERSION),
+        pref_name="alternate label",
+        component_accessions=None,
+        target_gene_synonyms="SSC1",
+        target_ec_numbers=ec,
+    )
+    artifacts = {a.name: json.loads(a.payload) for a in result.artifacts}
+    if ec is None:
+        assert result.projection["iuphar_target_id"] == "1"
+        assert result.projection["effective_class"] == "Ion Channel"
+        assert "exact_synonym" in {
+            row["match_method"] for row in artifacts["candidates.json"]
+        }
+    else:
+        assert result.projection["iuphar_target_id"] is None
+        assert result.projection["effective_class"] == "Enzyme.Hydrolase"
+        assert result.projection["effective_source"] == "ec_rule"
+        assert artifacts["candidates.json"] == []

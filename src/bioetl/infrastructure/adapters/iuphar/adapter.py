@@ -125,18 +125,17 @@ def _adapt_inputs(
     eligible: list[RawTargetRow] = []
     for row in inputs:
         taxon, reason = _eligibility(
-            row.business_data, profile.snapshot.species_taxon_ids
+            row.business_data,
+            profile.snapshot.species_taxon_ids,
+            policy=profile.matching_policy_version,
         )
         if reason is not None:
             results[row.input_row_id] = _unclassified(
                 row, profile.profile_sha256, reason, include_detail=include_detail
             )
         else:
-            eligible.append(
-                RawTargetRow(
-                    row.input_row_id, _raw_fields(row.business_data, taxon), "protein"
-                )
-            )
+            fields = _raw_fields(row.business_data, taxon)
+            eligible.append(RawTargetRow(row.input_row_id, fields, "protein"))
     return eligible, results
 
 

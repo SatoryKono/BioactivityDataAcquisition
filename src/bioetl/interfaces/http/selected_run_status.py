@@ -35,12 +35,9 @@ from bioetl.interfaces.http._health_server_observability_protocols import (
 )
 from bioetl.interfaces.http._reconciliation_display import linked_reconciliation_display
 from bioetl.interfaces.http._selected_run_a2_resolve import (
-    CATALOG_UNAVAILABLE_REASON,
     NO_RUNS_REASON,
     NO_RUNS_STATUS,
     is_unresolved_run_id,
-    list_a2_catalog,
-    resolve_a2_latest_run_id,
 )
 from bioetl.interfaces.http._selected_run_artifact_probes import _artifact_probes
 from bioetl.interfaces.http._selected_run_live import (
@@ -61,10 +58,15 @@ from bioetl.interfaces.http._selected_run_report_assessment import (
     _selected_pipeline,
 )
 from bioetl.interfaces.http._selected_run_unavailable import (
+    _resolve_a2_run_id,
     manifest_port_for_context,
     resolve_selected_run,
     respond_exact_selection,
     unavailable_status,
+)
+from bioetl.interfaces.http._selector_catalog import (
+    SelectorCatalog,
+    SelectorCatalogSnapshot,
 )
 from bioetl.interfaces.http.run_report_ops import _validated_artifact_paths
 
@@ -289,34 +291,6 @@ def _merge_active_diagnostics(
     return merged
 
 
-def _resolve_a2_run_id(
-    host: _HealthObservabilityRoutingHost,
-    *,
-    pipeline: str,
-    query: dict[str, str],
-) -> str | dict[str, object]:
-    """Return concrete run_id or an unavailable payload for A2 auto-select."""
-    if host._run_manifest_port is None:
-        return unavailable_status(
-            pipeline, "-", _QUERY_ERROR, CATALOG_UNAVAILABLE_REASON
-        )
-    manifests, workflow_manifests = list_a2_catalog(
-        host._run_manifest_port,
-        getattr(host, "_workflow_manifest_port", None),
-    )
-    latest = resolve_a2_latest_run_id(
-        manifests=manifests,
-        ledger_port=host._run_ledger_port,
-        workflow_manifests=workflow_manifests,
-        pipeline=pipeline,
-        query=query,
-        report_store=getattr(host, "_run_report_store", None),
-    )
-    if latest is None:
-        return unavailable_status(pipeline, "-", _NO_RUNS, NO_RUNS_REASON)
-    return latest
-
-
 def _load_selected_with_live_fallback(
     host: _HealthObservabilityRoutingHost,
     *,
@@ -352,6 +326,22 @@ def _load_selected_with_live_fallback(
     return result
 
 
+async def _shared_a2_catalog(
+    host: _HealthObservabilityRoutingHost, requested_run_id: str
+) -> SelectorCatalogSnapshot | None:
+    """Reuse the shared catalog only when the request needs A2 resolution."""
+    shared = getattr(host, "_selector_catalog", None)
+    if (
+        is_unresolved_run_id(requested_run_id)
+        and host._run_manifest_port is not None
+        and isinstance(shared, SelectorCatalog)
+    ):
+        return await shared.read(
+            host._run_manifest_port, getattr(host, "_workflow_manifest_port", None)
+        )
+    return None
+
+
 async def handle_selected_run_status(
     host: _HealthObservabilityRoutingHost,
     writer: asyncio.StreamWriter,
@@ -374,11 +364,13 @@ async def handle_selected_run_status(
     ):
         return
 
-    def load() -> dict[str, object]:
+    def load(catalog: SelectorCatalogSnapshot | None = None) -> dict[str, object]:
         run_id = requested_run_id
         a2_resolved = False
         if is_unresolved_run_id(run_id):
-            resolved = _resolve_a2_run_id(host, pipeline=pipeline, query=query)
+            resolved = _resolve_a2_run_id(
+                host, pipeline=pipeline, query=query, catalog=catalog
+            )
             if isinstance(resolved, dict):
                 return resolved
             run_id = resolved
@@ -393,12 +385,16 @@ async def handle_selected_run_status(
             skip_scope_check=a2_resolved,
         )
 
+    async def load_with_catalog() -> dict[str, object]:
+        catalog = await _shared_a2_catalog(host, requested_run_id)
+        return await asyncio.to_thread(load, catalog)
+
     async def cached_load() -> dict[str, object]:
         # Propagate ForensicEndpointUnavailable / IO failures so the cache does
         # not store QUERY ERROR frames as a fresh success payload.
         return await run_bounded_forensic_operation(
             limiter=host._forensic_endpoint_limiter,
-            operation_factory=lambda: asyncio.to_thread(load),
+            operation_factory=load_with_catalog,
             endpoint="selected-run-status",
         )
 

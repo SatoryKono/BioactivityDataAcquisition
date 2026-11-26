@@ -42,6 +42,55 @@ Proven overlaps become `uniprot_equivalent` (evidence only).
 - Matching policy version: `rf002-uniprot-roles-2026-11-23` (legacy merged
   anchors do not qualify this policy; RF-008 admits independently)
 
+## Effective-class policy `hgnc-uniprot-channel-ec-v1`
+
+For single proteins, the policy keeps the HGNC and primary UniProt priority
+and resolves a supported ion-channel/enzyme class conflict as `Ion Channel`.
+An ion-channel candidate blocks EC inference. Distinct valid first EC levels
+give `Enzyme.Multitarget`. A single EC level fills a missing effective class
+from the EC category, including for proteins outside IUPHAR species coverage.
+Partial EC codes count when their first level is valid. The effective source
+records `channel_priority` or `ec_rule`, and provider identity, annotation
+status and evidence remain available for review.
+
+Select the policy with `iuphar-snapshot-build --matching-policy-version
+hgnc-uniprot-channel-ec-v1`. Its profile requires its own RF-008 acceptance
+before use in `enrich`.
+
+## Effective-class policy `hgnc-uniprot-name-ec-keyword-v1`
+
+This version uses a same-species HGNC or primary UniProt match first, then a
+unique exact provider full name with compatible identifiers. Without a
+resolved provider class, a valid EC code supplies the effective class.
+Preliminary EC entries such as `3.1.26.n2` use the confirmed numeric levels.
+With a valid EC, synonyms are excluded from matching and cannot block the EC
+result. Without a valid EC, a unique same-species synonym can match when
+known identifiers are compatible and the gene symbol or Gene ID corroborates
+the match. The multi-category EC and ion-channel
+precedence rules still apply.
+
+If the identity and EC routes yield no result, standalone functional words
+in the target name can assign a local effective class with
+`effective_source=keyword_rule`. Conflicting keyword classes remain
+unassigned, except for ion channel versus enzyme. This fallback can also
+classify single proteins outside the IUPHAR species coverage. Keyword
+evidence records the word and the input name.
+
+Select this version with `--matching-policy-version
+hgnc-uniprot-name-ec-keyword-v1` at build time. The resulting profile
+requires its own RF-008 acceptance for `enrich`.
+
+## Effective-class policy `hgnc-uniprot-name-ec-keyword-tf-v1`
+
+This version adds a project-specific label for a target name identifying a
+transcription factor. It fills an empty effective class with
+`Receptor.Nuclear receptor` after the ranked identity, EC and existing
+keyword rules. It applies to single proteins across species. Names describing
+related proteins, including factor-binding proteins, proteases and complex
+subunits, do not trigger the transcription-factor rule. The result records
+`keyword_rule` as its effective source. This profile requires its own RF-008
+acceptance for `enrich`.
+
 ## Trigger
 
 Use this runbook to validate an offline IUPHAR classification dependency,
@@ -102,8 +151,9 @@ target record can hold fields this projection never sees. The kernel reads
 The `chembl_target` extractor does not set them, and it does not supply
 `keywords`, `predicted_l1`, or `predicted_l2`.
 
-The kernel UniProt channel is the ordered union of `component_accessions` and
-`target_xref_uniprot_ids`. Those two sources are not separate match channels.
+The kernel primary UniProt channel uses `component_accessions` and joined
+`uniprot_accession`. Auxiliary `target_xref_uniprot_ids` remain diagnostic;
+overlaps with primary accessions are recorded as equivalent evidence.
 
 `chembl_target_protein_classification` is a different pipeline. It is not this
 IUPHAR classifier. Workflows that write the same Silver/Gold target tables
@@ -111,14 +161,29 @@ still share the one `chembl_target` configuration.
 
 ### Stage signs and statuses
 
-Eligibility stops before classification. The reasons are
+Eligibility failures stop the affected row before classification. The reasons are
 `unsupported_target_type` (any type other than `SINGLE PROTEIN`),
 `invalid_taxonomy_id`, `unsupported_taxon`,
 `missing_taxonomy_for_known_organism`, and `taxonomy_name_conflict`. Those
 rows are `not_applicable` and do not receive a direct class.
 
+`unsupported_taxon` is an eligibility failure for the legacy and anchor-only
+policies. The channel-EC policy can admit an out-of-coverage single protein
+with a valid EC; ranked policies can also admit an unambiguous name keyword.
+For these admitted rows, provider matching remains `source_unavailable` with
+an `unsupported_taxon` diagnostic, while `effective_class` may be assigned by
+`ec_rule` or `keyword_rule`. Other eligibility failures still stop the row.
+
 Match status is `matched`, `ambiguous`, `not_found`, `source_unavailable`,
 `insufficient_input`, `identity_conflict`, or `contract_error`.
+
+For matching policy `hgnc-primary-uniprot-priority-v1`, an unambiguous
+same-species HGNC or primary UniProt hit confirms identity. Name and synonym
+hits remain in candidate evidence and cannot veto that result. Disjoint HGNC
+and primary UniProt hits produce `identity_conflict`. HGNC is a direct
+identifier only for human targets. This policy is opt-in through
+`iuphar-snapshot-build --matching-policy-version` and requires its own
+acceptance receipt before use in `enrich`.
 
 Annotation status is `available`, `partial`, `unmapped_type`, `conflicting`,
 or `not_available`. A `partial` annotation can still carry a coarse direct
