@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import math
+import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Any, cast
@@ -92,30 +94,48 @@ def restore_xlsx_table(path: str) -> pa.Table:
         and len(rows) != expected_rows
     ):
         raise ValueError("xlsx row count does not match the export manifest")
+    numeric_text_columns = set(
+        _optional_string_list(manifest.get("numeric_text_columns")) or ()
+    )
+    if not numeric_text_columns <= set(source_columns):
+        raise ValueError("xlsx numeric text column is missing")
     return table_from_xlsx_rows(
         rows,
         source_columns,
         _optional_string_list(manifest.get("column_types")),
+        numeric_text_columns=numeric_text_columns,
     )
 
 
 def write_xlsx_table_sheet(
     worksheet: Any,  # Any: openpyxl worksheet duck type
     table: pa.Table,
-) -> None:
-    """Write one Arrow table, keeping trailing all-null rows."""
+) -> list[str]:
+    """Write one Arrow table and return columns needing exact numeric text."""
     headers = list(table.column_names)
+    numeric_text_columns: set[str] = set()
     for column_index, header in enumerate(headers, start=1):
         _write_text(worksheet, 1, column_index, header)
-    columns = [table.column(index).to_pylist() for index in range(table.num_columns)]
+    columns = [
+        cast(list[object], table.column(index).to_pylist())
+        for index in range(table.num_columns)
+    ]
     for row_offset, values in enumerate(zip(*columns, strict=True), start=2):
         wrote = False
         for column_index, value in enumerate(values, start=1):
-            wrote = _write_value(worksheet, row_offset, column_index, value) or wrote
+            if value is None:
+                continue
+            wrote = True
+            if _needs_numeric_text(value):
+                numeric_text_columns.add(headers[column_index - 1])
+                _write_text(worksheet, row_offset, column_index, str(value))
+            else:
+                _write_value(worksheet, row_offset, column_index, value)
         if not wrote:
             # openpyxl omits a cell whose value is None, so a trailing all-null
             # row disappears on load. An empty string reads back as None.
             _write_text(worksheet, row_offset, 1, "")
+    return sorted(numeric_text_columns)
 
 
 def write_xlsx_manifest_sheet(
@@ -179,26 +199,35 @@ def load_xlsx_workbook(path: str) -> Any:  # Any: openpyxl workbook duck type
     return load_workbook(path, data_only=False)
 
 
+def _needs_numeric_text(value: object) -> bool:
+    """Detect numbers that native Excel cells cannot preserve exactly."""
+    if isinstance(value, bool):
+        return False
+    if isinstance(value, int):
+        return abs(value) >= 10**15
+    if not isinstance(value, float):
+        return False
+    if value == 0.0:
+        return math.copysign(1.0, value) < 0
+    magnitude = abs(value)
+    return (
+        not math.isfinite(value)
+        or magnitude < sys.float_info.min
+        or magnitude >= 1e308
+        or float(format(value, ".15g")) != value
+    )
+
+
 def _write_value(
     worksheet: Any,  # Any: openpyxl worksheet duck type
     row: int,
     column: int,
     value: object,
-) -> bool:
-    if value is None:
-        return False
-    if isinstance(value, bool):
+) -> None:
+    if isinstance(value, (bool, int, float)):
         worksheet.cell(row, column, value)
-        return True
-    if isinstance(value, int):
-        worksheet.cell(row, column, value)
-        return True
-    if isinstance(value, float):
-        worksheet.cell(row, column, value)
-        return True
-    text = value if isinstance(value, str) else str(value)
-    _write_text(worksheet, row, column, text)
-    return True
+    else:
+        _write_text(worksheet, row, column, str(value))
 
 
 def _write_text(

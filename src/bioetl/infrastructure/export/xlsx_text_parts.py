@@ -61,7 +61,9 @@ def write_arrow_xlsx(
     workbook = new_xlsx_workbook()
     worksheet = workbook.active
     worksheet.title = _DATA_SHEET_NAME
-    write_xlsx_table_sheet(worksheet, expanded)
+    numeric_text_columns = write_xlsx_table_sheet(worksheet, expanded)
+    if numeric_text_columns:
+        manifest["numeric_text_columns"] = numeric_text_columns
     write_xlsx_manifest_sheet(workbook, manifest)
     stamp_xlsx_workbook(workbook)
     save_xlsx_workbook(workbook, output_path)

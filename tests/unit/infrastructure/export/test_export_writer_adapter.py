@@ -283,6 +283,53 @@ def test_xlsx_round_trip_keeps_null_rows_numbers_and_first_duplicate(
     assert restored.column("blank").to_pylist() == [None, None, None, None]
 
 
+def test_xlsx_round_trip_preserves_excel_unsafe_numbers(tmp_path: Path) -> None:
+    import math
+
+    from openpyxl import load_workbook
+
+    from bioetl.infrastructure.export.export_writer_adapter import (
+        read_xlsx_export_manifest,
+        restore_xlsx_table,
+    )
+
+    large_id = 9_223_372_036_854_775_807
+    precise = 1.2345678901234567
+    subnormal = 5e-324
+    table = pa.table(
+        {
+            "identifier": pa.array([large_id, -large_id, 37, None, 0], type=pa.int64()),
+            "measurement": pa.array([precise, -0.0, subnormal, None, 1.25]),
+        }
+    )
+    output = ExportWriterAdapter().write_export(
+        table=table,
+        table_name="chembl.assay_parameters",
+        layer="silver",
+        fmt="xlsx",
+        output_dir=str(tmp_path),
+    )
+
+    workbook = load_workbook(output, read_only=True)
+    try:
+        assert list(workbook["Sheet1"].values)[1:] == [
+            (str(large_id), repr(precise)),
+            (str(-large_id), "-0.0"),
+            (37, repr(subnormal)),
+            (None, None),
+            (0, 1.25),
+        ]
+    finally:
+        workbook.close()
+    assert read_xlsx_export_manifest(output)["numeric_text_columns"] == [
+        "identifier",
+        "measurement",
+    ]
+    restored = restore_xlsx_table(output)
+    assert table.equals(restored)
+    assert math.copysign(1.0, restored["measurement"][1].as_py()) == -1.0
+
+
 def test_xlsx_text_part_name_collision_is_rejected(tmp_path: Path) -> None:
     table = pa.table(
         {
