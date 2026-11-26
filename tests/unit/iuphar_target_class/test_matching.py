@@ -829,3 +829,22 @@ def test_ranked_name_checks_explicit_gene_symbol_and_aliases(
     result = resolve_match(query, catalog, snapshot_complete=True)
     assert result.match_status == status
     assert result.matched_target_id == target_id
+
+
+@pytest.mark.parametrize("prioritize", [False, True])
+@pytest.mark.parametrize("ranked", [False, True])
+def test_explicit_other_species_id_is_not_replaced_by_shared_accession(
+    prioritize: bool, ranked: bool
+) -> None:
+    catalog = (
+        _target("1", uniprot="P11111", species="9606"),
+        _target("2", uniprot="P11111", species="10090"),
+    )
+    query = replace(
+        _query(target_id="2", organism="9606", uniprot_ids=("P11111",)),
+        prioritize_anchors=prioritize,
+        ranked_text=ranked,
+    )
+    result = resolve_match(query, catalog, snapshot_complete=True)
+    assert result.match_status != "matched"
+    assert result.matched_target_id is None
