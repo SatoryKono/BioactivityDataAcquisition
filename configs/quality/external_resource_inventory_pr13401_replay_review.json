@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "catalog_ref": "a22c3fd277d09180d31bdbc985e3340b41ddeadc",
-  "source_ref": "db5c345aa5fa6d7d24d5bb1d1a77e5fa490fce1c",
+  "source_ref": "88d065af436e4b62008fc68b4224928100d0c850",
   "source_reviews": {
     "src/bioetl/application/pipelines/chembl/target_protein_classification_transformer.py": "Project shaped string classification identifiers (leaf_id, root_id, l1_id..l5_id) to the published numeric Gold contract in transform_for_gold via int(). Pure in-memory projection; no file, network, or process acquisition calls added.",
     "src/bioetl/interfaces/http/_selected_run_artifact_probes.py": "Rework Windows bronze_batch binding: prefer the natively reachable recorded file (pathlib is_file readability check only), compare the binding prefix with PureWindowsPath case-insensitive segment rules while keeping the original tail case, and fail closed with artifact_path_escape when an absolute Windows reference escapes the attested data root instead of falling through to the generic resolver. No new external acquisition calls added.",
