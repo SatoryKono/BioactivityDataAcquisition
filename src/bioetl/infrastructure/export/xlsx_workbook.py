@@ -207,14 +207,14 @@ def _needs_numeric_text(value: object) -> bool:
         return abs(value) >= 10**15
     if not isinstance(value, float):
         return False
-    if value == 0.0:
+    if not value:
         return math.copysign(1.0, value) < 0
     magnitude = abs(value)
     return (
         not math.isfinite(value)
         or magnitude < sys.float_info.min
         or magnitude >= 1e308
-        or float(format(value, ".15g")) != value
+        or float(format(value, ".15g")).hex() != value.hex()
     )
 
 

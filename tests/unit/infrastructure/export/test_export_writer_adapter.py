@@ -298,8 +298,10 @@ def test_xlsx_round_trip_preserves_excel_unsafe_numbers(tmp_path: Path) -> None:
     subnormal = 5e-324
     table = pa.table(
         {
-            "identifier": pa.array([large_id, -large_id, 37, None, 0], type=pa.int64()),
-            "measurement": pa.array([precise, -0.0, subnormal, None, 1.25]),
+            "identifier": pa.array(
+                [large_id, -large_id, 37, None, 0, 1], type=pa.int64()
+            ),
+            "measurement": pa.array([precise, -0.0, subnormal, None, 1.25, 0.0]),
         }
     )
     output = ExportWriterAdapter().write_export(
@@ -318,6 +320,7 @@ def test_xlsx_round_trip_preserves_excel_unsafe_numbers(tmp_path: Path) -> None:
             (37, repr(subnormal)),
             (None, None),
             (0, 1.25),
+            (1, 0),
         ]
     finally:
         workbook.close()
@@ -327,7 +330,8 @@ def test_xlsx_round_trip_preserves_excel_unsafe_numbers(tmp_path: Path) -> None:
     ]
     restored = restore_xlsx_table(output)
     assert table.equals(restored)
-    assert math.copysign(1.0, restored["measurement"][1].as_py()) == -1.0
+    assert math.copysign(1.0, restored["measurement"][1].as_py()) < 0
+    assert math.copysign(1.0, restored["measurement"][5].as_py()) > 0
 
 
 def test_xlsx_text_part_name_collision_is_rejected(tmp_path: Path) -> None:
