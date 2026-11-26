@@ -1846,6 +1846,7 @@ def test_shadow_compare_routes_codex_launchers_and_guidance(changed_file: str) -
                 "configs/quality/external_resource_inventory_pr0_unreviewed.json",
             )
             for review_name in (
+                "external_resource_inventory_pr13400_cache_review.json",
                 "external_resource_inventory_pr13061_review.json",
                 "external_resource_inventory_pr13266_review.json",
                 "external_resource_inventory_pr13281_review.json",
