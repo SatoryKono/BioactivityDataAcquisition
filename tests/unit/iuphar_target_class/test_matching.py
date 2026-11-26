@@ -506,3 +506,36 @@ def test_anchor_priority_preserves_cross_species_primary_conflict(
     assert result.match_status == "identity_conflict"
     assert result.matched_target_id is None
     assert "identity_conflict" in {item.code for item in result.diagnostics}
+
+
+@pytest.mark.parametrize("channel", ["uniprot", "hgnc"])
+def test_priority_anchor_cannot_replace_explicit_target_id(channel: str) -> None:
+    catalog = (
+        replace(_target("1", uniprot="P11111", species="9606"), hgnc_ids=("101",)),
+        _target("2", uniprot="P22222", species="9606"),
+    )
+    query = replace(
+        _query(
+            target_id="2",
+            organism="9606",
+            uniprot_ids=("P11111",) if channel == "uniprot" else (),
+        ),
+        hgnc_ids=("101",) if channel == "hgnc" else (),
+        prioritize_anchors=True,
+    )
+    result = resolve_match(query, catalog, snapshot_complete=True)
+    assert result.match_status == "identity_conflict"
+    assert result.matched_target_id is None
+    assert result.candidate_target_ids == ("1", "2")
+
+
+def test_priority_anchor_does_not_replace_unknown_explicit_target_id() -> None:
+    query = replace(
+        _query(target_id="missing", uniprot_ids=("P11111",), organism="9606"),
+        prioritize_anchors=True,
+    )
+    result = resolve_match(
+        query, (_target("1", uniprot="P11111", species="9606"),), snapshot_complete=True
+    )
+    assert result.match_status != "matched"
+    assert result.matched_target_id is None

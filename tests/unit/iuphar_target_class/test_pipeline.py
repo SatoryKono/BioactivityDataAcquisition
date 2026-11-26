@@ -1139,3 +1139,68 @@ def test_distinct_chembl_rows_keep_conflicting_direct_evidence():
     assert set(rows[0]["iuphar_class_candidates"]) == {"Receptor", "Enzyme"}
     assert rows[1]["iuphar_class"] == "Enzyme"
     assert all(row["match_evidence_ids"] for row in rows)
+
+
+@pytest.mark.parametrize("business", ["{", "[]", "null"])
+def test_bad_business_json_is_isolated_from_other_batch_rows(business):
+    from iuphar_target_class.identifier_roles import RANKED_CLASS_POLICY_VERSION
+
+    batch = pipeline.classify_batch(
+        (
+            RawTargetRow("bad", {"source_business_data": business}, "protein"),
+            RawTargetRow(
+                "good",
+                {"target_id": "1", "organism": "Human", "source_business_data": "{}"},
+                "protein",
+            ),
+        ),
+        snapshot=_snapshot(),
+        provenance=replace(
+            _provenance(), matching_policy_version=RANKED_CLASS_POLICY_VERSION
+        ),
+        run_id="fixed",
+    )
+    rows = {row.result.input_row_id: row.result for row in batch.rows}
+    assert rows["bad"].input_validation_status == "invalid_input"
+    assert "source_business_data must be a JSON object" in rows["bad"].input_errors
+    assert rows["good"].input_validation_status == "valid"
+    assert rows["good"].matched_target_id == "1"
+
+
+def test_ranked_full_name_is_indexed_outside_names_and_synonyms():
+    from iuphar_target_class.identifier_roles import RANKED_CLASS_POLICY_VERSION
+
+    old = _snapshot()
+    snapshot = pipeline.IndexedSnapshot.build(
+        snapshot_id="fixture",
+        mapping_version="fixture-release",
+        complete=True,
+        catalog=(
+            replace(
+                old.catalog[0],
+                names=("short",),
+                synonyms=(),
+                full_names=("Official receptor name",),
+            ),
+        ),
+        annotations=old.annotations,
+        family_nodes=(FamilyNode("family", (), "gpcr"),),
+        type_to_class={"gpcr": "Receptor"},
+        family_to_class={},
+    )
+    batch = pipeline.classify_batch(
+        (
+            RawTargetRow(
+                "full-name",
+                {"name": "Official receptor name", "organism": "Human"},
+                "protein",
+            ),
+        ),
+        snapshot=snapshot,
+        provenance=replace(
+            _provenance(), matching_policy_version=RANKED_CLASS_POLICY_VERSION
+        ),
+        run_id="fixed",
+    )
+    assert batch.rows[0].result.matched_target_id == "1"
+    assert batch.rows[0].result.iuphar_class == "Receptor"

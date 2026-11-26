@@ -303,7 +303,7 @@ def _decide(
     if species_conflict is not None:
         return species_conflict
     if query.prioritize_anchors and query.organism is not None:
-        preferred = _preferred_identity(candidates)
+        preferred = _preferred_identity(candidates, explicit_target_id=query.target_id)
         if preferred is not None:
             return preferred
     explicit = _ids_of(candidates, EXPLICIT)
@@ -425,13 +425,24 @@ def _corroborates_synonym(query: MatchQuery, target: CatalogTarget) -> bool:
     )
 
 
-def _preferred_identity(candidates: tuple[Candidate, ...]) -> MatchResult | None:
+def _preferred_identity(
+    candidates: tuple[Candidate, ...], *, explicit_target_id: str | None = None
+) -> MatchResult | None:
     """Choose a same-species anchor before consulting lower-priority channels."""
     hgnc = set(_ids_of(candidates, HGNC))
     uniprot = set(_ids_of(candidates, UNIPROT))
     targets = hgnc | uniprot
     if not targets:
         return None
+    if explicit_target_id is not None:
+        explicit = _ids_of(candidates, EXPLICIT)
+        if not explicit:
+            return None
+        conflict = _identity_conflict(
+            [(EXPLICIT, explicit), (UNIPROT, _ids(uniprot)), (HGNC, _ids(hgnc))]
+        )
+        if conflict is not None:
+            return conflict
     target_ids = _ids(targets)
     methods = tuple(method for method, ids in ((UNIPROT, uniprot), (HGNC, hgnc)) if ids)
     if len(target_ids) == 1:

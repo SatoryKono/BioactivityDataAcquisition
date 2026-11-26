@@ -402,7 +402,10 @@ def _channels(row: CatalogTarget) -> tuple[tuple[str, str], ...]:
         ("id", row.target_id),
         *(("uniprot", value) for value in row.uniprot_ids),
         *(("hgnc", value) for value in row.hgnc_ids),
-        *(("text", value) for value in (*row.names, *row.synonyms)),
+        *(
+            ("text", value)
+            for value in (*row.names, *row.synonyms, *(row.full_names or ()))
+        ),
         *(("gene_id", row.gene_id) for _ in (0,) if row.gene_id),
         *(("gene_symbol", row.gene_symbol) for _ in (0,) if row.gene_symbol),
     )
