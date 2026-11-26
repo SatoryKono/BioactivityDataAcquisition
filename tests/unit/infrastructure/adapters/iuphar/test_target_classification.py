@@ -425,15 +425,16 @@ def test_shadow_hgnc_profile_requires_source_verified_snapshot_schema(tmp_path):
 
 
 @pytest.mark.parametrize(
-    ("taxon", "organism", "hgnc", "accession", "method"),
+    ("taxon", "organism", "hgnc", "accession", "method", "target_id"),
     [
-        (9606, "Homo sapiens", "HGNC:101", "Q88888", "hgnc"),
-        (9606, "Homo sapiens", "unknown", "P12345", "uniprot_xref"),
-        (10090, "Mus musculus", "HGNC:101", "Q88888", None),
+        (9606, "Homo sapiens", "HGNC:101", None, "hgnc", "1"),
+        (9606, "Homo sapiens", "HGNC:101", "Q88888", "hgnc", None),
+        (9606, "Homo sapiens", "unknown", "P12345", "uniprot_xref", "1"),
+        (10090, "Mus musculus", "HGNC:101", "Q88888", None, None),
     ],
 )
 def test_verified_hgnc_profile_uses_canonical_input_fields(
-    tmp_path, taxon, organism, hgnc, accession, method
+    tmp_path, taxon, organism, hgnc, accession, method, target_id
 ):
     provider = synthetic_export_row()
     provider["HGNC id"] = "101"
@@ -457,8 +458,8 @@ def test_verified_hgnc_profile_uses_canonical_input_fields(
         target_xref_hgnc_ids=hgnc,
     )
     result = _classify(adapter, **business)
-    assert result.projection["iuphar_target_id"] == ("1" if method else None)
-    assert result.projection["iuphar_class"] == ("Receptor" if method else None)
+    assert result.projection["iuphar_target_id"] == target_id
+    assert result.projection["iuphar_class"] == ("Receptor" if target_id else None)
     classification = json.loads(
         next(a.payload for a in result.artifacts if a.name == "classification.json")
     )[0]

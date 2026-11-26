@@ -372,12 +372,14 @@ def _ranked_text_identity(
 ) -> MatchResult | None:
     if query.organism is None or query.target_id is not None:
         return None
-    gene_ids = _ids_of(candidates, GENE_SYMBOL)
+    gene_channels = [_ids_of(candidates, method) for method in (GENE_ID, GENE_SYMBOL)]
     for method in (EXACT_NAME, EXACT_SYNONYM):
         ids = _ids_of(candidates, method)
         if not ids:
             continue
-        if len(ids) != 1 or (gene_ids and ids[0] not in gene_ids):
+        if len(ids) != 1 or any(
+            channel and ids[0] not in channel for channel in gene_channels
+        ):
             return None
         variants = tuple(
             t for t in _species_targets(query, catalog) if t.target_id == ids[0]
@@ -394,7 +396,6 @@ def _ranked_text_identity(
 
 def _compatible_text_variant(query: MatchQuery, target: CatalogTarget) -> bool:
     pairs = (
-        (query.uniprot_ids, target.uniprot_ids),
         (query.hgnc_ids, target.hgnc_ids),
         (
             _gene_names(query) if query.gene_symbol else (),
@@ -405,7 +406,7 @@ def _compatible_text_variant(query: MatchQuery, target: CatalogTarget) -> bool:
             (target.gene_id,) if target.gene_id else (),
         ),
     )
-    return all(
+    return set(query.uniprot_ids).issubset(target.uniprot_ids) and all(
         not supplied or not recorded or not set(supplied).isdisjoint(recorded)
         for supplied, recorded in pairs
     )
@@ -454,13 +455,10 @@ def _preferred_identity(
     if identity_conflict is not None:
         return identity_conflict
     methods = tuple(method for method, ids in anchor_channels if ids)
-    if len(target_ids) == 1 and (
-        len(query.uniprot_ids) < 2
-        or all(
-            target_ids[0] in ids
-            for method, ids in _exact_channels(query, catalog, candidates)
-            if method == UNIPROT
-        )
+    if len(target_ids) == 1 and all(
+        target_ids[0] in ids
+        for method, ids in _exact_channels(query, catalog, candidates)
+        if method == UNIPROT
     ):
         return _result("matched", target_ids[0], target_ids, methods, ())
     return _result("ambiguous", None, target_ids, methods, ("ambiguous_match",))
