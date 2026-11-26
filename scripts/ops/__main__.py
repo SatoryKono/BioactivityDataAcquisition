@@ -27,6 +27,8 @@ Stable commands:
                        Fail-closed smoke: BioETL Prometheus scrape target must be UP
     archive-control-plane
                        Create or verify a local control-plane archive copy
+    run-report-campaign
+                       Run an isolated attempt and optionally verify dashboard publication
     ensure-quarantine-explorer
                        REMOVED stub (exit 2): Quarantine Explorer UI no longer shipped
     run-grafana-audit-cycle
@@ -103,6 +105,9 @@ COMMAND_SPECS = {
 
 COMMAND_SPECS.update(
     {
+        "run-report-campaign": module_command(
+            "scripts.ops.observability.run_report_campaign"
+        ),
         "target-fk-repair": module_command("scripts.ops.target_fk_repair"),
         "iuphar-target-cohort": module_command("scripts.ops.iuphar_target_cohort"),
         "target-classification-migration": module_command(
