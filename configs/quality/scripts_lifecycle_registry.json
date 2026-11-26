@@ -2071,6 +2071,18 @@
       "owner": "@bioetl-observability",
       "review_by": "2026-11-30"
     },
+    "scripts/ops/observability/campaign_report_artifacts.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the internal report validation and installation helper for the existing ops command router.",
+      "owner": "@bioetl-observability",
+      "review_by": "2026-12-26"
+    },
+    "scripts/ops/observability/campaign_report_visibility.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the internal Ops HTTP and Grafana readback helper for report publication.",
+      "owner": "@bioetl-observability",
+      "review_by": "2026-12-26"
+    },
     "scripts/ops/observability/check_prometheus_rules_health.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the Prometheus rule-health implementation used by validate_live_observability.py; keep the canonical operator workflow routed through the aggregate live validator. Monthly static lifecycle review 2026-11-18 at e44ca5d22ecc76befca3389e8c27abf4d0de18e0: retained purpose and current tracked caller/command scripts/engineering/qa/check_prometheus_rules.py:717; Python syntax and source identity verified. Existing lifecycle decision and owner retained; no runtime or live-service acceptance. Next review 2026-12-18.",
@@ -2424,6 +2436,12 @@
       "next_step": "Retain only as the bounded #8576 JSON-source evidence refresher; remove it after visual-baseline closeout or consolidate it into the canonical dashboard audit command.",
       "owner": "@bioetl-observability",
       "review_by": "2026-09-30"
+    },
+    "scripts/ops/observability/run_report_campaign.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Invoke through the existing scripts.ops run-report-campaign command router.",
+      "owner": "@bioetl-observability",
+      "review_by": "2026-12-26"
     },
     "scripts/ops/observability/seed_dc6_pipeline_run_report.py": {
       "decision": "shared_helper_module",
