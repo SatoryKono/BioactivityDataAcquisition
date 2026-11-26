@@ -299,6 +299,9 @@ def _decide(
     snapshot_complete: bool,
 ) -> MatchResult:
     """Choose one status from every channel. Catalog order is ignored."""
+    species_conflict = _variant_species_conflict(query, catalog)
+    if species_conflict is not None:
+        return species_conflict
     if query.prioritize_anchors and query.organism is not None:
         preferred = _preferred_identity(candidates)
         if preferred is not None:
@@ -315,9 +318,6 @@ def _decide(
     conflict = _identity_conflict(conflict_channels)
     if conflict is not None:
         return conflict
-    species_conflict = _variant_species_conflict(query, catalog)
-    if species_conflict is not None:
-        return species_conflict
     if _missing_identity_input(query, uniprot_species_gap) or _explicit_species_gap(
         query, catalog
     ):

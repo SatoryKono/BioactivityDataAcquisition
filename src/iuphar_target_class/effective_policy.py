@@ -36,6 +36,11 @@ _ASSIGNED_NAME_WORDS = {
     for label, pattern in _NAME_KEYWORDS.items()
 }
 _EC_LABELS = dict(EC_SINGULAR)
+_FUNCTIONAL_RELATION = re.compile(
+    r"\b(?:inhibitors?|blockers?|activators?|agonists?|antagonists?|ligands?|"
+    r"binding|associated|interacting|regulators?|substrates?)\b",
+    re.IGNORECASE,
+)
 _TRANSCRIPTION_FACTOR = re.compile(r"\btranscription[\s-]+factors?\b", re.IGNORECASE)
 _TRANSCRIPTION_FACTOR_RELATED = re.compile(
     r"\b(?:binding|interacting|associated|inhibitors?|activators?|regulators?|"
@@ -82,6 +87,8 @@ def name_keyword_class(
     name: str | None, *, allow_transcription_factor: bool = False
 ) -> tuple[str, str] | None:
     """Use standalone functional terms in the target name as local evidence."""
+    if _FUNCTIONAL_RELATION.search(name or ""):
+        return None
     matches = {
         label: hit.group().lower()
         for label, expression in _ASSIGNED_NAME_WORDS.items()

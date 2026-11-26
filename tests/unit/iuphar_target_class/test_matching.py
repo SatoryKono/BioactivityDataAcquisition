@@ -487,3 +487,22 @@ def test_human_hgnc_is_not_a_direct_anchor_for_another_species() -> None:
     assert (
         resolve_match(query, catalog, snapshot_complete=False).matched_target_id is None
     )
+
+
+@pytest.mark.parametrize("ranked_text", [False, True])
+def test_anchor_priority_preserves_cross_species_primary_conflict(
+    ranked_text: bool,
+) -> None:
+    catalog = (
+        _target("1", uniprot="P11111", species="9606"),
+        _target("1", uniprot="P22222", species="10090"),
+    )
+    query = replace(
+        _query(uniprot_ids=("P11111", "P22222"), organism="9606"),
+        prioritize_anchors=True,
+        ranked_text=ranked_text,
+    )
+    result = resolve_match(query, catalog, snapshot_complete=True)
+    assert result.match_status == "identity_conflict"
+    assert result.matched_target_id is None
+    assert "identity_conflict" in {item.code for item in result.diagnostics}

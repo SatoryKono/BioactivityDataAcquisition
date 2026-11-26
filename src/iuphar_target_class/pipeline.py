@@ -601,11 +601,7 @@ def classify_target(
         row.provenance.matching_policy_version in RANKED_CLASS_POLICIES
         and row.target_kind == "protein"
     )
-    business = (
-        _source_business(row)
-        if row.provenance.matching_policy_version in EC_EFFECTIVE_POLICIES
-        else {}
-    )
+    business = _source_business(row) if prioritize_anchors else {}
     query = MatchQuery(
         row.target_id,
         row.uniprot_accessions,
@@ -666,7 +662,7 @@ def _row_hgnc_ids(
     explicit = row.raw_fields.get("hgnc")
     if (
         explicit is None
-        and row.provenance.matching_policy_version in EC_EFFECTIVE_POLICIES
+        and row.provenance.matching_policy_version in ANCHOR_PRIORITY_POLICIES
     ):
         value = business.get("target_xref_hgnc_ids")
         explicit = value if isinstance(value, str) else None
@@ -919,14 +915,14 @@ def _fallback_effective_class(
         return None
     if outcome.effective_class == ION_CHANNEL or outcome.iuphar_class == ION_CHANNEL:
         return None
+    if _has_channel_candidate(row, snapshot, outcome):
+        return None
     if ranked:
         if len(categories) == 1 and outcome.iuphar_class is not None:
             return None
     else:
         outside_scope = any(d.code == "unsupported_taxon" for d in match.diagnostics)
-        if (
-            len(categories) == 1 and outcome.effective_class and not outside_scope
-        ) or _has_channel_candidate(row, snapshot, outcome):
+        if len(categories) == 1 and outcome.effective_class and not outside_scope:
             return None
     content = "|".join(sorted({item.raw for item in row.ec_numbers if item.valid}))
     return select_ec_class(outcome, categories), content

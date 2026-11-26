@@ -24,6 +24,7 @@ from bioetl.infrastructure.adapters.iuphar import (
     validate_acceptance_receipt,
 )
 from iuphar_target_class.identifier_roles import (
+    ANCHOR_PRIORITY_POLICY_VERSION,
     CHANNEL_EC_POLICY_VERSION,
     RANKED_CLASS_POLICY_VERSION,
     TRANSCRIPTION_FACTOR_POLICY_VERSION,
@@ -605,6 +606,9 @@ def test_ranked_text_match_does_not_override_incompatible_uniprot(tmp_path, name
             "Enzyme.Oxidoreductase",
         ),
         ("Cyclin-dependent kinase inhibitor", 9606, "Homo sapiens", "unknown", None),
+        ("Protein kinase C inhibitor protein 1", 9606, "Homo sapiens", "unknown", None),
+        ("Inhibitor of protein kinase", 9606, "Homo sapiens", "unknown", None),
+        ("Sodium channel beta blocker", 9606, "Homo sapiens", "unknown", None),
         (
             "Transmembrane sodium channel and receptor",
             9606,
@@ -877,3 +881,96 @@ def test_profile_cannot_claim_an_unexecuted_normalization_version(tmp_path):
         load_profile(
             tmp_path / "profile.json", reference["sha256"], require_acceptance=False
         )
+
+
+@pytest.mark.parametrize(
+    "policy",
+    [
+        CHANNEL_EC_POLICY_VERSION,
+        RANKED_CLASS_POLICY_VERSION,
+        TRANSCRIPTION_FACTOR_POLICY_VERSION,
+    ],
+)
+def test_ambiguous_channel_anchor_blocks_every_ec_fallback(tmp_path, policy):
+    from iuphar_target_class.pipeline import IndexedSnapshot
+
+    profile = _profile(tmp_path, target_changes={"type": "vgic"})
+    old = profile.snapshot.snapshot
+    second = replace(old.catalog[0], target_id="2", uniprot_ids=("Q12345",))
+    snapshot = IndexedSnapshot.from_approved_gtopdb(
+        snapshot_id=old.snapshot_id,
+        release=old.mapping_version,
+        complete=True,
+        catalog=(*old.catalog, second),
+        annotations={
+            **old.annotations,
+            "2": replace(old.annotations["1"], target_id="2"),
+        },
+    )
+    profile = replace(profile, snapshot=replace(profile.snapshot, snapshot=snapshot))
+    result = _classify(
+        _channel_ec_adapter(profile, policy),
+        component_accessions="P12345|Q12345",
+        target_ec_numbers="2.7.11.1|3.4.21.1",
+    )
+    assert result.projection["iuphar_target_id"] is None
+    assert result.projection["effective_class"] is None
+
+
+def test_hgnc_anchor_runtime_and_canonical_fields_match(tmp_path):
+    from bioetl.infrastructure.adapters.iuphar.adapter import _adapt_inputs
+    from iuphar_target_class.bioetl_input import project_target_fields
+    from iuphar_target_class.models import RawTargetRow, RunProvenance
+    from iuphar_target_class.pipeline import IndexedSnapshot, classify_batch
+
+    profile = _profile(tmp_path)
+    old = profile.snapshot.snapshot
+    snapshot = IndexedSnapshot.from_approved_gtopdb(
+        snapshot_id=old.snapshot_id,
+        release=old.mapping_version,
+        complete=True,
+        catalog=(replace(old.catalog[0], hgnc_ids=("101",)),),
+        annotations=old.annotations,
+    )
+    profile = replace(
+        profile,
+        matching_policy_version=ANCHOR_PRIORITY_POLICY_VERSION,
+        snapshot=replace(profile.snapshot, snapshot=snapshot),
+    )
+    business = _business(
+        component_accessions=None,
+        target_xref_hgnc_ids="HGNC:101",
+        pref_name="unseen protein",
+        target_protein_synonyms=None,
+    )
+    inputs, rejected = _adapt_inputs(
+        (TargetClassificationInput("target:1", business),),
+        profile,
+        include_detail=False,
+    )
+    canonical = project_target_fields(business, "9606")
+    assert not rejected
+    assert inputs[0].fields == canonical
+    assert "hgnc" not in canonical
+    batch = classify_batch(
+        (RawTargetRow("target:1", canonical, "protein"),),
+        snapshot=snapshot,
+        provenance=RunProvenance(
+            snapshot.snapshot_id,
+            profile.normalization_version,
+            profile.rules_version,
+            profile.classification_schema_version,
+            "2026-11-16T00:00:00Z",
+            "2026-11-16T00:01:00Z",
+            ANCHOR_PRIORITY_POLICY_VERSION,
+        ),
+        run_id="run-a",
+    )
+    runtime = IupharTargetClassificationAdapter(profile).classify_record(
+        business,
+        input_row_id="target:1",
+        run_id="run-a",
+        run_started_at="2026-11-16T00:01:00Z",
+    )
+    assert batch.rows[0].result.matched_target_id == "1"
+    assert runtime.projection["iuphar_target_id"] == "1"
