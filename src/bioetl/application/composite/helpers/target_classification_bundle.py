@@ -196,6 +196,7 @@ def _business(
         "target_protein_synonyms",
         "target_gene_synonyms",
         "target_xref_uniprot_ids",
+        "target_xref_hgnc_ids",
     ):
         put_value(
             business, name, first_present(row, (f"chembl.target.{name}", name))[1]

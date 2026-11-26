@@ -611,6 +611,56 @@ def test_seed_auxiliary_xrefs_remain_diagnostic_after_join(xref_column: str) -> 
     assert fields["uniprot"] == "P11111"
 
 
+@pytest.mark.parametrize(
+    "column", ["target_xref_hgnc_ids", "chembl.target.target_xref_hgnc_ids"]
+)
+def test_seed_hgnc_remains_an_identity_anchor_after_join(column: str) -> None:
+    from iuphar_target_class.identifier_roles import ANCHOR_PRIORITY_POLICY_VERSION
+    from iuphar_target_class.matching import CatalogTarget
+    from iuphar_target_class.models import RawTargetRow, RunProvenance
+    from iuphar_target_class.pipeline import IndexedSnapshot, classify_batch
+
+    bundle = feature_bundle(
+        {
+            "target_id": "CHEMBL1",
+            "chembl.target.taxonomy_id": "9606",
+            column: "HGNC:101",
+        },
+        {},
+    )
+    fields = project_target_fields(bundle["business"], "9606")
+    snapshot = IndexedSnapshot.build(
+        snapshot_id="fixture",
+        mapping_version="fixture-release",
+        complete=True,
+        catalog=(
+            CatalogTarget("1", (), None, None, "9606", (), (), hgnc_ids=("101",)),
+        ),
+        annotations={},
+        family_nodes=(),
+        type_to_class={},
+        family_to_class={},
+    )
+    provenance = RunProvenance(
+        "fixture",
+        "base",
+        "rules",
+        "schema",
+        "t",
+        "t",
+        matching_policy_version=ANCHOR_PRIORITY_POLICY_VERSION,
+    )
+    row = classify_batch(
+        (RawTargetRow("joined", fields, "protein"),),
+        snapshot=snapshot,
+        provenance=provenance,
+        run_id="fixture",
+    ).rows[0]
+    assert row.result.match_status == "matched"
+    assert row.result.matched_target_id == "1"
+    assert row.match_methods == ("hgnc",)
+
+
 def test_hierarchy_origins_use_level_columns_and_all_relation_hashes() -> None:
     pipeline = "chembl_target_protein_classification"
     frame = pl.DataFrame(

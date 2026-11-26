@@ -755,6 +755,9 @@ _fail_*.txt
 !/docs/99-archive/prompts-2026-09/**
 !/reports/quality/external-resource-inventory.md
 /data/wf20261122-153743
-/data/exports
-/data/replay-readiness-chembl-target-20261125
 /data/workflows-replay-ready-20261125-v2
+/data/workflows-replay-ready-20261125-v4
+/data/workflows-replay-ready-20261125
+/data/workflows-replay-ready-20261125-v3
+/data/replay-readiness-chembl-target-20261125
+/data/exports

@@ -76,10 +76,18 @@ class SelectorCatalog:
             )
 
     async def read(
-        self, manifests: RunManifestPort, workflows: WorkflowManifestPort | None
+        self,
+        manifests: RunManifestPort,
+        workflows: WorkflowManifestPort | None,
+        *,
+        refresh: bool = False,
     ) -> SelectorCatalogSnapshot:
-        """Read a fresh catalog, sharing any already running scan."""
-        if self._snapshot is not None and monotonic() < self._expires_at:
+        """Share a scan; refresh bypasses completed snapshots for cached consumers."""
+        if (
+            not refresh
+            and self._snapshot is not None
+            and monotonic() < self._expires_at
+        ):
             return self._snapshot
         if self._task is None:
             self._snapshot = None

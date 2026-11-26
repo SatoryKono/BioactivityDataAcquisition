@@ -438,10 +438,9 @@ def _ranked_text_identity(
 
 def _compatible_text_variant(query: MatchQuery, target: CatalogTarget) -> bool:
     pairs = (
-        (query.uniprot_ids, target.uniprot_ids),
         (query.hgnc_ids, target.hgnc_ids),
         (
-            (query.gene_symbol.casefold(),) if query.gene_symbol else (),
+            _gene_names(query) if query.gene_symbol else (),
             (target.gene_symbol.casefold(),) if target.gene_symbol else (),
         ),
         (
@@ -449,20 +448,23 @@ def _compatible_text_variant(query: MatchQuery, target: CatalogTarget) -> bool:
             (target.gene_id,) if target.gene_id else (),
         ),
     )
-    return all(
+    return set(query.uniprot_ids).issubset(target.uniprot_ids) and all(
         not supplied or not recorded or not set(supplied).isdisjoint(recorded)
         for supplied, recorded in pairs
     )
 
 
+def _gene_names(query: MatchQuery) -> set[str]:
+    return {
+        value.casefold() for value in (*query.gene_aliases, query.gene_symbol) if value
+    }
+
+
 def _corroborates_synonym(query: MatchQuery, target: CatalogTarget) -> bool:
     """A shared alias alone cannot identify a variant with sparse provider IDs."""
-    gene_names = {value.casefold() for value in query.gene_aliases}
-    if query.gene_symbol:
-        gene_names.add(query.gene_symbol.casefold())
     return bool(
         (query.gene_id and query.gene_id == target.gene_id)
-        or (target.gene_symbol and target.gene_symbol.casefold() in gene_names)
+        or (target.gene_symbol and target.gene_symbol.casefold() in _gene_names(query))
     )
 
 

@@ -7,7 +7,6 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import cast
 
-from bioetl.application.observability.reason_aliases import display_reason
 from bioetl.application.services.control_plane.manifest.diagnostics.selected_run_replay_readiness import (
     INSUFFICIENT,
     empty_replay_readiness,
@@ -21,11 +20,6 @@ from bioetl.composition.composite_catalog import (
     project_assay_replay,
 )
 from bioetl.domain.ports import RunReportStorePort
-from bioetl.domain.run_reports.selected_status import (
-    provider_check_rows,
-    provider_selector_options,
-)
-from bioetl.domain.run_reports.stage_diagnostics import project_stage_diagnostics
 from bioetl.interfaces.http._forensic_request_budget import (
     ForensicEndpointUnavailable,
     run_bounded_forensic_operation,
@@ -47,6 +41,7 @@ from bioetl.interfaces.http._selected_run_live import (
 from bioetl.interfaces.http._selected_run_presentation import (
     _assessment_summary,
     _readiness_fields,
+    present_saved_status,
     presentation_rows,
 )
 from bioetl.interfaces.http._selected_run_report_assessment import (
@@ -54,8 +49,10 @@ from bioetl.interfaces.http._selected_run_report_assessment import (
     _load_report_assessment,
     _manifest_snapshot,
     _RevisionMissingError,
-    _saved_trust,
     _selected_pipeline,
+)
+from bioetl.interfaces.http._selected_run_report_assessment import (
+    _saved_trust as _saved_trust,
 )
 from bioetl.interfaces.http._selected_run_unavailable import (
     _resolve_a2_run_id,
@@ -72,60 +69,8 @@ from bioetl.interfaces.http.run_report_ops import _validated_artifact_paths
 
 _NOT_EVALUATED = "NOT EVALUATED"
 _QUERY_ERROR = "QUERY ERROR"
-_CONTROL_PLANE = "Control Plane"
 
 _NO_RUNS = NO_RUNS_STATUS
-
-
-def _present_status(
-    summary: dict[str, object],
-    report: dict[str, object],
-    domain_rows: list[dict[str, object]],
-    readiness_fields: dict[str, object],
-) -> dict[str, object]:
-    """Format domain rows, Trust and presentation mirrors for one saved report."""
-    issues = [
-        f"{row['domain']}: {display_reason(str(row.get('reason', '')))}"
-        for row in domain_rows
-        if row.get("verdict") not in {"OK", "N/A"}
-    ]
-    if issues:
-        summary["reason"] = "; ".join(issues)
-    rows = [
-        {
-            **summary,
-            **row,
-            "run_verdict": summary["verdict"],
-            "display_verdict": row["verdict"],
-            "reason_display": display_reason(str(row.get("reason", ""))),
-        }
-        for row in domain_rows
-    ]
-    trust = _saved_trust(report, summary, rows)
-    for row in rows:
-        if row["domain"] == _CONTROL_PLANE:
-            row["reason_display"] = trust["reasons_display"] or "No saved Trust reasons"
-            row["display_verdict"] = trust["trust_status"]
-    return attach_contract_fields(
-        {
-            **summary,
-            "summary": [summary],
-            "presentation_summary": [summary],
-            "presentation_trust": [trust],
-            "domains": rows,
-            "presentation_domains": presentation_rows(rows),
-            "provider_checks": provider_check_rows(report),
-            "provider_options": provider_selector_options(report),
-            "quality_evidence": {
-                "pipeline": summary["pipeline"],
-                "funnel": report.get("funnel"),
-            },
-            "rows": rows,
-            "trust": [trust],
-            **readiness_fields,
-            **project_stage_diagnostics(report),
-        }
-    )
 
 
 def _load_saved_assessment(
@@ -244,7 +189,9 @@ def load_selected_run_status(
     readiness_fields = _readiness_fields(projection)
     domain_rows = assessment["domains"]
     assert isinstance(domain_rows, list)  # Produced by the verified assessment.
-    result = _present_status(summary, report, domain_rows, readiness_fields)
+    result = attach_contract_fields(
+        present_saved_status(summary, report, domain_rows, readiness_fields)
+    )
     result["reconciliation_display"] = linked_reconciliation_display(report, root)
     return result
 
@@ -326,20 +273,31 @@ def _load_selected_with_live_fallback(
     return result
 
 
-async def _shared_a2_catalog(
-    host: _HealthObservabilityRoutingHost, requested_run_id: str
-) -> SelectorCatalogSnapshot | None:
-    """Reuse the shared catalog only when the request needs A2 resolution."""
-    shared = getattr(host, "_selector_catalog", None)
-    if (
-        is_unresolved_run_id(requested_run_id)
-        and host._run_manifest_port is not None
-        and isinstance(shared, SelectorCatalog)
-    ):
-        return await shared.read(
-            host._run_manifest_port, getattr(host, "_workflow_manifest_port", None)
+def _resolve_and_load_selected_status(
+    host: _HealthObservabilityRoutingHost,
+    *,
+    pipeline: str,
+    requested_run_id: str,
+    query: dict[str, str],
+    catalog: SelectorCatalogSnapshot | None,
+) -> dict[str, object]:
+    run_id = requested_run_id
+    a2_resolved = is_unresolved_run_id(requested_run_id)
+    if a2_resolved:
+        resolved = _resolve_a2_run_id(
+            host, pipeline=pipeline, query=query, catalog=catalog
         )
-    return None
+        if isinstance(resolved, dict):
+            return resolved
+        run_id = resolved
+    # A2 catalog membership already enforced filters, including workflow aliases.
+    return _load_selected_with_live_fallback(
+        host,
+        pipeline=pipeline,
+        run_id=run_id,
+        query=query,
+        skip_scope_check=a2_resolved,
+    )
 
 
 async def handle_selected_run_status(
@@ -364,30 +322,27 @@ async def handle_selected_run_status(
     ):
         return
 
-    def load(catalog: SelectorCatalogSnapshot | None = None) -> dict[str, object]:
-        run_id = requested_run_id
-        a2_resolved = False
-        if is_unresolved_run_id(run_id):
-            resolved = _resolve_a2_run_id(
-                host, pipeline=pipeline, query=query, catalog=catalog
+    async def load_with_catalog() -> dict[str, object]:
+        catalog = None
+        shared = getattr(host, "_selector_catalog", None)
+        if (
+            is_unresolved_run_id(requested_run_id)
+            and host._run_manifest_port is not None
+            and isinstance(shared, SelectorCatalog)
+        ):
+            catalog = await shared.read(
+                host._run_manifest_port,
+                getattr(host, "_workflow_manifest_port", None),
+                refresh=True,
             )
-            if isinstance(resolved, dict):
-                return resolved
-            run_id = resolved
-            a2_resolved = True
-        # A2 catalog membership already enforced filters (incl. workflow aliases);
-        # do not re-reject via report.workflow_id vs Grafana workflow alias.
-        return _load_selected_with_live_fallback(
+        return await asyncio.to_thread(
+            _resolve_and_load_selected_status,
             host,
             pipeline=pipeline,
-            run_id=run_id,
+            requested_run_id=requested_run_id,
             query=query,
-            skip_scope_check=a2_resolved,
+            catalog=catalog,
         )
-
-    async def load_with_catalog() -> dict[str, object]:
-        catalog = await _shared_a2_catalog(host, requested_run_id)
-        return await asyncio.to_thread(load, catalog)
 
     async def cached_load() -> dict[str, object]:
         # Propagate ForensicEndpointUnavailable / IO failures so the cache does

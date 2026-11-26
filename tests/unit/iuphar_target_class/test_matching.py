@@ -584,3 +584,267 @@ def test_ranked_name_preserves_known_exact_gene_channel(
     assert result.match_status == "ambiguous"
     assert result.matched_target_id is None
     assert result.candidate_target_ids == ("1", "2")
+
+
+@pytest.mark.parametrize("species", ["9606", "10090"])
+@pytest.mark.parametrize("prioritize", [False, True])
+@pytest.mark.parametrize("hgnc", [(), ("101",)])
+def test_each_primary_accession_retains_its_identity_conflict(
+    species: str, prioritize: bool, hgnc: tuple[str, ...]
+) -> None:
+    catalog = (
+        replace(_target("1", uniprot="P11111", species="9606"), hgnc_ids=("101",)),
+        _target("2", uniprot="Q22222", species=species),
+    )
+    query = replace(
+        _query(uniprot_ids=("P11111", "Q22222"), organism="9606"),
+        hgnc_ids=hgnc,
+        prioritize_anchors=prioritize,
+    )
+    result = resolve_match(query, catalog, snapshot_complete=True)
+    assert result.match_status == "identity_conflict"
+    assert result.matched_target_id is None
+    assert result.candidate_target_ids == ("1", "2")
+
+
+def test_concordant_primary_accessions_keep_priority_over_text() -> None:
+    catalog = (
+        replace(_target("1", species="9606"), uniprot_ids=("P11111", "Q22222")),
+        _target("2", species="9606", name="Shared"),
+    )
+    query = replace(
+        _query(uniprot_ids=("P11111", "Q22222"), organism="9606", name="Shared"),
+        prioritize_anchors=True,
+    )
+    result = resolve_match(query, catalog, snapshot_complete=True)
+    assert result.match_status == "matched"
+    assert result.matched_target_id == "1"
+
+
+def test_shared_primary_accessions_remain_ambiguous_with_anchor_priority() -> None:
+    catalog = tuple(
+        replace(_target(identifier, species="9606"), uniprot_ids=("P11111", "Q22222"))
+        for identifier in ("1", "2")
+    )
+    query = replace(
+        _query(uniprot_ids=("P11111", "Q22222"), organism="9606"),
+        prioritize_anchors=True,
+    )
+    result = resolve_match(query, catalog, snapshot_complete=True)
+    assert result.match_status == "ambiguous"
+    assert result.matched_target_id is None
+    assert result.candidate_target_ids == ("1", "2")
+
+
+@pytest.mark.parametrize(
+    ("uniprot", "hgnc"),
+    [(("P11111", "Q88888"), ()), (("Q88888",), ("101",))],
+)
+def test_priority_anchors_do_not_hide_a_species_variant_conflict(
+    uniprot: tuple[str, ...], hgnc: tuple[str, ...]
+) -> None:
+    catalog = (
+        replace(_target("1", uniprot="P11111", species="9606"), hgnc_ids=("101",)),
+        _target("1", uniprot="Q88888", species="10090"),
+    )
+    query = replace(
+        _query(uniprot_ids=uniprot, organism="9606"),
+        hgnc_ids=hgnc,
+        prioritize_anchors=True,
+    )
+    result = resolve_match(query, catalog, snapshot_complete=True)
+    assert result.match_status == "identity_conflict"
+    assert result.matched_target_id is None
+
+
+@pytest.mark.parametrize(
+    ("explicit", "status", "matched"),
+    [
+        ("1", "identity_conflict", None),
+        ("2", "matched", "2"),
+        ("999", "ambiguous", None),
+    ],
+)
+def test_priority_anchors_respect_an_explicit_target_id(explicit, status, matched):
+    catalog = (
+        _target("1", uniprot="P11111", species="9606"),
+        _target("2", uniprot="P22222", species="9606"),
+    )
+    query = replace(
+        _query(target_id=explicit, uniprot_ids=("P22222",), organism="9606"),
+        prioritize_anchors=True,
+    )
+    result = resolve_match(query, catalog, snapshot_complete=True)
+    assert result.match_status == status
+    assert result.matched_target_id == matched
+
+
+@pytest.mark.parametrize("hgnc", [(), ("101",)])
+@pytest.mark.parametrize("ranked", [False, True])
+def test_priority_anchors_keep_an_unknown_primary_mandatory(hgnc, ranked):
+    catalog = (
+        replace(
+            _target("1", uniprot="P11111", species="9606", name="First protein"),
+            hgnc_ids=("101",),
+        ),
+    )
+    query = replace(
+        _query(
+            uniprot_ids=("P11111", "Q99999"),
+            organism="9606",
+            name="First protein",
+        ),
+        hgnc_ids=hgnc,
+        prioritize_anchors=True,
+        ranked_text=ranked,
+    )
+    result = resolve_match(query, catalog, snapshot_complete=True)
+    assert result.match_status == "ambiguous"
+    assert result.matched_target_id is None
+
+
+def test_exact_name_cannot_replace_an_unrecorded_primary():
+    catalog = (_target("1", species="9606", name="First protein"),)
+    query = replace(
+        _query(uniprot_ids=("Q99999",), organism="9606", name="First protein"),
+        prioritize_anchors=True,
+        ranked_text=True,
+    )
+    result = resolve_match(query, catalog, snapshot_complete=True)
+    assert result.match_status == "ambiguous"
+    assert result.matched_target_id is None
+
+
+@pytest.mark.parametrize(
+    ("symbol", "aliases", "status"),
+    [
+        ("GENE2", (), "ambiguous"),
+        ("gene1", (), "matched"),
+        ("OLD_GENE1", ("gene1",), "matched"),
+        (None, ("unrelated",), "matched"),
+    ],
+)
+def test_full_name_checks_the_gene_symbol_and_accepted_aliases(symbol, aliases, status):
+    catalog = (
+        _target("1", gene="GENE1", species="9606", name="First protein"),
+        _target("2", gene="GENE2", species="9606", name="Second protein"),
+    )
+    query = replace(
+        _query(organism="9606", name="First protein", gene_symbol=symbol),
+        prioritize_anchors=True,
+        ranked_text=True,
+        gene_aliases=aliases,
+    )
+    result = resolve_match(query, catalog, snapshot_complete=True)
+    assert result.match_status == status
+    assert result.matched_target_id == ("1" if status == "matched" else None)
+
+
+def test_full_name_does_not_hide_a_gene_symbol_hit_with_sparse_provider_data():
+    catalog = (
+        _target("1", species="9606", name="First protein"),
+        _target("2", gene="GENE2", species="9606", name="Second protein"),
+    )
+    query = replace(
+        _query(organism="9606", name="First protein", gene_symbol="GENE2"),
+        prioritize_anchors=True,
+        ranked_text=True,
+    )
+    result = resolve_match(query, catalog, snapshot_complete=True)
+    assert result.match_status == "ambiguous"
+    assert result.matched_target_id is None
+
+
+def test_full_name_does_not_hide_a_gene_id_hit_with_sparse_provider_data():
+    catalog = (
+        _target("1", species="9606", name="First protein"),
+        replace(_target("2", species="9606", name="Second protein"), gene_id="2"),
+    )
+    query = replace(
+        _query(organism="9606", name="First protein"),
+        gene_id="2",
+        prioritize_anchors=True,
+        ranked_text=True,
+    )
+    result = resolve_match(query, catalog, snapshot_complete=True)
+    assert result.match_status == "ambiguous"
+    assert result.matched_target_id is None
+
+
+def test_ranked_matching_without_taxon_keeps_a_unique_uniprot_match():
+    catalog = (_target("1", uniprot="P11111", species="9606"),)
+    query = replace(
+        _query(uniprot_ids=("P11111",), organism=None),
+        prioritize_anchors=True,
+        ranked_text=True,
+    )
+    result = resolve_match(query, catalog, snapshot_complete=True)
+    assert result.match_status == "matched"
+    assert result.matched_target_id == "1"
+
+
+@pytest.mark.parametrize("ranked_text", [False, True])
+@pytest.mark.parametrize("hgnc_ids", [(), ("101",)])
+def test_priority_rejects_missing_primary_accession(ranked_text, hgnc_ids):
+    catalog = (
+        replace(
+            _target("1", uniprot="P11111", species="9606", name="First protein"),
+            hgnc_ids=("101",),
+        ),
+    )
+    query = replace(
+        _query(uniprot_ids=("P11111", "Q22222"), organism="9606", name="First protein"),
+        hgnc_ids=hgnc_ids,
+        prioritize_anchors=True,
+        ranked_text=ranked_text,
+    )
+    result = resolve_match(query, catalog, snapshot_complete=True)
+    assert result.match_status == "ambiguous"
+    assert result.matched_target_id is None
+    assert result.candidate_target_ids == ("1",)
+
+
+@pytest.mark.parametrize(
+    ("gene_symbol", "gene_aliases", "status", "target_id"),
+    [
+        ("GENE2", (), "ambiguous", None),
+        ("GENE2", ("gene1",), "ambiguous", None),
+        ("UNKNOWN", (), "ambiguous", None),
+        ("LEGACY", ("gene1",), "matched", "1"),
+        ("GENE1", (), "matched", "1"),
+    ],
+)
+def test_ranked_name_checks_explicit_gene_symbol_and_aliases(
+    gene_symbol, gene_aliases, status, target_id
+):
+    catalog = (
+        _target("1", gene="GENE1", species="9606", name="First protein"),
+        _target("2", gene="GENE2", species="9606", name="Second protein"),
+    )
+    query = replace(
+        _query(gene_symbol=gene_symbol, organism="9606", name="First protein"),
+        gene_aliases=gene_aliases,
+        ranked_text=True,
+    )
+    result = resolve_match(query, catalog, snapshot_complete=True)
+    assert result.match_status == status
+    assert result.matched_target_id == target_id
+
+
+@pytest.mark.parametrize("prioritize", [False, True])
+@pytest.mark.parametrize("ranked", [False, True])
+def test_explicit_other_species_id_is_not_replaced_by_shared_accession(
+    prioritize: bool, ranked: bool
+) -> None:
+    catalog = (
+        _target("1", uniprot="P11111", species="9606"),
+        _target("2", uniprot="P11111", species="10090"),
+    )
+    query = replace(
+        _query(target_id="2", organism="9606", uniprot_ids=("P11111",)),
+        prioritize_anchors=prioritize,
+        ranked_text=ranked,
+    )
+    result = resolve_match(query, catalog, snapshot_complete=True)
+    assert result.match_status != "matched"
+    assert result.matched_target_id is None

@@ -860,7 +860,10 @@ def _resolution_input(
 
 
 def _has_channel_candidate(
-    row: ValidatedInput, snapshot: IndexedSnapshot, outcome: Resolution
+    row: ValidatedInput,
+    snapshot: IndexedSnapshot,
+    outcome: Resolution,
+    candidate_ids: tuple[str, ...],
 ) -> bool:
     classes = (
         outcome.iuphar_class,
@@ -870,7 +873,7 @@ def _has_channel_candidate(
     )
     if ION_CHANNEL in classes:
         return True
-    ids = outcome.candidate_target_ids
+    ids = candidate_ids
     annotations: Iterable[ProviderAnnotation | None]
     if row.taxon is None and snapshot.species_annotations:
         annotations = (
@@ -903,7 +906,10 @@ def _fallback_effective_class(
         return _fallback_keyword_class(row, match, outcome, ranked=ranked)
     if outcome.effective_class == ION_CHANNEL or outcome.iuphar_class == ION_CHANNEL:
         return None
-    if _has_channel_candidate(row, snapshot, outcome):
+    candidate_ids = (
+        match.candidate_target_ids if ranked else outcome.candidate_target_ids
+    )
+    if _has_channel_candidate(row, snapshot, outcome, candidate_ids):
         return None
     if _keeps_effective_class(categories, outcome, match, ranked=ranked):
         return None

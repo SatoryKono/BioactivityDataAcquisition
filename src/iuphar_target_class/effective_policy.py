@@ -41,8 +41,9 @@ _FUNCTIONAL_RELATION = re.compile(
     re.IGNORECASE,
 )
 _FUNCTIONAL_RELATION_PREFIX = re.compile(
-    r"\b(?:(?:inhibitors?|blockers?|activators?|agonists?|antagonists?|ligands?|"
-    r"regulators?|substrates?)[\s-]+of|(?:binding|bound)[\s-]+to|"
+    r"\b(?:(?:inhibitor|blocker|activator|agonist|antagonist|ligand|regulator|substrate|"
+    r"partner|subunit|protease|peptidase|cofactor|coactivator|corepressor)s?"
+    r"[\s-]+(?:of|for)|(?:binding|bound)[\s-]+to|"
     r"(?:interacting|associated)[\s-]+with)\b[^,;()]*$",
     re.IGNORECASE,
 )
@@ -50,11 +51,6 @@ _TRANSCRIPTION_FACTOR = re.compile(r"\btranscription[\s-]+factors?\b", re.IGNORE
 _TRANSCRIPTION_FACTOR_RELATED = re.compile(
     r"\b(?:binding|interacting|associated|inhibitors?|activators?|regulators?|"
     r"substrates?|proteases?|peptidases?|subunits?|polypeptides?|cofactors?|coactivators?|corepressors?)\b",
-    re.IGNORECASE,
-)
-_TRANSCRIPTION_FACTOR_PREFIX = re.compile(
-    r"\b(?:(?:inhibitor|activator|regulator|subunit|protease|peptidase|cofactor|coactivator|corepressor)s?"
-    r"\s+of|(?:binding|bound)\s+to|(?:interacting|associated)\s+with)\b[^,;()]*$",
     re.IGNORECASE,
 )
 
@@ -70,12 +66,15 @@ def select_channel_priority(outcome: Resolution) -> Resolution:
         outcome.local_class,
         *outcome.iuphar_class_candidates,
     }
+    enzyme_classes = {
+        label
+        for label in confirmed
+        if label == "Enzyme" or (label or "").startswith("Enzyme.")
+    }
     if (
         ION_CHANNEL not in confirmed
-        or not any(
-            label == "Enzyme" or (label or "").startswith("Enzyme.")
-            for label in confirmed
-        )
+        or not enzyme_classes
+        or not confirmed.issubset({ION_CHANNEL, None, *enzyme_classes})
         or outcome.effective_class == ION_CHANNEL
     ):
         return outcome
@@ -105,7 +104,7 @@ def name_keyword_class(
         hit = _TRANSCRIPTION_FACTOR.search(name)
         if (
             hit
-            and not _TRANSCRIPTION_FACTOR_PREFIX.search(name[: hit.start()])
+            and not _FUNCTIONAL_RELATION_PREFIX.search(name[: hit.start()])
             and not _TRANSCRIPTION_FACTOR_RELATED.search(name[hit.end() :])
         ):
             return TRANSCRIPTION_FACTOR_CLASS, hit.group().lower()

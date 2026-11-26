@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "9b59ff1596ad82ce405c171ee32fe1d5d5573c33",
+  "source_ref": "9566292a94fb01aebe99f518d5c4ed00ba2a8317",
+  "source_reviews": {
+    "src/bioetl/infrastructure/adapters/iuphar/adapter.py": "Use the existing eligibility predicate directly while retaining the selected policy and HGNC projection. Pure in-memory classification.",
+    "src/bioetl/interfaces/http/_selected_run_unavailable.py": "Adopt the reviewed main-branch A2 resolver and its original catalog and report ports. Existing caller owns the forensic budget.",
+    "src/bioetl/interfaces/http/selected_run_status.py": "Use the same A2 resolver from its reviewed main-branch owner while retaining the current shared catalog refresh and bounded default-executor call."
+  },
+  "reference_moves": [
+    {
+      "identity": "health._selected_run_artifact_probes.file",
+      "fields": [
+        "production_binding"
+      ],
+      "from": {
+        "file": "src/bioetl/interfaces/http/selected_run_status.py",
+        "source_segment": "manifests=manifests,"
+      },
+      "to": {
+        "file": "src/bioetl/interfaces/http/_selected_run_unavailable.py",
+        "scope": "_resolve_a2_run_id",
+        "segment": "manifests=manifests,"
+      }
+    },
+    {
+      "identity": "health._selected_run_report_assessment.file",
+      "fields": [
+        "production_binding"
+      ],
+      "from": {
+        "file": "src/bioetl/interfaces/http/selected_run_status.py",
+        "source_segment": "manifests=manifests,"
+      },
+      "to": {
+        "file": "src/bioetl/interfaces/http/_selected_run_unavailable.py",
+        "scope": "_resolve_a2_run_id",
+        "segment": "manifests=manifests,"
+      }
+    }
+  ],
+  "resource_updates": {
+    "infrastructure.export.export_writer_adapter.xlsx-writer": {
+      "owner": "Arrow: _write_xlsx_file -> write_arrow_xlsx -> new_xlsx_workbook/save_xlsx_workbook owns one openpyxl Workbook save; non-Arrow: _write_duck_xlsx owns a pandas ExcelWriter context",
+      "closer": "Arrow save_xlsx_workbook invokes workbook.close in finally and removes its temporary path; the non-Arrow pandas ExcelWriter context owns its writer close. openpyxl archive/error cleanup still requires independent runtime observation.",
+      "shutdown_contract": "pa.Table dispatches to write_arrow_xlsx, creates openpyxl.Workbook and calls save_xlsx_workbook for temporary save/replace with workbook.close in finally. Non-Arrow objects dispatch to _write_duck_xlsx and its pandas ExcelWriter context. Static source ownership only; runtime shutdown/leak qualification remains NOT_RUN_12553.",
+      "production_entrypoint": "bioetl export --format xlsx -> ExportWriterAdapter -> _write_xlsx_file -> write_arrow_xlsx (pa.Table) or _write_duck_xlsx (non-Arrow)",
+      "call_path": [
+        "bioetl export --format xlsx -> ExportWriterAdapter -> _write_xlsx_file",
+        "pa.Table -> write_arrow_xlsx -> new_xlsx_workbook -> openpyxl.Workbook -> save_xlsx_workbook",
+        "non-Arrow -> _write_duck_xlsx -> pandas.ExcelWriter context -> dataframe.to_excel"
+      ]
+    },
+    "iuphar.bioetl.infrastructure.storage.target_classification_migration.file-lock": {
+      "closer": "Exiting with path.open('a+b') closes the descriptor and releases the kernel lock; _lock does not call an explicit unlock.",
+      "shutdown_contract": "_lock acquires a nonblocking msvcrt.locking or fcntl.flock lock and yields inside the file context. Descriptor closure on context exit, including exception exit, releases the lock; a leftover path is not a live owner. Static source mechanism only; runtime qualification remains NOT_RUN_12553."
+    }
+  }
+}

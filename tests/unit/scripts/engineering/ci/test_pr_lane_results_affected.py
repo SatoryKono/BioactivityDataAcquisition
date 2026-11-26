@@ -430,17 +430,23 @@ def test_iuphar_release_mapping_and_data_keep_bounded_owners(tmp_path: Path) -> 
         assert report["covers_full_suite"] is False
 
 
-def test_iuphar_batch_pipeline_keeps_a_bounded_owner(tmp_path: Path) -> None:
-    owner = tmp_path / "tests/unit/iuphar_target_class/test_pipeline.py"
-    owner.parent.mkdir(parents=True)
-    owner.write_text("def test_owner():\n    assert True\n", encoding="utf-8")
+def test_iuphar_batch_pipeline_keeps_bounded_owners(tmp_path: Path) -> None:
+    owners = [
+        "tests/unit/infrastructure/adapters/iuphar/test_target_classification.py",
+        "tests/unit/iuphar_target_class/test_pipeline.py",
+    ]
+    for name in owners:
+        owner = tmp_path / name
+        owner.parent.mkdir(parents=True)
+        owner.write_text("def test_owner():\n    assert True\n", encoding="utf-8")
     for path in (
+        "src/iuphar_target_class/effective_policy.py",
         "src/iuphar_target_class/pipeline.py",
         "src/iuphar_target_class/pipeline_io.py",
         "src/iuphar_target_class/pipeline_acceptance.py",
     ):
         report = build_shadow_compare([path], repo_root=tmp_path)
-        assert report["selected"] == ["tests/unit/iuphar_target_class/test_pipeline.py"]
+        assert set(report["selected"]) == set(owners)
         assert report["covers_full_suite"] is False
 
 
@@ -1840,6 +1846,7 @@ def test_shadow_compare_routes_codex_launchers_and_guidance(changed_file: str) -
                 "configs/quality/external_resource_inventory_pr0_unreviewed.json",
             )
             for review_name in (
+                "external_resource_inventory_pr13400_cache_review.json",
                 "external_resource_inventory_pr13061_review.json",
                 "external_resource_inventory_pr13266_review.json",
                 "external_resource_inventory_pr13281_review.json",
