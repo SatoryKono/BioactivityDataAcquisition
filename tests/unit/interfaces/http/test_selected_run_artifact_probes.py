@@ -184,7 +184,7 @@ def test_rejected_windows_bronze_reference_fails_closed_despite_matching_digest(
     assert probes[0]["reason"] == "artifact_path_escape"
 
 
-def test_windows_bronze_reference_prefers_recorded_file_over_bound_copy(tmp_path):
+def _probe_recorded_bronze_over_bound_copy(tmp_path):
     """A natively reachable recorded Bronze file is verified in place.
 
     When the originating host replays its own report, the recorded absolute
@@ -204,7 +204,11 @@ def test_windows_bronze_reference_prefers_recorded_file_over_bound_copy(tmp_path
         "artifacts": [{"kind": "bronze_batch", "ref": str(recorded), "sha256": digest}]
     }
     context = SimpleNamespace(data_root=data_root, trusted_alias_base=alias)
-    probes, present = _artifact_probes(report, tmp_path, context=context)
+    return _artifact_probes(report, tmp_path, context=context)
+
+
+def test_windows_bronze_reference_prefers_recorded_file_over_bound_copy(tmp_path):
+    probes, present = _probe_recorded_bronze_over_bound_copy(tmp_path)
     assert present
     assert probes[0]["reason"] == "digest_matches"
 
@@ -220,21 +224,7 @@ def test_windows_bronze_reference_uses_native_branch(tmp_path):
     priority this scenario binds to the stale copy and reports
     ``digest_mismatch`` instead.
     """
-    alias = tmp_path / "data"
-    data_root = alias / "attempt"
-    suffix = "chembl/target/2026-11-25/batch.jsonl.zst"
-    recorded = tmp_path / "other" / "data" / "attempt" / "output" / "bronze" / suffix
-    recorded.parent.mkdir(parents=True)
-    recorded.write_bytes(b"recorded-bronze")
-    digest = hashlib.sha256(recorded.read_bytes()).hexdigest()
-    stale = data_root / "output" / "bronze" / suffix
-    stale.parent.mkdir(parents=True)
-    stale.write_bytes(b"stale-bound-copy")
-    report = {
-        "artifacts": [{"kind": "bronze_batch", "ref": str(recorded), "sha256": digest}]
-    }
-    context = SimpleNamespace(data_root=data_root, trusted_alias_base=alias)
-    probes, present = _artifact_probes(report, tmp_path, context=context)
+    probes, present = _probe_recorded_bronze_over_bound_copy(tmp_path)
     assert present
     assert probes[0]["reason"] == "digest_matches"
 
