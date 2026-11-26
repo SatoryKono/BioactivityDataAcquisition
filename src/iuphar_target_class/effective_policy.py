@@ -63,12 +63,15 @@ def select_channel_priority(outcome: Resolution) -> Resolution:
         outcome.local_class,
         *outcome.iuphar_class_candidates,
     }
+    enzyme_classes = {
+        label
+        for label in confirmed
+        if label == "Enzyme" or (label or "").startswith("Enzyme.")
+    }
     if (
         ION_CHANNEL not in confirmed
-        or not any(
-            label == "Enzyme" or (label or "").startswith("Enzyme.")
-            for label in confirmed
-        )
+        or not enzyme_classes
+        or not confirmed.issubset({ION_CHANNEL, None, *enzyme_classes})
         or outcome.effective_class == ION_CHANNEL
     ):
         return outcome

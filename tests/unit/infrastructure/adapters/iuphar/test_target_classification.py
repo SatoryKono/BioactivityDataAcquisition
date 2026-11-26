@@ -526,6 +526,31 @@ def test_channel_wins_against_both_enzyme_and_multiple_ec_categories(tmp_path):
     assert "ion_channel_over_enzyme" in result.diagnostic_codes
 
 
+@pytest.mark.parametrize(
+    "policy",
+    [
+        CHANNEL_EC_POLICY_VERSION,
+        RANKED_CLASS_POLICY_VERSION,
+        TRANSCRIPTION_FACTOR_POLICY_VERSION,
+    ],
+)
+@pytest.mark.parametrize("ec", ["unknown", "3.1.1.1"])
+def test_channel_priority_does_not_resolve_a_third_class(tmp_path, policy, ec):
+    adapter = _channel_ec_adapter(
+        _profile(
+            tmp_path,
+            target_changes={"type": "vgic", "familyIds": [1, 78, 471]},
+        ),
+        policy,
+    )
+    result = _classify(adapter, target_ec_numbers=ec)
+    assert result.projection["iuphar_target_id"] == "1"
+    assert result.projection["iuphar_annotation_status"] == "conflicting"
+    assert result.projection["iuphar_class"] is None
+    assert result.projection["effective_class"] is None
+    assert result.projection["effective_source"] != "channel_priority"
+
+
 def test_unconfirmed_channel_candidate_blocks_ec_override(tmp_path):
     adapter = _channel_ec_adapter(_profile(tmp_path, target_changes={"type": "vgic"}))
     result = _classify(
