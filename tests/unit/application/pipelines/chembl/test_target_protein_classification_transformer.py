@@ -172,3 +172,55 @@ async def test_transform_defaults_missing_status_to_missing_classification(
     assert result is not None
     assert result["entity_id"] == "CHEMBL123:missing_classification"
     assert result["classification_status"] == "missing_classification"
+
+
+@pytest.mark.asyncio
+async def test_numeric_and_missing_classification_ids_pass_strict_gold_schema(
+    transformer: TargetProteinClassificationTransformer,
+    mock_context: PipelineContext,
+) -> None:
+    from bioetl.application.core._batch_writer_gold_support import prepare_gold_records
+    from bioetl.domain.contracts.gold._chembl_target_lookup_schemas import (
+        ChEMBLTargetProteinClassificationGoldSchema,
+    )
+    from bioetl.infrastructure.validation.pandera_validator import PanderaGoldValidator
+
+    identifiers = {
+        "leaf_id": 148,
+        "root_id": 1,
+        "l1_id": 1,
+        "l2_id": 2,
+        "l3_id": 3,
+        "l4_id": 4,
+        "l5_id": 5,
+    }
+    resolved = await transformer.transform(
+        mock_context,
+        {
+            "target_id": "CHEMBL123",
+            "component_id": 10,
+            "classification_status": "resolved",
+            **identifiers,
+        },
+        index=0,
+    )
+    missing = await transformer.transform(
+        mock_context, {"target_id": "CHEMBL456"}, index=1
+    )
+    assert resolved is not None and missing is not None
+    resolved_gold = transformer.transform_for_gold(mock_context, resolved)
+    missing_gold = transformer.transform_for_gold(mock_context, missing)
+    for field, expected in identifiers.items():
+        assert resolved[field] == str(expected)
+        assert type(resolved_gold[field]) is int
+        assert resolved_gold[field] == expected
+        assert missing[field] is None
+        assert missing_gold[field] is None
+
+    schema = ChEMBLTargetProteinClassificationGoldSchema
+    writer = MagicMock()
+    writer._gold_schema = schema
+    writer._get_schema_columns.return_value = set(schema.to_schema().columns)
+    projected, _ = prepare_gold_records(writer, [resolved_gold, missing_gold])
+    outcome = PanderaGoldValidator(schema=schema, strict=True).validate(projected)
+    assert outcome.valid is True, outcome.errors

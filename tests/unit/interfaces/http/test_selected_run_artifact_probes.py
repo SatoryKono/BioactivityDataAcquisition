@@ -9,6 +9,7 @@ from types import SimpleNamespace
 
 import pytest
 
+from bioetl.interfaces.http import _selected_run_bronze_binding as bronze_binding
 from bioetl.interfaces.http._selected_run_artifact_probes import _artifact_probes
 
 pytestmark = pytest.mark.unit
@@ -86,7 +87,7 @@ def test_existing_self_report_needs_no_impossible_self_hash(tmp_path):
         ("attempt", False, "digest_mismatch"),
         ("ATTEMPT", True, "digest_matches"),
         ("foreign", True, None),
-        ("foreign/../attempt", True, None),
+        ("foreign/../attempt", True, "artifact_path_escape"),
     ],
 )
 def test_windows_bronze_reference_uses_the_bound_data_root(
@@ -115,6 +116,40 @@ def test_windows_bronze_reference_uses_the_bound_data_root(
         assert probes[0]["result"] == "fail"
     else:
         assert probes[0]["reason"] == expected
+
+
+@pytest.mark.parametrize("accessible", [True, False])
+def test_windows_native_binding_and_inaccessible_fallback(
+    tmp_path, monkeypatch, accessible
+):
+    alias = tmp_path / "data"
+    root = alias / "attempt"
+    suffix = "chembl/target/2026-11-25/batch.jsonl.zst"
+    bound = root / "output/bronze" / suffix
+    bound.parent.mkdir(parents=True)
+    bound.write_bytes(b"bound")
+    native = tmp_path / "native"
+    native.write_bytes(b"recorded")
+    monkeypatch.setattr(bronze_binding, "_native_absolute_artifact", lambda _: native)
+    is_file = Path.is_file
+
+    def check_file(path):
+        if path == native and not accessible:
+            raise PermissionError("denied")
+        return is_file(path)
+
+    monkeypatch.setattr(Path, "is_file", check_file)
+    item = {
+        "kind": "bronze_batch",
+        "ref": f"D:/repo/DATA/attempt/output/bronze/{suffix}",
+        "sha256": hashlib.sha256(b"bound").hexdigest(),
+    }
+    context = SimpleNamespace(data_root=root, trusted_alias_base=alias)
+    if accessible:
+        assert bronze_binding._bound_bronze_reference(item, context) is item
+    else:
+        probes, _ = _artifact_probes({"artifacts": [item]}, tmp_path, context=context)
+        assert probes[0]["reason"] == "digest_matches"
 
 
 def test_rejected_windows_bronze_reference_fails_closed_despite_matching_digest(

@@ -37,8 +37,10 @@ def _bound_bronze_reference(item: object, context: object | None) -> object | No
     ):
         return item
     windows_path = PureWindowsPath(reference)
-    if not windows_path.is_absolute() or ".." in windows_path.parts:
+    if not windows_path.is_absolute():
         return item
+    if ".." in windows_path.parts:
+        return None
     native = _native_absolute_artifact(reference)
     try:
         native_available = native is not None and native.is_file()
