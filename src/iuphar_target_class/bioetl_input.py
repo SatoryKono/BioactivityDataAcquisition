@@ -7,6 +7,23 @@ import math
 import re
 from collections.abc import Mapping
 
+<<<<<<< Updated upstream
+||||||| Stash base
+from iuphar_target_class.effective_policy import name_keyword_class
+from iuphar_target_class.identifier_roles import (
+    EC_EFFECTIVE_POLICIES,
+    RANKED_CLASS_POLICY_VERSION,
+)
+from iuphar_target_class.normalization import parse_ec_numbers
+=======
+from iuphar_target_class.effective_policy import name_keyword_class
+from iuphar_target_class.identifier_roles import (
+    EC_EFFECTIVE_POLICIES,
+    RANKED_CLASS_POLICIES,
+    TRANSCRIPTION_FACTOR_POLICY_VERSION,
+)
+from iuphar_target_class.normalization import parse_ec_numbers
+>>>>>>> Stashed changes
 from iuphar_target_class.stage0.io import canonical_json_bytes
 
 _TAXONOMY_ERROR = "taxonomy_id must be a positive integer"
@@ -145,7 +162,44 @@ def target_input_eligibility(
     except ValueError:
         return None, "invalid_taxonomy_id"
     if taxon is not None and taxon not in species:
+<<<<<<< Updated upstream
         return taxon, "unsupported_taxon"
+||||||| Stash base
+        if policy not in EC_EFFECTIVE_POLICIES:
+            return taxon, "unsupported_taxon"
+        reason = _taxonomy_name_ineligibility(taxon, data.get("organism"))
+        if reason is not None:
+            return taxon, reason
+        ec = "|".join(_tokens(data.get("target_ec_numbers")))
+        ranked = policy == RANKED_CLASS_POLICY_VERSION
+        valid_ec = any(
+            number.valid for number in parse_ec_numbers(ec, allow_preliminary=ranked)
+        )
+        if not valid_ec and not (
+            ranked and name_keyword_class(_text(data.get("pref_name")))
+        ):
+            return taxon, "unsupported_taxon"
+=======
+        if policy not in EC_EFFECTIVE_POLICIES:
+            return taxon, "unsupported_taxon"
+        reason = _taxonomy_name_ineligibility(taxon, data.get("organism"))
+        if reason is not None:
+            return taxon, reason
+        ec = "|".join(_tokens(data.get("target_ec_numbers")))
+        ranked = policy in RANKED_CLASS_POLICIES
+        valid_ec = any(
+            number.valid for number in parse_ec_numbers(ec, allow_preliminary=ranked)
+        )
+        if not valid_ec and not (
+            ranked
+            and name_keyword_class(
+                _text(data.get("pref_name")),
+                allow_transcription_factor=policy
+                == TRANSCRIPTION_FACTOR_POLICY_VERSION,
+            )
+        ):
+            return taxon, "unsupported_taxon"
+>>>>>>> Stashed changes
     return taxon, _taxonomy_name_ineligibility(taxon, data.get("organism"))
 
 

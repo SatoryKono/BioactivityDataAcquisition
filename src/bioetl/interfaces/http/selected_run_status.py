@@ -66,6 +66,10 @@ from bioetl.interfaces.http._selected_run_unavailable import (
     respond_exact_selection,
     unavailable_status,
 )
+from bioetl.interfaces.http._selector_catalog import (
+    SelectorCatalog,
+    SelectorCatalogSnapshot,
+)
 from bioetl.interfaces.http.run_report_ops import _validated_artifact_paths
 
 _NOT_EVALUATED = "NOT EVALUATED"
@@ -294,15 +298,20 @@ def _resolve_a2_run_id(
     *,
     pipeline: str,
     query: dict[str, str],
+    catalog: SelectorCatalogSnapshot | None = None,
 ) -> str | dict[str, object]:
     """Return concrete run_id or an unavailable payload for A2 auto-select."""
     if host._run_manifest_port is None:
         return unavailable_status(
             pipeline, "-", _QUERY_ERROR, CATALOG_UNAVAILABLE_REASON
         )
-    manifests, workflow_manifests = list_a2_catalog(
-        host._run_manifest_port,
-        getattr(host, "_workflow_manifest_port", None),
+    manifests, workflow_manifests = (
+        catalog
+        if catalog is not None
+        else list_a2_catalog(
+            host._run_manifest_port,
+            getattr(host, "_workflow_manifest_port", None),
+        )
     )
     latest = resolve_a2_latest_run_id(
         manifests=manifests,
@@ -374,11 +383,13 @@ async def handle_selected_run_status(
     ):
         return
 
-    def load() -> dict[str, object]:
+    def load(catalog: SelectorCatalogSnapshot | None = None) -> dict[str, object]:
         run_id = requested_run_id
         a2_resolved = False
         if is_unresolved_run_id(run_id):
-            resolved = _resolve_a2_run_id(host, pipeline=pipeline, query=query)
+            resolved = _resolve_a2_run_id(
+                host, pipeline=pipeline, query=query, catalog=catalog
+            )
             if isinstance(resolved, dict):
                 return resolved
             run_id = resolved
@@ -393,12 +404,25 @@ async def handle_selected_run_status(
             skip_scope_check=a2_resolved,
         )
 
+    async def load_with_catalog() -> dict[str, object]:
+        catalog = None
+        shared = getattr(host, "_selector_catalog", None)
+        if (
+            is_unresolved_run_id(requested_run_id)
+            and host._run_manifest_port is not None
+            and isinstance(shared, SelectorCatalog)
+        ):
+            catalog = await shared.read(
+                host._run_manifest_port, getattr(host, "_workflow_manifest_port", None)
+            )
+        return await asyncio.to_thread(load, catalog)
+
     async def cached_load() -> dict[str, object]:
         # Propagate ForensicEndpointUnavailable / IO failures so the cache does
         # not store QUERY ERROR frames as a fresh success payload.
         return await run_bounded_forensic_operation(
             limiter=host._forensic_endpoint_limiter,
-            operation_factory=lambda: asyncio.to_thread(load),
+            operation_factory=load_with_catalog,
             endpoint="selected-run-status",
         )
 
