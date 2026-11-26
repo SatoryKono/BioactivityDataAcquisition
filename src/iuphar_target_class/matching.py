@@ -303,6 +303,14 @@ def _decide(
     if species_conflict is not None:
         return species_conflict
     if query.prioritize_anchors and query.organism is not None:
+        trusted_conflict = _identity_conflict(
+            [
+                *_exact_channels(query, catalog, candidates, unfiltered=True),
+                (HGNC, _ids_of(candidates, HGNC)),
+            ]
+        )
+        if trusted_conflict is not None:
+            return trusted_conflict
         preferred = _preferred_identity(candidates, explicit_target_id=query.target_id)
         if preferred is not None:
             return preferred

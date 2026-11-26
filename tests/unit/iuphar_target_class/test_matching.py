@@ -539,3 +539,23 @@ def test_priority_anchor_does_not_replace_unknown_explicit_target_id() -> None:
     )
     assert result.match_status != "matched"
     assert result.matched_target_id is None
+
+
+@pytest.mark.parametrize("field", ["gene_id", "gene_symbol"])
+def test_priority_anchor_preserves_conflicting_exact_gene_channel(field: str) -> None:
+    catalog = (
+        replace(
+            _target("1", uniprot="P11111", gene="FIRST", species="9606"), gene_id="101"
+        ),
+        replace(
+            _target("2", uniprot="P22222", gene="SECOND", species="9606"), gene_id="202"
+        ),
+    )
+    query = replace(
+        _query(uniprot_ids=("P11111",), organism="9606"),
+        prioritize_anchors=True,
+        **{field: getattr(catalog[1], field)},
+    )
+    result = resolve_match(query, catalog, snapshot_complete=True)
+    assert result.match_status == "identity_conflict"
+    assert result.matched_target_id is None

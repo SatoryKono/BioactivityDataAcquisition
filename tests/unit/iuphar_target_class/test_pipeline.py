@@ -1204,3 +1204,49 @@ def test_ranked_full_name_is_indexed_outside_names_and_synonyms():
     )
     assert batch.rows[0].result.matched_target_id == "1"
     assert batch.rows[0].result.iuphar_class == "Receptor"
+
+
+@pytest.mark.parametrize(
+    "policy",
+    [
+        "hgnc-primary-uniprot-priority-v1",
+        "hgnc-uniprot-channel-ec-v1",
+        "hgnc-uniprot-name-ec-keyword-v1",
+        "hgnc-uniprot-name-ec-keyword-tf-v1",
+    ],
+)
+def test_primary_conflict_across_distinct_species_ids_never_yields_direct_class(policy):
+    catalog = (
+        CatalogTarget("1", ("P11111",), None, None, "9606", (), ()),
+        CatalogTarget("2", ("P22222",), None, None, "10090", (), ()),
+    )
+    raw = '{"targetId":"1","type":"gpcr","taxonId":"9606"}'
+    snapshot = pipeline.IndexedSnapshot.build(
+        snapshot_id="fixture",
+        mapping_version="fixture-release",
+        complete=True,
+        catalog=catalog,
+        annotations={
+            "1": ProviderAnnotation(
+                "1", "gpcr", (), hashlib.sha256(raw.encode()).hexdigest(), "9606", raw
+            )
+        },
+        family_nodes=(),
+        type_to_class={"gpcr": "Receptor"},
+        family_to_class={},
+    )
+    batch = pipeline.classify_batch(
+        (
+            RawTargetRow(
+                "mixed", {"uniprot": "P11111|P22222", "organism": "9606"}, "protein"
+            ),
+        ),
+        snapshot=snapshot,
+        provenance=replace(_provenance(), matching_policy_version=policy),
+        run_id="fixed",
+    )
+    result = batch.rows[0].result
+    assert result.match_status == "identity_conflict"
+    assert result.matched_target_id is None
+    assert result.iuphar_class is None
+    assert result.effective_class is None
