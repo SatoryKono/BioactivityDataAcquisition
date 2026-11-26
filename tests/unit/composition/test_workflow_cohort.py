@@ -163,6 +163,11 @@ async def test_default_workflow_captures_actual_gold_cohort_producer(
         assert payload["reference_completeness"] == "unproven"
         assert payload["orphan_rows_deleted"] == 0
         assert payload["mutated"] is False
+        assert payload["selected_snapshots"] == payload["input_snapshots"]
+        chained = await executor(spec, upstream_outputs={"previous_fk": payload})
+        assert chained["closed_cohort_verified"] is True
+        assert chained["retained_rows"] == 1
+        assert chained["selected_snapshots"] == payload["selected_snapshots"]
     from deltalake import DeltaTable
 
     assert DeltaTable(str(gold_root / "chembl" / "assay")).version() == 0
