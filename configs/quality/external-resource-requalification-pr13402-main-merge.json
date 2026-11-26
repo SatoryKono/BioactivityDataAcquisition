@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "25f577b56b31fdb4a12fcb1849f6cbeb2945b125",
+  "source_ref": "6a16c1e1b7c56817cf43b9b2b441027f334a8fdf",
+  "source_reviews": {
+    "src/bioetl/application/workflow/transforms/reconcile_foreign_keys.py": "Include snapshot evidence in reports for closed cohorts. Existing foreign-key reconciliation calls are unchanged.",
+    "src/bioetl/infrastructure/export/xlsx_text_parts.py": "Record columns serialized as exact numeric text in the existing workbook manifest. The workbook writer and save calls are unchanged.",
+    "src/bioetl/infrastructure/export/xlsx_value_codec.py": "Parse exact numeric text according to declared Arrow types and validate corresponding manifest metadata. In-memory transformations only.",
+    "src/bioetl/infrastructure/export/xlsx_workbook.py": "Use text cells for numbers Excel cannot preserve exactly and restore them through the existing numeric decoder. Existing openpyxl acquisitions are unchanged.",
+    "src/bioetl/interfaces/http/_selected_run_artifact_probes.py": "Dispatch Windows Bronze probes through the binding helper and reuse the existing digest reader. Bound copies are resolved relative to the attested Bronze directory. No new external acquisition sites.",
+    "src/bioetl/interfaces/http/_selected_run_bronze_binding.py": "Reject traversal before native resolution, retry with the bound copy on native I/O errors, and retain the native digest verdict when the file is readable. The callback invokes the existing artifact probe. No new external acquisition sites."
+  },
+  "segment_updates": {
+    "src/bioetl/interfaces/http/_selected_run_artifact_probes.py": {
+      "probed.append(_probe_listed_artifact(bound, root, index))": "item, context, root, index, partial(_probe_listed_artifact, index=index)"
+    }
+  }
+}
