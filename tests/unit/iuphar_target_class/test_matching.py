@@ -14,11 +14,11 @@ from iuphar_target_class.matching import (
     resolve_match,
     select_uniprot_accessions,
 )
-from iuphar_target_class.models import MatchResult
 from iuphar_target_class.rf008_qualification import (
     _execute_projection,
     evaluate_categories,
 )
+from iuphar_target_class.models import MatchResult
 
 pytestmark = pytest.mark.unit
 
@@ -481,6 +481,111 @@ def test_primary_and_hgnc_disagreement_blocks_confirmation() -> None:
     assert result.candidate_target_ids == ("1", "2")
 
 
+def test_human_hgnc_is_not_a_direct_anchor_for_another_species() -> None:
+    catalog = (replace(_target("1", species="9606"), hgnc_ids=("101",)),)
+    query = replace(_query(organism="9913"), hgnc_ids=("101",), prioritize_anchors=True)
+    assert (
+        resolve_match(query, catalog, snapshot_complete=False).matched_target_id is None
+    )
+
+
+@pytest.mark.parametrize("ranked_text", [False, True])
+def test_anchor_priority_preserves_cross_species_primary_conflict(
+    ranked_text: bool,
+) -> None:
+    catalog = (
+        _target("1", uniprot="P11111", species="9606"),
+        _target("1", uniprot="P22222", species="10090"),
+    )
+    query = replace(
+        _query(uniprot_ids=("P11111", "P22222"), organism="9606"),
+        prioritize_anchors=True,
+        ranked_text=ranked_text,
+    )
+    result = resolve_match(query, catalog, snapshot_complete=True)
+    assert result.match_status == "identity_conflict"
+    assert result.matched_target_id is None
+    assert "identity_conflict" in {item.code for item in result.diagnostics}
+
+
+@pytest.mark.parametrize("channel", ["uniprot", "hgnc"])
+def test_priority_anchor_cannot_replace_explicit_target_id(channel: str) -> None:
+    catalog = (
+        replace(_target("1", uniprot="P11111", species="9606"), hgnc_ids=("101",)),
+        _target("2", uniprot="P22222", species="9606"),
+    )
+    query = replace(
+        _query(
+            target_id="2",
+            organism="9606",
+            uniprot_ids=("P11111",) if channel == "uniprot" else (),
+        ),
+        hgnc_ids=("101",) if channel == "hgnc" else (),
+        prioritize_anchors=True,
+    )
+    result = resolve_match(query, catalog, snapshot_complete=True)
+    assert result.match_status == "identity_conflict"
+    assert result.matched_target_id is None
+    assert result.candidate_target_ids == ("1", "2")
+
+
+def test_priority_anchor_does_not_replace_unknown_explicit_target_id() -> None:
+    query = replace(
+        _query(target_id="missing", uniprot_ids=("P11111",), organism="9606"),
+        prioritize_anchors=True,
+    )
+    result = resolve_match(
+        query, (_target("1", uniprot="P11111", species="9606"),), snapshot_complete=True
+    )
+    assert result.match_status != "matched"
+    assert result.matched_target_id is None
+
+
+@pytest.mark.parametrize("field", ["gene_id", "gene_symbol"])
+def test_priority_anchor_preserves_conflicting_exact_gene_channel(field: str) -> None:
+    catalog = (
+        replace(
+            _target("1", uniprot="P11111", gene="FIRST", species="9606"), gene_id="101"
+        ),
+        replace(
+            _target("2", uniprot="P22222", gene="SECOND", species="9606"), gene_id="202"
+        ),
+    )
+    query = replace(
+        _query(uniprot_ids=("P11111",), organism="9606"),
+        prioritize_anchors=True,
+        **{field: getattr(catalog[1], field)},
+    )
+    result = resolve_match(query, catalog, snapshot_complete=True)
+    assert result.match_status == "identity_conflict"
+    assert result.matched_target_id is None
+
+
+@pytest.mark.parametrize("field", ["gene_id", "gene_symbol"])
+@pytest.mark.parametrize("recorded", [False, True])
+def test_ranked_name_preserves_known_exact_gene_channel(
+    field: str, recorded: bool
+) -> None:
+    catalog = (
+        replace(
+            _target("1", name="First protein", species="9606"),
+            gene_symbol="GENE1" if recorded else None,
+            gene_id="101" if recorded else None,
+        ),
+        replace(_target("2", gene="GENE2", species="9606"), gene_id="202"),
+    )
+    query = replace(
+        _query(name="First protein", organism="9606"),
+        prioritize_anchors=True,
+        ranked_text=True,
+        **{field: getattr(catalog[1], field)},
+    )
+    result = resolve_match(query, catalog, snapshot_complete=True)
+    assert result.match_status == "ambiguous"
+    assert result.matched_target_id is None
+    assert result.candidate_target_ids == ("1", "2")
+
+
 @pytest.mark.parametrize("species", ["9606", "10090"])
 @pytest.mark.parametrize("prioritize", [False, True])
 @pytest.mark.parametrize("hgnc", [(), ("101",)])
@@ -529,14 +634,6 @@ def test_shared_primary_accessions_remain_ambiguous_with_anchor_priority() -> No
     assert result.match_status == "ambiguous"
     assert result.matched_target_id is None
     assert result.candidate_target_ids == ("1", "2")
-
-
-def test_human_hgnc_is_not_a_direct_anchor_for_another_species() -> None:
-    catalog = (replace(_target("1", species="9606"), hgnc_ids=("101",)),)
-    query = replace(_query(organism="9913"), hgnc_ids=("101",), prioritize_anchors=True)
-    assert (
-        resolve_match(query, catalog, snapshot_complete=False).matched_target_id is None
-    )
 
 
 @pytest.mark.parametrize(

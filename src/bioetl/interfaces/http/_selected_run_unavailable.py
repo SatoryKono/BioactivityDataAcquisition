@@ -20,15 +20,23 @@ from bioetl.composition.composite_catalog import attach_contract_fields
 from bioetl.domain.control_plane.run_evidence_location import EvidenceLocationKind
 from bioetl.domain.run_reports.selected_status import DOMAINS, RULES_VERSION
 from bioetl.domain.run_reports.stage_diagnostics import project_stage_diagnostics
+from bioetl.interfaces.http._health_server_observability_protocols import (
+    _HealthObservabilityRoutingHost,
+)
 from bioetl.interfaces.http._reconciliation_display import unavailable_reconciliation
 from bioetl.interfaces.http._selected_run_a2_resolve import (
+    CATALOG_UNAVAILABLE_REASON,
+    NO_RUNS_REASON,
     NO_RUNS_STATUS,
     is_unresolved_run_id,
+    list_a2_catalog,
+    resolve_a2_latest_run_id,
 )
 from bioetl.interfaces.http._selected_run_presentation import (
     _readiness_fields,
     presentation_rows,
 )
+from bioetl.interfaces.http._selector_catalog import SelectorCatalogSnapshot
 
 _NOT_EVALUATED = "NOT EVALUATED"
 _QUERY_ERROR = "QUERY ERROR"
@@ -53,6 +61,39 @@ async def respond_exact_selection(
         unavailable_status(pipeline, "-", _SELECT_RUN, "exact_run_required"),
     )
     return True
+
+
+def _resolve_a2_run_id(
+    host: _HealthObservabilityRoutingHost,
+    *,
+    pipeline: str,
+    query: dict[str, str],
+    catalog: SelectorCatalogSnapshot | None = None,
+) -> str | dict[str, object]:
+    """Return concrete run_id or an unavailable payload for A2 auto-select."""
+    if host._run_manifest_port is None:
+        return unavailable_status(
+            pipeline, "-", _QUERY_ERROR, CATALOG_UNAVAILABLE_REASON
+        )
+    manifests, workflow_manifests = (
+        catalog
+        if catalog is not None
+        else list_a2_catalog(
+            host._run_manifest_port,
+            getattr(host, "_workflow_manifest_port", None),
+        )
+    )
+    latest = resolve_a2_latest_run_id(
+        manifests=manifests,
+        ledger_port=host._run_ledger_port,
+        workflow_manifests=workflow_manifests,
+        pipeline=pipeline,
+        query=query,
+        report_store=getattr(host, "_run_report_store", None),
+    )
+    if latest is None:
+        return unavailable_status(pipeline, "-", _NO_RUNS, NO_RUNS_REASON)
+    return latest
 
 
 def readiness_state_for_unavailable(state: str) -> str:

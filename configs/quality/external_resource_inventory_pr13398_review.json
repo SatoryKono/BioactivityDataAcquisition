@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "62147359e5c74ba12ae0cd6775b14971c3e32dc8",
+  "source_ref": "1e8560520269a2b1c14d8bbe5790382b0a4e4a3d",
+  "source_reviews": {
+    "src/bioetl/infrastructure/adapters/iuphar/acceptance_receipt.py": "Admit opt-in versioned matching profiles only with verified schema-2 snapshots and their own acceptance. Existing profile reads and validation remain; no new resource acquisition.",
+    "src/bioetl/infrastructure/adapters/iuphar/adapter.py": "Pass the selected profile policy into eligibility and project human HGNC identifiers. Pure in-memory projection; no acquisition changes.",
+    "src/bioetl/infrastructure/adapters/iuphar/snapshot_loader.py": "Attach HGNC and full names from the already verified provider export bytes. Parsing is in memory; existing manifest reads remain unchanged.",
+    "src/bioetl/infrastructure/adapters/iuphar/snapshot_payload.py": "Select an explicitly versioned policy in the profile bundle. The same exclusive destination.open('xb') remains context-managed and closed by its with statement; no new acquisition.",
+    "src/bioetl/interfaces/http/selected_run_status.py": "Reuse the existing bounded SelectorCatalog for unresolved A2 requests. The same asyncio default executor is acquired via to_thread(load, catalog), now in load_with_catalog inside the original forensic limiter. Explicit run selections avoid catalog enumeration; lifecycle owner and shutdown remain unchanged.",
+    "src/bioetl/interfaces/http/_selected_run_unavailable.py": "Move the A2 resolver from selected_run_status into the existing unavailable/selection owner. The resolver keeps the same catalog ports, explicit gap states and bounded caller; no new acquisition or lifetime change."
+  },
+  "reference_moves": [
+    {
+      "identity": "asyncio.default-executor",
+      "fields": [
+        "creation_sites"
+      ],
+      "from": {
+        "file": "src/bioetl/interfaces/http/selected_run_status.py",
+        "expression": "asyncio.to_thread(load)"
+      },
+      "to": {
+        "file": "src/bioetl/interfaces/http/selected_run_status.py",
+        "scope": "handle_selected_run_status.load_with_catalog",
+        "call": "asyncio.to_thread",
+        "expression": "asyncio.to_thread(load, catalog)"
+      }
+    },
+    {
+      "identity": "health._selected_run_artifact_probes.file",
+      "fields": [
+        "production_binding"
+      ],
+      "from": {
+        "file": "src/bioetl/interfaces/http/selected_run_status.py",
+        "source_segment": "manifests=manifests,"
+      },
+      "to": {
+        "file": "src/bioetl/interfaces/http/_selected_run_unavailable.py",
+        "scope": "_resolve_a2_run_id",
+        "segment": "manifests=manifests,"
+      }
+    },
+    {
+      "identity": "health._selected_run_report_assessment.file",
+      "fields": [
+        "production_binding"
+      ],
+      "from": {
+        "file": "src/bioetl/interfaces/http/selected_run_status.py",
+        "source_segment": "manifests=manifests,"
+      },
+      "to": {
+        "file": "src/bioetl/interfaces/http/_selected_run_unavailable.py",
+        "scope": "_resolve_a2_run_id",
+        "segment": "manifests=manifests,"
+      }
+    }
+  ],
+  "resource_updates": {
+    "infrastructure.export.export_writer_adapter.xlsx-writer": {
+      "owner": "Arrow: _write_xlsx_file -> write_arrow_xlsx -> new_xlsx_workbook/save_xlsx_workbook owns one openpyxl Workbook save; non-Arrow: _write_duck_xlsx owns a pandas ExcelWriter context",
+      "closer": "Arrow save_xlsx_workbook invokes workbook.close in finally and removes its temporary path; the non-Arrow pandas ExcelWriter context owns its writer close. openpyxl archive/error cleanup still requires independent runtime observation.",
+      "shutdown_contract": "pa.Table dispatches to write_arrow_xlsx, creates openpyxl.Workbook and calls save_xlsx_workbook for temporary save/replace with workbook.close in finally. Non-Arrow objects dispatch to _write_duck_xlsx and its pandas ExcelWriter context. Static source ownership only; runtime shutdown/leak qualification remains NOT_RUN_12553.",
+      "production_entrypoint": "bioetl export --format xlsx -> ExportWriterAdapter -> _write_xlsx_file -> write_arrow_xlsx (pa.Table) or _write_duck_xlsx (non-Arrow)",
+      "call_path": [
+        "bioetl export --format xlsx -> ExportWriterAdapter -> _write_xlsx_file",
+        "pa.Table -> write_arrow_xlsx -> new_xlsx_workbook -> openpyxl.Workbook -> save_xlsx_workbook",
+        "non-Arrow -> _write_duck_xlsx -> pandas.ExcelWriter context -> dataframe.to_excel"
+      ]
+    },
+    "iuphar.bioetl.infrastructure.storage.target_classification_migration.file-lock": {
+      "closer": "Exiting with path.open('a+b') closes the descriptor and releases the kernel lock; _lock does not call an explicit unlock.",
+      "shutdown_contract": "_lock acquires a nonblocking msvcrt.locking or fcntl.flock lock and yields inside the file context. Descriptor closure on context exit, including exception exit, releases the lock; a leftover path is not a live owner. Static source mechanism only; runtime qualification remains NOT_RUN_12553."
+    }
+  }
+}

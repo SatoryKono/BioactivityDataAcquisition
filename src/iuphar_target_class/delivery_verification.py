@@ -187,7 +187,11 @@ def _publish(
         for path in created:
             path.unlink(missing_ok=True)
         raise
-    return tuple(destinations[name] for name in REPORT_NAMES)
+    return (
+        destinations[REPORT_NAMES[0]],
+        destinations[REPORT_NAMES[1]],
+        destinations[REPORT_NAMES[2]],
+    )
 
 
 def _checks(receipt: Mapping[str, object], names: tuple[str, ...]) -> dict[str, str]:

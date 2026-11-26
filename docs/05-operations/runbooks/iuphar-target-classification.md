@@ -151,8 +151,9 @@ target record can hold fields this projection never sees. The kernel reads
 The `chembl_target` extractor does not set them, and it does not supply
 `keywords`, `predicted_l1`, or `predicted_l2`.
 
-The kernel UniProt channel is the ordered union of `component_accessions` and
-`target_xref_uniprot_ids`. Those two sources are not separate match channels.
+The kernel primary UniProt channel uses `component_accessions` and joined
+`uniprot_accession`. Auxiliary `target_xref_uniprot_ids` remain diagnostic;
+overlaps with primary accessions are recorded as equivalent evidence.
 
 `chembl_target_protein_classification` is a different pipeline. It is not this
 IUPHAR classifier. Workflows that write the same Silver/Gold target tables
@@ -160,14 +161,29 @@ still share the one `chembl_target` configuration.
 
 ### Stage signs and statuses
 
-Eligibility stops before classification. The reasons are
+Eligibility failures stop the affected row before classification. The reasons are
 `unsupported_target_type` (any type other than `SINGLE PROTEIN`),
 `invalid_taxonomy_id`, `unsupported_taxon`,
 `missing_taxonomy_for_known_organism`, and `taxonomy_name_conflict`. Those
 rows are `not_applicable` and do not receive a direct class.
 
+`unsupported_taxon` is an eligibility failure for the legacy and anchor-only
+policies. The channel-EC policy can admit an out-of-coverage single protein
+with a valid EC; ranked policies can also admit an unambiguous name keyword.
+For these admitted rows, provider matching remains `source_unavailable` with
+an `unsupported_taxon` diagnostic, while `effective_class` may be assigned by
+`ec_rule` or `keyword_rule`. Other eligibility failures still stop the row.
+
 Match status is `matched`, `ambiguous`, `not_found`, `source_unavailable`,
 `insufficient_input`, `identity_conflict`, or `contract_error`.
+
+For matching policy `hgnc-primary-uniprot-priority-v1`, an unambiguous
+same-species HGNC or primary UniProt hit confirms identity. Name and synonym
+hits remain in candidate evidence and cannot veto that result. Disjoint HGNC
+and primary UniProt hits produce `identity_conflict`. HGNC is a direct
+identifier only for human targets. This policy is opt-in through
+`iuphar-snapshot-build --matching-policy-version` and requires its own
+acceptance receipt before use in `enrich`.
 
 Annotation status is `available`, `partial`, `unmapped_type`, `conflicting`,
 or `not_available`. A `partial` annotation can still carry a coarse direct

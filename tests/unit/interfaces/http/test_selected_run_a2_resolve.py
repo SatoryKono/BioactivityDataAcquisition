@@ -313,11 +313,11 @@ async def test_handle_unresolved_run_id_auto_selects_latest(
     selected = str(_run_id(9))
     host = _host()
     monkeypatch.setattr(
-        "bioetl.interfaces.http.selected_run_status.list_a2_catalog",
+        "bioetl.interfaces.http._selected_run_unavailable.list_a2_catalog",
         lambda *_a, **_k: ((_manifest(9),), ()),
     )
     monkeypatch.setattr(
-        "bioetl.interfaces.http.selected_run_status.resolve_a2_latest_run_id",
+        "bioetl.interfaces.http._selected_run_unavailable.resolve_a2_latest_run_id",
         lambda **_kwargs: selected,
     )
 
@@ -361,10 +361,11 @@ async def test_auto_scopes_share_the_selector_catalog_scan(
         raise AssertionError("AUTO must use the shared selector catalog")
 
     monkeypatch.setattr(
-        "bioetl.interfaces.http.selected_run_status.list_a2_catalog", unshared_scan
+        "bioetl.interfaces.http._selected_run_unavailable.list_a2_catalog",
+        unshared_scan,
     )
     monkeypatch.setattr(
-        "bioetl.interfaces.http.selected_run_status.resolve_a2_latest_run_id",
+        "bioetl.interfaces.http._selected_run_unavailable.resolve_a2_latest_run_id",
         lambda **kwargs: selected,
     )
     monkeypatch.setattr(
@@ -401,47 +402,16 @@ async def test_auto_scopes_share_the_selector_catalog_scan(
         assert call.args[2]["verdict"] == "OK"
 
 
-async def test_auto_refresh_does_not_extend_a_warm_catalog_snapshot(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """The status cache must not restart the lifetime of an older selection."""
-    host = _host()
-    host._selector_catalog = SelectorCatalog()
-    host._workflow_manifest_port = None
-    host._run_manifest_port.list_all.return_value = (_manifest(9),)
-    await host._selector_catalog.read(host._run_manifest_port, None)
-    host._run_manifest_port.list_all.return_value = (_manifest(9), _manifest(10))
-    monkeypatch.setattr(
-        "bioetl.interfaces.http.selected_run_status.load_selected_run_status",
-        lambda **kwargs: {
-            "pipeline": "chembl_assay",
-            "run_id": kwargs["run_id"],
-            "execution_state": "SUCCESS",
-            "verdict": "OK",
-        },
-    )
-    query = {"pipeline": "chembl_assay", "run_id": "-"}
-    try:
-        await handle_selected_run_status(host, MagicMock(), query)
-        await handle_selected_run_status(host, MagicMock(), query)
-        assert host._run_manifest_port.list_all.call_count == 2
-        for call in host._send_payload_response.await_args_list:
-            assert call.args[2]["run_id"] == str(_run_id(10))
-            assert call.args[2]["status_cache"]["fresh_seconds"] == 30
-    finally:
-        await host._selected_run_status_cache.close()
-
-
 async def test_handle_empty_catalog_emits_no_runs(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     host = _host()
     monkeypatch.setattr(
-        "bioetl.interfaces.http.selected_run_status.list_a2_catalog",
+        "bioetl.interfaces.http._selected_run_unavailable.list_a2_catalog",
         lambda *_a, **_k: ((), ()),
     )
     monkeypatch.setattr(
-        "bioetl.interfaces.http.selected_run_status.resolve_a2_latest_run_id",
+        "bioetl.interfaces.http._selected_run_unavailable.resolve_a2_latest_run_id",
         lambda **_kwargs: None,
     )
     await handle_selected_run_status(
@@ -472,7 +442,7 @@ async def test_handle_explicit_url_run_id_wins(
     host = _host()
     resolve = MagicMock(return_value=str(_run_id(1)))
     monkeypatch.setattr(
-        "bioetl.interfaces.http.selected_run_status.resolve_a2_latest_run_id",
+        "bioetl.interfaces.http._selected_run_unavailable.resolve_a2_latest_run_id",
         resolve,
     )
 
@@ -781,7 +751,8 @@ async def test_missing_explicit_context_keeps_requested_identity_without_a2(
     assert requested == {"pipeline": ",".join(pipelines) or "All", "run_id": explicit}
     resolve = MagicMock(return_value=str(foreign.run_id))
     monkeypatch.setattr(
-        "bioetl.interfaces.http.selected_run_status.resolve_a2_latest_run_id", resolve
+        "bioetl.interfaces.http._selected_run_unavailable.resolve_a2_latest_run_id",
+        resolve,
     )
     seen = []
 
@@ -807,3 +778,34 @@ async def test_missing_explicit_context_keeps_requested_identity_without_a2(
     resolve.assert_not_called()
     assert seen == [(requested["pipeline"], explicit)]
     assert host._send_payload_response.await_args.args[2]["run_id"] == explicit
+
+
+async def test_auto_refresh_does_not_extend_a_warm_catalog_snapshot(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The status cache must not restart the lifetime of an older selection."""
+    host = _host()
+    host._selector_catalog = SelectorCatalog()
+    host._workflow_manifest_port = None
+    host._run_manifest_port.list_all.return_value = (_manifest(9),)
+    await host._selector_catalog.read(host._run_manifest_port, None)
+    host._run_manifest_port.list_all.return_value = (_manifest(9), _manifest(10))
+    monkeypatch.setattr(
+        "bioetl.interfaces.http.selected_run_status.load_selected_run_status",
+        lambda **kwargs: {
+            "pipeline": "chembl_assay",
+            "run_id": kwargs["run_id"],
+            "execution_state": "SUCCESS",
+            "verdict": "OK",
+        },
+    )
+    query = {"pipeline": "chembl_assay", "run_id": "-"}
+    try:
+        await handle_selected_run_status(host, MagicMock(), query)
+        await handle_selected_run_status(host, MagicMock(), query)
+        assert host._run_manifest_port.list_all.call_count == 2
+        for call in host._send_payload_response.await_args_list:
+            assert call.args[2]["run_id"] == str(_run_id(10))
+            assert call.args[2]["status_cache"]["fresh_seconds"] == 30
+    finally:
+        await host._selected_run_status_cache.close()

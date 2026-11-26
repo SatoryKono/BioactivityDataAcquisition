@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import re
 from dataclasses import dataclass, replace
 from typing import cast
@@ -106,6 +107,8 @@ def _normalized_input_fields(
         errors.append("invalid evidence identity")
     if row.target_kind not in _KIND:
         errors.append("target_kind must be protein or complex")
+    if error := _source_business_error(row.fields.get("source_business_data")):
+        errors.append(error)
     normalized: dict[str, str | None] = {}
     for field_name in (*_SCALAR_FIELDS, *_MULTI_FIELDS):
         original = row.fields.get(field_name)
@@ -118,6 +121,19 @@ def _normalized_input_fields(
         if glue_error is not None:
             errors.append(glue_error)
     return normalized, errors
+
+
+def _source_business_error(value: str | None) -> str | None:
+    """Reject malformed business JSON before the row reaches classification."""
+    if not value:
+        return None
+    try:
+        data = json.loads(value)
+    except (TypeError, ValueError, RecursionError):
+        return "source_business_data must be a JSON object"
+    return (
+        None if isinstance(data, dict) else "source_business_data must be a JSON object"
+    )
 
 
 def _copy_input_row(row: RawTargetRow) -> RawTargetRow:

@@ -134,11 +134,8 @@ def _adapt_inputs(
                 row, profile.profile_sha256, reason, include_detail=include_detail
             )
         else:
-            eligible.append(
-                RawTargetRow(
-                    row.input_row_id, _raw_fields(row.business_data, taxon), "protein"
-                )
-            )
+            fields = _raw_fields(row.business_data, taxon)
+            eligible.append(RawTargetRow(row.input_row_id, fields, "protein"))
     return eligible, results
 
 

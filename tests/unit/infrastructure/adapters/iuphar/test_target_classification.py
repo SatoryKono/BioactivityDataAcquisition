@@ -408,86 +408,6 @@ def _channel_ec_adapter(profile, policy=CHANNEL_EC_POLICY_VERSION):
     )
 
 
-def test_shadow_hgnc_profile_requires_source_verified_snapshot_schema(tmp_path):
-    profile_path = _profile_path(_profile(tmp_path))
-    source = json.loads(profile_path.read_bytes())
-    source["matching_policy_version"] = ANCHOR_PRIORITY_POLICY_VERSION
-    reference = _write(profile_path.parent, "legacy-hgnc-profile.json", source)
-    with pytest.raises(
-        ValueError,
-        match="HGNC anchor priority requires source-verified snapshot schema 2",
-    ):
-        load_profile(
-            profile_path.parent / reference["path"],
-            reference["sha256"],
-            require_acceptance=False,
-        )
-
-
-@pytest.mark.parametrize(
-    ("taxon", "organism", "hgnc", "accession", "method", "target_id"),
-    [
-        (9606, "Homo sapiens", "HGNC:101", None, "hgnc", "1"),
-        (9606, "Homo sapiens", "HGNC:101", "Q88888", "hgnc", None),
-        (9606, "Homo sapiens", "unknown", "P12345", "uniprot_xref", "1"),
-        (10090, "Mus musculus", "HGNC:101", "Q88888", None, None),
-    ],
-)
-def test_verified_hgnc_profile_uses_canonical_input_fields(
-    tmp_path, taxon, organism, hgnc, accession, method, target_id
-):
-    provider = synthetic_export_row()
-    provider["HGNC id"] = "101"
-    root, _ = synthetic_snapshot_bundle(
-        tmp_path, rows=[provider], species=("9606", "10090")
-    )
-    profile = json.loads((root / "profile.json").read_bytes())
-    profile["matching_policy_version"] = ANCHOR_PRIORITY_POLICY_VERSION
-    reference = _write(root, "hgnc-profile.json", profile)
-    adapter = IupharTargetClassificationAdapter(
-        load_profile(
-            root / reference["path"], reference["sha256"], require_acceptance=False
-        )
-    )
-    business = _business(
-        pref_name="Other name",
-        target_protein_synonyms="unknown",
-        taxonomy_id=taxon,
-        organism=organism,
-        component_accessions=accession,
-        target_xref_hgnc_ids=hgnc,
-    )
-    result = _classify(adapter, **business)
-    assert result.projection["iuphar_target_id"] == target_id
-    assert result.projection["iuphar_class"] == ("Receptor" if target_id else None)
-    classification = json.loads(
-        next(a.payload for a in result.artifacts if a.name == "classification.json")
-    )[0]
-    expected = project_target_fields(business, str(taxon))
-    assert "hgnc" not in classification["raw_fields"]
-    assert (
-        classification["raw_fields"]["source_business_data"]
-        == expected["source_business_data"]
-    )
-    assert classification["match_method"] == ([method] if method else [])
-
-
-@pytest.mark.parametrize(
-    "policy", [RANKED_CLASS_POLICY_VERSION, TRANSCRIPTION_FACTOR_POLICY_VERSION]
-)
-def test_ranked_channel_candidate_blocks_ec_when_identity_is_unresolved(
-    tmp_path, policy
-):
-    adapter = _channel_ec_adapter(
-        _profile(tmp_path, target_changes={"type": "vgic"}), policy
-    )
-    result = _classify(
-        adapter, component_accessions="Q9BW60", target_ec_numbers="3.1.1.1"
-    )
-    assert result.projection["iuphar_target_id"] is None
-    assert result.projection["effective_class"] is None
-
-
 @pytest.mark.parametrize(
     ("ec", "expected", "source"),
     [
@@ -525,31 +445,6 @@ def test_channel_wins_against_both_enzyme_and_multiple_ec_categories(tmp_path):
     assert result.projection["effective_class"] == "Ion Channel"
     assert result.projection["effective_source"] == "channel_priority"
     assert "ion_channel_over_enzyme" in result.diagnostic_codes
-
-
-@pytest.mark.parametrize(
-    "policy",
-    [
-        CHANNEL_EC_POLICY_VERSION,
-        RANKED_CLASS_POLICY_VERSION,
-        TRANSCRIPTION_FACTOR_POLICY_VERSION,
-    ],
-)
-@pytest.mark.parametrize("ec", ["unknown", "3.1.1.1"])
-def test_channel_priority_does_not_resolve_a_third_class(tmp_path, policy, ec):
-    adapter = _channel_ec_adapter(
-        _profile(
-            tmp_path,
-            target_changes={"type": "vgic", "familyIds": [1, 78, 471]},
-        ),
-        policy,
-    )
-    result = _classify(adapter, target_ec_numbers=ec)
-    assert result.projection["iuphar_target_id"] == "1"
-    assert result.projection["iuphar_annotation_status"] == "conflicting"
-    assert result.projection["iuphar_class"] is None
-    assert result.projection["effective_class"] is None
-    assert result.projection["effective_source"] != "channel_priority"
 
 
 def test_unconfirmed_channel_candidate_blocks_ec_override(tmp_path):
@@ -711,7 +606,16 @@ def test_ranked_text_match_does_not_override_incompatible_uniprot(tmp_path, name
             "unknown",
             "Enzyme.Oxidoreductase",
         ),
+        (
+            "Inhibitor-resistant protein kinase",
+            9606,
+            "Homo sapiens",
+            "unknown",
+            "Enzyme.Transferase",
+        ),
         ("Cyclin-dependent kinase inhibitor", 9606, "Homo sapiens", "unknown", None),
+        ("Protein kinase C inhibitor protein 1", 9606, "Homo sapiens", "unknown", None),
+        ("Inhibitor of protein kinase", 9606, "Homo sapiens", "unknown", None),
         (
             "ATP-binding cassette transporter",
             9606,
@@ -720,12 +624,27 @@ def test_ranked_text_match_does_not_override_incompatible_uniprot(tmp_path, name
             "Transporter",
         ),
         (
-            "Inhibitor-resistant protein kinase",
+            "ATP-binding cassette transporter",
+            9823,
+            "Sus scrofa",
+            "unknown",
+            "Transporter",
+        ),
+        (
+            "Calcium-binding protein kinase",
             9606,
             "Homo sapiens",
             "unknown",
             "Enzyme.Transferase",
         ),
+        (
+            "ATP-binding cassette transporter inhibitor",
+            9606,
+            "Homo sapiens",
+            "unknown",
+            None,
+        ),
+        ("Sodium channel beta blocker", 9606, "Homo sapiens", "unknown", None),
         (
             "Transmembrane sodium channel and receptor",
             9606,
@@ -770,6 +689,31 @@ def test_ranked_policy_uses_unambiguous_name_keywords_as_last_fallback(
         ),
         ({"pref_name": "General transcription factor IIF subunit 2"}, None, None),
         ({"pref_name": "Inhibitor of transcription factor Jun"}, None, None),
+        (
+            {"pref_name": "Inhibitor of DNA-binding transcription factor Jun"},
+            None,
+            None,
+        ),
+        (
+            {"pref_name": "Protein bound to the DNA-binding transcription factor Jun"},
+            None,
+            None,
+        ),
+        (
+            {"pref_name": "Protein associated with activated transcription factor Jun"},
+            None,
+            None,
+        ),
+        (
+            {"pref_name": "Coactivator of DNA-binding transcription factor Jun"},
+            None,
+            None,
+        ),
+        (
+            {"pref_name": "DNA-binding transcription factor Jun"},
+            "Receptor.Nuclear receptor",
+            None,
+        ),
         ({"pref_name": "Protein binding to transcription factor Jun"}, None, None),
         ({"pref_name": "Protein bound to the transcription factor Jun"}, None, None),
         (
@@ -817,35 +761,6 @@ def test_global_transcription_factor_fallback(
     if expected_class == "Receptor.Nuclear receptor":
         assert result.projection["local_class"] == expected_class
         assert result.projection["effective_source"] == "keyword_rule"
-
-
-@pytest.mark.parametrize(
-    "policy", [RANKED_CLASS_POLICY_VERSION, TRANSCRIPTION_FACTOR_POLICY_VERSION]
-)
-@pytest.mark.parametrize(
-    "name",
-    [
-        "Inhibitor of protein kinase",
-        "Protein binding to receptor",
-        "Protein interacting with sodium channel",
-        "Protein associated with the membrane transporter",
-        "Activator of alcohol dehydrogenase",
-        "Ligand for receptor",
-    ],
-)
-def test_keyword_fallback_does_not_classify_a_functional_partner(
-    tmp_path, policy, name
-):
-    adapter = _channel_ec_adapter(_profile(tmp_path), policy)
-    result = _classify(
-        adapter,
-        pref_name=name,
-        component_accessions=None,
-        target_protein_synonyms=None,
-    )
-    assert result.projection["iuphar_target_id"] is None
-    assert result.projection["effective_class"] is None
-    assert result.projection["effective_source"] != "keyword_rule"
 
 
 def test_older_ranked_policy_keeps_transcription_factor_outcome(tmp_path):
@@ -1027,3 +942,257 @@ def test_profile_cannot_claim_an_unexecuted_normalization_version(tmp_path):
         load_profile(
             tmp_path / "profile.json", reference["sha256"], require_acceptance=False
         )
+
+
+@pytest.mark.parametrize(
+    "policy",
+    [
+        CHANNEL_EC_POLICY_VERSION,
+        RANKED_CLASS_POLICY_VERSION,
+        TRANSCRIPTION_FACTOR_POLICY_VERSION,
+    ],
+)
+def test_ambiguous_channel_anchor_blocks_every_ec_fallback(tmp_path, policy):
+    from iuphar_target_class.pipeline import IndexedSnapshot
+
+    profile = _profile(tmp_path, target_changes={"type": "vgic"})
+    old = profile.snapshot.snapshot
+    second = replace(old.catalog[0], target_id="2", uniprot_ids=("Q12345",))
+    snapshot = IndexedSnapshot.from_approved_gtopdb(
+        snapshot_id=old.snapshot_id,
+        release=old.mapping_version,
+        complete=True,
+        catalog=(*old.catalog, second),
+        annotations={
+            **old.annotations,
+            "2": replace(old.annotations["1"], target_id="2"),
+        },
+    )
+    profile = replace(profile, snapshot=replace(profile.snapshot, snapshot=snapshot))
+    result = _classify(
+        _channel_ec_adapter(profile, policy),
+        component_accessions="P12345|Q12345",
+        target_ec_numbers="2.7.11.1|3.4.21.1",
+    )
+    assert result.projection["iuphar_target_id"] is None
+    assert result.projection["effective_class"] is None
+
+
+def test_hgnc_anchor_runtime_and_canonical_fields_match(tmp_path):
+    from bioetl.infrastructure.adapters.iuphar.adapter import _adapt_inputs
+    from iuphar_target_class.bioetl_input import project_target_fields
+    from iuphar_target_class.models import RawTargetRow, RunProvenance
+    from iuphar_target_class.pipeline import IndexedSnapshot, classify_batch
+
+    profile = _profile(tmp_path)
+    old = profile.snapshot.snapshot
+    snapshot = IndexedSnapshot.from_approved_gtopdb(
+        snapshot_id=old.snapshot_id,
+        release=old.mapping_version,
+        complete=True,
+        catalog=(replace(old.catalog[0], hgnc_ids=("101",)),),
+        annotations=old.annotations,
+    )
+    profile = replace(
+        profile,
+        matching_policy_version=ANCHOR_PRIORITY_POLICY_VERSION,
+        snapshot=replace(profile.snapshot, snapshot=snapshot),
+    )
+    business = _business(
+        component_accessions=None,
+        target_xref_hgnc_ids="HGNC:101",
+        pref_name="unseen protein",
+        target_protein_synonyms=None,
+    )
+    inputs, rejected = _adapt_inputs(
+        (TargetClassificationInput("target:1", business),),
+        profile,
+        include_detail=False,
+    )
+    canonical = project_target_fields(business, "9606")
+    assert not rejected
+    assert inputs[0].fields == canonical
+    assert "hgnc" not in canonical
+    batch = classify_batch(
+        (RawTargetRow("target:1", canonical, "protein"),),
+        snapshot=snapshot,
+        provenance=RunProvenance(
+            snapshot.snapshot_id,
+            profile.normalization_version,
+            profile.rules_version,
+            profile.classification_schema_version,
+            "2026-11-16T00:00:00Z",
+            "2026-11-16T00:01:00Z",
+            ANCHOR_PRIORITY_POLICY_VERSION,
+        ),
+        run_id="run-a",
+    )
+    runtime = IupharTargetClassificationAdapter(profile).classify_record(
+        business,
+        input_row_id="target:1",
+        run_id="run-a",
+        run_started_at="2026-11-16T00:01:00Z",
+    )
+    assert batch.rows[0].result.matched_target_id == "1"
+    assert runtime.projection["iuphar_target_id"] == "1"
+
+
+@pytest.mark.parametrize("ec", [None, "3.1.26.n2"])
+def test_ranked_ec_preempts_an_otherwise_corroborated_synonym(tmp_path, ec):
+    profile = _profile(
+        tmp_path,
+        target_changes={"type": "vgic", "geneSymbol": "SSC1", "synonyms": ["SSC1"]},
+    )
+    result = _classify(
+        _channel_ec_adapter(profile, RANKED_CLASS_POLICY_VERSION),
+        pref_name="alternate label",
+        component_accessions=None,
+        target_gene_synonyms="SSC1",
+        target_ec_numbers=ec,
+    )
+    artifacts = {a.name: json.loads(a.payload) for a in result.artifacts}
+    if ec is None:
+        assert result.projection["iuphar_target_id"] == "1"
+        assert result.projection["effective_class"] == "Ion Channel"
+        assert "exact_synonym" in {
+            row["match_method"] for row in artifacts["candidates.json"]
+        }
+    else:
+        assert result.projection["iuphar_target_id"] is None
+        assert result.projection["effective_class"] == "Enzyme.Hydrolase"
+        assert result.projection["effective_source"] == "ec_rule"
+        assert artifacts["candidates.json"] == []
+
+
+def test_shadow_hgnc_profile_requires_source_verified_snapshot_schema(tmp_path):
+    profile_path = _profile_path(_profile(tmp_path))
+    source = json.loads(profile_path.read_bytes())
+    source["matching_policy_version"] = ANCHOR_PRIORITY_POLICY_VERSION
+    reference = _write(profile_path.parent, "legacy-hgnc-profile.json", source)
+    with pytest.raises(
+        ValueError,
+        match="HGNC anchor priority requires source-verified snapshot schema 2",
+    ):
+        load_profile(
+            profile_path.parent / reference["path"],
+            reference["sha256"],
+            require_acceptance=False,
+        )
+
+
+@pytest.mark.parametrize(
+    ("taxon", "organism", "hgnc", "accession", "method", "target_id"),
+    [
+        (9606, "Homo sapiens", "HGNC:101", None, "hgnc", "1"),
+        (9606, "Homo sapiens", "HGNC:101", "Q88888", "hgnc", None),
+        (9606, "Homo sapiens", "unknown", "P12345", "uniprot_xref", "1"),
+        (10090, "Mus musculus", "HGNC:101", "Q88888", None, None),
+    ],
+)
+def test_verified_hgnc_profile_uses_canonical_input_fields(
+    tmp_path, taxon, organism, hgnc, accession, method, target_id
+):
+    provider = synthetic_export_row()
+    provider["HGNC id"] = "101"
+    root, _ = synthetic_snapshot_bundle(
+        tmp_path, rows=[provider], species=("9606", "10090")
+    )
+    profile = json.loads((root / "profile.json").read_bytes())
+    profile["matching_policy_version"] = ANCHOR_PRIORITY_POLICY_VERSION
+    reference = _write(root, "hgnc-profile.json", profile)
+    adapter = IupharTargetClassificationAdapter(
+        load_profile(
+            root / reference["path"], reference["sha256"], require_acceptance=False
+        )
+    )
+    business = _business(
+        pref_name="Other name",
+        target_protein_synonyms="unknown",
+        taxonomy_id=taxon,
+        organism=organism,
+        component_accessions=accession,
+        target_xref_hgnc_ids=hgnc,
+    )
+    result = _classify(adapter, **business)
+    assert result.projection["iuphar_target_id"] == target_id
+    assert result.projection["iuphar_class"] == ("Receptor" if target_id else None)
+    classification = json.loads(
+        next(a.payload for a in result.artifacts if a.name == "classification.json")
+    )[0]
+    expected = project_target_fields(business, str(taxon))
+    assert "hgnc" not in classification["raw_fields"]
+    assert (
+        classification["raw_fields"]["source_business_data"]
+        == expected["source_business_data"]
+    )
+    assert classification["match_method"] == ([method] if method else [])
+
+
+@pytest.mark.parametrize(
+    "policy", [RANKED_CLASS_POLICY_VERSION, TRANSCRIPTION_FACTOR_POLICY_VERSION]
+)
+def test_ranked_channel_candidate_blocks_ec_when_identity_is_unresolved(
+    tmp_path, policy
+):
+    adapter = _channel_ec_adapter(
+        _profile(tmp_path, target_changes={"type": "vgic"}), policy
+    )
+    result = _classify(
+        adapter, component_accessions="Q9BW60", target_ec_numbers="3.1.1.1"
+    )
+    assert result.projection["iuphar_target_id"] is None
+    assert result.projection["effective_class"] is None
+
+
+@pytest.mark.parametrize(
+    "policy",
+    [
+        CHANNEL_EC_POLICY_VERSION,
+        RANKED_CLASS_POLICY_VERSION,
+        TRANSCRIPTION_FACTOR_POLICY_VERSION,
+    ],
+)
+@pytest.mark.parametrize("ec", ["unknown", "3.1.1.1"])
+def test_channel_priority_does_not_resolve_a_third_class(tmp_path, policy, ec):
+    adapter = _channel_ec_adapter(
+        _profile(
+            tmp_path,
+            target_changes={"type": "vgic", "familyIds": [1, 78, 471]},
+        ),
+        policy,
+    )
+    result = _classify(adapter, target_ec_numbers=ec)
+    assert result.projection["iuphar_target_id"] == "1"
+    assert result.projection["iuphar_annotation_status"] == "conflicting"
+    assert result.projection["iuphar_class"] is None
+    assert result.projection["effective_class"] is None
+    assert result.projection["effective_source"] != "channel_priority"
+
+
+@pytest.mark.parametrize(
+    "policy", [RANKED_CLASS_POLICY_VERSION, TRANSCRIPTION_FACTOR_POLICY_VERSION]
+)
+@pytest.mark.parametrize(
+    "name",
+    [
+        "Inhibitor of protein kinase",
+        "Protein binding to receptor",
+        "Protein interacting with sodium channel",
+        "Protein associated with the membrane transporter",
+        "Activator of alcohol dehydrogenase",
+        "Ligand for receptor",
+    ],
+)
+def test_keyword_fallback_does_not_classify_a_functional_partner(
+    tmp_path, policy, name
+):
+    adapter = _channel_ec_adapter(_profile(tmp_path), policy)
+    result = _classify(
+        adapter,
+        pref_name=name,
+        component_accessions=None,
+        target_protein_synonyms=None,
+    )
+    assert result.projection["iuphar_target_id"] is None
+    assert result.projection["effective_class"] is None
+    assert result.projection["effective_source"] != "keyword_rule"

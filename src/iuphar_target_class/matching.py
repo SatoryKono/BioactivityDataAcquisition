@@ -3,8 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
-from dataclasses import dataclass, replace
-from typing import cast
+from dataclasses import dataclass
 
 from .models import Diagnostic, MatchResult
 
@@ -300,9 +299,12 @@ def _decide(
     snapshot_complete: bool,
 ) -> MatchResult:
     """Choose one status from every channel. Catalog order is ignored."""
-    preferred = _preferred_identity(query, catalog, candidates)
-    if preferred is not None:
-        return preferred
+    species_conflict = _variant_species_conflict(query, catalog)
+    if species_conflict is not None:
+        return species_conflict
+    anchor = _anchor_identity(query, catalog, candidates)
+    if anchor is not None:
+        return anchor
     explicit = _ids_of(candidates, EXPLICIT)
     uniprot = _ids_of(candidates, UNIPROT)
     gene_id = _ids_of(candidates, GENE_ID)
@@ -315,9 +317,6 @@ def _decide(
     conflict = _identity_conflict(conflict_channels)
     if conflict is not None:
         return conflict
-    species_conflict = _variant_species_conflict(query, catalog)
-    if species_conflict is not None:
-        return species_conflict
     if _missing_identity_input(query, uniprot_species_gap) or _explicit_species_gap(
         query, catalog
     ):
@@ -344,6 +343,14 @@ def _decide(
         agreed is not None
         and set(everyone) == {agreed}
         and _matches_requested_species(query, catalog, agreed)
+        and (
+            not query.ranked_text
+            or any(
+                _compatible_text_variant(query, t)
+                for t in _species_targets(query, catalog)
+                if t.target_id == agreed
+            )
+        )
     ):
         return _result(
             "matched",
@@ -365,6 +372,39 @@ def _decide(
     return _result("not_found", None, (), (), ())
 
 
+def _anchor_identity(
+    query: MatchQuery,
+    catalog: tuple[CatalogTarget, ...],
+    candidates: tuple[Candidate, ...],
+) -> MatchResult | None:
+    """Apply anchor priority only after checking every trusted identity channel."""
+    if not query.prioritize_anchors or query.organism is None:
+        return None
+    conflict = _identity_conflict(
+        [
+            *_exact_channels(query, catalog, candidates, unfiltered=True),
+            (HGNC, _ids_of(candidates, HGNC)),
+        ]
+    )
+    if conflict is not None:
+        return conflict
+    if any(
+        method == UNIPROT and not ids
+        for method, ids in _exact_channels(query, catalog, candidates)
+    ):
+        everyone = _ids(candidate.target_id for candidate in candidates)
+        if everyone:
+            return _result(
+                "ambiguous",
+                None,
+                everyone,
+                _methods(candidates, set(everyone)),
+                ("ambiguous_match",),
+            )
+        return None
+    return _preferred_identity(candidates, explicit_target_id=query.target_id)
+
+
 def _ranked_text_identity(
     query: MatchQuery,
     catalog: tuple[CatalogTarget, ...],
@@ -372,13 +412,15 @@ def _ranked_text_identity(
 ) -> MatchResult | None:
     if query.organism is None or query.target_id is not None:
         return None
-    gene_channels = [_ids_of(candidates, method) for method in (GENE_ID, GENE_SYMBOL)]
     for method in (EXACT_NAME, EXACT_SYNONYM):
         ids = _ids_of(candidates, method)
         if not ids:
             continue
-        if len(ids) != 1 or any(
-            channel and ids[0] not in channel for channel in gene_channels
+        if len(ids) != 1:
+            return None
+        if any(
+            known_ids and ids[0] not in known_ids
+            for _, known_ids in _exact_channels(query, catalog, candidates)
         ):
             return None
         variants = tuple(
@@ -427,40 +469,31 @@ def _corroborates_synonym(query: MatchQuery, target: CatalogTarget) -> bool:
 
 
 def _preferred_identity(
-    query: MatchQuery,
-    catalog: tuple[CatalogTarget, ...],
-    candidates: tuple[Candidate, ...],
+    candidates: tuple[Candidate, ...], *, explicit_target_id: str | None = None
 ) -> MatchResult | None:
     """Choose a same-species anchor before consulting lower-priority channels."""
-    if not query.prioritize_anchors or query.organism is None:
+    hgnc = set(_ids_of(candidates, HGNC))
+    uniprot = set(_ids_of(candidates, UNIPROT))
+    targets = hgnc | uniprot
+    if not targets:
         return None
-    hgnc = _ids_of(candidates, HGNC)
-    uniprot = _ids_of(candidates, UNIPROT)
-    target_ids = _union(hgnc, uniprot)
-    if not target_ids:
-        return None
-    species_conflict = _variant_species_conflict(query, catalog)
-    if species_conflict is not None:
-        return species_conflict
-    anchor_channels = [(UNIPROT, uniprot), (HGNC, hgnc)]
-    explicit = _ids_of(candidates, EXPLICIT)
-    if query.target_id is not None and not explicit:
-        return None
-    primary_channels = [
-        (method, ids)
-        for method, ids in _exact_channels(query, catalog, candidates, unfiltered=True)
-        if method in {EXPLICIT, UNIPROT}
-    ]
-    identity_conflict = _identity_conflict([*primary_channels, (HGNC, hgnc)])
-    if identity_conflict is not None:
-        return identity_conflict
-    methods = tuple(method for method, ids in anchor_channels if ids)
-    if len(target_ids) == 1 and all(
-        target_ids[0] in ids
-        for method, ids in _exact_channels(query, catalog, candidates)
-        if method == UNIPROT
-    ):
+    if explicit_target_id is not None:
+        explicit = _ids_of(candidates, EXPLICIT)
+        if not explicit:
+            return None
+        conflict = _identity_conflict(
+            [(EXPLICIT, explicit), (UNIPROT, _ids(uniprot)), (HGNC, _ids(hgnc))]
+        )
+        if conflict is not None:
+            return conflict
+    target_ids = _ids(targets)
+    methods = tuple(method for method, ids in ((UNIPROT, uniprot), (HGNC, hgnc)) if ids)
+    if len(target_ids) == 1:
         return _result("matched", target_ids[0], target_ids, methods, ())
+    if hgnc and uniprot and hgnc.isdisjoint(uniprot):
+        return _result(
+            "identity_conflict", None, target_ids, methods, ("identity_conflict",)
+        )
     return _result("ambiguous", None, target_ids, methods, ("ambiguous_match",))
 
 
@@ -605,12 +638,9 @@ def _methods(
 def _matches_requested_species(
     query: MatchQuery, catalog: tuple[CatalogTarget, ...], target_id: str
 ) -> bool:
-    if query.organism is None:
-        return True
-    return any(
-        target.target_id == target_id
-        and (not query.ranked_text or _compatible_text_variant(query, target))
-        for target in _species_targets(query, catalog)
+    return query.organism is None or any(
+        target.target_id == target_id and target.species == query.organism
+        for target in catalog
     )
 
 
@@ -723,6 +753,11 @@ def _attach_auxiliary_diagnostics(
             )
     if not extras:
         return result
-    return cast(
-        MatchResult, replace(result, diagnostics=(*result.diagnostics, *extras))
+    return MatchResult(
+        match_status=result.match_status,
+        matched_target_id=result.matched_target_id,
+        candidate_target_ids=result.candidate_target_ids,
+        match_method=result.match_method,
+        match_evidence_ids=result.match_evidence_ids,
+        diagnostics=(*result.diagnostics, *extras),
     )
