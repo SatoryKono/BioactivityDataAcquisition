@@ -42,6 +42,97 @@ Proven overlaps become `uniprot_equivalent` (evidence only).
 - Matching policy version: `rf002-uniprot-roles-2026-11-23` (legacy merged
   anchors do not qualify this policy; RF-008 admits independently)
 
+<<<<<<< Updated upstream
+||||||| Stash base
+## Effective-class policy `hgnc-uniprot-channel-ec-v1`
+
+For single proteins, the policy keeps the HGNC and primary UniProt priority
+and resolves a supported ion-channel/enzyme class conflict as `Ion Channel`.
+An ion-channel candidate blocks EC inference. Distinct valid first EC levels
+give `Enzyme.Multitarget`. A single EC level fills a missing effective class
+from the EC category, including for proteins outside IUPHAR species coverage.
+Partial EC codes count when their first level is valid. The effective source
+records `channel_priority` or `ec_rule`, and provider identity, annotation
+status and evidence remain available for review.
+
+Select the policy with `iuphar-snapshot-build --matching-policy-version
+hgnc-uniprot-channel-ec-v1`. Its profile requires its own RF-008 acceptance
+before use in `enrich`.
+
+## Effective-class policy `hgnc-uniprot-name-ec-keyword-v1`
+
+This version uses a same-species HGNC or primary UniProt match first, then a
+unique exact provider full name with compatible identifiers. Without a
+resolved provider class, a valid EC code supplies the effective class.
+Preliminary EC entries such as `3.1.26.n2` use the confirmed numeric levels.
+With a valid EC, synonyms are excluded from matching and cannot block the EC
+result. Without a valid EC, a unique same-species synonym can match when
+known identifiers are compatible and the gene symbol or Gene ID corroborates
+the match. The multi-category EC and ion-channel
+precedence rules still apply.
+
+If the identity and EC routes yield no result, standalone functional words
+in the target name can assign a local effective class with
+`effective_source=keyword_rule`. Conflicting keyword classes remain
+unassigned, except for ion channel versus enzyme. This fallback can also
+classify single proteins outside the IUPHAR species coverage. Keyword
+evidence records the word and the input name.
+
+Select this version with `--matching-policy-version
+hgnc-uniprot-name-ec-keyword-v1` at build time. The resulting profile
+requires its own RF-008 acceptance for `enrich`.
+
+=======
+## Effective-class policy `hgnc-uniprot-channel-ec-v1`
+
+For single proteins, the policy keeps the HGNC and primary UniProt priority
+and resolves a supported ion-channel/enzyme class conflict as `Ion Channel`.
+An ion-channel candidate blocks EC inference. Distinct valid first EC levels
+give `Enzyme.Multitarget`. A single EC level fills a missing effective class
+from the EC category, including for proteins outside IUPHAR species coverage.
+Partial EC codes count when their first level is valid. The effective source
+records `channel_priority` or `ec_rule`, and provider identity, annotation
+status and evidence remain available for review.
+
+Select the policy with `iuphar-snapshot-build --matching-policy-version
+hgnc-uniprot-channel-ec-v1`. Its profile requires its own RF-008 acceptance
+before use in `enrich`.
+
+## Effective-class policy `hgnc-uniprot-name-ec-keyword-v1`
+
+This version uses a same-species HGNC or primary UniProt match first, then a
+unique exact provider full name with compatible identifiers. Without a
+resolved provider class, a valid EC code supplies the effective class.
+Preliminary EC entries such as `3.1.26.n2` use the confirmed numeric levels.
+With a valid EC, synonyms are excluded from matching and cannot block the EC
+result. Without a valid EC, a unique same-species synonym can match when
+known identifiers are compatible and the gene symbol or Gene ID corroborates
+the match. The multi-category EC and ion-channel
+precedence rules still apply.
+
+If the identity and EC routes yield no result, standalone functional words
+in the target name can assign a local effective class with
+`effective_source=keyword_rule`. Conflicting keyword classes remain
+unassigned, except for ion channel versus enzyme. This fallback can also
+classify single proteins outside the IUPHAR species coverage. Keyword
+evidence records the word and the input name.
+
+Select this version with `--matching-policy-version
+hgnc-uniprot-name-ec-keyword-v1` at build time. The resulting profile
+requires its own RF-008 acceptance for `enrich`.
+
+## Effective-class policy `hgnc-uniprot-name-ec-keyword-tf-v1`
+
+This version adds a project-specific label for a target name identifying a
+transcription factor. It fills an empty effective class with
+`Receptor.Nuclear receptor` after the ranked identity, EC and existing
+keyword rules. It applies to single proteins across species. Names describing
+related proteins, including factor-binding proteins, proteases and complex
+subunits, do not trigger the transcription-factor rule. The result records
+`keyword_rule` as its effective source. This profile requires its own RF-008
+acceptance for `enrich`.
+
+>>>>>>> Stashed changes
 ## Trigger
 
 Use this runbook to validate an offline IUPHAR classification dependency,

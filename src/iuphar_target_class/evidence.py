@@ -5,6 +5,14 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
+<<<<<<< Updated upstream
+||||||| Stash base
+from .effective_policy import CHANNEL_PRIORITY_RULE, EC_CLASS_RULE, KEYWORD_CLASS_RULE
+from .identifier_roles import EC_EFFECTIVE_POLICIES, RANKED_CLASS_POLICY_VERSION
+=======
+from .effective_policy import CHANNEL_PRIORITY_RULE, EC_CLASS_RULE, KEYWORD_CLASS_RULE
+from .identifier_roles import EC_EFFECTIVE_POLICIES, RANKED_CLASS_POLICIES
+>>>>>>> Stashed changes
 from .models import ClassificationResult, Evidence, ProviderAnnotation, RunProvenance
 
 EVIDENCE_TYPE_ORDER: tuple[str, ...] = (
@@ -322,7 +330,21 @@ def trace_violation(
     """Invariant 2. A class needs a matched id and a non-name method."""
     if not row.iuphar_class:
         return False
+<<<<<<< Updated upstream
     name_only = bool(methods) and set(methods) <= _NAME_ONLY
+||||||| Stash base
+    name_only = (
+        row.provenance.matching_policy_version != RANKED_CLASS_POLICY_VERSION
+        and bool(methods)
+        and set(methods) <= _NAME_ONLY
+    )
+=======
+    name_only = (
+        row.provenance.matching_policy_version not in RANKED_CLASS_POLICIES
+        and bool(methods)
+        and set(methods) <= _NAME_ONLY
+    )
+>>>>>>> Stashed changes
     return (
         row.match_status != "matched"
         or not row.matched_target_id
@@ -344,7 +366,33 @@ def unsupported_class(row: ClassificationResult) -> bool:
         "local_rule": local_supported,
         "iuphar_normalized": direct_supported,
     }
+<<<<<<< Updated upstream
     selected_supported = support_by_source.get(row.effective_source, False)
+||||||| Stash base
+    policy_rule = _EFFECTIVE_POLICY_RULES.get(row.effective_source or "")
+    selected_supported = support_by_source.get(row.effective_source, False) or (
+        policy_rule is not None
+        and row.provenance.matching_policy_version in EC_EFFECTIVE_POLICIES
+        and (
+            policy_rule != KEYWORD_CLASS_RULE
+            or row.provenance.matching_policy_version == RANKED_CLASS_POLICY_VERSION
+        )
+        and policy_rule in row.local_rule_ids
+        and bool(row.local_evidence_ids)
+    )
+=======
+    policy_rule = _EFFECTIVE_POLICY_RULES.get(row.effective_source or "")
+    selected_supported = support_by_source.get(row.effective_source, False) or (
+        policy_rule is not None
+        and row.provenance.matching_policy_version in EC_EFFECTIVE_POLICIES
+        and (
+            policy_rule != KEYWORD_CLASS_RULE
+            or row.provenance.matching_policy_version in RANKED_CLASS_POLICIES
+        )
+        and policy_rule in row.local_rule_ids
+        and bool(row.local_evidence_ids)
+    )
+>>>>>>> Stashed changes
     return bool(row.effective_class) and not selected_supported
 
 
