@@ -17,13 +17,24 @@ from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.types import BronzeRecord, PrimaryId, SilverRecord
+    from bioetl.domain.types import BronzeRecord, GoldRecord, PrimaryId, SilverRecord
 
 _CLASSIFICATION_STATUS_VALUES = {
     "missing_classification",
     "quarantined",
     "resolved",
 }
+
+
+_GOLD_NUMERIC_CLASSIFICATION_IDS = (
+    "leaf_id",
+    "root_id",
+    "l1_id",
+    "l2_id",
+    "l3_id",
+    "l4_id",
+    "l5_id",
+)
 
 
 class TargetProteinClassificationTransformer(BaseChemblTransformer):
@@ -67,6 +78,20 @@ class TargetProteinClassificationTransformer(BaseChemblTransformer):
             business_data=business_data,
             resolve_entity_id=_target_classification_entity_id,
         )
+
+    @override
+    def transform_for_gold(
+        self,
+        context: PipelineContext,
+        silver_record: GoldRecord,
+    ) -> GoldRecord:
+        """Project string identifiers to the published numeric Gold contract."""
+        gold_record = super().transform_for_gold(context, silver_record)
+        for field in _GOLD_NUMERIC_CLASSIFICATION_IDS:
+            value = gold_record.get(field)
+            if isinstance(value, str):
+                gold_record[field] = int(value)
+        return gold_record
 
     @override
     def _extract_business_data(

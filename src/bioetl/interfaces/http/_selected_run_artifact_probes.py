@@ -14,6 +14,10 @@ from bioetl.interfaces.http._forensic_request_budget import (
     _deadline_exceeded_error,
     request_deadline_exceeded,
 )
+from bioetl.interfaces.http._selected_run_bronze_binding import (
+    _bound_bronze_reference,
+    _rejected_bronze_probe,
+)
 
 _PIPELINE_REPORT_FILE = "pipeline-run-report.json"
 _SELF_REPORT_KINDS = frozenset(
@@ -367,13 +371,17 @@ def _probe_named_artifact(
 
 
 def _artifact_probes(
-    report: Mapping[str, object], run_root: Path
+    report: Mapping[str, object], run_root: Path, *, context: object | None = None
 ) -> tuple[list[Mapping[str, object]], bool]:
     artifacts = report.get("artifacts")
     if not isinstance(artifacts, list) or not artifacts:
         return [], False
     root = run_root.resolve()
-    return [
-        _probe_listed_artifact(item, root, index)
-        for index, item in enumerate(artifacts)
-    ], True
+    probed: list[Mapping[str, object]] = []
+    for index, item in enumerate(artifacts):
+        bound = _bound_bronze_reference(item, context)
+        if bound is None and isinstance(item, dict):
+            probed.append(_rejected_bronze_probe(item, index))
+        else:
+            probed.append(_probe_listed_artifact(bound, root, index))
+    return probed, True
