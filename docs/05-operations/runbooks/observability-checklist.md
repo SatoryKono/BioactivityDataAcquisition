@@ -90,6 +90,40 @@ sentinel expression check does not compare every rule expression. Preserve
 warnings about stale data or missing observations until their underlying
 evidence is recovered; a full dashboard profile does not resolve those alerts.
 
+### Publish isolated campaign runs to Run Explorer
+
+Launch each campaign attempt through `python -m scripts.ops run-report-campaign`.
+Choose `--mode isolated` for local evidence or `--mode publish` when the run must
+be visible in the live stack. Prepare a dedicated data directory, including any
+required inputs, before launch. Publish mode requires that directory to be beneath
+`BIOETL_DASHBOARD_DATA_ROOT` (default `data`). Give each attempt a fresh output
+directory outside the dashboard report tree. Arguments after `--` go to BioETL.
+
+```powershell
+.\.venv-win\Scripts\python.exe -m scripts.ops run-report-campaign run workflow chembl_assay --mode publish --data-root data/campaigns/assay-01 --output reports/local/assay-01 -- --limit 1000
+```
+
+The launcher checks report-root identity and the live Run Explorer query before
+starting BioETL. On success it publishes the workflow and pipeline reports, status
+revisions and evidence locators into `run-reports` under the configured dashboard
+reports mount. Keep the isolated data directory available to Ops HTTP. Report
+publication preserves the source reports and the attempt's archive.
+
+Read `publication.json` in the attempt output for execution status, publication
+status and missing run IDs. `verified` requires the exact workflow IDs in Ops HTTP
+and the exact pipeline IDs in Ops HTTP and Run Explorer. An unverified publication
+returns a nonzero exit code even when BioETL succeeded. Retry publication after
+resolving the error, using the same dashboard source and output directory:
+
+```powershell
+.\.venv-win\Scripts\python.exe -m scripts.ops run-report-campaign publish --output reports/local/assay-01
+```
+
+The retry uses the saved reports. Identical reports can be published again safely.
+An existing report with different bytes is a conflict and must be investigated
+before retrying. Use `--ops-url`, `--grafana-url` and `--timeout` for an alternate
+local deployment or a slower catalogue.
+
 ### CURRENT telemetry missing after a monitoring restart
 
 `1. Trust` answers whether the selected Run ID can be exactly replayed from saved inputs. CURRENT Monitor Readiness, Replay, Ledger, Telemetry and coverage live on Pipeline Diagnostics. They do not change exact-replay readiness. Selected-run Trust can remain OK while those cards report INCOMPLETE, UNKNOWN or CRIT.

@@ -1,0 +1,655 @@
+[
+  {
+    "table": "chembl.activity",
+    "layer": "silver",
+    "status": "ok",
+    "full_rows": 924,
+    "full_cols": 73,
+    "xlsx": "data\\workflow-limit1000-xlsx\\silver\\silver_chembl_activity.xlsx",
+    "xlsx_rows": 924,
+    "manifest_rows": 924,
+    "sheets": [
+      "Sheet1",
+      "_bioetl_export_manifest"
+    ],
+    "mismatch_first50": 0
+  },
+  {
+    "table": "chembl.assay",
+    "layer": "silver",
+    "status": "ok",
+    "full_rows": 1000,
+    "full_cols": 45,
+    "xlsx": "data\\workflow-limit1000-xlsx\\silver\\silver_chembl_assay.xlsx",
+    "xlsx_rows": 1000,
+    "manifest_rows": 1000,
+    "sheets": [
+      "Sheet1",
+      "_bioetl_export_manifest"
+    ],
+    "mismatch_first50": 0
+  },
+  {
+    "table": "chembl.assay_parameters",
+    "layer": "silver",
+    "status": "ok",
+    "full_rows": 1000,
+    "full_cols": 27,
+    "xlsx": "data\\workflow-limit1000-xlsx\\silver\\silver_chembl_assay_parameters.xlsx",
+    "xlsx_rows": 1000,
+    "manifest_rows": 1000,
+    "sheets": [
+      "Sheet1",
+      "_bioetl_export_manifest"
+    ],
+    "mismatch_first50": 49
+  },
+  {
+    "table": "chembl.cell_line",
+    "layer": "silver",
+    "status": "ok",
+    "full_rows": 229,
+    "full_cols": 22,
+    "xlsx": "data\\workflow-limit1000-xlsx\\silver\\silver_chembl_cell_line.xlsx",
+    "xlsx_rows": 229,
+    "manifest_rows": 229,
+    "sheets": [
+      "Sheet1",
+      "_bioetl_export_manifest"
+    ],
+    "mismatch_first50": 0
+  },
+  {
+    "table": "chembl.compound_record",
+    "layer": "silver",
+    "status": "ok",
+    "full_rows": 1000,
+    "full_cols": 12,
+    "xlsx": "data\\workflow-limit1000-xlsx\\silver\\silver_chembl_compound_record.xlsx",
+    "xlsx_rows": 1000,
+    "manifest_rows": 1000,
+    "sheets": [
+      "Sheet1",
+      "_bioetl_export_manifest"
+    ],
+    "mismatch_first50": 0
+  },
+  {
+    "table": "chembl.molecule",
+    "layer": "silver",
+    "status": "ok",
+    "full_rows": 1000,
+    "full_cols": 57,
+    "xlsx": "data\\workflow-limit1000-xlsx\\silver\\silver_chembl_molecule.xlsx",
+    "xlsx_rows": 1000,
+    "manifest_rows": 1000,
+    "sheets": [
+      "Sheet1",
+      "_bioetl_export_manifest"
+    ],
+    "mismatch_first50": 0
+  },
+  {
+    "table": "chembl.protein_class",
+    "layer": "silver",
+    "status": "ok",
+    "full_rows": 904,
+    "full_cols": 15,
+    "xlsx": "data\\workflow-limit1000-xlsx\\silver\\silver_chembl_protein_class.xlsx",
+    "xlsx_rows": 904,
+    "manifest_rows": 904,
+    "sheets": [
+      "Sheet1",
+      "_bioetl_export_manifest"
+    ],
+    "mismatch_first50": 0
+  },
+  {
+    "table": "chembl.publication",
+    "layer": "silver",
+    "status": "ok",
+    "full_rows": 1000,
+    "full_cols": 33,
+    "xlsx": "data\\workflow-limit1000-xlsx\\silver\\silver_chembl_publication.xlsx",
+    "xlsx_rows": 1000,
+    "manifest_rows": 1000,
+    "sheets": [
+      "Sheet1",
+      "_bioetl_export_manifest"
+    ],
+    "mismatch_first50": 0
+  },
+  {
+    "table": "chembl.publication_similarity",
+    "layer": "silver",
+    "status": "ok",
+    "full_rows": 1000,
+    "full_cols": 16,
+    "xlsx": "data\\workflow-limit1000-xlsx\\silver\\silver_chembl_publication_similarity.xlsx",
+    "xlsx_rows": 1000,
+    "manifest_rows": 1000,
+    "sheets": [
+      "Sheet1",
+      "_bioetl_export_manifest"
+    ],
+    "mismatch_first50": 41
+  },
+  {
+    "table": "chembl.publication_term",
+    "layer": "silver",
+    "status": "ok",
+    "full_rows": 783,
+    "full_cols": 10,
+    "xlsx": "data\\workflow-limit1000-xlsx\\silver\\silver_chembl_publication_term.xlsx",
+    "xlsx_rows": 783,
+    "manifest_rows": 783,
+    "sheets": [
+      "Sheet1",
+      "_bioetl_export_manifest"
+    ],
+    "mismatch_first50": 0
+  },
+  {
+    "table": "chembl.subcellular_fraction",
+    "layer": "silver",
+    "status": "ok",
+    "full_rows": 14,
+    "full_cols": 9,
+    "xlsx": "data\\workflow-limit1000-xlsx\\silver\\silver_chembl_subcellular_fraction.xlsx",
+    "xlsx_rows": 14,
+    "manifest_rows": 14,
+    "sheets": [
+      "Sheet1",
+      "_bioetl_export_manifest"
+    ],
+    "mismatch_first50": 0
+  },
+  {
+    "table": "chembl.target",
+    "layer": "silver",
+    "status": "ok",
+    "full_rows": 10690,
+    "full_cols": 41,
+    "xlsx": "data\\workflow-limit1000-xlsx\\silver\\silver_chembl_target.xlsx",
+    "xlsx_rows": 1000,
+    "manifest_rows": 1000,
+    "sheets": [
+      "Sheet1",
+      "_bioetl_export_manifest"
+    ],
+    "mismatch_first50": 0
+  },
+  {
+    "table": "chembl.target_component",
+    "layer": "silver",
+    "status": "ok",
+    "full_rows": 1000,
+    "full_cols": 16,
+    "xlsx": "data\\workflow-limit1000-xlsx\\silver\\silver_chembl_target_component.xlsx",
+    "xlsx_rows": 1000,
+    "manifest_rows": 1000,
+    "sheets": [
+      "Sheet1",
+      "_bioetl_export_manifest"
+    ],
+    "mismatch_first50": 0
+  },
+  {
+    "table": "chembl.target_protein_classification",
+    "layer": "silver",
+    "status": "ok",
+    "full_rows": 931,
+    "full_cols": 45,
+    "xlsx": "data\\workflow-limit1000-xlsx\\silver\\silver_chembl_target_protein_classification.xlsx",
+    "xlsx_rows": 931,
+    "manifest_rows": 931,
+    "sheets": [
+      "Sheet1",
+      "_bioetl_export_manifest"
+    ],
+    "mismatch_first50": 0
+  },
+  {
+    "table": "chembl.tissue",
+    "layer": "silver",
+    "status": "ok",
+    "full_rows": 791,
+    "full_cols": 17,
+    "xlsx": "data\\workflow-limit1000-xlsx\\silver\\silver_chembl_tissue.xlsx",
+    "xlsx_rows": 791,
+    "manifest_rows": 791,
+    "sheets": [
+      "Sheet1",
+      "_bioetl_export_manifest"
+    ],
+    "mismatch_first50": 0
+  },
+  {
+    "table": "pubchem.compound",
+    "layer": "silver",
+    "status": "ok",
+    "full_rows": 20,
+    "full_cols": 39,
+    "xlsx": "data\\workflow-limit1000-xlsx\\silver\\silver_pubchem_compound.xlsx",
+    "xlsx_rows": 20,
+    "manifest_rows": 20,
+    "sheets": [
+      "Sheet1",
+      "_bioetl_export_manifest"
+    ],
+    "mismatch_first50": 0
+  },
+  {
+    "table": "uniprot.protein",
+    "layer": "silver",
+    "status": "ok",
+    "full_rows": 997,
+    "full_cols": 97,
+    "xlsx": "data\\workflow-limit1000-xlsx\\silver\\silver_uniprot_protein.xlsx",
+    "xlsx_rows": 997,
+    "manifest_rows": 997,
+    "sheets": [
+      "Sheet1",
+      "_bioetl_export_manifest"
+    ],
+    "mismatch_first50": 0
+  },
+  {
+    "table": "uniprot.idmapping",
+    "layer": "silver",
+    "status": "ok",
+    "full_rows": 1000,
+    "full_cols": 19,
+    "xlsx": "data\\workflow-limit1000-xlsx\\silver\\silver_uniprot_idmapping.xlsx",
+    "xlsx_rows": 1000,
+    "manifest_rows": 1000,
+    "sheets": [
+      "Sheet1",
+      "_bioetl_export_manifest"
+    ],
+    "mismatch_first50": 0
+  },
+  {
+    "table": "crossref.publication",
+    "layer": "silver",
+    "status": "ok",
+    "full_rows": 243,
+    "full_cols": 48,
+    "xlsx": "data\\workflow-limit1000-xlsx\\silver\\silver_crossref_publication.xlsx",
+    "xlsx_rows": 243,
+    "manifest_rows": 243,
+    "sheets": [
+      "Sheet1",
+      "_bioetl_export_manifest"
+    ],
+    "mismatch_first50": 0
+  },
+  {
+    "table": "openalex.publication",
+    "layer": "silver",
+    "status": "ok",
+    "full_rows": 243,
+    "full_cols": 52,
+    "xlsx": "data\\workflow-limit1000-xlsx\\silver\\silver_openalex_publication.xlsx",
+    "xlsx_rows": 243,
+    "manifest_rows": 243,
+    "sheets": [
+      "Sheet1",
+      "_bioetl_export_manifest"
+    ],
+    "mismatch_first50": 0
+  },
+  {
+    "table": "pubmed.publication",
+    "layer": "silver",
+    "status": "ok",
+    "full_rows": 1000,
+    "full_cols": 59,
+    "xlsx": "data\\workflow-limit1000-xlsx\\silver\\silver_pubmed_publication.xlsx",
+    "xlsx_rows": 1000,
+    "manifest_rows": 1000,
+    "sheets": [
+      "Sheet1",
+      "_bioetl_export_manifest"
+    ],
+    "mismatch_first50": 0
+  },
+  {
+    "table": "semanticscholar.publication",
+    "layer": "silver",
+    "status": "ok",
+    "full_rows": 236,
+    "full_cols": 51,
+    "xlsx": "data\\workflow-limit1000-xlsx\\silver\\silver_semanticscholar_publication.xlsx",
+    "xlsx_rows": 236,
+    "manifest_rows": 236,
+    "sheets": [
+      "Sheet1",
+      "_bioetl_export_manifest"
+    ],
+    "mismatch_first50": 0
+  },
+  {
+    "table": "chembl.activity",
+    "layer": "gold",
+    "status": "ok",
+    "full_rows": 910,
+    "full_cols": 70,
+    "xlsx": "data\\workflow-limit1000-xlsx\\gold\\gold_chembl_activity.xlsx",
+    "xlsx_rows": 910,
+    "manifest_rows": 910,
+    "sheets": [
+      "Sheet1",
+      "_bioetl_export_manifest"
+    ],
+    "mismatch_first50": 0
+  },
+  {
+    "table": "chembl.assay",
+    "layer": "gold",
+    "status": "ok",
+    "full_rows": 983,
+    "full_cols": 41,
+    "xlsx": "data\\workflow-limit1000-xlsx\\gold\\gold_chembl_assay.xlsx",
+    "xlsx_rows": 983,
+    "manifest_rows": 983,
+    "sheets": [
+      "Sheet1",
+      "_bioetl_export_manifest"
+    ],
+    "mismatch_first50": 0
+  },
+  {
+    "table": "chembl.assay_parameters",
+    "layer": "gold",
+    "status": "ok",
+    "full_rows": 1000,
+    "full_cols": 27,
+    "xlsx": "data\\workflow-limit1000-xlsx\\gold\\gold_chembl_assay_parameters.xlsx",
+    "xlsx_rows": 1000,
+    "manifest_rows": 1000,
+    "sheets": [
+      "Sheet1",
+      "_bioetl_export_manifest"
+    ],
+    "mismatch_first50": 48
+  },
+  {
+    "table": "chembl.cell_line",
+    "layer": "gold",
+    "status": "ok",
+    "full_rows": 229,
+    "full_cols": 17,
+    "xlsx": "data\\workflow-limit1000-xlsx\\gold\\gold_chembl_cell_line.xlsx",
+    "xlsx_rows": 229,
+    "manifest_rows": 229,
+    "sheets": [
+      "Sheet1",
+      "_bioetl_export_manifest"
+    ],
+    "mismatch_first50": 0
+  },
+  {
+    "table": "chembl.compound_record",
+    "layer": "gold",
+    "status": "ok",
+    "full_rows": 1000,
+    "full_cols": 13,
+    "xlsx": "data\\workflow-limit1000-xlsx\\gold\\gold_chembl_compound_record.xlsx",
+    "xlsx_rows": 1000,
+    "manifest_rows": 1000,
+    "sheets": [
+      "Sheet1",
+      "_bioetl_export_manifest"
+    ],
+    "mismatch_first50": 0
+  },
+  {
+    "table": "chembl.molecule",
+    "layer": "gold",
+    "status": "no-gold-table",
+    "full_rows": 0,
+    "xlsx": null,
+    "verify": "n/a (molecule has no Gold table)"
+  },
+  {
+    "table": "chembl.protein_class",
+    "layer": "gold",
+    "status": "ok",
+    "full_rows": 904,
+    "full_cols": 16,
+    "xlsx": "data\\workflow-limit1000-xlsx\\gold\\gold_chembl_protein_class.xlsx",
+    "xlsx_rows": 904,
+    "manifest_rows": 904,
+    "sheets": [
+      "Sheet1",
+      "_bioetl_export_manifest"
+    ],
+    "mismatch_first50": 0
+  },
+  {
+    "table": "chembl.publication",
+    "layer": "gold",
+    "status": "ok",
+    "full_rows": 1000,
+    "full_cols": 23,
+    "xlsx": "data\\workflow-limit1000-xlsx\\gold\\gold_chembl_publication.xlsx",
+    "xlsx_rows": 1000,
+    "manifest_rows": 1000,
+    "sheets": [
+      "Sheet1",
+      "_bioetl_export_manifest"
+    ],
+    "mismatch_first50": 0
+  },
+  {
+    "table": "chembl.publication_similarity",
+    "layer": "gold",
+    "status": "ok",
+    "full_rows": 1000,
+    "full_cols": 13,
+    "xlsx": "data\\workflow-limit1000-xlsx\\gold\\gold_chembl_publication_similarity.xlsx",
+    "xlsx_rows": 1000,
+    "manifest_rows": 1000,
+    "sheets": [
+      "Sheet1",
+      "_bioetl_export_manifest"
+    ],
+    "mismatch_first50": 41
+  },
+  {
+    "table": "chembl.publication_term",
+    "layer": "gold",
+    "status": "ok",
+    "full_rows": 20,
+    "full_cols": 7,
+    "xlsx": "data\\workflow-limit1000-xlsx\\gold\\gold_chembl_publication_term.xlsx",
+    "xlsx_rows": 20,
+    "manifest_rows": 20,
+    "sheets": [
+      "Sheet1",
+      "_bioetl_export_manifest"
+    ],
+    "mismatch_first50": 0
+  },
+  {
+    "table": "chembl.subcellular_fraction",
+    "layer": "gold",
+    "status": "ok",
+    "full_rows": 1000,
+    "full_cols": 9,
+    "xlsx": "data\\workflow-limit1000-xlsx\\gold\\gold_chembl_subcellular_fraction.xlsx",
+    "xlsx_rows": 1000,
+    "manifest_rows": 1000,
+    "sheets": [
+      "Sheet1",
+      "_bioetl_export_manifest"
+    ],
+    "mismatch_first50": 0
+  },
+  {
+    "table": "chembl.target",
+    "layer": "gold",
+    "status": "ok",
+    "full_rows": 9155,
+    "full_cols": 41,
+    "xlsx": "data\\workflow-limit1000-xlsx\\gold\\gold_chembl_target.xlsx",
+    "xlsx_rows": 1000,
+    "manifest_rows": 1000,
+    "sheets": [
+      "Sheet1",
+      "_bioetl_export_manifest"
+    ],
+    "mismatch_first50": 0
+  },
+  {
+    "table": "chembl.target_component",
+    "layer": "gold",
+    "status": "ok",
+    "full_rows": 1000,
+    "full_cols": 17,
+    "xlsx": "data\\workflow-limit1000-xlsx\\gold\\gold_chembl_target_component.xlsx",
+    "xlsx_rows": 1000,
+    "manifest_rows": 1000,
+    "sheets": [
+      "Sheet1",
+      "_bioetl_export_manifest"
+    ],
+    "mismatch_first50": 0
+  },
+  {
+    "table": "chembl.target_protein_classification",
+    "layer": "gold",
+    "status": "ok",
+    "full_rows": 1000,
+    "full_cols": 46,
+    "xlsx": "data\\workflow-limit1000-xlsx\\gold\\gold_chembl_target_protein_classification.xlsx",
+    "xlsx_rows": 1000,
+    "manifest_rows": 1000,
+    "sheets": [
+      "Sheet1",
+      "_bioetl_export_manifest"
+    ],
+    "mismatch_first50": 0
+  },
+  {
+    "table": "chembl.tissue",
+    "layer": "gold",
+    "status": "ok",
+    "full_rows": 1000,
+    "full_cols": 12,
+    "xlsx": "data\\workflow-limit1000-xlsx\\gold\\gold_chembl_tissue.xlsx",
+    "xlsx_rows": 1000,
+    "manifest_rows": 1000,
+    "sheets": [
+      "Sheet1",
+      "_bioetl_export_manifest"
+    ],
+    "mismatch_first50": 0
+  },
+  {
+    "table": "pubchem.compound",
+    "layer": "gold",
+    "status": "ok",
+    "full_rows": 50,
+    "full_cols": 40,
+    "xlsx": "data\\workflow-limit1000-xlsx\\gold\\gold_pubchem_compound.xlsx",
+    "xlsx_rows": 50,
+    "manifest_rows": 50,
+    "sheets": [
+      "Sheet1",
+      "_bioetl_export_manifest"
+    ],
+    "mismatch_first50": 0
+  },
+  {
+    "table": "uniprot.protein",
+    "layer": "gold",
+    "status": "ok",
+    "full_rows": 993,
+    "full_cols": 98,
+    "xlsx": "data\\workflow-limit1000-xlsx\\gold\\gold_uniprot_protein.xlsx",
+    "xlsx_rows": 993,
+    "manifest_rows": 993,
+    "sheets": [
+      "Sheet1",
+      "_bioetl_export_manifest"
+    ],
+    "mismatch_first50": 0
+  },
+  {
+    "table": "uniprot.idmapping",
+    "layer": "gold",
+    "status": "ok",
+    "full_rows": 1000,
+    "full_cols": 20,
+    "xlsx": "data\\workflow-limit1000-xlsx\\gold\\gold_uniprot_idmapping.xlsx",
+    "xlsx_rows": 1000,
+    "manifest_rows": 1000,
+    "sheets": [
+      "Sheet1",
+      "_bioetl_export_manifest"
+    ],
+    "mismatch_first50": 0
+  },
+  {
+    "table": "crossref.publication",
+    "layer": "gold",
+    "status": "ok",
+    "full_rows": 274,
+    "full_cols": 34,
+    "xlsx": "data\\workflow-limit1000-xlsx\\gold\\gold_crossref_publication.xlsx",
+    "xlsx_rows": 274,
+    "manifest_rows": 274,
+    "sheets": [
+      "Sheet1",
+      "_bioetl_export_manifest"
+    ],
+    "mismatch_first50": 0
+  },
+  {
+    "table": "openalex.publication",
+    "layer": "gold",
+    "status": "ok",
+    "full_rows": 643,
+    "full_cols": 39,
+    "xlsx": "data\\workflow-limit1000-xlsx\\gold\\gold_openalex_publication.xlsx",
+    "xlsx_rows": 643,
+    "manifest_rows": 643,
+    "sheets": [
+      "Sheet1",
+      "_bioetl_export_manifest"
+    ],
+    "mismatch_first50": 0
+  },
+  {
+    "table": "pubmed.publication",
+    "layer": "gold",
+    "status": "ok",
+    "full_rows": 1028,
+    "full_cols": 35,
+    "xlsx": "data\\workflow-limit1000-xlsx\\gold\\gold_pubmed_publication.xlsx",
+    "xlsx_rows": 1000,
+    "manifest_rows": 1000,
+    "sheets": [
+      "Sheet1",
+      "_bioetl_export_manifest"
+    ],
+    "mismatch_first50": 0
+  },
+  {
+    "table": "semanticscholar.publication",
+    "layer": "gold",
+    "status": "ok",
+    "full_rows": 383,
+    "full_cols": 43,
+    "xlsx": "data\\workflow-limit1000-xlsx\\gold\\gold_semanticscholar_publication.xlsx",
+    "xlsx_rows": 383,
+    "manifest_rows": 383,
+    "sheets": [
+      "Sheet1",
+      "_bioetl_export_manifest"
+    ],
+    "mismatch_first50": 0
+  }
+]
