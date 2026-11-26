@@ -18,7 +18,7 @@ _INVALID_TARGET_ID = "assay/target FK restoration RF-009 found an invalid target
 _CANONICAL_CUTOVER = "RF-013"
 # Physical transitions the driver can execute. 3.2.0 stays declared and
 # refused until its field contract is installed and this set is updated.
-_EXECUTABLE_TRANSITIONS = frozenset({("V30", "V31")})
+_EXECUTABLE_TRANSITIONS = frozenset({("V30", "V31"), ("V31", "V31")})
 _BLOCKED_TRANSITIONS = {
     ("V30", "V32"): (
         "destination contract 3.2.0 is not installed; "

@@ -10,11 +10,15 @@ from bioetl.domain.config.target_classification import (
     TARGET_CLASSIFICATION_FIELDS,
 )
 from bioetl.domain.normalization.profiles.base import NormalizationProfile
+from bioetl.domain.normalization.profiles.chembl_target import CHEMBL_TARGET_PROFILE
 from bioetl.domain.normalization.profiles.chembl_target_classification import (
     target_v31_normalization_profile,
 )
 from bioetl.infrastructure.adapters.iuphar.adapter import (
     IupharTargetClassificationAdapter,
+)
+from bioetl.infrastructure.adapters.iuphar.evidence_store import (
+    LocalTargetClassificationEvidenceStore,
 )
 from bioetl.infrastructure.adapters.iuphar.snapshot_models import LoadedIupharProfile
 from bioetl.infrastructure.storage.target_fk_restoration_plan import (
@@ -57,9 +61,10 @@ def classification_fields(contract: str) -> tuple[str, ...]:
     return TARGET_CLASSIFICATION_FIELDS
 
 
-def _business_without_classification(
+def classification_input(
     row: Mapping[str, object], fields: tuple[str, ...]
 ) -> dict[str, object]:
+    """Exclude derived classification fields from the inputs to a fresh classification."""
     return {key: value for key, value in hash_input(row).items() if key not in fields}
 
 
@@ -68,22 +73,160 @@ def candidate_input_row_id(target_id: str) -> str:
     return "candidate:" + target_id
 
 
+def _classify_candidate_rows(
+    adapter: IupharTargetClassificationAdapter,
+    store: LocalTargetClassificationEvidenceStore,
+    old_silver: Sequence[dict[str, object]],
+    old_gold: Sequence[dict[str, object]],
+    columns: tuple[str, ...],
+    fields: tuple[str, ...],
+    normalization: NormalizationProfile,
+    *,
+    run_id: str,
+    run_started_at: str,
+    refresh_v31: bool,
+) -> tuple[
+    dict[str, dict[str, str | None]],
+    list[dict[str, object]],
+    list[dict[str, object]],
+    list[str],
+]:
+    """Classify frozen Silver rows and project them onto Gold rows."""
+    projections: dict[str, dict[str, str | None]] = {}
+    new_silver: list[dict[str, object]] = []
+    row_ids: list[str] = []
+    for row in old_silver:
+        identity = str(row["target_id"])
+        result = adapter.classify_record(
+            classification_input(row, columns),
+            input_row_id=candidate_input_row_id(identity),
+            run_id=run_id,
+            run_started_at=run_started_at,
+        )
+        projected = {name: result.projection[name] for name in columns}
+        projections[identity] = projected
+        updated = {**row, **projected}
+        updated["content_hash"] = scoped_target_hash(updated, fields, normalization)
+        new_silver.append(updated)
+        store.publish_result(result, run_id=run_id, batch_id="frozen-silver")
+        row_ids.append(result.input_row_id)
+    new_gold: list[dict[str, object]] = []
+    for row in old_gold:
+        if refresh_v31 and row.get("_is_current") is False:
+            new_gold.append(row)
+            continue
+        updated = {**row, **projections[str(row["target_id"])]}
+        updated["content_hash"] = scoped_target_hash(updated, fields, normalization)
+        new_gold.append(updated)
+    return projections, new_silver, new_gold, row_ids
+
+
+def _refresh_mutable_fields(
+    previous: Mapping[str, object],
+    classification: frozenset[str],
+) -> frozenset[str]:
+    """Closed Gold rows stay byte-identical; current rows reclassify."""
+    if previous.get("_is_current") is False:
+        return frozenset()
+    return frozenset({"content_hash"}) | classification
+
+
+def _compare_single_row(
+    key: tuple[str, int | None],
+    previous: Mapping[str, object],
+    current: Mapping[str, object],
+    *,
+    legacy_include_fields: tuple[str, ...],
+    source_fields: tuple[str, ...],
+    source_profile: NormalizationProfile,
+    classification: frozenset[str],
+    refresh_v31: bool,
+) -> None:
+    """Check one frozen row against its candidate, including V31 hashes."""
+    mutable = frozenset({"content_hash"})
+    if refresh_v31:
+        mutable = _refresh_mutable_fields(previous, classification)
+    _assert_legacy_values(str(key), previous, current, mutable_fields=mutable)
+    old_hash = scoped_target_hash(previous, source_fields, source_profile)
+    if refresh_v31:
+        old_legacy_hash = scoped_target_hash(
+            previous, legacy_include_fields, CHEMBL_TARGET_PROFILE
+        )
+    else:
+        old_legacy_hash = old_hash
+    new_legacy_hash = scoped_target_hash(
+        current, legacy_include_fields, CHEMBL_TARGET_PROFILE
+    )
+    if old_hash != previous.get("content_hash") or old_legacy_hash != new_legacy_hash:
+        raise ValueError(
+            "source V31 hash equivalence failed"
+            if refresh_v31
+            else "legacy 3.0 hash equivalence failed"
+        )
+
+
+def _assert_restored_values(
+    key: str,
+    published: Mapping[str, object],
+    current: Mapping[str, object],
+    *,
+    contract: str,
+) -> None:
+    """Keep a published restoration intact apart from its candidate hash and classification."""
+    for field, value in published.items():
+        if field == "content_hash":
+            continue
+        if (
+            field not in current
+            or type(current[field]) is not type(value)
+            or current[field] != value
+        ):
+            raise ValueError(f"restored target changed: {key}/{field}")
+    unexpected = set(current) - set(published) - set(classification_fields(contract))
+    if unexpected:
+        raise ValueError(f"restored target gained unexpected fields: {key}")
+
+
+def _assert_legacy_values(
+    key: str,
+    previous: Mapping[str, object],
+    current: Mapping[str, object],
+    *,
+    mutable_fields: frozenset[str] = frozenset({"content_hash"}),
+) -> None:
+    """Preserve every old physical value, including storage/runtime metadata."""
+    if previous.get("entity_id") != current.get("entity_id"):
+        raise ValueError(f"candidate changed legacy entity_id: {key}")
+    for field, value in previous.items():
+        if field in mutable_fields:
+            continue
+        if (
+            field not in current
+            or type(current[field]) is not type(value)
+            or current[field] != value
+        ):
+            kind = "technical" if field.startswith("_") else "business"
+            raise ValueError(f"candidate changed legacy {kind} field: {key}/{field}")
+
+
 def verify_source_classifications(
     layers: Mapping[str, list[dict[str, object]]],
     profile: LoadedIupharProfile,
     contract: str = "3.1.0",
+    *,
+    preserve_closed_gold: bool = False,
 ) -> None:
-    """Reclassify Silver, then require every Gold version to carry that projection.
+    """Reclassify Silver and verify the corresponding Gold projection.
 
-    Historical Gold business fields are not classified again. The documented
-    migration copies the current Silver projection onto each Gold version.
+    An initial migration projects Silver's classification onto every Gold version.
+    A V31 refresh verifies the projection for current Gold versions.
     """
     adapter = IupharTargetClassificationAdapter(profile, table_contract=contract)
     fields = classification_fields(contract)
     projections: dict[str, Mapping[str, str | None]] = {}
     for (target_id, _version), row in by_id(layers["silver"]).items():
         result = adapter.classify_record(
-            _business_without_classification(row, fields),
+            classification_input(row, fields),
             input_row_id=candidate_input_row_id(target_id),
             run_id="migration-validation",
             run_started_at="1970-01-01T00:00:00+00:00",
@@ -96,6 +239,8 @@ def verify_source_classifications(
             )
         projections[target_id] = result.projection
     for (target_id, _version), row in by_id(layers["gold"]).items():
+        if preserve_closed_gold and row.get("_is_current") is False:
+            continue
         expected = projections.get(target_id)
         if expected is None:
             raise ValueError("candidate Gold target has no classified Silver source")
@@ -157,6 +302,7 @@ __all__ = [
     "candidate_input_row_id",
     "canonical_row_sha256",
     "classification_fields",
+    "classification_input",
     "classify_target_absence",
     "current_assay_target_ids",
     "current_target_ids",

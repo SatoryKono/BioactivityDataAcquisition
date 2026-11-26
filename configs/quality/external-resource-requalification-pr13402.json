@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "14626e0958442fae447472369cb9cf6a10fcc6b3",
+  "source_ref": "14626e0958442fae447472369cb9cf6a10fcc6b3",
+  "source_reviews": {
+    "src/bioetl/application/pipelines/chembl/target_protein_classification_transformer.py": "Gold numeric ID projection (leaf/root/l1-l5 int conversion) plus a TYPE_CHECKING import. Pure in-memory transform, no I/O, no endpoints.",
+    "src/bioetl/interfaces/http/_selected_run_artifact_probes.py": "Threaded context parameter into artifact probes and delegate bronze reference checks to the reviewed bronze-binding helper. No new external acquisition.",
+    "src/bioetl/interfaces/http/_selected_run_bronze_binding.py": "New Windows Bronze reference binder: absolute-path checks, attested-root confinement (resolve/relative_to), fail-closed probes. Filesystem reads only, no network, no subprocess, no new executables.",
+    "src/bioetl/interfaces/http/selected_run_status.py": "Threaded context parameter through assessment probes (keyword-only). No new external acquisition."
+  },
+  "segment_updates": {
+    "src/bioetl/interfaces/http/_selected_run_artifact_probes.py": {
+      "_probe_listed_artifact(item, root, index)": "probed.append(_probe_listed_artifact(bound, root, index))"
+    }
+  }
+}

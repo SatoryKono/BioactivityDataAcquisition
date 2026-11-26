@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import shutil
 from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
@@ -9,7 +10,7 @@ from typing import cast
 
 import orjson
 import pyarrow as pa
-from deltalake import DeltaTable, write_deltalake
+from deltalake import DeltaTable, PostCommitHookProperties, write_deltalake
 
 from bioetl.domain.config.target_classification import TARGET_CLASSIFICATION_FIELDS
 from bioetl.domain.normalization.profiles.chembl_target_classification import (
@@ -30,23 +31,17 @@ from bioetl.infrastructure.storage.target_deployment_binding import (
     validate_deployment_binding,
 )
 from bioetl.infrastructure.storage.target_migration_classification_checks import (
-    assert_candidate_cohort_closure as _assert_candidate_cohort_closure,
-)
-from bioetl.infrastructure.storage.target_migration_classification_checks import (
-    candidate_input_row_id,
+    _classify_candidate_rows,
     classification_fields,
 )
-from bioetl.infrastructure.storage.target_migration_row_ops import (
-    business_fields as _business,
+from bioetl.infrastructure.storage.target_migration_classification_checks import (
+    assert_candidate_cohort_closure as _assert_candidate_cohort_closure,
 )
 from bioetl.infrastructure.storage.target_migration_row_ops import (
     by_id as _by_id,
 )
 from bioetl.infrastructure.storage.target_migration_row_ops import (
     read_delta as _read_delta,
-)
-from bioetl.infrastructure.storage.target_migration_row_ops import (
-    scoped_target_hash as _scoped_target_hash,
 )
 from bioetl.infrastructure.storage.target_migration_validation import (
     _frozen_v31_hash_fields,
@@ -67,6 +62,7 @@ class TargetCandidateBuildRequest:
     run_id: str
     run_started_at: str
     deployment: TargetDeploymentBinding
+    source_profile: str = "V30"
 
 
 def freeze_target_inputs(
@@ -75,6 +71,7 @@ def freeze_target_inputs(
     legacy_include_fields: tuple[str, ...],
     output: Path,
     restoration_manifest: Path | None = None,
+    source_profile: str = "V30",
 ) -> dict[str, object]:
     """Record stable table versions/files/cohorts without writing a source table."""
     checked = paths.checked()
@@ -84,8 +81,11 @@ def freeze_target_inputs(
     safe_output = workspace.joinpath(*relative_output.parts)
     before = _input_facts(checked)
     silver, gold = _read_delta(checked["silver"]), _read_delta(checked["gold"])
-    compare_target_rows(silver, silver, legacy_include_fields)
-    compare_target_rows(gold, gold, legacy_include_fields)
+    refresh_v31 = source_profile == "V31"
+    if refresh_v31 and restoration_manifest is not None:
+        raise ValueError("V31 refresh requires unchanged cohorts")
+    compare_target_rows(silver, silver, legacy_include_fields, refresh_v31=refresh_v31)
+    compare_target_rows(gold, gold, legacy_include_fields, refresh_v31=refresh_v31)
     if not {identity for (identity, _), _row in _by_id(gold).items()}.issubset(
         identity for (identity, _), _row in _by_id(silver).items()
     ):
@@ -104,6 +104,8 @@ def freeze_target_inputs(
         "legacy_include_fields": list(legacy_include_fields),
         "fk_restoration": restoration_record,
     }
+    if refresh_v31:
+        document["source_profile"] = source_profile
     safe_output.parent.mkdir(parents=True, exist_ok=True)
     with safe_output.open("xb") as handle:
         handle.write(canonical_json_bytes(document))
@@ -268,6 +270,8 @@ def _verified_inputs(
         or document.get("schema_version") != 1
     ):
         raise ValueError("unsupported target input freeze")
+    if document.get("source_profile", "V30") != request.source_profile:
+        raise ValueError("target frozen source profile differs")
     if document.get("legacy_include_fields") != list(request.legacy_include_fields):
         raise ValueError("target frozen hash policy differs")
     if document.get("inputs") != _input_facts(checked):
@@ -280,25 +284,39 @@ def _write_layer(
     original: Path,
     rows: list[dict[str, object]],
     columns: tuple[str, ...] = TARGET_CLASSIFICATION_FIELDS,
+    *,
+    refresh_v31: bool = False,
 ) -> None:
     """Write additive classification fields while retaining the original Delta schema."""
     table = DeltaTable(str(original))
     old_schema = delta_schema_to_pyarrow(table.schema())
     names = set(old_schema.names)
-    if names.intersection(columns):
-        raise ValueError("candidate builder requires a legacy V30 source")
-    schema = pa.schema(
-        [
-            *old_schema,
-            *(pa.field(name, pa.string()) for name in columns),
-        ]
-    )
+    if refresh_v31:
+        if not set(columns).issubset(names):
+            raise ValueError("V31 refresh requires all existing classification columns")
+        if destination.exists() and any(destination.iterdir()):
+            raise ValueError("target refresh destination is not empty")
+        shutil.copytree(original, destination, dirs_exist_ok=True)
+        schema = old_schema
+    else:
+        if names.intersection(columns):
+            raise ValueError("candidate builder requires a legacy V30 source")
+        schema = pa.schema(
+            [*old_schema, *(pa.field(name, pa.string()) for name in columns)]
+        )
     output = pa.Table.from_pylist(rows, schema=schema)
     write_deltalake(
         str(destination),
         output,
-        mode="error",
+        mode="overwrite" if refresh_v31 else "error",
         partition_by=table.metadata().partition_columns or None,
+        post_commithook_properties=(
+            PostCommitHookProperties(
+                create_checkpoint=False, cleanup_expired_logs=False
+            )
+            if refresh_v31
+            else None
+        ),
     )
 
 
@@ -317,6 +335,9 @@ def build_target_candidates(request: TargetCandidateBuildRequest) -> dict[str, o
     )
 
     contract = _candidate_table_contract(checked)
+    refresh_v31 = request.source_profile == "V31"
+    if refresh_v31 and contract != "3.1.0":
+        raise ValueError("V31 refresh requires contract 3.1.0")
     columns = classification_fields(contract)
     fields = _frozen_v31_hash_fields(checked, request.legacy_include_fields, contract)
     normalization = (
@@ -343,37 +364,39 @@ def build_target_candidates(request: TargetCandidateBuildRequest) -> dict[str, o
         classification_schema_version=profile.classification_schema_version,
         matching_policy_version=profile.matching_policy_version,
     )
-    projections: dict[str, dict[str, str | None]] = {}
-    new_silver: list[dict[str, object]] = []
-    row_ids = []
-    for row in old_silver:
-        identity = str(row["target_id"])
-        result = adapter.classify_record(
-            _business(row),
-            input_row_id=candidate_input_row_id(identity),
-            run_id=request.run_id,
-            run_started_at=request.run_started_at,
-        )
-        projected = {name: result.projection[name] for name in columns}
-        projections[identity] = projected
-        updated = {**row, **projected}
-        updated["content_hash"] = _scoped_target_hash(updated, fields, normalization)
-        new_silver.append(updated)
-        store.publish_result(result, run_id=request.run_id, batch_id="frozen-silver")
-        row_ids.append(result.input_row_id)
-    new_gold = []
-    for row in old_gold:
-        updated = {**row, **projections[str(row["target_id"])]}
-        updated["content_hash"] = _scoped_target_hash(updated, fields, normalization)
-        new_gold.append(updated)
+    _, new_silver, new_gold, row_ids = _classify_candidate_rows(
+        adapter,
+        store,
+        old_silver,
+        old_gold,
+        columns,
+        fields,
+        normalization,
+        run_id=request.run_id,
+        run_started_at=request.run_started_at,
+        refresh_v31=refresh_v31,
+    )
     _verified_inputs(request, checked)
-    _write_layer(checked["candidate_silver"], checked["silver"], new_silver, columns)
-    _write_layer(checked["candidate_gold"], checked["gold"], new_gold, columns)
+    _write_layer(
+        checked["candidate_silver"],
+        checked["silver"],
+        new_silver,
+        columns,
+        refresh_v31=refresh_v31,
+    )
+    _write_layer(
+        checked["candidate_gold"],
+        checked["gold"],
+        new_gold,
+        columns,
+        refresh_v31=refresh_v31,
+    )
     validation = validate_target_candidate(
         checked,
         request.legacy_include_fields,
         workspace=request.paths.workspace,
         restoration_manifest=restoration_manifest,
+        source_profile=request.source_profile,
     )
     _verified_inputs(request, checked)
     evidence = store.finalize_run(

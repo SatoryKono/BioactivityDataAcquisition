@@ -10,6 +10,9 @@ import pytest
 from openpyxl import Workbook
 
 from bioetl.domain.config.target_classification import TARGET_CLASSIFICATION_FIELDS
+from bioetl.infrastructure.storage.target_migration_physical import (
+    V31_REFRESH_PHYSICAL_POLICY,
+)
 from scripts.ops.target_classification_contour import (
     PHYSICAL_CONTRACT,
     ContourEvidenceError,
@@ -355,10 +358,18 @@ def test_repository_contour_stays_blocked_and_keeps_mode_off() -> None:
     assert axes["biological"]["rf008_admitted"] is False
 
 
+@pytest.mark.parametrize(
+    "physical_contract", (PHYSICAL_CONTRACT, V31_REFRESH_PHYSICAL_POLICY)
+)
 def test_ready_report_does_not_treat_matched_count_as_biological_acceptance(
     tmp_path: Path,
+    physical_contract: str,
 ) -> None:
     evidence, observations = _ready_case(tmp_path)
+    migration = dict(evidence["migration"])
+    evidence["migration"] = {**migration, "physical_contract": physical_contract}
+    if physical_contract == V31_REFRESH_PHYSICAL_POLICY:
+        observations = replace(observations, canonical_mode="enrich")
     report = evaluate_main_contour(evidence, observations)
 
     assert report["promotion_decision"] == "READY"
@@ -375,6 +386,25 @@ def test_ready_report_does_not_treat_matched_count_as_biological_acceptance(
         "matched": 1,
     }
     assert report["distribution_source"] == "shadow_classification"
+
+
+def test_refresh_report_requires_live_enrich_before_ready(
+    tmp_path: Path,
+) -> None:
+    evidence, observations = _ready_case(tmp_path)
+    migration = dict(evidence["migration"])
+    evidence["migration"] = {
+        **migration,
+        "physical_contract": V31_REFRESH_PHYSICAL_POLICY,
+    }
+    report = evaluate_main_contour(evidence, observations)
+
+    assert report["promotion_decision"] == "BLOCKED"
+    assert _phase(report, "migration") == "FAIL"
+    migration_reasons = report["phases"]["migration"]["reasons"]
+    assert isinstance(migration_reasons, list)
+    assert "refresh_canonical_not_enrich" in migration_reasons
+    assert "premature_canonical_activation" not in migration_reasons
 
 
 def test_shadow_pass_does_not_pass_enrich(tmp_path: Path) -> None:
