@@ -30,22 +30,6 @@ _DASHBOARD = "/api/dashboards/uid/bioetl-run-explorer-v1"
 _DATASOURCE = "bioetl-ops-http"
 
 
-def _lookup_url(query: dict, pipeline: str, run_id: str) -> str:
-    url = query["url"]
-    prefix = "${"
-    for key, value in {
-        "pipeline": pipeline,
-        "workflow": ".*",
-        "run_type:csv": ".*",
-        "run_id": "-",
-        "lookup_run_id:percentencode": run_id,
-    }.items():
-        url = url.replace(prefix + key + "}", quote(value, safe=""))
-    if prefix in url or "$__" in url:
-        raise ValueError("Run Explorer lookup contains unresolved Grafana variables")
-    return url
-
-
 class _NoRedirect(urllib.request.HTTPRedirectHandler):
     def redirect_request(self, _req, _fp, _code, _msg, _headers, _newurl):
         return None
@@ -64,13 +48,15 @@ class DashboardAccess:
         url = ensure_local_http_url(base.rstrip("/") + path)
         headers = {"Accept": "application/json"}
         if grafana:
-            parsed = urlsplit(url)
-            if parsed.scheme != "https" and parsed.hostname not in {
+            destination = urlsplit(url)
+            if destination.scheme != "https" and destination.hostname not in {
+                "localhost",
                 "127.0.0.1",
                 "::1",
-                "localhost",
             }:
-                raise ValueError("Grafana credentials require HTTPS outside loopback")
+                raise ValueError(
+                    "Grafana authentication requires HTTPS outside loopback"
+                )
             password = resolve_grafana_password()
             if not password:
                 raise ValueError(
@@ -121,75 +107,32 @@ class DashboardAccess:
             raise ValueError(
                 f"Dashboard report root is missing its matching marker or identity: {target}"
             )
+        query = self._panel_query()
+        self._query_result(
+            query, _query_url(query, lookup="00000000-0000-0000-0000-000000000000")
+        )
+        return source_id, query
+
+    def _panel_query(self) -> dict:
         dashboard = self.request(_DASHBOARD, grafana=True)["dashboard"]
         panels = [panel for panel in dashboard["panels"] if panel["id"] == 3010]
         if len(panels) != 1 or len(panels[0].get("targets", [])) != 1:
             raise ValueError("Grafana Run Explorer panel 3010 is unavailable")
         panel = panels[0]
         query = panel["targets"][0]
+        datasource = query.get("datasource") or panel.get("datasource", {})
         if (
             not query.get("url", "").startswith(f"{_PIPELINE_INDEX}?")
             or "${lookup_run_id:percentencode}" not in query["url"]
-            or query.get("datasource", panel.get("datasource", {})).get("uid")
-            != _DATASOURCE
+            or datasource.get("uid") != _DATASOURCE
             or query.get("hide") is True
         ):
             raise ValueError(
                 "Grafana Run Explorer does not have an active Ops HTTP lookup target"
             )
-        query = {**query, "datasource": query.get("datasource") or panel["datasource"]}
-        self._grafana_frames(
-            query, _lookup_url(query, ".*", "00000000-0000-0000-0000-000000000000")
-        )
-        return source_id, query
+        return {**query, "datasource": datasource}
 
-    def visible(self, run: RunReport, *, source_id: str, query: dict) -> bool:
-        try:
-            return self._visible(run, source_id=source_id, query=query)
-        except HTTPError as exc:
-            if exc.code == 404:
-                return False
-            raise
-
-    def _visible(self, run: RunReport, *, source_id: str, query: dict) -> bool:
-        if run.kind == "workflow":
-            params = urlencode({"workflow": run.owner, "workflow_run_id": run.run_id})
-            payload = self.request(f"/ops/observability/workflow-run-report?{params}")
-            identity = payload.get("identity", {})
-            return (identity.get("workflow_name"), identity.get("workflow_run_id")) == (
-                run.owner,
-                run.run_id,
-            )
-
-        url = _lookup_url(query, run.owner, run.run_id)
-        index = self.request(url)
-        if (
-            index.get("index_state") != "ok"
-            or index.get("source_identity_actual") != source_id
-            or not any(
-                (row.get("pipeline"), row.get("run_id"), row.get("report_state"))
-                == (run.owner, run.run_id, "AVAILABLE")
-                for row in index.get("items", [])
-            )
-        ):
-            return False
-        params = urlencode({"pipeline": run.owner, "run_id": run.run_id})
-        payload = self.request(f"/ops/observability/pipeline-run-report?{params}")
-        identity = payload.get("identity", {})
-        if (identity.get("pipeline_name"), identity.get("run_id")) != (
-            run.owner,
-            run.run_id,
-        ):
-            return False
-        return any(
-            field.get("name") == "run_id" and run.run_id in column
-            for frame in self._grafana_frames(query, url)
-            for field, column in zip(
-                frame["schema"]["fields"], frame["data"]["values"], strict=True
-            )
-        )
-
-    def _grafana_frames(self, query: dict, url: str) -> list[dict]:
+    def _query_result(self, query: dict, url: str) -> dict:
         end = datetime.now(UTC)
         body = {
             "from": str(int((end - timedelta(hours=12)).timestamp() * 1000)),
@@ -205,7 +148,80 @@ class DashboardAccess:
             or result.get("status", 200) != 200
         ):
             raise ValueError("Grafana Run Explorer datasource query failed")
-        frames = result.get("frames", [])
-        if not isinstance(frames, list):
+        if not isinstance(result.get("frames", []), list):
             raise ValueError("Grafana Run Explorer returned invalid data frames")
-        return frames
+        return result
+
+    def _report_exists(self, run: RunReport) -> bool:
+        if run.kind == "workflow":
+            params = {"workflow": run.owner, "workflow_run_id": run.run_id}
+            identity_keys = ("workflow_name", "workflow_run_id")
+        else:
+            params = {"pipeline": run.owner, "run_id": run.run_id}
+            identity_keys = ("pipeline_name", "run_id")
+        payload = self.request(
+            f"/ops/observability/{run.kind}-run-report?{urlencode(params)}"
+        )
+        identity = payload.get("identity", {})
+        return tuple(identity.get(key) for key in identity_keys) == (
+            run.owner,
+            run.run_id,
+        )
+
+    def visible(self, run: RunReport, *, source_id: str, query: dict) -> bool:
+        try:
+            return self._report_exists(run) and (
+                run.kind == "workflow" or self._pipeline_visible(run, source_id, query)
+            )
+        except HTTPError as exc:
+            if exc.code == 404:
+                return False
+            raise
+
+    def _pipeline_visible(self, run: RunReport, source_id: str, query: dict) -> bool:
+        url = _query_url(query, pipeline=run.owner, lookup=run.run_id)
+        index = self.request(url)
+        if (
+            index.get("index_state") != "ok"
+            or index.get("source_identity_actual") != source_id
+            or not any(
+                (row.get("pipeline"), row.get("run_id"), row.get("report_state"))
+                == (run.owner, run.run_id, "AVAILABLE")
+                for row in index.get("items", [])
+            )
+        ):
+            return False
+        result = self._query_result(query, url)
+        return any(
+            _frame_has_report(frame, run.run_id) for frame in result.get("frames", [])
+        )
+
+
+def _query_url(query: dict, *, pipeline: str = ".*", lookup: str = "") -> str:
+    url = query["url"]
+    for key, value in {
+        "pipeline": pipeline,
+        "workflow": ".*",
+        "run_type:csv": ".*",
+        "run_id": "-",
+        "lookup_run_id:percentencode": lookup,
+    }.items():
+        url = url.replace("${" + key + "}", quote(value, safe=""))
+    if "${" in url or "$__" in url:
+        raise ValueError("Run Explorer lookup contains unresolved Grafana variables")
+    return url
+
+
+def _frame_has_report(frame: dict, expected_run_id: str) -> bool:
+    columns = {
+        field["name"]: column
+        for field, column in zip(
+            frame["schema"]["fields"], frame["data"]["values"], strict=True
+        )
+    }
+    return any(
+        run_id == expected_run_id and state == "AVAILABLE"
+        for run_id, state in zip(
+            columns.get("run_id", []), columns.get("report_state", []), strict=False
+        )
+    )

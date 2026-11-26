@@ -98,17 +98,19 @@ be visible in the live stack. Prepare a dedicated data directory, including any
 required inputs, before launch. Publish mode requires that directory to be beneath
 `BIOETL_DASHBOARD_DATA_ROOT` (default `data`). Give each attempt a fresh output
 directory outside the dashboard report tree. Arguments after `--` go to the
-selected BioETL command and keep the owner selected by the launcher.
+selected BioETL command, with the owner, backend and output paths controlled
+by the campaign launcher.
 
 ```powershell
 .\.venv-win\Scripts\python.exe -m scripts.ops run-report-campaign run workflow chembl_assay --mode publish --data-root data/campaigns/assay-01 --output reports/local/assay-01 -- --limit 1000
 ```
 
-The launcher checks report-root identity and the live Run Explorer query before
-starting BioETL. On success it publishes the workflow and pipeline reports, status
-revisions and evidence locators into `run-reports` under the configured dashboard
-reports mount. Keep the isolated data directory available to Ops HTTP. Report
-publication preserves the source reports and the attempt's archive.
+The launcher checks report-root identity and executes the Run Explorer query
+through Grafana before starting BioETL. On success it publishes workflow and
+pipeline reports, status revisions and evidence locators into `run-reports` under
+the configured dashboard reports mount. Keep the isolated data directory
+available to Ops HTTP. Publication preserves the source reports and the
+attempt's archive.
 
 Read `publication.json` in the attempt output for execution status, publication
 status and missing run IDs. `verified` requires the exact workflow IDs in Ops HTTP

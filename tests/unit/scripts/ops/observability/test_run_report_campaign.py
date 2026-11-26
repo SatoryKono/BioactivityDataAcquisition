@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from io import BytesIO
 from pathlib import Path
 from subprocess import CompletedProcess
 from urllib.parse import parse_qs, urlsplit
@@ -152,14 +153,21 @@ def test_campaign_retries_publication_after_grafana_misses_exact_run(
             }
         assert grafana and path == "/api/ds/query"
         assert "lookup_run_id=pipeline-id" in body["queries"][0]["url"]
-        values = [PIPELINE.run_id] if grafana_ready else ["another-run-id"]
+        states = ["AVAILABLE" if grafana_ready else "MISSING", "AVAILABLE"]
         return {
             "results": {
                 "A": {
                     "frames": [
                         {
-                            "schema": {"fields": [{"name": "run_id"}]},
-                            "data": {"values": [values]},
+                            "schema": {
+                                "fields": [
+                                    {"name": "run_id"},
+                                    {"name": "report_state"},
+                                ]
+                            },
+                            "data": {
+                                "values": [[PIPELINE.run_id, "another-run-id"], states]
+                            },
                         }
                     ]
                 }
@@ -206,12 +214,24 @@ def test_campaign_retries_publication_after_grafana_misses_exact_run(
     assert read_json(output / campaign.RECEIPT)["publication_status"] == "verified"
 
 
-def test_isolated_mode_does_not_contact_dashboard_or_publish(monkeypatch, attempt):
+@pytest.mark.parametrize("external_mount", [False, True])
+def test_isolated_mode_does_not_contact_dashboard_or_publish(
+    monkeypatch, attempt, external_mount
+):
     output, data, target = attempt
-    monkeypatch.setenv("BIOETL_DASHBOARD_DATA_ROOT", str(data.parent))
+    alias = data.parent
+    if external_mount:
+        alias = campaign.REPO_ROOT.parent / "external-data"
+        target = campaign.REPO_ROOT.parent / "external-reports/run-reports"
+    monkeypatch.setenv("BIOETL_DASHBOARD_DATA_ROOT", str(alias))
+    monkeypatch.setenv("BIOETL_DASHBOARD_REPORT_ROOT", str(target.parent))
 
     def launch(cmd, *, env, cwd, check):
-        assert env["BIOETL_DASHBOARD_DATA_ROOT"] == ""
+        catalog = Path(env["BIOETL_DASHBOARD_DATA_ROOT"])
+        assert catalog == data
+        _write_json(
+            catalog / "output/control/run_manifest/local-only.json", {"local": True}
+        )
         _stage(Path(env["BIOETL_REPORT_ROOT"]))
         return CompletedProcess(cmd, 0)
 
@@ -237,6 +257,7 @@ def test_isolated_mode_does_not_contact_dashboard_or_publish(monkeypatch, attemp
     )
     assert (output / "run-reports" / PIPELINE.commit_file).exists()
     assert not (target / PIPELINE.commit_file).exists()
+    assert not (alias / "output/control/run_manifest/local-only.json").exists()
     assert read_json(output / campaign.RECEIPT)["publication_status"] == "not_requested"
 
 
@@ -336,7 +357,7 @@ def test_child_dispatches_validated_options_to_bioetl(monkeypatch):
 
 
 def test_campaign_options_cannot_override_selected_pipeline():
-    with pytest.raises(ValueError, match="cannot change the selected owner"):
+    with pytest.raises(ValueError, match="cannot override the selected owner"):
         campaign._bioetl_arguments(
             "pipeline", PIPELINE.owner, ["--pipeline=chembl_target"]
         )
@@ -345,6 +366,12 @@ def test_campaign_options_cannot_override_selected_pipeline():
 @pytest.mark.parametrize("state", ["MISSING", "AVAILABLE"])
 def test_catalog_match_alone_does_not_verify_publication(monkeypatch, state):
     def request(self, path, **kwargs):
+        if path.startswith("/ops/observability/pipeline-run-report?"):
+            if state == "AVAILABLE":
+                return {"status": "not_found"}
+            return {
+                "identity": {"pipeline_name": PIPELINE.owner, "run_id": PIPELINE.run_id}
+            }
         if path.startswith("/ops/observability/pipeline-run-reports?"):
             return {
                 "index_state": "ok",
@@ -357,10 +384,6 @@ def test_catalog_match_alone_does_not_verify_publication(monkeypatch, state):
                     }
                 ],
             }
-        if state == "AVAILABLE" and path.startswith(
-            "/ops/observability/pipeline-run-report?"
-        ):
-            return {"status": "not_found"}
         pytest.fail(f"Unexpected query: {path}")
 
     monkeypatch.setattr(DashboardAccess, "request", request)
@@ -487,3 +510,64 @@ def test_grafana_http_outside_loopback_stops_before_reading_credentials(monkeypa
     )
     with pytest.raises(ValueError, match="HTTPS outside loopback"):
         access.request("/api/ds/query", grafana=True)
+
+
+def test_forwarded_pipeline_override_is_rejected_before_launch(monkeypatch, attempt):
+    output, data, _ = attempt
+    monkeypatch.setattr(
+        campaign.subprocess, "run", lambda *_a, **_kw: pytest.fail("launch")
+    )
+    with pytest.raises(SystemExit) as error:
+        campaign.main(
+            [
+                "run",
+                "pipeline",
+                PIPELINE.owner,
+                "--mode",
+                "isolated",
+                "--data-root",
+                str(data),
+                "--output",
+                str(output),
+                "--",
+                "--pipeline=other_pipeline",
+            ]
+        )
+    assert error.value.code == 2
+    assert not output.exists()
+
+
+@pytest.mark.parametrize("host", ["grafana", "host.docker.internal", "dev.localhost"])
+def test_grafana_rejects_cleartext_outside_loopback(monkeypatch, host):
+    monkeypatch.setattr(
+        visibility.urllib.request,
+        "build_opener",
+        lambda *_: pytest.fail("network request"),
+    )
+    access = DashboardAccess("http://127.0.0.1:8000", f"http://{host}:3000", 10)
+    with pytest.raises(ValueError, match="requires HTTPS outside loopback"):
+        access.request("/api/dashboards", grafana=True)
+
+
+@pytest.mark.parametrize(
+    "grafana_url",
+    [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://[::1]:3000",
+        "https://grafana:3000",
+    ],
+)
+def test_grafana_auth_uses_https_or_loopback(monkeypatch, grafana_url):
+    class Opener:
+        def open(self, request, *, timeout):
+            assert request.full_url == f"{grafana_url}/api/dashboards"
+            assert request.get_header("Authorization") == "Basic test-only"
+            assert timeout == 10
+            return BytesIO(b'{"healthy": true}')
+
+    monkeypatch.setattr(visibility, "resolve_grafana_password", lambda: "test-password")
+    monkeypatch.setattr(visibility, "_auth_header", lambda *_: "Basic test-only")
+    monkeypatch.setattr(visibility.urllib.request, "build_opener", lambda *_: Opener())
+    access = DashboardAccess("http://127.0.0.1:8000", grafana_url, 10)
+    assert access.request("/api/dashboards", grafana=True) == {"healthy": True}

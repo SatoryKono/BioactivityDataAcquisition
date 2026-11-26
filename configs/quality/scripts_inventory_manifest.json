@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-26T17:50:53.651286+00:00",
+  "generated_at": "2026-11-26T18:28:12.663118+00:00",
   "summary": {
     "total_scripts": 778,
     "status_counts": {
@@ -25474,13 +25474,13 @@
         },
         {
           "path": "scripts/ops/observability/run_report_campaign.py",
-          "line": 15,
+          "line": 14,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.campaign_report_artifacts import ("
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_run_report_campaign.py",
-          "line": 22,
+          "line": 23,
           "source_group": "tests",
           "text": "from scripts.ops.observability.campaign_report_artifacts import ("
         }
@@ -25499,19 +25499,19 @@
       "references": [
         {
           "path": "scripts/ops/observability/run_report_campaign.py",
-          "line": 21,
+          "line": 20,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.campaign_report_visibility import DashboardAccess"
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_run_report_campaign.py",
-          "line": 20,
+          "line": 21,
           "source_group": "tests",
           "text": "from scripts.ops.observability import campaign_report_visibility as visibility"
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_run_report_campaign.py",
-          "line": 28,
+          "line": 29,
           "source_group": "tests",
           "text": "from scripts.ops.observability.campaign_report_visibility import DashboardAccess"
         }
@@ -28154,7 +28154,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_run_report_campaign.py",
-          "line": 21,
+          "line": 22,
           "source_group": "tests",
           "text": "from scripts.ops.observability import run_report_campaign as campaign"
         }
@@ -28268,7 +28268,7 @@
         },
         {
           "path": "scripts/ops/observability/run_report_campaign.py",
-          "line": 22,
+          "line": 21,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.validate_live_observability import _load_repo_environment"
         },
