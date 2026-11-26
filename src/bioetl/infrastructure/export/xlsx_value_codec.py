@@ -38,9 +38,13 @@ def table_from_xlsx_rows(
     rows: list[dict[str, object]],
     columns: list[str],
     column_types: list[str] | None,
+    *,
+    numeric_text_columns: set[str],
 ) -> pa.Table:
     if column_types is not None and len(column_types) != len(columns):
         raise ValueError("xlsx manifest column_types length does not match columns")
+    if numeric_text_columns and column_types is None:
+        raise ValueError("xlsx numeric text requires declared column types")
     if not rows:
         types = column_types or ["large_string"] * len(columns)
         return pa.table(
@@ -53,16 +57,21 @@ def table_from_xlsx_rows(
         _typed_array(
             [row.get(name) for row in rows],
             None if column_types is None else column_types[index],
+            allow_numeric_text=name in numeric_text_columns,
         )
         for index, name in enumerate(columns)
     ]
     return pa.Table.from_arrays(arrays, names=columns)
 
 
-def _typed_array(values: list[object], type_name: str | None) -> pa.Array:
-    if type_name is not None:
-        return _array_for_declared_type(values, _export_type(type_name))
-    return _inferred_array(values)
+def _typed_array(
+    values: list[object], type_name: str | None, *, allow_numeric_text: bool
+) -> pa.Array:
+    if type_name is None:
+        return _inferred_array(values)
+    return _array_for_declared_type(
+        values, _export_type(type_name), allow_numeric_text=allow_numeric_text
+    )
 
 
 def _inferred_array(values: list[object]) -> pa.Array:
@@ -93,11 +102,21 @@ def _text_array(values: list[object]) -> pa.Array:
     )
 
 
-def _array_for_declared_type(values: list[object], data_type: pa.DataType) -> pa.Array:
+def _array_for_declared_type(
+    values: list[object], data_type: pa.DataType, *, allow_numeric_text: bool
+) -> pa.Array:
     if pa.types.is_floating(data_type):
-        return pa.array(_as_floats(values), type=data_type)
+        return pa.array(
+            _as_floats(values, allow_numeric_text=allow_numeric_text), type=data_type
+        )
     if pa.types.is_integer(data_type):
-        return pa.array(_as_ints(values), type=data_type)
+        return pa.array(
+            _as_ints(values, allow_numeric_text=allow_numeric_text), type=data_type
+        )
+    if allow_numeric_text:
+        raise ValueError(
+            "xlsx numeric text requires an integer or floating-point column"
+        )
     if pa.types.is_boolean(data_type):
         return pa.array(values, type=data_type)
     if is_text_type(data_type):
@@ -116,11 +135,16 @@ def _is_number(value: object) -> bool:
     return isinstance(value, (int, float)) and not isinstance(value, bool)
 
 
-def _as_floats(values: list[object]) -> list[float | None]:
+def _as_floats(
+    values: list[object], *, allow_numeric_text: bool = False
+) -> list[float | None]:
     converted: list[float | None] = []
     for value in values:
         if value is None:
             converted.append(None)
+            continue
+        if allow_numeric_text and isinstance(value, str):
+            converted.append(float(value))
             continue
         if not _is_number(value):
             raise ValueError("xlsx numeric value is not a number")
@@ -128,11 +152,16 @@ def _as_floats(values: list[object]) -> list[float | None]:
     return converted
 
 
-def _as_ints(values: list[object]) -> list[int | None]:
+def _as_ints(
+    values: list[object], *, allow_numeric_text: bool = False
+) -> list[int | None]:
     converted: list[int | None] = []
     for value in values:
         if value is None:
             converted.append(None)
+            continue
+        if allow_numeric_text and isinstance(value, str):
+            converted.append(int(value))
             continue
         if not _is_number(value):
             raise ValueError("xlsx integer value is not an integer")
