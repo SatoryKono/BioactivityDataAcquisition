@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "catalog_ref": "62147359e5c74ba12ae0cd6775b14971c3e32dc8",
-  "source_ref": "fd7008200b2c4798572cca2c8eb633163947593c",
+  "source_ref": "a7cfaf6f7f57a28beda920cf1f02742406c99fea",
   "source_reviews": {
     "src/bioetl/infrastructure/adapters/iuphar/acceptance_receipt.py": "Admit opt-in versioned matching profiles only with verified schema-2 snapshots and their own acceptance. Existing profile reads and validation remain; no new resource acquisition.",
     "src/bioetl/infrastructure/adapters/iuphar/adapter.py": "Pass the selected profile policy into eligibility and project human HGNC identifiers. Pure in-memory projection; no acquisition changes.",
