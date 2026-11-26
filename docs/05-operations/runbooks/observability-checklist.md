@@ -123,7 +123,8 @@ resolving the error, using the same dashboard source and output directory:
 The retry uses the saved reports. Identical reports can be published again safely.
 An existing report with different bytes is a conflict and must be investigated
 before retrying. Use `--ops-url`, `--grafana-url` and `--timeout` for an alternate
-local deployment or a slower catalogue.
+local deployment or a slower catalogue. Grafana authentication uses HTTPS
+outside the loopback interface.
 
 ### CURRENT telemetry missing after a monitoring restart
 

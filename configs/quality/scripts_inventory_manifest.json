@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-26T17:46:08.124971+00:00",
+  "generated_at": "2026-11-26T18:01:53.597114+00:00",
   "summary": {
     "total_scripts": 778,
     "status_counts": {
@@ -25480,7 +25480,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_run_report_campaign.py",
-          "line": 21,
+          "line": 22,
           "source_group": "tests",
           "text": "from scripts.ops.observability.campaign_report_artifacts import ("
         }
@@ -25505,13 +25505,13 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_run_report_campaign.py",
-          "line": 19,
+          "line": 20,
           "source_group": "tests",
           "text": "from scripts.ops.observability import campaign_report_visibility as visibility"
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_run_report_campaign.py",
-          "line": 27,
+          "line": 28,
           "source_group": "tests",
           "text": "from scripts.ops.observability.campaign_report_visibility import DashboardAccess"
         }
@@ -28154,7 +28154,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_run_report_campaign.py",
-          "line": 20,
+          "line": 21,
           "source_group": "tests",
           "text": "from scripts.ops.observability import run_report_campaign as campaign"
         }

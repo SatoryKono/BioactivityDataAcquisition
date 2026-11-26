@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from urllib.error import HTTPError
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlsplit
 
 from bioetl.application.services.run_reports.paths import (
     inspect_report_root_marker,
@@ -48,6 +48,15 @@ class DashboardAccess:
         url = ensure_local_http_url(base.rstrip("/") + path)
         headers = {"Accept": "application/json"}
         if grafana:
+            destination = urlsplit(url)
+            if destination.scheme != "https" and destination.hostname not in {
+                "localhost",
+                "127.0.0.1",
+                "::1",
+            }:
+                raise ValueError(
+                    "Grafana authentication requires HTTPS outside loopback"
+                )
             password = resolve_grafana_password()
             if not password:
                 raise ValueError(

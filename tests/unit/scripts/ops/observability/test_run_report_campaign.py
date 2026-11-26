@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from io import BytesIO
 from pathlib import Path
 from subprocess import CompletedProcess
 from urllib.parse import parse_qs, urlsplit
@@ -415,3 +416,39 @@ def test_missing_referenced_markdown_leaves_index_empty(tmp_path):
             source, target, reports, source_id=SOURCE_ID, relative_data_root="batch"
         )
     assert not (target / PIPELINE.commit_file).exists()
+
+
+@pytest.mark.parametrize("host", ["grafana", "host.docker.internal", "dev.localhost"])
+def test_grafana_rejects_cleartext_outside_loopback(monkeypatch, host):
+    monkeypatch.setattr(
+        visibility.urllib.request,
+        "build_opener",
+        lambda *_: pytest.fail("network request"),
+    )
+    access = DashboardAccess("http://127.0.0.1:8000", f"http://{host}:3000", 10)
+    with pytest.raises(ValueError, match="requires HTTPS outside loopback"):
+        access.request("/api/dashboards", grafana=True)
+
+
+@pytest.mark.parametrize(
+    "grafana_url",
+    [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://[::1]:3000",
+        "https://grafana:3000",
+    ],
+)
+def test_grafana_auth_uses_https_or_loopback(monkeypatch, grafana_url):
+    class Opener:
+        def open(self, request, *, timeout):
+            assert request.full_url == f"{grafana_url}/api/dashboards"
+            assert request.get_header("Authorization") == "Basic test-only"
+            assert timeout == 10
+            return BytesIO(b'{"healthy": true}')
+
+    monkeypatch.setattr(visibility, "resolve_grafana_password", lambda: "test-password")
+    monkeypatch.setattr(visibility, "_auth_header", lambda *_: "Basic test-only")
+    monkeypatch.setattr(visibility.urllib.request, "build_opener", lambda *_: Opener())
+    access = DashboardAccess("http://127.0.0.1:8000", grafana_url, 10)
+    assert access.request("/api/dashboards", grafana=True) == {"healthy": True}
