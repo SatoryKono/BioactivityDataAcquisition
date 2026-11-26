@@ -10,6 +10,31 @@ from dataclasses import dataclass, field, replace
 from types import MappingProxyType
 from typing import Literal
 
+<<<<<<< Updated upstream
+||||||| Stash base
+from .bioetl_input import target_gene_aliases
+from .effective_policy import (
+    CHANNEL_PRIORITY_RULE,
+    ION_CHANNEL,
+    ec_categories,
+    name_keyword_class,
+    select_channel_priority,
+    select_ec_class,
+    select_keyword_class,
+)
+=======
+from .bioetl_input import target_gene_aliases
+from .effective_policy import (
+    CHANNEL_PRIORITY_RULE,
+    ION_CHANNEL,
+    TRANSCRIPTION_FACTOR_CLASS,
+    ec_categories,
+    name_keyword_class,
+    select_channel_priority,
+    select_ec_class,
+    select_keyword_class,
+)
+>>>>>>> Stashed changes
 from .evidence import (
     ContractDefect,
     EvidenceDraft,
@@ -27,6 +52,23 @@ from .hierarchy import (
     normalize_provider_class,
     validate_family_graph,
 )
+<<<<<<< Updated upstream
+||||||| Stash base
+from .identifier_roles import (
+    ANCHOR_PRIORITY_POLICIES,
+    EC_EFFECTIVE_POLICIES,
+    RANKED_CLASS_POLICY_VERSION,
+    normalize_hgnc_ids,
+)
+=======
+from .identifier_roles import (
+    ANCHOR_PRIORITY_POLICIES,
+    EC_EFFECTIVE_POLICIES,
+    RANKED_CLASS_POLICIES,
+    TRANSCRIPTION_FACTOR_POLICY_VERSION,
+    normalize_hgnc_ids,
+)
+>>>>>>> Stashed changes
 from .iuphar_mapping import approved_class_mappings, approved_subclass_mappings
 from .local_layer import apply_local, predictions_from_row
 from .matching import (
@@ -566,6 +608,34 @@ def classify_target(
             build_evidence_table((), run_id=run_id),
             (),
         )
+<<<<<<< Updated upstream
+||||||| Stash base
+    prioritize_anchors = (
+        row.provenance.matching_policy_version in ANCHOR_PRIORITY_POLICIES
+    )
+    ranked = (
+        row.provenance.matching_policy_version == RANKED_CLASS_POLICY_VERSION
+        and row.target_kind == "protein"
+    )
+    business = (
+        _source_business(row)
+        if row.provenance.matching_policy_version in EC_EFFECTIVE_POLICIES
+        else {}
+    )
+=======
+    prioritize_anchors = (
+        row.provenance.matching_policy_version in ANCHOR_PRIORITY_POLICIES
+    )
+    ranked = (
+        row.provenance.matching_policy_version in RANKED_CLASS_POLICIES
+        and row.target_kind == "protein"
+    )
+    business = (
+        _source_business(row)
+        if row.provenance.matching_policy_version in EC_EFFECTIVE_POLICIES
+        else {}
+    )
+>>>>>>> Stashed changes
     query = MatchQuery(
         row.target_id,
         row.uniprot_accessions,
@@ -790,6 +860,208 @@ def _resolution_input(
     )
 
 
+<<<<<<< Updated upstream
+||||||| Stash base
+def _has_channel_candidate(
+    row: ValidatedInput, snapshot: IndexedSnapshot, outcome: Resolution
+) -> bool:
+    classes = (
+        outcome.iuphar_class,
+        outcome.local_class,
+        *outcome.iuphar_class_candidates,
+        *outcome.local_candidates,
+    )
+    if ION_CHANNEL in classes:
+        return True
+    ids = outcome.candidate_target_ids
+    if row.taxon is None and snapshot.species_annotations:
+        annotations = (
+            annotation
+            for (key, _), annotation in snapshot.species_annotations.items()
+            if key in ids
+        )
+    else:
+        annotations = (_annotation(snapshot, key, row.taxon) for key in ids)
+    for annotation in annotations:
+        direct = _direct(snapshot, annotation)
+        if direct and ION_CHANNEL in (
+            direct.iuphar_class,
+            *direct.iuphar_class_candidates,
+        ):
+            return True
+    return False
+
+
+def _fallback_effective_class(
+    row: ValidatedInput,
+    snapshot: IndexedSnapshot,
+    match: MatchResult,
+    outcome: Resolution,
+    *,
+    ranked: bool,
+) -> tuple[Resolution, str] | None:
+    categories = ec_categories(row.ec_numbers)
+    if not categories:
+        if ranked and not outcome.effective_class and match.matched_target_id is None:
+            keyword = name_keyword_class(row.name)
+            if keyword is not None:
+                label, term = keyword
+                return select_keyword_class(outcome, label), f"{term}: {row.name}"
+        return None
+    if outcome.effective_class == ION_CHANNEL or outcome.iuphar_class == ION_CHANNEL:
+        return None
+    if ranked:
+        if len(categories) == 1 and outcome.iuphar_class is not None:
+            return None
+    else:
+        outside_scope = any(d.code == "unsupported_taxon" for d in match.diagnostics)
+        if (
+            len(categories) == 1 and outcome.effective_class and not outside_scope
+        ) or _has_channel_candidate(row, snapshot, outcome):
+            return None
+    content = "|".join(sorted({item.raw for item in row.ec_numbers if item.valid}))
+    return select_ec_class(outcome, categories), content
+
+
+def _effective_policy(
+    row: ValidatedInput,
+    snapshot: IndexedSnapshot,
+    match: MatchResult,
+    outcome: Resolution,
+) -> tuple[Resolution, EvidenceDraft | None]:
+    policy = row.provenance.matching_policy_version
+    if (
+        policy not in EC_EFFECTIVE_POLICIES
+        or row.target_kind != "protein"
+        or "contract_error" in outcome.conflict_codes
+    ):
+        return outcome, None
+    selected = select_channel_priority(outcome)
+    if selected.rule_id == CHANNEL_PRIORITY_RULE:
+        content = "Ion Channel and Enzyme in the matched annotation or supported local evidence"
+    else:
+        fallback = _fallback_effective_class(
+            row, snapshot, match, outcome, ranked=policy == RANKED_CLASS_POLICY_VERSION
+        )
+        if fallback is None:
+            return outcome, None
+        selected, content = fallback
+    witness = EvidenceDraft(
+        row.input_row_id,
+        "local_rule",
+        selected.rule_id,
+        f"{policy}:{selected.effective_class}:{content}",
+        "local",
+    )
+    return selected, witness
+
+
+=======
+def _has_channel_candidate(
+    row: ValidatedInput, snapshot: IndexedSnapshot, outcome: Resolution
+) -> bool:
+    classes = (
+        outcome.iuphar_class,
+        outcome.local_class,
+        *outcome.iuphar_class_candidates,
+        *outcome.local_candidates,
+    )
+    if ION_CHANNEL in classes:
+        return True
+    ids = outcome.candidate_target_ids
+    if row.taxon is None and snapshot.species_annotations:
+        annotations = (
+            annotation
+            for (key, _), annotation in snapshot.species_annotations.items()
+            if key in ids
+        )
+    else:
+        annotations = (_annotation(snapshot, key, row.taxon) for key in ids)
+    for annotation in annotations:
+        direct = _direct(snapshot, annotation)
+        if direct and ION_CHANNEL in (
+            direct.iuphar_class,
+            *direct.iuphar_class_candidates,
+        ):
+            return True
+    return False
+
+
+def _fallback_effective_class(
+    row: ValidatedInput,
+    snapshot: IndexedSnapshot,
+    match: MatchResult,
+    outcome: Resolution,
+    *,
+    ranked: bool,
+) -> tuple[Resolution, str] | None:
+    categories = ec_categories(row.ec_numbers)
+    if not categories:
+        if ranked and not outcome.effective_class:
+            keyword = name_keyword_class(
+                row.name,
+                allow_transcription_factor=(
+                    row.provenance.matching_policy_version
+                    == TRANSCRIPTION_FACTOR_POLICY_VERSION
+                ),
+            )
+            if keyword is not None:
+                label, term = keyword
+                if (
+                    match.matched_target_id is None
+                    or label == TRANSCRIPTION_FACTOR_CLASS
+                ):
+                    return select_keyword_class(outcome, label), f"{term}: {row.name}"
+        return None
+    if outcome.effective_class == ION_CHANNEL or outcome.iuphar_class == ION_CHANNEL:
+        return None
+    if ranked:
+        if len(categories) == 1 and outcome.iuphar_class is not None:
+            return None
+    else:
+        outside_scope = any(d.code == "unsupported_taxon" for d in match.diagnostics)
+        if (
+            len(categories) == 1 and outcome.effective_class and not outside_scope
+        ) or _has_channel_candidate(row, snapshot, outcome):
+            return None
+    content = "|".join(sorted({item.raw for item in row.ec_numbers if item.valid}))
+    return select_ec_class(outcome, categories), content
+
+
+def _effective_policy(
+    row: ValidatedInput,
+    snapshot: IndexedSnapshot,
+    match: MatchResult,
+    outcome: Resolution,
+) -> tuple[Resolution, EvidenceDraft | None]:
+    policy = row.provenance.matching_policy_version
+    if (
+        policy not in EC_EFFECTIVE_POLICIES
+        or row.target_kind != "protein"
+        or "contract_error" in outcome.conflict_codes
+    ):
+        return outcome, None
+    selected = select_channel_priority(outcome)
+    if selected.rule_id == CHANNEL_PRIORITY_RULE:
+        content = "Ion Channel and Enzyme in the matched annotation or supported local evidence"
+    else:
+        fallback = _fallback_effective_class(
+            row, snapshot, match, outcome, ranked=policy in RANKED_CLASS_POLICIES
+        )
+        if fallback is None:
+            return outcome, None
+        selected, content = fallback
+    witness = EvidenceDraft(
+        row.input_row_id,
+        "local_rule",
+        selected.rule_id,
+        f"{policy}:{selected.effective_class}:{content}",
+        "local",
+    )
+    return selected, witness
+
+
+>>>>>>> Stashed changes
 def _complete(
     row: ValidatedInput,
     snapshot: IndexedSnapshot,
@@ -829,6 +1101,36 @@ def _complete(
             direct_class,
         )
     )
+<<<<<<< Updated upstream
+||||||| Stash base
+    outcome, policy_evidence = _effective_policy(row, snapshot, match, outcome)
+    if outcome.effective_source == "keyword_rule":
+        local = replace(
+            local,
+            local_status="supported",
+            local_class=outcome.effective_class,
+            diagnostics=tuple(
+                item
+                for item in local.diagnostics
+                if item.code
+                not in {"free_text_manual_review", "free_text_substring_ignored"}
+            ),
+        )
+=======
+    outcome, policy_evidence = _effective_policy(row, snapshot, match, outcome)
+    if outcome.effective_source == "keyword_rule":
+        superseded = {"free_text_manual_review", "free_text_substring_ignored"}
+        if outcome.effective_class == TRANSCRIPTION_FACTOR_CLASS:
+            superseded.add("broad_nhr_rule_excluded")
+        local = replace(
+            local,
+            local_status="supported",
+            local_class=outcome.effective_class,
+            diagnostics=tuple(
+                item for item in local.diagnostics if item.code not in superseded
+            ),
+        )
+>>>>>>> Stashed changes
     evidence = _evidence(
         row,
         match,

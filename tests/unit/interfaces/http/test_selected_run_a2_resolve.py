@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
@@ -23,6 +24,7 @@ from bioetl.interfaces.http._selected_run_a2_resolve import (
     resolve_a2_latest_run_id,
 )
 from bioetl.interfaces.http.selected_run_status import handle_selected_run_status
+from bioetl.interfaces.http._selector_catalog import SelectorCatalog
 
 pytestmark = pytest.mark.unit
 
@@ -343,6 +345,60 @@ async def test_handle_unresolved_run_id_auto_selects_latest(
     payload = host._send_payload_response.await_args.args[2]
     assert payload["run_id"] == selected
     assert payload["verdict"] == "OK"
+
+
+async def test_auto_scopes_share_the_selector_catalog_scan(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Different assessment-cache keys must not start duplicate manifest scans."""
+    host = _host()
+    host._selector_catalog = SelectorCatalog()
+    host._workflow_manifest_port = None
+    host._run_manifest_port.list_all.return_value = (_manifest(9),)
+    selected = str(_run_id(9))
+
+    def unshared_scan(*_args, **_kwargs):
+        raise AssertionError("AUTO must use the shared selector catalog")
+
+    monkeypatch.setattr(
+        "bioetl.interfaces.http.selected_run_status.list_a2_catalog", unshared_scan
+    )
+    monkeypatch.setattr(
+        "bioetl.interfaces.http.selected_run_status.resolve_a2_latest_run_id",
+        lambda **kwargs: selected,
+    )
+    monkeypatch.setattr(
+        "bioetl.interfaces.http.selected_run_status.scope_matches", lambda *_args: True
+    )
+    monkeypatch.setattr(
+        "bioetl.interfaces.http.selected_run_status.load_selected_run_status",
+        lambda **kwargs: {
+            "pipeline": "chembl_assay",
+            "run_id": kwargs["run_id"],
+            "verdict": "OK",
+            "execution_state": "SUCCESS",
+            "reason": "checked",
+        },
+    )
+    await asyncio.gather(
+        *(
+            handle_selected_run_status(
+                host,
+                MagicMock(),
+                {
+                    "pipeline": "chembl_assay",
+                    "run_id": "-",
+                    "run_type": run_type,
+                },
+            )
+            for run_type in ("All", "incremental")
+        )
+    )
+    assert host._run_manifest_port.list_all.call_count == 1
+    assert host._send_payload_response.await_count == 2
+    for call in host._send_payload_response.await_args_list:
+        assert call.args[2]["run_id"] == selected
+        assert call.args[2]["verdict"] == "OK"
 
 
 async def test_handle_empty_catalog_emits_no_runs(

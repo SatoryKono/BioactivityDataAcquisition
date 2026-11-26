@@ -6,6 +6,12 @@ import re
 from dataclasses import dataclass, replace
 from typing import cast
 
+<<<<<<< Updated upstream
+||||||| Stash base
+from .identifier_roles import RANKED_CLASS_POLICY_VERSION
+=======
+from .identifier_roles import RANKED_CLASS_POLICIES
+>>>>>>> Stashed changes
 from .models import (
     ClassificationResult,
     Diagnostic,
@@ -141,7 +147,20 @@ def validate_input(
             tuple(errors),
             row_hash,
         )
+<<<<<<< Updated upstream
     ec_numbers = parse_ec_numbers(row.fields.get("ec"))
+||||||| Stash base
+    ec_numbers = parse_ec_numbers(
+        row.fields.get("ec"),
+        allow_preliminary=provenance.matching_policy_version
+        == RANKED_CLASS_POLICY_VERSION,
+    )
+=======
+    ec_numbers = parse_ec_numbers(
+        row.fields.get("ec"),
+        allow_preliminary=provenance.matching_policy_version in RANKED_CLASS_POLICIES,
+    )
+>>>>>>> Stashed changes
     diagnostics = _ec_diagnostics(ec_numbers)
     taxon, taxon_diagnostic = _taxon(
         normalized.get("organism"),
