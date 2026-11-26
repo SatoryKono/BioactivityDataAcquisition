@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from dataclasses import replace
 from pathlib import Path
 from types import MappingProxyType
 
+from iuphar_target_class.identifier_roles import normalize_hgnc_ids
+from iuphar_target_class.matching import CatalogTarget
 from iuphar_target_class.pipeline import IndexedSnapshot
 from iuphar_target_class.snapshot import Completeness, assess_completeness
 
@@ -17,6 +20,7 @@ from ._manifest import (
     require_sha256,
     text,
 )
+from ._official_targets_csv import _groups, _read_export
 from ._snapshot_payloads import (
     identifier,
     parse_target_payloads,
@@ -120,6 +124,35 @@ def load_snapshot_manifest(path: Path, expected_sha256: str) -> LoadedIupharSnap
     )
 
 
+def attach_official_hgnc(
+    catalog: tuple[CatalogTarget, ...], source: bytes, release: str
+) -> tuple[CatalogTarget, ...]:
+    """Bind HGNC IDs and full names from the same verified provider rows."""
+    groups = _groups(_read_export(source, release))
+    result = []
+    for target in catalog:
+        row = groups[target.target_id][0][1]
+        abbreviations = {
+            (row.get("Target abbreviated name") or "").casefold(),
+            (target.gene_symbol or "").casefold(),
+        }
+        full_names = tuple(
+            name
+            for key in ("Target name", "Target systematic name")
+            if (name := row.get(key)) and name.casefold() not in abbreviations
+        )
+        result.append(
+            replace(
+                target,
+                full_names=full_names,
+                hgnc_ids=normalize_hgnc_ids(row.get("HGNC id"))
+                if target.species == "9606"
+                else target.hgnc_ids,
+            )
+        )
+    return tuple(result)
+
+
 def _load_current_snapshot(
     path: Path, expected_sha256: str, document: Mapping[str, object]
 ) -> LoadedIupharSnapshot:
@@ -134,6 +167,9 @@ def _load_current_snapshot(
     if checked_bytes(audit_path, audit_hash) != projection.audit:
         raise ValueError("snapshot projection audit differs from source accounting")
     catalog, annotations = parse_target_species_payloads(raw)
+    catalog = attach_official_hgnc(
+        catalog, evidence.raw_artifacts["targets_csv"], evidence.provider_release
+    )
     completeness = Completeness(
         True,
         True,

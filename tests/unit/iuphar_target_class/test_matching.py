@@ -438,3 +438,52 @@ def test_rf008_projection_forwards_separated_uniprot_fields(
         "uniprot_equivalent": None,
         "uniprot_xref": "Q99999",
     }
+
+
+@pytest.mark.parametrize(
+    ("uniprot", "hgnc"),
+    [(("P11111",), ()), ((), ("101",)), (("P11111",), ("101",))],
+)
+def test_primary_or_hgnc_overrides_same_species_text(
+    uniprot: tuple[str, ...], hgnc: tuple[str, ...]
+) -> None:
+    catalog = (
+        replace(
+            _target("1", uniprot="P11111", species="9606", name="Original"),
+            hgnc_ids=("101",),
+        ),
+        _target("2", uniprot="P22222", species="9606", synonym="Shared"),
+    )
+    query = replace(
+        _query(uniprot_ids=uniprot, organism="9606", name="Shared"),
+        hgnc_ids=hgnc,
+        prioritize_anchors=True,
+    )
+    result = resolve_match(query, catalog, snapshot_complete=False)
+    assert result.match_status == "matched"
+    assert result.matched_target_id == "1"
+    assert result.candidate_target_ids == ("1",)
+
+
+def test_primary_and_hgnc_disagreement_blocks_confirmation() -> None:
+    catalog = (
+        replace(_target("1", species="9606"), hgnc_ids=("101",)),
+        _target("2", uniprot="P22222", species="9606"),
+    )
+    query = replace(
+        _query(uniprot_ids=("P22222",), organism="9606"),
+        hgnc_ids=("101",),
+        prioritize_anchors=True,
+    )
+    result = resolve_match(query, catalog, snapshot_complete=False)
+    assert result.match_status == "identity_conflict"
+    assert result.matched_target_id is None
+    assert result.candidate_target_ids == ("1", "2")
+
+
+def test_human_hgnc_is_not_a_direct_anchor_for_another_species() -> None:
+    catalog = (replace(_target("1", species="9606"), hgnc_ids=("101",)),)
+    query = replace(_query(organism="9913"), hgnc_ids=("101",), prioritize_anchors=True)
+    assert (
+        resolve_match(query, catalog, snapshot_complete=False).matched_target_id is None
+    )
