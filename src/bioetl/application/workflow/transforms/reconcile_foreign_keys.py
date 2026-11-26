@@ -104,9 +104,15 @@ def _build_reconcile_payload(
     if request.reconciliation_mode == "selected-snapshot":
         payload.update(
             reconciliation_mode=request.reconciliation_mode,
+            reference_scope="current_run",
+        )
+    if (
+        request.reconciliation_mode == "selected-snapshot"
+        or request.require_closed_cohort
+    ):
+        payload.update(
             selected_snapshots=getattr(r, "selected_snapshots", None),
             input_snapshots=getattr(r, "input_snapshots", None),
-            reference_scope="current_run",
         )
     blocked_reason = getattr(r, "mutation_blocked_reason", None)
     if blocked_reason:

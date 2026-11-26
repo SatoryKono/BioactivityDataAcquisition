@@ -761,4 +761,6 @@ _fail_*.txt
 /data/workflows-replay-ready-20261125-v3
 /data/replay-readiness-chembl-target-20261125
 /data/exports
-.bioetl-target-migration.lock
+/data/workflow-limit1000-xlsx
+/data/chembl-target-run-20261126
+/.bioetl-target-migration.lock

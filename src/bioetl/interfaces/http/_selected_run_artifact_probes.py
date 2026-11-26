@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 from collections.abc import Mapping
+from functools import partial
 from pathlib import Path, PurePosixPath
 
 from bioetl.application.services.run_reports.artifact_digest import (
@@ -15,8 +16,7 @@ from bioetl.interfaces.http._forensic_request_budget import (
     request_deadline_exceeded,
 )
 from bioetl.interfaces.http._selected_run_bronze_binding import (
-    _bound_bronze_reference,
-    _rejected_bronze_probe,
+    _probe_with_bronze_binding,
 )
 
 _PIPELINE_REPORT_FILE = "pipeline-run-report.json"
@@ -377,11 +377,9 @@ def _artifact_probes(
     if not isinstance(artifacts, list) or not artifacts:
         return [], False
     root = run_root.resolve()
-    probed: list[Mapping[str, object]] = []
-    for index, item in enumerate(artifacts):
-        bound = _bound_bronze_reference(item, context)
-        if bound is None and isinstance(item, dict):
-            probed.append(_rejected_bronze_probe(item, index))
-        else:
-            probed.append(_probe_listed_artifact(bound, root, index))
-    return probed, True
+    return [
+        _probe_with_bronze_binding(
+            item, context, root, index, partial(_probe_listed_artifact, index=index)
+        )
+        for index, item in enumerate(artifacts)
+    ], True
