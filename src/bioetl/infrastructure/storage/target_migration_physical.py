@@ -18,6 +18,7 @@ from bioetl.infrastructure.storage.target_migration_row_ops import (
 )
 
 _LEGACY_PHYSICAL_POLICY = "legacy_physical_target_v30_to_v31_v1"
+V31_REFRESH_PHYSICAL_POLICY = "existing_physical_target_v31_to_v31_v1"
 _OMITTABLE_RUNTIME_COLUMNS = {
     "silver": frozenset({"_run_id", "_run_type", "_ingestion_ts"}),
     "gold": frozenset({"_index", "_dq_error", "_dq_warn"}),
@@ -48,6 +49,8 @@ def validate_physical_projection(
     old: Sequence[Mapping[str, object]],
     new: Sequence[Mapping[str, object]],
     contract: str = "3.1.0",
+    *,
+    refresh_v31: bool = False,
 ) -> dict[str, object]:
     """Validate a frozen physical projection without changing runtime schemas.
 
@@ -57,9 +60,12 @@ def validate_physical_projection(
     """
     previous, current = _physical_columns(old), _physical_columns(new)
     added = set(classification_fields(contract))
-    if previous.intersection(added):
+    if refresh_v31:
+        if not added.issubset(previous) or current != previous:
+            raise ValueError("V31 refresh must preserve the complete physical schema")
+    elif previous.intersection(added):
         raise ValueError("physical target migration requires a legacy V30 cohort")
-    if current != previous.union(added):
+    elif current != previous.union(added):
         message = (
             "candidate physical columns must equal old columns plus the 3.2.0 classification fields"
             if contract == "3.2.0"
@@ -79,7 +85,9 @@ def validate_physical_projection(
     nullable_absences = _logical_nullable_absences(layer, previous, schema, frame)
     schema.validate(frame, lazy=True)
     return {
-        "policy_id": _physical_policy_id(
+        "policy_id": V31_REFRESH_PHYSICAL_POLICY
+        if refresh_v31
+        else _physical_policy_id(
             contract,
             legacy=any((omissions, storage, nullable_absences)),
         ),

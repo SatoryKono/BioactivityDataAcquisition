@@ -111,6 +111,30 @@ def _bind(case, **kwargs):
     )
 
 
+def _build_rehearsal_candidates(paths, fields, binding, source_profile="V30"):
+    output = paths.backup.with_name(f"build-{source_profile.lower()}")
+    frozen = output.with_suffix(".json")
+    freeze_target_inputs(
+        paths,
+        legacy_include_fields=fields,
+        output=frozen,
+        source_profile=source_profile,
+    )
+    return build_target_candidates(
+        TargetCandidateBuildRequest(
+            paths,
+            frozen,
+            sha256_file(frozen),
+            output,
+            fields,
+            "synthetic-physical-rehearsal",
+            "2026-11-16T00:00:00Z",
+            binding,
+            source_profile=source_profile,
+        )
+    )
+
+
 def test_actual_build_prepare_promote_and_physical_rollback_on_copy(rehearsal):
     paths, occurrence, _, active, _, fields, profile = rehearsal
     original = {
@@ -125,20 +149,7 @@ def test_actual_build_prepare_promote_and_physical_rollback_on_copy(rehearsal):
     binding = _bind(rehearsal)
     assert binding.role == "rehearsal"
     assert binding.profile_sha256 == sha256_file(profile)
-    frozen = occurrence / "frozen.json"
-    freeze_target_inputs(paths, legacy_include_fields=fields, output=frozen)
-    built = build_target_candidates(
-        TargetCandidateBuildRequest(
-            paths,
-            frozen,
-            sha256_file(frozen),
-            occurrence / "build",
-            fields,
-            "synthetic-physical-rehearsal",
-            "2026-11-16T00:00:00Z",
-            binding,
-        )
-    )
+    built = _build_rehearsal_candidates(paths, fields, binding)
     assert built["status"] == "complete"
     assert DeltaTable(paths.candidate_silver).to_pyarrow_table().num_rows == 2
     state = prepare_target_migration(
@@ -185,6 +196,74 @@ def test_actual_build_prepare_promote_and_physical_rollback_on_copy(rehearsal):
     assert (paths.backup / "failed-config").is_file()
     with _lock(paths.workspace):
         pass
+    assert sha256_file(active_config) == active_before
+
+
+def test_v31_refresh_promotes_and_restores_the_previous_enrich_bundle(rehearsal):
+    paths, occurrence, _, active, _, fields, profile = rehearsal
+    active_config = active / "entities/chembl/target.yaml"
+
+    initial_binding = _bind(rehearsal)
+    _build_rehearsal_candidates(paths, fields, initial_binding)
+    prepare_target_migration(
+        paths, legacy_include_fields=fields, deployment=initial_binding
+    )
+    promote_target_migration(paths, deployment=initial_binding)
+    active_config.write_bytes(paths.config.read_bytes())
+    active_before = sha256_file(active_config)
+
+    original = {
+        name: _tree_hashes(getattr(paths, name))
+        for name in ("silver", "gold", "assay", "config")
+    }
+    versions = {
+        name: DeltaTable(str(getattr(paths, name))).version()
+        for name in ("silver", "gold")
+    }
+    _, _, refreshed_bundle, _ = make_dependency_fixture.__wrapped__(occurrence)
+    refreshed_profile = refreshed_bundle / "enrich-profile.json"
+    deployment = yaml.safe_load(paths.config.read_bytes())
+    classification = deployment["pipeline"]["target_classification"]
+    assert classification["mode"] == "enrich"
+    assert classification["snapshot_manifest_sha256"] == sha256_file(profile)
+    classification["snapshot_manifest"] = refreshed_profile.relative_to(
+        paths.workspace
+    ).as_posix()
+    classification["snapshot_manifest_sha256"] = sha256_file(refreshed_profile)
+    paths.candidate_config.write_text(yaml.safe_dump(deployment), encoding="utf-8")
+
+    paths = replace(paths, backup=occurrence / "refresh-backup")
+    binding = _bind((paths, *rehearsal[1:]))
+    assert binding.profile_sha256 != initial_binding.profile_sha256
+    _build_rehearsal_candidates(paths, fields, binding, source_profile="V31")
+    prepared = prepare_target_migration(
+        paths, legacy_include_fields=fields, deployment=binding, source_profile="V31"
+    )
+    assert prepared["phase"] == "prepared"
+    assert prepared["source_profile"] == prepared["destination_profile"] == "V31"
+    assert prepared["source_contract_version"] == "3.1.0"
+    assert prepared["destination_contract_version"] == "3.1.0"
+    assert prepared["fk_restoration"]["status"] == "closed"
+
+    promoted = promote_target_migration(
+        paths, deployment=binding, source_profile="V31", destination_profile="V31"
+    )
+    assert promoted["phase"] == "promoted"
+    assert sha256_file(paths.config) == binding.deployment_config_sha256
+    assert _tree_hashes(paths.assay) == original["assay"]
+    for name, version in versions.items():
+        table = DeltaTable(str(getattr(paths, name)))
+        assert table.version() == version + 1
+        assert set(
+            table.to_pyarrow_table()["target_class_profile_sha256"].to_pylist()
+        ) == {binding.profile_sha256}
+
+    restored = rollback_target_migration(
+        paths, source_profile="V31", destination_profile="V31"
+    )
+    assert restored["phase"] == "rolled_back"
+    for name, hashes in original.items():
+        assert _tree_hashes(getattr(paths, name)) == hashes
     assert sha256_file(active_config) == active_before
 
 

@@ -28,8 +28,8 @@ flowchart LR
     composition -->|337 OK| domain
     composition -->|364 OK| infrastructure
     domain -->|1337 OK| domain
-    infrastructure -->|833 OK| domain
-    infrastructure -->|1433 OK| infrastructure
+    infrastructure -->|834 OK| domain
+    infrastructure -->|1432 OK| infrastructure
     interfaces -->|86 OK| application
     interfaces -->|64 OK| composition
     interfaces -->|100 OK| domain
@@ -47,8 +47,8 @@ flowchart LR
 | `composition`    | `domain`         |     337 | allowed |
 | `composition`    | `infrastructure` |     364 | allowed |
 | `domain`         | `domain`         |    1337 | allowed |
-| `infrastructure` | `domain`         |     833 | allowed |
-| `infrastructure` | `infrastructure` |    1433 | allowed |
+| `infrastructure` | `domain`         |     834 | allowed |
+| `infrastructure` | `infrastructure` |    1432 | allowed |
 | `interfaces`     | `application`    |      86 | allowed |
 | `interfaces`     | `composition`    |      64 | allowed |
 | `interfaces`     | `domain`         |     100 | allowed |

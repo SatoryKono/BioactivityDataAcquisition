@@ -20,6 +20,9 @@ import yaml
 
 from bioetl.domain.config.target_classification import TARGET_CLASSIFICATION_FIELDS
 from bioetl.infrastructure.storage.atomic import atomic_write_text
+from bioetl.infrastructure.storage.target_migration_physical import (
+    V31_REFRESH_PHYSICAL_POLICY,
+)
 from scripts.engineering.common.repo_paths import confined_io_path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -796,7 +799,10 @@ def _migration_closure_reasons(
         reasons.append("writers_not_quiesced")
     if migration["backup_retained"] is not True:
         reasons.append("backup_not_retained")
-    if migration["physical_contract"] != PHYSICAL_CONTRACT:
+    if migration["physical_contract"] not in (
+        PHYSICAL_CONTRACT,
+        V31_REFRESH_PHYSICAL_POLICY,
+    ):
         reasons.append("physical_contract_mismatch")
     if migration["source_identity_matches"] is not True:
         reasons.append("source_identity_mismatch")
@@ -819,6 +825,11 @@ def _migration_identity_reasons(
     return reasons
 
 
+def _is_refresh_migration(migration: dict[str, object]) -> bool:
+    """Refresh journals reclassify live V31 tables instead of first activation."""
+    return migration.get("physical_contract") == V31_REFRESH_PHYSICAL_POLICY
+
+
 def _promotion_config_reasons(
     migration: dict[str, object], observations: ContourObservations
 ) -> list[str]:
@@ -829,7 +840,10 @@ def _promotion_config_reasons(
         if migration["effective_config_sha256"] != observations.canonical_config_sha256:
             reasons.append("promoted_config_hash_mismatch")
         return reasons
-    if observations.canonical_mode != "off":
+    if _is_refresh_migration(migration):
+        if observations.canonical_mode != "enrich":
+            reasons.append("refresh_canonical_not_enrich")
+    elif observations.canonical_mode != "off":
         reasons.append("premature_canonical_activation")
     if migration["effective_config_sha256"] == observations.canonical_config_sha256:
         reasons.append("candidate_config_not_separate")
@@ -1011,13 +1025,14 @@ def _is_ready(
     promoted: bool,
     mode: str,
     live_status: object,
+    refresh: bool,
 ) -> bool:
     return (
         technical
         and bio_ok
         and axes_ok
         and not promoted
-        and mode == "off"
+        and mode == ("enrich" if refresh else "off")
         and live_status == "NOT_RUN"
     )
 
@@ -1050,6 +1065,7 @@ def _blocked_reasons(
     promoted: bool,
     mode: str,
     live_status: object,
+    refresh: bool,
 ) -> list[str]:
     reasons = [f"{name}_not_passed" for name in failed]
     if not bio_ok:
@@ -1058,8 +1074,12 @@ def _blocked_reasons(
         reasons.append("local_not_passed")
     if ci["status"] != "PASS":
         reasons.append("ci_not_passed")
-    if not promoted and mode != "off":
-        reasons.append("premature_canonical_activation")
+    if not promoted and mode != ("enrich" if refresh else "off"):
+        reasons.append(
+            "refresh_canonical_not_enrich"
+            if refresh
+            else "premature_canonical_activation"
+        )
     if not promoted and live_status != "NOT_RUN":
         reasons.append("live_before_promotion")
     if promoted and live_status != "PASS":
@@ -1077,6 +1097,7 @@ def _decide(
 ) -> tuple[str, list[str], bool]:
     migration = cast(dict[str, object], document["migration"])
     promoted = migration["promoted"] is True
+    refresh = _is_refresh_migration(migration)
     technical = all(phases[name]["status"] == "PASS" for name in _PHASE_NAMES[:4])
     bio_ok = biological["status"] == "PASS" or biological["rf008_admitted"] is True
     axes_ok = local["status"] == "PASS" and ci["status"] == "PASS"
@@ -1102,6 +1123,7 @@ def _decide(
         promoted=promoted,
         mode=observations.canonical_mode,
         live_status=live_status,
+        refresh=refresh,
     ):
         return "READY", ["technical_gates_passed"], False
     if _is_live_accepted(
@@ -1123,6 +1145,7 @@ def _decide(
             promoted=promoted,
             mode=observations.canonical_mode,
             live_status=live_status,
+            refresh=refresh,
         ),
         False,
     )

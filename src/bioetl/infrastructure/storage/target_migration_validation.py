@@ -8,6 +8,7 @@ from pathlib import Path
 
 import psutil
 import yaml
+from deltalake import DeltaTable
 from pandera.pandas import DataFrameModel
 
 from bioetl.domain.config.target_classification import (
@@ -21,10 +22,12 @@ from bioetl.domain.normalization.profiles.chembl_target_classification import (
 from bioetl.infrastructure.adapters.iuphar.acceptance_receipt import load_profile
 from bioetl.infrastructure.adapters.iuphar.snapshot_loader import LoadedIupharProfile
 from bioetl.infrastructure.storage.target_migration_classification_checks import (
-    assert_candidate_cohort_closure as _assert_candidate_cohort_closure,
+    _assert_restored_values,
+    _compare_single_row,
+    classification_fields,
 )
 from bioetl.infrastructure.storage.target_migration_classification_checks import (
-    classification_fields,
+    assert_candidate_cohort_closure as _assert_candidate_cohort_closure,
 )
 from bioetl.infrastructure.storage.target_migration_classification_checks import (
     verify_candidate_hashes as _verify_candidate_hashes,
@@ -43,9 +46,6 @@ from bioetl.infrastructure.storage.target_migration_row_ops import (
 )
 from bioetl.infrastructure.storage.target_migration_row_ops import (
     read_delta as _read_delta,
-)
-from bioetl.infrastructure.storage.target_migration_row_ops import (
-    scoped_target_hash as _scoped_target_hash,
 )
 
 
@@ -162,6 +162,7 @@ def compare_target_rows(
     legacy_include_fields: tuple[str, ...],
     *,
     allowed_additions: frozenset[tuple[str, int | None]] = frozenset(),
+    refresh_v31: bool = False,
 ) -> dict[str, int]:
     """Reject subsets, changed old fields, duplicates or legacy-hash drift.
 
@@ -170,65 +171,36 @@ def compare_target_rows(
     """
     if not legacy_include_fields:
         raise ValueError("explicit frozen legacy hash include-policy required")
+    if refresh_v31 and allowed_additions:
+        raise ValueError("V31 refresh requires unchanged cohorts")
     old, new = _by_id(original), _by_id(candidate)
     if set(old) - set(new) or set(new) - set(old) != set(allowed_additions):
         raise ValueError("candidate target IDs differ from the full canonical cohort")
+    classification = frozenset(classification_fields("3.1.0"))
+    source_fields = (
+        (*legacy_include_fields, *sorted(classification))
+        if refresh_v31
+        else legacy_include_fields
+    )
+    source_profile = (
+        target_v31_normalization_profile() if refresh_v31 else CHEMBL_TARGET_PROFILE
+    )
     for key, previous in old.items():
-        current = new[key]
-        _assert_legacy_values(str(key), previous, current)
-        old_hash = _scoped_target_hash(
-            previous, legacy_include_fields, CHEMBL_TARGET_PROFILE
+        _compare_single_row(
+            key,
+            previous,
+            new[key],
+            legacy_include_fields=legacy_include_fields,
+            source_fields=source_fields,
+            source_profile=source_profile,
+            classification=classification,
+            refresh_v31=refresh_v31,
         )
-        new_legacy_hash = _scoped_target_hash(
-            current, legacy_include_fields, CHEMBL_TARGET_PROFILE
-        )
-        if old_hash != previous.get("content_hash") or old_hash != new_legacy_hash:
-            raise ValueError("legacy 3.0 hash equivalence failed")
     return {
         "rows": len(new),
         "legacy_hashes_verified": len(old),
         "restored_rows": len(new) - len(old),
     }
-
-
-def _assert_restored_values(
-    key: str,
-    published: Mapping[str, object],
-    current: Mapping[str, object],
-    *,
-    contract: str,
-) -> None:
-    """Keep a published restoration intact apart from its candidate hash and classification."""
-    for field, value in published.items():
-        if field == "content_hash":
-            continue
-        if (
-            field not in current
-            or type(current[field]) is not type(value)
-            or current[field] != value
-        ):
-            raise ValueError(f"restored target changed: {key}/{field}")
-    unexpected = set(current) - set(published) - set(classification_fields(contract))
-    if unexpected:
-        raise ValueError(f"restored target gained unexpected fields: {key}")
-
-
-def _assert_legacy_values(
-    key: str, previous: Mapping[str, object], current: Mapping[str, object]
-) -> None:
-    """Preserve every old physical value, including storage/runtime metadata."""
-    if previous.get("entity_id") != current.get("entity_id"):
-        raise ValueError(f"candidate changed legacy entity_id: {key}")
-    for field, value in previous.items():
-        if field == "content_hash":
-            continue
-        if (
-            field not in current
-            or type(current[field]) is not type(value)
-            or current[field] != value
-        ):
-            kind = "technical" if field.startswith("_") else "business"
-            raise ValueError(f"candidate changed legacy {kind} field: {key}/{field}")
 
 
 def _frozen_v31_hash_fields(
@@ -272,6 +244,7 @@ def validate_target_candidate(
     *,
     workspace: Path | None = None,
     restoration_manifest: Path | None = None,
+    source_profile: str = "V30",
 ) -> dict[str, object]:
     """Validate admission, strict candidate schemas and both entire cohorts."""
     from bioetl.domain.schemas.chembl.target import TargetSchemaV31, TargetSchemaV32
@@ -282,6 +255,9 @@ def validate_target_candidate(
 
     profile = _load_candidate_profile(paths, workspace=workspace)
     contract = _candidate_table_contract(paths)
+    refresh_v31 = source_profile == "V31"
+    if refresh_v31 and (contract != "3.1.0" or restoration_manifest is not None):
+        raise ValueError("V31 refresh requires contract 3.1.0 and unchanged cohorts")
     include_fields = _frozen_v31_hash_fields(paths, legacy_include_fields, contract)
     silver_schema: type[DataFrameModel] = TargetSchemaV31
     gold_schema: type[DataFrameModel] = ChEMBLTargetGoldSchemaV31
@@ -306,8 +282,11 @@ def validate_target_candidate(
             include_fields,
             contract,
             additions[name],
+            refresh_v31=refresh_v31,
         )
-    _verify_source_classifications(layers, profile, contract)
+    _verify_source_classifications(
+        layers, profile, contract, preserve_closed_gold=refresh_v31
+    )
     _assert_candidate_cohort_closure(paths, layers["gold"])
     result["fk_closure"] = "PASS"
     result["profile_sha256"] = profile.profile_sha256
@@ -378,13 +357,19 @@ def _validate_candidate_layer(
     include_fields: tuple[str, ...],
     contract: str,
     additions: Mapping[tuple[str, int | None], Mapping[str, object]],
+    *,
+    refresh_v31: bool = False,
 ) -> tuple[dict[str, object], list[dict[str, object]]]:
     """Validate one full layer and its unchanged legacy/hash projection."""
     old = _read_delta(paths[name])
     new = _read_delta(paths["candidate_" + name])
     result: dict[str, object] = dict(
         compare_target_rows(
-            old, new, legacy_include_fields, allowed_additions=frozenset(additions)
+            old,
+            new,
+            legacy_include_fields,
+            allowed_additions=frozenset(additions),
+            refresh_v31=refresh_v31,
         )
     )
     if additions:
@@ -394,9 +379,15 @@ def _validate_candidate_layer(
                 str(key), published, current[key], contract=contract
             )
     result["physical_projection"] = validate_physical_projection(
-        name, schema, old, new, contract
+        name, schema, old, new, contract, refresh_v31=refresh_v31
     )
-    if any(row.get("target_class_profile_sha256") != profile_sha256 for row in new):
+    if refresh_v31:
+        _validate_refresh_history(paths[name], paths["candidate_" + name])
+    if any(
+        row.get("target_class_profile_sha256") != profile_sha256
+        for row in new
+        if not refresh_v31 or row.get("_is_current") is not False
+    ):
         raise ValueError("candidate rows belong to another IUPHAR profile")
     hash_profile = (
         target_v32_normalization_profile()
@@ -405,3 +396,24 @@ def _validate_candidate_layer(
     )
     _verify_candidate_hashes(new, include_fields, hash_profile)
     return result, new
+
+
+def _validate_refresh_history(source: Path, candidate: Path) -> None:
+    """A refresh appends one Delta version and retains all original files."""
+    from bioetl.infrastructure.storage.target_classification_migration_bundle import (
+        _tree_hashes,
+    )
+
+    previous, refreshed = DeltaTable(str(source)), DeltaTable(str(candidate))
+    if (
+        previous.metadata().id != refreshed.metadata().id
+        or refreshed.version() != previous.version() + 1
+    ):
+        raise ValueError(
+            "V31 refresh must append one version to the existing Delta table"
+        )
+    if previous.schema() != refreshed.schema():
+        raise ValueError("V31 refresh changed the Delta schema")
+    before, after = _tree_hashes(source), _tree_hashes(candidate)
+    if any(after.get(path) != digest for path, digest in before.items()):
+        raise ValueError("V31 refresh changed an original Delta file")

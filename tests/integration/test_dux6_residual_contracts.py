@@ -221,17 +221,15 @@ def test_pfill_12_browse_explains_artifact_backing_and_backend_failure() -> None
         "&run_id=${run_id}&view=recent&workflow=${workflow}"
         "&run_type=${run_type:csv}&lookup_run_id=${lookup_run_id:percentencode}"
     )
-    status_override = next(
-        item
-        for item in (browse.get("fieldConfig") or {}).get("overrides") or []
-        if (item.get("matcher") or {}).get("options") == "status"
+    organize = next(
+        item for item in browse["transformations"] if item["id"] == "organize"
     )
+    status_column = organize["options"]["renameByName"]["status"]
+    assert status_column == "Overview"
     mapped = {
         key
-        for prop in status_override.get("properties") or []
-        if prop.get("id") == "mappings"
-        for entry in prop.get("value") or []
-        for key in (entry.get("options") or {})
+        for entry in overrides[status_column]["mappings"]
+        for key in entry["options"]
     }
     assert {"TREE_MISSING", "LAYOUT_UNHEALTHY", "IDENTITY_UNHEALTHY"} <= mapped
 
@@ -304,11 +302,28 @@ def test_primary_status_documents_unknown_class() -> None:
         no_value = str(
             (status.get("fieldConfig") or {}).get("defaults", {}).get("noValue") or ""
         ).lower()
-        assert "unknown" in desc or "unknown" in no_value
         if path.name == "bioetl-incident-v1.json":
+            assert "unknown" in desc or "unknown" in no_value
             assert "current" in desc and "run id does not filter" in desc
         else:
-            assert "evidence incomplete" in desc or "missing" in desc
+            assert no_value == "no result · inspect source panel 9002"
+            assert status["targets"][0]["panelId"] == 9002
+            assert "query status" in desc
+            assert "missing checks are incomplete" in desc
+            processing = next(
+                item
+                for item in status["fieldConfig"]["overrides"]
+                if item["matcher"] == {"id": "byName", "options": "Processing"}
+            )
+            mappings = next(
+                prop["value"]
+                for prop in processing["properties"]
+                if prop["id"] == "mappings"
+            )
+            assert any(
+                entry["options"].get("UNKNOWN", {}).get("text") == "UNKNOWN"
+                for entry in mappings
+            )
     dq = json.loads((DASH / "bioetl-dq-v2.json").read_text(encoding="utf-8"))
     selected = next(p for p in _walk(dq.get("panels")) if p.get("id") == 9406)
     assert selected["fieldConfig"]["defaults"]["noValue"] == "UNKNOWN"

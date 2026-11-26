@@ -665,6 +665,20 @@ datetime or ISO8601 text values. Present business and metadata fields and all ni
 new fields remain validated. These bounded migration adaptations do not change
 the schemas required for new runtime writes.
 
+To refresh the policy on existing V31 tables, specify `source_profile: V31`
+and `destination_profile: V31` in the plan. Freeze and validate both current
+cohorts and their existing V31 hashes. Build each candidate from a complete copy
+of its source table, appending one Delta commit that recalculates the
+classification fields and content hashes for Silver and current Gold rows.
+Closed Gold SCD versions retain their original values, and earlier Delta
+versions remain readable. The refresh preserves the schema, target identities,
+and foreign-key closure under physical contract
+`existing_physical_target_v31_to_v31_v1`. Use a V31 `enrich` candidate config
+bound to the new profile and its accepted RF-008 receipt. Gate the refresh with
+`contour-report --require-ready` while the canonical tables stay `enrich`:
+`READY` requires the live `enrich` mode and a candidate config separate from
+the canonical one.
+
 Rehearse promotion and recovery against separate complete copies. The production
 CLI binds the active configuration and canonical destinations; use the composition
 API `bind_target_rehearsal` for a copy rehearsal. Keep `paths.workspace` at the
@@ -729,6 +743,17 @@ pipeline or reconciliation transform can still mutate these resources.
 .\.venv-win\Scripts\python.exe -m scripts.ops target-classification-migration promote --plan 'PATH_TO_APPROVED_PLAN_JSON'
 ```
 
+For a V31 policy refresh (`source_profile: V31`, `destination_profile: V31`),
+run `prepare` without `--restoration-manifest`. `validate_target_candidate`
+requires contract 3.1.0 and unchanged cohorts for a refresh plan and rejects
+any restoration manifest.
+
+```powershell
+.\.venv-win\Scripts\python.exe -m scripts.ops target-classification-migration prepare `
+  --plan 'PATH_TO_APPROVED_V31_REFRESH_PLAN_JSON'
+.\.venv-win\Scripts\python.exe -m scripts.ops target-classification-migration promote --plan 'PATH_TO_APPROVED_V31_REFRESH_PLAN_JSON'
+```
+
 `prepare` validates admission, strict V31 schemas, unique target IDs, unchanged
 legacy business values and identities, V30/V31 hash recomputation, the complete original target
 cohort separately in each layer, and inclusion of the non-null final baseline
@@ -738,8 +763,10 @@ by the workflow's final reconciliation. Gold's
 `description` alias is mapped back to Silver's `target_description` for the
 legacy hash check. Every candidate Silver row is classified again against the
 admitted snapshot; its nine new fields and the corresponding Gold projection
-must agree with that result. It copies and hashes the entire physical old tables and
-configuration, then writes `journal.json`.
+must agree with that result. For a V31 refresh, this projection check covers
+current Gold rows. The validator compares closed Gold rows with their originals.
+Preparation copies and hashes the entire physical old tables and configuration,
+then writes `journal.json`.
 
 `promote` rechecks canonical, candidate, and assay bytes and validation before
 moving both candidates and the configuration into place. It journals each
