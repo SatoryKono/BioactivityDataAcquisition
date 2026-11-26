@@ -559,3 +559,28 @@ def test_priority_anchor_preserves_conflicting_exact_gene_channel(field: str) ->
     result = resolve_match(query, catalog, snapshot_complete=True)
     assert result.match_status == "identity_conflict"
     assert result.matched_target_id is None
+
+
+@pytest.mark.parametrize("field", ["gene_id", "gene_symbol"])
+@pytest.mark.parametrize("recorded", [False, True])
+def test_ranked_name_preserves_known_exact_gene_channel(
+    field: str, recorded: bool
+) -> None:
+    catalog = (
+        replace(
+            _target("1", name="First protein", species="9606"),
+            gene_symbol="GENE1" if recorded else None,
+            gene_id="101" if recorded else None,
+        ),
+        replace(_target("2", gene="GENE2", species="9606"), gene_id="202"),
+    )
+    query = replace(
+        _query(name="First protein", organism="9606"),
+        prioritize_anchors=True,
+        ranked_text=True,
+        **{field: getattr(catalog[1], field)},
+    )
+    result = resolve_match(query, catalog, snapshot_complete=True)
+    assert result.match_status == "ambiguous"
+    assert result.matched_target_id is None
+    assert result.candidate_target_ids == ("1", "2")

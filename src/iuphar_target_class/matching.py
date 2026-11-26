@@ -394,6 +394,11 @@ def _ranked_text_identity(
             continue
         if len(ids) != 1:
             return None
+        if any(
+            known_ids and ids[0] not in known_ids
+            for _, known_ids in _exact_channels(query, catalog, candidates)
+        ):
+            return None
         variants = tuple(
             t for t in _species_targets(query, catalog) if t.target_id == ids[0]
         )
@@ -411,6 +416,10 @@ def _compatible_text_variant(query: MatchQuery, target: CatalogTarget) -> bool:
     pairs = (
         (query.uniprot_ids, target.uniprot_ids),
         (query.hgnc_ids, target.hgnc_ids),
+        (
+            (query.gene_symbol.casefold(),) if query.gene_symbol else (),
+            (target.gene_symbol.casefold(),) if target.gene_symbol else (),
+        ),
         (
             (query.gene_id,) if query.gene_id else (),
             (target.gene_id,) if target.gene_id else (),

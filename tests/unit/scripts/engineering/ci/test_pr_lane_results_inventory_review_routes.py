@@ -59,6 +59,7 @@ def test_pr13166_inventory_review_snapshots_keep_bounded_owners(path: str) -> No
     [
         "configs/quality/external_resource_inventory_pr13346_dq_alias_review.json",
         "configs/quality/external_resource_inventory_pr13342_sync_review.json",
+        "configs/quality/external_resource_inventory_pr13398_review.json",
     ],
 )
 def test_review_receipts_route_only_to_inventory_owners(path: str) -> None:
@@ -84,3 +85,13 @@ def test_target_replay_owner_keeps_lock_and_admission_coverage() -> None:
         )
         for owner in owners
     )
+
+
+def test_effective_class_policy_keeps_classifier_and_pipeline_owners() -> None:
+    path = "src/iuphar_target_class/effective_policy.py"
+    owners = {
+        "tests/unit/infrastructure/adapters/iuphar/test_target_classification.py",
+        "tests/unit/iuphar_target_class/test_pipeline.py",
+    }
+    assert owners.issubset(affected_pytest_targets([path], repo_root=ROOT))
+    assert build_shadow_compare([path], repo_root=ROOT)["covers_full_suite"] is False

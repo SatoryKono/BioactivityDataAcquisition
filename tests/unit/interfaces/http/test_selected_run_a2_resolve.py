@@ -313,11 +313,11 @@ async def test_handle_unresolved_run_id_auto_selects_latest(
     selected = str(_run_id(9))
     host = _host()
     monkeypatch.setattr(
-        "bioetl.interfaces.http.selected_run_status.list_a2_catalog",
+        "bioetl.interfaces.http._selected_run_unavailable.list_a2_catalog",
         lambda *_a, **_k: ((_manifest(9),), ()),
     )
     monkeypatch.setattr(
-        "bioetl.interfaces.http.selected_run_status.resolve_a2_latest_run_id",
+        "bioetl.interfaces.http._selected_run_unavailable.resolve_a2_latest_run_id",
         lambda **_kwargs: selected,
     )
 
@@ -361,10 +361,11 @@ async def test_auto_scopes_share_the_selector_catalog_scan(
         raise AssertionError("AUTO must use the shared selector catalog")
 
     monkeypatch.setattr(
-        "bioetl.interfaces.http.selected_run_status.list_a2_catalog", unshared_scan
+        "bioetl.interfaces.http._selected_run_unavailable.list_a2_catalog",
+        unshared_scan,
     )
     monkeypatch.setattr(
-        "bioetl.interfaces.http.selected_run_status.resolve_a2_latest_run_id",
+        "bioetl.interfaces.http._selected_run_unavailable.resolve_a2_latest_run_id",
         lambda **kwargs: selected,
     )
     monkeypatch.setattr(
@@ -406,11 +407,11 @@ async def test_handle_empty_catalog_emits_no_runs(
 ) -> None:
     host = _host()
     monkeypatch.setattr(
-        "bioetl.interfaces.http.selected_run_status.list_a2_catalog",
+        "bioetl.interfaces.http._selected_run_unavailable.list_a2_catalog",
         lambda *_a, **_k: ((), ()),
     )
     monkeypatch.setattr(
-        "bioetl.interfaces.http.selected_run_status.resolve_a2_latest_run_id",
+        "bioetl.interfaces.http._selected_run_unavailable.resolve_a2_latest_run_id",
         lambda **_kwargs: None,
     )
     await handle_selected_run_status(
@@ -441,7 +442,7 @@ async def test_handle_explicit_url_run_id_wins(
     host = _host()
     resolve = MagicMock(return_value=str(_run_id(1)))
     monkeypatch.setattr(
-        "bioetl.interfaces.http.selected_run_status.resolve_a2_latest_run_id",
+        "bioetl.interfaces.http._selected_run_unavailable.resolve_a2_latest_run_id",
         resolve,
     )
 
@@ -750,7 +751,8 @@ async def test_missing_explicit_context_keeps_requested_identity_without_a2(
     assert requested == {"pipeline": ",".join(pipelines) or "All", "run_id": explicit}
     resolve = MagicMock(return_value=str(foreign.run_id))
     monkeypatch.setattr(
-        "bioetl.interfaces.http.selected_run_status.resolve_a2_latest_run_id", resolve
+        "bioetl.interfaces.http._selected_run_unavailable.resolve_a2_latest_run_id",
+        resolve,
     )
     seen = []
 

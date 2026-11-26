@@ -41,6 +41,12 @@ _FUNCTIONAL_RELATION = re.compile(
     r"binding|associated|interacting|regulators?|substrates?)\b",
     re.IGNORECASE,
 )
+_FUNCTIONAL_RELATION_PREFIX = re.compile(
+    r"\b(?:(?:inhibitors?|blockers?|activators?|agonists?|antagonists?|ligands?|"
+    r"regulators?|substrates?)[\s-]+of|(?:binding|bound)[\s-]+to|"
+    r"(?:interacting|associated)[\s-]+with)\b[^,;()]*$",
+    re.IGNORECASE,
+)
 _TRANSCRIPTION_FACTOR = re.compile(r"\btranscription[\s-]+factors?\b", re.IGNORECASE)
 _TRANSCRIPTION_FACTOR_RELATED = re.compile(
     r"\b(?:binding|interacting|associated|inhibitors?|activators?|regulators?|"
@@ -87,12 +93,10 @@ def name_keyword_class(
     name: str | None, *, allow_transcription_factor: bool = False
 ) -> tuple[str, str] | None:
     """Use standalone functional terms in the target name as local evidence."""
-    if _FUNCTIONAL_RELATION.search(name or ""):
-        return None
     matches = {
         label: hit.group().lower()
         for label, expression in _ASSIGNED_NAME_WORDS.items()
-        if (hit := expression.search(name or "")) is not None
+        if (hit := _functional_name_hit(name or "", expression)) is not None
     }
     if ION_CHANNEL in matches and all(
         label == ION_CHANNEL or label.startswith("Enzyme.") for label in matches
@@ -107,6 +111,21 @@ def name_keyword_class(
         ):
             return TRANSCRIPTION_FACTOR_CLASS, hit.group().lower()
     return next(iter(matches.items())) if len(matches) == 1 else None
+
+
+def _functional_name_hit(
+    name: str, expression: re.Pattern[str]
+) -> re.Match[str] | None:
+    """Keep binding qualifiers before a term, but reject relations to that term."""
+    return next(
+        (
+            hit
+            for hit in expression.finditer(name)
+            if not _FUNCTIONAL_RELATION_PREFIX.search(name[: hit.start()])
+            and not _FUNCTIONAL_RELATION.search(name[hit.end() :])
+        ),
+        None,
+    )
 
 
 def select_ec_class(outcome: Resolution, categories: frozenset[int]) -> Resolution:
