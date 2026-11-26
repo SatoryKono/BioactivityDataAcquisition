@@ -366,7 +366,9 @@ async def handle_selected_run_status(
             and isinstance(shared, SelectorCatalog)
         ):
             catalog = await shared.read(
-                host._run_manifest_port, getattr(host, "_workflow_manifest_port", None)
+                host._run_manifest_port,
+                getattr(host, "_workflow_manifest_port", None),
+                refresh=True,
             )
         return await asyncio.to_thread(
             _resolve_and_load_selected_status,
