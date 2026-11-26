@@ -151,17 +151,19 @@ def test_rejected_windows_bronze_reference_fails_closed_despite_matching_digest(
 
 
 @pytest.mark.parametrize(
-    ("mode", "expected"),
+    ("mode", "digest_payload", "expected"),
     [
-        ("native", "digest_matches"),
-        ("digest_mismatch", "digest_mismatch"),
-        ("stat_denied", "digest_matches"),
-        ("open_denied", "digest_matches"),
-        ("traversal", "artifact_path_escape"),
+        ("native", b"recorded", "digest_matches"),
+        ("native_mismatch", b"bound", "digest_mismatch"),
+        ("stat_denied", b"bound", "digest_matches"),
+        ("open_denied", b"bound", "digest_matches"),
+        ("bound_mismatch", b"recorded", "digest_mismatch"),
+        ("both_unreadable", b"bound", "artifact_unreadable"),
+        ("traversal", b"recorded", "artifact_path_escape"),
     ],
 )
 def test_windows_bronze_reference_native_priority_and_fallback(
-    tmp_path, monkeypatch, mode, expected
+    tmp_path, monkeypatch, mode, digest_payload, expected
 ):
     alias = tmp_path / "data"
     root = alias / "attempt"
@@ -173,13 +175,13 @@ def test_windows_bronze_reference_native_priority_and_fallback(
     recorded.write_bytes(b"recorded")
     bound.parent.mkdir(parents=True)
     bound.write_bytes(b"bound")
-    fallback = mode in {"stat_denied", "open_denied"}
-    payload = b"bound" if fallback or mode == "digest_mismatch" else b"recorded"
 
     prefix = native_root.as_posix()
     if sys.platform != "win32":
         prefix = "D:/original/data"
-        monkeypatch.setattr(bronze_binding, "_native_absolute_artifact", lambda _: recorded)
+        monkeypatch.setattr(
+            bronze_binding, "_native_absolute_artifact", lambda _: recorded
+        )
     (native_root / "foreign").mkdir()
     relative_root = "foreign/../attempt" if mode == "traversal" else root.name
     report = {
@@ -187,7 +189,7 @@ def test_windows_bronze_reference_native_priority_and_fallback(
             {
                 "kind": "bronze_batch",
                 "ref": f"{prefix}/{relative_root}/output/bronze/{suffix.as_posix()}",
-                "sha256": hashlib.sha256(payload).hexdigest(),
+                "sha256": hashlib.sha256(digest_payload).hexdigest(),
             }
         ]
     }
@@ -200,8 +202,14 @@ def test_windows_bronze_reference_native_priority_and_fallback(
         return real_is_file(path)
 
     def open_file(path, *args, **kwargs):
-        if path == recorded and mode == "open_denied":
-            raise PermissionError("open denied")
+        if path == recorded and mode in {
+            "open_denied",
+            "bound_mismatch",
+            "both_unreadable",
+        }:
+            raise PermissionError("recorded open denied")
+        if path == bound and mode == "both_unreadable":
+            raise PermissionError("bound copy open denied")
         return real_open(path, *args, **kwargs)
 
     monkeypatch.setattr(Path, "is_file", check_file)
