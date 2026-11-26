@@ -1,7 +1,7 @@
 {
-  "additive_coverage_xml_path": "reports/quality/local/pr13342-migration-coverage.xml",
-  "additive_coverage_xml_sha256": "ebe96c728c02b4a59ce74e6fee68ccd2617a2d131290af8bdf59a0e0b2c8ed3d",
-  "additive_measured_module_count": 3,
+  "additive_coverage_xml_path": ".amp/in/orb-backup/pr13401-coverage.xml",
+  "additive_coverage_xml_sha256": "f7efac1c6af1f47db395ab001eb3807889dfaa9bc900ad46c405ffd141cc5c7d",
+  "additive_measured_module_count": 1,
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",
   "coverage_xml_sha256": "e91ac60f5fbd43db94af3916ed6708f84c7f101af68f794440a84860a1a9eb72",
@@ -26347,6 +26347,16 @@
       "module": "bioetl.interfaces.http._selected_run_artifact_probes",
       "path": "src/bioetl/interfaces/http/_selected_run_artifact_probes.py",
       "source_lines": 379
+    },
+    {
+      "coverage_percent": 89.36,
+      "coverage_status": "partially_covered",
+      "covered_lines": 42,
+      "executable_lines": 47,
+      "missing_lines": 5,
+      "module": "bioetl.interfaces.http._selected_run_bronze_binding",
+      "path": "src/bioetl/interfaces/http/_selected_run_bronze_binding.py",
+      "source_lines": 81
     },
     {
       "coverage_percent": 100.0,
@@ -53081,6 +53091,16 @@
       "source_lines": 379
     },
     {
+      "coverage_percent": 89.36,
+      "coverage_status": "partially_covered",
+      "covered_lines": 42,
+      "executable_lines": 47,
+      "missing_lines": 5,
+      "module": "bioetl.interfaces.http._selected_run_bronze_binding",
+      "path": "src/bioetl/interfaces/http/_selected_run_bronze_binding.py",
+      "source_lines": 81
+    },
+    {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
       "covered_lines": 3,
@@ -53628,12 +53648,12 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 2673,
+    "source_module_count": 2674,
     "status_counts": {
       "coverage_xml_missing": 12,
       "fully_covered": 2537,
       "no_executable_lines": 1,
-      "partially_covered": 123,
+      "partially_covered": 124,
       "uncovered": 0,
       "unmeasured": 0
     },
