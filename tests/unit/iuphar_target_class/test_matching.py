@@ -515,6 +515,7 @@ def test_priority_anchors_do_not_hide_a_species_variant_conflict(
     [
         ("1", "identity_conflict", None),
         ("2", "matched", "2"),
+        ("999", "ambiguous", None),
     ],
 )
 def test_priority_anchors_respect_an_explicit_target_id(explicit, status, matched):

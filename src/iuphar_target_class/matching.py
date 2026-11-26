@@ -434,9 +434,10 @@ def _preferred_identity(
     if species_conflict is not None:
         return species_conflict
     anchor_channels = [(UNIPROT, uniprot), (HGNC, hgnc)]
-    identity_conflict = _identity_conflict(
-        [(EXPLICIT, _ids_of(candidates, EXPLICIT)), *anchor_channels]
-    )
+    explicit = _ids_of(candidates, EXPLICIT)
+    if query.target_id is not None and not explicit:
+        return None
+    identity_conflict = _identity_conflict([(EXPLICIT, explicit), *anchor_channels])
     if identity_conflict is not None:
         return identity_conflict
     methods = tuple(method for method, ids in anchor_channels if ids)

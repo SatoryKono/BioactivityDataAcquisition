@@ -233,6 +233,9 @@ IUPHAR_IDENTIFIER_ROLES_RF002_TEST = (
     "tests/unit/iuphar_target_class/test_identifier_roles_rf002.py"
 )
 IUPHAR_POLICY_TEST = "tests/unit/iuphar_target_class/test_policy.py"
+IUPHAR_ADAPTER_CLASSIFICATION_TEST = (
+    "tests/unit/infrastructure/adapters/iuphar/test_target_classification.py"
+)
 IUPHAR_HIERARCHY_TEST = "tests/unit/iuphar_target_class/test_hierarchy.py"
 AI_MEMORY_PROGRAM_TEST = "tests/architecture/test_ai_memory_program_contracts.py"
 CODEX_TASK_ROUTING_TEST = "tests/architecture/test_codex_task_routing.py"
@@ -794,7 +797,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "src/iuphar_target_class/identifier_roles.py": (
         IUPHAR_IDENTIFIER_ROLES_RF002_TEST,
         IUPHAR_POLICY_TEST,
-        "tests/unit/infrastructure/adapters/iuphar/test_target_classification.py",
+        IUPHAR_ADAPTER_CLASSIFICATION_TEST,
     ),
     **dict.fromkeys(
         (
@@ -898,7 +901,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/unit/iuphar_target_class/test_local_layer.py",
     ),
     "src/iuphar_target_class/effective_policy.py": (
-        "tests/unit/infrastructure/adapters/iuphar/test_target_classification.py",
+        IUPHAR_ADAPTER_CLASSIFICATION_TEST,
         "tests/unit/iuphar_target_class/test_pipeline.py",
     ),
     "src/iuphar_target_class/resolution.py": (
@@ -939,7 +942,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         ),
         (
             "tests/unit/iuphar_target_class/test_pipeline.py",
-            "tests/unit/infrastructure/adapters/iuphar/test_target_classification.py",
+            IUPHAR_ADAPTER_CLASSIFICATION_TEST,
         ),
     ),
     "src/iuphar_target_class/csv_io.py": (
@@ -948,7 +951,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "src/iuphar_target_class/bioetl_input.py": (
         "tests/unit/iuphar_target_class/test_stage0_v2.py",
         "tests/unit/iuphar_target_class/test_integration_acceptance.py",
-        "tests/unit/infrastructure/adapters/iuphar/test_target_classification.py",
+        IUPHAR_ADAPTER_CLASSIFICATION_TEST,
         "tests/unit/infrastructure/adapters/iuphar/test_classification_evidence_boundaries.py",
     ),
     **dict.fromkeys(
