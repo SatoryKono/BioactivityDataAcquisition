@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "cd1ecb455370ec20ab2dea7036cc1d85331d6627",
+  "source_ref": "cd1ecb455370ec20ab2dea7036cc1d85331d6627",
+  "source_reviews": {
+    "src/bioetl/infrastructure/storage/target_candidates.py": "Extracted row-classification loop into _classify_candidate_rows in target_migration_classification_checks (arch LOC/function budgets). No behavior change; no new external acquisition.",
+    "src/bioetl/infrastructure/storage/target_classification_migration.py": "Extracted prepared-state assembly into _build_prepared_state (arch function budget). No behavior change; no new external acquisition.",
+    "src/bioetl/infrastructure/storage/target_migration_classification_checks.py": "Hosts relocated row-compare/classification helpers moved unchanged from sibling storage modules (arch LOC budgets). No new external acquisition.",
+    "src/bioetl/infrastructure/storage/target_migration_validation.py": "Moved row-compare helpers to the classification-checks module (arch LOC budgets). No behavior change; no new external acquisition."
+  }
+}

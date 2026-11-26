@@ -14,6 +14,7 @@ from deltalake import DeltaTable, write_deltalake
 from bioetl.infrastructure.storage import target_candidates as builder
 from bioetl.infrastructure.storage import target_migration_validation as validation
 from bioetl.infrastructure.storage.delta.schema_ops import coerce_null_types_for_delta
+from bioetl.infrastructure.storage.target_migration_row_ops import scoped_target_hash
 from bioetl.infrastructure.storage.target_classification_migration import (
     TargetMigrationPaths,
 )
@@ -144,9 +145,7 @@ def test_v31_refresh_preserves_history_and_ignores_old_classification(
 
     def stale(row):
         updated = {**row, "iuphar_target_id": "stale-provider-id"}
-        updated["content_hash"] = validation._scoped_target_hash(
-            updated, fields, hash_profile
-        )
+        updated["content_hash"] = scoped_target_hash(updated, fields, hash_profile)
         return updated
 
     silver = [

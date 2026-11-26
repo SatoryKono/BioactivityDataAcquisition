@@ -14,7 +14,6 @@ from pandera.pandas import DataFrameModel
 from bioetl.domain.config.target_classification import (
     resolve_physical_table_contract,
 )
-from bioetl.domain.normalization.profiles.base import NormalizationProfile
 from bioetl.domain.normalization.profiles.chembl_target import CHEMBL_TARGET_PROFILE
 from bioetl.domain.normalization.profiles.chembl_target_classification import (
     target_v31_normalization_profile,
@@ -23,10 +22,12 @@ from bioetl.domain.normalization.profiles.chembl_target_classification import (
 from bioetl.infrastructure.adapters.iuphar.acceptance_receipt import load_profile
 from bioetl.infrastructure.adapters.iuphar.snapshot_loader import LoadedIupharProfile
 from bioetl.infrastructure.storage.target_migration_classification_checks import (
-    assert_candidate_cohort_closure as _assert_candidate_cohort_closure,
+    _assert_restored_values,
+    _compare_single_row,
+    classification_fields,
 )
 from bioetl.infrastructure.storage.target_migration_classification_checks import (
-    classification_fields,
+    assert_candidate_cohort_closure as _assert_candidate_cohort_closure,
 )
 from bioetl.infrastructure.storage.target_migration_classification_checks import (
     verify_candidate_hashes as _verify_candidate_hashes,
@@ -45,9 +46,6 @@ from bioetl.infrastructure.storage.target_migration_row_ops import (
 )
 from bioetl.infrastructure.storage.target_migration_row_ops import (
     read_delta as _read_delta,
-)
-from bioetl.infrastructure.storage.target_migration_row_ops import (
-    scoped_target_hash as _scoped_target_hash,
 )
 
 
@@ -158,50 +156,6 @@ def _managed_writer_command(argv: Sequence[str]) -> bool:
     )
 
 
-def _refresh_mutable_fields(
-    previous: Mapping[str, object],
-    classification: frozenset[str],
-) -> frozenset[str]:
-    """Closed Gold rows stay byte-identical; current rows reclassify."""
-    if previous.get("_is_current") is False:
-        return frozenset()
-    return frozenset({"content_hash"}) | classification
-
-
-def _compare_single_row(
-    key: tuple[str, int | None],
-    previous: Mapping[str, object],
-    current: Mapping[str, object],
-    *,
-    legacy_include_fields: tuple[str, ...],
-    source_fields: tuple[str, ...],
-    source_profile: NormalizationProfile,
-    classification: frozenset[str],
-    refresh_v31: bool,
-) -> None:
-    """Check one frozen row against its candidate, including V31 hashes."""
-    mutable = frozenset({"content_hash"})
-    if refresh_v31:
-        mutable = _refresh_mutable_fields(previous, classification)
-    _assert_legacy_values(str(key), previous, current, mutable_fields=mutable)
-    old_hash = _scoped_target_hash(previous, source_fields, source_profile)
-    if refresh_v31:
-        old_legacy_hash = _scoped_target_hash(
-            previous, legacy_include_fields, CHEMBL_TARGET_PROFILE
-        )
-    else:
-        old_legacy_hash = old_hash
-    new_legacy_hash = _scoped_target_hash(
-        current, legacy_include_fields, CHEMBL_TARGET_PROFILE
-    )
-    if old_hash != previous.get("content_hash") or old_legacy_hash != new_legacy_hash:
-        raise ValueError(
-            "source V31 hash equivalence failed"
-            if refresh_v31
-            else "legacy 3.0 hash equivalence failed"
-        )
-
-
 def compare_target_rows(
     original: Sequence[Mapping[str, object]],
     candidate: Sequence[Mapping[str, object]],
@@ -247,50 +201,6 @@ def compare_target_rows(
         "legacy_hashes_verified": len(old),
         "restored_rows": len(new) - len(old),
     }
-
-
-def _assert_restored_values(
-    key: str,
-    published: Mapping[str, object],
-    current: Mapping[str, object],
-    *,
-    contract: str,
-) -> None:
-    """Keep a published restoration intact apart from its candidate hash and classification."""
-    for field, value in published.items():
-        if field == "content_hash":
-            continue
-        if (
-            field not in current
-            or type(current[field]) is not type(value)
-            or current[field] != value
-        ):
-            raise ValueError(f"restored target changed: {key}/{field}")
-    unexpected = set(current) - set(published) - set(classification_fields(contract))
-    if unexpected:
-        raise ValueError(f"restored target gained unexpected fields: {key}")
-
-
-def _assert_legacy_values(
-    key: str,
-    previous: Mapping[str, object],
-    current: Mapping[str, object],
-    *,
-    mutable_fields: frozenset[str] = frozenset({"content_hash"}),
-) -> None:
-    """Preserve every old physical value, including storage/runtime metadata."""
-    if previous.get("entity_id") != current.get("entity_id"):
-        raise ValueError(f"candidate changed legacy entity_id: {key}")
-    for field, value in previous.items():
-        if field in mutable_fields:
-            continue
-        if (
-            field not in current
-            or type(current[field]) is not type(value)
-            or current[field] != value
-        ):
-            kind = "technical" if field.startswith("_") else "business"
-            raise ValueError(f"candidate changed legacy {kind} field: {key}/{field}")
 
 
 def _frozen_v31_hash_fields(

@@ -45,6 +45,7 @@ from bioetl.infrastructure.storage.target_classification_migration_pins import (
 )
 from bioetl.infrastructure.storage.target_classification_migration_state import (
     TargetMigrationJournal,
+    TargetMigrationTransition,
     _assert_canonical_cutover,
     migration_status,
     require_rf009_fk_restoration,
@@ -113,6 +114,58 @@ def _recorded_restoration(
     return manifest
 
 
+def _build_prepared_state(
+    paths: TargetMigrationPaths,
+    checked: dict[str, Path],
+    before: dict[str, dict[str, str]],
+    validation: dict[str, object],
+    fk_restoration: dict[str, object],
+    dependencies: dict[str, str],
+    dependency_backups: dict[str, str],
+    candidate_profiles: dict[str, str],
+    legacy_include_fields: tuple[str, ...],
+    deployment: TargetDeploymentBinding | None,
+    transition: TargetMigrationTransition,
+    pins: dict[str, dict[str, object]] | None,
+) -> TargetMigrationJournal:
+    """Assemble the prepared migration journal from validated inputs."""
+    return {
+        "artifact": "bioetl_target_migration",
+        "schema_version": 2,
+        "phase": "prepared",
+        "paths": {k: str(v) for k, v in checked.items()},
+        "original_hashes": before,
+        "candidate_hashes": {
+            name: _tree_hashes(checked["candidate_" + name])
+            for name in ("silver", "gold", "config")
+        },
+        "validation": validation,
+        "moved": [],
+        "activated": [],
+        "legacy_include_fields": list(legacy_include_fields),
+        "assay_hashes": _tree_hashes(checked["assay"]),
+        "deployment_binding": deployment.document() if deployment else {},
+        "dependencies": dependencies,
+        "dependency_backups": dependency_backups,
+        "source_profile": transition.source_profile,
+        "destination_profile": transition.destination_profile,
+        "source_contract_version": transition.source_contract_version,
+        "destination_contract_version": transition.destination_contract_version,
+        "table_versions": _public_pins(pins),
+        "candidate_profiles": candidate_profiles,
+        "config_contract_version": _active_contract_version(checked["config"]),
+        # On-disk YAML active_version. The effective enrich contract is
+        # destination_contract_version, not this declared document version.
+        "destination_config_contract_version": _active_contract_version(
+            checked["candidate_config"]
+        ),
+        "dependency_schema_versions": _dependency_schema_versions(
+            paths.workspace, dependencies
+        ),
+        "fk_restoration": fk_restoration,
+    }
+
+
 def prepare_target_migration(
     paths: TargetMigrationPaths,
     *,
@@ -170,41 +223,20 @@ def prepare_target_migration(
             _tree_hashes(checked[name]) != hashes for name, hashes in before.items()
         ):
             raise ValueError("canonical target changed during backup; refuse promotion")
-        state: TargetMigrationJournal = {
-            "artifact": "bioetl_target_migration",
-            "schema_version": 2,
-            "phase": "prepared",
-            "paths": {k: str(v) for k, v in checked.items()},
-            "original_hashes": before,
-            "candidate_hashes": {
-                name: _tree_hashes(checked["candidate_" + name])
-                for name in ("silver", "gold", "config")
-            },
-            "validation": validation,
-            "moved": [],
-            "activated": [],
-            "legacy_include_fields": list(legacy_include_fields),
-            "assay_hashes": _tree_hashes(checked["assay"]),
-            "deployment_binding": deployment.document() if deployment else {},
-            "dependencies": dependencies,
-            "dependency_backups": dependency_backups,
-            "source_profile": transition.source_profile,
-            "destination_profile": transition.destination_profile,
-            "source_contract_version": transition.source_contract_version,
-            "destination_contract_version": transition.destination_contract_version,
-            "table_versions": _public_pins(pins),
-            "candidate_profiles": candidate_profiles,
-            "config_contract_version": _active_contract_version(checked["config"]),
-            # On-disk YAML active_version. The effective enrich contract is
-            # destination_contract_version, not this declared document version.
-            "destination_config_contract_version": _active_contract_version(
-                checked["candidate_config"]
-            ),
-            "dependency_schema_versions": _dependency_schema_versions(
-                paths.workspace, dependencies
-            ),
-            "fk_restoration": fk_restoration,
-        }
+        state = _build_prepared_state(
+            paths,
+            checked,
+            before,
+            validation,
+            fk_restoration,
+            dependencies,
+            dependency_backups,
+            candidate_profiles,
+            legacy_include_fields,
+            deployment,
+            transition,
+            pins,
+        )
         if restoration_manifest is not None:
             relative = restoration_manifest.resolve().relative_to(
                 paths.workspace.resolve()

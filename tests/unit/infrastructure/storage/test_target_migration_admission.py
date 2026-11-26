@@ -664,7 +664,7 @@ def test_unknown_nullable_business_omission_is_not_adapted(admitted_candidate):
         include = (
             fields if layer == "gold" else (*fields, *TARGET_CLASSIFICATION_FIELDS)
         )
-        row["content_hash"] = validation._scoped_target_hash(
+        row["content_hash"] = scoped_target_hash(
             row,
             include,
             CHEMBL_TARGET_PROFILE

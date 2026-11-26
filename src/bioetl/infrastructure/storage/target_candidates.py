@@ -31,21 +31,17 @@ from bioetl.infrastructure.storage.target_deployment_binding import (
     validate_deployment_binding,
 )
 from bioetl.infrastructure.storage.target_migration_classification_checks import (
-    assert_candidate_cohort_closure as _assert_candidate_cohort_closure,
+    _classify_candidate_rows,
+    classification_fields,
 )
 from bioetl.infrastructure.storage.target_migration_classification_checks import (
-    candidate_input_row_id,
-    classification_fields,
-    classification_input,
+    assert_candidate_cohort_closure as _assert_candidate_cohort_closure,
 )
 from bioetl.infrastructure.storage.target_migration_row_ops import (
     by_id as _by_id,
 )
 from bioetl.infrastructure.storage.target_migration_row_ops import (
     read_delta as _read_delta,
-)
-from bioetl.infrastructure.storage.target_migration_row_ops import (
-    scoped_target_hash as _scoped_target_hash,
 )
 from bioetl.infrastructure.storage.target_migration_validation import (
     _frozen_v31_hash_fields,
@@ -368,32 +364,18 @@ def build_target_candidates(request: TargetCandidateBuildRequest) -> dict[str, o
         classification_schema_version=profile.classification_schema_version,
         matching_policy_version=profile.matching_policy_version,
     )
-    projections: dict[str, dict[str, str | None]] = {}
-    new_silver: list[dict[str, object]] = []
-    row_ids = []
-    for row in old_silver:
-        identity = str(row["target_id"])
-        result = adapter.classify_record(
-            classification_input(row, columns),
-            input_row_id=candidate_input_row_id(identity),
-            run_id=request.run_id,
-            run_started_at=request.run_started_at,
-        )
-        projected = {name: result.projection[name] for name in columns}
-        projections[identity] = projected
-        updated = {**row, **projected}
-        updated["content_hash"] = _scoped_target_hash(updated, fields, normalization)
-        new_silver.append(updated)
-        store.publish_result(result, run_id=request.run_id, batch_id="frozen-silver")
-        row_ids.append(result.input_row_id)
-    new_gold = []
-    for row in old_gold:
-        if refresh_v31 and row.get("_is_current") is False:
-            new_gold.append(row)
-            continue
-        updated = {**row, **projections[str(row["target_id"])]}
-        updated["content_hash"] = _scoped_target_hash(updated, fields, normalization)
-        new_gold.append(updated)
+    _, new_silver, new_gold, row_ids = _classify_candidate_rows(
+        adapter,
+        store,
+        old_silver,
+        old_gold,
+        columns,
+        fields,
+        normalization,
+        run_id=request.run_id,
+        run_started_at=request.run_started_at,
+        refresh_v31=refresh_v31,
+    )
     _verified_inputs(request, checked)
     _write_layer(
         checked["candidate_silver"],
