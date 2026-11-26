@@ -138,6 +138,25 @@ async def test_transform_preserves_shaped_relation_row_identity(
     assert gold["l5_id"] is None
     assert gold["content_hash"] == result["content_hash"]
 
+    from bioetl.domain.contracts.gold._chembl_target_lookup_schemas import (
+        ChEMBLTargetProteinClassificationGoldSchema,
+    )
+    from bioetl.infrastructure.validation.pandera_validator import (
+        PanderaGoldValidator,
+    )
+
+    schema_columns = list(
+        ChEMBLTargetProteinClassificationGoldSchema.to_schema().columns.keys()
+    )
+    validator = PanderaGoldValidator(
+        schema=ChEMBLTargetProteinClassificationGoldSchema,
+        strict=True,
+    )
+    gold_row = {column: gold.get(column) for column in schema_columns}
+    gold_row.update({"_dq_warn": False, "_dq_error": False, "_index": 0})
+    outcome = validator.validate([gold_row])
+    assert outcome.valid is True, outcome.errors
+
 
 @pytest.mark.asyncio
 async def test_transform_defaults_missing_status_to_missing_classification(
