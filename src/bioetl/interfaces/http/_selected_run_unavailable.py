@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Awaitable, Callable, Mapping
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, cast
+from typing import cast
 
 from bioetl.application.observability.reason_aliases import display_reason
 from bioetl.application.services.control_plane.manifest.diagnostics.selected_run_replay_readiness import (
@@ -20,6 +20,9 @@ from bioetl.composition.composite_catalog import attach_contract_fields
 from bioetl.domain.control_plane.run_evidence_location import EvidenceLocationKind
 from bioetl.domain.run_reports.selected_status import DOMAINS, RULES_VERSION
 from bioetl.domain.run_reports.stage_diagnostics import project_stage_diagnostics
+from bioetl.interfaces.http._health_server_observability_protocols import (
+    _HealthObservabilityRoutingHost,
+)
 from bioetl.interfaces.http._reconciliation_display import unavailable_reconciliation
 from bioetl.interfaces.http._selected_run_a2_resolve import (
     CATALOG_UNAVAILABLE_REASON,
@@ -33,12 +36,7 @@ from bioetl.interfaces.http._selected_run_presentation import (
     _readiness_fields,
     presentation_rows,
 )
-
-if TYPE_CHECKING:
-    from bioetl.interfaces.http._health_server_observability_protocols import (
-        _HealthObservabilityRoutingHost,
-    )
-    from bioetl.interfaces.http._selector_catalog import SelectorCatalogSnapshot
+from bioetl.interfaces.http._selector_catalog import SelectorCatalogSnapshot
 
 _NOT_EVALUATED = "NOT EVALUATED"
 _QUERY_ERROR = "QUERY ERROR"
