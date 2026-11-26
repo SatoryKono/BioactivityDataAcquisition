@@ -249,8 +249,16 @@ def test_cli_forwards_restoration_manifest_only_to_freeze_and_prepare(
     monkeypatch.setattr(cli, "resolve_configs_root", lambda: configs)
     seen: dict[str, Path | None] = {}
 
-    def freeze(paths, *, legacy_include_fields, output, restoration_manifest=None):
+    def freeze(
+        paths,
+        *,
+        legacy_include_fields,
+        output,
+        source_profile,
+        restoration_manifest=None,
+    ):
         del paths, legacy_include_fields, output
+        assert source_profile == "V30"
         seen["freeze"] = restoration_manifest
 
     def prepare(

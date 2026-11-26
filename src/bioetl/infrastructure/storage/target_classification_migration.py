@@ -137,6 +137,7 @@ def prepare_target_migration(
             legacy_include_fields,
             workspace=paths.workspace,
             restoration_manifest=restoration_manifest,
+            source_profile=transition.source_profile,
         )
         fk_restoration = _fk_restoration(
             pins,
@@ -254,6 +255,7 @@ def promote_target_migration(
             tuple(state["legacy_include_fields"]),
             workspace=paths.workspace,
             restoration_manifest=restoration_manifest,
+            source_profile=transition.source_profile,
         )
         from bioetl.infrastructure.storage.target_contract_transition import (
             assert_live_promotion_allowed,

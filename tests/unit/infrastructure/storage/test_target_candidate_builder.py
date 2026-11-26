@@ -9,7 +9,7 @@ from pathlib import Path
 import pyarrow as pa
 import pytest
 import yaml
-from deltalake import write_deltalake
+from deltalake import DeltaTable, write_deltalake
 
 from bioetl.infrastructure.storage import target_candidates as builder
 from bioetl.infrastructure.storage import target_migration_validation as validation
@@ -123,6 +123,101 @@ def test_frozen_rows_build_real_candidates_and_pass_validator(source_bundle):
         )["fk_closure"]
         == "PASS"
     )
+
+
+def test_v31_refresh_preserves_history_and_ignores_old_classification(
+    source_bundle, monkeypatch: pytest.MonkeyPatch
+):
+    initial = source_bundle
+    builder.build_target_candidates(initial)
+    root = initial.paths.workspace
+    paths = replace(
+        initial.paths,
+        silver=root / "refresh-source-silver",
+        gold=root / "refresh-source-gold",
+        candidate_silver=root / "refresh-candidate-silver",
+        candidate_gold=root / "refresh-candidate-gold",
+    )
+    columns = validation.classification_fields("3.1.0")
+    fields = (*initial.legacy_include_fields, *columns)
+    hash_profile = validation.target_v31_normalization_profile()
+
+    def stale(row):
+        updated = {**row, "iuphar_target_id": "stale-provider-id"}
+        updated["content_hash"] = validation._scoped_target_hash(
+            updated, fields, hash_profile
+        )
+        return updated
+
+    silver = [
+        stale(row) for row in validation._read_delta(initial.paths.candidate_silver)
+    ]
+    gold = [stale(row) for row in validation._read_delta(initial.paths.candidate_gold)]
+    if "_is_current" in gold[0]:
+        closed = {**gold[0], "_is_current": False, "_valid_to": "2026-11-17T00:00:00Z"}
+        gold = [closed, {**gold[0], "_version": 2}]
+    builder._write_layer(
+        paths.silver, initial.paths.candidate_silver, silver, refresh_v31=True
+    )
+    builder._write_layer(
+        paths.gold, initial.paths.candidate_gold, gold, refresh_v31=True
+    )
+    for source in (paths.silver, paths.gold):
+        table = DeltaTable(str(source))
+        table.alter.set_table_properties({"delta.checkpointInterval": "1"})
+        DeltaTable(str(source)).create_checkpoint()
+    new_profile = replace(
+        builder._load_candidate_profile(paths.checked()), profile_sha256="b" * 64
+    )
+    monkeypatch.setattr(
+        builder, "_load_candidate_profile", lambda *_a, **_k: new_profile
+    )
+    monkeypatch.setattr(
+        validation, "_load_candidate_profile", lambda *_a, **_k: new_profile
+    )
+    frozen = root / "refresh-frozen.json"
+    builder.freeze_target_inputs(
+        paths,
+        legacy_include_fields=initial.legacy_include_fields,
+        output=frozen,
+        source_profile="V31",
+    )
+    binding = replace(
+        initial.deployment,
+        silver_path=str(paths.silver),
+        gold_path=str(paths.gold),
+        profile_sha256=new_profile.profile_sha256,
+    )
+    request = replace(
+        initial,
+        paths=paths,
+        input_manifest=frozen,
+        input_manifest_sha256=sha256_file(frozen),
+        output_dir=root / "refresh-build",
+        deployment=binding,
+        source_profile="V31",
+    )
+    report = builder.build_target_candidates(request)
+    assert report["validation"]["fk_closure"] == "PASS"
+    for original, candidate in (
+        (paths.silver, paths.candidate_silver),
+        (paths.gold, paths.candidate_gold),
+    ):
+        old = DeltaTable(str(original))
+        new = DeltaTable(str(candidate))
+        assert new.metadata().id == old.metadata().id
+        assert new.version() == old.version() + 1
+        before = validation._by_id(validation._read_delta(original))
+        after = validation._by_id(validation._read_delta(candidate))
+        historical = DeltaTable(str(candidate), version=old.version())
+        assert validation._by_id(historical.to_pyarrow_table().to_pylist()) == before
+        assert before.keys() == after.keys()
+        for key, row in after.items():
+            if row.get("_is_current") is False:
+                assert row == before[key]
+            else:
+                assert row["target_class_profile_sha256"] == new_profile.profile_sha256
+                assert row["iuphar_target_id"] != "stale-provider-id"
 
 
 def test_v32_candidate_persists_details_and_revalidates_them(source_bundle):

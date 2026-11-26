@@ -57,9 +57,10 @@ def classification_fields(contract: str) -> tuple[str, ...]:
     return TARGET_CLASSIFICATION_FIELDS
 
 
-def _business_without_classification(
+def classification_input(
     row: Mapping[str, object], fields: tuple[str, ...]
 ) -> dict[str, object]:
+    """Exclude derived classification fields from the inputs to a fresh classification."""
     return {key: value for key, value in hash_input(row).items() if key not in fields}
 
 
@@ -72,18 +73,20 @@ def verify_source_classifications(
     layers: Mapping[str, list[dict[str, object]]],
     profile: LoadedIupharProfile,
     contract: str = "3.1.0",
+    *,
+    preserve_closed_gold: bool = False,
 ) -> None:
-    """Reclassify Silver, then require every Gold version to carry that projection.
+    """Reclassify Silver and verify the corresponding Gold projection.
 
-    Historical Gold business fields are not classified again. The documented
-    migration copies the current Silver projection onto each Gold version.
+    An initial migration projects Silver's classification onto every Gold version.
+    A V31 refresh verifies the projection for current Gold versions.
     """
     adapter = IupharTargetClassificationAdapter(profile, table_contract=contract)
     fields = classification_fields(contract)
     projections: dict[str, Mapping[str, str | None]] = {}
     for (target_id, _version), row in by_id(layers["silver"]).items():
         result = adapter.classify_record(
-            _business_without_classification(row, fields),
+            classification_input(row, fields),
             input_row_id=candidate_input_row_id(target_id),
             run_id="migration-validation",
             run_started_at="1970-01-01T00:00:00+00:00",
@@ -96,6 +99,8 @@ def verify_source_classifications(
             )
         projections[target_id] = result.projection
     for (target_id, _version), row in by_id(layers["gold"]).items():
+        if preserve_closed_gold and row.get("_is_current") is False:
+            continue
         expected = projections.get(target_id)
         if expected is None:
             raise ValueError("candidate Gold target has no classified Silver source")
@@ -157,6 +162,7 @@ __all__ = [
     "candidate_input_row_id",
     "canonical_row_sha256",
     "classification_fields",
+    "classification_input",
     "classify_target_absence",
     "current_assay_target_ids",
     "current_target_ids",

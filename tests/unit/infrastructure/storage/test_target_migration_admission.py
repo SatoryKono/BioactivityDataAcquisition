@@ -701,7 +701,7 @@ def test_historical_scd_iso8601_text_remains_exactly_preserved(admitted_candidat
     assert tables[paths["candidate_gold"]][0]["_valid_from"] == value
 
 
-def test_supported_transition_is_only_v30_to_v31():
+def test_supported_transitions_preserve_the_v31_destination():
     from bioetl.infrastructure.storage.target_classification_migration import (
         require_rf009_fk_restoration,
         resolve_target_migration_transition,
@@ -710,6 +710,12 @@ def test_supported_transition_is_only_v30_to_v31():
     transition = resolve_target_migration_transition("V30", "V31")
     assert transition.source_contract_version == "3.0.0"
     assert transition.destination_contract_version == "3.1.0"
+    refresh = resolve_target_migration_transition("V31", "V31")
+    assert (
+        refresh.source_contract_version
+        == refresh.destination_contract_version
+        == "3.1.0"
+    )
     assert (
         require_rf009_fk_restoration({"CHEMBL1"}, {"CHEMBL1", "CHEMBL2"})["status"]
         == "closed"
@@ -722,7 +728,6 @@ def test_supported_transition_is_only_v30_to_v31():
         ("V30", "V32", "3.2.0 is not installed"),
         ("V31", "V32", "3.2.0 is not installed"),
         ("V31", "V30", "unsupported target migration transition"),
-        ("V31", "V31", "unsupported target migration transition"),
         ("V30", "V30", "unsupported target migration transition"),
         ("empty", "V31", "unsupported target migration transition"),
         ("V32", "V31", "unsupported target migration transition"),

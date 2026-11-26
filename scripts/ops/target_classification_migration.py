@@ -77,6 +77,7 @@ def _freeze_inputs(
     paths: TargetMigrationPaths,
     fields: tuple[str, ...],
     restoration: Path | None,
+    source_profile: str,
 ) -> None:
     if args.output is None:
         parser.error("freeze-inputs requires --output NEW_MANIFEST_PATH")
@@ -85,6 +86,7 @@ def _freeze_inputs(
         legacy_include_fields=fields,
         output=args.output,
         restoration_manifest=restoration,
+        source_profile=source_profile,
     )
     print(json.dumps({"status": "frozen", "manifest": str(args.output)}))
 
@@ -94,9 +96,8 @@ def _build_candidates(
     args: argparse.Namespace,
     paths: TargetMigrationPaths,
     fields: tuple[str, ...],
-    restoration: Path | None,
+    source_profile: str,
 ) -> None:
-    del restoration
     if not all(
         (
             args.input_manifest,
@@ -119,6 +120,7 @@ def _build_candidates(
             args.run_id,
             args.run_started_at,
             bind_target_deployment(paths),
+            source_profile=source_profile,
         )
     )
     print(json.dumps({"status": "complete", "output": str(args.output)}))
@@ -175,10 +177,10 @@ def _run_migration(parser: argparse.ArgumentParser, args: argparse.Namespace) ->
     fields = tuple(document["legacy_include_fields"])
     restoration = _restoration_manifest(parser, args, active_root)
     if args.action == "freeze-inputs":
-        _freeze_inputs(parser, args, paths, fields, restoration)
+        _freeze_inputs(parser, args, paths, fields, restoration, source_profile)
         return
     if args.action == "build-candidates":
-        _build_candidates(parser, args, paths, fields, restoration)
+        _build_candidates(parser, args, paths, fields, source_profile)
         return
     _migrate(args, paths, fields, restoration, source_profile, destination_profile)
 
