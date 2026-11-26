@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "091253953649eb6646d915940ad45a241dc8da49",
+  "source_ref": "8a7b612d3b759972490360279ab88ba60870aeba",
+  "source_reviews": {
+    "src/bioetl/interfaces/http/_selector_catalog.py": "Allow cached status consumers to bypass a completed selector snapshot while sharing any in-flight scan. Existing manifest/workflow port reads, task lifecycle and executor sites are unchanged.",
+    "src/bioetl/interfaces/http/selected_run_status.py": "Refresh the selector catalog only when the existing status cache invokes its loader, preventing stacked cache lifetimes. Existing forensic budget, scan sharing, ports and response handling are retained."
+  }
+}
