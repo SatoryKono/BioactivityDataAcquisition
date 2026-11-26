@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "62147359e5c74ba12ae0cd6775b14971c3e32dc8",
+  "source_ref": "fd7008200b2c4798572cca2c8eb633163947593c",
+  "source_reviews": {
+    "src/bioetl/infrastructure/adapters/iuphar/acceptance_receipt.py": "Admit opt-in versioned matching profiles only with verified schema-2 snapshots and their own acceptance. Existing profile reads and validation remain; no new resource acquisition.",
+    "src/bioetl/infrastructure/adapters/iuphar/adapter.py": "Pass the selected profile policy into eligibility and project human HGNC identifiers. Pure in-memory projection; no acquisition changes.",
+    "src/bioetl/infrastructure/adapters/iuphar/snapshot_loader.py": "Attach HGNC and full names from the already verified provider export bytes. Parsing is in memory; existing manifest reads remain unchanged.",
+    "src/bioetl/infrastructure/adapters/iuphar/snapshot_payload.py": "Select an explicitly versioned policy in the profile bundle. The same exclusive destination.open('xb') remains context-managed and closed by its with statement; no new acquisition.",
+    "src/bioetl/interfaces/http/selected_run_status.py": "Reuse the existing bounded SelectorCatalog for unresolved A2 requests. The same asyncio default executor is acquired via to_thread(load, catalog), now in load_with_catalog inside the original forensic limiter. Explicit run selections avoid catalog enumeration; lifecycle owner and shutdown remain unchanged."
+  },
+  "reference_moves": [
+    {
+      "identity": "asyncio.default-executor",
+      "fields": [
+        "creation_sites"
+      ],
+      "from": {
+        "file": "src/bioetl/interfaces/http/selected_run_status.py",
+        "expression": "asyncio.to_thread(load)"
+      },
+      "to": {
+        "file": "src/bioetl/interfaces/http/selected_run_status.py",
+        "scope": "handle_selected_run_status.load_with_catalog",
+        "call": "asyncio.to_thread",
+        "expression": "asyncio.to_thread(load, catalog)"
+      }
+    }
+  ]
+}
