@@ -649,6 +649,14 @@ def test_ranked_policy_uses_unambiguous_name_keywords_as_last_fallback(
         ),
         ({"pref_name": "General transcription factor IIF subunit 2"}, None, None),
         ({"pref_name": "Inhibitor of transcription factor Jun"}, None, None),
+        ({"pref_name": "Protein binding to transcription factor Jun"}, None, None),
+        ({"pref_name": "Protein bound to the transcription factor Jun"}, None, None),
+        (
+            {"pref_name": "Protein interacting with transcription factor Jun"},
+            None,
+            None,
+        ),
+        ({"pref_name": "Protein associated with transcription factor Jun"}, None, None),
         ({"pref_name": "Transcription factor Jun coactivator"}, None, None),
         (
             {"pref_name": "Membrane-bound transcription factor site-1 protease"},

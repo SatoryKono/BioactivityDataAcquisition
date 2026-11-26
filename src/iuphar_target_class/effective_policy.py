@@ -43,8 +43,8 @@ _TRANSCRIPTION_FACTOR_RELATED = re.compile(
     re.IGNORECASE,
 )
 _TRANSCRIPTION_FACTOR_PREFIX = re.compile(
-    r"\b(?:inhibitor|activator|regulator|subunit|protease|peptidase|cofactor|coactivator|corepressor)s?"
-    r"\s+of\s+(?:the\s+)?$",
+    r"\b(?:(?:inhibitor|activator|regulator|subunit|protease|peptidase|cofactor|coactivator|corepressor)s?"
+    r"\s+of|(?:binding|bound)\s+to|(?:interacting|associated)\s+with)\s+(?:the\s+)?$",
     re.IGNORECASE,
 )
 
