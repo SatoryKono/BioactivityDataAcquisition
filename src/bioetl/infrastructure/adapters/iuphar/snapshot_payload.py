@@ -7,6 +7,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from types import MappingProxyType
 
+from iuphar_target_class.identifier_roles import (
+    ANCHOR_PRIORITY_POLICIES,
+    MATCHING_POLICY_VERSION,
+)
 from iuphar_target_class.policy import LOCAL_CATALOG_VERSION
 from iuphar_target_class.stage0.io import canonical_json_bytes
 
@@ -47,8 +51,15 @@ def _source_files(evidence: SourceEvidence) -> dict[str, bytes]:
     return files
 
 
-def compile_snapshot_bundle(evidence: SourceEvidence) -> SnapshotBundle:
+def compile_snapshot_bundle(
+    evidence: SourceEvidence, *, matching_policy_version: str = MATCHING_POLICY_VERSION
+) -> SnapshotBundle:
     """Derive every target/audit byte from verified raw acquisition and scope."""
+    if matching_policy_version not in {
+        MATCHING_POLICY_VERSION,
+        *ANCHOR_PRIORITY_POLICIES,
+    }:
+        raise ValueError("unsupported IUPHAR matching policy")
     projection = project_official_export(evidence)
     files = _source_files(evidence)
     files.update(
@@ -75,8 +86,6 @@ def compile_snapshot_bundle(evidence: SourceEvidence) -> SnapshotBundle:
         ),
     }
     files[_SNAPSHOT_JSON] = canonical_json_bytes(snapshot)
-    from iuphar_target_class.identifier_roles import MATCHING_POLICY_VERSION
-
     profile = {
         "artifact": "bioetl_iuphar_profile",
         "schema_version": 2,
@@ -85,7 +94,7 @@ def compile_snapshot_bundle(evidence: SourceEvidence) -> SnapshotBundle:
         "normalization_version": "bioetl-iuphar-input-v1",
         "rules_version": LOCAL_CATALOG_VERSION,
         "classification_schema_version": "3.1.0",
-        "matching_policy_version": MATCHING_POLICY_VERSION,
+        "matching_policy_version": matching_policy_version,
     }
     files["profile.json"] = canonical_json_bytes(profile)
     return SnapshotBundle(
@@ -136,12 +145,15 @@ def build_snapshot_bundle(
     coverage: Path,
     coverage_sha256: str,
     output_dir: Path,
+    matching_policy_version: str = MATCHING_POLICY_VERSION,
 ) -> SnapshotBundle:
     """Write a new immutable bundle only after all input/source checks succeed."""
     evidence = load_source_evidence(
         acquisition, acquisition_sha256, coverage, coverage_sha256
     )
-    bundle = compile_snapshot_bundle(evidence)
+    bundle = compile_snapshot_bundle(
+        evidence, matching_policy_version=matching_policy_version
+    )
     output = output_dir.resolve()
     output.mkdir(parents=True, exist_ok=False)
     for relative, content in sorted(bundle.files.items()):

@@ -361,6 +361,22 @@ def _load_selected_with_live_fallback(
     return result
 
 
+async def _shared_a2_catalog(
+    host: _HealthObservabilityRoutingHost, requested_run_id: str
+) -> SelectorCatalogSnapshot | None:
+    """Reuse the shared catalog only when the request needs A2 resolution."""
+    shared = getattr(host, "_selector_catalog", None)
+    if (
+        is_unresolved_run_id(requested_run_id)
+        and host._run_manifest_port is not None
+        and isinstance(shared, SelectorCatalog)
+    ):
+        return await shared.read(
+            host._run_manifest_port, getattr(host, "_workflow_manifest_port", None)
+        )
+    return None
+
+
 async def handle_selected_run_status(
     host: _HealthObservabilityRoutingHost,
     writer: asyncio.StreamWriter,
@@ -405,16 +421,7 @@ async def handle_selected_run_status(
         )
 
     async def load_with_catalog() -> dict[str, object]:
-        catalog = None
-        shared = getattr(host, "_selector_catalog", None)
-        if (
-            is_unresolved_run_id(requested_run_id)
-            and host._run_manifest_port is not None
-            and isinstance(shared, SelectorCatalog)
-        ):
-            catalog = await shared.read(
-                host._run_manifest_port, getattr(host, "_workflow_manifest_port", None)
-            )
+        catalog = await _shared_a2_catalog(host, requested_run_id)
         return await asyncio.to_thread(load, catalog)
 
     async def cached_load() -> dict[str, object]:
