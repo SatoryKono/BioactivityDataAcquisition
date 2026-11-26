@@ -1,0 +1,32 @@
+{
+  "catalog_ref": "d5ea54adbc6bc9a07945ce244aa05e1b66bf43e4",
+  "reference_moves": [
+    {
+      "fields": [
+        "creation_sites"
+      ],
+      "from": {
+        "expression": "asyncio.to_thread(load)",
+        "file": "src/bioetl/interfaces/http/selected_run_status.py",
+        "line": 401
+      },
+      "identity": "asyncio.default-executor",
+      "to": {
+        "call": "asyncio.to_thread",
+        "file": "src/bioetl/interfaces/http/selected_run_status.py",
+        "scope": "handle_selected_run_status.load_with_catalog"
+      }
+    }
+  ],
+  "schema_version": 1,
+  "source_ref": "a165f2a9f00990801ef8bd0f1f14b67e4b4d01d5",
+  "source_reviews": {
+    "src/bioetl/application/composite/helpers/target_classification_bundle.py": "Pass the resolved ChEMBL HGNC input into the existing post-join business projection. Pure projection.",
+    "src/bioetl/infrastructure/adapters/iuphar/acceptance_receipt.py": "Admit policy versions for source-verified schema 2 profiles and retain RF-008 validation. Existing profile and receipt reads.",
+    "src/bioetl/infrastructure/adapters/iuphar/adapter.py": "Send the profile version to input eligibility and use the same canonical projection for all profiles. No external I/O.",
+    "src/bioetl/infrastructure/adapters/iuphar/snapshot_loader.py": "Derive HGNC and full names from already verified CSV bytes. Existing snapshot and acquisition reads.",
+    "src/bioetl/infrastructure/adapters/iuphar/snapshot_payload.py": "Record the selected matching policy in the envelope. Existing output path checks and write sites.",
+    "src/bioetl/interfaces/http/_selected_run_presentation.py": "Move the pure saved-result payload formatting into the presentation module. No resource acquisition.",
+    "src/bioetl/interfaces/http/selected_run_status.py": "Use the existing shared catalog under the forensic request budget. The existing default executor call moves into the async catalog loader; manifest and report ports and response handling are retained."
+  }
+}
