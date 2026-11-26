@@ -6,6 +6,10 @@ import argparse
 from pathlib import Path
 
 from bioetl.infrastructure.adapters.iuphar.snapshot_payload import build_snapshot_bundle
+from iuphar_target_class.identifier_roles import (
+    ANCHOR_PRIORITY_POLICIES,
+    MATCHING_POLICY_VERSION,
+)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -15,6 +19,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--coverage", type=Path, required=True)
     parser.add_argument("--coverage-sha256", required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
+    parser.add_argument(
+        "--matching-policy-version",
+        choices=(MATCHING_POLICY_VERSION, *sorted(ANCHOR_PRIORITY_POLICIES)),
+        default=MATCHING_POLICY_VERSION,
+    )
     args = parser.parse_args(argv)
     bundle = build_snapshot_bundle(
         acquisition=args.acquisition,
@@ -22,6 +31,7 @@ def main(argv: list[str] | None = None) -> int:
         coverage=args.coverage,
         coverage_sha256=args.coverage_sha256,
         output_dir=args.output_dir,
+        matching_policy_version=args.matching_policy_version,
     )
     print(f"snapshot_sha256={bundle.snapshot_sha256}")
     print(f"profile_sha256={bundle.profile_sha256}")

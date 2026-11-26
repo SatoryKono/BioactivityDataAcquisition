@@ -8,6 +8,7 @@ or claim biological accuracy. Independent qualification remains RF-008.
 
 from __future__ import annotations
 
+import re
 from collections.abc import Mapping
 from types import MappingProxyType
 
@@ -15,6 +16,26 @@ RF002_CONTRACT_VERSION = "rf002-2026-11-23"
 RF002_ISSUE = "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/13310"
 RF002_EPIC = "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/13308"
 MATCHING_POLICY_VERSION = "rf002-uniprot-roles-2026-11-23"
+ANCHOR_PRIORITY_POLICY_VERSION = "hgnc-primary-uniprot-priority-v1"
+CHANNEL_EC_POLICY_VERSION = "hgnc-uniprot-channel-ec-v1"
+RANKED_CLASS_POLICY_VERSION = "hgnc-uniprot-name-ec-keyword-v1"
+TRANSCRIPTION_FACTOR_POLICY_VERSION = "hgnc-uniprot-name-ec-keyword-tf-v1"
+RANKED_CLASS_POLICIES = frozenset(
+    {RANKED_CLASS_POLICY_VERSION, TRANSCRIPTION_FACTOR_POLICY_VERSION}
+)
+EC_EFFECTIVE_POLICIES = RANKED_CLASS_POLICIES | {CHANNEL_EC_POLICY_VERSION}
+ANCHOR_PRIORITY_POLICIES = EC_EFFECTIVE_POLICIES | {ANCHOR_PRIORITY_POLICY_VERSION}
+
+
+def normalize_hgnc_ids(value: str | None) -> tuple[str, ...]:
+    """Normalize explicit HGNC identifiers without interpreting other namespaces."""
+    identifiers = (
+        re.fullmatch(r"(?:HGNC:\s*)?([1-9](?a:\d)*)", token.strip(), re.IGNORECASE)
+        for token in re.split(r"[|,;]", value or "")
+    )
+    return tuple(dict.fromkeys(match[1] for match in identifiers if match))
+
+
 # Profiles / receipts recorded under the pre-RF-002 merge of component + xref
 # into one mandatory ``uniprot`` channel do not qualify this policy.
 LEGACY_MATCHING_POLICY_VERSION = "pre-rf002-merged-uniprot-anchors"

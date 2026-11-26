@@ -66,6 +66,10 @@ from bioetl.interfaces.http._selected_run_unavailable import (
     respond_exact_selection,
     unavailable_status,
 )
+from bioetl.interfaces.http._selector_catalog import (
+    SelectorCatalog,
+    SelectorCatalogSnapshot,
+)
 from bioetl.interfaces.http.run_report_ops import _validated_artifact_paths
 
 _NOT_EVALUATED = "NOT EVALUATED"
@@ -294,15 +298,20 @@ def _resolve_a2_run_id(
     *,
     pipeline: str,
     query: dict[str, str],
+    catalog: SelectorCatalogSnapshot | None = None,
 ) -> str | dict[str, object]:
     """Return concrete run_id or an unavailable payload for A2 auto-select."""
     if host._run_manifest_port is None:
         return unavailable_status(
             pipeline, "-", _QUERY_ERROR, CATALOG_UNAVAILABLE_REASON
         )
-    manifests, workflow_manifests = list_a2_catalog(
-        host._run_manifest_port,
-        getattr(host, "_workflow_manifest_port", None),
+    manifests, workflow_manifests = (
+        catalog
+        if catalog is not None
+        else list_a2_catalog(
+            host._run_manifest_port,
+            getattr(host, "_workflow_manifest_port", None),
+        )
     )
     latest = resolve_a2_latest_run_id(
         manifests=manifests,
@@ -352,6 +361,33 @@ def _load_selected_with_live_fallback(
     return result
 
 
+def _resolve_and_load_selected_status(
+    host: _HealthObservabilityRoutingHost,
+    *,
+    pipeline: str,
+    requested_run_id: str,
+    query: dict[str, str],
+    catalog: SelectorCatalogSnapshot | None,
+) -> dict[str, object]:
+    run_id = requested_run_id
+    a2_resolved = is_unresolved_run_id(requested_run_id)
+    if a2_resolved:
+        resolved = _resolve_a2_run_id(
+            host, pipeline=pipeline, query=query, catalog=catalog
+        )
+        if isinstance(resolved, dict):
+            return resolved
+        run_id = resolved
+    # A2 catalog membership already enforced filters, including workflow aliases.
+    return _load_selected_with_live_fallback(
+        host,
+        pipeline=pipeline,
+        run_id=run_id,
+        query=query,
+        skip_scope_check=a2_resolved,
+    )
+
+
 async def handle_selected_run_status(
     host: _HealthObservabilityRoutingHost,
     writer: asyncio.StreamWriter,
@@ -374,23 +410,24 @@ async def handle_selected_run_status(
     ):
         return
 
-    def load() -> dict[str, object]:
-        run_id = requested_run_id
-        a2_resolved = False
-        if is_unresolved_run_id(run_id):
-            resolved = _resolve_a2_run_id(host, pipeline=pipeline, query=query)
-            if isinstance(resolved, dict):
-                return resolved
-            run_id = resolved
-            a2_resolved = True
-        # A2 catalog membership already enforced filters (incl. workflow aliases);
-        # do not re-reject via report.workflow_id vs Grafana workflow alias.
-        return _load_selected_with_live_fallback(
+    async def load_with_catalog() -> dict[str, object]:
+        catalog = None
+        shared = getattr(host, "_selector_catalog", None)
+        if (
+            is_unresolved_run_id(requested_run_id)
+            and host._run_manifest_port is not None
+            and isinstance(shared, SelectorCatalog)
+        ):
+            catalog = await shared.read(
+                host._run_manifest_port, getattr(host, "_workflow_manifest_port", None)
+            )
+        return await asyncio.to_thread(
+            _resolve_and_load_selected_status,
             host,
             pipeline=pipeline,
-            run_id=run_id,
+            requested_run_id=requested_run_id,
             query=query,
-            skip_scope_check=a2_resolved,
+            catalog=catalog,
         )
 
     async def cached_load() -> dict[str, object]:
@@ -398,7 +435,7 @@ async def handle_selected_run_status(
         # not store QUERY ERROR frames as a fresh success payload.
         return await run_bounded_forensic_operation(
             limiter=host._forensic_endpoint_limiter,
-            operation_factory=lambda: asyncio.to_thread(load),
+            operation_factory=load_with_catalog,
             endpoint="selected-run-status",
         )
 

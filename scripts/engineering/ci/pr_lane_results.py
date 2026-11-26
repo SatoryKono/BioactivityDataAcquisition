@@ -896,6 +896,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "src/iuphar_target_class/local_layer.py": (
         "tests/unit/iuphar_target_class/test_local_layer.py",
     ),
+    "src/iuphar_target_class/effective_policy.py": (
+        "tests/unit/infrastructure/adapters/iuphar/test_target_classification.py",
+        "tests/unit/iuphar_target_class/test_pipeline.py",
+    ),
     "src/iuphar_target_class/resolution.py": (
         "tests/unit/iuphar_target_class/test_resolution.py",
     ),
