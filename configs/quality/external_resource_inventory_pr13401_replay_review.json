@@ -1,11 +1,12 @@
 {
   "schema_version": 1,
   "catalog_ref": "a22c3fd277d09180d31bdbc985e3340b41ddeadc",
-  "source_ref": "e9fc13d8a5e5840324943ab0eb1449b129b65661",
+  "source_ref": "db5c345aa5fa6d7d24d5bb1d1a77e5fa490fce1c",
   "source_reviews": {
     "src/bioetl/application/pipelines/chembl/target_protein_classification_transformer.py": "Project shaped string classification identifiers (leaf_id, root_id, l1_id..l5_id) to the published numeric Gold contract in transform_for_gold via int(). Pure in-memory projection; no file, network, or process acquisition calls added.",
     "src/bioetl/interfaces/http/_selected_run_artifact_probes.py": "Rework Windows bronze_batch binding: prefer the natively reachable recorded file (pathlib is_file readability check only), compare the binding prefix with PureWindowsPath case-insensitive segment rules while keeping the original tail case, and fail closed with artifact_path_escape when an absolute Windows reference escapes the attested data root instead of falling through to the generic resolver. No new external acquisition calls added.",
-    "src/bioetl/interfaces/http/selected_run_status.py": "Thread the evidence read context (data_root, trusted_alias_base) as a keyword-only argument into the artifact probe chain. No new external acquisition calls added; the existing asyncio.to_thread site only shifted lines."
+    "src/bioetl/interfaces/http/selected_run_status.py": "Thread the evidence read context (data_root, trusted_alias_base) as a keyword-only argument into the artifact probe chain. No new external acquisition calls added; the existing asyncio.to_thread site only shifted lines.",
+    "src/bioetl/interfaces/http/_selected_run_bronze_binding.py": "New module hosts the relocated Windows bronze_batch binding helpers verbatim (native reachability check, case-insensitive bound matcher, fail-closed escape probe). No new external acquisition calls added."
   },
   "segment_updates": {
     "src/bioetl/interfaces/http/_selected_run_artifact_probes.py": {
