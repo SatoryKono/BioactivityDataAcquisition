@@ -437,7 +437,12 @@ def _preferred_identity(
     explicit = _ids_of(candidates, EXPLICIT)
     if query.target_id is not None and not explicit:
         return None
-    identity_conflict = _identity_conflict([(EXPLICIT, explicit), *anchor_channels])
+    primary_channels = [
+        (method, ids)
+        for method, ids in _exact_channels(query, catalog, candidates, unfiltered=True)
+        if method in {EXPLICIT, UNIPROT}
+    ]
+    identity_conflict = _identity_conflict([*primary_channels, (HGNC, hgnc)])
     if identity_conflict is not None:
         return identity_conflict
     methods = tuple(method for method, ids in anchor_channels if ids)

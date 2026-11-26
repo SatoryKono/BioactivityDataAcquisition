@@ -481,6 +481,56 @@ def test_primary_and_hgnc_disagreement_blocks_confirmation() -> None:
     assert result.candidate_target_ids == ("1", "2")
 
 
+@pytest.mark.parametrize("species", ["9606", "10090"])
+@pytest.mark.parametrize("prioritize", [False, True])
+@pytest.mark.parametrize("hgnc", [(), ("101",)])
+def test_each_primary_accession_retains_its_identity_conflict(
+    species: str, prioritize: bool, hgnc: tuple[str, ...]
+) -> None:
+    catalog = (
+        replace(_target("1", uniprot="P11111", species="9606"), hgnc_ids=("101",)),
+        _target("2", uniprot="Q22222", species=species),
+    )
+    query = replace(
+        _query(uniprot_ids=("P11111", "Q22222"), organism="9606"),
+        hgnc_ids=hgnc,
+        prioritize_anchors=prioritize,
+    )
+    result = resolve_match(query, catalog, snapshot_complete=True)
+    assert result.match_status == "identity_conflict"
+    assert result.matched_target_id is None
+    assert result.candidate_target_ids == ("1", "2")
+
+
+def test_concordant_primary_accessions_keep_priority_over_text() -> None:
+    catalog = (
+        replace(_target("1", species="9606"), uniprot_ids=("P11111", "Q22222")),
+        _target("2", species="9606", name="Shared"),
+    )
+    query = replace(
+        _query(uniprot_ids=("P11111", "Q22222"), organism="9606", name="Shared"),
+        prioritize_anchors=True,
+    )
+    result = resolve_match(query, catalog, snapshot_complete=True)
+    assert result.match_status == "matched"
+    assert result.matched_target_id == "1"
+
+
+def test_shared_primary_accessions_remain_ambiguous_with_anchor_priority() -> None:
+    catalog = tuple(
+        replace(_target(identifier, species="9606"), uniprot_ids=("P11111", "Q22222"))
+        for identifier in ("1", "2")
+    )
+    query = replace(
+        _query(uniprot_ids=("P11111", "Q22222"), organism="9606"),
+        prioritize_anchors=True,
+    )
+    result = resolve_match(query, catalog, snapshot_complete=True)
+    assert result.match_status == "ambiguous"
+    assert result.matched_target_id is None
+    assert result.candidate_target_ids == ("1", "2")
+
+
 def test_human_hgnc_is_not_a_direct_anchor_for_another_species() -> None:
     catalog = (replace(_target("1", species="9606"), hgnc_ids=("101",)),)
     query = replace(_query(organism="9913"), hgnc_ids=("101",), prioritize_anchors=True)
