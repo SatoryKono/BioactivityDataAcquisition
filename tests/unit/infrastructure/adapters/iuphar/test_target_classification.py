@@ -23,7 +23,9 @@ from bioetl.infrastructure.adapters.iuphar import (
     parse_target_payloads,
     validate_acceptance_receipt,
 )
+from iuphar_target_class.bioetl_input import project_target_fields
 from iuphar_target_class.identifier_roles import (
+    ANCHOR_PRIORITY_POLICY_VERSION,
     CHANNEL_EC_POLICY_VERSION,
     RANKED_CLASS_POLICY_VERSION,
     TRANSCRIPTION_FACTOR_POLICY_VERSION,
@@ -404,6 +406,85 @@ def _channel_ec_adapter(profile, policy=CHANNEL_EC_POLICY_VERSION):
             snapshot=replace(profile.snapshot, snapshot=snapshot),
         )
     )
+
+
+def test_shadow_hgnc_profile_requires_source_verified_snapshot_schema(tmp_path):
+    profile_path = _profile_path(_profile(tmp_path))
+    source = json.loads(profile_path.read_bytes())
+    source["matching_policy_version"] = ANCHOR_PRIORITY_POLICY_VERSION
+    reference = _write(profile_path.parent, "legacy-hgnc-profile.json", source)
+    with pytest.raises(
+        ValueError,
+        match="HGNC anchor priority requires source-verified snapshot schema 2",
+    ):
+        load_profile(
+            profile_path.parent / reference["path"],
+            reference["sha256"],
+            require_acceptance=False,
+        )
+
+
+@pytest.mark.parametrize(
+    ("taxon", "organism", "hgnc", "accession", "method"),
+    [
+        (9606, "Homo sapiens", "HGNC:101", "Q88888", "hgnc"),
+        (9606, "Homo sapiens", "unknown", "P12345", "uniprot_xref"),
+        (10090, "Mus musculus", "HGNC:101", "Q88888", None),
+    ],
+)
+def test_verified_hgnc_profile_uses_canonical_input_fields(
+    tmp_path, taxon, organism, hgnc, accession, method
+):
+    provider = synthetic_export_row()
+    provider["HGNC id"] = "101"
+    root, _ = synthetic_snapshot_bundle(
+        tmp_path, rows=[provider], species=("9606", "10090")
+    )
+    profile = json.loads((root / "profile.json").read_bytes())
+    profile["matching_policy_version"] = ANCHOR_PRIORITY_POLICY_VERSION
+    reference = _write(root, "hgnc-profile.json", profile)
+    adapter = IupharTargetClassificationAdapter(
+        load_profile(
+            root / reference["path"], reference["sha256"], require_acceptance=False
+        )
+    )
+    business = _business(
+        pref_name="Other name",
+        target_protein_synonyms="unknown",
+        taxonomy_id=taxon,
+        organism=organism,
+        component_accessions=accession,
+        target_xref_hgnc_ids=hgnc,
+    )
+    result = _classify(adapter, **business)
+    assert result.projection["iuphar_target_id"] == ("1" if method else None)
+    assert result.projection["iuphar_class"] == ("Receptor" if method else None)
+    classification = json.loads(
+        next(a.payload for a in result.artifacts if a.name == "classification.json")
+    )[0]
+    expected = project_target_fields(business, str(taxon))
+    assert "hgnc" not in classification["raw_fields"]
+    assert (
+        classification["raw_fields"]["source_business_data"]
+        == expected["source_business_data"]
+    )
+    assert classification["match_method"] == ([method] if method else [])
+
+
+@pytest.mark.parametrize(
+    "policy", [RANKED_CLASS_POLICY_VERSION, TRANSCRIPTION_FACTOR_POLICY_VERSION]
+)
+def test_ranked_channel_candidate_blocks_ec_when_identity_is_unresolved(
+    tmp_path, policy
+):
+    adapter = _channel_ec_adapter(
+        _profile(tmp_path, target_changes={"type": "vgic"}), policy
+    )
+    result = _classify(
+        adapter, component_accessions="Q9BW60", target_ec_numbers="3.1.1.1"
+    )
+    assert result.projection["iuphar_target_id"] is None
+    assert result.projection["effective_class"] is None
 
 
 @pytest.mark.parametrize(

@@ -19,7 +19,6 @@ from iuphar_target_class.bioetl_input import (
 from iuphar_target_class.bioetl_input import (
     target_input_eligibility as _eligibility,
 )
-from iuphar_target_class.identifier_roles import ANCHOR_PRIORITY_POLICY_VERSION
 from iuphar_target_class.models import RawTargetRow, RunProvenance
 from iuphar_target_class.pipeline import BatchResult, classify_batch
 from iuphar_target_class.pipeline_io import render_batch
@@ -135,15 +134,11 @@ def _adapt_inputs(
                 row, profile.profile_sha256, reason, include_detail=include_detail
             )
         else:
-            fields = _raw_fields(row.business_data, taxon)
-            if (
-                profile.matching_policy_version == ANCHOR_PRIORITY_POLICY_VERSION
-                and taxon == "9606"
-            ):
-                hgnc = row.business_data.get("target_xref_hgnc_ids")
-                if isinstance(hgnc, str):
-                    fields["hgnc"] = hgnc
-            eligible.append(RawTargetRow(row.input_row_id, fields, "protein"))
+            eligible.append(
+                RawTargetRow(
+                    row.input_row_id, _raw_fields(row.business_data, taxon), "protein"
+                )
+            )
     return eligible, results
 
 

@@ -487,3 +487,57 @@ def test_human_hgnc_is_not_a_direct_anchor_for_another_species() -> None:
     assert (
         resolve_match(query, catalog, snapshot_complete=False).matched_target_id is None
     )
+
+
+@pytest.mark.parametrize(
+    ("uniprot", "hgnc"),
+    [(("P11111", "Q88888"), ()), (("Q88888",), ("101",))],
+)
+def test_priority_anchors_do_not_hide_a_species_variant_conflict(
+    uniprot: tuple[str, ...], hgnc: tuple[str, ...]
+) -> None:
+    catalog = (
+        replace(_target("1", uniprot="P11111", species="9606"), hgnc_ids=("101",)),
+        _target("1", uniprot="Q88888", species="10090"),
+    )
+    query = replace(
+        _query(uniprot_ids=uniprot, organism="9606"),
+        hgnc_ids=hgnc,
+        prioritize_anchors=True,
+    )
+    result = resolve_match(query, catalog, snapshot_complete=True)
+    assert result.match_status == "identity_conflict"
+    assert result.matched_target_id is None
+
+
+@pytest.mark.parametrize(
+    ("explicit", "status", "matched"),
+    [
+        ("1", "identity_conflict", None),
+        ("2", "matched", "2"),
+    ],
+)
+def test_priority_anchors_respect_an_explicit_target_id(explicit, status, matched):
+    catalog = (
+        _target("1", uniprot="P11111", species="9606"),
+        _target("2", uniprot="P22222", species="9606"),
+    )
+    query = replace(
+        _query(target_id=explicit, uniprot_ids=("P22222",), organism="9606"),
+        prioritize_anchors=True,
+    )
+    result = resolve_match(query, catalog, snapshot_complete=True)
+    assert result.match_status == status
+    assert result.matched_target_id == matched
+
+
+def test_ranked_matching_without_taxon_keeps_a_unique_uniprot_match():
+    catalog = (_target("1", uniprot="P11111", species="9606"),)
+    query = replace(
+        _query(uniprot_ids=("P11111",), organism=None),
+        prioritize_anchors=True,
+        ranked_text=True,
+    )
+    result = resolve_match(query, catalog, snapshot_complete=True)
+    assert result.match_status == "matched"
+    assert result.matched_target_id == "1"

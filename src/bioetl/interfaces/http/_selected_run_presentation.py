@@ -5,6 +5,15 @@ from __future__ import annotations
 from collections.abc import Mapping
 from urllib.parse import urlencode
 
+from bioetl.application.observability.reason_aliases import display_reason
+from bioetl.domain.run_reports.selected_status import (
+    provider_check_rows,
+    provider_selector_options,
+)
+from bioetl.domain.run_reports.stage_diagnostics import project_stage_diagnostics
+from bioetl.interfaces.http._selected_run_report_assessment import _saved_trust
+
+_CONTROL_PLANE = "Control Plane"
 _SELECT_RUN = "SELECT RUN"
 _NO_RUNS = "NO RUNS"
 _RUN_EXPLORER_SELECT_PATH = "d/bioetl-run-explorer-v1/1-run-explorer?var-run_id=-"
@@ -132,4 +141,53 @@ def _assessment_summary(
         "evidence_availability": availability,
         "heartbeat_now": heartbeat_now,
         "reason": "Saved run evidence; CURRENT and chart coverage are separate",
+    }
+
+
+def present_saved_status(
+    summary: dict[str, object],
+    report: dict[str, object],
+    domain_rows: list[dict[str, object]],
+    readiness_fields: dict[str, object],
+) -> dict[str, object]:
+    """Format domain rows, Trust and presentation mirrors for one saved report."""
+    issues = [
+        f"{row['domain']}: {display_reason(str(row.get('reason', '')))}"
+        for row in domain_rows
+        if row.get("verdict") not in {"OK", "N/A"}
+    ]
+    if issues:
+        summary["reason"] = "; ".join(issues)
+    rows = [
+        {
+            **summary,
+            **row,
+            "run_verdict": summary["verdict"],
+            "display_verdict": row["verdict"],
+            "reason_display": display_reason(str(row.get("reason", ""))),
+        }
+        for row in domain_rows
+    ]
+    trust = _saved_trust(report, summary, rows)
+    for row in rows:
+        if row["domain"] == _CONTROL_PLANE:
+            row["reason_display"] = trust["reasons_display"] or "No saved Trust reasons"
+            row["display_verdict"] = trust["trust_status"]
+    return {
+        **summary,
+        "summary": [summary],
+        "presentation_summary": [summary],
+        "presentation_trust": [trust],
+        "domains": rows,
+        "presentation_domains": presentation_rows(rows),
+        "provider_checks": provider_check_rows(report),
+        "provider_options": provider_selector_options(report),
+        "quality_evidence": {
+            "pipeline": summary["pipeline"],
+            "funnel": report.get("funnel"),
+        },
+        "rows": rows,
+        "trust": [trust],
+        **readiness_fields,
+        **project_stage_diagnostics(report),
     }

@@ -794,6 +794,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "src/iuphar_target_class/identifier_roles.py": (
         IUPHAR_IDENTIFIER_ROLES_RF002_TEST,
         IUPHAR_POLICY_TEST,
+        "tests/unit/infrastructure/adapters/iuphar/test_target_classification.py",
     ),
     **dict.fromkeys(
         (
@@ -936,7 +937,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "src/iuphar_target_class/pipeline_io.py",
             "src/iuphar_target_class/pipeline_acceptance.py",
         ),
-        ("tests/unit/iuphar_target_class/test_pipeline.py",),
+        (
+            "tests/unit/iuphar_target_class/test_pipeline.py",
+            "tests/unit/infrastructure/adapters/iuphar/test_target_classification.py",
+        ),
     ),
     "src/iuphar_target_class/csv_io.py": (
         "tests/unit/iuphar_target_class/test_csv_io.py",
@@ -1443,6 +1447,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
     ),
     "configs/quality/external_resource_inventory_pr13360_rf002_review.json": (
+        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
+        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
+    ),
+    "configs/quality/external_resource_inventory_pr13400_iuphar_review.json": (
         EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
         EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
     ),

@@ -601,11 +601,7 @@ def classify_target(
         row.provenance.matching_policy_version in RANKED_CLASS_POLICIES
         and row.target_kind == "protein"
     )
-    business = (
-        _source_business(row)
-        if row.provenance.matching_policy_version in EC_EFFECTIVE_POLICIES
-        else {}
-    )
+    business = _source_business(row) if prioritize_anchors else {}
     query = MatchQuery(
         row.target_id,
         row.uniprot_accessions,
@@ -664,10 +660,7 @@ def _row_hgnc_ids(
     row: ValidatedInput, business: Mapping[str, object]
 ) -> tuple[str, ...]:
     explicit = row.raw_fields.get("hgnc")
-    if (
-        explicit is None
-        and row.provenance.matching_policy_version in EC_EFFECTIVE_POLICIES
-    ):
+    if explicit is None:
         value = business.get("target_xref_hgnc_ids")
         explicit = value if isinstance(value, str) else None
     return normalize_hgnc_ids(explicit)
@@ -861,7 +854,10 @@ def _resolution_input(
 
 
 def _has_channel_candidate(
-    row: ValidatedInput, snapshot: IndexedSnapshot, outcome: Resolution
+    row: ValidatedInput,
+    snapshot: IndexedSnapshot,
+    outcome: Resolution,
+    candidate_ids: tuple[str, ...],
 ) -> bool:
     classes = (
         outcome.iuphar_class,
@@ -871,16 +867,15 @@ def _has_channel_candidate(
     )
     if ION_CHANNEL in classes:
         return True
-    ids = outcome.candidate_target_ids
     annotations: Iterable[ProviderAnnotation | None]
     if row.taxon is None and snapshot.species_annotations:
         annotations = (
             annotation
             for (key, _), annotation in snapshot.species_annotations.items()
-            if key in ids
+            if key in candidate_ids
         )
     else:
-        annotations = (_annotation(snapshot, key, row.taxon) for key in ids)
+        annotations = (_annotation(snapshot, key, row.taxon) for key in candidate_ids)
     for annotation in annotations:
         direct = _direct(snapshot, annotation)
         if direct and ION_CHANNEL in (
@@ -924,14 +919,17 @@ def _fallback_effective_class(
         return _keyword_fallback(row, match, outcome) if ranked else None
     if outcome.effective_class == ION_CHANNEL or outcome.iuphar_class == ION_CHANNEL:
         return None
+    candidate_ids = (
+        match.candidate_target_ids if ranked else outcome.candidate_target_ids
+    )
+    if _has_channel_candidate(row, snapshot, outcome, candidate_ids):
+        return None
     if ranked:
         if len(categories) == 1 and outcome.iuphar_class is not None:
             return None
     else:
         outside_scope = any(d.code == "unsupported_taxon" for d in match.diagnostics)
-        if (
-            len(categories) == 1 and outcome.effective_class and not outside_scope
-        ) or _has_channel_candidate(row, snapshot, outcome):
+        if len(categories) == 1 and outcome.effective_class and not outside_scope:
             return None
     content = "|".join(sorted({item.raw for item in row.ec_numbers if item.valid}))
     return select_ec_class(outcome, categories), content
