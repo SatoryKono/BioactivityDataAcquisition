@@ -16,6 +16,7 @@ from bioetl.infrastructure.control_plane.file_evidence_location_store import (
 )
 
 from scripts.ops.__main__ import main as ops_main
+from scripts.ops.observability import campaign_report_visibility as visibility
 from scripts.ops.observability import run_report_campaign as campaign
 from scripts.ops.observability.campaign_report_artifacts import (
     RunReport,
@@ -126,25 +127,34 @@ def test_campaign_retries_publication_after_grafana_misses_exact_run(
     def request(self, path, *, grafana=False, body=None):
         if path.startswith("/ops/observability/workflow-run-report?"):
             return read_json(target / WORKFLOW.commit_file)
+        if path.startswith("/ops/observability/pipeline-run-report?"):
+            return read_json(target / PIPELINE.commit_file)
         if path.startswith("/ops/observability/pipeline-run-reports?"):
             assert parse_qs(urlsplit(path).query)["lookup_run_id"] == [PIPELINE.run_id]
             return {
                 "index_state": "ok",
                 "source_identity_actual": SOURCE_ID,
-                "items": [{"run_id": PIPELINE.run_id}]
+                "items": [{"run_id": PIPELINE.run_id, "report_state": "AVAILABLE"}]
                 if (target / PIPELINE.commit_file).is_file()
                 else [],
             }
         assert grafana and path == "/api/ds/query"
         assert "lookup_run_id=pipeline-id" in body["queries"][0]["url"]
-        values = [PIPELINE.run_id] if grafana_ready else ["another-run-id"]
+        states = ["AVAILABLE" if grafana_ready else "MISSING", "AVAILABLE"]
         return {
             "results": {
                 "A": {
                     "frames": [
                         {
-                            "schema": {"fields": [{"name": "run_id"}]},
-                            "data": {"values": [values]},
+                            "schema": {
+                                "fields": [
+                                    {"name": "run_id"},
+                                    {"name": "report_state"},
+                                ]
+                            },
+                            "data": {
+                                "values": [[PIPELINE.run_id, "another-run-id"], states]
+                            },
                         }
                     ]
                 }
@@ -191,10 +201,24 @@ def test_campaign_retries_publication_after_grafana_misses_exact_run(
     assert read_json(output / campaign.RECEIPT)["publication_status"] == "verified"
 
 
-def test_isolated_mode_does_not_contact_dashboard_or_publish(monkeypatch, attempt):
+@pytest.mark.parametrize("external_mount", [False, True])
+def test_isolated_mode_does_not_contact_dashboard_or_publish(
+    monkeypatch, attempt, external_mount
+):
     output, data, target = attempt
+    alias = data.parent
+    if external_mount:
+        alias = campaign.REPO_ROOT.parent / "external-data"
+        target = campaign.REPO_ROOT.parent / "external-reports/run-reports"
+    monkeypatch.setenv("BIOETL_DASHBOARD_DATA_ROOT", str(alias))
+    monkeypatch.setenv("BIOETL_DASHBOARD_REPORT_ROOT", str(target.parent))
 
     def launch(cmd, *, env, cwd, check):
+        catalog = Path(env["BIOETL_DASHBOARD_DATA_ROOT"])
+        assert catalog == data
+        _write_json(
+            catalog / "output/control/run_manifest/local-only.json", {"local": True}
+        )
         _stage(Path(env["BIOETL_REPORT_ROOT"]))
         return CompletedProcess(cmd, 0)
 
@@ -220,6 +244,7 @@ def test_isolated_mode_does_not_contact_dashboard_or_publish(monkeypatch, attemp
     )
     assert (output / "run-reports" / PIPELINE.commit_file).exists()
     assert not (target / PIPELINE.commit_file).exists()
+    assert not (alias / "output/control/run_manifest/local-only.json").exists()
     assert read_json(output / campaign.RECEIPT)["publication_status"] == "not_requested"
 
 
@@ -247,6 +272,104 @@ def test_unhealthy_target_stops_before_bioetl_launch(monkeypatch, attempt, capsy
         == 1
     )
     assert "source identity is unhealthy" in capsys.readouterr().err
+    assert not output.exists()
+
+
+def test_missing_exact_report_cannot_be_verified_by_catalog(monkeypatch):
+    def request(self, path, **kwargs):
+        assert path.startswith("/ops/observability/pipeline-run-report?")
+        return {"identity": {}}
+
+    monkeypatch.setattr(DashboardAccess, "request", request)
+    access = DashboardAccess("http://127.0.0.1:8000", "http://127.0.0.1:3000", 10)
+    assert not access.visible(PIPELINE, source_id=SOURCE_ID, query=QUERY)
+
+
+def test_preflight_queries_grafana_before_launch(monkeypatch, attempt, capsys):
+    output, data, _ = attempt
+    monkeypatch.setattr(
+        campaign.subprocess, "run", lambda *_a, **_kw: pytest.fail("launch")
+    )
+    monkeypatch.setattr(
+        visibility, "inspect_report_root_marker", lambda **_: {"status": "healthy"}
+    )
+    monkeypatch.setattr(
+        visibility,
+        "inspect_report_root_source_identity",
+        lambda **_: {"source_identity_state": "aligned"},
+    )
+
+    def request(self, path, *, grafana=False, body=None):
+        if path == "/health/ready":
+            return {
+                "checks": {
+                    "report_root": {
+                        "status": "healthy",
+                        "source_identity_state": "aligned",
+                        "source_identity_actual": SOURCE_ID,
+                        "source_identity_expected": SOURCE_ID,
+                    }
+                }
+            }
+        if path == "/api/dashboards/uid/bioetl-run-explorer-v1":
+            return {
+                "dashboard": {
+                    "panels": [
+                        {
+                            "id": 3010,
+                            "datasource": {"uid": "bioetl-ops-http"},
+                            "targets": [QUERY],
+                        }
+                    ]
+                }
+            }
+        assert grafana and path == "/api/ds/query"
+        assert body["queries"][0]["url"].endswith("lookup_run_id=")
+        return {"results": {"A": {"status": 502, "error": "backend unavailable"}}}
+
+    monkeypatch.setattr(DashboardAccess, "request", request)
+    assert (
+        campaign.main(
+            [
+                "run",
+                "workflow",
+                WORKFLOW.owner,
+                "--mode",
+                "publish",
+                "--data-root",
+                str(data),
+                "--output",
+                str(output),
+            ]
+        )
+        == 1
+    )
+    assert "datasource query failed" in capsys.readouterr().err
+    assert not output.exists()
+
+
+def test_forwarded_pipeline_override_is_rejected_before_launch(monkeypatch, attempt):
+    output, data, _ = attempt
+    monkeypatch.setattr(
+        campaign.subprocess, "run", lambda *_a, **_kw: pytest.fail("launch")
+    )
+    with pytest.raises(SystemExit) as error:
+        campaign.main(
+            [
+                "run",
+                "pipeline",
+                PIPELINE.owner,
+                "--mode",
+                "isolated",
+                "--data-root",
+                str(data),
+                "--output",
+                str(output),
+                "--",
+                "--pipeline=other_pipeline",
+            ]
+        )
+    assert error.value.code == 2
     assert not output.exists()
 
 

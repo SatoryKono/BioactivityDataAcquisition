@@ -12,7 +12,9 @@ from pathlib import Path
 from bioetl.composition.observability_runtime import create_run_report_store
 from filelock import FileLock
 
+from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
 from scripts.ops.observability.campaign_report_artifacts import (
+    RunReport,
     collect_reports,
     publish_reports,
     read_json,
@@ -107,15 +109,17 @@ def _run(
     env = {
         **os.environ,
         "BIOETL_DATA_DIR": receipt["data_root"],
+        "BIOETL_DASHBOARD_DATA_ROOT": receipt.get(
+            "dashboard_data_root", receipt["data_root"]
+        ),
         "BIOETL_REPORT_ROOT": str(output / "run-reports"),
         "BIOETL_ARCHIVE_ROOT": str(output / "archive"),
     }
     if receipt.get("runtime_source_id"):
-        env.update(
-            BIOETL_RUNTIME_SOURCE_ID=receipt["runtime_source_id"],
-            BIOETL_DASHBOARD_DATA_ROOT=receipt["dashboard_data_root"],
-        )
-    cmd = [sys.executable, "-m", "bioetl", *prefix, args.owner, *cli_args]
+        env["BIOETL_RUNTIME_SOURCE_ID"] = receipt["runtime_source_id"]
+    cmd = ensure_safe_cli_argv(
+        [sys.executable, "-m", "bioetl", *prefix, args.owner, *cli_args]
+    )
     output.mkdir(parents=True, exist_ok=False)
     _save(output, receipt)
     result = subprocess.run(cmd, env=env, cwd=REPO_ROOT, check=False)
@@ -161,7 +165,7 @@ def _finish_publication(
     return exit_code
 
 
-def _run_command(argv: list[str] | None) -> int:
+def _parse_command(argv: list[str] | None) -> tuple[argparse.Namespace, list[str]]:
     argv = list(sys.argv[1:] if argv is None else argv)
     delimiter = argv.index("--") if "--" in argv else len(argv)
     cli_args = argv[delimiter + 1 :]
@@ -169,52 +173,63 @@ def _run_command(argv: list[str] | None) -> int:
     args = parser.parse_args(argv[:delimiter])
     if (args.action == "publish" and cli_args) or not 0 < args.timeout <= 300:
         parser.error("Retry accepts no BioETL arguments; timeout must be in (0, 300]")
-    output = _inside(args.output, REPO_ROOT)
-    _load_repo_environment()
+    protected = {
+        "--pipeline",
+        "--ensure-observability-backend",
+        "--observability-backend-port",
+        "--debug-export-dir",
+    }
+    if any(token.partition("=")[0] in protected for token in cli_args):
+        parser.error(
+            "Forwarded arguments cannot override the campaign pipeline, backend or output paths"
+        )
+    return args, cli_args
+
+
+def _dashboard_roots() -> tuple[Path, Path]:
     mount = Path(
         os.environ.get("BIOETL_DASHBOARD_REPORT_ROOT") or REPO_ROOT / "reports"
     )
-    target = _inside(mount / "run-reports", REPO_ROOT)
-    alias = _inside(
-        Path(os.environ.get("BIOETL_DASHBOARD_DATA_ROOT") or REPO_ROOT / "data"),
-        REPO_ROOT,
-    )
+    alias = Path(os.environ.get("BIOETL_DASHBOARD_DATA_ROOT") or REPO_ROOT / "data")
+    return (mount / "run-reports").resolve(), alias.resolve()
+
+
+def _new_attempt(args: argparse.Namespace, output: Path, alias: Path) -> dict:
+    RunReport(args.kind, args.owner, "pending")
+    data_root = _inside(args.data_root, REPO_ROOT)
+    if not data_root.is_dir() or data_root in {alias, REPO_ROOT / "data"}:
+        raise ValueError("Use a prepared, isolated campaign data directory")
+    if output.is_relative_to(data_root) or data_root.is_relative_to(output):
+        raise ValueError("Attempt output and campaign data roots must be disjoint")
+    return {
+        "mode": args.mode,
+        "kind": args.kind,
+        "owner": args.owner,
+        "data_root": str(data_root),
+        "execution_status": "running",
+        "publication_status": "not_requested" if args.mode == "isolated" else "pending",
+    }
+
+
+def _retry_attempt(output: Path) -> dict:
+    receipt = read_json(output / RECEIPT)
+    if (receipt.get("mode"), receipt.get("execution_status")) != ("publish", "success"):
+        raise ValueError("Retry requires a successful attempt started in publish mode")
+    return receipt
+
+
+def _publish_or_retry(
+    args: argparse.Namespace,
+    cli_args: list[str],
+    output: Path,
+    target: Path,
+    alias: Path,
+    receipt: dict,
+) -> int:
+    target = _inside(target, REPO_ROOT)
+    alias = _inside(alias, REPO_ROOT)
+    relative = _inside(Path(receipt["data_root"]), alias).relative_to(alias).as_posix()
     access = DashboardAccess(args.ops_url, args.grafana_url, args.timeout)
-    if args.action == "run":
-        data_root = _inside(args.data_root, REPO_ROOT)
-        if (
-            not data_root.is_dir()
-            or data_root == alias
-            or data_root == REPO_ROOT / "data"
-        ):
-            raise ValueError("Use a prepared, isolated campaign data directory")
-        if output.is_relative_to(data_root) or data_root.is_relative_to(output):
-            raise ValueError("Attempt output and campaign data roots must be disjoint")
-        receipt = {
-            "mode": args.mode,
-            "kind": args.kind,
-            "owner": args.owner,
-            "data_root": str(data_root),
-            "execution_status": "running",
-            "publication_status": "not_requested"
-            if args.mode == "isolated"
-            else "pending",
-        }
-    else:
-        receipt = read_json(output / RECEIPT)
-        if (
-            receipt.get("mode") != "publish"
-            or receipt.get("execution_status") != "success"
-        ):
-            raise ValueError(
-                "Retry requires a successful attempt started in publish mode"
-            )
-        data_root = _inside(Path(receipt["data_root"]), REPO_ROOT)
-    if output.is_relative_to(target) or target.is_relative_to(output):
-        raise ValueError("Attempt output and dashboard report roots must be disjoint")
-    if args.action == "run" and args.mode == "isolated":
-        return _run(args, cli_args, output, receipt)
-    relative = _inside(data_root, alias).relative_to(alias).as_posix()
     source_id, _ = access.preflight(target)
     binding = {
         "runtime_source_id": source_id,
@@ -231,6 +246,22 @@ def _run_command(argv: list[str] | None) -> int:
             "Publication target or runtime source changed since the attempt"
         )
     return _finish_publication(output, target, relative, access, source_id)
+
+
+def _run_command(argv: list[str] | None) -> int:
+    args, cli_args = _parse_command(argv)
+    output = _inside(args.output, REPO_ROOT)
+    _load_repo_environment()
+    target, alias = _dashboard_roots()
+    if output.is_relative_to(target) or target.is_relative_to(output):
+        raise ValueError("Attempt output and dashboard report roots must be disjoint")
+    if args.action == "run":
+        receipt = _new_attempt(args, output, alias)
+        if args.mode == "isolated":
+            return _run(args, cli_args, output, receipt)
+    else:
+        receipt = _retry_attempt(output)
+    return _publish_or_retry(args, cli_args, output, target, alias, receipt)
 
 
 def main(argv: list[str] | None = None) -> int:
