@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "catalog_ref": "a22c3fd277d09180d31bdbc985e3340b41ddeadc",
-  "source_ref": "bc8ab735ad14c05b0cd7c505d09a1a65bc7dade1",
+  "source_ref": "21a65c41baa7f34ccc5e15691f50451eb345d08f",
   "source_reviews": {
     "src/bioetl/application/pipelines/chembl/target_protein_classification_transformer.py": "Project shaped string classification identifiers (leaf_id, root_id, l1_id..l5_id) to the published numeric Gold contract in transform_for_gold via int(). Pure in-memory projection; no file, network, or process acquisition calls added.",
     "src/bioetl/interfaces/http/_selected_run_artifact_probes.py": "Dispatch Windows Bronze probes through the binding helper and reuse the existing digest reader. Bound copies are resolved relative to the attested Bronze directory. No new external acquisition sites.",
