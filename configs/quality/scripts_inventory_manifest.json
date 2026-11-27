@@ -11334,7 +11334,7 @@
         },
         {
           "path": ".github/workflows/nightly.yml",
-          "line": 163,
+          "line": 188,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci"
         },
@@ -11715,13 +11715,13 @@
       "references": [
         {
           "path": ".github/workflows/nightly.yml",
-          "line": 151,
+          "line": 176,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks"
         },
         {
           "path": ".github/workflows/nightly.yml",
-          "line": 157,
+          "line": 182,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks"
         },
@@ -11911,7 +11911,7 @@
       "references": [
         {
           "path": ".github/workflows/nightly.yml",
-          "line": 164,
+          "line": 189,
           "source_group": "ci",
           "text": "nightly-shadow partition"
         },
@@ -15730,7 +15730,7 @@
       "references": [
         {
           "path": ".github/workflows/nightly.yml",
-          "line": 83,
+          "line": 107,
           "source_group": "ci",
           "text": "run: python scripts/engineering/qa/check_codeql_freshness.py --ref main --max-age-days 7"
         }
