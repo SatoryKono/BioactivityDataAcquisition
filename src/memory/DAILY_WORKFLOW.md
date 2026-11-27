@@ -204,10 +204,13 @@ Use `python -m memory.tooling.prune --json` for the policy-default density
 report or `python -m memory.tooling.prune --max-active <N> --json` for an
 explicit override. The default cadence is a dry-run review every 7 days with a
 target ceiling of 1000 active episodic notes.
-`.github/workflows/memory-retention.yml` is the governed weekly and
-pull-request gate: it runs `python -m memory.tooling.prune --check --json` and
-fails when expired, excess, or metadata-invalid notes require owner review.
-The gate never deletes content. An owner must review the bounded report before
+CircleCI owns the intended retention schedule through its main-only
+`memory-retention` lane, which runs
+`python -m memory.tooling.prune --check --json` and fails when expired, excess,
+or metadata-invalid notes require owner review. Current schedule operation is
+NOT_PROVEN pending #13421; this lane is
+not a PR gate. The GitHub workflow is manual dispatch only. The check never
+deletes content. An owner must review the bounded report before
 running `python -m memory.tooling.prune --apply`; destructive retention remains
 explicitly authorized and separate from detection.
 
