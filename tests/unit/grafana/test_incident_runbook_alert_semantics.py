@@ -75,6 +75,26 @@ def test_operator_docs_use_only_real_alertnames() -> None:
     assert not offenders, offenders
 
 
+def test_pipeline_failure_runbook_trigger_matches_alert_rules() -> None:
+    runbook_path = "docs/05-operations/runbooks/pipeline-failure-critical.md"
+    trigger = (
+        (ROOT / runbook_path)
+        .read_text(encoding="utf-8")
+        .split("## Trigger\n", 1)[1]
+        .split("\n## ", 1)[0]
+    )
+    documented = re.findall(r"- ALERT: `([^`]+)` — severity: (\w+)\.", trigger)
+    payload = yaml.safe_load(RULES_PATH.read_text(encoding="utf-8"))
+    rules = {
+        rule["alert"]: rule["labels"]["severity"]
+        for group in payload["groups"]
+        for rule in group["rules"]
+        if rule.get("annotations", {}).get("runbook") == runbook_path
+    }
+    assert len(documented) == 4
+    assert dict(documented) == rules
+
+
 def test_gold_procedure_distinguishes_exception_from_validation_result() -> None:
     """The Gold section names the thrown error and the returned result apart."""
     text = OPERATOR_DOCS[0].read_text(encoding="utf-8")
