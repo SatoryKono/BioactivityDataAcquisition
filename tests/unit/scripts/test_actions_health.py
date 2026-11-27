@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import subprocess
 import sys
 from unittest.mock import patch
 
@@ -78,3 +79,64 @@ def test_daily_scan_detects_job_finishing_after_previous_scan(capsys):
     ):
         assert check_actions_health.main() == 1
     assert "42" in capsys.readouterr().out
+
+
+def test_empty_selection_is_healthy(capsys):
+    with (
+        patch.object(sys, "argv", ["health", "--repo", "o/r"]),
+        patch.object(
+            check_actions_health,
+            "api_pages",
+            return_value=[{"total_count": 0, "workflow_runs": []}],
+        ),
+    ):
+        assert check_actions_health.main() == 0
+    assert "No failed zero-step jobs" in capsys.readouterr().out
+
+
+def test_jobs_with_steps_or_success_are_healthy(capsys):
+    def pages(endpoint):
+        if "/jobs?" in endpoint:
+            return [
+                {
+                    "jobs": [
+                        {"conclusion": "success", "steps": []},
+                        {"conclusion": "failure", "steps": [{"name": "test"}]},
+                    ]
+                }
+            ]
+        return [
+            {
+                "total_count": 1,
+                "workflow_runs": [{"id": 42, "created_at": "2026-10-03T12:00:00Z"}],
+            }
+        ]
+
+    with (
+        patch.object(
+            sys,
+            "argv",
+            [
+                "health",
+                "--repo",
+                "o/r",
+                "--since",
+                "2026-10-03",
+                "--until",
+                "2026-10-05",
+            ],
+        ),
+        patch.object(check_actions_health, "api_pages", side_effect=pages),
+    ):
+        assert check_actions_health.main() == 0
+    assert "No failed zero-step jobs" in capsys.readouterr().out
+
+
+def test_api_error_returns_error_status(capsys):
+    error = subprocess.CalledProcessError(1, "gh", stderr="API unavailable")
+    with (
+        patch.object(sys, "argv", ["health", "--repo", "o/r"]),
+        patch.object(check_actions_health, "api_pages", side_effect=error),
+    ):
+        assert check_actions_health.main() == 2
+    assert "API unavailable" in capsys.readouterr().err
