@@ -61,12 +61,16 @@ PILOT_SUCCESS_RETENTION_FLOOR_DAYS = 30
 PILOT_DIAGNOSTIC_RETENTION_FLOOR_DAYS = 90
 PILOT_VERIFIED_ARCHIVE_FLOOR_DAYS = 90
 PILOT_RECORD_NAME = "pilot-48min.json"
+PILOT_BASELINE_SHA = "c41cd6f7b7e4f1cb841358837fec6c6d30625106"
+PILOT_RECORD_SHA256 = "8d8824f60299c031f89cfcb4e09f31e94a413d3461455d16670bd344e517b258"
+PILOT_WORKFLOW_BLOB = "cb83e657abd8ccbb8526d9f3eec83152b671e1be"
 PILOT_ISSUE = 12362
 PARENT_ACCEPTANCE_ISSUE = 12349
 MISSING_PILOT_FAILURES = "pilot facts are missing cited failure runs"
 _SYNTHETIC_EVENTS = frozenset({"synthetic", "fabricated"})
 _EXTERNAL_OBSERVATION = frozenset({"external_state", "external_state_security"})
 REQUIRED_EXTERNAL_JOBS = (
+    "actions-health",
     "security",
     "zizmor",
     "codeql",
@@ -81,6 +85,7 @@ WEEKDAYS = frozenset({"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"})
 UTC_WEEKDAY_NAMES = ("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
 QUARTER_MONTHS = frozenset({"01", "04", "07", "10"})
 JOB_KINDS: dict[str, str] = {
+    "actions-health": "external_daily",
     "clock": "clock",
     "tests": "deterministic",
     "e2e": "deterministic",
@@ -96,6 +101,7 @@ JOB_KINDS: dict[str, str] = {
     "github-settings": "quarterly",
 }
 CHECK_CLASS: dict[str, str] = {
+    "actions-health": "external_state",
     "clock": "clock",
     "tests": "deterministic",
     "e2e": "deterministic",
@@ -111,6 +117,7 @@ CHECK_CLASS: dict[str, str] = {
     "github-settings": "external_state",
 }
 _CADENCE_LABEL = {
+    "external_daily": "every_scheduled_nightly",
     "clock": "every_scheduled_nightly",
     "deterministic": "every_scheduled_nightly",
     "security_daily": "every_scheduled_nightly",
@@ -266,7 +273,7 @@ def job_duty(
     kind = JOB_KINDS.get(name)
     if kind is None:
         return "unknown"
-    if kind in {"clock", "deterministic", "security_daily"}:
+    if kind in {"clock", "deterministic", "external_daily", "security_daily"}:
         return "mandatory"
     force = parse_force(force_weekly)
     weekday = dow if isinstance(dow, str) and dow in WEEKDAYS else None
@@ -514,7 +521,9 @@ def _pilot_configuration_jobs(
     ).hexdigest()
     if blob != configuration.get("workflow_blob_sha"):
         raise ArchiveError("pilot workflow source checksum mismatch")
-    jobs = _validated_workflow_jobs(source)
+    jobs = _validated_workflow_jobs(
+        source, historical_pilot=blob == PILOT_WORKFLOW_BLOB
+    )
     if any(snippet not in source for snippet in _WORKFLOW_DRIFT_SNIPPETS):
         raise ArchiveError("pilot workflow configuration drifted")
     return jobs
@@ -1690,13 +1699,18 @@ def _load_unique_workflow(text: str) -> Any:
         loader.dispose()
 
 
-def _validated_workflow_jobs(text: str) -> dict[str, Any]:
+def _validated_workflow_jobs(
+    text: str, *, historical_pilot: bool = False
+) -> dict[str, Any]:
     try:
         workflow = _load_unique_workflow(text)
     except yaml.YAMLError as exc:
         raise ArchiveError("malformed nightly workflow") from exc
     jobs = workflow.get("jobs") if isinstance(workflow, Mapping) else None
-    if not isinstance(jobs, dict) or set(jobs) != set(JOB_KINDS):
+    expected_jobs = set(JOB_KINDS)
+    if historical_pilot:
+        expected_jobs.remove("actions-health")
+    if not isinstance(jobs, dict) or set(jobs) != expected_jobs:
         raise ArchiveError("JOB_KINDS drifted from nightly.yml")
     for name, job in jobs.items():
         if not isinstance(job, Mapping):
@@ -2539,9 +2553,18 @@ def _command_record_pilot(argv: Sequence[str]) -> int:
     destination = resolve_cli_path(args.output, root=REPO_ROOT)
     if destination.name != PILOT_RECORD_NAME:
         raise ArchiveError(f"pilot record must be named {PILOT_RECORD_NAME}")
+    if args.baseline_sha == PILOT_BASELINE_SHA:
+        # Replay the dated observation using its independently pinned evidence.
+        path = REPO_ROOT / "reports/governance/n1-shadow-window" / PILOT_RECORD_NAME
+        historical = json.loads(path.read_text(encoding="utf-8"))
+        if pilot_record_sha256(historical) != PILOT_RECORD_SHA256:
+            raise ArchiveError("historical pilot record checksum mismatch")
+        inventory = historical["inventory"]
+    else:
+        inventory = nightly_check_inventory(REPO_ROOT)
     record = build_reduced_pilot_record(
         baseline_sha=args.baseline_sha,
-        inventory=nightly_check_inventory(REPO_ROOT),
+        inventory=inventory,
     )
     _write_canonical_record(destination, record)
     print(record["status"])

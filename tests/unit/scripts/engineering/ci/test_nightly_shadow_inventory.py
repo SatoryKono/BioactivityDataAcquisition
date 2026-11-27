@@ -100,6 +100,7 @@ def test_nightly_inventory_matches_workflow_and_fails_on_drift(tmp_path: Path) -
     inventory = nightly_check_inventory()
     assert {row["name"] for row in inventory["jobs"]} == set(JOB_KINDS)
     assert set(inventory["security_and_external_jobs"]) == {
+        "actions-health",
         "branch-hygiene",
         "codeql",
         "github-settings",
@@ -108,6 +109,8 @@ def test_nightly_inventory_matches_workflow_and_fails_on_drift(tmp_path: Path) -
         "zizmor",
     }
     by_name = {row["name"]: row for row in inventory["jobs"]}
+    assert by_name["actions-health"]["cadence"] == "every_scheduled_nightly"
+    assert by_name["actions-health"]["observation_class"] == "external_state"
     assert by_name["security"]["schedule_kind"] == "security_daily"
     assert by_name["security"]["observation_class"] == "external_state_security"
     assert by_name["codeql"]["cadence"] == "weekly_monday"
@@ -166,10 +169,14 @@ def test_committed_pilot_record_is_not_opened(tmp_path: Path) -> None:
     assert record["retention_floors"]["verified_archive_days"] == 90
     assert record["api_counts"]["missing"] is None
     assert record["api_counts"]["unknown"] is None
-    assert record["sha256"] == pilot_record_sha256(record)
+    assert (
+        record["sha256"]
+        == pilot_record_sha256(record)
+        == archive_module.PILOT_RECORD_SHA256
+    )
     rebuilt = build_reduced_pilot_record(
         baseline_sha=BASELINE_SHA,
-        inventory=nightly_check_inventory(),
+        inventory=record["inventory"],
     )
     assert record_path.read_bytes() == canonical_bytes(rebuilt)
     cited = {item["run_id"]: item for item in record["cited_failure_runs"]}
