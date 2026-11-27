@@ -12,7 +12,7 @@ from datetime import UTC, datetime, timedelta
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--ref", default="main", help="Branch name")
+    parser.add_argument("--ref", choices=["main"], default="main", help="Branch name")
     parser.add_argument("--max-age-days", type=int, default=7)
     args = parser.parse_args()
     if args.max_age_days < 0:
@@ -31,7 +31,7 @@ def main() -> int:
                 "-f",
                 "tool_name=CodeQL",
                 "-f",
-                f"ref=refs/heads/{args.ref}",
+                "ref=refs/heads/main",
                 "-f",
                 "per_page=100",
             ],
