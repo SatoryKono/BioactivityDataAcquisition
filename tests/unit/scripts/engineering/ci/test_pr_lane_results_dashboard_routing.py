@@ -15,7 +15,7 @@ def test_pipeline_failure_runbook_routes_to_alert_contract() -> None:
     path = "docs/05-operations/runbooks/pipeline-failure-critical.md"
     report = build_shadow_compare([path], repo_root=root)
     assert (
-        "tests/integration/test_pipeline_failure_runbook_alerts.py"
+        "tests/unit/grafana/test_incident_runbook_alert_semantics.py"
         in report["selected"]
     )
     assert "tests/integration/test_prometheus_rules_config.py" in report["selected"]

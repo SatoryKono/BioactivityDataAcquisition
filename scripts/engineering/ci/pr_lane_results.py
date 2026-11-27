@@ -1618,7 +1618,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         INCIDENT_RUNBOOK_ALERT_SEMANTICS_TEST,
     ),
     "docs/05-operations/runbooks/pipeline-failure-critical.md": (
-        "tests/integration/test_pipeline_failure_runbook_alerts.py",
+        INCIDENT_RUNBOOK_ALERT_SEMANTICS_TEST,
         PROMETHEUS_RULES_CONFIG_TEST,
     ),
     "docs/05-operations/runbooks/branch-hygiene-wave.md": (
