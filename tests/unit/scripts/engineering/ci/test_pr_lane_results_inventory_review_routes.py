@@ -63,6 +63,7 @@ def test_pr13166_inventory_review_snapshots_keep_bounded_owners(path: str) -> No
         "configs/quality/external_resource_inventory_pr13400_main_merge_review.json",
         "configs/quality/external-resource-requalification-pr13402.json",
         "configs/quality/external-resource-requalification-pr13402-main-merge.json",
+        "configs/quality/external_resource_inventory_pr13414_iuphar_review.json",
     ],
 )
 def test_review_receipts_route_only_to_inventory_owners(path: str) -> None:

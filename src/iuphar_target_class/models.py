@@ -156,6 +156,7 @@ class LocalInference:
     local_candidates: tuple[str, ...] = ()
     diagnostics: tuple[Diagnostic, ...] = ()
     local_rules_by_evidence: tuple[tuple[str, tuple[str, ...]], ...] = ()
+    supported_evidence_ids: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)

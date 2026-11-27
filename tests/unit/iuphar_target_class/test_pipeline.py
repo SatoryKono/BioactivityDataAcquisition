@@ -10,6 +10,7 @@ import pytest
 from iuphar_target_class import pipeline
 from iuphar_target_class.evidence import ContractDefect
 from iuphar_target_class.hierarchy import FamilyNode
+from iuphar_target_class.identifier_roles import REVIEWED_CLASS_POLICY_VERSION
 from iuphar_target_class.matching import CatalogTarget
 from iuphar_target_class.models import (
     Diagnostic,
@@ -82,6 +83,26 @@ def _run(*rows, snapshot=None):
         provenance=_provenance(),
         run_id="fixed",
     )
+
+
+def test_reviewed_ec_subclass_ignores_unverified_prediction():
+    row = RawTargetRow(
+        "weak-prediction",
+        {"organism": "9913", "ec": "3.1.26.n2", "predicted_l1": "Enzyme"},
+        "protein",
+    )
+    result = pipeline.classify_batch(
+        (row,),
+        snapshot=_snapshot(),
+        provenance=replace(
+            _provenance(), matching_policy_version=REVIEWED_CLASS_POLICY_VERSION
+        ),
+        run_id="fixed",
+    ).rows[0]
+    assert result.local is not None
+    assert "L1" in result.local.local_evidence_ids
+    assert result.local.supported_evidence_ids == ("ec:3.1.26.n2",)
+    assert result.result.effective_class == "Enzyme.Hydrolase"
 
 
 def test_auxiliary_same_species_hit_stays_off_the_identity_channel():
