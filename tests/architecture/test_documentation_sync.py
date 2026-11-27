@@ -483,18 +483,26 @@ def test_root_readme_uses_current_docs_entrypoints() -> None:
         )
 
 
-def _without_artifact_paths(text: str) -> str:
-    """Skip literal artifact paths while retaining surrounding commands and prose."""
-    return re.sub(r"`(?:[\w.-]+/)+[\w.-]+\.(?:xlsx|xml)`", "", text)
+def _legacy_pipeline_id_pattern(pipeline_id: str) -> re.Pattern[str]:
+    # A hyphen can join parts of a larger token, e.g. an artifact filename.
+    return re.compile(rf"(?<![A-Za-z0-9_-]){re.escape(pipeline_id)}(?![A-Za-z0-9_-])")
 
 
-def test_legacy_pipeline_guard_distinguishes_ids_from_artifact_paths() -> None:
-    command = "bioetl run --pipeline chembl-target"
-    path = "`xlsx/chembl-target-silver-v31.xlsx`"
-    assert _without_artifact_paths(f"{command} writes {path}").strip() == (
-        f"{command} writes"
-    )
-    assert _without_artifact_paths("`chembl-target`") == "`chembl-target`"
+@pytest.mark.parametrize(
+    ("text", "legacy_id", "expected"),
+    [
+        ("`xlsx/chembl-target-silver-v31.xlsx`", "chembl-target", False),
+        ("`xlsx/chembl-target-gold-v31.xlsx`", "chembl-target", False),
+        ("reports/e2e/chembl-activity-smoke.xml", "chembl-activity", False),
+        ("--pipeline chembl-target", "chembl-target", True),
+        ("`chembl-target`", "chembl-target", True),
+        ("(chembl-target).", "chembl-target", True),
+        ("`chembl-target-component`", "chembl-target-component", True),
+        ("`chembl-target-component`", "chembl-target", False),
+    ],
+)
+def test_legacy_pipeline_id_pattern(text: str, legacy_id: str, expected: bool) -> None:
+    assert bool(_legacy_pipeline_id_pattern(legacy_id).search(text)) is expected
 
 
 def test_no_legacy_kebab_pipeline_ids_in_active_docs(
@@ -537,11 +545,8 @@ def test_no_legacy_kebab_pipeline_ids_in_active_docs(
     candidates.extend(workflow_text_cache)
 
     violations: list[str] = []
-    # Match legacy kebab pipeline IDs as tokens, not as substrings of
-    # artifact names like reports/e2e/chembl-activity-smoke.xml.
     legacy_patterns = [
-        re.compile(rf"(?<![A-Za-z0-9_]){re.escape(item)}(?![A-Za-z0-9_])")
-        for item in legacy_pipeline_ids
+        _legacy_pipeline_id_pattern(item) for item in legacy_pipeline_ids
     ]
     for path in candidates:
         if path == Path("README.md"):
@@ -550,8 +555,7 @@ def test_no_legacy_kebab_pipeline_ids_in_active_docs(
             text = workflow_text_cache[path]
         else:
             text = docs_text_cache[path]
-        active_text = _without_artifact_paths(text)
-        if any(pattern.search(active_text) for pattern in legacy_patterns):
+        if any(pattern.search(text) for pattern in legacy_patterns):
             violations.append(path.as_posix())
 
     assert not violations, (
