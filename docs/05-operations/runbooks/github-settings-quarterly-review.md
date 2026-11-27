@@ -18,11 +18,10 @@ ______________________________________________________________________
 
 ## Trigger
 
-- The legacy cadence is the first day of January, April, July, and October.
-  The pull-request coordinator runs in GitHub Actions. This review stays
-  read-only. CircleCI `ci-lane=github-settings-review` is a manual lane, not
-  merge protection. External quarterly schedule acceptance is pending in
-  #11931; do not claim that schedule is enforced.
+- GitHub Actions `nightly.yml` schedules the review on the first day of
+  January, April, July, and October via `github-settings-quarterly-review.yml`.
+  The reusable workflow also supports manual dispatch. The review stays
+  read-only; a workflow definition does not prove successful scheduled runs.
 - Run manually after migrations affecting rulesets, protected branches, merge
   methods, Actions policy, environments, security settings, CODEOWNERS, labels,
   Issue Forms, or Wiki ownership.
@@ -48,7 +47,7 @@ state.
 
 ## Procedure
 
-1. Trigger the CircleCI main pipeline with `ci-lane=github-settings-review` or execute locally:
+1. Manually dispatch GitHub Actions `github-settings-quarterly-review.yml` or execute locally:
 
        python -m scripts.engineering.repo github-settings-review --json-out reports/quality/github-settings-review.json --markdown-out reports/quality/github-settings-review.md
 

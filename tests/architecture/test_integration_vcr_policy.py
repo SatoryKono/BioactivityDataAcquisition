@@ -501,20 +501,13 @@ def test_secret_inventory_runs_in_blocking_ci_lanes() -> None:
         command in step.get("run", "") and not step.get("continue-on-error", False)
         for step in preflight["steps"]
     )
-    circle = yaml.safe_load((ROOT / ".circleci/config.yml").read_text(encoding="utf-8"))
-    runs = [
-        step["run"]["command"]
-        for step in circle["jobs"]["test-fast"]["steps"]
-        if isinstance(step, dict) and "run" in step
-    ]
+    assert "if" not in preflight
+    assert not preflight.get("continue-on-error", False)
+    aggregate = github["jobs"]["tests-complete"]
+    assert "vcr-preflight" in aggregate["needs"]
     assert any(
-        command in run and "unit-vcr-secrets" in run and "set -euo pipefail" in run
-        for run in runs
+        'all(.[]; .result == "success")' in step.get("run", "")
+        and "exit 1" in step.get("run", "")
+        and not step.get("continue-on-error", False)
+        for step in aggregate["steps"]
     )
-    jobs = circle["workflows"]["pr-gate"]["jobs"]
-    aggregate = next(
-        job["pr-gate-complete"]
-        for job in jobs
-        if isinstance(job, dict) and "pr-gate-complete" in job
-    )
-    assert "test-fast" in aggregate["requires"]

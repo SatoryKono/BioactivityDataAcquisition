@@ -70,8 +70,9 @@ GitHub live state snapshot: GET `2026-09-09`, then `docs.yml` and
 `compiled-artifacts-block.yml` re-enabled the same day as PR-gate reusable
 owners (#10263). Do not re-enable other disabled canonical lanes without a
 new spend/safety decision. The two memory workflows were observed `active`
-by API on 2026-11-27, but have only `workflow_dispatch` triggers; CircleCI is
-the intended schedule owner, with schedule operation NOT_PROVEN (#13421).
+by API on 2026-11-27, but have only `workflow_dispatch` triggers. CircleCI is
+retired; a current schedule owner and automatic execution are not established
+(#13421).
 
 ### PR / push verification workflows
 
@@ -126,7 +127,7 @@ the intended schedule owner, with schedule operation NOT_PROVEN (#13421).
 | `diagram-nightly.yml` | `Diagram Nightly Regression` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Nightly canary and phase2 stay off; PR lint is docs.yml (#11196) |
 | `docs-kpi-weekly.yml` | `Docs KPI Weekly` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Manual workflow_dispatch docs KPI: runtime-mirror and freshness drift, then check-kpi. No schedule |
 | `github-settings-quarterly-review.yml` | `Quarterly GitHub Settings Review` | `workflow_call`, `workflow_dispatch` | `active` | `active` | Read-only quarterly GitHub settings review delegated by `nightly.yml` |
-| `memory-freshness.yml` | `Memory freshness` | `workflow_dispatch` | `active` | `active` | Manual repository memory freshness and contract checks; CircleCI owns PR coverage |
+| `memory-freshness.yml` | `Memory freshness` | `workflow_dispatch` | `active` | `active` | Manual repository memory freshness and contract checks; automatic PR coverage is not established |
 | `memory-retention.yml` | `Memory Retention Policy` | `workflow_dispatch` | `active` | `active` | Manual non-destructive episodic-memory retention policy check |
 | `mutation-testing.yml` | `Mutation Testing` | `workflow_call`, `workflow_dispatch` | `active` | `active` | Sole Sunday mutation owner (#10263 exception); push and pull_request stay off |
 | `nightly.yml` | `Nightly` | `schedule`, `workflow_dispatch` | `active` | `active` | Daily 03:00 UTC, including tests, E2E, duplication, import-linter, and generated artifacts. Security and zizmor stay daily. CodeQL, Scorecard, and branch hygiene stay Monday. Mutation stays Sunday |

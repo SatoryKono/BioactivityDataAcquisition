@@ -13,6 +13,11 @@ ______________________________________________________________________
 <!-- policy-anchor:deployment-provider -->
 The runnable pull-request coordinator is GitHub Actions (`deployment.provider=github_actions`). The canonical applicability catalog is `configs/quality/github_required_checks.yaml`. `.circleci/config.yml` remains historical configuration, not current merge protection. The owner cancelled deletion in #11930; its status is not_planned.
 
+CircleCI is retired. The CircleCI migration preparations, lane descriptions,
+schedule registrations, and acceptance results below are historical evidence,
+not current operating instructions or proof of active jobs or schedules. Consult
+the GitHub Actions workflow definitions for current triggers.
+
 <!-- policy-anchor:ruleset-enforcement-mode -->
 Ruleset `13643213` is `enforcement: active` (GET 2026-11-06); rulesets `15730586` and `24517966` were deleted on 2026-11-02 (settings-audit phase 0). <!-- policy-anchor:stored-ruleset-contexts --> The active rule requires `pr-gate-complete` (GET 2026-11-06); the rule binds this context to GitHub Actions App 15368 (integration_id=15368). <!-- policy-anchor:target-gha-context --> The target GitHub required context name is `pr-gate-complete`, and that name is the context stored on ruleset `13643213` since 2026-11-02. <!-- policy-anchor:enforcement-verified-date --> Catalog `enforcement_verified_date` `2026-10-09` is not proof of active merge protection. <!-- policy-anchor:merge-block --> A successful `pr-gate-complete` does not by itself block merge; the active server rule requires it. An offline catalog match does not confirm live server rulesets. Positive/negative merge acceptance was not run in this audit.
 
@@ -86,13 +91,12 @@ CircleCI lane or five independent successful samples. No external schedule was
 changed or verified by this local patch.
 The prepared `replay-parity` lane retains the determinism, idempotency, composite
 resume and independent determinism recheck, with nonempty checksum comparison
-and replay artifacts. CircleCI `memory-freshness` checks catalog integrity,
+and replay artifacts. The historical CircleCI `memory-freshness` checked catalog integrity,
 curated review age, graph projection age/source identity, and the MCP seed;
-it publishes evidence without GitHub write credentials. It is part of `pr-gate`
-and required by `pr-gate-complete`; its separate main-only lane is opt-in.
-CircleCI is the intended schedule owner for both memory lanes, but current
-schedule state, trigger parameters and automatic executions are NOT_PROVEN
-pending diagnosis #13421. Previously documented freshness and retention windows
+it published evidence without GitHub write credentials and was part of the old
+`pr-gate`. Both GitHub Actions memory workflows are manual dispatch-only; a
+current schedule owner and automatic executions are NOT_PROVEN pending diagnosis
+#13421. Previously documented freshness and retention windows
 were Monday 05:00–05:59 UTC and 04:00–04:59 UTC respectively; they are not
 evidence of current operation. Both named lanes exclude `scheduled_pipeline`
 in their configuration; the effect on actual schedule events is NOT_PROVEN.
@@ -131,9 +135,9 @@ zero orphan candidates, no breaches. The JSON and Markdown artifacts were
 downloaded and verified. Scheduled pipeline351/job6374 on main c644f2e4 repeated those passing KPI
 results with three verified artifacts. Notification parity remains pending;
 the legacy 04:30 minute is represented by an hourly window.
-CircleCI `memory-retention` checks episodic retention policy in check-only mode;
-it does not prune. Its separate main-only lane is opt-in; neither a current
-weekly run nor a retention PR gate is established by the configuration.
+The GitHub Actions `memory-retention` workflow checks episodic retention policy
+in check-only mode; it does not prune. It is manual dispatch-only; neither a
+current weekly run nor a retention PR gate is established by the configuration.
 
 The `consolidation` lane preserves the manual canonical source/test hash artifacts
 with a ten-minute command limit. `branch-hygiene` preserves the report-only branch
@@ -225,10 +229,10 @@ Manual successes do not establish scheduler, notification or release acceptance.
 On 2026-10-06 the owner cancelled GitHub Actions deletion. Issue #11930 is
 closed as `not planned`; all 54 workflow definitions and composite actions are
 retained. Actions run the pull-request coordinator. CircleCI implementation and acceptance under
-#11931 continue independently. Retention does not establish functional parity,
+#11931 are historical. Retention does not establish functional parity,
 authorize public OpenSSF channel retirement, or enable legacy workflows.
 
-Current source inventory contains 54 workflows. Every row records the intended
+This historical source inventory recorded 54 workflows. Each row records the then-intended
 replacement or retained local/disabled policy; "prepared" is not external acceptance.
 No pending replacement authorizes deleting its source workflow. Scheduled entries
 are UTC cron expressions from the source definitions, not registered CircleCI triggers.
@@ -258,8 +262,8 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `github-settings-quarterly-review.yml` | quarter-day gate in `nightly.yml` | CircleCI github-settings-review | Scheduled pipeline355/job6381 succeeds on main c644f2e4; JSON/Markdown report verified and policy drift remains explicit. The reusable workflow has no direct schedule; `nightly.yml` is the single GitHub Actions schedule owner and calls it on the first day of Jan/Apr/Jul/Oct |
 | `import-linter.yml` | — | CircleCI lint-arch and arch-tests | Prepared gates; full external architecture acceptance pending |
 | `labeler.yml` | — | Retain disabled label maintenance | Preserve #10263/#11234; taxonomy reconciliation is required before any future trusted replacement |
-| `memory-freshness.yml` | None; formerly `17 5 * * 1` | CircleCI memory-freshness | Intended schedule owner; current schedule and automatic execution NOT_PROVEN (#13421). PR freshness is in CircleCI `pr-gate`; notifications deferred |
-| `memory-retention.yml` | None; formerly `17 4 * * 1` | CircleCI memory-retention | Intended schedule owner; current schedule and automatic execution NOT_PROVEN (#13421). Check-only; no pruning |
+| `memory-freshness.yml` | None; formerly `17 5 * * 1` | GitHub Actions manual dispatch | Current schedule owner, automatic execution and PR coverage NOT_PROVEN (#13421); notifications deferred |
+| `memory-retention.yml` | None; formerly `17 4 * * 1` | GitHub Actions manual dispatch | Current schedule owner and automatic execution NOT_PROVEN (#13421). Check-only; no pruning |
 | `mutation-testing.yml` | `0 0 * * 0` | Actions Sunday owner; CircleCI manual ci-lane=mutation backup | Actual scheduled pipeline340 on main d9f5b026 SUCCESS, all four targets: domain6140 72.01%, control-plane6139 78.26%, workflow-runner6138 73.42%, export-manifests6141 64.22%. All eight artifacts and complete statistics independently verified. Large targets use large4CPU/8GB and four workers; small targets retain medium/one worker. Sunday00UTC restored and read back; full scope,60-minute timeout and70/60/60/60 thresholds unchanged. Keep the CircleCI Sunday schedule paused so Actions is the weekly runner. Native scheduled_pipeline triggers do not select the CircleCI mutation workflow |
 | `nightly-replay-parity.yml` | `30 2 * * *` | CircleCI replay-parity | Main job 3366 passes four-run checksum parity; daily 02 UTC trigger accepted by scheduled pipeline 266/job 4481 on main 303ced3 (16 tests, no skips, repeated checksum files identical) |
 | `no-partial-tree-commits.yml` | — | Full-tree guard in root governance | Integrated into root-hygiene; main jobs 3500, 3529, 3549 passed the full-tree guard alongside strict root checks |
@@ -321,7 +325,7 @@ acceptance gates; workflow deletion is no longer a completion criterion.
 | `import-linter.yml` | Lint and Architecture Gates | import-linter + layer architecture |
 | `main-ghcr-publish.yml` | Main GHCR Publish | After a successful Main Integrity push on main, publish the scanned image for current HEAD through `ghcr-publish`. A stale SHA does not open a deployment |
 | `main-integrity.yml` | Main Integrity | Post-merge smoke, root hygiene, and Docker validation through `docker-complete` |
-| `memory-freshness.yml` | Memory freshness | Manual dispatch-only freshness and contract checks; CircleCI owns PR coverage |
+| `memory-freshness.yml` | Memory freshness | Manual dispatch-only freshness and contract checks; automatic PR coverage is not established |
 | `memory-retention.yml` | Memory Retention Policy | Manual dispatch-only, non-destructive retention check |
 | `mutation-testing.yml` | Mutation Testing | Sole Sunday mutation owner (#10263 exception); push and pull_request stay off |
 | `nightly.yml` | Nightly | Daily 03:00 UTC, including tests, E2E, duplication, import-linter, and generated artifacts. Security and zizmor stay daily. CodeQL, Scorecard, and branch hygiene stay Monday. Mutation stays Sunday |

@@ -19,10 +19,10 @@ ______________________________________________________________________
 
 Record the candidate SHA and the `pr-gate-complete` result. A successful coordinator job does not by itself block merge: on the 2026-10-16 read, classic branch protection was absent and rulesets `13643213` and `15730586` were `enforcement: disabled`.
 <!-- policy-anchor:deployment-provider --> `deployment.provider=github_actions`. <!-- policy-anchor:ruleset-enforcement-mode --> Ruleset `13643213` is `enforcement: active` (GET 2026-11-06); rulesets `15730586` and `24517966` were deleted on 2026-11-02 (settings-audit phase 0). <!-- policy-anchor:stored-ruleset-contexts --> The active rule requires `pr-gate-complete` (GET 2026-11-06); the rule binds this context to GitHub Actions App 15368 (integration_id=15368). <!-- policy-anchor:target-gha-context --> `pr-gate-complete` is the context stored on ruleset `13643213` since 2026-11-02. <!-- policy-anchor:enforcement-verified-date --> `2026-10-09` is not proof of active merge protection. <!-- policy-anchor:merge-block --> A successful `pr-gate-complete` does not by itself block merge; the active server rule requires it. An offline catalog match does not confirm live server rulesets. Positive/negative merge acceptance was not run in this audit.
-The prepared `release-validation` lane builds and verifies artifacts; it does
-not publish them. Protected package promotion, signed provenance and release
-asset upload remain pending in #11931. A build-only success cannot satisfy a
-publish checkpoint. See the [migration workflow map](ci-workflow-map.md).
+GitHub Actions `release.yml` is manually dispatched: it builds distributions,
+tests installation and can publish to TestPyPI on a non-dry run. Its definition
+does not publish to production PyPI or upload GitHub Release assets. A build-only
+success cannot satisfy a publish checkpoint. See the [migration workflow map](ci-workflow-map.md).
 
 ## Release metadata
 
@@ -40,12 +40,12 @@ publish checkpoint. See the [migration workflow map](ci-workflow-map.md).
 
 | Checkpoint | Owner | Input artifact | Quality gate / policy workflow | Done criteria (PASS / FAIL) |
 |---|---|---|---|---|
-| Architecture boundaries and import policy | Architecture Owner | PR diff + architecture test output | CircleCI `arch-tests`, `lint-arch`; RULES §1.4/§4.4 | **PASS** if architecture + import-linter jobs green and no new boundary violations. **FAIL** otherwise. |
+| Architecture boundaries and import policy | Architecture Owner | PR diff + architecture test output | GitHub Actions `pr-required.yml` applicable `lint-arch` steps; RULES §1.4/§4.4 | **PASS** if required architecture and import checks are evidenced and no new boundary violations exist. **FAIL** otherwise. |
 | Runtime compatibility (Codex/Junie mirrors and runtime guardrails) | Runtime Owner | Runtime-surface diff (`.codex/**`, `.junie/**`, `.devin/**`, `docs/00-project/ai/**`) | `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md` | **PASS** if runtime-source updates are synced to mirrors when required and mirror drift is documented. **FAIL** if unsynced runtime behavior exists. |
-| Data quality policy readiness (DQ thresholds/hash/medallion) | Data Quality Owner | DQ configs/tests + policy evidence | CircleCI `dq-consistency`, `schema-governance`, `semantic-governance`; RULES §2.4/§2.8 | **PASS** if DQ checks green and the release scope validates the active threshold surface explicitly (`configs/base/quality.yaml` currently hard-fail 0.50; contract/runtime fallbacks currently hard-fail 20%). **FAIL** on any blocking DQ gate. |
-| Documentation governance readiness | Docs Owner | Updated docs set + links matrix | CircleCI `docs-governance`, `skills-consistency`; RULES §6 | **PASS** if docs governance jobs green and changed contracts/behavior are documented. **FAIL** if docs gate fails or contract docs missing. |
-| Type/lint/test baseline | QA Owner | CI run for branch head | CircleCI `test-fast`, `test-integration`, `mypy`, `lint-ruff` | **PASS** if required CI checks are green on release candidate SHA. **FAIL** otherwise. |
-| Security & secret hygiene | Security Owner | Security scan outputs + VCR sanitization report | CircleCI `security-scans`, `compiled-artifacts` | **PASS** if no blocking HIGH/CRITICAL findings for release policy and no secret leaks. **FAIL** otherwise. |
+| Data quality policy readiness (DQ thresholds/hash/medallion) | Data Quality Owner | DQ configs/tests + policy evidence | Scope-specific DQ, schema and contract evidence; RULES §2.4/§2.8 | **PASS** if DQ checks green and the release scope validates the active threshold surface explicitly (`configs/base/quality.yaml` currently hard-fail 0.50; contract/runtime fallbacks currently hard-fail 20%). **FAIL** on any blocking DQ gate. |
+| Documentation governance readiness | Docs Owner | Updated docs set + links matrix | GitHub Actions `pr-required.yml` docs lane and applicable mirror checks; RULES §6 | **PASS** if docs governance jobs green and changed contracts/behavior are documented. **FAIL** if docs gate fails or contract docs missing. |
+| Type/lint/test baseline | QA Owner | CI run for branch head | GitHub Actions `pr-required.yml` applicable class-lane steps | **PASS** if required CI checks are green on release candidate SHA. **FAIL** otherwise. |
+| Security & secret hygiene | Security Owner | Security scan outputs + VCR sanitization report | GitHub Actions applicable security checks and release `security-gate` | **PASS** if no blocking HIGH/CRITICAL findings for release policy and no secret leaks. **FAIL** otherwise. |
 
 ---
 
@@ -54,10 +54,10 @@ publish checkpoint. See the [migration workflow map](ci-workflow-map.md).
 | Checkpoint | Owner | Input artifact | Quality gate / policy workflow | Done criteria (PASS / FAIL) |
 |---|---|---|---|---|
 | Version and changelog freeze | Release Manager | `pyproject.toml`, `CHANGELOG.md`, release notes draft | RULES release/deprecation governance | **PASS** if version/tag/changelog aligned to same `v6.x.y` and approved. **FAIL** on mismatch. |
-| Tag creation and signed release record | Release Manager | Git tag + tag annotation | CircleCI `release-validation` plus release-manager evidence | **PASS** if annotated tag created for approved SHA and the validated artifact identity matches that exact approved SHA. **FAIL** if wrong SHA/tag metadata. |
-| Build artifacts production (wheel/sdist) | Release Engineer | CI artifacts from release run | CircleCI `release-validation` plus release-manager evidence | **PASS** if wheel+sdist build succeeds and artifacts attached to release run. **FAIL** on missing/failed artifacts. |
+| Tag creation and signed release record | Release Manager | Git tag + tag annotation | Release-manager evidence and exact-SHA build evidence | **PASS** if annotated tag created for approved SHA and the validated artifact identity matches that exact approved SHA. **FAIL** if wrong SHA/tag metadata. |
+| Build artifacts production (wheel/sdist) | Release Engineer | CI artifacts from release run | GitHub Actions `release.yml` build plus release-manager evidence | **PASS** if wheel+sdist build succeeds and artifacts attached to release run. **FAIL** on missing/failed artifacts. |
 | Publish and provenance | Release Engineer | Publish logs, package registry record | Protected promotion (not yet accepted; #11931) | **PASS** if publish steps complete and provenance/identity checks pass per workflow output. **FAIL** otherwise. |
-| Runtime compatibility confirmation for released assets | Runtime Owner | Install/run smoke evidence for released package | CircleCI `release-install`, release tests and local smoke notes | **PASS** if package install and CLI/runtime smoke pass for release artifact. **FAIL** on runtime regressions. |
+| Runtime compatibility confirmation for released assets | Runtime Owner | Install/run smoke evidence for released package | GitHub Actions `release.yml` test-install and release tests; local smoke notes | **PASS** if package install and CLI/runtime smoke pass for release artifact. **FAIL** on runtime regressions. |
 
 ---
 
@@ -65,9 +65,9 @@ publish checkpoint. See the [migration workflow map](ci-workflow-map.md).
 
 | Checkpoint | Owner | Input artifact | Quality gate / policy workflow | Done criteria (PASS / FAIL) |
 |---|---|---|---|---|
-| Post-release regression watch (24–48h) | QA Owner | First post-release CI window | CircleCI test lanes and the retained local-only contract campaign | **PASS** if no critical regressions in first monitoring window. **FAIL** if production-blocking regression found. |
-| Contract and schema drift watch | Data Contract Owner | Drift reports, governance checks | CircleCI `schema-governance`, `semantic-governance`, `provider-contract-drift` | **PASS** if no unapproved contract/schema drift introduced by release. **FAIL** if drift gate breaks. |
-| Documentation and migration follow-up | Docs Owner | Published release notes + migration notes | CircleCI `docs-governance`; RULES contract/versioning policy | **PASS** if release notes and migration notes published and linked from canonical docs. **FAIL** if migration guidance missing for breaking/behavior changes. |
+| Post-release regression watch (24–48h) | QA Owner | First post-release CI window | GitHub Actions test evidence and the retained local-only contract campaign | **PASS** if no critical regressions in first monitoring window. **FAIL** if production-blocking regression found. |
+| Contract and schema drift watch | Data Contract Owner | Drift reports, governance checks | Scope-specific contract and schema checks | **PASS** if no unapproved contract/schema drift introduced by release. **FAIL** if drift gate breaks. |
+| Documentation and migration follow-up | Docs Owner | Published release notes + migration notes | GitHub Actions docs governance; RULES contract/versioning policy | **PASS** if release notes and migration notes published and linked from canonical docs. **FAIL** if migration guidance missing for breaking/behavior changes. |
 | Quality debt and backlog capture | Architecture Owner | Follow-up issues/ADR notes | Canonical local debt audits and architecture policy docs; disabled automation stays disabled | **PASS** if actionable follow-ups captured with owners/dates. **FAIL** if known release debt has no tracked issue. |
 | Final release sign-off | Release Manager | Completed checklist + evidence package | `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md` | **PASS** if all mandatory checks are PASS (or approved waiver recorded). **FAIL** if unresolved mandatory FAIL exists. |
 
@@ -77,7 +77,7 @@ publish checkpoint. See the [migration workflow map](ci-workflow-map.md).
 
 Use this block as a hard checklist before sign-off:
 
-- [ ] **Architecture**: CircleCI `arch-tests` + `lint-arch` green.
+- [ ] **Architecture**: applicable GitHub Actions architecture and import checks green, with additional scope evidence where needed.
 - [ ] **Data quality**: DQ/schema/contract gates green for touched pipelines/entities.
 - [ ] **Documentation**: docs governance and mirror consistency checks green.
 - [ ] **Runtime compatibility**: runtime source + mirrors consistency verified; release artifact smoke verified.
@@ -91,12 +91,9 @@ If any mandatory item is not green, release decision = **FAIL** unless explicit 
 Attach these links in the concrete release checklist/PR:
 
 1. **CI run links**
-   - CircleCI test job URLs and exact source SHA
-   - CircleCI `mypy` job URL
-   - CircleCI `arch-tests` / `lint-arch` job URLs
-   - CircleCI `docs-governance` job URL
-   - CircleCI schema/semantic governance job URLs
-   - CircleCI `release-validation` URL plus separately approved publication receipt
+   - GitHub Actions run and applicable test, mypy, architecture and docs job URLs, with exact source SHA
+   - Scope-specific schema and semantic governance evidence
+   - GitHub Actions `release.yml` run URL plus separately approved publication receipt
 2. **Build and publish artifacts**
    - wheel artifact URL
    - sdist artifact URL

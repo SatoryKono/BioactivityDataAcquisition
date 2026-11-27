@@ -342,28 +342,22 @@ def test_mcp_doctor_writes_only_to_explicit_quality_report(
 
 
 def test_native_runtime_workflow_has_complete_path_filters_and_static_job() -> None:
-    """Codex runtime checks stay gated via the CircleCI lane.
-
-    After the coordinator cutover, automatic coverage moved from leaf
-    workflow path filters to the unconditional ``skills-consistency`` job in
-    ``pr-gate``; the Actions workflow keeps the manual dispatch path.
-    """
+    """The GitHub workflow runs static checks for runtime changes and dispatches."""
     config = yaml.safe_load(
-        (ROOT / ".circleci" / "config.yml").read_text(encoding="utf-8")
+        (ROOT / ".github/workflows/skills-consistency.yml").read_text(encoding="utf-8")
     )
-    job = config["jobs"]["skills-consistency"]
+    job = config["jobs"]["verify-native-codex-runtime"]
     commands = " ".join(
-        step["run"]["command"]
-        for step in job["steps"]
-        if isinstance(step, dict) and isinstance(step.get("run"), dict)
+        step.get("run", "") for step in job["steps"] if isinstance(step, dict)
     )
-    assert "python scripts/ai/codex/doctor.py static --no-write" in commands
-    assert "python -m scripts.ai.mcp wrappers check" in commands
-    workflow = (ROOT / ".github/workflows/skills-consistency.yml").read_text(
-        encoding="utf-8"
-    )
-    assert "workflow_dispatch:" in workflow
-    assert "python3 scripts/ai/codex/doctor.py static --no-write" in workflow
+    assert "python3 scripts/ai/codex/doctor.py static --no-write" in commands
+    assert "python3 -m scripts.ai.mcp wrappers check" in commands
+    assert "if" not in job
+    events = config.get("on", config.get(True))
+    assert "workflow_dispatch" in events
+    for event in ("push", "pull_request"):
+        for path in (".codex/**", "scripts/ai/**", ".mcp.json"):
+            assert path in events[event]["paths"]
 
 
 def test_shared_catalog_daily_flag_matches_stable_local_inventory() -> None:

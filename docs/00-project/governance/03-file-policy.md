@@ -116,8 +116,8 @@ Docker helper dispositions are resolved as follows and MUST stay aligned with
   project surfaces: `.agents`, `.amp`, `.circleci`, `.claude`, `.codex`, `.cursor`, `.devin`, `.gemini`, `.github`,
   `.junie`, `.opencode`, `.vibe`, `.vscode`, `.zed`, `artifacts`, `assets`, `configs`, `data`,
   `docs`, `grafana`, `reports`, `scripts`, `src`, and `tests`.
-- `.circleci/config.yml` is the vendor-required entrypoint for the existing
-  CircleCI project. Its tracked root is limited to reviewed CI configuration;
+- `.circleci/config.yml` is retained historical configuration for retired
+  CircleCI, not an active CI entrypoint. Its tracked root is limited to reviewed CI configuration;
   credentials, caches, runtime state, and generated artifacts remain excluded.
 - Canonical machine-readable root governance lives in `.github/root-allowlist.txt`,
   `configs/quality/repo_structure_catalog.yaml`,

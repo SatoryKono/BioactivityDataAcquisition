@@ -8,8 +8,7 @@ concurrency:
 
 # Push and pull_request stay omitted so a code change cannot start four
 # 60-minute jobs. The Sunday run is the nightly coordinator calling this
-# workflow, an explicit exception to #10263. CircleCI workflow mutation remains
-# the manual ci-lane=mutation backup; keep its Sunday schedule paused.
+# workflow, an explicit exception to #10263. CircleCI has been retired.
 on:
   workflow_dispatch:
   workflow_call:

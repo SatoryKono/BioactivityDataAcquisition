@@ -163,7 +163,13 @@ Docker remains optional under ADR-010. This runbook documents command names and
 artifact filenames only; it MUST NOT record secret values, `.env` contents, or
 registry credentials. Generated evidence stays in gitignored `reports/security/`.
 
-## CircleCI protected publication preparation
+## Historical CircleCI protected publication preparation
+
+CircleCI is retired. The following describes the former preparation and is not
+an instruction to configure credentials, approvals, or publication. GitHub
+Actions `main-ghcr-publish.yml` calls `docker-publish.yml` after the qualifying
+Main Integrity run; inspect those workflows and their run evidence for the
+current publication path. Parity with this historical design is not established.
 
 The `docker-publish` lane is opt-in and restricted to `main`. Its security job
 uses `bioetl-github-read-only`, persists the exact scanned image and its complete
