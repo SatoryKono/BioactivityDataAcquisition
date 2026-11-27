@@ -173,6 +173,12 @@ class _DependencyCollector:
             self.reference(path.parent, document.get("projection_audit"))
             self.reference(path.parent, document.get("acquisition"), "acquisition")
             self.reference(path.parent, document.get("coverage"), "coverage")
+            if "reviewed_inputs" in document:
+                self.reference(path.parent, document["reviewed_inputs"])
+                for reference in _mapping(
+                    document.get("supplemental_csvs", {})
+                ).values():
+                    self.reference(path.parent, reference)
 
     def acquisition(self, path: Path, document: Mapping[str, object]) -> None:
         _header(document, "bioetl_iuphar_acquisition", (1,))

@@ -9,6 +9,9 @@ import pytest
 from bioetl.infrastructure.adapters.iuphar import load_profile, load_snapshot_manifest
 from bioetl.infrastructure.adapters.iuphar._manifest import sha256
 from bioetl.infrastructure.adapters.iuphar.snapshot_payload import build_snapshot_bundle
+from bioetl.infrastructure.storage.composite_replay_bundle import (
+    publish_target_classifier,
+)
 from iuphar_target_class.identifier_roles import REVIEWED_CLASS_POLICY_VERSION
 from iuphar_target_class.models import RawTargetRow, RunProvenance
 from iuphar_target_class.pipeline import classify_batch
@@ -155,6 +158,18 @@ def test_reviewed_inputs_bind_local_class_and_supplements_without_changing_offic
     assert admitted.acceptance_sha256 == receipt_sha256
     assert admitted.matching_policy_version == REVIEWED_CLASS_POLICY_VERSION
     assert admitted.profile_sha256 != bundle.profile_sha256
+    replay = tmp_path / "replay"
+    sealed_profile, sealed_files = publish_target_classifier(
+        replay, out / "enrich-profile.json", enrich_sha256
+    )
+    assert sealed_files["target-classifier/reviewed-inputs.json"] == review_hash
+    for name, raw in csv_sources.items():
+        assert sealed_files[f"target-classifier/sources/reviewed/{name}"] == sha256(raw)
+    replay_profile = load_profile(
+        replay / sealed_profile, enrich_sha256, require_acceptance=True
+    )
+    assert replay_profile.acceptance_sha256 == receipt_sha256
+    assert replay_profile.snapshot.snapshot == admitted.snapshot.snapshot
     snapshot = loaded.snapshot.snapshot
     assert ("2", "9913") in snapshot.species_annotations
     assert ("3", "9606") not in snapshot.species_annotations
