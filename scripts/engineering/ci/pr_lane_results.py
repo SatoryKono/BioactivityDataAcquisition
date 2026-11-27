@@ -85,6 +85,7 @@ BRACES_BACKPORT_TEST = "tests/architecture/test_braces_backport.py"
 PICOMATCH_BACKPORT_TEST = "tests/architecture/test_picomatch_backport.py"
 MYPY_TARGET_CONTRACT_TEST = "tests/architecture/test_mypy_target_contract.py"
 DOCUMENTATION_SYNC_TEST = "tests/architecture/test_documentation_sync.py"
+PROOF_OR_STOP_TEST = "tests/unit/scripts/engineering/qa/test_proof_or_stop.py"
 RUNTIME_AGENT_DOCS_DRIFT_TEST = "tests/architecture/test_runtime_agent_docs_drift.py"
 CODEX_NATIVE_RUNTIME_TEST = "tests/architecture/test_codex_native_runtime.py"
 REQUIRED_CHECKS_PROSE_TEST = (
@@ -696,12 +697,12 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "docs/05-operations/runbooks/ai-closeout-wrapper.md": (
         "tests/unit/scripts/repo/test_closeout_runtime.py",
         "tests/unit/scripts/repo/test_closeout_git_safety.py",
-        "tests/unit/scripts/engineering/qa/test_proof_or_stop.py",
+        PROOF_OR_STOP_TEST,
         "tests/architecture/test_proof_or_stop_contract.py",
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
     "docs/04-reference/contracts/proof-or-stop-evidence.md": (
-        "tests/unit/scripts/engineering/qa/test_proof_or_stop.py",
+        PROOF_OR_STOP_TEST,
         "tests/architecture/test_proof_or_stop_contract.py",
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
@@ -748,7 +749,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         MEMORY_BASELINE_TEST_TARGETS,
     ),
     "src/memory/proof.py": (
-        "tests/unit/scripts/engineering/qa/test_proof_or_stop.py",
+        PROOF_OR_STOP_TEST,
         "tests/unit/scripts/repo/test_closeout_git_safety.py",
         "tests/unit/scripts/repo/test_closeout_runtime.py",
     ),
