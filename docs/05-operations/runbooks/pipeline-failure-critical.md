@@ -17,13 +17,16 @@ ______________________________________________________________________
 
 ## Trigger
 
-- ALERT: `PipelineExecutionFailed`
-- Severity: Critical (P0)
+- ALERT: `BioETLPipelinePreflightDataSourceFailed` — severity: critical.
+- ALERT: `BioETLPipelineInfrastructureValidationFailed` — severity: critical.
+- ALERT: `BioETLPipelineRunFailed` — severity: critical.
+- ALERT: `BioETLNoRecordsProcessed` — severity: warning.
 - Manual report of data ingestion stall or database corruption.
 
 ## Impact
 
-- Pipeline stops immediately.
+- A critical failure may stop the pipeline; `BioETLNoRecordsProcessed` is a
+  warning and does not imply a failed or stopped run.
 - Potential data loss in Bronze layer if not handled correctly.
 - Downstream Gold analytics delayed.
 
