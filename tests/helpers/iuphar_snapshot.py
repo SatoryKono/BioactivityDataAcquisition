@@ -17,8 +17,10 @@ def write_fixture_json(path: Path, value: object) -> str:
     return sha256(path.read_bytes())
 
 
-def synthetic_export_row(*, target_id="1", family_id="1", family_type="gpcr"):
-    row = dict.fromkeys(
+def synthetic_export_row(
+    *, target_id="1", family_id="1", family_type="gpcr"
+) -> dict[str, str]:
+    row: dict[str, str] = dict.fromkeys(
         (
             "Type",
             "Family id",
