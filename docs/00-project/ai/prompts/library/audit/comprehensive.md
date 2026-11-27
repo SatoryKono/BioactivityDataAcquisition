@@ -122,11 +122,14 @@ Artifacts:
 | P19 | Repo hygiene/typing/dead code | domains `repo-hygiene` + `tech-debt` + `scripts-inventory` |
 | P20 | Independent double-check | `prompt.audit.reconcile` |
 
-Compile a domain card with:
+Compile a domain card for execution with:
 
 ```text
-python -m scripts.ai.prompts compile --domain <domain> --profile audit-readonly
+python -m scripts.ai.prompts.compile --domain <domain> --profile audit-readonly --write
 ```
+
+Read the resulting untracked `docs/00-project/ai/prompts/generated/<domain>/audit-readonly.md`.
+Without `--write`, compilation runs in memory and does not produce a card file.
 
 When a stage uses several domains, execute each domain once, preserve its
 Evidence IDs, then produce one stage handoff. Do not re-run a full repo scan per
