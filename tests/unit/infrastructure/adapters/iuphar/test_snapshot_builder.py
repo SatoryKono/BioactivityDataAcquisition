@@ -72,6 +72,30 @@ def test_builder_is_deterministic_and_preserves_raw_receipt_bytes(tmp_path):
     ).read_bytes() == original.read_bytes()
 
 
+def _assert_reviewed_snapshot_backup(workspace, profile_digest, reviewed_files):
+    config = workspace / "target.yaml"
+    config.write_text(
+        json.dumps(
+            {
+                "target_classification": {
+                    "mode": "shadow",
+                    "snapshot_manifest": "reviewed/profile.json",
+                    "snapshot_manifest_sha256": profile_digest,
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    dependencies = collect_target_dependencies(workspace=workspace, configs=(config,))
+    backups = backup_target_dependencies(
+        workspace=workspace, dependencies=dependencies, destination=workspace / "backup"
+    )
+    for relative, content in reviewed_files.items():
+        reference = f"backup/reviewed/{relative}"
+        assert backups[reference] == sha256(content)
+        assert (workspace / reference).read_bytes() == content
+
+
 def test_reviewed_inputs_bind_local_class_and_supplements_without_changing_official(
     tmp_path,
 ):
@@ -174,31 +198,14 @@ def test_reviewed_inputs_bind_local_class_and_supplements_without_changing_offic
     )
     assert replay_profile.acceptance_sha256 == receipt_sha256
     assert replay_profile.snapshot.snapshot == admitted.snapshot.snapshot
-    config = tmp_path / "target.yaml"
-    config.write_text(
-        json.dumps(
-            {
-                "target_classification": {
-                    "mode": "shadow",
-                    "snapshot_manifest": "reviewed/profile.json",
-                    "snapshot_manifest_sha256": bundle.profile_sha256,
-                }
-            }
-        ),
-        encoding="utf-8",
+    _assert_reviewed_snapshot_backup(
+        tmp_path,
+        bundle.profile_sha256,
+        {
+            "reviewed-inputs.json": review.read_bytes(),
+            **{f"sources/reviewed/{name}": raw for name, raw in csv_sources.items()},
+        },
     )
-    dependencies = collect_target_dependencies(workspace=tmp_path, configs=(config,))
-    backups = backup_target_dependencies(
-        workspace=tmp_path, dependencies=dependencies, destination=tmp_path / "backup"
-    )
-    assert backups["backup/reviewed/reviewed-inputs.json"] == review_hash
-    assert (
-        tmp_path / "backup/reviewed/reviewed-inputs.json"
-    ).read_bytes() == review.read_bytes()
-    for name, raw in csv_sources.items():
-        relative = f"reviewed/sources/reviewed/{name}"
-        assert backups[f"backup/{relative}"] == sha256(raw)
-        assert (tmp_path / "backup" / relative).read_bytes() == raw
     snapshot = loaded.snapshot.snapshot
     assert ("2", "9913") in snapshot.species_annotations
     assert ("3", "9606") not in snapshot.species_annotations
