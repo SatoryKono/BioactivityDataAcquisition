@@ -271,8 +271,11 @@ surface.
 - Contract DQ routing: `configs/contracts/**`
 - Inline overrides: pipeline YAML → `pipeline.dq_overrides.*`
 
-**Evaluation**: when error rate exceeds `soft_fail`, runtime emits a warning.
-When it exceeds `hard_fail`, the batch is rejected or quarantined according to
+**Evaluation**: when the error rate is greater than or equal to `soft_fail`
+and below `hard_fail`, batch runtime emits a warning. For `soft_fail=0.05`,
+4/100 errors produce no warning, while 5/100 and 6/100 produce a warning
+provided the hard threshold has not been reached.
+When it reaches or exceeds `hard_fail`, the batch is rejected or quarantined according to
 the active disposition policy and the concrete config surface in effect.
 
 ## Validation Layer Matrix
