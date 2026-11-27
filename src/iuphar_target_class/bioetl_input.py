@@ -11,7 +11,8 @@ from iuphar_target_class.effective_policy import name_keyword_class
 from iuphar_target_class.identifier_roles import (
     EC_EFFECTIVE_POLICIES,
     RANKED_CLASS_POLICIES,
-    TRANSCRIPTION_FACTOR_POLICY_VERSION,
+    REVIEWED_CLASS_POLICY_VERSION,
+    TRANSCRIPTION_FACTOR_POLICIES,
 )
 from iuphar_target_class.normalization import parse_ec_numbers
 from iuphar_target_class.stage0.io import canonical_json_bytes
@@ -167,6 +168,8 @@ def target_input_eligibility(
         taxon = _taxon(data.get("taxonomy_id"))
     except ValueError:
         return None, "invalid_taxonomy_id"
+    if policy == REVIEWED_CLASS_POLICY_VERSION:
+        return taxon, _taxonomy_name_ineligibility(taxon, data.get("organism"))
     if taxon is not None and taxon not in species:
         if policy not in EC_EFFECTIVE_POLICIES:
             return taxon, "unsupported_taxon"
@@ -182,8 +185,7 @@ def target_input_eligibility(
             ranked
             and name_keyword_class(
                 _text(data.get("pref_name")),
-                allow_transcription_factor=policy
-                == TRANSCRIPTION_FACTOR_POLICY_VERSION,
+                allow_transcription_factor=policy in TRANSCRIPTION_FACTOR_POLICIES,
             )
         ):
             return taxon, "unsupported_taxon"

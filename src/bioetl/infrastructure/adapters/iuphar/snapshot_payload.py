@@ -10,14 +10,16 @@ from types import MappingProxyType
 from iuphar_target_class.identifier_roles import (
     ANCHOR_PRIORITY_POLICIES,
     MATCHING_POLICY_VERSION,
+    REVIEWED_CLASS_POLICY_VERSION,
 )
 from iuphar_target_class.policy import LOCAL_CATALOG_VERSION
 from iuphar_target_class.stage0.io import canonical_json_bytes
 
-from ._manifest import referenced_path, sha256
+from ._manifest import checked_bytes, referenced_path, sha256
 from ._official_target_projection import project_official_export
 from ._official_targets_csv import OfficialProjection
 from .snapshot_evidence import SourceEvidence, load_source_evidence
+from .snapshot_reviewed_inputs import parse_reviewed_inputs
 
 SNAPSHOT_FORMAT = "gtopdb_target_species_payload_v2"
 _SNAPSHOT_JSON = "snapshot.json"
@@ -52,7 +54,11 @@ def _source_files(evidence: SourceEvidence) -> dict[str, bytes]:
 
 
 def compile_snapshot_bundle(
-    evidence: SourceEvidence, *, matching_policy_version: str = MATCHING_POLICY_VERSION
+    evidence: SourceEvidence,
+    *,
+    matching_policy_version: str = MATCHING_POLICY_VERSION,
+    reviewed_inputs: bytes | None = None,
+    supplemental_csvs: Mapping[str, bytes] | None = None,
 ) -> SnapshotBundle:
     """Derive every target/audit byte from verified raw acquisition and scope."""
     if matching_policy_version not in {
@@ -65,9 +71,21 @@ def compile_snapshot_bundle(
     files.update(
         {"targets.json": projection.targets, "projection-audit.json": projection.audit}
     )
-    identity = sha256(
-        evidence.acquisition_bytes + evidence.coverage_bytes + projection.targets
-    )
+    reviewed_sources = dict(supplemental_csvs or {})
+    if reviewed_inputs is not None:
+        if matching_policy_version != REVIEWED_CLASS_POLICY_VERSION:
+            raise ValueError("reviewed inputs require the reviewed matching policy")
+        review = parse_reviewed_inputs(reviewed_inputs)
+        if {
+            name: sha256(raw) for name, raw in reviewed_sources.items()
+        } != review.source_hashes:
+            raise ValueError(
+                "supplemental CSV bytes differ from reviewed source digests"
+            )
+        files["reviewed-inputs.json"] = reviewed_inputs
+    elif reviewed_sources:
+        raise ValueError("supplemental CSVs require reviewed inputs")
+    identity = _snapshot_identity(evidence, projection.targets, reviewed_inputs)
     snapshot = {
         "artifact": "bioetl_iuphar_snapshot",
         "schema_version": 2,
@@ -85,6 +103,17 @@ def compile_snapshot_bundle(
             "sources/coverage/coverage.json", evidence.coverage_bytes
         ),
     }
+    if reviewed_inputs is not None:
+        snapshot["reviewed_inputs"] = _reference(
+            "reviewed-inputs.json", reviewed_inputs
+        )
+        if reviewed_sources:
+            references = {}
+            for name, raw in sorted(reviewed_sources.items()):
+                path = f"sources/reviewed/{name}"
+                files[path] = raw
+                references[name] = _reference(path, raw)
+            snapshot["supplemental_csvs"] = references
     files[_SNAPSHOT_JSON] = canonical_json_bytes(snapshot)
     profile = {
         "artifact": "bioetl_iuphar_profile",
@@ -106,7 +135,7 @@ def compile_snapshot_bundle(
 
 def verify_snapshot_sources(
     document: Mapping[str, object], root: Path, targets: bytes
-) -> tuple[SourceEvidence, OfficialProjection]:
+) -> tuple[SourceEvidence, OfficialProjection, bytes | None]:
     """Recompute published projections; manifest flags cannot establish admission."""
     acquisition, acquisition_hash = referenced_path(root, document.get("acquisition"))
     coverage, coverage_hash = referenced_path(root, document.get("coverage"))
@@ -127,15 +156,43 @@ def verify_snapshot_sources(
         )
     if document.get("annotation_capability") != "family_only":
         raise ValueError("snapshot claims unsupported direct target-type capability")
-    identity = sha256(
-        evidence.acquisition_bytes + evidence.coverage_bytes + projection.targets
-    )
+    reviewed_inputs = None
+    if "reviewed_inputs" in document:
+        review, review_hash = referenced_path(root, document["reviewed_inputs"])
+        reviewed_inputs = checked_bytes(review, review_hash)
+        _verify_supplemental_files(document, root, reviewed_inputs)
+    identity = _snapshot_identity(evidence, projection.targets, reviewed_inputs)
     if (
         document.get("snapshot_id")
         != "gtopdb:" + evidence.provider_release + ":" + identity
     ):
         raise ValueError("snapshot identity differs from source-derived bytes")
-    return evidence, projection
+    return evidence, projection, reviewed_inputs
+
+
+def _verify_supplemental_files(
+    document: Mapping[str, object], root: Path, reviewed_inputs: bytes
+) -> None:
+    references = document.get("supplemental_csvs", {})
+    hashes = parse_reviewed_inputs(reviewed_inputs).source_hashes
+    if not isinstance(references, Mapping) or references.keys() != hashes.keys():
+        raise ValueError("snapshot supplemental CSV manifest differs from review")
+    for name, expected_hash in hashes.items():
+        path, digest = referenced_path(root, references[name])
+        if digest != expected_hash:
+            raise ValueError("snapshot supplemental CSV digest differs from review")
+        checked_bytes(path, digest)
+
+
+def _snapshot_identity(
+    evidence: SourceEvidence, targets: bytes, reviewed_inputs: bytes | None
+) -> str:
+    source_bytes = evidence.acquisition_bytes + evidence.coverage_bytes + targets
+    if reviewed_inputs is not None:
+        source_bytes += b"\x00reviewed-inputs\x00" + bytes.fromhex(
+            sha256(reviewed_inputs)
+        )
+    return sha256(source_bytes)
 
 
 def build_snapshot_bundle(
@@ -146,13 +203,36 @@ def build_snapshot_bundle(
     coverage_sha256: str,
     output_dir: Path,
     matching_policy_version: str = MATCHING_POLICY_VERSION,
+    reviewed_inputs: Path | None = None,
+    reviewed_inputs_sha256: str | None = None,
+    supplemental_csv_dir: Path | None = None,
 ) -> SnapshotBundle:
     """Write a new immutable bundle only after all input/source checks succeed."""
     evidence = load_source_evidence(
         acquisition, acquisition_sha256, coverage, coverage_sha256
     )
+    if (reviewed_inputs is None) != (reviewed_inputs_sha256 is None):
+        raise ValueError("reviewed inputs require a path and SHA-256")
+    review = (
+        checked_bytes(reviewed_inputs, reviewed_inputs_sha256)
+        if reviewed_inputs is not None and reviewed_inputs_sha256 is not None
+        else None
+    )
+    if review is None and supplemental_csv_dir is not None:
+        raise ValueError("supplemental CSV directory requires reviewed inputs")
+    sources = (
+        {
+            name: checked_bytes(supplemental_csv_dir / name, digest)
+            for name, digest in parse_reviewed_inputs(review).source_hashes.items()
+        }
+        if review is not None and supplemental_csv_dir is not None
+        else None
+    )
     bundle = compile_snapshot_bundle(
-        evidence, matching_policy_version=matching_policy_version
+        evidence,
+        matching_policy_version=matching_policy_version,
+        reviewed_inputs=review,
+        supplemental_csvs=sources,
     )
     output = output_dir.resolve()
     output.mkdir(parents=True, exist_ok=False)

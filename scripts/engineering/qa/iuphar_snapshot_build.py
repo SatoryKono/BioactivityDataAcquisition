@@ -19,6 +19,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--coverage", type=Path, required=True)
     parser.add_argument("--coverage-sha256", required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
+    parser.add_argument("--reviewed-inputs", type=Path)
+    parser.add_argument("--reviewed-inputs-sha256")
+    parser.add_argument("--supplemental-csv-dir", type=Path)
     parser.add_argument(
         "--matching-policy-version",
         choices=(MATCHING_POLICY_VERSION, *sorted(ANCHOR_PRIORITY_POLICIES)),
@@ -32,6 +35,9 @@ def main(argv: list[str] | None = None) -> int:
         coverage_sha256=args.coverage_sha256,
         output_dir=args.output_dir,
         matching_policy_version=args.matching_policy_version,
+        reviewed_inputs=args.reviewed_inputs,
+        reviewed_inputs_sha256=args.reviewed_inputs_sha256,
+        supplemental_csv_dir=args.supplemental_csv_dir,
     )
     print(f"snapshot_sha256={bundle.snapshot_sha256}")
     print(f"profile_sha256={bundle.profile_sha256}")
