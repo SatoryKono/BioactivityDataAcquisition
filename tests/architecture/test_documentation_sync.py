@@ -483,6 +483,20 @@ def test_root_readme_uses_current_docs_entrypoints() -> None:
         )
 
 
+def _without_artifact_paths(text: str) -> str:
+    """Skip literal artifact paths while retaining surrounding commands and prose."""
+    return re.sub(r"`(?:[\w.-]+/)+[\w.-]+\.(?:xlsx|xml)`", "", text)
+
+
+def test_legacy_pipeline_guard_distinguishes_ids_from_artifact_paths() -> None:
+    command = "bioetl run --pipeline chembl-target"
+    path = "`xlsx/chembl-target-silver-v31.xlsx`"
+    assert _without_artifact_paths(f"{command} writes {path}").strip() == (
+        f"{command} writes"
+    )
+    assert _without_artifact_paths("`chembl-target`") == "`chembl-target`"
+
+
 def test_no_legacy_kebab_pipeline_ids_in_active_docs(
     docs_markdown_files: list[Path],
     docs_text_cache: dict[Path, str],
@@ -536,7 +550,8 @@ def test_no_legacy_kebab_pipeline_ids_in_active_docs(
             text = workflow_text_cache[path]
         else:
             text = docs_text_cache[path]
-        if any(pattern.search(text) for pattern in legacy_patterns):
+        active_text = _without_artifact_paths(text)
+        if any(pattern.search(active_text) for pattern in legacy_patterns):
             violations.append(path.as_posix())
 
     assert not violations, (
