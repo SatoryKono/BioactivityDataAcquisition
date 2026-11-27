@@ -103,7 +103,11 @@ as evidence. Corrupt, tampered, stale, unauthorized, or cross-scope material is
 rejected before ingestion. Bundle producer provenance and source/output digests
 are stored alongside the separate ingestion actor provenance.
 
-### CircleCI producer reuse
+### Historical CircleCI producer reuse
+
+CircleCI is retired. This section records the former producer design, not a
+current CI execution path. GitHub Actions parity for this closeout transport is
+not established; use separately verified evidence for current closeout claims.
 
 `configs/quality/proof_closeout_checks.yaml` owns the exact closeout command
 set and branch activation list. The CircleCI adapter is
@@ -115,7 +119,7 @@ receipt creation; transferred evidence must not be rewritten afterward.
 
 The shared `ci_run_id` is `circleci-workflow:<CIRCLE_WORKFLOW_ID>`, not an
 individual job URL. Receipts from another workflow are rejected even when
-both jobs used the same checkout path. Jobs currently share CircleCI's
+both jobs used the same checkout path. The historical jobs shared CircleCI's
 checkout path; raw coverage paths and recorded argv are checked exactly.
 Evidence reuse across arbitrary filesystem layouts is not supported by this
 adapter. Producer job identities remain in their execution records.
