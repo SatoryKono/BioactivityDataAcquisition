@@ -12,6 +12,10 @@ from bioetl.infrastructure.adapters.iuphar.snapshot_payload import build_snapsho
 from bioetl.infrastructure.storage.composite_replay_bundle import (
     publish_target_classifier,
 )
+from bioetl.infrastructure.storage.target_migration_dependencies import (
+    backup_target_dependencies,
+    collect_target_dependencies,
+)
 from iuphar_target_class.identifier_roles import REVIEWED_CLASS_POLICY_VERSION
 from iuphar_target_class.models import RawTargetRow, RunProvenance
 from iuphar_target_class.pipeline import classify_batch
@@ -170,6 +174,31 @@ def test_reviewed_inputs_bind_local_class_and_supplements_without_changing_offic
     )
     assert replay_profile.acceptance_sha256 == receipt_sha256
     assert replay_profile.snapshot.snapshot == admitted.snapshot.snapshot
+    config = tmp_path / "target.yaml"
+    config.write_text(
+        json.dumps(
+            {
+                "target_classification": {
+                    "mode": "shadow",
+                    "snapshot_manifest": "reviewed/profile.json",
+                    "snapshot_manifest_sha256": bundle.profile_sha256,
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    dependencies = collect_target_dependencies(workspace=tmp_path, configs=(config,))
+    backups = backup_target_dependencies(
+        workspace=tmp_path, dependencies=dependencies, destination=tmp_path / "backup"
+    )
+    assert backups["backup/reviewed/reviewed-inputs.json"] == review_hash
+    assert (
+        tmp_path / "backup/reviewed/reviewed-inputs.json"
+    ).read_bytes() == review.read_bytes()
+    for name, raw in csv_sources.items():
+        relative = f"reviewed/sources/reviewed/{name}"
+        assert backups[f"backup/{relative}"] == sha256(raw)
+        assert (tmp_path / "backup" / relative).read_bytes() == raw
     snapshot = loaded.snapshot.snapshot
     assert ("2", "9913") in snapshot.species_annotations
     assert ("3", "9606") not in snapshot.species_annotations
