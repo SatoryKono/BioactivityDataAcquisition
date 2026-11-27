@@ -255,6 +255,7 @@ def test_mutation_score_rejects_invalid_missing_or_insufficient_evidence(
     script = command.split("python - <<'PY'\n", 1)[1].rsplit("\nPY", 1)[0]
     monkeypatch.setenv("MUTATION_TARGET", "domain")
     monkeypatch.setenv("MUTATION_SCORE_THRESHOLD", "60.0")
+    monkeypatch.setenv("PYTHONIOENCODING", "utf-8")
     if stats is not None:
         path = tmp_path / "reports/domain/mutmut-cicd-stats.json"
         path.parent.mkdir(parents=True)
