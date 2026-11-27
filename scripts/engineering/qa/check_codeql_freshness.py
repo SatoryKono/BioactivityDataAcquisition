@@ -25,31 +25,27 @@ def main() -> int:
                 "api",
                 "--method",
                 "GET",
-                "--paginate",
-                "--slurp",
                 "repos/{owner}/{repo}/code-scanning/analyses",
                 "-f",
                 "tool_name=CodeQL",
                 "-f",
                 "ref=refs/heads/main",
                 "-f",
-                "per_page=100",
+                "per_page=1",
+                "-f",
+                "sort=created",
+                "-f",
+                "direction=desc",
             ],
             check=True,
             capture_output=True,
             text=True,
         )
-        pages = json.loads(result.stdout)
-        analyses = [analysis for page in pages for analysis in page]
+        analyses = json.loads(result.stdout)
         if not analyses:
             print(f"No CodeQL analyses found for {args.ref}", file=sys.stderr)
             return 1
-        latest = max(
-            analyses,
-            key=lambda item: datetime.fromisoformat(
-                item["created_at"].replace("Z", "+00:00")
-            ),
-        )
+        latest = analyses[0]
         created = datetime.fromisoformat(latest["created_at"].replace("Z", "+00:00"))
         if created.tzinfo is None:
             raise ValueError("analysis timestamp has no timezone")
