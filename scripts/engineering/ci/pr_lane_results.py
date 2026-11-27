@@ -233,6 +233,7 @@ IUPHAR_IDENTIFIER_ROLES_RF002_TEST = (
     "tests/unit/iuphar_target_class/test_identifier_roles_rf002.py"
 )
 IUPHAR_POLICY_TEST = "tests/unit/iuphar_target_class/test_policy.py"
+IUPHAR_PIPELINE_TEST = "tests/unit/iuphar_target_class/test_pipeline.py"
 IUPHAR_ADAPTER_CLASSIFICATION_TEST = (
     "tests/unit/infrastructure/adapters/iuphar/test_target_classification.py"
 )
@@ -902,7 +903,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     ),
     "src/iuphar_target_class/effective_policy.py": (
         IUPHAR_ADAPTER_CLASSIFICATION_TEST,
-        "tests/unit/iuphar_target_class/test_pipeline.py",
+        IUPHAR_PIPELINE_TEST,
     ),
     "src/iuphar_target_class/resolution.py": (
         "tests/unit/iuphar_target_class/test_resolution.py",
@@ -941,7 +942,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "src/iuphar_target_class/pipeline_acceptance.py",
         ),
         (
-            "tests/unit/iuphar_target_class/test_pipeline.py",
+            IUPHAR_PIPELINE_TEST,
             IUPHAR_ADAPTER_CLASSIFICATION_TEST,
         ),
     ),
@@ -955,7 +956,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         ),
         (
             "tests/unit/infrastructure/adapters/iuphar/test_snapshot_builder.py",
-            "tests/unit/iuphar_target_class/test_pipeline.py",
+            IUPHAR_PIPELINE_TEST,
         ),
     ),
     "src/iuphar_target_class/bioetl_input.py": (
