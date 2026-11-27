@@ -108,7 +108,7 @@ workflow и условие job. `[UNIQUE-GH]` означает отсутств�
 | контур не найден | `memory-freshness.yml:freshness` (.github/workflows/memory-freshness.yml:10) | [UNIQUE-GH] | — | runs-on=ubuntu-latest, uv, pytest | — | — | {"workflow_dispatch": null} / — |
 | контур не найден | `memory-freshness.yml:open-review-issue` (.github/workflows/memory-freshness.yml:28) | [UNIQUE-GH] | — | runs-on=ubuntu-latest, uv | — | — | {"workflow_dispatch": null} / "failure() && github.event_name == 'schedule'" |
 | контур не найден | `memory-retention.yml:check-retention-policy` (.github/workflows/memory-retention.yml:14) | [UNIQUE-GH] | — | runs-on=ubuntu-latest, uv | — | — | {"workflow_dispatch": null} / — |
-| контур не найден | `mutation-testing.yml:mutation-testing` (.github/workflows/mutation-testing.yml:18) | [UNIQUE-GH] | — | runs-on=ubuntu-latest, matrix, uv | — | — | {"workflow_dispatch": null, "workflow_call": null} / — |
+| контур не найден | `mutation-testing.yml:mutation-testing` (.github/workflows/mutation-testing.yml:17) | [UNIQUE-GH] | — | runs-on=ubuntu-latest, matrix, uv | — | — | {"workflow_dispatch": null, "workflow_call": null} / — |
 | контур не найден | `nightly-replay-parity.yml:replay-parity` (.github/workflows/nightly-replay-parity.yml:18) | [UNIQUE-GH] | — | runs-on=ubuntu-latest, uv, pytest | — | — | {"workflow_dispatch": null} / — |
 | контур не найден | `nightly.yml:actions-health` (.github/workflows/nightly.yml:16) | [UNIQUE-GH] | — | runs-on=ubuntu-latest | — | — | {"schedule": [{"cron": "0 3 * * *"}], "workflow_dispatch": null} / — |
 | контур не найден | `nightly.yml:clock` (.github/workflows/nightly.yml:34) | [UNIQUE-GH] | — | runs-on=ubuntu-latest | — | — | {"schedule": [{"cron": "0 3 * * *"}], "workflow_dispatch": null} / — |
