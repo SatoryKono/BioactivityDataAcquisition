@@ -1616,6 +1616,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/integration/test_prometheus_rules_config.py",
         INCIDENT_RUNBOOK_ALERT_SEMANTICS_TEST,
     ),
+    "docs/05-operations/runbooks/pipeline-failure-critical.md": (
+        "tests/integration/test_pipeline_failure_runbook_alerts.py",
+        "tests/integration/test_prometheus_rules_config.py",
+    ),
     "docs/05-operations/runbooks/branch-hygiene-wave.md": (
         "tests/unit/scripts/repo/test_branch_hygiene.py",
     ),

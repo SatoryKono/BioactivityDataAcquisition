@@ -10,6 +10,17 @@ from scripts.engineering.ci.pr_lane_results import build_shadow_compare
 pytestmark = pytest.mark.unit
 
 
+def test_pipeline_failure_runbook_routes_to_alert_contract() -> None:
+    root = Path(__file__).resolve().parents[5]
+    path = "docs/05-operations/runbooks/pipeline-failure-critical.md"
+    report = build_shadow_compare([path], repo_root=root)
+    assert (
+        "tests/integration/test_pipeline_failure_runbook_alerts.py"
+        in report["selected"]
+    )
+    assert "tests/integration/test_prometheus_rules_config.py" in report["selected"]
+
+
 def test_shadow_compare_routes_dashboard_docs_and_json() -> None:
     """Dashboard contracts and shipped JSON select their governing tests."""
     root = Path(__file__).resolve().parents[5]
