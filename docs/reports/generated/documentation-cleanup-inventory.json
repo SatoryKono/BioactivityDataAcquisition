@@ -42271,7 +42271,7 @@
       "github_issue_url": null,
       "inbound_links": 9,
       "lifecycle": null,
-      "outbound_links": 4,
+      "outbound_links": 5,
       "owner": "BioETL Team",
       "path": "docs/04-reference/github-actions-workflows.md",
       "recommended_action": "keep",
@@ -50338,6 +50338,34 @@
       "outbound_links": 1,
       "owner": "BioETL Team",
       "path": "docs/05-operations/release-checklist.md",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "05-operations",
+      "status": "Active",
+      "surface_family": "active",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": "published",
+      "declared_status": "active",
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "current",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 1,
+      "lifecycle": null,
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "docs/05-operations/runbooks/actions-quota.md",
       "recommended_action": "keep",
       "root_doc_kind": null,
       "section": "05-operations",
@@ -118805,7 +118833,7 @@
     "by_recommended_action": {
       "archive-after-migration": 434,
       "generate-automatically": 1071,
-      "keep": 2707
+      "keep": 2708
     },
     "by_section": {
       ".github": 6,
@@ -118816,7 +118844,7 @@
       "03-guides": 128,
       "04-reference": 339,
       "05-engineering": 3,
-      "05-operations": 103,
+      "05-operations": 104,
       "99-archive": 1554,
       "AGENTS.md": 1,
       "CHANGELOG.md": 1,
@@ -118834,21 +118862,21 @@
       "security": 2
     },
     "by_status": {
-      "Active": 782,
+      "Active": 783,
       "Archived": 1554,
       "Canonical": 77,
       "Generated": 1071,
       "Working": 728
     },
     "by_surface_family": {
-      "active": 782,
+      "active": 783,
       "archive": 1554,
       "canonical": 77,
       "generated": 1071,
       "working": 728
     },
     "by_tracking_state": {
-      "tracked": 4212
+      "tracked": 4213
     },
     "docs_reports_local_count": 84,
     "duplicate_group_count": 80,
@@ -118861,8 +118889,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 4212,
+    "total_doc_like": 4213,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 4212
+    "total_doc_like_tracked": 4213
   }
 }

@@ -13,6 +13,24 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  actions-health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Check Actions health
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -o pipefail
+          echo '## Actions health' >> "$GITHUB_STEP_SUMMARY"
+          python scripts/engineering/ops/check_actions_health.py 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+
   clock:
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -32,6 +50,7 @@ jobs:
           echo "month=$(LC_ALL=C date -u +%m)" >> "$GITHUB_OUTPUT"
 
   tests:
+    needs: actions-health
     uses: ./.github/workflows/tests.yml
     with:
       generated-artifacts: true
@@ -39,26 +58,31 @@ jobs:
       contents: read
 
   e2e:
+    needs: actions-health
     uses: ./.github/workflows/e2e-matrix-health.yml
     permissions:
       contents: read
 
   security:
+    needs: actions-health
     uses: ./.github/workflows/security.yml
     permissions:
       contents: read
 
   duplication:
+    needs: actions-health
     uses: ./.github/workflows/duplication-complexity.yml
     permissions:
       contents: read
 
   import-linter:
+    needs: actions-health
     uses: ./.github/workflows/import-linter.yml
     permissions:
       contents: read
 
   zizmor:
+    needs: actions-health
     uses: ./.github/workflows/zizmor.yml
     permissions:
       contents: read
@@ -83,7 +107,7 @@ jobs:
         run: python scripts/engineering/qa/check_codeql_freshness.py --ref main --max-age-days 7
 
   codeql:
-    needs: clock
+    needs: [clock, actions-health]
     if: needs.clock.outputs.dow == 'Mon'
     uses: ./.github/workflows/codeql.yml
     permissions:
@@ -91,7 +115,7 @@ jobs:
       security-events: write
 
   scorecard:
-    needs: clock
+    needs: [clock, actions-health]
     if: needs.clock.outputs.dow == 'Mon'
     uses: ./.github/workflows/scorecard.yml
     permissions:
@@ -100,7 +124,7 @@ jobs:
       id-token: write
 
   branch-hygiene:
-    needs: clock
+    needs: [clock, actions-health]
     if: needs.clock.outputs.dow == 'Mon'
     uses: ./.github/workflows/branch-hygiene.yml
     permissions:
@@ -108,7 +132,7 @@ jobs:
       pull-requests: read
 
   github-settings:
-    needs: clock
+    needs: [clock, actions-health]
     if: >-
       ${{
         needs.clock.outputs.dom == '01' &&
@@ -123,13 +147,14 @@ jobs:
       security-events: read
 
   mutation:
-    needs: clock
+    needs: [clock, actions-health]
     if: needs.clock.outputs.dow == 'Sun'
     uses: ./.github/workflows/mutation-testing.yml
     permissions:
       contents: read
 
   generated-artifact-daily:
+    needs: actions-health
     name: Generated artifact assertions (daily)
     runs-on: ubuntu-latest
     timeout-minutes: 120
