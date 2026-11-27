@@ -528,6 +528,7 @@ nav:
       - "Common Error Patterns": 05-operations/troubleshooting/common-errors.md
       - Runbooks:
           - "Index": 05-operations/runbooks/index.md
+          - "Actions Billing Recovery": 05-operations/runbooks/actions-quota.md
           - "Pipeline Failure (Critical)": 05-operations/runbooks/pipeline-failure-critical.md
           - "Pipeline Failure (Recovery)": 05-operations/runbooks/pipeline-failure-recovery.md
           - "Pipeline Failure (DQ)": 05-operations/runbooks/pipeline-failure-dq.md
