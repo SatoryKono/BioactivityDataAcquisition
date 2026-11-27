@@ -146,7 +146,9 @@ returns that business row unchanged. `enrich` merges the nine projection
 fields into it. `"off"` does not bind a classifier.
 
 With an enabled profile, `composite_target` also classifies after its dependency
-joins, using the pinned workflow configuration when present. A composite target
+joins, using the pinned workflow configuration when present. Historical replay
+without a saved target classification configuration leaves the post-join
+classifier disabled. A composite target
 record can hold fields the standalone projection never sees. The kernel reads
 `gene_symbol` and `gene_id` only when they are already on the business row.
 The `chembl_target` extractor leaves these fields and `keywords`, `predicted_l1`,
@@ -690,7 +692,9 @@ the stored profile independently:
 2. Read both target Delta tables and assay Gold. Record the Delta versions,
    distinct current target IDs, closed Gold rows, rows with no effective
    class, and orphan assay references. Compare the profile digest on every
-   current target row with the envelope and its accepted RF-008 receipt.
+   current target row with the final enrich profile envelope. Verify the RF-008
+   receipt using the envelope's `acceptance` path and SHA-256 and the snapshot
+   shared with the accepted shadow profile.
 3. If the canonical configuration resolves to `off` while both tables are
    V31, pause target writers. On isolated copies, validate a separate
    `enrich` configuration pinned to the accepted profile already stored in
@@ -824,8 +828,11 @@ Shadow, the isolated `--limit 1000` enrich, composite enrich, migration, and
 live readback are separate statuses. A passing smoke does not prove the full
 cohort. `biological_accuracy_accepted` stays false for a bounded RF-008
 reference; a matched count must not be recorded as biological qualification.
-The canonical entity document stays `mode: "off"` until `promotion_decision`
-is `READY` and `promote` then runs in a window with no writers. `LIVE_ACCEPTED`
+For V30 → V31, keep the canonical entity document in `mode: "off"` until
+`promotion_decision` is `READY`. For V31 → V31, verify that the canonical
+configuration resolves to `enrich` with the accepted profile stored in the
+current rows and use a separate candidate configuration. After `READY`,
+`promote` runs in a window with no writers. `LIVE_ACCEPTED`
 requires that promotion plus a readback of the next ordinary run. If a gate
 fails after promotion, the command exits 1 with `rollback_required: true`;
 restore with the rollback command above. Do not switch the mode to `"off"`
