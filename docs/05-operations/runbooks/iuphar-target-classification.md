@@ -641,8 +641,9 @@ Shadow run `666e51a7-229f-5dca-9270-d835243301cb` completed on
 all 66 independent cases, including 64/64 historical IDs and their classes,
 as well as evidence integrity, pipeline integration and deterministic output.
 The final profile loaded with `require_acceptance=True`. The receipt records
-`scientific_status: bounded_reference_cases_only`, `biological_accuracy_accepted: false`
-and a separate RF-008-local CI status of `NOT_RUN`.
+`scientific_status: bounded_reference_cases_only` and
+`biological_accuracy_accepted: false`. The separate
+`proof-verification.json` records `ci.status: NOT_RUN` for this local execution.
 
 The receipt and final profile are stored under
 `reports/local/iuphar-13408-admission-20261127/rf008-429c4aed-51ff-42d6-af51-321a44f1fdd3/`
