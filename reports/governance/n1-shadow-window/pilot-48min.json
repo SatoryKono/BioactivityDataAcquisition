@@ -181,12 +181,6 @@
         "schedule_kind": "security_daily"
       },
       {
-        "cadence": "every_scheduled_nightly",
-        "name": "codeql-freshness",
-        "observation_class": "external_state_security",
-        "schedule_kind": "security_daily_after_codeql"
-      },
-      {
         "cadence": "weekly_monday",
         "name": "codeql",
         "observation_class": "external_state_security",
@@ -233,7 +227,6 @@
     "security_and_external_jobs": [
       "branch-hygiene",
       "codeql",
-      "codeql-freshness",
       "github-settings",
       "scorecard",
       "security",
@@ -288,7 +281,7 @@
     "successful_scheduled_nightly_total_count": 0
   },
   "schema_version": 1,
-  "sha256": "5cb092abc10dee6f101e59ce5488bdfcce3d83aea63be8a77bfb938b79cf39b9",
+  "sha256": "8d8824f60299c031f89cfcb4e09f31e94a413d3461455d16670bd344e517b258",
   "shallow_checkout": false,
   "status": "not_opened",
   "synthetic_events": false,

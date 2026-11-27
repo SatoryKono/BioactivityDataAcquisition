@@ -1,17 +1,17 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-27T07:54:13.435933+00:00",
+  "generated_at": "2026-11-26T19:15:59.049265+00:00",
   "summary": {
-    "total_scripts": 779,
+    "total_scripts": 778,
     "status_counts": {
-      "active": 335,
+      "active": 334,
       "supporting": 442,
       "temporary_diagnostic": 2
     },
     "reference_group_coverage": {
       "agents": 12,
       "build": 18,
-      "ci": 82,
+      "ci": 81,
       "docs": 312,
       "other": 22,
       "scripts": 674,
@@ -11334,7 +11334,7 @@
         },
         {
           "path": ".github/workflows/nightly.yml",
-          "line": 163,
+          "line": 145,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci"
         },
@@ -11715,13 +11715,13 @@
       "references": [
         {
           "path": ".github/workflows/nightly.yml",
-          "line": 151,
+          "line": 133,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks"
         },
         {
           "path": ".github/workflows/nightly.yml",
-          "line": 157,
+          "line": 139,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci.generated_artifact_checks"
         },
@@ -11911,7 +11911,7 @@
       "references": [
         {
           "path": ".github/workflows/nightly.yml",
-          "line": 164,
+          "line": 146,
           "source_group": "ci",
           "text": "nightly-shadow partition"
         },
@@ -15718,21 +15718,6 @@
           "line": 141,
           "source_group": "scripts",
           "text": "\"check-c901\": \"scripts/engineering/qa/check_c901_baseline.py\","
-        }
-      ]
-    },
-    {
-      "path": "scripts/engineering/qa/check_codeql_freshness.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": ".github/workflows/nightly.yml",
-          "line": 83,
-          "source_group": "ci",
-          "text": "run: python scripts/engineering/qa/check_codeql_freshness.py --ref main --max-age-days 7"
         }
       ]
     },
@@ -22615,13 +22600,13 @@
         },
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 215,
+          "line": 214,
           "source_group": "docs",
           "text": "| `sha_pinning_required` | `true` | Workflow SHA-pin SSOT: [`check_github_actions_runtime_policy.py`](../../../scripts/engineering/repo/check_github_actions_runtime_policy.py) `ALLOWED_USES` |"
         },
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 629,
+          "line": 628,
           "source_group": "docs",
           "text": "- `scripts/engineering/repo/check_github_actions_runtime_policy.py` enforces the"
         },
@@ -23232,7 +23217,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 216,
+          "line": 215,
           "source_group": "docs",
           "text": "| `allowed_actions` | `selected` | `github_owned_allowed: true`, `verified_allowed: false`. Third-party patterns are `owner/repo@*` plus nested `owner/repo/path@*` from `ALLOWED_USES` (GitHub `*` does"
         },
@@ -25216,7 +25201,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 549,
+          "line": 548,
           "source_group": "docs",
           "text": "`bash scripts/ops/maintenance/github/remove_required_status_check.sh --dry-run`."
         }

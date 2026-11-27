@@ -2348,6 +2348,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "configs/quality/scripts_inventory_manifest.json": (
         SCRIPTS_INVENTORY_MANIFEST_TEST,
     ),
+    "scripts/engineering/repo/catalog.yaml": (
+        "tests/architecture/test_scripts_catalog_governance.py",
+        SCRIPTS_INVENTORY_MANIFEST_TEST,
+    ),
     "configs/quality/domain_aggregate_classification.yaml": (
         "tests/architecture/test_domain_aggregate_classification.py",
     ),
