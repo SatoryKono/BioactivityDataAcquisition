@@ -251,7 +251,7 @@ def test_real_daily_caller_and_command_partition_are_complete() -> None:
     assert "workflow_dispatch" in nightly[True]
     assert nightly["jobs"]["tests"]["with"]["generated-artifacts"] is True
     daily = nightly["jobs"]["generated-artifact-daily"]
-    assert "needs" not in daily
+    assert daily["needs"] == "actions-health"
     assert "if" not in daily
     assert "continue-on-error" not in daily
     commands = "\n".join(step.get("run", "") for step in daily["steps"])

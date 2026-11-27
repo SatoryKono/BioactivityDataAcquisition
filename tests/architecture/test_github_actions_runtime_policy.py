@@ -798,10 +798,10 @@ def test_nightly_deterministic_lanes_stay_daily_until_shadow_acceptance() -> Non
     assert triggers["workflow_dispatch"] is None
     for name in _DAILY_DETERMINISTIC_JOBS:
         assert "if" not in jobs[name]
-        assert "needs" not in jobs[name]
+        assert jobs[name]["needs"] == "actions-health"
     for name in ("security", "zizmor"):
         assert "if" not in jobs[name]
-        assert "needs" not in jobs[name]
+        assert jobs[name]["needs"] == "actions-health"
     for name in ("codeql", "scorecard", "branch-hygiene"):
         assert jobs[name]["if"] == "needs.clock.outputs.dow == 'Mon'"
     assert jobs["mutation"]["if"] == "needs.clock.outputs.dow == 'Sun'"
