@@ -28,6 +28,7 @@ from iuphar_target_class.identifier_roles import (
     ANCHOR_PRIORITY_POLICY_VERSION,
     CHANNEL_EC_POLICY_VERSION,
     RANKED_CLASS_POLICY_VERSION,
+    REVIEWED_CLASS_POLICY_VERSION,
     TRANSCRIPTION_FACTOR_POLICY_VERSION,
 )
 from iuphar_target_class.policy import (
@@ -772,6 +773,53 @@ def test_older_ranked_policy_keeps_transcription_factor_outcome(tmp_path):
         target_protein_synonyms=None,
     )
     assert result.projection["effective_class"] is None
+
+
+@pytest.mark.parametrize(
+    ("changes", "expected_id", "expected_class"),
+    [
+        ({"pref_name": "Example kinase"}, "1", "Enzyme.Transferase"),
+        (
+            {"pref_name": "Example", "target_ec_numbers": "3.1.26.n2"},
+            "1",
+            "Enzyme.Hydrolase",
+        ),
+        (
+            {
+                "pref_name": "Example",
+                "organism": None,
+                "taxonomy_id": None,
+                "target_ec_numbers": "3.1.26.n2",
+            },
+            None,
+            "Enzyme.Hydrolase",
+        ),
+        (
+            {
+                "pref_name": "Example",
+                "organism": "Bos taurus",
+                "taxonomy_id": 9913,
+                "target_ec_numbers": "2.3.1.-|3.5.1.44",
+            },
+            None,
+            "Enzyme.Multitarget",
+        ),
+    ],
+)
+def test_reviewed_policy_fallbacks_keep_direct_identity_scoped(
+    tmp_path, changes, expected_id, expected_class
+):
+    profile = _profile(
+        tmp_path,
+        target_changes={"type": "unmapped"},
+        required_target_types=["unmapped"],
+    )
+    result = _classify(
+        _channel_ec_adapter(profile, REVIEWED_CLASS_POLICY_VERSION),
+        **changes,
+    )
+    assert result.projection["iuphar_target_id"] == expected_id
+    assert result.projection["effective_class"] == expected_class
 
 
 def test_current_rule_catalog_records_the_enzyme_subclass(tmp_path):

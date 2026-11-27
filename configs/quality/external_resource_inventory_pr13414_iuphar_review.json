@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "fc809507f28d773e9aedeb8e444b50209813fa4b",
+  "source_ref": "03210c394b7d9fb95998cb141a9b993e4e056516",
+  "source_reviews": {
+    "src/bioetl/infrastructure/adapters/iuphar/acceptance_receipt.py": "Check the reviewed snapshot dependency during profile admission. Existing profile, snapshot and receipt reads continue through the same verified loaders.",
+    "src/bioetl/infrastructure/adapters/iuphar/snapshot_loader.py": "Parse reviewed supplemental bytes and combine official and reviewed projections. Files continue to be read by the existing checked bytes helper.",
+    "src/bioetl/infrastructure/adapters/iuphar/snapshot_payload.py": "Read reviewed inputs and both supplemental CSVs via checked bytes. The bundle writer retains its confined exclusive-open context; the existing creation site moves.",
+    "src/bioetl/infrastructure/adapters/iuphar/snapshot_reviewed_inputs.py": "Decode reviewed input bytes and validate exact anchors and family-only rows. Pure parsing without external acquisition."
+  }
+}

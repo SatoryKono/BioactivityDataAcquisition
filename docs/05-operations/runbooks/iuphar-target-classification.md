@@ -91,6 +91,43 @@ subunits, do not trigger the transcription-factor rule. The result records
 `keyword_rule` as its effective source. This profile requires its own RF-008
 acceptance for `enrich`.
 
+## Effective-class policy `hgnc-uniprot-reviewed-target-class-v1`
+
+This V31 policy requires a known taxon for direct identity. A unique same-species
+HGNC or primary UniProt candidate takes precedence over text. Two incompatible
+confirmed anchors retain `identity_conflict`. A unique compatible full name is
+eligible when direct anchors provide no result. A corroborated synonym is used
+only when no valid EC exists. A single EC category fills an empty class or
+refines an EC-only generic `Enzyme`; distinct EC categories yield
+`Enzyme.Multitarget`, with supported ion channels retaining priority.
+Functional keywords can fill an empty class even when a direct IUPHAR ID
+exists. The transcription-factor rule again applies only to empty classes.
+Single proteins outside the snapshot's species can receive a local class.
+
+Provide the independently reviewed JSON to the snapshot builder using
+`--matching-policy-version hgnc-uniprot-reviewed-target-class-v1`,
+`--reviewed-inputs`, and `--reviewed-inputs-sha256`. The document has artifact
+`bioetl_iuphar_reviewed_inputs` and `schema_version: 1`:
+
+- `supplemental_source_sha256` maps the names of the reviewed CSV sources to
+  their digests. When supplying supplemental rows, supply both original CSVs
+  in `--supplemental-csv-dir`. The builder copies the bytes into the snapshot
+  and the loader rechecks them against the review. `targets.json` and the
+  official projection audit remain reproducible from official acquisition.
+- `supplemental_targets` contains independently reviewed provider target/species
+  payloads. Each requires a `reviewReference` and a primary UniProt or human
+  HGNC anchor. Official variants and existing official anchors take priority.
+- `local_classes` contains approved rows with `target_chembl_id`, `taxon`,
+  `primary_uniprot`, `effective_class`, `origin` (`manual_review` or
+  `ortholog`), and `review_reference`. The exact three-field identity must
+  match. This last stage fills an empty class without creating a direct
+  IUPHAR identity. Rows with conflicting strong identifiers stay in review.
+  Keep orthology evidence tied to both proteins and species in the cited record.
+
+The classifier emits the evidence for each applied assignment. This policy
+requires its own executed RF-008 acceptance and the pinned reviewed inputs for
+`enrich`.
+
 ## Trigger
 
 Use this runbook to validate an offline IUPHAR classification dependency,
