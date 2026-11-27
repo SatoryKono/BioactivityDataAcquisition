@@ -130,7 +130,7 @@ from checks that run only for matching paths.
 | Workflow               | File                     | Key Jobs                                                                | What It Checks                                                                                          |
 | ---------------------- | ------------------------ | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
 | **Security Scans**     | `security.yml`           | `detect-secrets`, `pip-audit`, `bandit`, `gitleaks`, `osv-scanner`      | Credential leak prevention, lockfile CVE scanning, Bandit, Gitleaks                                     |
-| **Dependency review**  | `dependency-review.yml`  | `dependency-review`                                                     | PR-time HIGH/CRITICAL vulnerable dependency block on lockfile/manifest changes                          |
+| **Dependency review**  | `pr-required.yml`        | `fast-governance`                                                       | PR-time HIGH/CRITICAL vulnerable dependency block in `runtime` scope on lockfile/manifest changes; `dependency-review.yml` is dispatch-only and lacks required base/head refs |
 | **CodeQL**             | `codeql.yml`             | `analyze`                                                               | Python and Actions SAST uploaded to GitHub code scanning                                                            |
 | **OpenSSF Scorecard**  | `scorecard.yml`          | `analysis`                                                              | Weekly non-blocking supply-chain scorecard baseline (SARIF to Security tab)                             |
 | **zizmor**             | `zizmor.yml`             | `zizmor`                                                                | High-confidence GitHub Actions YAML audit on workflow/action changes                                    |
@@ -359,7 +359,7 @@ or `configs/quality/github_required_checks.yaml`.
 | `branch-hygiene.yml` | Advisory branch-name / hygiene; coordinator does not require it |
 | `dashboard-first-window-noscroll.yml` | DASH-FIT-004 first-window no-scroll; path-unfiltered, not merge wall |
 | `e2e-matrix-health.yml` | Advisory/nightly `e2e-smoke` and matrix health (#10412 variant B) |
-| `dependency-review.yml` | GitHub Dependency review; keep enabled, not a required context |
+| `dependency-review.yml` | Dispatch-only GitHub Dependency review; missing base/head refs prevent a successful manual run. PR-time review runs in `pr-required.yml` / `fast-governance` |
 | `zizmor.yml` | Static Actions audit; keep enabled, not a required context |
 
 `e2e-smoke` remains a serial test-matrix lane. It is not PR-blocking and must
