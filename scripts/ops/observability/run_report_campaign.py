@@ -5,14 +5,12 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import runpy
 import subprocess
 import sys
 from pathlib import Path
 
 from bioetl.composition.observability_runtime import create_run_report_store
-from filelock import FileLock
-
-from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
 from scripts.ops.observability.campaign_report_artifacts import (
     RunReport,
     collect_reports,
@@ -24,6 +22,13 @@ from scripts.ops.observability.validate_live_observability import _load_repo_env
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 RECEIPT = "publication.json"
+_CHILD_REQUEST = "BIOETL_REPORT_CAMPAIGN_REQUEST"
+_PROTECTED_OPTIONS = {
+    "--pipeline",
+    "--ensure-observability-backend",
+    "--observability-backend-port",
+    "--debug-export-dir",
+}
 
 
 def _save(output: Path, receipt: dict) -> None:
@@ -102,27 +107,64 @@ def _parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _validate_forwarded_options(options: list[str]) -> None:
+    if any(
+        option == "--" or option.partition("=")[0] in _PROTECTED_OPTIONS
+        for option in options
+    ):
+        raise ValueError(
+            "Campaign arguments cannot override the selected owner, backend or output paths"
+        )
+
+
+def _bioetl_arguments(kind: str, owner: str, options: list[str]) -> list[str]:
+    RunReport(kind, owner, "campaign")
+    _validate_forwarded_options(options)
+    if kind == "pipeline":
+        return ["run", "--pipeline", owner, *options]
+    return ["workflow", "run", owner, *options]
+
+
+def _launch_child() -> None:
+    """Enter BioETL with the bound request while preserving terminal input."""
+    request = json.loads(os.environ.pop(_CHILD_REQUEST))
+    kind, owner, options = request["kind"], request["owner"], request["options"]
+    if not (
+        isinstance(kind, str)
+        and isinstance(owner, str)
+        and isinstance(options, list)
+        and all(isinstance(option, str) for option in options)
+    ):
+        raise ValueError("Invalid campaign child request")
+    sys.argv = ["bioetl", *_bioetl_arguments(kind, owner, options)]
+    runpy.run_module("bioetl", run_name="__main__", alter_sys=True)
+
+
 def _run(
     args: argparse.Namespace, cli_args: list[str], output: Path, receipt: dict
 ) -> int:
-    prefix = ["run", "--pipeline"] if args.kind == "pipeline" else ["workflow", "run"]
+    _bioetl_arguments(args.kind, args.owner, cli_args)
+    request = {"kind": args.kind, "owner": args.owner, "options": cli_args}
     env = {
         **os.environ,
-        "BIOETL_DATA_DIR": receipt["data_root"],
+        _CHILD_REQUEST: json.dumps(request),
         "BIOETL_DASHBOARD_DATA_ROOT": receipt.get(
             "dashboard_data_root", receipt["data_root"]
         ),
+        "BIOETL_DATA_DIR": receipt["data_root"],
         "BIOETL_REPORT_ROOT": str(output / "run-reports"),
         "BIOETL_ARCHIVE_ROOT": str(output / "archive"),
     }
     if receipt.get("runtime_source_id"):
         env["BIOETL_RUNTIME_SOURCE_ID"] = receipt["runtime_source_id"]
-    cmd = ensure_safe_cli_argv(
-        [sys.executable, "-m", "bioetl", *prefix, args.owner, *cli_args]
-    )
     output.mkdir(parents=True, exist_ok=False)
     _save(output, receipt)
-    result = subprocess.run(cmd, env=env, cwd=REPO_ROOT, check=False)
+    result = subprocess.run(
+        [sys.executable, "-m", "scripts.ops.observability.run_report_campaign"],
+        env=env,
+        cwd=REPO_ROOT,
+        check=False,
+    )
     receipt.update(
         execution_status="success" if result.returncode == 0 else "failed",
         exit_code=result.returncode,
@@ -134,6 +176,11 @@ def _run(
 def _finish_publication(
     output: Path, target: Path, relative: str, access: DashboardAccess, source_id: str
 ) -> int:
+    try:
+        from filelock import FileLock
+    except ImportError as exc:
+        raise ValueError("Campaign publication requires the filelock package") from exc
+
     with FileLock(output / "publication.lock", timeout=0):
         receipt = read_json(output / RECEIPT)
         try:
@@ -173,16 +220,10 @@ def _parse_command(argv: list[str] | None) -> tuple[argparse.Namespace, list[str
     args = parser.parse_args(argv[:delimiter])
     if (args.action == "publish" and cli_args) or not 0 < args.timeout <= 300:
         parser.error("Retry accepts no BioETL arguments; timeout must be in (0, 300]")
-    protected = {
-        "--pipeline",
-        "--ensure-observability-backend",
-        "--observability-backend-port",
-        "--debug-export-dir",
-    }
-    if any(token.partition("=")[0] in protected for token in cli_args):
-        parser.error(
-            "Forwarded arguments cannot override the campaign pipeline, backend or output paths"
-        )
+    try:
+        _validate_forwarded_options(cli_args)
+    except ValueError as exc:
+        parser.error(str(exc))
     return args, cli_args
 
 
@@ -271,3 +312,7 @@ def main(argv: list[str] | None = None) -> int:
     except (OSError, ValueError, KeyError) as error:
         print(f"Campaign setup failed: {error}", file=sys.stderr)
         return 1
+
+
+if __name__ == "__main__":
+    _launch_child()

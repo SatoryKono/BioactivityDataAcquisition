@@ -11,7 +11,10 @@ from pathlib import Path
 
 from bioetl.domain.control_plane.run_evidence_location import (
     DEFAULT_EVIDENCE_ROOT_ALIAS,
+    EvidenceLocationRegisterOutcome,
+    decide_register_outcome,
 )
+from bioetl.domain.run_reports.selected_status import verify_snapshot
 from bioetl.infrastructure.control_plane.evidence_location_publish import (
     publish_bytes_if_absent,
     read_existing_bytes,
@@ -117,18 +120,12 @@ def _report_files(source: Path, run: RunReport, payload: dict) -> dict[Path, byt
     paths = [markdown] if (source / markdown).exists() else []
     revisions = directory / "status-revisions"
     paths.extend(path.relative_to(source) for path in sorted(revisions.glob("*.json")))
-    if run.kind == "pipeline" and payload["schema_version"] == "pipeline_run_report_v2":
-        revision = payload.get("selected_run_snapshot", {}).get("revision", "")
-        expected = run.directory / "status-revisions" / f"{revision}.json"
-        if not re.fullmatch(r"[a-f0-9]{64}", revision) or expected not in paths:
-            raise ValueError(f"Committed status revision missing: {run.label}")
-        _check_source_path(source / expected, source)
-        if read_json(source / expected) != payload["selected_run_snapshot"]:
-            raise ValueError(f"Committed status revision differs: {run.label}")
     files = {}
     for path in (*paths, run.commit_file):
         _check_source_path(source / path, source)
         files[path] = (source / path).read_bytes()
+    if run.kind == "pipeline" and payload["schema_version"] == "pipeline_run_report_v2":
+        _verify_committed_revision(run, payload.get("selected_run_snapshot"), files)
     for artifact in payload.get("artifacts", []):
         if artifact.get("kind") == "pipeline_run_report_md" and (
             markdown not in files
@@ -140,6 +137,19 @@ def _report_files(source: Path, run: RunReport, payload: dict) -> dict[Path, byt
     if json.loads(files[run.commit_file]) != payload:
         raise ValueError(f"Report changed during publication: {run.label}")
     return files
+
+
+def _verify_committed_revision(
+    run: RunReport, snapshot: object, files: dict[Path, bytes]
+) -> None:
+    if not isinstance(snapshot, dict) or not verify_snapshot(snapshot):
+        raise ValueError(f"Invalid committed status snapshot: {run.label}")
+    revision = snapshot["revision"]
+    expected = run.directory / "status-revisions" / f"{revision}.json"
+    if expected not in files:
+        raise ValueError(f"Committed status revision missing: {run.label}")
+    if json.loads(files[expected]) != snapshot:
+        raise ValueError(f"Committed status revision differs: {run.label}")
 
 
 def _verify_existing(target: Path, files: dict[Path, bytes]) -> None:
@@ -209,6 +219,12 @@ def publish_reports(
             raise ValueError(
                 f"Evidence location does not bind to dashboard data: {run.label}"
             )
+        existing = target_locations.get(
+            kind=run.kind, owner=run.owner, run_id=run.run_id
+        )
+        decision = decide_register_outcome(candidate=location, existing=existing)
+        if decision.outcome is EvidenceLocationRegisterOutcome.CONFLICT:
+            raise ValueError(f"Published report locator conflicts: {run.label}")
         files = _report_files(source, run, payload)
         if (target / run.directory).exists():
             _verify_existing(target, files)

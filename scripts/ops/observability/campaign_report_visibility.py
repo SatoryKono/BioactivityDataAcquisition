@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from urllib.error import HTTPError
-from urllib.parse import urlencode, urlsplit
+from urllib.parse import quote, urlencode, urlsplit
 
 from bioetl.application.services.run_reports.paths import (
     inspect_report_root_marker,
@@ -108,7 +108,9 @@ class DashboardAccess:
                 f"Dashboard report root is missing its matching marker or identity: {target}"
             )
         query = self._panel_query()
-        self._query_result(query, _query_url(query))
+        self._query_result(
+            query, _query_url(query, lookup="00000000-0000-0000-0000-000000000000")
+        )
         return source_id, query
 
     def _panel_query(self) -> dict:
@@ -140,8 +142,14 @@ class DashboardAccess:
         result = self.request("/api/ds/query", grafana=True, body=body)["results"][
             query["refId"]
         ]
-        if result.get("error") or result.get("status", 200) != 200:
+        if (
+            not isinstance(result, dict)
+            or result.get("error")
+            or result.get("status", 200) != 200
+        ):
             raise ValueError("Grafana Run Explorer datasource query failed")
+        if not isinstance(result.get("frames", []), list):
+            raise ValueError("Grafana Run Explorer returned invalid data frames")
         return result
 
     def _report_exists(self, run: RunReport) -> bool:
@@ -177,8 +185,8 @@ class DashboardAccess:
             index.get("index_state") != "ok"
             or index.get("source_identity_actual") != source_id
             or not any(
-                row.get("run_id") == run.run_id
-                and row.get("report_state") == "AVAILABLE"
+                (row.get("pipeline"), row.get("run_id"), row.get("report_state"))
+                == (run.owner, run.run_id, "AVAILABLE")
                 for row in index.get("items", [])
             )
         ):
@@ -198,7 +206,7 @@ def _query_url(query: dict, *, pipeline: str = ".*", lookup: str = "") -> str:
         "run_id": "-",
         "lookup_run_id:percentencode": lookup,
     }.items():
-        url = url.replace("${" + key + "}", value)
+        url = url.replace("${" + key + "}", quote(value, safe=""))
     if "${" in url or "$__" in url:
         raise ValueError("Run Explorer lookup contains unresolved Grafana variables")
     return url
