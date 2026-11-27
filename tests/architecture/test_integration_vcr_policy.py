@@ -501,6 +501,19 @@ def test_secret_inventory_runs_in_blocking_ci_lanes() -> None:
         command in step.get("run", "") and not step.get("continue-on-error", False)
         for step in preflight["steps"]
     )
+    assert "if" not in preflight
+    assert not preflight.get("continue-on-error", False)
+    aggregate = github["jobs"]["tests-complete"]
+    assert "vcr-preflight" in aggregate["needs"]
+    assert any(
+        'all(.[]; .result == "success")' in step.get("run", "")
+        and "exit 1" in step.get("run", "")
+        and not step.get("continue-on-error", False)
+        for step in aggregate["steps"]
+    )
+
+    # tests.yml is called by nightly, not the required GitHub PR gate. Preserve
+    # the CircleCI PR assertions until an equivalent PR check is established.
     circle = yaml.safe_load((ROOT / ".circleci/config.yml").read_text(encoding="utf-8"))
     runs = [
         step["run"]["command"]
