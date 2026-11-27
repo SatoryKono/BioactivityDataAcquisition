@@ -178,14 +178,17 @@ class IndexedSnapshot:
             complex_ids=complex_ids,
             species_annotations=species_annotations,
             admission_complete=admission_complete,
-            reviewed_classes=reviewed_classes,
         )
         if snapshot.graph_defect is not None:
             raise ValueError(
                 "approved family graph is not admitted: "
                 + snapshot.graph_defect.message
             )
-        return snapshot
+        return (
+            replace(snapshot, reviewed_classes=reviewed_classes)
+            if reviewed_classes
+            else snapshot
+        )
 
     @classmethod
     def build(
@@ -204,7 +207,6 @@ class IndexedSnapshot:
         complex_ids: frozenset[str] = frozenset(),
         species_annotations: Mapping[tuple[str, str], ProviderAnnotation] | None = None,
         admission_complete: bool | None = None,
-        reviewed_classes: Mapping[ReviewKey, ReviewedClass] | None = None,
     ) -> IndexedSnapshot:
         """Index all channels once and verify recorded provider payload hashes."""
         lookup, families = _snapshot_indexes(catalog, family_nodes)
@@ -234,7 +236,6 @@ class IndexedSnapshot:
             MappingProxyType(dict(type_to_subclass or {})),
             MappingProxyType(dict(family_to_subclass or {})),
             admission,
-            reviewed_classes or {},
         )
 
 

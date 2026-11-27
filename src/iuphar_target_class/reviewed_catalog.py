@@ -33,18 +33,7 @@ def merge_reviewed_catalog(
     anchor_refs = {}
     for target in reviewed_catalog:
         key = target.target_id, target.species or ""
-        pairs = _anchor_pairs(target)
-        if not pairs:
-            raise ValueError(
-                "reviewed supplemental target has no exact identity anchor"
-            )
-        if any(owners[(key[1], method, token)] - {key[0]} for method, token in pairs):
-            continue
-        extra = tuple(
-            (method, token)
-            for method, token in pairs
-            if not owners[(key[1], method, token)]
-        )
+        extra = _new_anchors(target, owners)
         if not extra:
             continue
         base = catalog.get(key)
@@ -72,6 +61,22 @@ def merge_reviewed_catalog(
             {(*key, method, token): raw_payload for method, token in extra}
         )
     return CatalogProjection(tuple(catalog.values()), annotations, anchor_refs)
+
+
+def _new_anchors(
+    target: CatalogTarget, owners: Mapping[tuple[str, str, str], set[str]]
+) -> tuple[tuple[str, str], ...]:
+    pairs = _anchor_pairs(target)
+    if not pairs:
+        raise ValueError("reviewed supplemental target has no exact identity anchor")
+    species = target.species or ""
+    official_owners = {
+        (method, token): owners.get((species, method, token), set())
+        for method, token in pairs
+    }
+    if any(ids - {target.target_id} for ids in official_owners.values()):
+        return ()
+    return tuple(pair for pair, ids in official_owners.items() if not ids)
 
 
 def _anchor_pairs(target: CatalogTarget) -> tuple[tuple[str, str], ...]:

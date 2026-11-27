@@ -31,9 +31,11 @@ class ReviewedClass:
 
     def __post_init__(self) -> None:
         if not (
-            re.fullmatch(r"CHEMBL[1-9][0-9]*", self.target_chembl_id)
-            and re.fullmatch(r"[1-9][0-9]*", self.taxon)
-            and re.fullmatch(r"[A-Z0-9]{6,10}(?:-[1-9][0-9]*)?", self.primary_uniprot)
+            re.fullmatch(r"CHEMBL[1-9]\d*", self.target_chembl_id, re.ASCII)
+            and re.fullmatch(r"[1-9]\d*", self.taxon, re.ASCII)
+            and re.fullmatch(
+                r"[A-Z\d]{6,10}(?:-[1-9]\d*)?", self.primary_uniprot, re.ASCII
+            )
         ):
             raise ValueError("invalid reviewed target identity key")
         if self.effective_class not in _CLASSES:
