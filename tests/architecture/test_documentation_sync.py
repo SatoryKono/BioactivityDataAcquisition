@@ -10,12 +10,11 @@
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 from __future__ import annotations
 
-import pytest
-
-from collections import Counter
 import re
+from collections import Counter
 from pathlib import Path
 
+import pytest
 import yaml
 
 pytestmark = pytest.mark.architecture
@@ -526,7 +525,10 @@ def test_no_legacy_kebab_pipeline_ids_in_active_docs(
     # Match legacy kebab pipeline IDs as tokens, not as substrings of
     # artifact names like reports/e2e/chembl-activity-smoke.xml.
     legacy_patterns = [
-        re.compile(rf"(?<![A-Za-z0-9_]){re.escape(item)}(?![A-Za-z0-9_])")
+        re.compile(
+            rf"(?<![A-Za-z0-9_]){re.escape(item)}(?![A-Za-z0-9_])"
+            r"(?!(?:-[A-Za-z0-9_]+)+\.(?:xlsx|xml)(?![A-Za-z0-9_.-]))"
+        )
         for item in legacy_pipeline_ids
     ]
     for path in candidates:
