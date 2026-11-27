@@ -1018,8 +1018,8 @@ def _keeps_effective_class(
         generic_ec = (
             outcome.effective_class == "Enzyme"
             and outcome.effective_source == "local_rule"
-            and bool(local.local_evidence_ids)
-            and all(ref.startswith("ec:") for ref in local.local_evidence_ids)
+            and bool(local.supported_evidence_ids)
+            and all(ref.startswith("ec:") for ref in local.supported_evidence_ids)
         )
         return bool(outcome.effective_class) and not generic_ec
     if ranked:

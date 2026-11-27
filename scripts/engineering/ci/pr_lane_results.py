@@ -948,6 +948,16 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "src/iuphar_target_class/csv_io.py": (
         "tests/unit/iuphar_target_class/test_csv_io.py",
     ),
+    **dict.fromkeys(
+        (
+            "src/iuphar_target_class/reviewed_catalog.py",
+            "src/iuphar_target_class/reviewed_classes.py",
+        ),
+        (
+            "tests/unit/infrastructure/adapters/iuphar/test_snapshot_builder.py",
+            "tests/unit/iuphar_target_class/test_pipeline.py",
+        ),
+    ),
     "src/iuphar_target_class/bioetl_input.py": (
         "tests/unit/iuphar_target_class/test_stage0_v2.py",
         "tests/unit/iuphar_target_class/test_integration_acceptance.py",

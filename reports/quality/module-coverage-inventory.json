@@ -53513,7 +53513,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-11-20",
-  "source_tree_sha256": "393ed53423ad254ead312a50f1b9349b33ebd167888081de69f39d9dc4462108",
+  "source_tree_sha256": "a6fc687f9282007b750426884fdde39206fdda69fbf35bc967317b154b27b78a",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
