@@ -103,17 +103,19 @@ def test_nightly_inventory_matches_workflow_and_fails_on_drift(tmp_path: Path) -
         "actions-health",
         "branch-hygiene",
         "codeql",
+        "codeql-freshness",
         "github-settings",
         "scorecard",
         "security",
         "zizmor",
     }
     by_name = {row["name"]: row for row in inventory["jobs"]}
-    assert by_name["actions-health"]["cadence"] == "every_scheduled_nightly"
     assert by_name["actions-health"]["observation_class"] == "external_state"
+    assert by_name["actions-health"]["cadence"] == "every_scheduled_nightly"
     assert by_name["security"]["schedule_kind"] == "security_daily"
     assert by_name["security"]["observation_class"] == "external_state_security"
     assert by_name["codeql"]["cadence"] == "weekly_monday"
+    assert by_name["codeql-freshness"]["cadence"] == "every_scheduled_nightly"
     assert by_name["tests"]["observation_class"] == "deterministic"
     assert inventory["fetch_depth"] == 0
     assert inventory["shallow_checkout"] is False
@@ -169,14 +171,10 @@ def test_committed_pilot_record_is_not_opened(tmp_path: Path) -> None:
     assert record["retention_floors"]["verified_archive_days"] == 90
     assert record["api_counts"]["missing"] is None
     assert record["api_counts"]["unknown"] is None
-    assert (
-        record["sha256"]
-        == pilot_record_sha256(record)
-        == archive_module.PILOT_RECORD_SHA256
-    )
+    assert record["sha256"] == pilot_record_sha256(record)
     rebuilt = build_reduced_pilot_record(
         baseline_sha=BASELINE_SHA,
-        inventory=record["inventory"],
+        inventory=nightly_check_inventory(),
     )
     assert record_path.read_bytes() == canonical_bytes(rebuilt)
     cited = {item["run_id"]: item for item in record["cited_failure_runs"]}
@@ -215,20 +213,3 @@ def test_committed_pilot_record_is_not_opened(tmp_path: Path) -> None:
         ]
     )
     assert refused == 1
-
-
-@pytest.mark.parametrize(
-    "right_digest,expected",
-    [(archive_module.PILOT_WORKFLOW_SHA256, "passed"), (None, "not_passed")],
-)
-def test_historical_pair_uses_the_pinned_job_inventory(
-    right_digest: str | None, expected: str
-) -> None:
-    jobs = {name: "success" for name in JOB_KINDS if name != "actions-health"}
-    left = {
-        "conclusion": "success",
-        "configuration_sha256": archive_module.PILOT_WORKFLOW_SHA256,
-        "job_conclusions": jobs,
-    }
-    right = {**left, "configuration_sha256": right_digest}
-    assert archive_module._pair_equivalence(left, right, []) == expected

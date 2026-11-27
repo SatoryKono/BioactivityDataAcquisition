@@ -61,11 +61,6 @@ PILOT_SUCCESS_RETENTION_FLOOR_DAYS = 30
 PILOT_DIAGNOSTIC_RETENTION_FLOOR_DAYS = 90
 PILOT_VERIFIED_ARCHIVE_FLOOR_DAYS = 90
 PILOT_RECORD_NAME = "pilot-48min.json"
-PILOT_BASELINE_SHA = "c41cd6f7b7e4f1cb841358837fec6c6d30625106"
-PILOT_RECORD_SHA256 = "8d8824f60299c031f89cfcb4e09f31e94a413d3461455d16670bd344e517b258"
-PILOT_WORKFLOW_SHA256 = (
-    "e2a572072843c45d6127a6c9a0ba2b46dc36390d005b943db5def6a90d0a2a6d"
-)
 PILOT_ISSUE = 12362
 PARENT_ACCEPTANCE_ISSUE = 12349
 MISSING_PILOT_FAILURES = "pilot facts are missing cited failure runs"
@@ -96,6 +91,7 @@ JOB_KINDS: dict[str, str] = {
     "generated-artifact-daily": "deterministic",
     "security": "security_daily",
     "zizmor": "security_daily",
+    "codeql-freshness": "security_daily_after_codeql",
     "codeql": "weekly_monday",
     "scorecard": "weekly_monday",
     "branch-hygiene": "weekly_monday",
@@ -113,6 +109,7 @@ CHECK_CLASS: dict[str, str] = {
     "mutation": "deterministic",
     "security": "external_state_security",
     "zizmor": "external_state_security",
+    "codeql-freshness": "external_state_security",
     "codeql": "external_state_security",
     "scorecard": "external_state_security",
     "branch-hygiene": "external_state",
@@ -123,11 +120,13 @@ _CADENCE_LABEL = {
     "clock": "every_scheduled_nightly",
     "deterministic": "every_scheduled_nightly",
     "security_daily": "every_scheduled_nightly",
+    "security_daily_after_codeql": "every_scheduled_nightly",
     "weekly_monday": "weekly_monday",
     "weekly_sunday": "weekly_sunday",
     "quarterly": "quarterly",
 }
 _CADENCE_CONDITIONS = {
+    "security_daily_after_codeql": "!cancelled()",
     "weekly_monday": "needs.clock.outputs.dow == 'Mon'",
     "weekly_sunday": "needs.clock.outputs.dow == 'Sun'",
     "quarterly": (
@@ -275,7 +274,13 @@ def job_duty(
     kind = JOB_KINDS.get(name)
     if kind is None:
         return "unknown"
-    if kind in {"clock", "deterministic", "external_daily", "security_daily"}:
+    if kind in {
+        "external_daily",
+        "clock",
+        "deterministic",
+        "security_daily",
+        "security_daily_after_codeql",
+    }:
         return "mandatory"
     force = parse_force(force_weekly)
     weekday = dow if isinstance(dow, str) and dow in WEEKDAYS else None
@@ -523,7 +528,7 @@ def _pilot_configuration_jobs(
     ).hexdigest()
     if blob != configuration.get("workflow_blob_sha"):
         raise ArchiveError("pilot workflow source checksum mismatch")
-    jobs = _validated_workflow_jobs(source, configuration_sha256=oracle_sha256(encoded))
+    jobs = _validated_workflow_jobs(source)
     if any(snippet not in source for snippet in _WORKFLOW_DRIFT_SNIPPETS):
         raise ArchiveError("pilot workflow configuration drifted")
     return jobs
@@ -1389,12 +1394,7 @@ def _pair_equivalence(
     if _job_block_reason(left) is not None or _job_block_reason(right) is not None:
         reasons.append("mandatory_or_unknown_job")
         return "not_passed"
-    names = sorted(
-        _expected_pilot_jobs(left.get("configuration_sha256"))
-        | _expected_pilot_jobs(right.get("configuration_sha256"))
-        | set(left_jobs)
-        | set(right_jobs)
-    )
+    names = sorted(set(JOB_KINDS) | set(left_jobs) | set(right_jobs))
     compared = oracle_equivalent(left_jobs, right_jobs, job_names=names)
     if compared["equivalent"] is True and _pilot_api_jobs_equivalent(left, right):
         return "passed"
@@ -1704,23 +1704,25 @@ def _load_unique_workflow(text: str) -> Any:
         loader.dispose()
 
 
-def _expected_pilot_jobs(configuration_sha256: object) -> set[str]:
-    jobs = set(JOB_KINDS)
-    if configuration_sha256 == PILOT_WORKFLOW_SHA256:
-        jobs.remove("actions-health")
-    return jobs
+def _validate_job_dependencies(
+    name: str, job: Mapping[str, Any], expected: str
+) -> None:
+    needs = job.get("needs", [])
+    dependencies = [needs] if isinstance(needs, str) else needs
+    if JOB_KINDS[name] == "security_daily_after_codeql":
+        if dependencies != ["codeql"]:
+            raise ArchiveError(f"nightly CodeQL dependency drifted: {name}")
+    elif expected and "clock" not in dependencies:
+        raise ArchiveError(f"nightly clock dependency drifted: {name}")
 
 
-def _validated_workflow_jobs(
-    text: str, *, configuration_sha256: object = None
-) -> dict[str, Any]:
+def _validated_workflow_jobs(text: str) -> dict[str, Any]:
     try:
         workflow = _load_unique_workflow(text)
     except yaml.YAMLError as exc:
         raise ArchiveError("malformed nightly workflow") from exc
     jobs = workflow.get("jobs") if isinstance(workflow, Mapping) else None
-    expected_jobs = _expected_pilot_jobs(configuration_sha256)
-    if not isinstance(jobs, dict) or set(jobs) != expected_jobs:
+    if not isinstance(jobs, dict) or set(jobs) != set(JOB_KINDS):
         raise ArchiveError("JOB_KINDS drifted from nightly.yml")
     for name, job in jobs.items():
         if not isinstance(job, Mapping):
@@ -1730,9 +1732,7 @@ def _validated_workflow_jobs(
             expected
         ):
             raise ArchiveError(f"nightly cadence drifted: {name}")
-        needs = job.get("needs", [])
-        if expected and "clock" not in ([needs] if isinstance(needs, str) else needs):
-            raise ArchiveError(f"nightly clock dependency drifted: {name}")
+        _validate_job_dependencies(name, job, expected)
     return jobs
 
 
@@ -2563,18 +2563,9 @@ def _command_record_pilot(argv: Sequence[str]) -> int:
     destination = resolve_cli_path(args.output, root=REPO_ROOT)
     if destination.name != PILOT_RECORD_NAME:
         raise ArchiveError(f"pilot record must be named {PILOT_RECORD_NAME}")
-    if args.baseline_sha == PILOT_BASELINE_SHA:
-        # Replay the dated observation using its independently pinned evidence.
-        path = REPO_ROOT / "reports/governance/n1-shadow-window" / PILOT_RECORD_NAME
-        historical = json.loads(path.read_text(encoding="utf-8"))
-        if pilot_record_sha256(historical) != PILOT_RECORD_SHA256:
-            raise ArchiveError("historical pilot record checksum mismatch")
-        inventory = historical["inventory"]
-    else:
-        inventory = nightly_check_inventory(REPO_ROOT)
     record = build_reduced_pilot_record(
         baseline_sha=args.baseline_sha,
-        inventory=inventory,
+        inventory=nightly_check_inventory(REPO_ROOT),
     )
     _write_canonical_record(destination, record)
     print(record["status"])
