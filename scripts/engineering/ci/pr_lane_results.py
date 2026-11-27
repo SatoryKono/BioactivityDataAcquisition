@@ -98,6 +98,7 @@ DASHBOARD_FIRST_WINDOW_NOSCROLL_TEST = (
 GRAFANA_METRIC_SEMANTICS_TEST = (
     "tests/integration/test_grafana_dashboard_metric_semantics.py"
 )
+PROMETHEUS_RULES_CONFIG_TEST = "tests/integration/test_prometheus_rules_config.py"
 STAGE0_EVIDENCE_TEST = "tests/unit/scripts/engineering/ci/test_stage0_evidence.py"
 MANIFEST_VALIDATION_CATALOG_TEST = (
     "tests/unit/interfaces/http/test_manifest_validation_catalog.py"
@@ -1111,7 +1112,7 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
             "grafana/prometheus-rules/tests/workflow_selector_isolation.test.yml",
         ),
         (
-            "tests/integration/test_prometheus_rules_config.py",
+            PROMETHEUS_RULES_CONFIG_TEST,
             GRAFANA_METRIC_SEMANTICS_TEST,
             "tests/architecture/test_observability_metric_governance.py",
             INCIDENT_RUNBOOK_ALERT_SEMANTICS_TEST,
@@ -1613,12 +1614,12 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         ("tests/e2e/test_pipeline_graceful_shutdown_e2e.py",),
     ),
     "docs/05-operations/runbooks/incident-response.md": (
-        "tests/integration/test_prometheus_rules_config.py",
+        PROMETHEUS_RULES_CONFIG_TEST,
         INCIDENT_RUNBOOK_ALERT_SEMANTICS_TEST,
     ),
     "docs/05-operations/runbooks/pipeline-failure-critical.md": (
         "tests/integration/test_pipeline_failure_runbook_alerts.py",
-        "tests/integration/test_prometheus_rules_config.py",
+        PROMETHEUS_RULES_CONFIG_TEST,
     ),
     "docs/05-operations/runbooks/branch-hygiene-wave.md": (
         "tests/unit/scripts/repo/test_branch_hygiene.py",
