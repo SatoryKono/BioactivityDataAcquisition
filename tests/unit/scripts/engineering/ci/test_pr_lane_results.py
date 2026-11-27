@@ -428,6 +428,17 @@ def test_shadow_compare_routes_entity_configs(path: str) -> None:
     )
 
 
+def test_shadow_compare_routes_proof_evidence_contract() -> None:
+    repo_root = Path(__file__).resolve().parents[5]
+    report = build_shadow_compare(
+        ["docs/04-reference/contracts/proof-or-stop-evidence.md"], repo_root=repo_root
+    )
+    assert "tests/architecture/test_proof_or_stop_contract.py" in report["selected"]
+    assert (
+        "tests/unit/scripts/engineering/qa/test_proof_or_stop.py" in report["selected"]
+    )
+
+
 def test_shadow_compare_routes_run_report_contracts_and_docs() -> None:
     """Run-report contracts, goldens, and operator docs select contract tests."""
     repo_root = Path(__file__).resolve().parents[5]

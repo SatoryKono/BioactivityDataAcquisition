@@ -17,7 +17,7 @@ ______________________________________________________________________
 ## Overview
 
 <!-- policy-anchor:deployment-provider -->
-Pull-request coordination runs in GitHub Actions (`deployment.provider=github_actions`, `.github/workflows/pr-required.yml`). `.circleci/config.yml` remains in the tree and is not current merge protection. Local-Only product runtime does not require cloud deployment.
+Pull-request coordination runs in GitHub Actions (`deployment.provider=github_actions`, `.github/workflows/pr-required.yml`). CircleCI is retired; `.circleci/config.yml` remains historical and is not current merge protection. Local-Only product runtime does not require cloud deployment.
 
 <!-- policy-anchor:ruleset-enforcement-mode -->
 Ruleset `13643213` is `enforcement: active` (GET 2026-11-06); rulesets `15730586` and `24517966` were deleted on 2026-11-02 (settings-audit phase 0). <!-- policy-anchor:stored-ruleset-contexts --> The active rule requires `pr-gate-complete` (GET 2026-11-06); the rule binds this context to GitHub Actions App 15368 (integration_id=15368). <!-- policy-anchor:target-gha-context --> The target job name `pr-gate-complete` is the context stored on ruleset `13643213` since 2026-11-02. <!-- policy-anchor:enforcement-verified-date --> Catalog `enforcement_verified_date` `2026-10-09` is not proof of active merge protection. <!-- policy-anchor:merge-block --> A successful `pr-gate-complete` does not by itself block merge; the active server rule requires it. An offline catalog match does not confirm live server rulesets. Positive/negative merge acceptance was not run in this audit. CodeQL is excluded from required checks by the owner decision in #11929.
@@ -75,11 +75,9 @@ The names below are retained CircleCI jobs and typed `ci-lane` values from
 | Docker | `docker-baseline`, `docker-publish` | Build and full baseline before separate publication approval |
 | Release preparation | `release-validation` | Prepared wheel/sdist, install, tests, security and SPDX; remote acceptance and protected promotion pending |
 
-Scheduled and manual lanes in that config use typed pipeline parameters on
-main. The workflow map records actual run IDs, schedule registration, input
-acceptance, disabled surfaces and unresolved parity. Do not treat a configured
-historical lane as accepted until its required artifacts and terminal result
-have been verified.
+The retired configuration used typed pipeline parameters on main. The workflow
+map records historical run IDs and acceptance evidence; these do not establish
+current execution or parity with GitHub Actions.
 
 ## Quality gates contributors hit most
 
@@ -126,12 +124,9 @@ passed.
 
 - Restricted CircleCI contexts belong to the retained `.circleci/config.yml`,
   not to `.github/workflows/pr-required.yml`.
-- `bioetl-github-read-only` is restricted to the project and trusted main jobs.
-- `bioetl-ghcr-publish` and `bioetl-security-events-write` separate registry and
-  SARIF permissions. Their credential population and successful publication
-  acceptance remain pending in #11931.
-- Publication follows successful same-source gates and a separate approval.
-  Failed, canceled, missing or stale evidence must block publication.
+- The historical preparation separated `bioetl-github-read-only`,
+  `bioetl-ghcr-publish`, and `bioetl-security-events-write` contexts. These are
+  not instructions to configure or use CircleCI credentials or publication.
 
 ## Related
 

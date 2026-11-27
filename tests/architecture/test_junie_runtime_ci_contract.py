@@ -29,20 +29,19 @@ def _workflow() -> dict[Any, Any]:
 
 
 def test_skills_consistency_watches_runtime_parity_surfaces() -> None:
-    """Runtime parity surfaces stay guarded after the coordinator cutover.
-
-    Leaf Actions workflows no longer carry push/pull_request path filters;
-    the CircleCI ``skills-consistency`` job runs the canonical mirror checks
-    inside ``pr-gate`` on every gated run.
-    """
-    config = yaml.safe_load(
-        (ROOT / ".circleci" / "config.yml").read_text(encoding="utf-8")
+    """Runtime changes trigger the independent GitHub parity checks."""
+    config = _workflow()
+    jobs = config["jobs"]
+    names = (
+        "verify-codex-junie-runtime-parity",
+        "verify-local-skills-mirror",
+        "detect-runtime-skill-drift",
     )
-    job = config["jobs"]["skills-consistency"]
     commands = " ".join(
-        step["run"]["command"]
-        for step in job["steps"]
-        if isinstance(step, dict) and isinstance(step.get("run"), dict)
+        step.get("run", "")
+        for name in names
+        for step in jobs[name]["steps"]
+        if isinstance(step, dict)
     )
     for check in (
         "bash scripts/ai/junie/check_junie_mirror.sh --check",
@@ -51,11 +50,14 @@ def test_skills_consistency_watches_runtime_parity_surfaces() -> None:
         "python -m scripts.ai.sync.runtime_skills",
     ):
         assert check in commands
-    pr_gate_jobs = config["workflows"]["pr-gate"]["jobs"]
-    assert any(
-        isinstance(entry, dict) and "skills-consistency" in entry
-        for entry in pr_gate_jobs
-    )
+    assert "--mode check" in commands
+    assert "if" not in jobs[names[0]]
+    assert "if" not in jobs[names[1]]
+    assert jobs[names[2]]["if"] == "github.event_name != 'workflow_dispatch'"
+    events = config.get("on", config.get(True))
+    for event in ("push", "pull_request"):
+        for path in (".codex/**", ".junie/**", ".devin/**", "scripts/ai/**"):
+            assert path in events[event]["paths"]
 
 
 def test_skills_consistency_executes_canonical_junie_checker() -> None:

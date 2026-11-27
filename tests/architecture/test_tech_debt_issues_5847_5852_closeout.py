@@ -133,7 +133,7 @@ def test_issue_5847_root_baseline_is_reduced_without_new_root_directory() -> Non
         ".vscode",
     }
     for prefix, role, filenames in (
-        (".circleci", "canonical_circleci_project_configuration", {"config.yml"}),
+        (".circleci", "historical_circleci_project_configuration", {"config.yml"}),
         (
             ".agents",
             "derived_native_agent_skill_discovery_surface",
