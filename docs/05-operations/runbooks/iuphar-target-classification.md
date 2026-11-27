@@ -145,11 +145,12 @@ UniProt cross-references, EC numbers, and protein/gene synonyms. `shadow`
 returns that business row unchanged. `enrich` merges the nine projection
 fields into it. `"off"` does not bind a classifier.
 
-The step does not run again after composite dependency joins. A composite
-target record can hold fields this projection never sees. The kernel reads
+With an enabled profile, `composite_target` also classifies after its dependency
+joins, using the pinned workflow configuration when present. A composite target
+record can hold fields the standalone projection never sees. The kernel reads
 `gene_symbol` and `gene_id` only when they are already on the business row.
-The `chembl_target` extractor does not set them, and it does not supply
-`keywords`, `predicted_l1`, or `predicted_l2`.
+The `chembl_target` extractor leaves these fields and `keywords`, `predicted_l1`,
+and `predicted_l2` unset.
 
 The kernel primary UniProt channel uses `component_accessions` and joined
 `uniprot_accession`. Auxiliary `target_xref_uniprot_ids` remain diagnostic;
@@ -678,6 +679,28 @@ bound to the new profile and its accepted RF-008 receipt. Gate the refresh with
 `contour-report --require-ready` while the canonical tables stay `enrich`:
 `READY` requires the live `enrich` mode and a candidate config separate from
 the canonical one.
+
+Before preparing a V31 refresh, verify the current writer configuration and
+the stored profile independently:
+
+1. Resolve the shared target configuration for standalone, workflow, and
+   post-join composite writers. Record the config path, config SHA-256, mode,
+   table contract, profile SHA-256, and destination paths. Record historically
+   pinned workflow dependencies separately.
+2. Read both target Delta tables and assay Gold. Record the Delta versions,
+   distinct current target IDs, closed Gold rows, rows with no effective
+   class, and orphan assay references. Compare the profile digest on every
+   current target row with the envelope and its accepted RF-008 receipt.
+3. If the canonical configuration resolves to `off` while both tables are
+   V31, pause target writers. On isolated copies, validate a separate
+   `enrich` configuration pinned to the accepted profile already stored in
+   the tables. Verify profile loading, non-destructive writer preflight,
+   and the V31 guard for destructive workflow defaults. Obtain change
+   authorization before restoring that binding on the shared contour.
+4. Recheck the effective binding and current table digests after restoration.
+   A standard `backfill` remains rejected for existing V31 tables. Keep the
+   new profile in its own candidate configuration until the refresh reaches
+   `READY`.
 
 Rehearse promotion and recovery against separate complete copies. The production
 CLI binds the active configuration and canonical destinations; use the composition
