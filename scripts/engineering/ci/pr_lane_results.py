@@ -700,6 +700,11 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/architecture/test_proof_or_stop_contract.py",
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
+    "docs/04-reference/contracts/proof-or-stop-evidence.md": (
+        "tests/unit/scripts/engineering/qa/test_proof_or_stop.py",
+        "tests/architecture/test_proof_or_stop_contract.py",
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
     **dict.fromkeys(
         (
             "src/memory/artifact_readiness.py",
