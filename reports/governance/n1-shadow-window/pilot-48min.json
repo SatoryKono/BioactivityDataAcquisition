@@ -140,6 +140,12 @@
     "jobs": [
       {
         "cadence": "every_scheduled_nightly",
+        "name": "actions-health",
+        "observation_class": "external_state",
+        "schedule_kind": "external_daily"
+      },
+      {
+        "cadence": "every_scheduled_nightly",
         "name": "clock",
         "observation_class": "clock",
         "schedule_kind": "clock"
@@ -179,6 +185,12 @@
         "name": "zizmor",
         "observation_class": "external_state_security",
         "schedule_kind": "security_daily"
+      },
+      {
+        "cadence": "every_scheduled_nightly",
+        "name": "codeql-freshness",
+        "observation_class": "external_state_security",
+        "schedule_kind": "security_daily_after_codeql"
       },
       {
         "cadence": "weekly_monday",
@@ -225,8 +237,10 @@
     ],
     "schema_version": 1,
     "security_and_external_jobs": [
+      "actions-health",
       "branch-hygiene",
       "codeql",
+      "codeql-freshness",
       "github-settings",
       "scorecard",
       "security",
@@ -281,7 +295,7 @@
     "successful_scheduled_nightly_total_count": 0
   },
   "schema_version": 1,
-  "sha256": "8d8824f60299c031f89cfcb4e09f31e94a413d3461455d16670bd344e517b258",
+  "sha256": "79a6f9c86262a7258ce09574eb38fed75f36b2747d070a8ecac5e3c30fe40258",
   "shallow_checkout": false,
   "status": "not_opened",
   "synthetic_events": false,

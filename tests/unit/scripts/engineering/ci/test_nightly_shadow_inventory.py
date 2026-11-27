@@ -100,17 +100,22 @@ def test_nightly_inventory_matches_workflow_and_fails_on_drift(tmp_path: Path) -
     inventory = nightly_check_inventory()
     assert {row["name"] for row in inventory["jobs"]} == set(JOB_KINDS)
     assert set(inventory["security_and_external_jobs"]) == {
+        "actions-health",
         "branch-hygiene",
         "codeql",
+        "codeql-freshness",
         "github-settings",
         "scorecard",
         "security",
         "zizmor",
     }
     by_name = {row["name"]: row for row in inventory["jobs"]}
+    assert by_name["actions-health"]["observation_class"] == "external_state"
+    assert by_name["actions-health"]["cadence"] == "every_scheduled_nightly"
     assert by_name["security"]["schedule_kind"] == "security_daily"
     assert by_name["security"]["observation_class"] == "external_state_security"
     assert by_name["codeql"]["cadence"] == "weekly_monday"
+    assert by_name["codeql-freshness"]["cadence"] == "every_scheduled_nightly"
     assert by_name["tests"]["observation_class"] == "deterministic"
     assert inventory["fetch_depth"] == 0
     assert inventory["shallow_checkout"] is False
