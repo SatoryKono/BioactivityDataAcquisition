@@ -1258,22 +1258,24 @@ The 64 historical reference IDs and their classes, 37 closed Gold versions,
 and 983 assay Gold rows were preserved. Unresolved assay target references
 numbered zero. The two XLSX files contain the current rows at the accepted
 Delta versions and passed round-trip verification. The journal and original
-bundle are retained under `backup/`.
+bundle are retained under `backup/`. The migration lock was released and the
+active configuration admitted subsequent incremental writes.
 
 The deployment host retains the evidence and exports in
 `reports/local/iuphar-13410-rf013-20261127-1700/`.
 
-| Local evidence | SHA-256 |
+| Path relative to the cutover directory | SHA-256 |
 | --- | --- |
-| Prepared input manifest | `1d45834ce3cb0c79653628acaf0f06d0da8f1f70a275059c9787fcf3d18f9bce` |
-| Completed full-candidate manifest | `f5d58b026c74909344d4e0188653474cfc197e19c64507421ba7e45b34a075ba` |
-| Pre-promotion contour | `ac317e3cfc64b28c348cba84d7df1bd11a8bfe023f78f44034d5f10d6a934149` |
-| Promotion journal | `61ab44a8536acdd9de3a15d4189f8f67e05d7304503749488a524602b8466cf6` |
-| Live contour | `383b0c931fb2eee6a7c74fb8539c2df7bfdca4ff414fbf0a2edfa7e8918317d1` |
-| Incremental readback | `10c9edba3b4d93a349197a3c02751ab69c988ffd71143bc36a6a689313047c38` |
-| XLSX verification | `71e6b3803b943edd863e1321f60d50eb56740d0a0ae246dce6f34ec6ad565846` |
-| Silver XLSX | `2b42f795c9aa33647824ebd75ae3a89ea14552eeb72045e2eb46def35b83a228` |
-| Gold XLSX | `2491b28e91b77dd81dff09b906a026f0380c925aa4e5bb4eb3cb2402396e1111` |
+| `frozen.json` | `1d45834ce3cb0c79653628acaf0f06d0da8f1f70a275059c9787fcf3d18f9bce` |
+| `build/build-manifest.json` | `f5d58b026c74909344d4e0188653474cfc197e19c64507421ba7e45b34a075ba` |
+| `ready-contour.json` | `ac317e3cfc64b28c348cba84d7df1bd11a8bfe023f78f44034d5f10d6a934149` |
+| `backup/journal.json` | `61ab44a8536acdd9de3a15d4189f8f67e05d7304503749488a524602b8466cf6` |
+| `live-contour.json` | `383b0c931fb2eee6a7c74fb8539c2df7bfdca4ff414fbf0a2edfa7e8918317d1` |
+| `incremental-readback.json` | `10c9edba3b4d93a349197a3c02751ab69c988ffd71143bc36a6a689313047c38` |
+| `writer-release-verification.json` | `328ab6e96ba3fc07ac1e317bf19d9bf9be04d9397161ef1feae3635af53305e8` |
+| `xlsx/verification.json` | `71e6b3803b943edd863e1321f60d50eb56740d0a0ae246dce6f34ec6ad565846` |
+| `xlsx/chembl-target-silver-v31.xlsx` | `2b42f795c9aa33647824ebd75ae3a89ea14552eeb72045e2eb46def35b83a228` |
+| `xlsx/chembl-target-gold-v31.xlsx` | `2491b28e91b77dd81dff09b906a026f0380c925aa4e5bb4eb3cb2402396e1111` |
 
 ## Compliance
 
