@@ -18,6 +18,10 @@ jobs:
           ref: a30dcb2d9bc2dc32f740219998ffc7997435a1e4
           persist-credentials: false
           fetch-depth: 0
+      - name: Fetch pinned external resource inventory evidence
+        run: |
+          git fetch --no-tags origin 1a459aa85f2fe16b3fbfc66df5473ac1dd421d9e
+          test "$(git rev-parse '1a459aa85f2fe16b3fbfc66df5473ac1dd421d9e^{tree}')" = 858d1852085bd90c3aae6bceb782d8ddcda26302
       - uses: ./.github/actions/setup-python-uv
         with:
           uv-extras: dev tracing performance
