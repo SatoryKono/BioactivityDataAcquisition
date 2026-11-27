@@ -102,6 +102,7 @@ def test_nightly_inventory_matches_workflow_and_fails_on_drift(tmp_path: Path) -
     assert set(inventory["security_and_external_jobs"]) == {
         "branch-hygiene",
         "codeql",
+        "codeql-freshness",
         "github-settings",
         "scorecard",
         "security",
@@ -111,6 +112,7 @@ def test_nightly_inventory_matches_workflow_and_fails_on_drift(tmp_path: Path) -
     assert by_name["security"]["schedule_kind"] == "security_daily"
     assert by_name["security"]["observation_class"] == "external_state_security"
     assert by_name["codeql"]["cadence"] == "weekly_monday"
+    assert by_name["codeql-freshness"]["cadence"] == "every_scheduled_nightly"
     assert by_name["tests"]["observation_class"] == "deterministic"
     assert inventory["fetch_depth"] == 0
     assert inventory["shallow_checkout"] is False
