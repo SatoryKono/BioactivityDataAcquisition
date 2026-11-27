@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 import re
 import shutil
 from dataclasses import replace
@@ -10,6 +9,7 @@ from pathlib import Path
 
 import pyarrow as pa
 import pytest
+import yaml
 from deltalake import write_deltalake
 
 from bioetl.infrastructure.storage import target_candidates as builder
@@ -44,17 +44,25 @@ def test_accepts_exactly_one_delta_version(delta_pair: tuple[Path, Path]) -> Non
 
 
 @pytest.mark.parametrize(
-    "wrong_identity", [False, True], ids=["wrong-step", "wrong-id"]
+    ("append_count", "wrong_identity"),
+    [(0, False), (2, False), (1, True)],
+    ids=["no-append", "two-appends", "wrong-id"],
 )
 def test_rejects_wrong_delta_version_or_identity(
-    delta_pair: tuple[Path, Path], wrong_identity: bool, tmp_path: Path
+    delta_pair: tuple[Path, Path],
+    append_count: int,
+    wrong_identity: bool,
+    tmp_path: Path,
 ) -> None:
     source, candidate = delta_pair
     if wrong_identity:
         candidate = tmp_path / "different-table"
         write_deltalake(str(candidate), pa.table({"target_id": ["first"]}))
+    for version in range(append_count):
         write_deltalake(
-            str(candidate), pa.table({"target_id": ["second"]}), mode="append"
+            str(candidate),
+            pa.table({"target_id": [f"appended-{version}"]}),
+            mode="append",
         )
     with pytest.raises(ValueError, match="must append one version"):
         _validate_refresh_history(source, candidate)
@@ -108,17 +116,32 @@ def test_build_refuses_frozen_source_profile_mismatch(source_bundle) -> None:
     assert not request.paths.candidate_gold.exists()
 
 
-def test_build_v31_refuses_wrong_contract(source_bundle, monkeypatch) -> None:
+def _write_v32_candidate_config(path: Path) -> None:
+    config = yaml.safe_load(path.read_bytes())
+    config["pipeline"]["target_classification"]["table_contract"] = "3.2.0"
+    path.write_text(yaml.safe_dump(config), encoding="utf-8")
+
+
+def test_build_v31_refuses_wrong_contract(source_bundle) -> None:
     request = source_bundle
-    document = json.loads(request.input_manifest.read_bytes())
-    document["source_profile"] = "V31"
-    request.input_manifest.write_text(json.dumps(document), encoding="utf-8")
+    config_path = request.paths.candidate_config
+    _write_v32_candidate_config(config_path)
+    frozen = request.input_manifest.with_name("frozen-v31.json")
+    builder.freeze_target_inputs(
+        request.paths,
+        legacy_include_fields=request.legacy_include_fields,
+        output=frozen,
+        source_profile="V31",
+    )
     request = replace(
         request,
         source_profile="V31",
-        input_manifest_sha256=sha256_file(request.input_manifest),
+        input_manifest=frozen,
+        input_manifest_sha256=sha256_file(frozen),
+        deployment=replace(
+            request.deployment, deployment_config_sha256=sha256_file(config_path)
+        ),
     )
-    monkeypatch.setattr(validation, "_candidate_table_contract", lambda _: "3.2.0")
     with pytest.raises(
         ValueError, match=re.escape("V31 refresh requires contract 3.1.0")
     ):
@@ -180,11 +203,11 @@ def test_compare_v31_refuses_cohort_addition() -> None:
     "wrong_contract", [False, True], ids=["restoration", "contract"]
 )
 def test_validation_v31_refuses_wrong_contract_or_restoration(
-    source_bundle, monkeypatch, wrong_contract
+    source_bundle, wrong_contract
 ) -> None:
     request = source_bundle
     if wrong_contract:
-        monkeypatch.setattr(validation, "_candidate_table_contract", lambda _: "3.2.0")
+        _write_v32_candidate_config(request.paths.candidate_config)
     manifest = None if wrong_contract else request.paths.workspace / "restoration.json"
     with pytest.raises(
         ValueError,
