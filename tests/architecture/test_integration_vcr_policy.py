@@ -511,3 +511,23 @@ def test_secret_inventory_runs_in_blocking_ci_lanes() -> None:
         and not step.get("continue-on-error", False)
         for step in aggregate["steps"]
     )
+
+    # tests.yml is called by nightly, not the required GitHub PR gate. Preserve
+    # the CircleCI PR assertions until an equivalent PR check is established.
+    circle = yaml.safe_load((ROOT / ".circleci/config.yml").read_text(encoding="utf-8"))
+    runs = [
+        step["run"]["command"]
+        for step in circle["jobs"]["test-fast"]["steps"]
+        if isinstance(step, dict) and "run" in step
+    ]
+    assert any(
+        command in run and "unit-vcr-secrets" in run and "set -euo pipefail" in run
+        for run in runs
+    )
+    jobs = circle["workflows"]["pr-gate"]["jobs"]
+    aggregate = next(
+        job["pr-gate-complete"]
+        for job in jobs
+        if isinstance(job, dict) and "pr-gate-complete" in job
+    )
+    assert "test-fast" in aggregate["requires"]

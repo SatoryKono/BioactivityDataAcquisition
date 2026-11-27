@@ -44,7 +44,7 @@ success cannot satisfy a publish checkpoint. See the [migration workflow map](ci
 | Runtime compatibility (Codex/Junie mirrors and runtime guardrails) | Runtime Owner | Runtime-surface diff (`.codex/**`, `.junie/**`, `.devin/**`, `docs/00-project/ai/**`) | `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md` | **PASS** if runtime-source updates are synced to mirrors when required and mirror drift is documented. **FAIL** if unsynced runtime behavior exists. |
 | Data quality policy readiness (DQ thresholds/hash/medallion) | Data Quality Owner | DQ configs/tests + policy evidence | Scope-specific DQ, schema and contract evidence; RULES §2.4/§2.8 | **PASS** if DQ checks green and the release scope validates the active threshold surface explicitly (`configs/base/quality.yaml` currently hard-fail 0.50; contract/runtime fallbacks currently hard-fail 20%). **FAIL** on any blocking DQ gate. |
 | Documentation governance readiness | Docs Owner | Updated docs set + links matrix | GitHub Actions `pr-required.yml` docs lane and applicable mirror checks; RULES §6 | **PASS** if docs governance jobs green and changed contracts/behavior are documented. **FAIL** if docs gate fails or contract docs missing. |
-| Type/lint/test baseline | QA Owner | CI run for branch head | GitHub Actions `pr-required.yml` applicable class-lane steps | **PASS** if required CI checks are green on release candidate SHA. **FAIL** otherwise. |
+| Type/lint/test baseline | QA Owner | CI runs with tested checkout SHA, PR head and base SHAs | GitHub Actions `pr-required.yml` applicable class-lane steps | **PASS** if required checks are green for the relevant PR merge candidate and exact release candidate SHA evidence is separately recorded. **FAIL** otherwise. |
 | Security & secret hygiene | Security Owner | Security scan outputs + VCR sanitization report | GitHub Actions applicable security checks and release `security-gate` | **PASS** if no blocking HIGH/CRITICAL findings for release policy and no secret leaks. **FAIL** otherwise. |
 
 ---
@@ -91,7 +91,7 @@ If any mandatory item is not green, release decision = **FAIL** unless explicit 
 Attach these links in the concrete release checklist/PR:
 
 1. **CI run links**
-   - GitHub Actions run and applicable test, mypy, architecture and docs job URLs, with exact source SHA
+   - GitHub Actions run and applicable test, mypy, architecture and docs job URLs, with the actual tested checkout SHA and, for PR runs, head and base SHAs. PR class-lane checkout uses the synthetic merge SHA, not the head SHA; do not treat its result as exact-head or release-artifact evidence without separate verification.
    - Scope-specific schema and semantic governance evidence
    - GitHub Actions `release.yml` run URL plus separately approved publication receipt
 2. **Build and publish artifacts**
