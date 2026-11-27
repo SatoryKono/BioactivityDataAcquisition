@@ -145,11 +145,14 @@ UniProt cross-references, EC numbers, and protein/gene synonyms. `shadow`
 returns that business row unchanged. `enrich` merges the nine projection
 fields into it. `"off"` does not bind a classifier.
 
-The step does not run again after composite dependency joins. A composite
-target record can hold fields this projection never sees. The kernel reads
+With an enabled profile, `composite_target` also classifies after its dependency
+joins, using the pinned workflow configuration when present. Historical replay
+without a saved target classification configuration leaves the post-join
+classifier disabled. A composite target
+record can hold fields the standalone projection never sees. The kernel reads
 `gene_symbol` and `gene_id` only when they are already on the business row.
-The `chembl_target` extractor does not set them, and it does not supply
-`keywords`, `predicted_l1`, or `predicted_l2`.
+The `chembl_target` extractor leaves these fields and `keywords`, `predicted_l1`,
+and `predicted_l2` unset.
 
 The kernel primary UniProt channel uses `component_accessions` and joined
 `uniprot_accession`. Auxiliary `target_xref_uniprot_ids` remain diagnostic;
@@ -679,6 +682,104 @@ bound to the new profile and its accepted RF-008 receipt. Gate the refresh with
 `READY` requires the live `enrich` mode and a candidate config separate from
 the canonical one.
 
+Before preparing a V31 refresh, verify the current writer configuration and
+the stored profile independently:
+
+1. Resolve the shared target configuration for standalone, workflow, and
+   post-join composite writers. Record the config path, config SHA-256, mode,
+   table contract, profile SHA-256, and destination paths. Record historically
+   pinned workflow dependencies separately.
+2. Read both target Delta tables and assay Gold. Record the Delta versions,
+   distinct current target IDs, closed Gold rows, rows with no effective
+   class, and orphan assay references. Compare the profile digest on every
+   current target row with the final enrich profile envelope. Verify the RF-008
+   receipt using the envelope's `acceptance` path and SHA-256 and the snapshot
+   shared with the accepted shadow profile.
+3. If the canonical configuration resolves to `off` while both tables are
+   V31, pause target writers. On isolated copies, validate a separate
+   `enrich` configuration pinned to the accepted profile already stored in
+   the tables. Verify profile loading, non-destructive writer preflight,
+   and the V31 guard for destructive workflow defaults using the copy
+   verification procedure below. Obtain change
+   authorization before restoring that binding on the shared contour.
+4. Recheck the effective binding and current table digests after restoration.
+   A standard `backfill` remains rejected for existing V31 tables. Keep the
+   new profile in its own candidate configuration until the refresh reaches
+   `READY`.
+
+#### Verify the restored baseline binding on copies
+
+Use the isolated config and Delta copies described below. Set the copied
+`entities/chembl/target.yaml` to `enrich`, table contract `3.1.0`, and the
+path and SHA-256 of the previously accepted profile. In `incremental-workflows/`
+under the occurrence, copy the five workflow files from the copied `configs/`
+tree and set their `workflow.defaults.run_options.run_type` to `incremental`. Use the
+project Python from the checkout root. Save this snippet within the occurrence
+and set its occurrence path before running it. It changes only the config
+loader's root for the preflight calls and writes `restore-preflight.json`.
+
+```python
+from functools import partial
+from hashlib import sha256
+import json
+from pathlib import Path
+from unittest.mock import patch
+
+from bioetl.composition.bootstrap.assembly import storage
+from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config_from_root
+from bioetl.infrastructure.config.settings_api import Settings
+from bioetl.infrastructure.config.workflow_config_api import load_workflow_config
+
+occurrence = Path("reports/local/<occurrence>").resolve()
+configs = occurrence / "configs"
+settings = Settings(_env_file=None, test_mode=True, data_dir=occurrence / "data")
+load_pipeline = partial(load_pipeline_config_from_root, configs_root=configs)
+target = storage.hydrate_target_runtime_config(load_pipeline("chembl_target"))
+profile = storage.load_target_runtime_profile(target, require_new_admission=True)
+assert profile is not None and profile.acceptance_sha256 is not None
+report = {
+    "config_sha256": sha256((configs / "entities/chembl/target.yaml").read_bytes()).hexdigest(),
+    "profile_sha256": profile.profile_sha256,
+    "receipt_sha256": profile.acceptance_sha256,
+    "workflows": {},
+}
+names = (
+    "chembl_baseline", "chembl_core", "chembl_reference_pack", "chembl_target",
+    "chembl_target_protein_classification",
+)
+with patch.object(storage, "load_pipeline_config", load_pipeline):
+    for name in names:
+        workflow = load_workflow_config(name, configs_root=configs)
+        try:
+            storage.preflight_workflow_target_dependencies(workflow, {}, settings=settings)
+        except ValueError as exc:
+            if "V31 target requires staged complete-cohort migration" not in str(exc):
+                raise
+        else:
+            raise RuntimeError(f"{name} admitted a destructive run")
+        incremental = load_workflow_config(name, config_dir=occurrence / "incremental-workflows")
+        binding = storage.preflight_workflow_target_dependencies(incremental, {}, settings=settings)
+        assert binding
+        assert storage.preflight_workflow_target_dependencies(
+            incremental, binding, settings=settings
+        ) == binding
+        report["workflows"][name] = {"incremental": "PASS", "backfill_guard": "PASS"}
+with (occurrence / "restore-preflight.json").open("x", encoding="utf-8") as stream:
+    json.dump(report, stream, indent=2)
+print(json.dumps(report, indent=2))
+```
+
+On 2026-11-27 all five incremental preflights and their pinned replays passed.
+All five backfill defaults were blocked by the V31 guard. The report is stored
+at `reports/local/iuphar-13406-baseline-20261127/restore-preflight.json`.
+
+| Verified byte identity | SHA-256 |
+| --- | --- |
+| Copied `enrich` target config | `8726685545fa80840b9b1db8a75447d658f028c5bf75b01fda4c054700a41a5b` |
+| Final baseline profile | `2d96b292124aa14aa47fa60c7bbdf2f5d04003a1998a8d004383e50a0c059aa3` |
+| Baseline RF-008 receipt | `64a3d6c22fb80630e188bb0bab240d0906b129f4f466a2ac31670374589df7c3` |
+| Preflight report | `d906570024a9a1d1e0804ee8f5dfa1bbfb387330c96e7f4b927a71781786c625` |
+
 Rehearse promotion and recovery against separate complete copies. The production
 CLI binds the active configuration and canonical destinations; use the composition
 API `bind_target_rehearsal` for a copy rehearsal. Keep `paths.workspace` at the
@@ -801,8 +902,11 @@ Shadow, the isolated `--limit 1000` enrich, composite enrich, migration, and
 live readback are separate statuses. A passing smoke does not prove the full
 cohort. `biological_accuracy_accepted` stays false for a bounded RF-008
 reference; a matched count must not be recorded as biological qualification.
-The canonical entity document stays `mode: "off"` until `promotion_decision`
-is `READY` and `promote` then runs in a window with no writers. `LIVE_ACCEPTED`
+For V30 → V31, keep the canonical entity document in `mode: "off"` until
+`promotion_decision` is `READY`. For V31 → V31, verify that the canonical
+configuration resolves to `enrich` with the accepted profile stored in the
+current rows and use a separate candidate configuration. After `READY`,
+`promote` runs in a window with no writers. `LIVE_ACCEPTED`
 requires that promotion plus a readback of the next ordinary run. If a gate
 fails after promotion, the command exits 1 with `rollback_required: true`;
 restore with the rollback command above. Do not switch the mode to `"off"`
