@@ -1021,6 +1021,11 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         DOC_CROSSREF_INTEGRITY_TEST,
         *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
     ),
+    "docs/05-operations/runbooks/actions-quota.md": (
+        DOC_CROSSREF_INTEGRITY_TEST,
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+        "tests/unit/scripts/test_actions_health.py",
+    ),
     "docs/05-operations/runbooks/iuphar-target-classification.md": (
         DOC_CROSSREF_INTEGRITY_TEST,
         IUPHAR_IDENTIFIER_ROLES_RF002_TEST,
