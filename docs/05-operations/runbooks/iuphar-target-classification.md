@@ -644,10 +644,11 @@ The final profile loaded with `require_acceptance=True`. The receipt records
 `scientific_status: bounded_reference_cases_only`, `biological_accuracy_accepted: false`
 and a separate RF-008-local CI status of `NOT_RUN`.
 
-Retain the receipt and its artifact reference closure in
+The receipt and final profile are stored under
 `reports/local/iuphar-13408-admission-20261127/rf008-429c4aed-51ff-42d6-af51-321a44f1fdd3/`
-on the rehearsal host. This receipt qualifies the profile for the complete
-V31 copy rehearsal.
+on the rehearsal host. Retain the referenced Stage0, labels, and shadow
+artifacts at their pinned locations in the parent occurrence. This receipt
+qualifies the profile for the complete V31 copy rehearsal.
 
 ### Prepare and promote complete physical tables
 
