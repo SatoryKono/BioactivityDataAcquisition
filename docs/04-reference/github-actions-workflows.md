@@ -75,8 +75,9 @@ GitHub live state snapshot: GET `2026-09-09`, then `docs.yml` and
 `compiled-artifacts-block.yml` re-enabled the same day as PR-gate reusable
 owners (#10263). Do not re-enable other disabled canonical lanes without a
 new spend/safety decision. The two memory workflows were observed `active`
-by API on 2026-11-27, but have only `workflow_dispatch` triggers; CircleCI is
-the intended schedule owner, with schedule operation NOT_PROVEN (#13421).
+by API on 2026-11-27, but have only `workflow_dispatch` triggers. CircleCI is
+retired; a current schedule owner and automatic execution are not established
+(#13421).
 
 ### PR / push verification workflows
 
@@ -131,7 +132,7 @@ the intended schedule owner, with schedule operation NOT_PROVEN (#13421).
 | `diagram-nightly.yml` | `Diagram Nightly Regression` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Nightly canary and phase2 stay off; PR lint is docs.yml (#11196) |
 | `docs-kpi-weekly.yml` | `Docs KPI Weekly` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Manual workflow_dispatch docs KPI: runtime-mirror and freshness drift, then check-kpi. No schedule |
 | `github-settings-quarterly-review.yml` | `Quarterly GitHub Settings Review` | `workflow_call`, `workflow_dispatch` | `active` | `active` | Read-only quarterly GitHub settings review delegated by `nightly.yml` |
-| `memory-freshness.yml` | `Memory freshness` | `workflow_dispatch` | `active` | `active` | Manual repository memory freshness and contract checks; CircleCI owns PR coverage |
+| `memory-freshness.yml` | `Memory freshness` | `workflow_dispatch` | `active` | `active` | Manual repository memory freshness and contract checks; automatic PR coverage is not established |
 | `memory-retention.yml` | `Memory Retention Policy` | `workflow_dispatch` | `active` | `active` | Manual non-destructive episodic-memory retention policy check |
 | `mutation-testing.yml` | `Mutation Testing` | `workflow_call`, `workflow_dispatch` | `active` | `active` | Sole Sunday mutation owner (#10263 exception); push and pull_request stay off |
 | `nightly.yml` | `Nightly` | `schedule`, `workflow_dispatch` | `active` | `active` | Daily 03:00 UTC, including tests, E2E, duplication, import-linter, and generated artifacts. Security and zizmor stay daily. CodeQL, Scorecard, and branch hygiene stay Monday. Mutation stays Sunday |
@@ -151,7 +152,7 @@ the intended schedule owner, with schedule operation NOT_PROVEN (#13421).
 | `docker.yml` | `Docker Build & Compose Validation` | `workflow_call`, `workflow_dispatch` | `active` | `active` | Validation only. Checkout is `github.sha`. `main-integrity.yml` calls this workflow and stops at `docker-complete`. Pull requests use `docker-lane` |
 | `docker-publish.yml` | `Docker GHCR Publish` | `workflow_call` | `active` | `active` | No-checkout GHCR promotion of the already scanned image. `main-ghcr-publish.yml` calls it with `source-sha` and `artifact-run-id` |
 | `labeler.yml` | `Labeler` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Applies repository labels to PRs |
-| `release.yml` | `Release` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Publish stays outside Actions (#11182) |
+| `release.yml` | `Release` | `workflow_dispatch` | `active` | `keep-disabled` | Policy/live drift: GET 2026-11-27 reports active despite #11182; no automatic release trigger or production publication |
 
 ### Reusable / compatibility-only helpers
 
@@ -183,7 +184,7 @@ enable heavy nightlies without Actions spend evidence. Do not reopen #9975 or
 | `pr-hygiene.yml` | Depends on the `stale` label from `stale.yml`; keep both disabled together |
 | `provider-contract-drift.yml` | Optional drift lane; not a `pr-required.yml` owner |
 | `quality-debt-weekly.yml` | Optional weekly scorecard; do not raise debt budgets to justify enable |
-| `release.yml` | Publish stays outside Actions. Do not restore the `release` trigger (#11182) |
+| `release.yml` | Policy remains keep-disabled (#11182); API observed active on 2026-11-27. Do not infer approval to run it or restore release triggers |
 | `reusable-mermaid-setup.yml` | Deprecated; use `.github/actions/setup-mermaid` |
 | `reusable-setup.yml` | Deprecated; use `.github/actions/setup-python-uv` |
 | `semantic-governance.yml` | Overlaps schema/docs governance; not a `pr-required.yml` owner |
@@ -221,8 +222,8 @@ Route only to **active** GitHub lanes. Keep-disabled files above do not run.
 - YAML `on.schedule` on a `keep-disabled` workflow is a cadence claim only; it
   does **not** run while GitHub `state` is `disabled_manually`.
 - `mutation-testing.yml` is the #10263 exception: GitHub `state` is `active`,
-  and the Sunday cron is the live mutation owner. CircleCI `mutation` is the
-  manual backup.
+  and `nightly.yml` calls it on Sundays. CircleCI is retired, not a manual
+  backup; no equivalent replacement backup is established here.
 - If a workflow file is added, removed, renamed, or materially repurposed,
   update this page together with any workflow-specific governance docs. The
   focused parity command above must report neither missing nor extra workflow
