@@ -12,7 +12,7 @@ from tests.performance import test_hotspot_budgets as hotspots
 
 
 @pytest.mark.parametrize(
-    ("benchmark", "key", "needs_tmp_path"),
+    ("benchmark_fn", "key", "needs_tmp_path"),
     [
         (
             hotspots.test_silver_prepare_arrow_data_budget,
@@ -30,7 +30,7 @@ from tests.performance import test_hotspot_budgets as hotspots
     ],
 )
 def test_failed_budget_keeps_completed_observation(
-    benchmark,
+    benchmark_fn,
     key: str,
     needs_tmp_path: bool,
     tmp_path: Path,
@@ -51,9 +51,9 @@ def test_failed_budget_keeps_completed_observation(
 
     with pytest.raises(AssertionError, match="regression"):
         if needs_tmp_path:
-            benchmark(tmp_path=tmp_path, pytestconfig=config)
+            benchmark_fn(tmp_path=tmp_path, pytestconfig=config)
         else:
-            benchmark(pytestconfig=config)
+            benchmark_fn(pytestconfig=config)
 
     observations = [json.loads(line) for line in output.read_text().splitlines()]
     assert len(observations) == 1
