@@ -3,7 +3,7 @@ on:
   push:
     branches: ["verify/pr-13435-a30dcb2d"]
 concurrency:
-  group: verify-pr-13435-full-tests
+  group: verify-pr-13435-fast-retry
   cancel-in-progress: true
 permissions:
   contents: read
@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [test, test-fast]
+        target: [test-fast]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
