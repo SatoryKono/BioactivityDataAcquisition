@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          ref: 6b0452d871a18371f5f2230fe963d0490c961192
+          ref: 8e2d88166f63dc3c20f916499129717998654470
           persist-credentials: false
           fetch-depth: 0
       - name: Fetch pinned external resource inventory evidence
