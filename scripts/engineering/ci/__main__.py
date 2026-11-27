@@ -23,6 +23,7 @@ Commands:
     debt-report     Generate weekly quality debt report
     publish-scorecard  Publish approved source-bound Scorecard SARIF
     publish-docker  Publish the approved same-workflow scanned image
+    actions-health  Report failed GitHub Actions runs with zero-step jobs
     nightly-shadow  Partition nightly evidence and guard mandatory skips
     mypy-diagnostic-ratchet  Block growth of mypy error identities
 """
@@ -56,6 +57,9 @@ COMMANDS = {
 COMMAND_SPECS = {name: python_command(script) for name, script in COMMANDS.items()}
 COMMAND_SPECS.update(
     {
+        "actions-health": module_command(
+            "scripts.engineering.ops.check_actions_health"
+        ),
         "nightly-shadow": module_command(
             "scripts.engineering.ci.nightly_shadow_archive"
         ),

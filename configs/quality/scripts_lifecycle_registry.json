@@ -1237,6 +1237,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-11-30"
     },
+    "scripts/engineering/ops/check_actions_health.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Keep the implementation behind python -m scripts.engineering.ci actions-health and retain the previous direct invocation for compatibility.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-31"
+    },
     "scripts/engineering/qa/_gen_cyclic_workflows.py": {
       "decision": "legacy_manual_utility",
       "next_step": "Retain as a bounded generator of zero-arg Grok workflow cards; keep it supporting until the workflow catalog is owned by a governed scripts.engineering.qa command.",
