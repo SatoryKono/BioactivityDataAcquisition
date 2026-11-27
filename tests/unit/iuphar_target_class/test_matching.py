@@ -115,6 +115,38 @@ def test_catalog_order_does_not_change_the_result() -> None:
     )
 
 
+@pytest.mark.parametrize(
+    ("accession", "species", "expected_status", "expected_id"),
+    [
+        ("P99999", "9606", "matched", "1"),
+        ("P22222", "9606", "identity_conflict", None),
+        ("P11111", None, "insufficient_input", None),
+    ],
+)
+def test_reviewed_policy_prioritizes_confirmed_anchors(
+    accession, species, expected_status, expected_id
+) -> None:
+    catalog = (
+        replace(
+            _target("1", uniprot="P11111", species="9606"),
+            hgnc_ids=("101",),
+        ),
+        _target("2", uniprot="P22222", gene="SIMILAR", species="9606"),
+    )
+    query = replace(
+        _query(uniprot_ids=(accession,), organism=species, gene_symbol="SIMILAR"),
+        hgnc_ids=("101",),
+        prioritize_anchors=True,
+        ranked_text=True,
+        require_known_species=True,
+    )
+    result = resolve_match(query, catalog, snapshot_complete=True)
+    assert (result.match_status, result.matched_target_id) == (
+        expected_status,
+        expected_id,
+    )
+
+
 def test_one_uniprot_with_several_targets_is_ambiguous() -> None:
     catalog = (
         _target("1", uniprot="P35372", species="human"),

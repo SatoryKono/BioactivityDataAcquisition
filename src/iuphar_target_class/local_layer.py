@@ -393,6 +393,7 @@ def _assemble(
             )
         ),
         local_rules_by_evidence=_rules_by_evidence(support, observations),
+        supported_evidence_ids=tuple(sorted({item.evidence_id for item in support})),
     )
 
 
