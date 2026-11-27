@@ -1,5 +1,7 @@
 """The matrix reflects live workflows without requiring retired CI inputs."""
 
+from __future__ import annotations
+
 from scripts.engineering.ci import report_gate_platform_matrix as matrix
 
 

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-27T23:04:39.990631+00:00",
+  "generated_at": "2026-11-27T23:14:51.686738+00:00",
   "summary": {
     "total_scripts": 780,
     "status_counts": {
@@ -12429,7 +12429,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_gate_platform_matrix.py",
-          "line": 3,
+          "line": 5,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import report_gate_platform_matrix as matrix"
         }
