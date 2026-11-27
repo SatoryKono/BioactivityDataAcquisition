@@ -1230,6 +1230,51 @@ directory.
 | Pipeline report | `f002e1fe9f3cbb6c5d213550b528336cc33511299f5d7359910ef287a51d305d` |
 | Classification manifest | `e7a8c0c2e0b37ca1b20d05995840922e69faa4611c96da93c397967ab712e339` |
 
+### RF-013 V31 refresh on 2026-11-27
+
+The shared `chembl.target` tables were refreshed from V31 to V31 in the
+authorised 17:00–18:30 window (UTC+03:00). The pre-promotion contour returned
+`READY` with local and CI checks passing and a retained backup.
+`LIVE_ACCEPTED` was recorded at 17:46:41 local time
+(14:46:41 UTC).
+
+- Code deployed at `627d517dc1d71ff92919ca57396b3df74dedc6da`.
+- Rehearsal PR #13438 passed its gate at `dc37df9273b6dabd2b3dfae9fdba587578ddf06a`.
+- Active mode `enrich`, contract `3.1.0`, and policy
+  `hgnc-uniprot-reviewed-target-class-v1`.
+- Enrich profile SHA-256 `b02152d8cce606caa43915f9039c2275b99a098861e52acf47643a128640dd15`.
+- Effective local configuration SHA-256 `e4de770dd608a9ba45b213416dc931044e07d82349458a812248cc63bdeab469`.
+- The controlled incremental `29f2fb28-eb43-579a-b367-5fbe531d43f7` used one
+  hash-pinned Bronze record. The stored projection agreed between Silver and
+  current Gold across all nine classification fields.
+
+| Layer | Delta version after incremental | Current rows | No effective class |
+| --- | ---: | ---: | ---: |
+| Silver | 25 | 10,690 | 1,117 |
+| Gold | 12 | 9,118 | 768 |
+
+Both layers retained the original business cohort and previous Delta versions.
+The 64 historical reference IDs and their classes, 37 closed Gold versions,
+and 983 assay Gold rows were preserved. Unresolved assay target references
+numbered zero. The two XLSX files contain the current rows at the accepted
+Delta versions and passed round-trip verification. The journal and original
+bundle are retained under `backup/`.
+
+The deployment host retains the evidence and exports in
+`reports/local/iuphar-13410-rf013-20261127-1700/`.
+
+| Local evidence | SHA-256 |
+| --- | --- |
+| Prepared input manifest | `1d45834ce3cb0c79653628acaf0f06d0da8f1f70a275059c9787fcf3d18f9bce` |
+| Completed full-candidate manifest | `f5d58b026c74909344d4e0188653474cfc197e19c64507421ba7e45b34a075ba` |
+| Pre-promotion contour | `ac317e3cfc64b28c348cba84d7df1bd11a8bfe023f78f44034d5f10d6a934149` |
+| Promotion journal | `61ab44a8536acdd9de3a15d4189f8f67e05d7304503749488a524602b8466cf6` |
+| Live contour | `383b0c931fb2eee6a7c74fb8539c2df7bfdca4ff414fbf0a2edfa7e8918317d1` |
+| Incremental readback | `10c9edba3b4d93a349197a3c02751ab69c988ffd71143bc36a6a689313047c38` |
+| XLSX verification | `71e6b3803b943edd863e1321f60d50eb56740d0a0ae246dce6f34ec6ad565846` |
+| Silver XLSX | `2b42f795c9aa33647824ebd75ae3a89ea14552eeb72045e2eb46def35b83a228` |
+| Gold XLSX | `2491b28e91b77dd81dff09b906a026f0380c925aa4e5bb4eb3cb2402396e1111` |
+
 ## Compliance
 
 Keep production `"off"` until the admission and promotion procedure has actual
