@@ -215,3 +215,20 @@ def test_committed_pilot_record_is_not_opened(tmp_path: Path) -> None:
         ]
     )
     assert refused == 1
+
+
+@pytest.mark.parametrize(
+    "right_digest,expected",
+    [(archive_module.PILOT_WORKFLOW_SHA256, "passed"), (None, "not_passed")],
+)
+def test_historical_pair_uses_the_pinned_job_inventory(
+    right_digest: str | None, expected: str
+) -> None:
+    jobs = {name: "success" for name in JOB_KINDS if name != "actions-health"}
+    left = {
+        "conclusion": "success",
+        "configuration_sha256": archive_module.PILOT_WORKFLOW_SHA256,
+        "job_conclusions": jobs,
+    }
+    right = {**left, "configuration_sha256": right_digest}
+    assert archive_module._pair_equivalence(left, right, []) == expected

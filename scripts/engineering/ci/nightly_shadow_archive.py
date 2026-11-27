@@ -63,7 +63,9 @@ PILOT_VERIFIED_ARCHIVE_FLOOR_DAYS = 90
 PILOT_RECORD_NAME = "pilot-48min.json"
 PILOT_BASELINE_SHA = "c41cd6f7b7e4f1cb841358837fec6c6d30625106"
 PILOT_RECORD_SHA256 = "8d8824f60299c031f89cfcb4e09f31e94a413d3461455d16670bd344e517b258"
-PILOT_WORKFLOW_BLOB = "cb83e657abd8ccbb8526d9f3eec83152b671e1be"
+PILOT_WORKFLOW_SHA256 = (
+    "e2a572072843c45d6127a6c9a0ba2b46dc36390d005b943db5def6a90d0a2a6d"
+)
 PILOT_ISSUE = 12362
 PARENT_ACCEPTANCE_ISSUE = 12349
 MISSING_PILOT_FAILURES = "pilot facts are missing cited failure runs"
@@ -521,9 +523,7 @@ def _pilot_configuration_jobs(
     ).hexdigest()
     if blob != configuration.get("workflow_blob_sha"):
         raise ArchiveError("pilot workflow source checksum mismatch")
-    jobs = _validated_workflow_jobs(
-        source, historical_pilot=blob == PILOT_WORKFLOW_BLOB
-    )
+    jobs = _validated_workflow_jobs(source, configuration_sha256=oracle_sha256(encoded))
     if any(snippet not in source for snippet in _WORKFLOW_DRIFT_SNIPPETS):
         raise ArchiveError("pilot workflow configuration drifted")
     return jobs
@@ -1389,7 +1389,12 @@ def _pair_equivalence(
     if _job_block_reason(left) is not None or _job_block_reason(right) is not None:
         reasons.append("mandatory_or_unknown_job")
         return "not_passed"
-    names = sorted(set(JOB_KINDS) | set(left_jobs) | set(right_jobs))
+    names = sorted(
+        _expected_pilot_jobs(left.get("configuration_sha256"))
+        | _expected_pilot_jobs(right.get("configuration_sha256"))
+        | set(left_jobs)
+        | set(right_jobs)
+    )
     compared = oracle_equivalent(left_jobs, right_jobs, job_names=names)
     if compared["equivalent"] is True and _pilot_api_jobs_equivalent(left, right):
         return "passed"
@@ -1699,17 +1704,22 @@ def _load_unique_workflow(text: str) -> Any:
         loader.dispose()
 
 
+def _expected_pilot_jobs(configuration_sha256: object) -> set[str]:
+    jobs = set(JOB_KINDS)
+    if configuration_sha256 == PILOT_WORKFLOW_SHA256:
+        jobs.remove("actions-health")
+    return jobs
+
+
 def _validated_workflow_jobs(
-    text: str, *, historical_pilot: bool = False
+    text: str, *, configuration_sha256: object = None
 ) -> dict[str, Any]:
     try:
         workflow = _load_unique_workflow(text)
     except yaml.YAMLError as exc:
         raise ArchiveError("malformed nightly workflow") from exc
     jobs = workflow.get("jobs") if isinstance(workflow, Mapping) else None
-    expected_jobs = set(JOB_KINDS)
-    if historical_pilot:
-        expected_jobs.remove("actions-health")
+    expected_jobs = _expected_pilot_jobs(configuration_sha256)
     if not isinstance(jobs, dict) or set(jobs) != expected_jobs:
         raise ArchiveError("JOB_KINDS drifted from nightly.yml")
     for name, job in jobs.items():
