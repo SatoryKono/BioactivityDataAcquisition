@@ -69,7 +69,9 @@ Use it when you need to answer:
 GitHub live state snapshot: GET `2026-09-09`, then `docs.yml` and
 `compiled-artifacts-block.yml` re-enabled the same day as PR-gate reusable
 owners (#10263). Do not re-enable other disabled canonical lanes without a
-new spend/safety decision.
+new spend/safety decision. The two memory workflows were observed `active`
+by API on 2026-11-27, but have only `workflow_dispatch` triggers; CircleCI is
+the intended schedule owner, with schedule operation NOT_PROVEN (#13421).
 
 ### PR / push verification workflows
 
@@ -124,8 +126,8 @@ new spend/safety decision.
 | `diagram-nightly.yml` | `Diagram Nightly Regression` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Nightly canary and phase2 stay off; PR lint is docs.yml (#11196) |
 | `docs-kpi-weekly.yml` | `Docs KPI Weekly` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Manual workflow_dispatch docs KPI: runtime-mirror and freshness drift, then check-kpi. No schedule |
 | `github-settings-quarterly-review.yml` | `Quarterly GitHub Settings Review` | `workflow_call`, `workflow_dispatch` | `active` | `active` | Read-only quarterly GitHub settings review delegated by `nightly.yml` |
-| `memory-freshness.yml` | `Memory freshness` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Repository memory freshness and contract checks |
-| `memory-retention.yml` | `Memory Retention Policy` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Weekly and change-triggered non-destructive episodic-memory retention policy check |
+| `memory-freshness.yml` | `Memory freshness` | `workflow_dispatch` | `active` | `active` | Manual repository memory freshness and contract checks; CircleCI owns PR coverage |
+| `memory-retention.yml` | `Memory Retention Policy` | `workflow_dispatch` | `active` | `active` | Manual non-destructive episodic-memory retention policy check |
 | `mutation-testing.yml` | `Mutation Testing` | `workflow_call`, `workflow_dispatch` | `active` | `active` | Sole Sunday mutation owner (#10263 exception); push and pull_request stay off |
 | `nightly.yml` | `Nightly` | `schedule`, `workflow_dispatch` | `active` | `active` | Daily 03:00 UTC, including tests, E2E, duplication, import-linter, and generated artifacts. Security and zizmor stay daily. CodeQL, Scorecard, and branch hygiene stay Monday. Mutation stays Sunday |
 | `nightly-replay-parity.yml` | `nightly-replay-parity` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Replay/determinism parity validation |
@@ -170,8 +172,6 @@ enable heavy nightlies without Actions spend evidence. Do not reopen #9975 or
 | `diagram-nightly.yml` | Nightly canary and full-corpus phase2. Actions billing will not return. PR diagram lint stays in `docs.yml` (#11196) |
 | `docs-kpi-weekly.yml` | Optional manual KPI (`workflow_dispatch` only). Do not add a cron or change KPI thresholds to justify enable |
 | `labeler.yml` | `pull_request_target`; re-enable only after live GitHub labels match `.github/labeler.yml` and `docs/00-project/governance/github-label-taxonomy.md` |
-| `memory-freshness.yml` | Optional memory lane; not a `pr-required.yml` owner |
-| `memory-retention.yml` | Optional memory lane; extra scheduled spend |
 | `nightly-replay-parity.yml` | Heavy nightly replay; extra spend |
 | `performance-nightly.yml` | Heavy nightly benchmarks; extra spend |
 | `port-contracts.yml` | Supporting contracts lane; not invoked by `pr-required.yml` |
