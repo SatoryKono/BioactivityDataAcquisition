@@ -21,6 +21,18 @@ pytestmark = pytest.mark.unit
 
 HEAD = "a" * 40
 
+
+def test_scripts_catalog_routes_to_governance_checks() -> None:
+    repo_root = Path(__file__).resolve().parents[5]
+    path = "scripts/engineering/repo/catalog.yaml"
+    owners = {
+        "tests/architecture/test_scripts_catalog_governance.py",
+        "tests/architecture/test_scripts_inventory_manifest.py",
+    }
+    assert owners <= set(affected_pytest_targets([path], repo_root=repo_root))
+    assert owners <= set(build_shadow_compare([path], repo_root=repo_root)["selected"])
+
+
 _INVENTORY_REVIEW_OWNERS = {
     "tests/architecture/test_external_resource_inventory_catalog.py",
     "tests/unit/scripts/engineering/qa/test_requalify_external_resource_inventory.py",

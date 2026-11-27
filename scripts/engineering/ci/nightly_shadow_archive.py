@@ -67,6 +67,7 @@ MISSING_PILOT_FAILURES = "pilot facts are missing cited failure runs"
 _SYNTHETIC_EVENTS = frozenset({"synthetic", "fabricated"})
 _EXTERNAL_OBSERVATION = frozenset({"external_state", "external_state_security"})
 REQUIRED_EXTERNAL_JOBS = (
+    "actions-health",
     "security",
     "zizmor",
     "codeql",
@@ -81,6 +82,7 @@ WEEKDAYS = frozenset({"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"})
 UTC_WEEKDAY_NAMES = ("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
 QUARTER_MONTHS = frozenset({"01", "04", "07", "10"})
 JOB_KINDS: dict[str, str] = {
+    "actions-health": "external_daily",
     "clock": "clock",
     "tests": "deterministic",
     "e2e": "deterministic",
@@ -89,6 +91,7 @@ JOB_KINDS: dict[str, str] = {
     "generated-artifact-daily": "deterministic",
     "security": "security_daily",
     "zizmor": "security_daily",
+    "codeql-freshness": "security_daily_after_codeql",
     "codeql": "weekly_monday",
     "scorecard": "weekly_monday",
     "branch-hygiene": "weekly_monday",
@@ -96,6 +99,7 @@ JOB_KINDS: dict[str, str] = {
     "github-settings": "quarterly",
 }
 CHECK_CLASS: dict[str, str] = {
+    "actions-health": "external_state",
     "clock": "clock",
     "tests": "deterministic",
     "e2e": "deterministic",
@@ -105,20 +109,24 @@ CHECK_CLASS: dict[str, str] = {
     "mutation": "deterministic",
     "security": "external_state_security",
     "zizmor": "external_state_security",
+    "codeql-freshness": "external_state_security",
     "codeql": "external_state_security",
     "scorecard": "external_state_security",
     "branch-hygiene": "external_state",
     "github-settings": "external_state",
 }
 _CADENCE_LABEL = {
+    "external_daily": "every_scheduled_nightly",
     "clock": "every_scheduled_nightly",
     "deterministic": "every_scheduled_nightly",
     "security_daily": "every_scheduled_nightly",
+    "security_daily_after_codeql": "every_scheduled_nightly",
     "weekly_monday": "weekly_monday",
     "weekly_sunday": "weekly_sunday",
     "quarterly": "quarterly",
 }
 _CADENCE_CONDITIONS = {
+    "security_daily_after_codeql": "!cancelled()",
     "weekly_monday": "needs.clock.outputs.dow == 'Mon'",
     "weekly_sunday": "needs.clock.outputs.dow == 'Sun'",
     "quarterly": (
@@ -266,7 +274,13 @@ def job_duty(
     kind = JOB_KINDS.get(name)
     if kind is None:
         return "unknown"
-    if kind in {"clock", "deterministic", "security_daily"}:
+    if kind in {
+        "external_daily",
+        "clock",
+        "deterministic",
+        "security_daily",
+        "security_daily_after_codeql",
+    }:
         return "mandatory"
     force = parse_force(force_weekly)
     weekday = dow if isinstance(dow, str) and dow in WEEKDAYS else None
@@ -1690,6 +1704,18 @@ def _load_unique_workflow(text: str) -> Any:
         loader.dispose()
 
 
+def _validate_job_dependencies(
+    name: str, job: Mapping[str, Any], expected: str
+) -> None:
+    needs = job.get("needs", [])
+    dependencies = [needs] if isinstance(needs, str) else needs
+    if JOB_KINDS[name] == "security_daily_after_codeql":
+        if dependencies != ["codeql"]:
+            raise ArchiveError(f"nightly CodeQL dependency drifted: {name}")
+    elif expected and "clock" not in dependencies:
+        raise ArchiveError(f"nightly clock dependency drifted: {name}")
+
+
 def _validated_workflow_jobs(text: str) -> dict[str, Any]:
     try:
         workflow = _load_unique_workflow(text)
@@ -1706,9 +1732,7 @@ def _validated_workflow_jobs(text: str) -> dict[str, Any]:
             expected
         ):
             raise ArchiveError(f"nightly cadence drifted: {name}")
-        needs = job.get("needs", [])
-        if expected and "clock" not in ([needs] if isinstance(needs, str) else needs):
-            raise ArchiveError(f"nightly clock dependency drifted: {name}")
+        _validate_job_dependencies(name, job, expected)
     return jobs
 
 

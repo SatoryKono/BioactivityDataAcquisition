@@ -152,6 +152,7 @@ alert ownership.
 | Languages | Python, Actions (`build-mode: none`) |
 | Token permissions | Workflow `contents: read`; job `security-events: write` for SARIF upload |
 | Cadence | Monday Nightly via `workflow_call`, plus manual `workflow_dispatch` on the selected ref |
+| Freshness | Daily Nightly check fails if the latest CodeQL analysis on `main` is missing or more than seven days old |
 | Alert triage owner | BioETL Team (security lane); CODEOWNERS fallback `@SatoryKono` |
 | Alert triage cadence | Weekly on Monday, together with OpenSSF Scorecard |
 | Duplicate scans | Forbidden. Default setup stays off. |
