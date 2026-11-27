@@ -37,8 +37,6 @@ docs_code_zones:
 
 root_tooling_roots:
   approved_roots:
-    - path: .circleci
-      role: historical_circleci_project_configuration
     - path: .agents
       role: derived_native_agent_skill_discovery_surface
     - path: .amp
