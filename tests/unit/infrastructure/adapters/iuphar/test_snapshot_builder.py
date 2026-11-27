@@ -71,13 +71,13 @@ def test_reviewed_inputs_bind_local_class_and_supplements_without_changing_offic
     acquisition, acquisition_hash, coverage, coverage_hash = synthetic_snapshot_sources(
         tmp_path / "sources"
     )
-    profile = {
-        "acquisition": acquisition,
-        "acquisition_sha256": acquisition_hash,
-        "coverage": coverage,
-        "coverage_sha256": coverage_hash,
-    }
-    baseline = build_snapshot_bundle(**profile, output_dir=tmp_path / "baseline")
+    baseline = build_snapshot_bundle(
+        acquisition=acquisition,
+        acquisition_sha256=acquisition_hash,
+        coverage=coverage,
+        coverage_sha256=coverage_hash,
+        output_dir=tmp_path / "baseline",
+    )
     csv_sources = {
         "_IUPHAR_family.csv": b"family_id,family_name\n123,example\n",
         "_IUPHAR_target.csv": b"target_id,target_name\n2,example\n",
@@ -128,7 +128,10 @@ def test_reviewed_inputs_bind_local_class_and_supplements_without_changing_offic
     )
     out = tmp_path / "reviewed"
     bundle = build_snapshot_bundle(
-        **profile,
+        acquisition=acquisition,
+        acquisition_sha256=acquisition_hash,
+        coverage=coverage,
+        coverage_sha256=coverage_hash,
         output_dir=out,
         matching_policy_version=REVIEWED_CLASS_POLICY_VERSION,
         reviewed_inputs=review,
