@@ -67,6 +67,7 @@ MISSING_PILOT_FAILURES = "pilot facts are missing cited failure runs"
 _SYNTHETIC_EVENTS = frozenset({"synthetic", "fabricated"})
 _EXTERNAL_OBSERVATION = frozenset({"external_state", "external_state_security"})
 REQUIRED_EXTERNAL_JOBS = (
+    "actions-health",
     "security",
     "zizmor",
     "codeql",
@@ -81,6 +82,7 @@ WEEKDAYS = frozenset({"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"})
 UTC_WEEKDAY_NAMES = ("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
 QUARTER_MONTHS = frozenset({"01", "04", "07", "10"})
 JOB_KINDS: dict[str, str] = {
+    "actions-health": "external_daily",
     "clock": "clock",
     "tests": "deterministic",
     "e2e": "deterministic",
@@ -97,6 +99,7 @@ JOB_KINDS: dict[str, str] = {
     "github-settings": "quarterly",
 }
 CHECK_CLASS: dict[str, str] = {
+    "actions-health": "external_state",
     "clock": "clock",
     "tests": "deterministic",
     "e2e": "deterministic",
@@ -113,6 +116,7 @@ CHECK_CLASS: dict[str, str] = {
     "github-settings": "external_state",
 }
 _CADENCE_LABEL = {
+    "external_daily": "every_scheduled_nightly",
     "clock": "every_scheduled_nightly",
     "deterministic": "every_scheduled_nightly",
     "security_daily": "every_scheduled_nightly",
@@ -271,6 +275,7 @@ def job_duty(
     if kind is None:
         return "unknown"
     if kind in {
+        "external_daily",
         "clock",
         "deterministic",
         "security_daily",

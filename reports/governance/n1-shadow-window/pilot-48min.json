@@ -140,6 +140,12 @@
     "jobs": [
       {
         "cadence": "every_scheduled_nightly",
+        "name": "actions-health",
+        "observation_class": "external_state",
+        "schedule_kind": "external_daily"
+      },
+      {
+        "cadence": "every_scheduled_nightly",
         "name": "clock",
         "observation_class": "clock",
         "schedule_kind": "clock"
@@ -231,6 +237,7 @@
     ],
     "schema_version": 1,
     "security_and_external_jobs": [
+      "actions-health",
       "branch-hygiene",
       "codeql",
       "codeql-freshness",
@@ -288,7 +295,7 @@
     "successful_scheduled_nightly_total_count": 0
   },
   "schema_version": 1,
-  "sha256": "5cb092abc10dee6f101e59ce5488bdfcce3d83aea63be8a77bfb938b79cf39b9",
+  "sha256": "79a6f9c86262a7258ce09574eb38fed75f36b2747d070a8ecac5e3c30fe40258",
   "shallow_checkout": false,
   "status": "not_opened",
   "synthetic_events": false,
