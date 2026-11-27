@@ -19,10 +19,12 @@ ______________________________________________________________________
 
 Record the candidate SHA and the `pr-gate-complete` result. A successful coordinator job does not by itself block merge: on the 2026-10-16 read, classic branch protection was absent and rulesets `13643213` and `15730586` were `enforcement: disabled`.
 <!-- policy-anchor:deployment-provider --> `deployment.provider=github_actions`. <!-- policy-anchor:ruleset-enforcement-mode --> Ruleset `13643213` is `enforcement: active` (GET 2026-11-06); rulesets `15730586` and `24517966` were deleted on 2026-11-02 (settings-audit phase 0). <!-- policy-anchor:stored-ruleset-contexts --> The active rule requires `pr-gate-complete` (GET 2026-11-06); the rule binds this context to GitHub Actions App 15368 (integration_id=15368). <!-- policy-anchor:target-gha-context --> `pr-gate-complete` is the context stored on ruleset `13643213` since 2026-11-02. <!-- policy-anchor:enforcement-verified-date --> `2026-10-09` is not proof of active merge protection. <!-- policy-anchor:merge-block --> A successful `pr-gate-complete` does not by itself block merge; the active server rule requires it. An offline catalog match does not confirm live server rulesets. Positive/negative merge acceptance was not run in this audit.
-GitHub Actions `release.yml` is manually dispatched: it builds distributions,
-tests installation and can publish to TestPyPI on a non-dry run. Its definition
-does not publish to production PyPI or upload GitHub Release assets. A build-only
-success cannot satisfy a publish checkpoint. See the [migration workflow map](ci-workflow-map.md).
+GitHub Actions `release.yml` defines manual distribution builds, install tests
+and optional TestPyPI publication, but its keep-disabled policy conflicts with
+the observed active API state. Do not dispatch it without a new owner decision;
+obtain separately approved release evidence instead. The definition does not
+publish to production PyPI or upload GitHub Release assets. A build-only success
+cannot satisfy a publish checkpoint. See the [migration workflow map](ci-workflow-map.md).
 
 ## Release metadata
 

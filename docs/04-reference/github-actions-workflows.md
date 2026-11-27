@@ -147,7 +147,7 @@ retired; a current schedule owner and automatic execution are not established
 | `docker.yml` | `Docker Build & Compose Validation` | `workflow_call`, `workflow_dispatch` | `active` | `active` | Validation only. Checkout is `github.sha`. `main-integrity.yml` calls this workflow and stops at `docker-complete`. Pull requests use `docker-lane` |
 | `docker-publish.yml` | `Docker GHCR Publish` | `workflow_call` | `active` | `active` | No-checkout GHCR promotion of the already scanned image. `main-ghcr-publish.yml` calls it with `source-sha` and `artifact-run-id` |
 | `labeler.yml` | `Labeler` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Applies repository labels to PRs |
-| `release.yml` | `Release` | `workflow_dispatch` | `active` (GET 2026-11-27) | `active` | Manual build and install test; non-dry run can publish to TestPyPI, not production PyPI or GitHub Release assets |
+| `release.yml` | `Release` | `workflow_dispatch` | `active` | `keep-disabled` | Policy/live drift: GET 2026-11-27 reports active despite #11182; no automatic release trigger or production publication |
 
 ### Reusable / compatibility-only helpers
 
@@ -179,6 +179,7 @@ enable heavy nightlies without Actions spend evidence. Do not reopen #9975 or
 | `pr-hygiene.yml` | Depends on the `stale` label from `stale.yml`; keep both disabled together |
 | `provider-contract-drift.yml` | Optional drift lane; not a `pr-required.yml` owner |
 | `quality-debt-weekly.yml` | Optional weekly scorecard; do not raise debt budgets to justify enable |
+| `release.yml` | Policy remains keep-disabled (#11182); API observed active on 2026-11-27. Do not infer approval to run it or restore release triggers |
 | `reusable-mermaid-setup.yml` | Deprecated; use `.github/actions/setup-mermaid` |
 | `reusable-setup.yml` | Deprecated; use `.github/actions/setup-python-uv` |
 | `semantic-governance.yml` | Overlaps schema/docs governance; not a `pr-required.yml` owner |
