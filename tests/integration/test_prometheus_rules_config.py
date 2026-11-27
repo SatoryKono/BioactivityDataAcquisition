@@ -1765,6 +1765,24 @@ def test_monitoring_stack_alerts_reference_up_metric_and_checklist_runbook() -> 
         )
 
 
+def test_pipeline_failure_runbook_trigger_matches_alert_rules() -> None:
+    runbook_path = "docs/05-operations/runbooks/pipeline-failure-critical.md"
+    trigger = (
+        Path(runbook_path)
+        .read_text(encoding="utf-8")
+        .split("## Trigger\n", 1)[1]
+        .split("\n## ", 1)[0]
+    )
+    documented = re.findall(r"- ALERT: `([^`]+)` — severity: (\w+)\.", trigger)
+    rules = {
+        name: rule["labels"]["severity"]
+        for name, rule in _build_rule_map(_load_rules()).items()
+        if rule.get("annotations", {}).get("runbook") == runbook_path
+    }
+    assert len(documented) == 4
+    assert dict(documented) == rules
+
+
 def test_pipeline_runtime_alerts_reference_expected_metrics() -> None:
     payload = _load_rules()
     rule_map = _build_rule_map(payload)
