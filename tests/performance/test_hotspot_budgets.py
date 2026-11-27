@@ -397,17 +397,17 @@ def test_silver_prepare_arrow_data_budget(
         )
 
     result = _run_sync_benchmark(op, repeats=_REPEATS_FAST)
-    _assert_budget(
-        benchmark_key="silver_prepare_arrow_2000",
-        budget=budget,
-        result=result,
-        processed_records=len(records),
-    )
     _record_observation(
         benchmark_key="silver_prepare_arrow_2000",
         result=result,
         processed_records=len(records),
         obs_out_path=_obs_out_from_config(pytestconfig),
+    )
+    _assert_budget(
+        benchmark_key="silver_prepare_arrow_2000",
+        budget=budget,
+        result=result,
+        processed_records=len(records),
     )
 
 
@@ -457,17 +457,17 @@ def test_silver_write_append_budget(
             asyncio.set_event_loop_policy(policy_cls())
 
     result = asyncio.run(run())
-    _assert_budget(
-        benchmark_key="silver_write_append_600",
-        budget=budget,
-        result=result,
-        processed_records=600,
-    )
     _record_observation(
         benchmark_key="silver_write_append_600",
         result=result,
         processed_records=600,
         obs_out_path=_obs_out_from_config(pytestconfig),
+    )
+    _assert_budget(
+        benchmark_key="silver_write_append_600",
+        budget=budget,
+        result=result,
+        processed_records=600,
     )
 
 
@@ -524,17 +524,17 @@ def test_silver_write_merge_budget(
             asyncio.set_event_loop_policy(policy_cls())
 
     result = asyncio.run(run())
-    _assert_budget(
-        benchmark_key="silver_write_merge_600",
-        budget=budget,
-        result=result,
-        processed_records=600,
-    )
     _record_observation(
         benchmark_key="silver_write_merge_600",
         result=result,
         processed_records=600,
         obs_out_path=_obs_out_from_config(pytestconfig),
+    )
+    _assert_budget(
+        benchmark_key="silver_write_merge_600",
+        budget=budget,
+        result=result,
+        processed_records=600,
     )
 
 
@@ -576,17 +576,17 @@ def test_crossref_batch_adapter_budget(pytestconfig: pytest.Config) -> None:
         )
 
     result = asyncio.run(run())
-    _assert_budget(
-        benchmark_key="crossref_batch_fetch_200",
-        budget=budget,
-        result=result,
-        processed_records=len(dois),
-    )
     _record_observation(
         benchmark_key="crossref_batch_fetch_200",
         result=result,
         processed_records=len(dois),
         obs_out_path=_obs_out_from_config(pytestconfig),
+    )
+    _assert_budget(
+        benchmark_key="crossref_batch_fetch_200",
+        budget=budget,
+        result=result,
+        processed_records=len(dois),
     )
 
 
@@ -627,15 +627,15 @@ def test_atomic_write_group_budget(
         p95_latency_s=_percentile(durations, 0.95),
         all_durations=durations,
     )
-    _assert_budget(
-        benchmark_key="atomic_write_group_50",
-        budget=budget,
-        result=result,
-        processed_records=file_count,
-    )
     _record_observation(
         benchmark_key="atomic_write_group_50",
         result=result,
         processed_records=file_count,
         obs_out_path=_obs_out_from_config(pytestconfig),
+    )
+    _assert_budget(
+        benchmark_key="atomic_write_group_50",
+        budget=budget,
+        result=result,
+        processed_records=file_count,
     )
