@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "catalog_ref": "9c748332854748cfcdac3533f3e582c13f49a7e6",
+  "source_ref": "1a459aa85f2fe16b3fbfc66df5473ac1dd421d9e",
+  "source_reviews": {
+    "src/bioetl/infrastructure/storage/target_migration_dependencies.py": "The existing confined SHA-256 reference reader visits the reviewed register and supplemental CSV references in the snapshot. The existing verified copy and backup operations keep their file destinations and checks."
+  }
+}
