@@ -9,7 +9,7 @@ Reviewers:
 - BioETL Team
   Priority: P2
   Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-  Last verified: '2026-11-23'
+  Last verified: '2026-11-27'
 
 ______________________________________________________________________
 
@@ -588,6 +588,66 @@ SHA-256 of the accepted receipt. This creates new profile bytes and a new
 profile digest. The dependency is noncircular: the receipt binds the snapshot;
 the final profile binds the snapshot and receipt. Re-pin the final profile's
 digest before building enriched candidates.
+
+#### Independent reference for the reviewed V31 policy
+
+The 2026-11-27 independent review froze GtoPdb 2026.3.1 at 3,390 source
+records for 3,304 distinct IDs. The admitted scope contains 3,154 IDs and
+9,057 species variants. The review records 150 exclusions and leaves
+`allows_not_found` false. Official annotations retain precedence.
+
+The only supplemental direct anchor is human UniProt `P35613` for existing
+official target `3127` (`CHEMBL3580492`, family `852`,
+`Other Protein Target`). The reviewer confirmed this mapping against both
+legacy CSVs and the official release. For bovine `CHEMBL4471` (`P00735`),
+the class `Enzyme.Hydrolase` has separate orthology and bovine EC evidence.
+The human ortholog `P00734` supports the recorded relationship. The bovine
+direct IUPHAR ID stays null.
+
+The admitted register has 1,730 explicitly approved manual rows, including
+21 approved cluster rows. The 728 diagnostic cluster proposals are excluded.
+The preliminary `ZNF664` entry for `CHEMBL4105757` remains excluded. The
+review verified the decisions and exact keys in the frozen Gold data.
+
+The 1,000-row shadow cohort was selected from retained Bronze and includes
+all 64 historical IUPHAR ID cases, the orthology case, and the supplemental
+anchor. Source precedence, label definitions, and reviewed/unreviewed row
+membership belong to the frozen independent reference. A separate byte-pinned
+comparison verified the 107 shadow rows that used the manual fallback
+against the approved identity keys, classes, and evidence references. All
+107 had a null direct IUPHAR ID.
+
+| Input or proof | SHA-256 |
+| --- | --- |
+| Raw official CSV | `9e91ae4eed1e147f0c5b01dd2e0645c2d57edb39442114d3128c70232b0d39fb` |
+| `_IUPHAR_target.csv` | `4756ff664c195aa5b54031d4403fe8eed8a144abfe9a6c3882978d1ec445b440` |
+| `_IUPHAR_family.csv` | `3d56abada7f06068af153eca88e3b0d9fc04755ba319fd2d9acc00033875ecc3` |
+| Reviewed scope | `b5b06e9679bf776dc3ae222ffa57df8661d11f31ab8baaf4c51e671f0a95fc6e` |
+| Admitted reviewed inputs | `18ebd722d13b7bee3db3397d356d9f414276e917ec87a8ef8a2cfe37a3b5f6a1` |
+| Independent evidence | `0e40ee4c6368b6555ebe8c35b3ed0e00ae1f3f3017c9daf9dc9a5ac5ce6fc516` |
+| Stage0 V2 manifest | `2d877df31e6cd0ecd65efa323cd7d7ef2455fd3abc1d195dfaf9879172dd34f1` |
+| Frozen expected labels | `9cb232b8d11084b2533ecf2215648a00e1cc5306f9cb615d3759c1a848720798` |
+| Shadow profile | `abf6442c15d3311ae7570f97a7c915001f5ed77a6c9d082b22930ef43053d5b8` |
+| Shadow proof | `61493626a053e0ad6c12e98a4f69d9b4636fe887c82a20c42a37a0b148c9089a` |
+| Manual provenance comparison | `e153ab0c08db6fadda5886c4764edcc76ea6da323ead8fc7dad994cc25bce333` |
+| Snapshot manifest | `2dcfde4b7790845383781b79e540b52ede0abf01def04a53cf952fd2c7bc0f1e` |
+| RF-008 V2 receipt | `d4ce8e3ee3a4803d09902ce1658e2f0213100fcf546e57e5ef3bac953ba2b1da` |
+| Enrich profile with the required receipt | `b02152d8cce606caa43915f9039c2275b99a098861e52acf47643a128640dd15` |
+
+Shadow run `666e51a7-229f-5dca-9270-d835243301cb` completed on
+`9c0aef926ad25a0c84fe48011829e413b4d24c2a`. RF-008 run
+`429c4aed-51ff-42d6-af51-321a44f1fdd3` returned `PASS` on
+`c9debf63adff9e0d62cb149189b1a1915822df00`. The producer verified
+all 66 independent cases, including 64/64 historical IDs and their classes,
+as well as evidence integrity, pipeline integration and deterministic output.
+The final profile loaded with `require_acceptance=True`. The receipt records
+`scientific_status: bounded_reference_cases_only`, `biological_accuracy_accepted: false`
+and a separate RF-008-local CI status of `NOT_RUN`.
+
+Retain the receipt and its artifact reference closure in
+`reports/local/iuphar-13408-admission-20261127/rf008-429c4aed-51ff-42d6-af51-321a44f1fdd3/`
+on the rehearsal host. This receipt qualifies the profile for the complete
+V31 copy rehearsal.
 
 ### Prepare and promote complete physical tables
 
