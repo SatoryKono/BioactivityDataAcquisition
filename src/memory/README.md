@@ -227,10 +227,12 @@ python -m memory.tooling.review_curated --json
 python -m memory.tooling.check_freshness --json
 ```
 
-The scheduled `memory-freshness.yml` gate validates catalog integrity, curated
-review age, graph projection age/source identity, and the MCP seed. A stale
-scheduled curated-memory result creates or updates one deduplicated GitHub
-Issue. Graph projections are rebuild-only: absence is valid, but a materialized
+CircleCI `memory-freshness` validates catalog integrity, curated review age,
+graph projection age/source identity, and the MCP seed as part of `pr-gate`.
+CircleCI is also the intended schedule owner, but current schedule operation is
+NOT_PROVEN pending #13421; scheduled failure notifications are deferred. The
+GitHub `memory-freshness.yml` workflow is manual dispatch only. Graph projections
+are rebuild-only: absence is valid, but a materialized
 `graph/projections/manifest.json` must be at most 30 days old and match the
 SHA-256 of `ontology.yaml` plus `mappings.yaml`.
 
