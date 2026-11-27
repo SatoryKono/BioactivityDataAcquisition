@@ -3,7 +3,7 @@ on:
   push:
     branches: ["verify/pr-13435-a30dcb2d"]
 concurrency:
-  group: verify-pr-13435-fast-retry
+  group: verify-pr-13435-baseline-diagnostics
   cancel-in-progress: true
 permissions:
   contents: read
@@ -14,11 +14,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [test-fast]
+        target: [test-fast, diagnostic]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          ref: 8e2d88166f63dc3c20f916499129717998654470
+          ref: 52853232831a93a16055734ef67ba5cc2593eaea
           persist-credentials: false
           fetch-depth: 0
       - name: Fetch pinned external resource inventory evidence
@@ -31,4 +31,9 @@ jobs:
       - name: Run requested Makefile target
         env:
           TARGET: ${{ matrix.target }}
-        run: make "$TARGET"
+        run: |
+          if [ "$TARGET" = diagnostic ]; then
+            uv run coverage run --branch -m pytest -q tests/architecture/test_layer_dependencies.py::test_dead_code_vulture tests/performance/test_hotspot_budgets.py::test_crossref_batch_adapter_budget
+          else
+            make test-fast
+          fi
