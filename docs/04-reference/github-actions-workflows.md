@@ -306,3 +306,12 @@ YAML and are not repository required-check owners.
 - [Project Navigator](../00-project/00-map.md)
 - [Workflow Catalog](workflow-catalog.md)
 - [CI workflow map](../05-operations/ci-workflow-map.md)
+
+## Nightly Actions health
+
+The nightly `actions-health` job checks the previous 24 hours of Actions runs for
+failed jobs with no steps and reports their run IDs in the job summary. Heavy
+nightly jobs wait for the check to succeed. This signature is not specific to
+billing, and a billing lock can also prevent the health job from starting;
+monitor missing nightly runs independently. See the [Actions billing recovery
+runbook](../05-operations/runbooks/actions-quota.md).
