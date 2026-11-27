@@ -277,6 +277,7 @@ _RAW_CANONICAL_SCHEMA_REGISTRY: tuple[tuple[str, str, str, tuple[str, ...]], ...
             "descriptors",
             "components",
             "enriched_components",
+            "target_classification_outcome",
             "protein_classification_summary",
             "protein_function",
             "disease_pharma",
