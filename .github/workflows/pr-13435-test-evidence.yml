@@ -2,6 +2,9 @@ name: PR 13435 full test evidence
 on:
   push:
     branches: ["verify/pr-13435-a30dcb2d"]
+concurrency:
+  group: verify-pr-13435-full-tests
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:
@@ -15,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          ref: a1f169d6ec75344d38cd32f034506c74301f8655
+          ref: 6b0452d871a18371f5f2230fe963d0490c961192
           persist-credentials: false
           fetch-depth: 0
       - name: Fetch pinned external resource inventory evidence
