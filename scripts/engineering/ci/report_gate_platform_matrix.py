@@ -135,13 +135,22 @@ def github_jobs() -> dict:
 def unmatched_rows(github: dict, mapped: set[str]):
     for candidate, (job, path, line, events) in github.items():
         if candidate not in mapped:
+            job_features = features(job, job.get("strategy", {}).get("matrix"))
+            if candidate == "codeql.yml:analyze":
+                match = re.search(
+                    r"^\s*runs-on:\s*\S+\s+# canary-verified: (.+)$",
+                    path.read_text(encoding="utf-8"),
+                    re.MULTILINE,
+                )
+                if match:
+                    job_features += f", canary-verified: {match.group(1)}"
             yield (
                 row(
                     "контур не найден",
                     f"`{candidate}` ({path.as_posix()}:{line})",
                     "[UNIQUE-GH]",
                     "—",
-                    features(job, job.get("strategy", {}).get("matrix")),
+                    job_features,
                     "—",
                     "—",
                     f"{cell(events)} / {cell(job.get('if'))}",
