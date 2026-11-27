@@ -1699,6 +1699,18 @@ def _load_unique_workflow(text: str) -> Any:
         loader.dispose()
 
 
+def _validate_job_dependencies(
+    name: str, job: Mapping[str, Any], expected: str
+) -> None:
+    needs = job.get("needs", [])
+    dependencies = [needs] if isinstance(needs, str) else needs
+    if JOB_KINDS[name] == "security_daily_after_codeql":
+        if dependencies != ["codeql"]:
+            raise ArchiveError(f"nightly CodeQL dependency drifted: {name}")
+    elif expected and "clock" not in dependencies:
+        raise ArchiveError(f"nightly clock dependency drifted: {name}")
+
+
 def _validated_workflow_jobs(text: str) -> dict[str, Any]:
     try:
         workflow = _load_unique_workflow(text)
@@ -1715,13 +1727,7 @@ def _validated_workflow_jobs(text: str) -> dict[str, Any]:
             expected
         ):
             raise ArchiveError(f"nightly cadence drifted: {name}")
-        needs = job.get("needs", [])
-        dependencies = [needs] if isinstance(needs, str) else needs
-        if JOB_KINDS[name] == "security_daily_after_codeql":
-            if dependencies != ["codeql"]:
-                raise ArchiveError(f"nightly CodeQL dependency drifted: {name}")
-        elif expected and "clock" not in dependencies:
-            raise ArchiveError(f"nightly clock dependency drifted: {name}")
+        _validate_job_dependencies(name, job, expected)
     return jobs
 
 
