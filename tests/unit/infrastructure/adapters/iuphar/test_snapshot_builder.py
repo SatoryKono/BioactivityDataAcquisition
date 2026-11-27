@@ -334,6 +334,7 @@ def test_builder_keeps_public_identity_with_three_distinct_species(tmp_path):
     ]:
         result = _run(loaded, target_id="1", uniprot=accession, organism=taxon)
         assert result.result.matched_target_id == "1"
+        assert result.annotation is not None
         assert result.annotation.taxon == taxon
         assert result.result.iuphar_class == "Receptor"
         assert result.annotation.type_raw is None
@@ -358,6 +359,7 @@ def test_species_ambiguous_explicit_id_requires_taxon_but_unique_accession_can_r
     assert _run(loaded, target_id="1").result.match_status == "insufficient_input"
     resolved = _run(loaded, target_id="1", uniprot="Q12345")
     assert resolved.result.match_status == "matched"
+    assert resolved.annotation is not None
     assert resolved.annotation.taxon == "10116"
 
 
@@ -369,6 +371,7 @@ def test_csv_type_is_family_evidence_and_mixed_families_are_preserved(tmp_path):
     root, bundle = synthetic_snapshot_bundle(tmp_path, rows=rows)
     loaded = load_snapshot_manifest(root / "snapshot.json", bundle.snapshot_sha256)
     row = _run(loaded, target_id="498", organism="9606")
+    assert row.annotation is not None
     assert row.annotation.type_raw is None
     assert set(row.annotation.family_ids) == {"78", "471"}
     assert row.result.iuphar_class is None
