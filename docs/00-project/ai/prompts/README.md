@@ -115,13 +115,15 @@ in `scripts/ai/prompts/check.py` (per-card override `max_rendered_lines`).
 ## Compile (ADR-060)
 
 ```text
-python -m scripts.ai.prompts compile --domain docs --profile audit-readonly
+python -m scripts.ai.prompts.compile --domain docs --profile audit-readonly --write
 python -m scripts.ai.prompts render prompt.audit.cycle --param SCOPE=src/bioetl --param DOMAIN=docs
 python -m scripts.ai.prompts check
 ```
 
 Overlays live in `domains.yaml` (not `overlays/*.yaml`). Generated markdown is
-on-demand, not tracked.
+on-demand, not tracked. `--write` saves the card under
+`generated/<domain>/<profile>.md`; without it compilation runs in memory only.
+Generated cards are not Git-ignored: remove them after use and do not commit them.
 
 ## Related Generators
 
