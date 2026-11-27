@@ -86,14 +86,18 @@ CircleCI lane or five independent successful samples. No external schedule was
 changed or verified by this local patch.
 The prepared `replay-parity` lane retains the determinism, idempotency, composite
 resume and independent determinism recheck, with nonempty checksum comparison
-and replay artifacts. `memory-freshness` checks and publishes evidence without
-GitHub write credentials; its schedule-failure notification and PR event parity
-remain pending. Both lanes are opt-in and main-only.
-On 2026-10-05, CircleCI confirmed creation of `bioetl-memory-freshness-weekly`:
-branch `main`, `ci-lane=memory-freshness`, Monday, every month, one run during
-05:00–05:59 UTC, Scheduled Actor. This replaces the legacy 05:17 minute with
-an hourly window. Scheduled pipeline352/job6375 on main c644f2e4 passed all four freshness checks.
-Failure-notification parity remains pending.
+and replay artifacts. CircleCI `memory-freshness` checks catalog integrity,
+curated review age, graph projection age/source identity, and the MCP seed;
+it publishes evidence without GitHub write credentials. It is part of `pr-gate`
+and required by `pr-gate-complete`; its separate main-only lane is opt-in.
+CircleCI is the intended schedule owner for both memory lanes, but current
+schedule state, trigger parameters and automatic executions are NOT_PROVEN
+pending diagnosis #13421. Previously documented freshness and retention windows
+were Monday 05:00–05:59 UTC and 04:00–04:59 UTC respectively; they are not
+evidence of current operation. Both named lanes exclude `scheduled_pipeline`
+in their configuration; the effect on actual schedule events is NOT_PROVEN.
+Scheduled failure notifications are deferred: no recipient is configured or
+verified here, and no issue notification should be assumed.
 
 The main-only `e2e-replay` lane retains the five legacy replay commands:
 three matrix runs, the ChEMBL activity smoke, the 15% skip SLO, zero recurrent
@@ -127,12 +131,9 @@ zero orphan candidates, no breaches. The JSON and Markdown artifacts were
 downloaded and verified. Scheduled pipeline351/job6374 on main c644f2e4 repeated those passing KPI
 results with three verified artifacts. Notification parity remains pending;
 the legacy 04:30 minute is represented by an hourly window.
-On 2026-10-05, the CircleCI UI confirmed creation of
-`bioetl-memory-retention-weekly`: branch `main`, `ci-lane=memory-retention`,
-Monday, every month, one run during 04:00–04:59 UTC, Scheduled Actor.
-The hour-based trigger replaces the legacy 04:17 minute with a weekly window.
-Scheduled pipeline356/job6383 on main c644f2e4 passed with apply=false,
-zero candidates/removals and no policy violation; its artifact was verified.
+CircleCI `memory-retention` checks episodic retention policy in check-only mode;
+it does not prune. Its separate main-only lane is opt-in; neither a current
+weekly run nor a retention PR gate is established by the configuration.
 
 The `consolidation` lane preserves the manual canonical source/test hash artifacts
 with a ten-minute command limit. `branch-hygiene` preserves the report-only branch
@@ -257,8 +258,8 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `github-settings-quarterly-review.yml` | quarter-day gate in `nightly.yml` | CircleCI github-settings-review | Scheduled pipeline355/job6381 succeeds on main c644f2e4; JSON/Markdown report verified and policy drift remains explicit. The reusable workflow has no direct schedule; `nightly.yml` is the single GitHub Actions schedule owner and calls it on the first day of Jan/Apr/Jul/Oct |
 | `import-linter.yml` | — | CircleCI lint-arch and arch-tests | Prepared gates; full external architecture acceptance pending |
 | `labeler.yml` | — | Retain disabled label maintenance | Preserve #10263/#11234; taxonomy reconciliation is required before any future trusted replacement |
-| `memory-freshness.yml` | `17 5 * * 1` | CircleCI memory-freshness | Scheduled pipeline352/job6375 succeeds on main c644f2e4:all four freshness checks pass. Monday05UTC restored; required PR/main freshness checks accepted in main371. Scheduled failure issue-notification remains pending |
-| `memory-retention.yml` | `17 4 * * 1` | CircleCI memory-retention | Scheduled pipeline356/job6383 succeeds on main c644f2e4:apply=false,zero candidates/removals,no policy violation. Monday04UTC restored; no pruning |
+| `memory-freshness.yml` | None; formerly `17 5 * * 1` | CircleCI memory-freshness | Intended schedule owner; current schedule and automatic execution NOT_PROVEN (#13421). PR freshness is in CircleCI `pr-gate`; notifications deferred |
+| `memory-retention.yml` | None; formerly `17 4 * * 1` | CircleCI memory-retention | Intended schedule owner; current schedule and automatic execution NOT_PROVEN (#13421). Check-only; no pruning |
 | `mutation-testing.yml` | `0 0 * * 0` | Actions Sunday owner; CircleCI manual ci-lane=mutation backup | Actual scheduled pipeline340 on main d9f5b026 SUCCESS, all four targets: domain6140 72.01%, control-plane6139 78.26%, workflow-runner6138 73.42%, export-manifests6141 64.22%. All eight artifacts and complete statistics independently verified. Large targets use large4CPU/8GB and four workers; small targets retain medium/one worker. Sunday00UTC restored and read back; full scope,60-minute timeout and70/60/60/60 thresholds unchanged. Keep the CircleCI Sunday schedule paused so Actions is the weekly runner. Native scheduled_pipeline triggers do not select the CircleCI mutation workflow |
 | `nightly-replay-parity.yml` | `30 2 * * *` | CircleCI replay-parity | Main job 3366 passes four-run checksum parity; daily 02 UTC trigger accepted by scheduled pipeline 266/job 4481 on main 303ced3 (16 tests, no skips, repeated checksum files identical) |
 | `no-partial-tree-commits.yml` | — | Full-tree guard in root governance | Integrated into root-hygiene; main jobs 3500, 3529, 3549 passed the full-tree guard alongside strict root checks |
@@ -320,6 +321,8 @@ acceptance gates; workflow deletion is no longer a completion criterion.
 | `import-linter.yml` | Lint and Architecture Gates | import-linter + layer architecture |
 | `main-ghcr-publish.yml` | Main GHCR Publish | After a successful Main Integrity push on main, publish the scanned image for current HEAD through `ghcr-publish`. A stale SHA does not open a deployment |
 | `main-integrity.yml` | Main Integrity | Post-merge smoke, root hygiene, and Docker validation through `docker-complete` |
+| `memory-freshness.yml` | Memory freshness | Manual dispatch-only freshness and contract checks; CircleCI owns PR coverage |
+| `memory-retention.yml` | Memory Retention Policy | Manual dispatch-only, non-destructive retention check |
 | `mutation-testing.yml` | Mutation Testing | Sole Sunday mutation owner (#10263 exception); push and pull_request stay off |
 | `nightly.yml` | Nightly | Daily 03:00 UTC, including tests, E2E, duplication, import-linter, and generated artifacts. Security and zizmor stay daily. CodeQL, Scorecard, and branch hygiene stay Monday. Mutation stays Sunday |
 | `no-partial-tree-commits.yml` | No partial-tree commits | Reject incomplete Git trees (#11709) |
@@ -358,8 +361,6 @@ not operator routing targets. Reasons live in
 | `diagram-nightly.yml` | Diagram Nightly Regression | `keep-disabled` |
 | `docs-kpi-weekly.yml` | Docs KPI Weekly | `keep-disabled` |
 | `labeler.yml` | Labeler | `keep-disabled` |
-| `memory-freshness.yml` | Memory freshness | `keep-disabled` |
-| `memory-retention.yml` | Memory Retention Policy | `keep-disabled` |
 | `nightly-replay-parity.yml` | nightly-replay-parity | `keep-disabled` |
 | `performance-nightly.yml` | Performance Nightly | `keep-disabled` |
 | `port-contracts.yml` | Port Contract Tests | `keep-disabled` |
