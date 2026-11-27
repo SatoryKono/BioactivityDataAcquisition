@@ -119,8 +119,7 @@ Docker helper dispositions are resolved as follows and MUST stay aligned with
 - `.circleci/config.yml` is retained historical configuration for retired
   CircleCI, not an active CI entrypoint. Its tracked root is limited to reviewed CI configuration;
   credentials, caches, runtime state, and generated artifacts remain excluded.
-  The catalog still labels this root `canonical_circleci_project_configuration`;
-  that retained label does not establish an active CI provider.
+  The catalog records this role as `historical_circleci_project_configuration`.
 - Canonical machine-readable root governance lives in `.github/root-allowlist.txt`,
   `configs/quality/repo_structure_catalog.yaml`,
   `configs/quality/root_hygiene_review_registry.yaml`, and
