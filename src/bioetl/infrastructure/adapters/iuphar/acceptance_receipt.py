@@ -8,6 +8,7 @@ from pathlib import Path
 from iuphar_target_class.identifier_roles import (
     ANCHOR_PRIORITY_POLICIES,
     MATCHING_POLICY_VERSION,
+    REVIEWED_CLASS_POLICY_VERSION,
 )
 from iuphar_target_class.policy import (
     LOCAL_CATALOG_VERSION,
@@ -144,6 +145,23 @@ def _load_acceptance(
     return digest, versions
 
 
+def _require_reviewed_inputs(
+    snapshot: LoadedIupharSnapshot,
+    matching_policy: str,
+    *,
+    require_acceptance: bool,
+) -> None:
+    has_reviewed_inputs = "reviewed_inputs" in snapshot.manifest
+    if has_reviewed_inputs and matching_policy != REVIEWED_CLASS_POLICY_VERSION:
+        raise ValueError("reviewed inputs require the reviewed matching policy")
+    if (
+        require_acceptance
+        and matching_policy == REVIEWED_CLASS_POLICY_VERSION
+        and not has_reviewed_inputs
+    ):
+        raise ValueError("reviewed enrich requires pinned reviewed inputs")
+
+
 def load_profile(
     path: Path, expected_sha256: str, *, require_acceptance: bool = True
 ) -> LoadedIupharProfile:
@@ -165,6 +183,9 @@ def load_profile(
         document, path.parent, snapshot, require_acceptance
     )
     versions = tuple(text(document, key) for key in _VERSION_KEYS)
+    _require_reviewed_inputs(
+        snapshot, versions[-1], require_acceptance=require_acceptance
+    )
     if (
         versions[-1] in ANCHOR_PRIORITY_POLICIES
         and snapshot.manifest.get("schema_version") != 2

@@ -64,6 +64,7 @@ class MatchQuery:
     ranked_text: bool = False
     use_synonyms: bool = True
     gene_aliases: tuple[str, ...] = ()
+    require_known_species: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -299,6 +300,15 @@ def _decide(
     snapshot_complete: bool,
 ) -> MatchResult:
     """Choose one status from every channel. Catalog order is ignored."""
+    if query.require_known_species and query.organism is None:
+        ids = _ids(candidate.target_id for candidate in candidates)
+        return _result(
+            "insufficient_input",
+            None,
+            ids,
+            _methods(candidates, set(ids)),
+            ("insufficient_input",),
+        )
     species_conflict = _variant_species_conflict(query, catalog)
     if species_conflict is not None:
         return species_conflict
@@ -380,15 +390,15 @@ def _anchor_identity(
     """Apply anchor priority only after checking every trusted identity channel."""
     if not query.prioritize_anchors or query.organism is None:
         return None
-    conflict = _identity_conflict(
-        [
-            *_exact_channels(query, catalog, candidates, unfiltered=True),
-            (HGNC, _ids_of(candidates, HGNC)),
+    channels = _exact_channels(query, catalog, candidates, unfiltered=True)
+    if query.require_known_species:
+        channels = [
+            channel for channel in channels if channel[0] in {EXPLICIT, UNIPROT}
         ]
-    )
+    conflict = _identity_conflict([*channels, (HGNC, _ids_of(candidates, HGNC))])
     if conflict is not None:
         return conflict
-    if any(
+    if not query.require_known_species and any(
         method == UNIPROT and not ids
         for method, ids in _exact_channels(query, catalog, candidates)
     ):
@@ -448,7 +458,10 @@ def _compatible_text_variant(query: MatchQuery, target: CatalogTarget) -> bool:
             (target.gene_id,) if target.gene_id else (),
         ),
     )
-    return set(query.uniprot_ids).issubset(target.uniprot_ids) and all(
+    compatible_uniprot = set(query.uniprot_ids).issubset(target.uniprot_ids) or (
+        query.require_known_species and not target.uniprot_ids
+    )
+    return compatible_uniprot and all(
         not supplied or not recorded or not set(supplied).isdisjoint(recorded)
         for supplied, recorded in pairs
     )

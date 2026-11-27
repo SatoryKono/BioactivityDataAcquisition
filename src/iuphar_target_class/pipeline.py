@@ -15,12 +15,14 @@ from .bioetl_input import target_gene_aliases
 from .effective_policy import (
     CHANNEL_PRIORITY_RULE,
     ION_CHANNEL,
+    REVIEWED_CLASS_RULE,
     TRANSCRIPTION_FACTOR_CLASS,
     ec_categories,
     name_keyword_class,
     select_channel_priority,
     select_ec_class,
     select_keyword_class,
+    select_reviewed_class,
 )
 from .evidence import (
     ContractDefect,
@@ -43,13 +45,16 @@ from .identifier_roles import (
     ANCHOR_PRIORITY_POLICIES,
     EC_EFFECTIVE_POLICIES,
     RANKED_CLASS_POLICIES,
-    TRANSCRIPTION_FACTOR_POLICY_VERSION,
+    REVIEWED_CLASS_POLICY_VERSION,
+    TRANSCRIPTION_FACTOR_POLICIES,
     normalize_hgnc_ids,
 )
 from .iuphar_mapping import approved_class_mappings, approved_subclass_mappings
 from .local_layer import apply_local, predictions_from_row
 from .matching import (
+    HGNC,
     METHOD_ORDER,
+    UNIPROT,
     Candidate,
     CatalogTarget,
     MatchQuery,
@@ -76,6 +81,7 @@ from .policy import (
     validate_rules,
 )
 from .resolution import Resolution, ResolutionInput, select_effective_class
+from .reviewed_classes import ReviewedClass, ReviewKey
 
 
 @dataclass(frozen=True, slots=True)
@@ -100,6 +106,11 @@ class IndexedSnapshot:
     type_to_subclass: Mapping[str, str] = field(default_factory=dict)
     family_to_subclass: Mapping[str, str] = field(default_factory=dict)
     graph_defect: Diagnostic | None = None
+    reviewed_classes: Mapping[ReviewKey, ReviewedClass] = field(default_factory=dict)
+    reviewed_anchors: Mapping[tuple[str, str, str, str], str] = field(
+        default_factory=dict
+    )
+    official_species: frozenset[str] | None = None
 
     def __post_init__(self) -> None:
         """Copy every mapping so a later edit of the caller's dict is ignored."""
@@ -119,6 +130,13 @@ class IndexedSnapshot:
         object.__setattr__(
             self, "family_to_subclass", _frozen_strings(self.family_to_subclass)
         )
+        decisions = dict(self.reviewed_classes)
+        if any(key != decision.key for key, decision in decisions.items()):
+            raise ValueError("reviewed class key differs from its identity")
+        object.__setattr__(self, "reviewed_classes", MappingProxyType(decisions))
+        object.__setattr__(
+            self, "reviewed_anchors", MappingProxyType(dict(self.reviewed_anchors))
+        )
 
     @classmethod
     def from_approved_gtopdb(
@@ -132,6 +150,7 @@ class IndexedSnapshot:
         complex_ids: frozenset[str] = frozenset(),
         species_annotations: Mapping[tuple[str, str], ProviderAnnotation] | None = None,
         admission_complete: bool | None = None,
+        reviewed_classes: Mapping[ReviewKey, ReviewedClass] | None = None,
     ) -> IndexedSnapshot:
         """Bind a frozen provider snapshot to the exact approved release.
 
@@ -165,7 +184,11 @@ class IndexedSnapshot:
                 "approved family graph is not admitted: "
                 + snapshot.graph_defect.message
             )
-        return snapshot
+        return (
+            replace(snapshot, reviewed_classes=reviewed_classes)
+            if reviewed_classes
+            else snapshot
+        )
 
     @classmethod
     def build(
@@ -333,7 +356,17 @@ def _scope_match(
     """A provider ID cannot establish coverage for a missing species variant."""
     if not snapshot.species_annotations or row.taxon is None:
         return match
-    species = {taxon for _, taxon in snapshot.species_annotations}
+    if (
+        row.provenance.matching_policy_version == REVIEWED_CLASS_POLICY_VERSION
+        and match.match_status == "identity_conflict"
+    ):
+        return match
+    if snapshot.official_species is not None:
+        if (match.matched_target_id, row.taxon) in snapshot.species_annotations:
+            return match
+        species = snapshot.official_species
+    else:
+        species = {taxon for _, taxon in snapshot.species_annotations}
     missing_variant = _missing_variant(row, snapshot)
     outside_species = row.taxon not in species
     if outside_species or (not snapshot.complete and missing_variant):
@@ -523,6 +556,7 @@ def _evidence(
     rule_id: str | None,
     mapping_version: str,
     policy_evidence: EvidenceDraft | None,
+    reviewed_evidence: tuple[EvidenceDraft, ...] = (),
 ) -> EvidenceTable:
     draft = [
         EvidenceDraft(
@@ -578,7 +612,32 @@ def _evidence(
     )
     if policy_evidence is not None:
         draft.append(policy_evidence)
+    draft.extend(reviewed_evidence)
     return build_evidence_table(tuple(draft), run_id=run_id)
+
+
+def _reviewed_anchor_evidence(
+    row: ValidatedInput, match: MatchResult, snapshot: IndexedSnapshot
+) -> tuple[EvidenceDraft, ...]:
+    if not (match.matched_target_id and row.taxon and snapshot.reviewed_anchors):
+        return ()
+    hgnc_ids = _row_hgnc_ids(row, _source_business(row)) if row.taxon == "9606" else ()
+    return tuple(
+        EvidenceDraft(
+            row.input_row_id,
+            "match",
+            "reviewed_supplement",
+            f"{method}:{value}:{reference}",
+            "match",
+        )
+        for method, values in ((UNIPROT, row.uniprot_accessions), (HGNC, hgnc_ids))
+        for value in values
+        if (
+            reference := snapshot.reviewed_anchors.get(
+                (match.matched_target_id, row.taxon, method, value)
+            )
+        )
+    )
 
 
 def classify_target(
@@ -623,6 +682,9 @@ def classify_target(
         ranked_text=ranked,
         use_synonyms=not ranked or not any(number.valid for number in row.ec_numbers),
         gene_aliases=target_gene_aliases(business) if ranked else (),
+        require_known_species=(
+            row.provenance.matching_policy_version == REVIEWED_CLASS_POLICY_VERSION
+        ),
     )
     subset = _shortlist(query, snapshot)
     hits = collect_candidates(query, subset)
@@ -898,6 +960,7 @@ def _fallback_effective_class(
     snapshot: IndexedSnapshot,
     match: MatchResult,
     outcome: Resolution,
+    local: LocalInference,
     *,
     ranked: bool,
 ) -> tuple[Resolution, str] | None:
@@ -911,7 +974,7 @@ def _fallback_effective_class(
     )
     if _has_channel_candidate(row, snapshot, outcome, candidate_ids):
         return None
-    if _keeps_effective_class(categories, outcome, match, ranked=ranked):
+    if _keeps_effective_class(row, categories, outcome, match, local, ranked=ranked):
         return None
     content = "|".join(sorted({item.raw for item in row.ec_numbers if item.valid}))
     return select_ec_class(outcome, categories), content
@@ -925,23 +988,40 @@ def _fallback_keyword_class(
     keyword = name_keyword_class(
         row.name,
         allow_transcription_factor=(
-            row.provenance.matching_policy_version
-            == TRANSCRIPTION_FACTOR_POLICY_VERSION
+            row.provenance.matching_policy_version in TRANSCRIPTION_FACTOR_POLICIES
         ),
     )
     if keyword is None:
         return None
     label, term = keyword
-    if match.matched_target_id is None or label == TRANSCRIPTION_FACTOR_CLASS:
+    if (
+        match.matched_target_id is None
+        or label == TRANSCRIPTION_FACTOR_CLASS
+        or row.provenance.matching_policy_version == REVIEWED_CLASS_POLICY_VERSION
+    ):
         return select_keyword_class(outcome, label), f"{term}: {row.name}"
     return None
 
 
 def _keeps_effective_class(
-    categories: frozenset[int], outcome: Resolution, match: MatchResult, *, ranked: bool
+    row: ValidatedInput,
+    categories: frozenset[int],
+    outcome: Resolution,
+    match: MatchResult,
+    local: LocalInference,
+    *,
+    ranked: bool,
 ) -> bool:
     if len(categories) != 1:
         return False
+    if row.provenance.matching_policy_version == REVIEWED_CLASS_POLICY_VERSION:
+        generic_ec = (
+            outcome.effective_class == "Enzyme"
+            and outcome.effective_source == "local_rule"
+            and bool(local.supported_evidence_ids)
+            and all(ref.startswith("ec:") for ref in local.supported_evidence_ids)
+        )
+        return bool(outcome.effective_class) and not generic_ec
     if ranked:
         return outcome.iuphar_class is not None
     outside_scope = any(d.code == "unsupported_taxon" for d in match.diagnostics)
@@ -953,6 +1033,8 @@ def _effective_policy(
     snapshot: IndexedSnapshot,
     match: MatchResult,
     outcome: Resolution,
+    local: LocalInference,
+    reviewed: ReviewedClass | None,
 ) -> tuple[Resolution, EvidenceDraft | None]:
     policy = row.provenance.matching_policy_version
     if (
@@ -966,8 +1048,17 @@ def _effective_policy(
         content = "Ion Channel and Enzyme in the matched annotation or supported local evidence"
     else:
         fallback = _fallback_effective_class(
-            row, snapshot, match, outcome, ranked=policy in RANKED_CLASS_POLICIES
+            row, snapshot, match, outcome, local, ranked=policy in RANKED_CLASS_POLICIES
         )
+        if (
+            fallback is None
+            and reviewed is not None
+            and outcome.effective_class is None
+        ):
+            fallback = (
+                select_reviewed_class(outcome, reviewed.effective_class),
+                _review_content(reviewed),
+            )
         if fallback is None:
             return outcome, None
         selected, content = fallback
@@ -979,6 +1070,29 @@ def _effective_policy(
         "local",
     )
     return selected, witness
+
+
+def _reviewed_decision(
+    row: ValidatedInput,
+    snapshot: IndexedSnapshot,
+    match: MatchResult,
+) -> ReviewedClass | None:
+    chembl_id = row.raw_fields.get("target_chembl_id")
+    if (
+        row.provenance.matching_policy_version != REVIEWED_CLASS_POLICY_VERSION
+        or match.match_status == "identity_conflict"
+        or not chembl_id
+        or not row.taxon
+        or len(row.uniprot_accessions) != 1
+    ):
+        return None
+    return snapshot.reviewed_classes.get(
+        (chembl_id, row.taxon, row.uniprot_accessions[0])
+    )
+
+
+def _review_content(decision: ReviewedClass) -> str:
+    return f"{decision.origin}:{':'.join(decision.key)}:{decision.reference}"
 
 
 def _complete(
@@ -1020,8 +1134,30 @@ def _complete(
             direct_class,
         )
     )
-    outcome, policy_evidence = _effective_policy(row, snapshot, match, outcome)
-    if outcome.effective_source == "keyword_rule":
+    reviewed = _reviewed_decision(row, snapshot, match)
+    outcome, policy_evidence = _effective_policy(
+        row, snapshot, match, outcome, local, reviewed
+    )
+    reviewed_evidence = _reviewed_anchor_evidence(row, match, snapshot)
+    if (
+        reviewed is not None
+        and reviewed.origin == "ortholog"
+        and (
+            policy_evidence is None or policy_evidence.source_id != REVIEWED_CLASS_RULE
+        )
+    ):
+        reviewed_evidence += (
+            EvidenceDraft(
+                row.input_row_id,
+                "local_rule",
+                "reviewed_target_orthology",
+                _review_content(reviewed),
+                "local",
+            ),
+        )
+    if outcome.effective_source == "keyword_rule" or (
+        policy_evidence is not None and policy_evidence.source_id == REVIEWED_CLASS_RULE
+    ):
         superseded = {"free_text_manual_review", "free_text_substring_ignored"}
         if outcome.effective_class == TRANSCRIPTION_FACTOR_CLASS:
             superseded.add("broad_nhr_rule_excluded")
@@ -1044,6 +1180,7 @@ def _complete(
         rule_id=rule_id,
         mapping_version=snapshot.mapping_version,
         policy_evidence=policy_evidence,
+        reviewed_evidence=reviewed_evidence,
     )
     result = ClassificationResult(
         input_row_id=row.input_row_id,

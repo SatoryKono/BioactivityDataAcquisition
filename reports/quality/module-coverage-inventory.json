@@ -1,6 +1,6 @@
 {
-  "additive_coverage_xml_path": ".amp/in/orb-backup/pr13401-coverage.xml",
-  "additive_coverage_xml_sha256": "f7efac1c6af1f47db395ab001eb3807889dfaa9bc900ad46c405ffd141cc5c7d",
+  "additive_coverage_xml_path": "reports/local/iuphar-13408-admission-20261127/iuphar-reviewed-input-module-only.xml",
+  "additive_coverage_xml_sha256": "1ca0211475fb708342894ae17f333d9232a45aef3248edc4a8e395302d2c4731",
   "additive_measured_module_count": 1,
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",
@@ -19267,6 +19267,16 @@
       "module": "bioetl.infrastructure.adapters.iuphar.snapshot_payload",
       "path": "src/bioetl/infrastructure/adapters/iuphar/snapshot_payload.py",
       "source_lines": 151
+    },
+    {
+      "coverage_percent": 90.0,
+      "coverage_status": "partially_covered",
+      "covered_lines": 45,
+      "executable_lines": 50,
+      "missing_lines": 5,
+      "module": "bioetl.infrastructure.adapters.iuphar.snapshot_reviewed_inputs",
+      "path": "src/bioetl/infrastructure/adapters/iuphar/snapshot_reviewed_inputs.py",
+      "source_lines": 92
     },
     {
       "coverage_percent": 100.0,
@@ -46011,6 +46021,16 @@
       "source_lines": 151
     },
     {
+      "coverage_percent": 90.0,
+      "coverage_status": "partially_covered",
+      "covered_lines": 45,
+      "executable_lines": 50,
+      "missing_lines": 5,
+      "module": "bioetl.infrastructure.adapters.iuphar.snapshot_reviewed_inputs",
+      "path": "src/bioetl/infrastructure/adapters/iuphar/snapshot_reviewed_inputs.py",
+      "source_lines": 92
+    },
+    {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
       "covered_lines": 3,
@@ -53493,7 +53513,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-11-20",
-  "source_tree_sha256": "4d01845d08eb1d10b3315caca1ce24dea4ad923d89fdd1be875ff280def21e1b",
+  "source_tree_sha256": "a6fc687f9282007b750426884fdde39206fdda69fbf35bc967317b154b27b78a",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -53648,12 +53668,12 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 2674,
+    "source_module_count": 2675,
     "status_counts": {
       "coverage_xml_missing": 12,
       "fully_covered": 2537,
       "no_executable_lines": 1,
-      "partially_covered": 124,
+      "partially_covered": 125,
       "uncovered": 0,
       "unmeasured": 0
     },
