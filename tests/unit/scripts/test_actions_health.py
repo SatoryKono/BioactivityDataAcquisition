@@ -1,5 +1,7 @@
 """Contract tests for the Actions health command."""
 
+from __future__ import annotations
+
 import sys
 from unittest.mock import patch
 
@@ -42,7 +44,7 @@ def test_daily_scan_detects_job_finishing_after_previous_scan(capsys):
     class FrozenDateTime(datetime):
         @classmethod
         def now(cls, tz=None):
-            return cls(2026, 10, 5, 3, 0, tzinfo=tz or UTC)
+            return cls(2026, 10, 5, 3, 5, tzinfo=tz or UTC)
 
     def pages(endpoint):
         if "/jobs?" in endpoint:
@@ -58,10 +60,14 @@ def test_daily_scan_detects_job_finishing_after_previous_scan(capsys):
                     ]
                 }
             ]
+        from urllib.parse import parse_qs, urlsplit
+
+        created = parse_qs(urlsplit(endpoint).query)["created"][0]
+        assert created.startswith("2026-10-02T03:05:00+00:00")
         return [
             {
                 "total_count": 1,
-                "workflow_runs": [{"id": 42, "created_at": "2026-10-04T02:59:00Z"}],
+                "workflow_runs": [{"id": 42, "created_at": "2026-10-03T04:00:00Z"}],
             }
         ]
 

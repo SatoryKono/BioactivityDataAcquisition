@@ -102,9 +102,13 @@ def main() -> int:
                 text=True,
             ).stdout.strip()
         )
-        # Daily scans overlap by a day so jobs still queued at the previous
-        # scan can be observed after they finish. Explicit ranges remain exact.
-        scan_start = start - timedelta(hours=24) if args.since is None else start
+        # Default scans overlap completion windows by a day, and look back
+        # another day for runs queued before that window. Explicit ranges stay exact.
+        if args.since is None:
+            start -= timedelta(hours=24)
+            scan_start = start - timedelta(hours=24)
+        else:
+            scan_start = start
         failed = failed_runs(repo, start, end, scan_start)
         if failed:
             print(

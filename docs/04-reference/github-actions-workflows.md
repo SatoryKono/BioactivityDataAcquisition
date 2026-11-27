@@ -315,3 +315,7 @@ nightly jobs wait for the check to succeed. This signature is not specific to
 billing, and a billing lock can also prevent the health job from starting;
 monitor missing nightly runs independently. See the [Actions billing recovery
 runbook](../05-operations/runbooks/actions-quota.md).
+
+The default scan overlaps the reporting window by 24 hours and searches one
+additional day for older runs, so adjacent scans can report the same failure.
+Runs created more than 72 hours before a scan are outside its search window.
