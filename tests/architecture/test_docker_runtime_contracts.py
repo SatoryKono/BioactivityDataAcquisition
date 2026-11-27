@@ -1507,7 +1507,11 @@ def test_docker_push_uses_environment_and_does_not_publish_latest_on_main() -> N
     assert "docker/build-push-action@" not in rendered
     assert "actions/checkout@" not in rendered
     assert "bioetl-scanned-image-${{ inputs.source-sha }}" in rendered
-    assert "docker manifest inspect" in rendered
+    assert "docker buildx imagetools inspect --raw" in rendered
+    publish = next(step for step in job["steps"] if step.get("id") == "publish")
+    assert "remote_config" in publish["run"]
+    assert '"${remote_config}" != "${expected_id}"' in publish["run"]
+    assert 'docker push "${branch_ref}"' not in publish["run"]
 
 
 def test_docker_push_requires_all_validation_jobs() -> None:
