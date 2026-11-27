@@ -33,6 +33,7 @@ from .snapshot_models import (
     LoadedIupharSnapshot,
 )
 from .snapshot_payload import SNAPSHOT_FORMAT, verify_snapshot_sources
+from .snapshot_reviewed_inputs import merge_reviewed_catalog, parse_reviewed_inputs
 
 
 def _required_strings(document: Mapping[str, object], key: str) -> tuple[str, ...]:
@@ -160,7 +161,9 @@ def _load_current_snapshot(
         raise ValueError("unsupported source-verified snapshot format")
     targets_path, targets_hash = referenced_path(path.parent, document.get("targets"))
     raw = checked_bytes(targets_path, targets_hash)
-    evidence, projection = verify_snapshot_sources(document, path.parent, raw)
+    evidence, projection, reviewed_inputs = verify_snapshot_sources(
+        document, path.parent, raw
+    )
     audit_path, audit_hash = referenced_path(
         path.parent, document.get("projection_audit")
     )
@@ -170,6 +173,15 @@ def _load_current_snapshot(
     catalog = attach_official_hgnc(
         catalog, evidence.raw_artifacts["targets_csv"], evidence.provider_release
     )
+    reviewed = parse_reviewed_inputs(reviewed_inputs) if reviewed_inputs else None
+    anchors = {}
+    if reviewed is not None:
+        merged = merge_reviewed_catalog(catalog, annotations, reviewed)
+        catalog, annotations, anchors = (
+            merged.catalog,
+            merged.annotations,
+            merged.anchor_refs,
+        )
     completeness = Completeness(
         True,
         True,
@@ -186,7 +198,10 @@ def _load_current_snapshot(
         catalog=catalog,
         annotations={},
         species_annotations=annotations,
+        reviewed_classes=reviewed.local_classes if reviewed is not None else None,
     )
+    if anchors:
+        snapshot = replace(snapshot, reviewed_anchors=anchors)
     return LoadedIupharSnapshot(
         snapshot,
         completeness,

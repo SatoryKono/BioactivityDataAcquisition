@@ -9,6 +9,7 @@ import pytest
 from bioetl.infrastructure.adapters.iuphar import load_profile, load_snapshot_manifest
 from bioetl.infrastructure.adapters.iuphar._manifest import sha256
 from bioetl.infrastructure.adapters.iuphar.snapshot_payload import build_snapshot_bundle
+from iuphar_target_class.identifier_roles import REVIEWED_CLASS_POLICY_VERSION
 from iuphar_target_class.models import RawTargetRow, RunProvenance
 from iuphar_target_class.pipeline import classify_batch
 from iuphar_target_class.stage0.io import canonical_json_bytes
@@ -61,6 +62,152 @@ def test_builder_is_deterministic_and_preserves_raw_receipt_bytes(tmp_path):
     assert (
         root_a / "sources/acquisition/official-fixture.csv"
     ).read_bytes() == original.read_bytes()
+
+
+def test_reviewed_inputs_bind_local_class_and_supplements_without_changing_official(
+    tmp_path,
+):
+    acquisition, acquisition_hash, coverage, coverage_hash = synthetic_snapshot_sources(
+        tmp_path / "sources"
+    )
+    profile = {
+        "acquisition": acquisition,
+        "acquisition_sha256": acquisition_hash,
+        "coverage": coverage,
+        "coverage_sha256": coverage_hash,
+    }
+    baseline = build_snapshot_bundle(**profile, output_dir=tmp_path / "baseline")
+    csv_sources = {
+        "_IUPHAR_family.csv": b"family_id,family_name\n123,example\n",
+        "_IUPHAR_target.csv": b"target_id,target_name\n2,example\n",
+    }
+    for name, raw in csv_sources.items():
+        (tmp_path / name).write_bytes(raw)
+    review = tmp_path / "review.json"
+    review_hash = write_fixture_json(
+        review,
+        {
+            "artifact": "bioetl_iuphar_reviewed_inputs",
+            "schema_version": 1,
+            "supplemental_source_sha256": {
+                name: sha256(raw) for name, raw in csv_sources.items()
+            },
+            "supplemental_targets": [
+                {
+                    "targetId": "1",
+                    "taxonId": "9606",
+                    "reviewReference": "additional-reviewed-anchor",
+                    "uniprotIds": ["P22222"],
+                    "type": "enzyme",
+                },
+                {
+                    "targetId": "2",
+                    "taxonId": "9913",
+                    "reviewReference": "synthetic-reviewed-row",
+                    "uniprotIds": ["P34567"],
+                },
+                {
+                    "targetId": "3",
+                    "taxonId": "9606",
+                    "reviewReference": "overlapping-anchor",
+                    "uniprotIds": ["P12345"],
+                },
+            ],
+            "local_classes": [
+                {
+                    "target_chembl_id": "CHEMBL2",
+                    "taxon": "9913",
+                    "primary_uniprot": "Q23456",
+                    "effective_class": "Enzyme.Isomerase",
+                    "origin": "ortholog",
+                    "review_reference": "synthetic-reviewed-orthology",
+                }
+            ],
+        },
+    )
+    out = tmp_path / "reviewed"
+    bundle = build_snapshot_bundle(
+        **profile,
+        output_dir=out,
+        matching_policy_version=REVIEWED_CLASS_POLICY_VERSION,
+        reviewed_inputs=review,
+        reviewed_inputs_sha256=review_hash,
+        supplemental_csv_dir=tmp_path,
+    )
+    assert bundle.files["targets.json"] == baseline.files["targets.json"]
+    assert bundle.snapshot_sha256 != baseline.snapshot_sha256
+    loaded = load_profile(
+        out / "profile.json", bundle.profile_sha256, require_acceptance=False
+    )
+    snapshot = loaded.snapshot.snapshot
+    assert ("2", "9913") in snapshot.species_annotations
+    assert ("3", "9606") not in snapshot.species_annotations
+    common = {"target_chembl_id": "CHEMBL2", "organism": "9913", "name": "Example"}
+    rows = (
+        RawTargetRow("reviewed", {**common, "uniprot": "Q23456"}, "protein"),
+        RawTargetRow("wrong-accession", {**common, "uniprot": "Q23457"}, "protein"),
+    )
+    provenance = RunProvenance(
+        snapshot.snapshot_id,
+        "bioetl-iuphar-input-v1",
+        "plan-v1-r9",
+        "3.1.0",
+        loaded.snapshot.retrieved_at,
+        "frozen",
+        matching_policy_version=REVIEWED_CLASS_POLICY_VERSION,
+    )
+
+    def classify(items):
+        return classify_batch(
+            items, snapshot=snapshot, provenance=provenance, run_id="synthetic-run"
+        ).rows
+
+    result, other = classify(rows)
+    assert result.result.effective_class == "Enzyme.Isomerase"
+    assert result.result.matched_target_id is None
+    assert other.result.effective_class is None
+    assert classify(rows[::-1]) == (result, other)
+    assert classify(rows[:1]) == (result,)
+    (alias,) = classify(
+        (
+            RawTargetRow(
+                "additional-anchor",
+                {"organism": "9606", "uniprot": "P22222"},
+                "protein",
+            ),
+        )
+    )
+    assert alias.result.matched_target_id == "1"
+    assert alias.result.iuphar_class == "Receptor"
+    assert any(
+        item.source_id == "reviewed_supplement"
+        and "additional-reviewed-anchor" in item.content
+        for item in alias.evidence.records
+    )
+    (ec_first,) = classify(
+        (
+            RawTargetRow(
+                "ortholog-with-ec",
+                {**common, "uniprot": "Q23456", "ec": "3.1.26.n2"},
+                "protein",
+            ),
+        )
+    )
+    assert ec_first.result.effective_source == "ec_rule"
+    assert ec_first.result.matched_target_id is None
+    assert any(
+        item.source_id == "reviewed_target_orthology"
+        and "synthetic-reviewed-orthology" in item.content
+        for item in ec_first.evidence.records
+    )
+    supplemental = out / "sources/reviewed/_IUPHAR_target.csv"
+    supplemental.write_bytes(b"modified")
+    with pytest.raises(ValueError, match="digest mismatch"):
+        load_snapshot_manifest(out / "snapshot.json", bundle.snapshot_sha256)
+    supplemental.write_bytes(csv_sources[supplemental.name])
+    (out / "reviewed-inputs.json").write_bytes(b"{}")
+    with pytest.raises(ValueError, match="digest mismatch"):
+        load_snapshot_manifest(out / "snapshot.json", bundle.snapshot_sha256)
 
 
 def test_scope_review_evidence_is_verified_and_copied(tmp_path):

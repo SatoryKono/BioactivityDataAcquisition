@@ -13,6 +13,7 @@ TRANSCRIPTION_FACTOR_CLASS = "Receptor.Nuclear receptor"
 CHANNEL_PRIORITY_RULE = "ion_channel_over_enzyme"
 EC_CLASS_RULE = "ec_effective_class"
 KEYWORD_CLASS_RULE = "name_keyword_effective_class"
+REVIEWED_CLASS_RULE = "reviewed_target_effective_class"
 
 _NAME_KEYWORDS = {
     ION_CHANNEL: r"channels?|chanels?",
@@ -133,6 +134,10 @@ def select_ec_class(outcome: Resolution, categories: frozenset[int]) -> Resoluti
 
 def select_keyword_class(outcome: Resolution, label: str) -> Resolution:
     return _select_local_class(outcome, label, "keyword_rule", KEYWORD_CLASS_RULE)
+
+
+def select_reviewed_class(outcome: Resolution, label: str) -> Resolution:
+    return _select_local_class(outcome, label, "local_rule", REVIEWED_CLASS_RULE)
 
 
 def _select_local_class(
