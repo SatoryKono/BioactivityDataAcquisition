@@ -22,6 +22,11 @@ until retirement (#11930); optional analysis is a separate decision. Trivy and
 Scorecard SARIF upload functions must survive migration even though the old upload
 transport uses `github/codeql-action/upload-sarif`.
 
+CodeQL runs through `workflow_call` from Monday Nightly and `workflow_dispatch`
+on the selected ref. Direct push and schedule triggers were removed in #12127;
+manual dispatch was added in #12974. Nightly also checks daily that the latest
+CodeQL analysis on `main` is no more than seven days old.
+
 ## Purpose
 
 This page is the canonical published inventory of the **61** live GitHub Actions
