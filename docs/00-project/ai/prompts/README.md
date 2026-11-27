@@ -123,6 +123,7 @@ python -m scripts.ai.prompts check
 Overlays live in `domains.yaml` (not `overlays/*.yaml`). Generated markdown is
 on-demand, not tracked. `--write` saves the card under
 `generated/<domain>/<profile>.md`; without it compilation runs in memory only.
+Generated cards are not Git-ignored: remove them after use and do not commit them.
 
 ## Related Generators
 

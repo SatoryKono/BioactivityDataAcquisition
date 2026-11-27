@@ -129,7 +129,8 @@ python -m scripts.ai.prompts.compile --domain <domain> --profile audit-readonly 
 ```
 
 Read the resulting untracked `docs/00-project/ai/prompts/generated/<domain>/audit-readonly.md`.
-Without `--write`, compilation runs in memory and does not produce a card file.
+The file is not Git-ignored: remove it after use and do not commit it. Without
+`--write`, compilation runs in memory and does not produce a card file.
 
 When a stage uses several domains, execute each domain once, preserve its
 Evidence IDs, then produce one stage handoff. Do not re-run a full repo scan per
