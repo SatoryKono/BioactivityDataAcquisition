@@ -1,0 +1,27 @@
+name: PR 13435 full test evidence
+on:
+  push:
+    branches: ["verify/pr-13435-a30dcb2d"]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [test, test-fast]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: a30dcb2d9bc2dc32f740219998ffc7997435a1e4
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: ./.github/actions/setup-python-uv
+        with:
+          uv-extras: dev tracing performance
+      - name: Run requested Makefile target
+        env:
+          TARGET: ${{ matrix.target }}
+        run: make "$TARGET"
