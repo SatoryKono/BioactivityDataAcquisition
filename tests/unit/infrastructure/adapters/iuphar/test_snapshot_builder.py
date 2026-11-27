@@ -71,13 +71,13 @@ def test_reviewed_inputs_bind_local_class_and_supplements_without_changing_offic
     acquisition, acquisition_hash, coverage, coverage_hash = synthetic_snapshot_sources(
         tmp_path / "sources"
     )
-    profile = {
-        "acquisition": acquisition,
-        "acquisition_sha256": acquisition_hash,
-        "coverage": coverage,
-        "coverage_sha256": coverage_hash,
-    }
-    baseline = build_snapshot_bundle(**profile, output_dir=tmp_path / "baseline")
+    baseline = build_snapshot_bundle(
+        acquisition=acquisition,
+        acquisition_sha256=acquisition_hash,
+        coverage=coverage,
+        coverage_sha256=coverage_hash,
+        output_dir=tmp_path / "baseline",
+    )
     csv_sources = {
         "_IUPHAR_family.csv": b"family_id,family_name\n123,example\n",
         "_IUPHAR_target.csv": b"target_id,target_name\n2,example\n",
@@ -128,7 +128,10 @@ def test_reviewed_inputs_bind_local_class_and_supplements_without_changing_offic
     )
     out = tmp_path / "reviewed"
     bundle = build_snapshot_bundle(
-        **profile,
+        acquisition=acquisition,
+        acquisition_sha256=acquisition_hash,
+        coverage=coverage,
+        coverage_sha256=coverage_hash,
         output_dir=out,
         matching_policy_version=REVIEWED_CLASS_POLICY_VERSION,
         reviewed_inputs=review,
@@ -334,6 +337,7 @@ def test_builder_keeps_public_identity_with_three_distinct_species(tmp_path):
     ]:
         result = _run(loaded, target_id="1", uniprot=accession, organism=taxon)
         assert result.result.matched_target_id == "1"
+        assert result.annotation is not None
         assert result.annotation.taxon == taxon
         assert result.result.iuphar_class == "Receptor"
         assert result.annotation.type_raw is None
@@ -358,6 +362,7 @@ def test_species_ambiguous_explicit_id_requires_taxon_but_unique_accession_can_r
     assert _run(loaded, target_id="1").result.match_status == "insufficient_input"
     resolved = _run(loaded, target_id="1", uniprot="Q12345")
     assert resolved.result.match_status == "matched"
+    assert resolved.annotation is not None
     assert resolved.annotation.taxon == "10116"
 
 
@@ -369,6 +374,7 @@ def test_csv_type_is_family_evidence_and_mixed_families_are_preserved(tmp_path):
     root, bundle = synthetic_snapshot_bundle(tmp_path, rows=rows)
     loaded = load_snapshot_manifest(root / "snapshot.json", bundle.snapshot_sha256)
     row = _run(loaded, target_id="498", organism="9606")
+    assert row.annotation is not None
     assert row.annotation.type_raw is None
     assert set(row.annotation.family_ids) == {"78", "471"}
     assert row.result.iuphar_class is None
