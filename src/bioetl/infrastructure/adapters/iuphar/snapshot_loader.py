@@ -10,6 +10,7 @@ from types import MappingProxyType
 from iuphar_target_class.identifier_roles import normalize_hgnc_ids
 from iuphar_target_class.matching import CatalogTarget
 from iuphar_target_class.pipeline import IndexedSnapshot
+from iuphar_target_class.reviewed_catalog import merge_reviewed_catalog
 from iuphar_target_class.snapshot import Completeness, assess_completeness
 
 from ._manifest import (
@@ -33,7 +34,7 @@ from .snapshot_models import (
     LoadedIupharSnapshot,
 )
 from .snapshot_payload import SNAPSHOT_FORMAT, verify_snapshot_sources
-from .snapshot_reviewed_inputs import merge_reviewed_catalog, parse_reviewed_inputs
+from .snapshot_reviewed_inputs import parse_reviewed_inputs
 
 
 def _required_strings(document: Mapping[str, object], key: str) -> tuple[str, ...]:
@@ -170,13 +171,16 @@ def _load_current_snapshot(
     if checked_bytes(audit_path, audit_hash) != projection.audit:
         raise ValueError("snapshot projection audit differs from source accounting")
     catalog, annotations = parse_target_species_payloads(raw)
+    projected_official_species = frozenset(taxon for _, taxon in annotations)
     catalog = attach_official_hgnc(
         catalog, evidence.raw_artifacts["targets_csv"], evidence.provider_release
     )
     reviewed = parse_reviewed_inputs(reviewed_inputs) if reviewed_inputs else None
     anchors = {}
     if reviewed is not None:
-        merged = merge_reviewed_catalog(catalog, annotations, reviewed)
+        merged = merge_reviewed_catalog(
+            catalog, annotations, reviewed.catalog, reviewed.annotations
+        )
         catalog, annotations, anchors = (
             merged.catalog,
             merged.annotations,
@@ -200,18 +204,23 @@ def _load_current_snapshot(
         species_annotations=annotations,
         reviewed_classes=reviewed.local_classes if reviewed is not None else None,
     )
+    official_species = frozenset(
+        identifier(value)
+        for value in _required_strings(evidence.scope, "species_taxon_ids")
+    )
     if anchors:
-        snapshot = replace(snapshot, reviewed_anchors=anchors)
+        snapshot = replace(
+            snapshot,
+            reviewed_anchors=anchors,
+            official_species=projected_official_species,
+        )
     return LoadedIupharSnapshot(
         snapshot,
         completeness,
         require_sha256(expected_sha256),
         path.as_uri(),
         evidence.retrieved_at,
-        frozenset(
-            identifier(value)
-            for value in _required_strings(evidence.scope, "species_taxon_ids")
-        ),
+        official_species,
         MappingProxyType(dict(document)),
     )
 

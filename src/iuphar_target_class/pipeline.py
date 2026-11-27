@@ -110,6 +110,7 @@ class IndexedSnapshot:
     reviewed_anchors: Mapping[tuple[str, str, str, str], str] = field(
         default_factory=dict
     )
+    official_species: frozenset[str] | None = None
 
     def __post_init__(self) -> None:
         """Copy every mapping so a later edit of the caller's dict is ignored."""
@@ -359,7 +360,12 @@ def _scope_match(
         and match.match_status == "identity_conflict"
     ):
         return match
-    species = {taxon for _, taxon in snapshot.species_annotations}
+    if snapshot.official_species is not None:
+        if (match.matched_target_id, row.taxon) in snapshot.species_annotations:
+            return match
+        species = snapshot.official_species
+    else:
+        species = {taxon for _, taxon in snapshot.species_annotations}
     missing_variant = _missing_variant(row, snapshot)
     outside_species = row.taxon not in species
     if outside_species or (not snapshot.complete and missing_variant):

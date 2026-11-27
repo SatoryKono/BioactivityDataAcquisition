@@ -15,6 +15,7 @@ from iuphar_target_class.pipeline import classify_batch
 from iuphar_target_class.stage0.io import canonical_json_bytes
 from tests.helpers.iuphar_snapshot import (
     synthetic_export_row,
+    synthetic_reference_receipt,
     synthetic_snapshot_bundle,
     synthetic_snapshot_sources,
     write_fixture_json,
@@ -98,7 +99,7 @@ def test_reviewed_inputs_bind_local_class_and_supplements_without_changing_offic
                     "taxonId": "9606",
                     "reviewReference": "additional-reviewed-anchor",
                     "uniprotIds": ["P22222"],
-                    "type": "enzyme",
+                    "familyIds": ["471"],
                 },
                 {
                     "targetId": "2",
@@ -139,6 +140,18 @@ def test_reviewed_inputs_bind_local_class_and_supplements_without_changing_offic
     loaded = load_profile(
         out / "profile.json", bundle.profile_sha256, require_acceptance=False
     )
+    receipt = synthetic_reference_receipt(
+        bundle.snapshot_sha256, root=out / "reference"
+    )
+    receipt["matching_policy_version"] = REVIEWED_CLASS_POLICY_VERSION
+    receipt_sha256 = write_fixture_json(out / "receipt.json", receipt)
+    enrich_profile = json.loads(bundle.files["profile.json"])
+    enrich_profile["acceptance"] = {"path": "receipt.json", "sha256": receipt_sha256}
+    enrich_sha256 = write_fixture_json(out / "enrich-profile.json", enrich_profile)
+    admitted = load_profile(out / "enrich-profile.json", enrich_sha256)
+    assert admitted.acceptance_sha256 == receipt_sha256
+    assert admitted.matching_policy_version == REVIEWED_CLASS_POLICY_VERSION
+    assert admitted.profile_sha256 != bundle.profile_sha256
     snapshot = loaded.snapshot.snapshot
     assert ("2", "9913") in snapshot.species_annotations
     assert ("3", "9606") not in snapshot.species_annotations
@@ -166,6 +179,7 @@ def test_reviewed_inputs_bind_local_class_and_supplements_without_changing_offic
     assert result.result.effective_class == "Enzyme.Isomerase"
     assert result.result.matched_target_id is None
     assert other.result.effective_class is None
+    assert other.result.match_status == "source_unavailable"
     assert classify(rows[::-1]) == (result, other)
     assert classify(rows[:1]) == (result,)
     (alias,) = classify(
@@ -184,6 +198,14 @@ def test_reviewed_inputs_bind_local_class_and_supplements_without_changing_offic
         and "additional-reviewed-anchor" in item.content
         for item in alias.evidence.records
     )
+    (new_species_match,) = classify(
+        (
+            RawTargetRow(
+                "reviewed-variant", {"organism": "9913", "uniprot": "P34567"}, "protein"
+            ),
+        )
+    )
+    assert new_species_match.result.matched_target_id == "2"
     (ec_first,) = classify(
         (
             RawTargetRow(
@@ -208,6 +230,53 @@ def test_reviewed_inputs_bind_local_class_and_supplements_without_changing_offic
     (out / "reviewed-inputs.json").write_bytes(b"{}")
     with pytest.raises(ValueError, match="digest mismatch"):
         load_snapshot_manifest(out / "snapshot.json", bundle.snapshot_sha256)
+
+
+@pytest.mark.parametrize(
+    ("fields", "error"),
+    [
+        ({}, "no exact identity anchor"),
+        ({"uniprotIds": ["P34567"], "type": "enzyme"}, "family-only"),
+    ],
+)
+def test_builder_rejects_invalid_reviewed_target_before_publication(
+    tmp_path, fields, error
+):
+    acquisition, acquisition_hash, coverage, coverage_hash = synthetic_snapshot_sources(
+        tmp_path / "sources"
+    )
+    review_hash = write_fixture_json(
+        tmp_path / "review.json",
+        {
+            "artifact": "bioetl_iuphar_reviewed_inputs",
+            "schema_version": 1,
+            "supplemental_source_sha256": {
+                "_IUPHAR_family.csv": "1" * 64,
+                "_IUPHAR_target.csv": "2" * 64,
+            },
+            "supplemental_targets": [
+                {
+                    "targetId": "2",
+                    "taxonId": "9913",
+                    "reviewReference": "synthetic",
+                    **fields,
+                }
+            ],
+            "local_classes": [],
+        },
+    )
+    with pytest.raises(ValueError, match=error):
+        build_snapshot_bundle(
+            acquisition=acquisition,
+            acquisition_sha256=acquisition_hash,
+            coverage=coverage,
+            coverage_sha256=coverage_hash,
+            output_dir=tmp_path / "rejected",
+            matching_policy_version=REVIEWED_CLASS_POLICY_VERSION,
+            reviewed_inputs=tmp_path / "review.json",
+            reviewed_inputs_sha256=review_hash,
+        )
+    assert not (tmp_path / "rejected").exists()
 
 
 def test_scope_review_evidence_is_verified_and_copied(tmp_path):
