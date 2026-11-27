@@ -34,3 +34,41 @@ def test_reports_all_failed_zero_step_runs(capsys):
     ):
         assert check_actions_health.main() == 1
     assert capsys.readouterr().out.strip().endswith(", ".join(map(str, range(1, 15))))
+
+
+def test_daily_scan_detects_job_finishing_after_previous_scan(capsys):
+    from datetime import UTC, datetime
+
+    class FrozenDateTime(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return cls(2026, 10, 5, 3, 0, tzinfo=tz or UTC)
+
+    def pages(endpoint):
+        if "/jobs?" in endpoint:
+            assert "filter=latest" in endpoint
+            return [
+                {
+                    "jobs": [
+                        {
+                            "conclusion": "failure",
+                            "steps": [],
+                            "completed_at": "2026-10-04T03:02:00Z",
+                        }
+                    ]
+                }
+            ]
+        return [
+            {
+                "total_count": 1,
+                "workflow_runs": [{"id": 42, "created_at": "2026-10-04T02:59:00Z"}],
+            }
+        ]
+
+    with (
+        patch.object(sys, "argv", ["health", "--repo", "o/r"]),
+        patch.object(check_actions_health, "datetime", FrozenDateTime),
+        patch.object(check_actions_health, "api_pages", side_effect=pages),
+    ):
+        assert check_actions_health.main() == 1
+    assert "42" in capsys.readouterr().out

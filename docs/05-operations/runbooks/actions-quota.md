@@ -37,10 +37,13 @@ requires an account or organization billing administrator.
    billing, payment status and Actions spending limits, resolve the issue, and
    confirm that a new Actions job actually starts. Escalate to GitHub Support if
    the account remains locked.
-3. After unlocking, manually dispatch the CodeQL workflow on the affected
-   branch or commit using `gh workflow run codeql.yml --ref <ref>`. Rerun or
-   dispatch each needed revision according to the incident recovery scope.
+3. After unlocking, rerun the original CodeQL run where possible, or manually
+   dispatch `gh workflow run codeql.yml --ref <branch-or-tag>`. To dispatch an
+   older commit, an authorized maintainer must first create a branch or tag at
+   that commit; `--ref` is a branch or tag, not a commit SHA. Recover each needed
+   revision according to the incident recovery scope.
    A successful dispatch alone does not establish that analyses were uploaded.
+
 ## Rollback/Recovery
 
 If a dispatched run fails, keep merges paused and investigate its job logs

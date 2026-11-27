@@ -22,6 +22,51 @@ def api_pages(endpoint: str) -> list[dict]:
     return json.loads(result.stdout)
 
 
+def parse_time(value: str) -> datetime:
+    result = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    return (
+        result.replace(tzinfo=UTC) if result.tzinfo is None else result.astimezone(UTC)
+    )
+
+
+def is_failed_job(
+    job: dict, created_at: datetime, start: datetime, end: datetime
+) -> bool:
+    if job["conclusion"] != "failure" or job["steps"]:
+        return False
+    completed_at = job.get("completed_at")
+    return created_at >= start or bool(
+        completed_at and start <= parse_time(completed_at) < end
+    )
+
+
+def failed_runs(
+    repo: str, start: datetime, end: datetime, scan_start: datetime
+) -> set[int]:
+    query = urlencode(
+        {"per_page": 100, "created": f"{scan_start.isoformat()}..{end.isoformat()}"}
+    )
+    pages = api_pages(f"repos/{repo}/actions/runs?{query}")
+    if pages and pages[0]["total_count"] > 1000:
+        raise ValueError("More than 1000 runs match; use a narrower time window")
+    failed = set()
+    for page in pages:
+        for run in page["workflow_runs"]:
+            created_at = parse_time(run["created_at"])
+            if not scan_start <= created_at < end:
+                continue
+            jobs_pages = api_pages(
+                f"repos/{repo}/actions/runs/{run['id']}/jobs?per_page=100&filter=latest"
+            )
+            if any(
+                is_failed_job(job, created_at, start, end)
+                for jobs_page in jobs_pages
+                for job in jobs_page["jobs"]
+            ):
+                failed.add(run["id"])
+    return failed
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--since", help="UTC start date or timestamp (inclusive)")
@@ -36,12 +81,8 @@ def main() -> int:
     since = args.since or (now - timedelta(hours=24)).isoformat(timespec="seconds")
     until = args.until or now.isoformat(timespec="seconds")
     try:
-        start = datetime.fromisoformat(since.replace("Z", "+00:00"))
-        end = datetime.fromisoformat(until.replace("Z", "+00:00"))
-        start = (
-            start.replace(tzinfo=UTC) if start.tzinfo is None else start.astimezone(UTC)
-        )
-        end = end.replace(tzinfo=UTC) if end.tzinfo is None else end.astimezone(UTC)
+        start = parse_time(since)
+        end = parse_time(until)
         if start >= end:
             parser.error("--since must be earlier than --until")
         repo = (
@@ -61,28 +102,10 @@ def main() -> int:
                 text=True,
             ).stdout.strip()
         )
-        created = f"{start.isoformat()}..{end.isoformat()}"
-        query = urlencode({"per_page": 100, "created": created})
-        pages = api_pages(f"repos/{repo}/actions/runs?{query}")
-        if pages and pages[0]["total_count"] > 1000:
-            raise ValueError("More than 1000 runs match; use a narrower time window")
-        failed = set()
-        for page in pages:
-            for run in page["workflow_runs"]:
-                created_at = datetime.fromisoformat(
-                    run["created_at"].replace("Z", "+00:00")
-                )
-                if not start <= created_at < end:
-                    continue
-                jobs_pages = api_pages(
-                    f"repos/{repo}/actions/runs/{run['id']}/jobs?per_page=100&filter=all"
-                )
-                if any(
-                    job["conclusion"] == "failure" and not job["steps"]
-                    for jobs_page in jobs_pages
-                    for job in jobs_page["jobs"]
-                ):
-                    failed.add(run["id"])
+        # Daily scans overlap by a day so jobs still queued at the previous
+        # scan can be observed after they finish. Explicit ranges remain exact.
+        scan_start = start - timedelta(hours=24) if args.since is None else start
+        failed = failed_runs(repo, start, end, scan_start)
         if failed:
             print(
                 "Failed runs with zero-step jobs: "
