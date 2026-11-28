@@ -8,6 +8,8 @@ import io
 import json
 from pathlib import Path
 import re
+import subprocess
+import sys
 
 import pytest
 import yaml
@@ -266,3 +268,89 @@ def test_github_publish_requires_successful_main_integrity_and_current_main():
     assert "needs.docker-publish-gate.outputs.current == 'true'" in push["if"]
     assert push["environment"] == "ghcr-publish"
     assert push["concurrency"]["cancel-in-progress"] is False
+
+
+@pytest.mark.parametrize("failure", [None, "image-config", "stale-main"])
+def test_github_publication_checks_live_guards(tmp_path, monkeypatch, failure):
+    if sys.platform == "win32":
+        pytest.skip("The GitHub publication steps run on Linux with Bash and jq")
+
+    workflow = yaml.safe_load(
+        (ROOT / ".github/workflows/docker-publish.yml").read_text(encoding="utf-8")
+    )
+    steps = workflow["jobs"]["docker-push"]["steps"]
+    publish = next(step["run"] for step in steps if step.get("id") == "publish")
+    promote = next(
+        step["run"]
+        for step in steps
+        if step["name"] == "Promote the attested image to the main tag"
+    )
+    (tmp_path / "scanned-image").mkdir()
+    (tmp_path / "scanned-image/bioetl-image-id.txt").write_text(
+        IMAGE_ID + "\n", encoding="utf-8"
+    )
+    manifest = json.dumps(
+        {"config": {"digest": DIGEST if failure == "image-config" else IMAGE_ID}}
+    )
+    (tmp_path / "manifest.json").write_text(manifest, encoding="utf-8")
+    for key, value in {
+        "SOURCE_SHA": SHA,
+        "TESTED_SHA": SHA,
+        "MAIN_SHA": SHA,
+        "REPOSITORY": "owner/repo",
+        "IMAGE_REF": f"bioetl:{SHA}",
+        "IMAGE_BASE": "ghcr.io/owner/repo",
+        "GITHUB_REF_NAME": "main",
+        "GITHUB_OUTPUT": "github-output",
+    }.items():
+        monkeypatch.setenv(key, value)
+
+    stubs = r"""
+    gh() { printf '%s\n' "$MAIN_SHA"; }
+    docker() {
+        printf '%s\n' "$*" >> docker-calls
+        case "$1 $2 ${3-}" in
+            'buildx imagetools inspect') cat manifest.json ;;
+        esac
+    }
+    """
+    result = subprocess.run(
+        ["bash", "-c", stubs + publish],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    calls = tmp_path / "docker-calls"
+    assert ":main" not in calls.read_text(encoding="utf-8")
+    if failure == "image-config":
+        assert result.returncode == 1
+        assert "does not match the scanned image ID" in result.stdout
+        assert not (tmp_path / "github-output").exists()
+        return
+
+    assert result.returncode == 0, result.stderr
+    expected_digest = "sha256:" + hashlib.sha256(manifest.encode()).hexdigest()
+    assert (tmp_path / "github-output").read_text(encoding="utf-8") == (
+        f"digest={expected_digest}\n"
+    )
+    monkeypatch.setenv("EXPECTED_DIGEST", expected_digest)
+    if failure == "stale-main":
+        monkeypatch.setenv("MAIN_SHA", "d" * 40)
+    result = subprocess.run(
+        ["bash", "-c", stubs + promote],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    log = calls.read_text(encoding="utf-8")
+    if failure == "stale-main":
+        assert "no longer main HEAD" in result.stdout
+        assert "imagetools create" not in log
+    else:
+        assert (
+            f"imagetools create --prefer-index=false --tag ghcr.io/owner/repo:main "
+            f"ghcr.io/owner/repo@{expected_digest}"
+        ) in log
