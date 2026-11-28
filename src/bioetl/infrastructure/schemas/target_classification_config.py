@@ -54,7 +54,7 @@ class TargetClassificationYamlConfig(BaseModel):
                     },
                 },
                 {
-                    # Missing mode also matches: the runtime defaults to off.
+                    # An omitted mode resolves to the legacy schema default, off.
                     "if": {"properties": {"mode": {"enum": ["off", "shadow"]}}},
                     "then": {
                         "properties": {"table_contract": {"enum": ["3.0.0", None]}}

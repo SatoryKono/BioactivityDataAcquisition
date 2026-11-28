@@ -1,4 +1,4 @@
-"""Immutable, opt-in configuration for offline IUPHAR target classification.
+"""Immutable configuration for offline IUPHAR target classification.
 
 RF-001 (#13309) field-layer contract (semantics only; no biological admission):
 
