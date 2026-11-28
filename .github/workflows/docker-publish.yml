@@ -163,22 +163,31 @@ jobs:
           fi
           expected_id="$(cat scanned-image/bioetl-image-id.txt)"
           sha_ref="${IMAGE_BASE}:${TESTED_SHA}"
-          branch_ref="${IMAGE_BASE}:${GITHUB_REF_NAME}"
           docker tag "${IMAGE_REF}" "${sha_ref}"
-          docker tag "${IMAGE_REF}" "${branch_ref}"
           docker push "${sha_ref}"
-          docker push "${branch_ref}"
-          remote_config="$(docker manifest inspect "${sha_ref}" | jq -r '.config.digest')"
-          test "${remote_config}" = "${expected_id}"
-          digest="$(docker buildx imagetools inspect "${sha_ref}" --format '{{.Manifest.Digest}}')"
-          [[ "${digest}" =~ ^sha256:[0-9a-f]{64}$ ]]
+          manifest="$(mktemp)"
+          trap 'rm -f -- "${manifest}"' EXIT
+          if ! docker buildx imagetools inspect --raw "${sha_ref}" > "${manifest}"; then
+            echo "::error::Could not read the published SHA manifest from GHCR."
+            exit 1
+          fi
+          if ! remote_config="$(jq -er '.config.digest | select(type == "string" and test("^sha256:[0-9a-f]{64}$"))' "${manifest}")"; then
+            echo "::error::Published SHA manifest does not contain a valid image config digest."
+            exit 1
+          fi
+          if [[ "${remote_config}" != "${expected_id}" ]]; then
+            echo "::error::Published image config does not match the scanned image ID."
+            exit 1
+          fi
+          digest="$(sha256sum "${manifest}")"
+          digest="sha256:${digest%% *}"
           echo "digest=${digest}" >> "$GITHUB_OUTPUT"
 
       - name: Generate GHCR image SBOM
         if: steps.head-guard.outputs.stale != 'true' && steps.publish.outputs.stale != 'true'
         uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
         with:
-          image: ${{ steps.ghcr.outputs.image_base }}:${{ inputs.source-sha }}
+          image: ${{ steps.ghcr.outputs.image_base }}@${{ steps.publish.outputs.digest }}
           format: spdx-json
           output-file: bioetl-ghcr.spdx.json
           artifact-name: bioetl-ghcr-sbom
@@ -193,3 +202,27 @@ jobs:
           subject-name: ${{ steps.ghcr.outputs.image_base }}
           subject-digest: ${{ steps.publish.outputs.digest }}
           push-to-registry: true
+
+      - name: Promote the attested image to the main tag
+        if: steps.head-guard.outputs.stale != 'true' && steps.publish.outputs.stale != 'true'
+        env:
+          IMAGE_BASE: ${{ steps.ghcr.outputs.image_base }}
+          EXPECTED_DIGEST: ${{ steps.publish.outputs.digest }}
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          SOURCE_SHA: ${{ inputs.source-sha }}
+        run: |
+          set -euo pipefail
+          current_sha="$(gh api "/repos/${REPOSITORY}/branches/main" --jq '.commit.sha')"
+          if [[ "${current_sha}" != "${SOURCE_SHA}" ]]; then
+            echo "::notice::Not moving the main tag: ${SOURCE_SHA} is no longer main HEAD (${current_sha})."
+            exit 0
+          fi
+          branch_ref="${IMAGE_BASE}:${GITHUB_REF_NAME}"
+          [[ "${EXPECTED_DIGEST}" =~ ^sha256:[0-9a-f]{64}$ ]]
+          docker buildx imagetools create --prefer-index=false --tag "${branch_ref}" "${IMAGE_BASE}@${EXPECTED_DIGEST}"
+          actual_digest="$(docker buildx imagetools inspect --raw "${branch_ref}" | sha256sum)"
+          if [[ "sha256:${actual_digest%% *}" != "${EXPECTED_DIGEST}" ]]; then
+            echo "::error::The main tag does not match the attested manifest digest."
+            exit 1
+          fi
