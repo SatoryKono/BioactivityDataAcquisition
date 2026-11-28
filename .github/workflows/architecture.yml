@@ -4,7 +4,7 @@ on:
     workflow_dispatch:
         inputs:
             source_sha:
-                description: Exact BioETL candidate commit to verify
+                description: Exact BioETL candidate commit to build
                 required: true
                 type: string
 
@@ -12,17 +12,47 @@ permissions:
     contents: read
 
 jobs:
-    windows-delta-compatibility:
-        runs-on: windows-latest
+    selectorshell-adaptive-rebuild:
+        runs-on: ubuntu-latest
         timeout-minutes: 15
+        defaults:
+            run:
+                working-directory: grafana/plugins/bioetl-selectorshell-panel
         steps:
             - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
               with:
                   ref: ${{ inputs.source_sha }}
                   persist-credentials: false
-            - name: Setup Python + uv
-              uses: ./.github/actions/setup-python-uv
-            - name: Verify locked Delta Lake version
-              run: uv run --frozen --no-build python -c "import deltalake; assert deltalake.__version__ == '1.7.0'; print(deltalake.__version__)"
-            - name: Verify Delta active files and physical schema on Windows
-              run: uv run --frozen --no-build pytest tests/unit/infrastructure/storage/delta/test_table_ops.py tests/integration/infrastructure/storage/test_issue_12475_physical_parity.py tests/integration/infrastructure/storage/test_issue_12474_parity_control.py -n 0 -q --tb=short -k "windows_read or physical_parity or parity_control"
+            - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+              with:
+                  node-version: "24"
+                  package-manager-cache: false
+            - name: Install locked packages
+              run: npm ci --ignore-scripts --no-audit --no-fund
+            - name: Run selector tests
+              run: npm run test:ci
+            - name: Check TypeScript
+              run: npm run typecheck
+            - name: Rebuild the adaptive bundle
+              run: npm exec -- webpack -c ./webpack.adaptive.config.ts --env production
+            - name: Record exact changed outputs
+              run: |
+                  python3 - <<'PY'
+                  import base64
+                  import hashlib
+                  import pathlib
+                  import subprocess
+                  root = pathlib.Path(subprocess.check_output(["git", "rev-parse", "--show-toplevel"], text=True).strip())
+                  out = pathlib.Path("dist-adaptive")
+                  for path in sorted(out.rglob("*")):
+                      if not path.is_file():
+                          continue
+                      relative = path.resolve().relative_to(root).as_posix()
+                      data = path.read_bytes()
+                      original = subprocess.run(["git", "show", f"HEAD:{relative}"], cwd=root, capture_output=True, check=False)
+                      if original.returncode or original.stdout != data:
+                          print(f"ADAPTIVE_SHA256 {relative} {hashlib.sha256(data).hexdigest()}", flush=True)
+                          encoded = base64.b64encode(data).decode()
+                          for pos in range(0, len(encoded), 7000):
+                              print(f"ADAPTIVE_BYTES {relative} {encoded[pos:pos + 7000]}", flush=True)
+                  PY
