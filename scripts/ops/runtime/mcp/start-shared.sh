@@ -5,43 +5,47 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)"
 cd "$ROOT"
 CATALOG="$ROOT/scripts/ops/runtime/mcp/shared-servers.json"
-LOG_DIR="$ROOT/logs/mcp-shared"
-PID_DIR="$LOG_DIR/pids"
-NATIVE_CACHE_HOME="${XDG_CACHE_HOME:-$(python3 -c 'from pathlib import Path; print(Path.home() / ".cache")')}"
-MCP_CACHE_ROOT="$NATIVE_CACHE_HOME/bioetl-mcp"
-NPM_CACHE="$MCP_CACHE_ROOT/npm-cache"
-UV_CACHE="$MCP_CACHE_ROOT/uv-cache"
-UV_TOOLS="$MCP_CACHE_ROOT/uv-tools"
-GLOBAL_LOCK_DIR="${XDG_RUNTIME_DIR:-/tmp}/bioetl-mcp-shared-$(id -u)"
-mkdir -p "$PID_DIR" "$NPM_CACHE" "$UV_CACHE" "$UV_TOOLS" "$GLOBAL_LOCK_DIR"
-chmod 700 "$GLOBAL_LOCK_DIR"
-
-# One launcher owns reconciliation across every checkout for this OS user.
-# Child processes do not inherit this descriptor because Python Popen closes
-# unrelated file descriptors.
-exec 9>"$GLOBAL_LOCK_DIR/launcher.lock"
-flock 9
-
-export NPM_CONFIG_CACHE="$NPM_CACHE"
-export UV_CACHE_DIR="$UV_CACHE"
-export UV_TOOL_DIR="$UV_TOOLS"
-
 MODE="daily"
+DRY_RUN=0
 SELECTED=()
 for arg in "$@"; do
   case "$arg" in
     --all|-a) MODE="all" ;;
     --daily|-d) MODE="daily" ;;
+    --dry-run) DRY_RUN=1 ;;
     *) SELECTED+=("$arg") ;;
   esac
 done
 
-PROXY_PKG="$(python3 -c "import json; print(json.load(open(r'$CATALOG'))['proxy_package'])")"
-echo "Pre-warming $PROXY_PKG ..."
-npx -y "$PROXY_PKG" --help >"$LOG_DIR/prewarm.out.log" 2>"$LOG_DIR/prewarm.err.log" || \
-  echo "pre-warm warning (see $LOG_DIR/prewarm.err.log)"
+LOG_DIR="$ROOT/logs/mcp-shared"
+PID_DIR="$LOG_DIR/pids"
+if [[ "$DRY_RUN" == 0 ]]; then
+  NATIVE_CACHE_HOME="${XDG_CACHE_HOME:-$(python3 -c 'from pathlib import Path; print(Path.home() / ".cache")')}"
+  MCP_CACHE_ROOT="$NATIVE_CACHE_HOME/bioetl-mcp"
+  NPM_CACHE="$MCP_CACHE_ROOT/npm-cache"
+  UV_CACHE="$MCP_CACHE_ROOT/uv-cache"
+  UV_TOOLS="$MCP_CACHE_ROOT/uv-tools"
+  GLOBAL_LOCK_DIR="${XDG_RUNTIME_DIR:-/tmp}/bioetl-mcp-shared-$(id -u)"
+  mkdir -p "$PID_DIR" "$NPM_CACHE" "$UV_CACHE" "$UV_TOOLS" "$GLOBAL_LOCK_DIR"
+  chmod 700 "$GLOBAL_LOCK_DIR"
 
-python3 - "$CATALOG" "$ROOT" "$PID_DIR" "$LOG_DIR" "$MODE" "${SELECTED[@]}" <<'PY'
+  # One launcher owns reconciliation across every checkout for this OS user.
+  # Child processes do not inherit this descriptor because Python Popen closes
+  # unrelated file descriptors.
+  exec 9>"$GLOBAL_LOCK_DIR/launcher.lock"
+  flock 9
+
+  export NPM_CONFIG_CACHE="$NPM_CACHE"
+  export UV_CACHE_DIR="$UV_CACHE"
+  export UV_TOOL_DIR="$UV_TOOLS"
+
+  PROXY_PKG="$(python3 -c "import json; print(json.load(open(r'$CATALOG'))['proxy_package'])")"
+  echo "Pre-warming $PROXY_PKG ..."
+  npx -y "$PROXY_PKG" --help >"$LOG_DIR/prewarm.out.log" 2>"$LOG_DIR/prewarm.err.log" || \
+    echo "pre-warm warning (see $LOG_DIR/prewarm.err.log)"
+fi
+
+python3 - "$CATALOG" "$ROOT" "$PID_DIR" "$LOG_DIR" "$MODE" "$DRY_RUN" "${SELECTED[@]}" <<'PY'
 from __future__ import annotations
 
 import json
@@ -54,7 +58,7 @@ import time
 import urllib.request
 from pathlib import Path
 
-catalog_path, root_arg, pid_arg, log_arg, mode, *selected = sys.argv[1:]
+catalog_path, root_arg, pid_arg, log_arg, mode, dry_run, *selected = sys.argv[1:]
 catalog = json.loads(Path(catalog_path).read_text(encoding="utf-8"))
 root = Path(root_arg)
 pid_dir = Path(pid_arg)
@@ -146,6 +150,11 @@ elif mode == "daily":
         for name, entry in items
         if entry.get("daily", True) is not False
     ]
+
+if dry_run == "1":
+    for name, _ in items:
+        print(name)
+    raise SystemExit(0)
 
 status: dict[str, object] = {
     "started_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),

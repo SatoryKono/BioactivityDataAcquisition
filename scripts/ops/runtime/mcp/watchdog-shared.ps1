@@ -34,7 +34,7 @@ New-Item -ItemType Directory -Force -Path $logDir | Out-Null
 
 $names = @($catalog.servers.PSObject.Properties.Name)
 if ($Daily -or ($Servers.Count -eq 0 -and -not $IncludeNeo4j)) {
-    $names = @($names | Where-Object { $_ -notmatch '^neo4j-' })
+    $names = @($names | Where-Object { $catalog.servers.$_.daily })
 }
 if ($Servers.Count -gt 0) {
     $want = @($Servers | ForEach-Object { $_ -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ })
@@ -52,10 +52,13 @@ $healthOut = & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $healthSc
 $healthOut | ForEach-Object { Write-Host $_ }
 
 $down = @()
+$authRejected = @()
 foreach ($line in $healthOut) {
     $s = [string]$line
     if ($s -match '^\[DOWN\]\s+(\S+)') {
         $down += $Matches[1]
+    } elseif ($s -match '^\[AUTH\]\s+(\S+)') {
+        $authRejected += $Matches[1]
     }
 }
 
@@ -63,13 +66,18 @@ $report = [ordered]@{
     checked_at = (Get-Date).ToString('o')
     watched = $names
     down = $down
+    auth_rejected = $authRejected
     restarted = @()
-    ok = $true
+    ok = ($authRejected.Count -eq 0)
 }
 
 if ($down.Count -eq 0) {
-    Write-Host 'watchdog-shared: all watched servers up'
     $report | ConvertTo-Json -Depth 4 | Set-Content (Join-Path $logDir 'watchdog.json') -Encoding utf8
+    if ($authRejected.Count -gt 0) {
+        Write-Warning "watchdog-shared: authentication rejected: $($authRejected -join ', ')"
+        exit 1
+    }
+    Write-Host 'watchdog-shared: all watched servers up'
     exit 0
 }
 
@@ -85,15 +93,22 @@ $health2 = & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $healthScri
     -Servers ($names -join ',') -TimeoutSec $HealthTimeoutSec -OverallTimeoutSec 60 2>&1
 $health2 | ForEach-Object { Write-Host $_ }
 $stillDown = @()
+$authRejected = @()
 foreach ($line in $health2) {
     if ([string]$line -match '^\[DOWN\]\s+(\S+)') { $stillDown += $Matches[1] }
+    elseif ([string]$line -match '^\[AUTH\]\s+(\S+)') { $authRejected += $Matches[1] }
 }
 $report.still_down = $stillDown
-$report.ok = ($stillDown.Count -eq 0)
+$report.auth_rejected = $authRejected
+$report.ok = ($stillDown.Count -eq 0 -and $authRejected.Count -eq 0)
 $report | ConvertTo-Json -Depth 5 | Set-Content (Join-Path $logDir 'watchdog.json') -Encoding utf8
 
 if ($stillDown.Count -gt 0) {
     Write-Warning "watchdog-shared: still down: $($stillDown -join ', ')"
+    exit 1
+}
+if ($authRejected.Count -gt 0) {
+    Write-Warning "watchdog-shared: authentication rejected: $($authRejected -join ', ')"
     exit 1
 }
 Write-Host 'watchdog-shared: recovered'

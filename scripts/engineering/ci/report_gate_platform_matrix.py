@@ -40,11 +40,32 @@ def render() -> str:
         workflow = yaml.safe_load(source)
         root = yaml.compose(source)
         jobs_node = next(value for key, value in root.value if key.value == "jobs")
-        job_lines = {key.value: key.start_mark.line + 1 for key, _ in jobs_node.value}
         events = workflow.get("on", workflow.get(True))
-        for name, job in workflow["jobs"].items():
-            identifier = f"`{path.name}:{name}` ({path.as_posix()}:{job_lines[name]})"
+        for name_node, job_node in jobs_node.value:
+            name = name_node.value
+            job = workflow["jobs"][name]
+            line = name_node.start_mark.line + 1
+            identifier = f"`{path.name}:{name}` ({path.as_posix()}:{line})"
             runner = job.get("runs-on", job.get("uses"))
+            if (
+                path.name == "codeql.yml"
+                and name == "analyze"
+                and isinstance(runner, str)
+            ):
+                runner_end = next(
+                    (
+                        value.end_mark
+                        for key, value in job_node.value
+                        if key.value == "runs-on"
+                        and key.start_mark.line == value.end_mark.line
+                    ),
+                    None,
+                )
+                if runner_end is not None:
+                    tail = source.splitlines()[runner_end.line][runner_end.column :]
+                    note = tail.partition("#")[2].strip()
+                    if note.startswith("canary-verified: "):
+                        runner = f"{runner}, {note}"
             values = (
                 identifier,
                 cell(events),

@@ -72,25 +72,42 @@ function Test-TcpPort {
     }
 }
 
-function Test-HttpPing {
+function Get-HttpPingResult {
     param([string]$Uri, [int]$TimeoutSec)
     try {
         # Prefer HttpWebRequest for hard timeout on older PowerShell.
         $req = [System.Net.HttpWebRequest]::Create($Uri)
         $req.Method = 'GET'
+        $req.Proxy = $null
+        $req.AllowAutoRedirect = $false
+        if ($env:BIOETL_MCP_SHARED_API_KEY) {
+            $req.Headers['X-API-Key'] = $env:BIOETL_MCP_SHARED_API_KEY
+        }
         $req.Timeout = $TimeoutSec * 1000
         $req.ReadWriteTimeout = $TimeoutSec * 1000
         $req.KeepAlive = $false
         $resp = $null
         try {
             $resp = $req.GetResponse()
-            $code = [int]$resp.StatusCode
-            return ($code -ge 200 -and $code -lt 500)
+            return @{ Status = [int]$resp.StatusCode; Error = $null }
         } finally {
             if ($null -ne $resp) { $resp.Close() }
         }
-    } catch {
-        return $false
+    } catch [System.Net.WebException] {
+        $response = $_.Exception.Response
+        if ($null -ne $response) {
+            try {
+                return @{ Status = [int]$response.StatusCode; Error = $null }
+            } finally {
+                $response.Close()
+            }
+        }
+        $failure = if ($_.Exception.Status -eq [System.Net.WebExceptionStatus]::Timeout) {
+            'http_timeout'
+        } else {
+            'http_unreachable'
+        }
+        return @{ Status = $null; Error = $failure }
     }
 }
 
@@ -108,6 +125,8 @@ foreach ($name in $selected) {
                 Url = "http://127.0.0.1:$([int]$entryRest.port)$([string]$entryRest.path)"
                 PortOpen = $false
                 PingOk = $false
+                HttpStatus = $null
+                ReadinessLevel = 'not_tested'
                 Ok = $false
                 Error = 'overall_timeout'
             }
@@ -126,6 +145,8 @@ foreach ($name in $selected) {
             Url = $null
             PortOpen = $false
             PingOk = $false
+            HttpStatus = $null
+            ReadinessLevel = 'not_tested'
             Ok = $false
             Error = 'unknown'
         }
@@ -140,16 +161,31 @@ foreach ($name in $selected) {
     $timeoutMs = $perTimeout * 1000
     $portUp = Test-TcpPort -Port $port -TimeoutMs $timeoutMs
     $pingOk = $false
+    $httpStatus = $null
+    $readiness = 'not_tested'
+    $failure = 'tcp_unreachable'
+    $nativeStreaming = [string]$entry.launch_mode -in @('windows_docker_streaming', 'windows_npx_streaming')
     if ($portUp) {
-        if ([string]$entry.launch_mode -in @('windows_docker_streaming', 'windows_npx_streaming')) {
-            $pingOk = $true
+        if ($nativeStreaming) {
+            $readiness = 'tcp'
+            $failure = $null
         } else {
-            $pingOk = Test-HttpPing -Uri $pingUrl -TimeoutSec $perTimeout
+            $ping = Get-HttpPingResult -Uri $pingUrl -TimeoutSec $perTimeout
+            $readiness = 'tcp'
+            $httpStatus = $ping.Status
+            $failure = $ping.Error
+            if ($httpStatus -ge 200 -and $httpStatus -lt 300) {
+                $pingOk = $true
+                $readiness = 'http_ping'
+            } elseif ($httpStatus -in @(401, 403)) {
+                $failure = 'auth_rejected'
+            } elseif ($null -ne $httpStatus) {
+                $failure = 'http_error'
+            }
         }
     }
-    # mcp-proxy exposes /ping only after its stdio child completed MCP
-    # initialization. A bare TCP listener is not a ready MCP endpoint.
-    $ok = ($portUp -and $pingOk)
+    # Preserve the watchdog transport gate for native listeners.
+    $ok = $portUp -and ($nativeStreaming -or $pingOk)
     if (-not $ok) { $failed++ }
     $line = [pscustomobject]@{
         Server = $name
@@ -157,12 +193,14 @@ foreach ($name in $selected) {
         Url = $mcpUrl
         PortOpen = $portUp
         PingOk = $pingOk
+        HttpStatus = $httpStatus
+        ReadinessLevel = $readiness
         Ok = $ok
-        Error = $null
+        Error = $failure
     }
     $results += $line
-    $mark = if ($ok) { 'OK' } else { 'DOWN' }
-    Write-Host ("[{0}] {1} port={2} ping={3} {4}" -f $mark, $name, $portUp, $pingOk, $mcpUrl)
+    $mark = if ($ok) { 'OK' } elseif ($failure -eq 'auth_rejected') { 'AUTH' } else { 'DOWN' }
+    Write-Host ("[{0}] {1} level={2} http={3} error={4} {5}" -f $mark, $name, $readiness, $httpStatus, $failure, $mcpUrl)
 }
 
 $logDir = Join-Path $Root 'logs\mcp-shared'

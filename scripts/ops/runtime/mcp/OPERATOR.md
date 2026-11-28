@@ -14,7 +14,7 @@ per thrash image (no N× `docker run --rm -i` stdio).
 ```bash
 cd <repo>
 
-# 1) Shared plane (daily servers only; skips daily=false e.g. deja without binary)
+# 1) Shared plane (entries marked daily in shared-servers.json)
 ./scripts/ops/runtime/mcp/start-shared.sh
 ./scripts/ops/runtime/mcp/health-shared.sh
 # optional full catalog including optional servers:
@@ -44,6 +44,13 @@ python3 scripts/ops/runtime/mcp/apply-shared-to-devin.py
 #    Codex, Devin, Grok, Cursor, VS Code
 ```
 
+On Windows, run `start-shared.ps1` for the same daily selection, `start-shared.ps1
+-All` for the full catalog, or use `-Servers` for a subset. Add `-DryRun` to list
+the selected names without starting processes or writing a status report.
+On Linux or WSL, `start-shared.sh --dry-run` lists the daily selection without
+creating caches or starting processes. Combine it with `--all` or server names
+to preview a different selection.
+
 ### Thrash proof
 
 ```bash
@@ -72,16 +79,16 @@ python3 scripts/ai/codex/setup_mcp.py \
 
 | Server | Port | Daily | Notes |
 | --- | --- | --- | --- |
-| deja | 8814 | **no** | Needs `deja` binary (`go install github.com/vshulcz/deja-vu/cmd/deja@latest`). Start with `./start-shared.sh deja` when installed. |
+| deja | 8814 | **yes** | Requires the `deja` executable. |
 | docker | 8817 | **no** | Gateway thrash leader. Single proxy: `./start-shared.sh docker`. Keep off daily unless needed; Devin daily still omits. |
-| mermaid | 8818 | **no** | Same pattern: `./start-shared.sh mermaid` (or `docker mermaid dockerhub`). |
-| dockerhub | 8819 | **no** | Same pattern: `./start-shared.sh dockerhub`. |
+| mermaid | 8818 | **no** | Start with `./start-shared.sh mermaid`. |
 
 Catalog SSOT: `scripts/ops/runtime/mcp/shared-servers.json` (`daily: false` = optional).
 
 ## Ready gate (start-shared)
 
-- Success = HTTP `GET http://127.0.0.1:<port>/ping` (not TCP-only).
+- A proxy health check requires HTTP 2xx from `GET http://127.0.0.1:<port>/ping`.
+- Windows health reports `auth_rejected` for 401/403 and `http_timeout` for an HTTP timeout. The watchdog leaves auth-rejected endpoints for operator review. Native Docker and Mermaid listeners have TCP status only. Check the protocol and a read-only tool call in the client before accepting a route.
 - Default settle ≈25s host / 45s docker-backed; retries **never** double-bind (kill tree + wait free, or accept already-ready).
 - Idempotent re-run: already-ready servers report `already_up` and exit 0 when all selected are healthy.
 
