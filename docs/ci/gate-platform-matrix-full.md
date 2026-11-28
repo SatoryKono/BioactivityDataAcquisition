@@ -17,7 +17,7 @@
 | `chembl-baseline-smoke.yml:baseline-cli-runner-smoke` (.github/workflows/chembl-baseline-smoke.yml:19) | {"workflow_dispatch": null} | — | — | "ubuntu-24.04" |
 | `chembl-baseline-smoke.yml:baseline-reconciliation-smoke` (.github/workflows/chembl-baseline-smoke.yml:73) | {"workflow_dispatch": null} | — | — | "ubuntu-24.04" |
 | `chembl-baseline-smoke.yml:baseline-architecture-smoke` (.github/workflows/chembl-baseline-smoke.yml:114) | {"workflow_dispatch": null} | — | — | "ubuntu-24.04" |
-| `codeql.yml:analyze` (.github/workflows/codeql.yml:15) | {"workflow_call": null, "workflow_dispatch": null} | — | — | "ubuntu-latest" |
+| `codeql.yml:analyze` (.github/workflows/codeql.yml:15) | {"workflow_call": null, "workflow_dispatch": null} | — | — | "ubuntu-latest, canary-verified: 2026-11-27, ubuntu-26.04; workflow_dispatch on main" |
 | `coderabbit.yml:cli-review` (.github/workflows/coderabbit.yml:17) | {"workflow_dispatch": null} | — | — | "ubuntu-latest" |
 | `commit-lint.yml:commit-lint` (.github/workflows/commit-lint.yml:13) | {"workflow_call": null} | — | — | "ubuntu-latest" |
 | `compiled-artifacts-block.yml:no-pyc-check` (.github/workflows/compiled-artifacts-block.yml:16) | {"workflow_call": null} | — | — | "ubuntu-latest" |

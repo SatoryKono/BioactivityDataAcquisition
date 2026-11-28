@@ -9,8 +9,9 @@
   Logs under logs/mcp-shared/; status in logs/mcp-shared/status.json.
   Does not touch bioetl / bioetl-neo4j compose stacks.
 
-  Daily catalog includes github on port 8820. Do not skip github when using
-  -Daily (#10299). Grok daily should use url http://127.0.0.1:8820/mcp rather
+  The default and -Daily select daily catalog entries. Use -All to include
+  optional servers or -Servers to select specific entries. Grok daily should
+  use url http://127.0.0.1:8820/mcp rather
   than a second stdio github process.
 
   W1.2 hardening:
@@ -31,21 +32,21 @@
 [CmdletBinding()]
 param(
     [string[]]$Servers = @(),
-    # Daily multi-client set: catalog minus neo4j-* (auth-dependent optional).
     [switch]$Daily,
-    # Dry-run only (avoid reserved -WhatIf).
+    [switch]$All,
+    # Show the selected servers without probing ports or changing state.
     [switch]$DryRun,
     # Host cold-start (npx + wrapper) often exceeds 12s; /ping is the success signal.
     [int]$SettleSeconds = 25,
     [int]$MaxAttempts = 2,
     [switch]$SkipPrewarm,
     # Bind host for mcp-proxy (default loopback only).
+    [ValidateSet('127.0.0.1', 'localhost')]
     [string]$BindHost = '127.0.0.1'
 )
 
 $ErrorActionPreference = 'Stop'
 $Root = (Resolve-Path (Join-Path $PSScriptRoot '..\..\..\..')).Path
-Set-Location $Root
 
 $catalogPath = Join-Path $PSScriptRoot 'shared-servers.json'
 if (-not (Test-Path $catalogPath)) {
@@ -53,6 +54,33 @@ if (-not (Test-Path $catalogPath)) {
     exit 1
 }
 $catalog = Get-Content $catalogPath -Raw | ConvertFrom-Json
+$ordered = @($catalog.servers.PSObject.Properties.Name | Sort-Object {
+    $entry = $catalog.servers.$_
+    if ($entry.PSObject.Properties.Name -contains 'priority') { [int]$entry.priority } else { 100 }
+}, { $_ })
+$want = @($Servers | ForEach-Object { $_ -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+if ($All -and ($Daily -or $want.Count -gt 0)) {
+    throw '-All cannot be combined with -Daily or -Servers.'
+}
+$unknown = @($want | Where-Object { $ordered -notcontains $_ })
+if ($unknown.Count -gt 0) {
+    throw "Unknown shared MCP servers: $($unknown -join ', ')"
+}
+$selected = if ($want.Count -gt 0) {
+    $ordered | Where-Object { $want -contains $_ }
+} elseif ($All) {
+    $ordered
+} else {
+    $ordered | Where-Object {
+        $entry = $catalog.servers.$_
+        -not ($entry.PSObject.Properties.Name -contains 'daily') -or [bool]$entry.daily
+    }
+}
+if ($DryRun) {
+    $selected | ForEach-Object { Write-Output $_ }
+    exit 0
+}
+Set-Location $Root
 $nativeStreamingPorts = @(
     $catalog.servers.PSObject.Properties |
         Where-Object { [string]$_.Value.launch_mode -in @('windows_docker_streaming', 'windows_npx_streaming') } |
@@ -107,12 +135,17 @@ function Test-McpPing {
         $uri = "http://127.0.0.1:$Port/ping"
         $req = [System.Net.HttpWebRequest]::Create($uri)
         $req.Method = 'GET'
+        $req.Proxy = $null
+        $req.AllowAutoRedirect = $false
+        if ($env:BIOETL_MCP_SHARED_API_KEY) {
+            $req.Headers['X-API-Key'] = $env:BIOETL_MCP_SHARED_API_KEY
+        }
         $req.Timeout = [Math]::Max(500, $TimeoutSec * 1000)
         $req.ReadWriteTimeout = $req.Timeout
         $resp = $req.GetResponse()
         try {
             $code = [int]$resp.StatusCode
-            return ($code -ge 200 -and $code -lt 500)
+            return ($code -ge 200 -and $code -lt 300)
         } finally {
             $resp.Close()
         }
@@ -217,29 +250,6 @@ function New-McpAttemptLogPaths {
     }
 }
 
-$allNames = @($catalog.servers.PSObject.Properties.Name)
-# Prefer catalog priority then name for deterministic sequential start.
-$ordered = @($allNames | Sort-Object {
-    $e = $catalog.servers.$_
-    if ($e.PSObject.Properties.Name -contains 'priority') { [int]$e.priority } else { 100 }
-}, { $_ })
-
-if ($Daily -and $Servers.Count -eq 0) {
-    $Servers = @($ordered | Where-Object {
-        $dailyEntry = $catalog.servers.$_
-        -not ($dailyEntry.PSObject.Properties.Name -contains 'daily') -or [bool]$dailyEntry.daily
-    })
-    Write-Host "Daily profile: $($Servers -join ', ')"
-}
-
-# -File invocations often pass -Servers a,b,c as one string "a,b,c".
-$selected = if ($Servers.Count -gt 0) {
-    $want = @($Servers | ForEach-Object { $_ -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ })
-    @($ordered | Where-Object { $want -contains $_ }) + @($want | Where-Object { $ordered -notcontains $_ })
-} else {
-    $ordered
-}
-
 $apiKey = [string]$env:BIOETL_MCP_SHARED_API_KEY
 if ([string]::IsNullOrWhiteSpace($apiKey)) {
     $apiKey = ''
@@ -247,7 +257,7 @@ if ([string]::IsNullOrWhiteSpace($apiKey)) {
     Write-Host 'Auth: BIOETL_MCP_SHARED_API_KEY set (mcp-proxy --apiKey / clients need X-API-Key)'
 }
 
-if (-not $DryRun -and -not $SkipPrewarm) {
+if (-not $SkipPrewarm) {
     Write-Host "Pre-warming $proxyPkg (cache=$npmCache) ..."
     $warmLog = Join-Path $logDir 'prewarm.err.log'
     $warmOut = Join-Path $logDir 'prewarm.out.log'
@@ -274,11 +284,6 @@ if (-not $DryRun -and -not $SkipPrewarm) {
 $failed = 0
 foreach ($name in $selected) {
     $entry = $catalog.servers.$name
-    if (-not $entry) {
-        Write-Warning "Unknown shared server '$name'; skip"
-        $failed++
-        continue
-    }
     $port = [int]$entry.port
     $wrapperBase = [string]$entry.wrapper
     $wrapper = Join-Path $Root "scripts\ai\mcp\${wrapperBase}.ps1"
@@ -346,12 +351,6 @@ foreach ($name in $selected) {
         $cmdArgs = "/d /c powershell.exe -NoLogo -NonInteractive -NoProfile -ExecutionPolicy Bypass -File `"$wrapper`" -Transport streamable -BindHost $BindHost -Port $port -Endpoint /mcp"
     } else {
         $cmdArgs = "/d /c set `"NPM_CONFIG_CACHE=$npmCache`"&& npx -y $proxyPkg $proxyFlags -- powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"$wrapper`""
-    }
-
-    if ($DryRun) {
-        Write-Host "DryRun: $comSpec $cmdArgs"
-        $status.servers[$name] = @{ port = $port; state = 'whatif' }
-        continue
     }
 
     $state = 'exited'
