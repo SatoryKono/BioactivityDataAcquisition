@@ -106,7 +106,7 @@ retired; a current schedule owner and automatic execution are not established
 | `root-hygiene.yml` | `Root Hygiene` | `workflow_call`, `workflow_dispatch` | `active` | `active` | Root-surface cleanliness and governance checks |
 | `schema-governance.yml` | `Schema Governance` | `workflow_call` | `active` | `active` | Generated artifacts, schema parity, schema drift |
 | `codeql.yml` | `CodeQL` | `workflow_call`, `workflow_dispatch` | `active` | `active` | Advanced Python CodeQL SAST; default setup off. Monday Nightly still calls it; dispatch scans the selected ref without waiting for Monday |
-| `dependency-review.yml` | `Dependency review` | `workflow_dispatch` | `active` | `active` | PR-time HIGH/CRITICAL dependency review on lockfile/manifest changes |
+| `dependency-review.yml` | `Dependency review` | `workflow_dispatch` | `active` | `active` | Dispatch-only; missing base/head refs prevent a successful manual run. PR-time HIGH/CRITICAL dependency review in `runtime` scope runs in `pr-required.yml` / `fast-governance` |
 | `security.yml` | `Security Scans` | `workflow_call` | `active` | `active` | Secrets, pip-audit, Bandit, Gitleaks, OSV-Scanner |
 | `zizmor.yml` | `zizmor` | `workflow_call`, `workflow_dispatch` | `active` | `active` | High-confidence GitHub Actions YAML audit |
 | `semantic-governance.yml` | `Semantic Pipeline Governance` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Semantic pipeline contract/policy governance |
@@ -205,7 +205,7 @@ Route only to **active** GitHub lanes. Keep-disabled files above do not run.
 | Dashboard first-window no-scroll (DASH-FIT-004) | `dashboard-first-window-noscroll.yml` |
 | Schema and generated-artifact drift | `schema-governance.yml` |
 | Security scans | `security.yml` |
-| Dependency review | `dependency-review.yml` |
+| Dependency review | `pr-required.yml` / `fast-governance` for PRs; `dependency-review.yml` is dispatch-only but lacks required base/head refs |
 | CodeQL Python SAST | `codeql.yml` |
 | OpenSSF Scorecard | `scorecard.yml` |
 | zizmor Actions audit | `zizmor.yml` |

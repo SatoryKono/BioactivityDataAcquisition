@@ -17,7 +17,7 @@ Commands:
     gitleaks-boundaries  Verify Gitleaks false-positive exception boundaries
     neo4j-memory    Check deterministic Neo4j memory ontology invariants
     neo4j-memory-live  Apply deterministic sync and validate live Neo4j drift
-    gate-platform-matrix  Generate or check the GitHub Actions/CircleCI matrix
+    gate-platform-matrix  Generate or check the GitHub Actions job matrix
     docker-timing   Report Docker workflow timing and capacity evidence
     pr-gate-timing  Report PR Gate Complete timing and capacity evidence
     debt-report     Generate weekly quality debt report

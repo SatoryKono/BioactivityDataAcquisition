@@ -112,7 +112,7 @@ make security-check
 - **Dependabot version updates**: `.github/dependabot.yml` (pip + github-actions + docker; weekly, grouped minor/patch for pip, grouped per ecosystem otherwise)
 - **Dependabot alerts + security updates**: must be enabled in GitHub Settings → Code security and analysis → Dependency graph / Dependabot alerts / Dependabot security updates (separate from `dependabot.yml` version-update PRs)
 - **Dependabot triage**: owner `@SatoryKono` (CODEOWNERS), weekly; SLA Critical ≤ 24h, High ≤ 72h (see `05-github-policy.md §5`). PRs must pass all checks; auto-merge forbidden.
-- **Dependency review**: PR-time fail-closed scan of lockfile/manifest diffs (`.github/workflows/dependency-review.yml`, `fail-on-severity: high`)
+- **Dependency review**: PR-time scan of lockfile/manifest diffs in `.github/workflows/pr-required.yml` / `fast-governance` blocks HIGH/CRITICAL vulnerabilities in the default `runtime` scope; `development` and `unknown` scopes do not block. Snapshot warnings do not fail the check, so success does not prove a complete dependency graph. `.github/workflows/dependency-review.yml` is dispatch-only but lacks the base and head refs required for a successful manual run.
 - **detect-secrets**: Runs in CI (`.github/workflows/security.yml`) to prevent credential leaks
 - **GitHub secret scanning**: enabled with push protection. Partner-pattern **validity checks are disabled** (GET 2026-11-06; standing exception #10310). Non-provider patterns stay **disabled** (noisy; #10264).
 - **Gitleaks**: Runs in CI (`.github/workflows/security.yml`) with `.gitleaks.toml` (`--redact`; no secret values in job summaries/comments)
