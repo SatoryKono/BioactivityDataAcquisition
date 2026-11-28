@@ -37,6 +37,17 @@ jobs:
               run: npm run test:ci
             - name: Check TypeScript
               run: npm run typecheck
+            - name: Version the rebuilt adaptive bundle
+              run: |
+                  python3 - <<'PY'
+                  from pathlib import Path
+                  path = Path("webpack.adaptive.config.ts")
+                  text = path.read_text()
+                  assert text.count("replace: '1.1.9'") == 1
+                  text = text.replace("replace: '1.1.9'", "replace: '1.1.10'")
+                  assert text.count("2026-11-15") == 2
+                  path.write_text(text.replace("2026-11-15", "2026-11-28"))
+                  PY
             - name: Rebuild the adaptive bundle
               run: npm exec -- webpack -c ./webpack.adaptive.config.ts --env production
             - name: Record exact changed outputs
@@ -48,7 +59,7 @@ jobs:
                   import subprocess
                   root = pathlib.Path(subprocess.check_output(["git", "rev-parse", "--show-toplevel"], text=True).strip())
                   out = pathlib.Path("dist-adaptive")
-                  changed_inputs = [pathlib.Path("package.json"), pathlib.Path("package-lock.json")]
+                  changed_inputs = [pathlib.Path("package.json"), pathlib.Path("package-lock.json"), pathlib.Path("webpack.adaptive.config.ts")]
                   for path in sorted([*out.rglob("*"), *changed_inputs]):
                       if not path.is_file():
                           continue
