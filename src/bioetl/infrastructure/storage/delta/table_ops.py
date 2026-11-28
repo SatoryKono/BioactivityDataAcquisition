@@ -64,7 +64,8 @@ def _read_records_from_active_parquet_files(
     if len(tables) == 1:
         rows: list[BronzeRecord] = tables[0].to_pylist()
         return rows
-    concatenated = pa.concat_tables(tables)
+    # Files written before and after an evolution may differ in nullability.
+    concatenated = pa.concat_tables(tables, promote_options="default")
     return cast("list[BronzeRecord]", concatenated.to_pylist())
 
 
@@ -73,7 +74,7 @@ class _PartitionInfo:
     root: Path
     columns: list[str]
     schema: pa.Schema
-    values: dict[str, dict[str, str | None]]
+    values: dict[str, dict[str, object]]
 
 
 def _partition_info(
@@ -82,14 +83,15 @@ def _partition_info(
     columns = table.metadata().partition_columns
     if not columns:
         return None
+    actions = pa.table(table.get_add_actions())
+    partition_field = (
+        "partition" if "partition" in actions.column_names else "partition_values"
+    )
     return _PartitionInfo(
         Path(resolve_parquet_file_uri(table.table_uri)).resolve(),
         columns,
         schema if schema is not None else delta_schema_to_pyarrow(table.schema()),
-        {
-            item["path"]: item["partition_values"]
-            for item in table.get_add_actions().to_pylist()
-        },
+        {item["path"]: item[partition_field] for item in actions.to_pylist()},
     )
 
 
