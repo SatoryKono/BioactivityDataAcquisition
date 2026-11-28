@@ -45,9 +45,9 @@ BIOETL_GHCR_DIGEST='sha256:<published-digest>' \
 python scripts/ops/runtime/docker/runtime_manager.py start --stack main
 ```
 
-Для повторного запуска вспомогательных стеков используйте `make docker-start-full`.
-Команда больше не запускает предварительную сборку. Если требуется новый
-локальный образ, сначала выполните `make docker-build` явно.
+Для повторного запуска вспомогательных стеков с GHCR-образом выполните
+`BIOETL_GHCR_DIGEST='sha256:<published-digest>' make docker-start-full`.
+Для локального режима используйте `make docker-start-full` без переменной и при необходимости предварительно выполните `make docker-build`.
 
 ## Default release surface
 
