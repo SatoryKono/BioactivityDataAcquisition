@@ -849,7 +849,9 @@ pmid → pmid → pubmed-id
 
 ### 3.1.2. Пороги Ошибок Батча (Thresholds)
 
-- **Soft Threshold**: по умолчанию `>5%` ошибок качества данных -> Warning.
+- **Soft Threshold**: при доле ошибок качества данных `>= soft_fail`
+  и ниже hard threshold -> Warning. При `soft_fail=0.05`: 4/100 — без
+  Warning, 5/100 и 6/100 — Warning (если hard threshold не достигнут).
 - **Hard Threshold**: default `hard_fail=0.50` (50%) for hierarchical `quality:`
   config (`configs/base/quality.yaml`), domain/contract fallbacks, and standard
   entity contracts. Some surfaces keep specialized overrides (e.g. stricter or

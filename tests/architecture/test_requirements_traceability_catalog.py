@@ -17,6 +17,7 @@ aliases (REQ-ARCH family members past CSV 001-007, REQ-PERF-*, …).
 
 from __future__ import annotations
 
+import ast
 import csv
 import os
 import re
@@ -204,6 +205,66 @@ def test_executable_surface_paths_exist() -> None:
         "crosswalk executable_surface cites paths missing from checkout:\n"
         + "\n".join(f"  {item}" for item in missing)
     )
+
+
+def _python_symbol_exists(path: Path, symbol: str) -> bool:
+    """Resolve a qualified definition in its lexical module/class scope."""
+    scope = ast.parse(path.read_text(encoding="utf-8")).body
+    for part in symbol.split("."):
+        definition = next(
+            (
+                node
+                for node in scope
+                if isinstance(
+                    node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)
+                )
+                and node.name == part
+            ),
+            None,
+        )
+        if definition is None:
+            return False
+        scope = definition.body
+    return True
+
+
+def test_named_source_symbols_resolve() -> None:
+    """Explicit Python source selectors must name definitions in their module."""
+    with _CSV.open(encoding="utf-8", newline="") as handle:
+        rows = list(csv.DictReader(handle))
+    missing = []
+    for row in rows:
+        for match in re.finditer(
+            r"(src/[A-Za-z0-9_./-]+\.py)::([^\s;+`]+)",
+            row.get("executable_surface") or "",
+        ):
+            path, symbol = match.groups()
+            if not (_ROOT / path).is_file() or not _python_symbol_exists(
+                _ROOT / path, symbol
+            ):
+                missing.append(f"{row['requirement_id']}: {path}::{symbol}")
+    assert not missing, "unresolved source symbols:\n" + "\n".join(missing)
+
+
+def test_source_symbol_resolution_respects_scope() -> None:
+    path = _ROOT / "src/bioetl/domain/medallion.py"
+    assert _python_symbol_exists(path, "MedallionPolicy.for_run_type")
+    assert not _python_symbol_exists(path, "for_run_type")
+    assert not _python_symbol_exists(path, "MedallionPolicy.missing")
+
+
+def test_named_source_symbols_reject_malformed_selector(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    catalog = tmp_path / "crosswalk.csv"
+    catalog.write_text(
+        "requirement_id,executable_surface\n"
+        "example,src/bioetl/domain/medallion.py::MedallionPolicy.\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(sys.modules[__name__], "_CSV", catalog)
+    with pytest.raises(AssertionError, match=r"MedallionPolicy\."):
+        test_named_source_symbols_resolve()
 
 
 def _collect_selector(selector: str) -> subprocess.CompletedProcess[str]:

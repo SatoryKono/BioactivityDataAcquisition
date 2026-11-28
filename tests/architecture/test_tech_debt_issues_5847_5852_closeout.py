@@ -132,8 +132,10 @@ def test_issue_5847_root_baseline_is_reduced_without_new_root_directory() -> Non
         ".gemini",
         ".vscode",
     }
+    # CircleCI was retired and must not return as an approved tooling root.
+    assert ".circleci" not in approved_tooling_roots
+    assert not any(path.startswith(".circleci/") for path in tracked)
     for prefix, role, filenames in (
-        (".circleci", "historical_circleci_project_configuration", {"config.yml"}),
         (
             ".agents",
             "derived_native_agent_skill_discovery_surface",
