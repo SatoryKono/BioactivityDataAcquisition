@@ -8,7 +8,7 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, cast
-from urllib.parse import unquote, urlparse
+from urllib.parse import quote, unquote, urlparse
 
 import pyarrow as pa
 import pyarrow.parquet as pq
@@ -109,7 +109,13 @@ def _align_table_to_schema(
         )
     if not target:
         return result
-    return result.select(target)
+    projected = result.select(target)
+    for index, name in enumerate(target):
+        target_type = schema.field(name).type
+        column = projected.column(index)
+        if column.type != target_type:
+            projected = projected.set_column(index, name, column.cast(target_type))
+    return projected
 
 
 def _physical_columns_for_read(
@@ -179,7 +185,18 @@ def _append_partition_columns(
 ) -> pa.Table:
     """Restore partition fields from Delta add-actions with Delta-native types."""
     relative = Path(path).resolve().relative_to(partition_info.root).as_posix()
-    values = partition_info.values[relative]
+    values = partition_info.values.get(relative)
+    if values is None:
+        # delta-rs and the local filesystem can expose different URI escaping.
+        aliases = {unquote(relative), quote(relative, safe="/=")}
+        matches = [
+            partition_info.values[key]
+            for key in aliases
+            if key in partition_info.values
+        ]
+        if len(matches) != 1:
+            raise KeyError(f"Cannot match Delta add action for {relative!r}")
+        (values,) = matches
     for name in partition_info.columns:
         if columns is not None and name not in columns:
             continue
@@ -248,7 +265,7 @@ def read_delta_records(
             for batch in batches:
                 records.extend(batch.to_pylist())
             return records
-        # Dataset path available but no reader — fall through carefully.
+        # Dataset path available but no reader - fall through carefully.
         return _read_records_from_active_parquet_files(table, columns=columns)
 
     return _read_records_from_active_parquet_files(table, columns=columns)
