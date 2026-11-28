@@ -31,7 +31,7 @@ def test_gemini_toolchain_versions_are_exact_and_integrity_pinned() -> None:
 
     assert manifest["private"] is True
     assert manifest["dependencies"] == {
-        "@google/gemini-cli": "0.68.0",
+        "@google/gemini-cli": "0.71.1",
     }
     assert manifest["optionalDependencies"] == {
         "node-linux-arm64": "26.13.1",
@@ -45,7 +45,7 @@ def test_gemini_toolchain_versions_are_exact_and_integrity_pinned() -> None:
     )
 
     for package_path, expected_version in (
-        ("node_modules/@google/gemini-cli", "0.68.0"),
+        ("node_modules/@google/gemini-cli", "0.71.1"),
         ("node_modules/node-linux-arm64", "26.13.1"),
         ("node_modules/node-linux-x64", "26.13.1"),
     ):
