@@ -28,32 +28,21 @@ Docker — optional local adjunct. Канонический runtime: Python/venv
 Выберите опубликованный digest для вашей платформы и проверьте совместимость
 версии образа с локальными конфигами и форматом отчётов.
 
-Из того же основного checkout, который обслуживает стек, один раз подготовьте
-сети штатной командой `ensure-networks`. Затем укажите выбранный digest в
-переменной текущей сессии и выполните команды ниже. Первый файл Compose задаёт
-пути монтирования и проект. Оверлей выбирает готовый образ.
+Из основного checkout, который обслуживает стек, запустите `main` через
+runtime manager. Он подготавливает сети и аттестацию источника отчётов,
+подключает оверлей Compose и скачивает образ, если этого digest ещё нет локально.
 
 ```bash
-export BIOETL_GHCR_DIGEST='sha256:<published-digest>'
-docker compose -p bioetl-main -f docker-compose.yml \
-  -f scripts/ops/runtime/docker/compose.ghcr.yml config --images
-docker compose -p bioetl-main -f docker-compose.yml \
-  -f scripts/ops/runtime/docker/compose.ghcr.yml pull bioetl
-docker compose -p bioetl-main -f docker-compose.yml \
-  -f scripts/ops/runtime/docker/compose.ghcr.yml up -d --no-build --pull never --wait bioetl
+BIOETL_GHCR_DIGEST='sha256:<published-digest>' \
+  python scripts/ops/runtime/docker/runtime_manager.py start --stack main --timeout 300
 ```
 
-`pull` нужен при первом запуске или выборе нового digest. После запуска
-проверьте `/health/live`, `/health/ready` и источник отчётов. Для отката
-выберите предыдущий рабочий digest и повторите запуск сервиса.
-
-Для проверки локальных исправлений соберите образ командой
-`docker compose -p bioetl-main -f docker-compose.yml build bioetl` или
-`make docker-build`. Затем запустите основной Compose без оверлея:
+После запуска проверьте `/health/live` и `/health/ready`. Для отката повторите
+команду с предыдущим рабочим digest. Для локальных исправлений выполните
+`make docker-build` и запустите `main` без `BIOETL_GHCR_DIGEST`:
 
 ```bash
-docker compose -p bioetl-main -f docker-compose.yml \
-  up -d --no-build --pull never --wait bioetl
+python scripts/ops/runtime/docker/runtime_manager.py start --stack main
 ```
 
 Для повторного запуска вспомогательных стеков используйте `make docker-start-full`.

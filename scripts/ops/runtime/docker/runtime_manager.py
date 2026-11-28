@@ -36,6 +36,8 @@ from scripts.ops.runtime.docker import docker_runtime_preflight as runtime_prefl
 ROOT = Path(__file__).resolve().parents[4]
 DEFAULT_CONTRACT = ROOT / "configs/quality/docker_runtime_contracts.yaml"
 DEFAULT_REPORT_DIR = ROOT / "reports/quality"
+_GHCR_IMAGE = "ghcr.io/satorykono/bioactivitydataacquisition"
+_GHCR_OVERLAY = Path("scripts/ops/runtime/docker/compose.ghcr.yml")
 _SECRET_KEY = re.compile(r"(?:password|secret|token|credential|auth)", re.I)
 _SECRET_VALUE = re.compile(r"(?:gh[pousr]_\w{12,}|Bearer\s+\S+)", re.I)
 _SECRET_ASSIGNMENT = re.compile(
@@ -188,6 +190,7 @@ class StackSpec:
     expected_images: Mapping[str, str]
     # Started with the stack but not required for readiness / --wait.
     optional_services: tuple[str, ...] = ()
+    compose_overlay: Path | None = None
 
 
 @dataclass(frozen=True)
@@ -327,6 +330,13 @@ def resolve_stack(contract_path: Path, stack_name: str) -> StackSpec:
         for name, service in compose["services"].items()
         if "image" in service
     }
+    compose_overlay = None
+    digest = os.environ.get("BIOETL_GHCR_DIGEST") if stack_name == "main" else None
+    if digest is not None:
+        if not re.fullmatch(r"sha256:[0-9a-f]{64}", digest):
+            raise ValueError("BIOETL_GHCR_DIGEST must be a sha256 image digest")
+        compose_overlay = ROOT / _GHCR_OVERLAY
+        expected_images["bioetl"] = f"{_GHCR_IMAGE}@{digest}"
     optional_raw = stack.get("optional_services") or []
     return StackSpec(
         name=stack_name,
@@ -335,6 +345,7 @@ def resolve_stack(contract_path: Path, stack_name: str) -> StackSpec:
         required_services=tuple(map(str, stack["required_services"])),
         expected_images=expected_images,
         optional_services=tuple(map(str, optional_raw)),
+        compose_overlay=compose_overlay,
     )
 
 
@@ -397,15 +408,12 @@ def _reseed_neo4j_auth_volume(
 
 
 def _compose(spec: StackSpec, *args: str) -> list[str]:
-    return [
-        "docker",
-        "compose",
-        "-p",
-        spec.project,
-        "-f",
-        str(spec.compose_file),
-        *args,
-    ]
+    command = ["docker", "compose", "-p", spec.project, "-f", str(spec.compose_file)]
+    if spec.compose_overlay is not None:
+        command.extend(("-f", str(spec.compose_overlay)))
+        if args and args[0] == "up":
+            return [*command, "up", "--no-build", "--pull", "missing", *args[1:]]
+    return [*command, *args]
 
 
 def _json_rows(text: str) -> list[dict[str, Any]]:
