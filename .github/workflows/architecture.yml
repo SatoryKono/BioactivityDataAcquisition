@@ -27,9 +27,9 @@ jobs:
               with:
                   node-version: "24"
                   package-manager-cache: false
-            - name: Restore the supported TypeScript range and resolve the lock
+            - name: Restore supported TypeScript and ESLint ranges
               run: |
-                  npm pkg set 'devDependencies.typescript=>=6.0.3 <6.1'
+                  npm pkg set 'devDependencies.typescript=>=6.0.3 <6.1' 'devDependencies.eslint=^9.39.5'
                   npm install --package-lock-only --ignore-scripts --no-audit --no-fund
             - name: Install locked packages
               run: npm ci --ignore-scripts --no-audit --no-fund
