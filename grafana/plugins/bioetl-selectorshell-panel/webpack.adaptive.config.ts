@@ -15,13 +15,13 @@ export default async function adaptiveWebpackConfig(env: Env) {
         dir: path.resolve('dist-adaptive'),
         test: [/(^|\/)plugin\.json$/, /(^|\/)README\.md$/],
         rules: [
-          { search: /%VERSION%/g, replace: '1.1.9' },
-          { search: /%TODAY%/g, replace: '2026-11-15' },
+          { search: /%VERSION%/g, replace: '1.1.10' },
+          { search: /%TODAY%/g, replace: '2026-11-28' },
           { search: /%PLUGIN_ID%/g, replace: 'bioetl-selectorshell-panel' },
           { search: /"keywords":\s*\[\s*"panel"\s*\]/g, replace: '"keywords": ["panel", "adaptive-table-v1"]' },
           { search: /"name": "Selector-Shell"/g, replace: '"name": "BioETL Adaptive Table"' },
           { search: /"description":\s*"[^"]*"/g, replace: '"description": "Responsive tables with complete details and a compatible selector shell."' },
-          { search: /"updated": "2026-10-03"/g, replace: '"updated": "2026-11-15"' },
+          { search: /"updated": "2026-10-03"/g, replace: '"updated": "2026-11-28"' },
         ],
       }])
       : plugin) ?? []), new AdaptiveBuildProvenance()],
