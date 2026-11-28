@@ -1008,8 +1008,8 @@ Shadow, the isolated `--limit 1000` enrich, composite enrich, migration, and
 live readback are separate statuses. A passing smoke does not prove the full
 cohort. `biological_accuracy_accepted` stays false for a bounded RF-008
 reference; a matched count must not be recorded as biological qualification.
-For V30 → V31, keep the canonical entity document in `mode: "off"` until
-`promotion_decision` is `READY`. For V31 → V31, verify that the canonical
+For V30 → V31, keep ordinary writers paused and use the frozen V30 source
+configuration until `promotion_decision` is `READY`. For V31 → V31, verify that the canonical
 configuration resolves to `enrich` with the accepted profile stored in the
 current rows and use a separate candidate configuration. After `READY`,
 `promote` runs in a window with no writers. `LIVE_ACCEPTED`
@@ -1268,11 +1268,11 @@ Delta versions and passed round-trip verification. The journal and original
 bundle are retained under `backup/`. The migration lock was released and the
 active configuration admitted subsequent incremental writes.
 
-Apply the accepted V31 configuration through the migration procedure as a
-deployment-local override. The checked-in `configs/entities/chembl/target.yaml`
-continues to select `off` and V30 for a clean checkout. Before resuming jobs on
-the already migrated Silver and Gold tables, verify that every writer uses
-the active V31 configuration and the admitted profile digest listed above.
+At the time of this refresh, V31 was applied as a deployment-local override.
+The checked-in `configs/entities/chembl/target.yaml` now selects the admitted
+V31 profile by default. Before resuming jobs on the migrated Silver and Gold
+tables, verify that every writer uses the active V31 configuration and the
+admitted profile digest listed above.
 
 The deployment host retains the evidence and exports in
 `reports/local/iuphar-13410-rf013-20261127-1700/`.
