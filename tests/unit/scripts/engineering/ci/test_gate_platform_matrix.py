@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
+import pytest
+
 from scripts.engineering.ci import report_gate_platform_matrix as matrix
+
+pytestmark = pytest.mark.unit
 
 
 def test_matrix_checks_current_workflow_content(tmp_path, monkeypatch):

@@ -28,6 +28,8 @@ from scripts.ops.observability.campaign_report_artifacts import (
 )
 from scripts.ops.observability.campaign_report_visibility import DashboardAccess
 
+pytestmark = pytest.mark.unit
+
 SOURCE_ID = "a" * 64
 REVISION = "b" * 64
 PIPELINE = RunReport("pipeline", "chembl_assay", "pipeline-id")
