@@ -765,3 +765,4 @@ _fail_*.txt
 /data/chembl-target-run-20261126
 /.bioetl-target-migration.lock
 /data
+/data/campaigns
