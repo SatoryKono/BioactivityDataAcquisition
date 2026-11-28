@@ -41,6 +41,7 @@ ALLOWED_USES: dict[str, set[str]] = {
     "SatoryKono/BioactivityDataAcquisition/.github/workflows/docker.yml": {
         "89fbcab7461c6400f8b2df38ebd95375713e7d32",  # #12417
         "84548f8bfed680b9415fc6855d6be059ffd9d1ab",  # Docker workflow pin
+        "cfc518a21c94eba702157209946b38cd21a9ce7a",  # trusted main Docker lane
         "390e7fd01eea914f934ffb7dc9aeaab5d1d54a80",  # #13165 validation-only workflow
     },
     "SatoryKono/BioactivityDataAcquisition/.github/workflows/docs.yml": {
@@ -48,6 +49,7 @@ ALLOWED_USES: dict[str, set[str]] = {
         "0deeafe064844e467b6c5943430dbfb3b80333ba",  # #12565 docs concurrency
         "02888d30cd4e343eeb9778fb8bbea8098591cf3d",  # docs lane base SHA
         "f6f924bd6d3cf362e14a20206bd611179ca800a3",  # trusted main docs lane
+        "cfc518a21c94eba702157209946b38cd21a9ce7a",  # trusted main docs lane
     },
     "actions/attest-build-provenance": {
         "977bb373ede98d70efdf65b84cb5f73e068dcc2a",  # v3
@@ -116,6 +118,7 @@ ALLOWED_USES: dict[str, set[str]] = {
     "anchore/sbom-action": {
         "e22c389904149dbc22b58101806040fa8d37a610",  # v0.24.0
         "66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c",  # v0.24.3
+        "dfcb83b97731532d72be422cbc51ee64adb6fd56",  # v0.24.4
     },
     "aquasecurity/trivy-action": {
         "57a97c7e7821a5776cebc9bb87c984fa69cba8f1",  # v0.35.0
@@ -143,6 +146,7 @@ ALLOWED_USES: dict[str, set[str]] = {
         "b96794f015dfd88f77b49b1c93e0fa7110f94c63",  # v4.38.0
         "9b3254085494b55a0f7c4c2b3d2d52cc712ce370",  # v4.39.1
         "33d7b85da1a04171e211befe2c739303b9a4c066",  # v4.39.3
+        "915412ff23e8b7659517e607487dbeae018f2934",  # v4.39.5
     },
     "github/codeql-action/analyze": {
         "db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28",  # v4.37.8
@@ -150,6 +154,7 @@ ALLOWED_USES: dict[str, set[str]] = {
         "b96794f015dfd88f77b49b1c93e0fa7110f94c63",  # v4.38.0
         "9b3254085494b55a0f7c4c2b3d2d52cc712ce370",  # v4.39.1
         "33d7b85da1a04171e211befe2c739303b9a4c066",  # v4.39.3
+        "915412ff23e8b7659517e607487dbeae018f2934",  # v4.39.5
     },
     "github/codeql-action/upload-sarif": {
         "8dca8a82e2fa1a2c8908956f711300f9c4a4f4f6",  # v2 (docker.yml Trivy)
@@ -158,6 +163,7 @@ ALLOWED_USES: dict[str, set[str]] = {
         "b96794f015dfd88f77b49b1c93e0fa7110f94c63",  # v4.38.0
         "9b3254085494b55a0f7c4c2b3d2d52cc712ce370",  # v4.39.1
         "33d7b85da1a04171e211befe2c739303b9a4c066",  # v4.39.3
+        "915412ff23e8b7659517e607487dbeae018f2934",  # v4.39.5
     },
     "google/osv-scanner-action/osv-scanner-action": {
         "6e4298ebc4db23e847df9b2e2de2939d6f066c67",  # v2.5.1
@@ -171,6 +177,7 @@ ALLOWED_USES: dict[str, set[str]] = {
     "ossf/scorecard-action": {
         "2d1146689b8cda280b9bc96326124645441f03bc",  # v2.4.4
         "fa7117db83c52d787ae5a89f350999701505d78e",  # v2.5.0
+        "23f22cd43608bae7a1f1fa2603d7314dee9538a5",  # v2.6.0
     },
     "pypa/gh-action-pypi-publish": {
         "dc37677b2e1c63e2034f94d8a5b11f265b73ba33",  # v1.14.2
@@ -188,6 +195,7 @@ ALLOWED_USES: dict[str, set[str]] = {
         "85b2b9fb8e3325e7a23d7d0a9d7ba5ae0f999e3e",  # v0.7.1
         "53290badfa369cb0bf7ad16342cb62c2fa47ac7b",  # v0.8.0
         "45d7276c9ca790aabd705e31ca99c6185c3e76dd",  # v0.8.1
+        "1b4550e929643b8b26a62303c6bd64814271a4f1",  # v0.9.2
     },
 }
 
