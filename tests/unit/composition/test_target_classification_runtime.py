@@ -52,9 +52,18 @@ from bioetl.domain.types import RunType
 from bioetl.domain.workflow import WorkflowConfig, WorkflowStepConfig
 from bioetl.infrastructure.config.converters import yaml_config_to_domain
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+from bioetl.infrastructure.schemas.target_classification_config import (
+    TargetClassificationYamlConfig,
+)
 from tests.helpers.clock import FIXED_TEST_TIME
 
 pytestmark = pytest.mark.unit
+
+
+def _legacy_config() -> PipelineYamlConfig:
+    return load_pipeline_config("chembl_target").model_copy(
+        update={"target_classification": TargetClassificationYamlConfig(mode="off")}
+    )
 
 
 @pytest.fixture
@@ -255,7 +264,7 @@ async def test_enrich_uses_v31_schema_and_identical_direct_staged_hash(
 async def test_shadow_preserves_old_output_and_staged_direct_parity(
     shadow_config, tmp_path
 ):
-    off = load_pipeline_config("chembl_target")
+    off = _legacy_config()
     direct = _transformer(shadow_config, tmp_path / "direct")
     staged = _transformer(shadow_config, tmp_path / "staged")
     legacy = _transformer(off, tmp_path / "legacy")
@@ -488,7 +497,7 @@ async def test_runtime_dq_rejection_excludes_target_from_final_evidence(
 
 
 @pytest.mark.parametrize("dry_run", [False, True])
-def test_target_preflight_uses_actual_writer_paths_even_when_off(
+def test_historical_target_preflight_uses_actual_writer_paths(
     monkeypatch, tmp_path, dry_run
 ):
     from bioetl.composition.factories.services.preflight import (
@@ -503,7 +512,9 @@ def test_target_preflight_uses_actual_writer_paths_even_when_off(
     )
     pipeline = SimpleNamespace(
         services=SimpleNamespace(storage=SimpleNamespace(silver=silver, gold=gold)),
-        runtime=SimpleNamespace(run_type=RunType.INCREMENTAL, dry_run=dry_run),
+        runtime=SimpleNamespace(
+            run_type=RunType.INCREMENTAL, dry_run=dry_run, exact_replay=True
+        ),
         config=SimpleNamespace(
             effective_silver_table="chembl.target", effective_gold_table="chembl.target"
         ),
@@ -513,7 +524,7 @@ def test_target_preflight_uses_actual_writer_paths_even_when_off(
         "bioetl.composition.factories.services.preflight.assert_target_table_compatibility",
         guard,
     )
-    _validate_target_dependencies(pipeline, load_pipeline_config("chembl_target"))
+    _validate_target_dependencies(pipeline, _legacy_config())
     if dry_run:
         guard.assert_not_called()
         silver._resolve_table_path.assert_not_called()
@@ -556,7 +567,8 @@ def test_target_exact_replay_prefers_parent_to_current_workflow_binding(
         )
         assert restored.target_classification == shadow_config.target_classification
         assert (
-            resolve_target_runtime_config(restored).target_classification.mode == "off"
+            resolve_target_runtime_config(restored).target_classification
+            == current_config.target_classification
         )
         assert (
             resolve_target_runtime_config(
@@ -1173,7 +1185,7 @@ def test_exact_replay_keeps_parent_with_current_workflow_binding(
         load_target_aware_pipeline_config,
     )
 
-    off = load_pipeline_config("chembl_target")
+    off = _legacy_config()
     parent_config = shadow_config if parent_mode == "shadow" else off
     current = off if parent_mode == "shadow" else shadow_config
     token = bind_target_classification_dependency(
@@ -1207,7 +1219,7 @@ def test_workflow_preflight_pins_exact_replay_parent(
     from bioetl.domain.workflow import WorkflowRunOptionsConfig
     from bioetl.infrastructure.config.settings_api import Settings
 
-    off = load_pipeline_config("chembl_target")
+    off = _legacy_config()
     parent_config = (
         off
         if parent_mode == "off"
@@ -1254,7 +1266,7 @@ def test_workflow_preflight_pins_exact_replay_parent(
         )
     token = bind_target_classification_dependency(binding)
     try:
-        validate_target_runtime_dependency(parent_config)
+        validate_target_runtime_dependency(parent_config, exact_replay=True)
     finally:
         reset_target_classification_dependency(token)
 
@@ -1265,10 +1277,10 @@ def test_workflow_preflight_rejects_conflicting_replay_dependencies(
     from bioetl.domain.workflow import WorkflowRunOptionsConfig
     from bioetl.infrastructure.config.settings_api import Settings
 
-    off = load_pipeline_config("chembl_target")
+    current = load_pipeline_config("chembl_target")
     monkeypatch.setattr(
         "bioetl.composition.bootstrap.assembly.storage.load_pipeline_config",
-        lambda _: off,
+        lambda _: current,
     )
     monkeypatch.setattr(
         "bioetl.composition.bootstrap.assembly.storage.resolve_replay_parent_manifest",

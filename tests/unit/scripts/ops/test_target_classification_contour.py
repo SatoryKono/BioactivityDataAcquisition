@@ -328,11 +328,11 @@ def _ready_case(tmp_path: Path) -> tuple[dict[str, object], ContourObservations]
     return parsed, observations
 
 
-def test_repository_contour_stays_blocked_and_keeps_mode_off() -> None:
+def test_repository_contour_requires_evidence_with_shipped_enrich() -> None:
     observations = inspect_repository()
     report = evaluate_main_contour(_not_run_evidence(), observations)
 
-    assert observations.canonical_mode == "off"
+    assert observations.canonical_mode == "enrich"
     assert observations.composite_classification_fields == (
         observations.entity_classification_fields
     )
@@ -534,7 +534,7 @@ def test_contour_report_cli_writes_blocked_report_without_promoting(
     report = json.loads(output.read_text(encoding="utf-8"))
 
     assert exit_code == 0
-    assert report["canonical"]["mode"] == "off"
+    assert report["canonical"]["mode"] == "enrich"
     assert report["promotion_decision"] == "BLOCKED"
     ready_code = main(
         [

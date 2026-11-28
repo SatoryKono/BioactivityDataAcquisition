@@ -51,6 +51,8 @@ def resolve_target_runtime_config(
         if not isinstance(payload, Mapping):
             raise ValueError("workflow target dependency has no pinned configuration")
         config = hydrate_target_runtime_config(payload)
+    if not exact_replay:
+        config.target_classification.to_domain().require_active()
     return resolve_target_classification_profile(config).resolved_yaml_config
 
 
@@ -58,8 +60,13 @@ def validate_target_runtime_dependency(
     config: object, *, exact_replay: bool = False
 ) -> None:
     """Recheck pinned bytes immediately before a target run can clear outputs."""
-    if not isinstance(config, PipelineYamlConfig):
+    if (
+        not isinstance(config, PipelineYamlConfig)
+        or config.pipeline_name != "chembl_target"
+    ):
         return
+    if not exact_replay:
+        config.target_classification.to_domain().require_active()
     profile = load_target_runtime_profile(config)
     stored = None if exact_replay else get_target_classification_dependency()
     if stored is None or profile is None:
@@ -125,9 +132,12 @@ def build_composite_target_classification_stage(
     if getattr(config, "name", None) != "composite_target":
         return None
     binding = get_target_classification_dependency()
-    if isinstance(binding, Mapping) and binding.get("replay_mode") == "historical":
-        return None
+    historical = (
+        isinstance(binding, Mapping) and binding.get("replay_mode") == "historical"
+    )
     pinned = binding.get("target_config") if isinstance(binding, Mapping) else None
+    if historical and pinned is None:
+        return None
     if isinstance(pinned, Mapping):
         yaml_config = resolve_target_classification_profile(
             hydrate_target_runtime_config(pinned)
@@ -136,13 +146,14 @@ def build_composite_target_classification_stage(
         yaml_config = resolve_target_runtime_config(
             load_pipeline_config("chembl_target")
         )
-    if yaml_config.target_classification.mode == "off":
+    if historical and yaml_config.target_classification.mode == "off":
         return None
+    yaml_config.target_classification.to_domain().require_active()
     session = build_target_classification_session(
         yaml_config, settings or get_settings()
     )
     if session is None:
-        return None
+        raise ValueError("composite_target requires a target classification session")
     return CompositeTargetClassification(
         session,
         table_contract=yaml_config.target_classification.to_domain().contract_version,

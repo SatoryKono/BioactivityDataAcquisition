@@ -1,0 +1,16 @@
+{
+  "artifact": "bioetl_iuphar_acquisition",
+  "provider_release": "2026.3.1",
+  "raw_artifacts": {
+    "targets_csv": {
+      "byte_count": 1896910,
+      "path": "raw/targets_and_families.csv",
+      "sha256": "9e91ae4eed1e147f0c5b01dd2e0645c2d57edb39442114d3128c70232b0d39fb",
+      "source_url": "https://www.guidetopharmacology.org/DATA/targets_and_families.csv"
+    }
+  },
+  "retrieved_at": "2026-11-16T16:48:57.114983+00:00",
+  "schema_version": 1,
+  "source_format": "gtopdb_targets_csv_v1",
+  "transport_receipt_note": "Saved transport receipt is included in the proposal diagnostic archive; no HTTP status is present in its persisted JSON."
+}

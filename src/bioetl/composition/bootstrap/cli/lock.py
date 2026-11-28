@@ -104,9 +104,12 @@ def validate_workflow_target_mutations(
         for paths in _target_bundles(target, settings)
     ]
     required = any(item.step.pipeline_name == "chembl_target" for item in intents)
+    pending_writes = any(item.pending_writes for item in admissions)
+    if pending_writes and not required:
+        # A transform or alias writing the target has no historical target parent.
+        target.target_classification.to_domain().require_active()
     return WorkflowTargetAdmission(
-        required or any(item.required for item in admissions),
-        any(item.pending_writes for item in admissions),
+        required or any(item.required for item in admissions), pending_writes
     )
 
 
@@ -313,9 +316,8 @@ def _resolve_step_replay_config(
     hydrate_config: Callable[[Mapping[str, object]], PipelineYamlConfig],
 ) -> PipelineYamlConfig:
     """Restore a persisted replay parent while retaining normal workflow defaults."""
-    if not options.exact_replay or not (
-        options.replay_of_manifest_id or options.replay_of_run_id
-    ):
+    if not options.exact_replay:
+        current.target_classification.to_domain().require_active()
         return current
     parent = load_parent(ctx=options, settings=settings)
     if parent.pipeline_name != "chembl_target" or not parent.resolved_config:

@@ -1,0 +1,16 @@
+{
+  "acceptance": {
+    "path": "acceptance.json",
+    "sha256": "d4ce8e3ee3a4803d09902ce1658e2f0213100fcf546e57e5ef3bac953ba2b1da"
+  },
+  "artifact": "bioetl_iuphar_profile",
+  "classification_schema_version": "3.1.0",
+  "matching_policy_version": "hgnc-uniprot-reviewed-target-class-v1",
+  "normalization_version": "bioetl-iuphar-input-v1",
+  "rules_version": "local-rules-2026.11.23",
+  "schema_version": 2,
+  "snapshot": {
+    "path": "snapshot.json",
+    "sha256": "2dcfde4b7790845383781b79e540b52ede0abf01def04a53cf952fd2c7bc0f1e"
+  }
+}

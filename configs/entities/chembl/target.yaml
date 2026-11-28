@@ -1,6 +1,6 @@
 # RF-001 (#13309) semantics baseline for standalone chembl_target:
 # - target_type = ChEMBL object type (partition/filter); never an IUPHAR class.
-# - target_classification mode stays "off" on the shared production writers.
+# - Ordinary writers select the pinned RF-008 profile and physical contract below.
 # - Full UniProt/protein-class features arrive only after composite dependency joins;
 #   early standalone classification cannot claim those capabilities.
 # - Vocabulary: src/iuphar_target_class/semantics.py (rf001-2026-11-23).
@@ -14,11 +14,10 @@ pipeline:
   entity_type: target
   description: Extract biological targets from ChEMBL API
   target_classification:
-    # RF-001 / RF-013: canonical mode stays "off" (keeps V30 / schema 3.0.0)
-    # until contour-report is READY and a maintenance-window migration promotes
-    # a separate enrich document. shadow|enrich require a paired profile
-    # envelope + sha256; enrich alone does not admit biological accuracy.
-    mode: "off"
+    mode: enrich
+    table_contract: "3.1.0"
+    snapshot_manifest: configs/reference/iuphar/2026.3.1/profile.json
+    snapshot_manifest_sha256: "b02152d8cce606caa43915f9039c2275b99a098861e52acf47643a128640dd15"
   field_policy: {}
   business_primary_keys:
     - target_id
@@ -301,6 +300,8 @@ contracts:
   hash_exclude: []
   hash_datetime_policy: v2_datetime_utc
   contract_ref: chembl.target
+  # The classifier derives the active write and hash contracts from table_contract.
+  # These base fields also describe historical V30 and explicit shadow runs.
   active_version: 3.0.0
   rollout:
     mode: single

@@ -71,11 +71,9 @@ def _bind_target_replay(
     if envelope["pipeline"] != "composite_target":
         return None
     pinned = restore_target_classification_config(root, envelope["objects"])
-    payload: dict[str, object] = (
-        {"target_config": pinned}
-        if pinned is not None
-        else {"replay_mode": "historical"}
-    )
+    payload: dict[str, object] = {"replay_mode": "historical"}
+    if pinned is not None:
+        payload["target_config"] = pinned
     return bind_target_classification_dependency(payload)
 
 

@@ -1,0 +1,1459 @@
+{
+  "approval_reference": "urn:bioetl:rf008:issue-13408:independent-source-review:20261127",
+  "artifact": "bioetl_iuphar_independent_source_review",
+  "biological_accuracy_accepted": false,
+  "direct_reference_result": {
+    "cases": [
+      {
+        "expected_iuphar_class": "Enzyme",
+        "expected_iuphar_target_id": "2636",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "851",
+            "family_name": "DNA topoisomerases",
+            "family_type": "enzyme",
+            "source_record": 1430
+          }
+        ],
+        "input_hgnc_ids": [],
+        "official_hgnc_ids": [],
+        "primary_uniprot": "Q9WUL0",
+        "target_chembl_id": "CHEMBL1075164",
+        "taxon": "10116"
+      },
+      {
+        "expected_iuphar_class": "Enzyme",
+        "expected_iuphar_target_id": "1542",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "474",
+            "family_name": "AMPK subfamily",
+            "family_type": "enzyme",
+            "source_record": 1148
+          }
+        ],
+        "input_hgnc_ids": [],
+        "official_hgnc_ids": [],
+        "primary_uniprot": "Q8BRK8",
+        "target_chembl_id": "CHEMBL1255154",
+        "taxon": "10090"
+      },
+      {
+        "expected_iuphar_class": "Enzyme",
+        "expected_iuphar_target_id": "2636",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "851",
+            "family_name": "DNA topoisomerases",
+            "family_type": "enzyme",
+            "source_record": 1430
+          }
+        ],
+        "input_hgnc_ids": [
+          "11986"
+        ],
+        "official_hgnc_ids": [
+          "11986"
+        ],
+        "primary_uniprot": "P11387",
+        "target_chembl_id": "CHEMBL1781",
+        "taxon": "9606"
+      },
+      {
+        "expected_iuphar_class": "Enzyme",
+        "expected_iuphar_target_id": "1354",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "265",
+            "family_name": "CYP5, CYP7 and CYP8 families",
+            "family_type": "enzyme",
+            "source_record": 1395
+          }
+        ],
+        "input_hgnc_ids": [
+          "2651"
+        ],
+        "official_hgnc_ids": [
+          "2651"
+        ],
+        "primary_uniprot": "P22680",
+        "target_chembl_id": "CHEMBL1851",
+        "taxon": "9606"
+      },
+      {
+        "expected_iuphar_class": "Receptor",
+        "expected_iuphar_target_id": "588",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "84",
+            "family_name": "1A. Thyroid hormone receptors",
+            "family_type": "nhr",
+            "source_record": 416
+          }
+        ],
+        "input_hgnc_ids": [
+          "11796"
+        ],
+        "official_hgnc_ids": [
+          "11796"
+        ],
+        "primary_uniprot": "P10827",
+        "target_chembl_id": "CHEMBL1860",
+        "taxon": "9606"
+      },
+      {
+        "expected_iuphar_class": "Receptor",
+        "expected_iuphar_target_id": "1812",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "324",
+            "family_name": "Type IV RTKs: VEGF (vascular endothelial growth factor) receptor family",
+            "family_type": "catalytic_receptor",
+            "source_record": 1023
+          }
+        ],
+        "input_hgnc_ids": [
+          "3763"
+        ],
+        "official_hgnc_ids": [
+          "3763"
+        ],
+        "primary_uniprot": "P17948",
+        "target_chembl_id": "CHEMBL1868",
+        "taxon": "9606"
+      },
+      {
+        "expected_iuphar_class": "Enzyme",
+        "expected_iuphar_target_id": "1276",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "256",
+            "family_name": "Decarboxylases",
+            "family_type": "enzyme",
+            "source_record": 1413
+          }
+        ],
+        "input_hgnc_ids": [
+          "8109"
+        ],
+        "official_hgnc_ids": [
+          "8109"
+        ],
+        "primary_uniprot": "P11926",
+        "target_chembl_id": "CHEMBL1869",
+        "taxon": "9606"
+      },
+      {
+        "expected_iuphar_class": "Transporter",
+        "expected_iuphar_target_id": "968",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "184",
+            "family_name": "SLC12 family of cation-coupled chloride transporters",
+            "family_type": "transporter",
+            "source_record": 2709
+          }
+        ],
+        "input_hgnc_ids": [
+          "10910"
+        ],
+        "official_hgnc_ids": [
+          "10910"
+        ],
+        "primary_uniprot": "Q13621",
+        "target_chembl_id": "CHEMBL1874",
+        "taxon": "9606"
+      },
+      {
+        "expected_iuphar_class": "Enzyme",
+        "expected_iuphar_target_id": "1611",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "740",
+            "family_name": "M13: Neprilysin",
+            "family_type": "enzyme",
+            "source_record": 1784
+          }
+        ],
+        "input_hgnc_ids": [
+          "7154"
+        ],
+        "official_hgnc_ids": [
+          "7154"
+        ],
+        "primary_uniprot": "P08473",
+        "target_chembl_id": "CHEMBL1944",
+        "taxon": "9606"
+      },
+      {
+        "expected_iuphar_class": "Enzyme",
+        "expected_iuphar_target_id": "2632",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "853",
+            "family_name": "Blood coagulation components",
+            "family_type": "enzyme",
+            "source_record": 1172
+          }
+        ],
+        "input_hgnc_ids": [
+          "775"
+        ],
+        "official_hgnc_ids": [
+          "775"
+        ],
+        "primary_uniprot": "P01008",
+        "target_chembl_id": "CHEMBL1950",
+        "taxon": "9606"
+      },
+      {
+        "expected_iuphar_class": "Enzyme",
+        "expected_iuphar_target_id": "1393",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "272",
+            "family_name": "Leukotriene and lipoxin metabolism",
+            "family_type": "enzyme",
+            "source_record": 1695
+          },
+          {
+            "family_id": "749",
+            "family_name": "M19: Membrane dipeptidase",
+            "family_type": "enzyme",
+            "source_record": 1808
+          }
+        ],
+        "input_hgnc_ids": [
+          "3002"
+        ],
+        "official_hgnc_ids": [
+          "3002"
+        ],
+        "primary_uniprot": "P16444",
+        "target_chembl_id": "CHEMBL1989",
+        "taxon": "9606"
+      },
+      {
+        "expected_iuphar_class": "Enzyme",
+        "expected_iuphar_target_id": "2379",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "751",
+            "family_name": "S1: Chymotrypsin",
+            "family_type": "enzyme",
+            "source_record": 2261
+          }
+        ],
+        "input_hgnc_ids": [
+          "6371"
+        ],
+        "official_hgnc_ids": [
+          "6371"
+        ],
+        "primary_uniprot": "P03952",
+        "target_chembl_id": "CHEMBL2000",
+        "taxon": "9606"
+      },
+      {
+        "expected_iuphar_class": "Enzyme",
+        "expected_iuphar_target_id": "2364",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "751",
+            "family_name": "S1: Chymotrypsin",
+            "family_type": "enzyme",
+            "source_record": 2252
+          }
+        ],
+        "input_hgnc_ids": [
+          "3551"
+        ],
+        "official_hgnc_ids": [
+          "3551"
+        ],
+        "primary_uniprot": "P00740",
+        "target_chembl_id": "CHEMBL2016",
+        "taxon": "9606"
+      },
+      {
+        "expected_iuphar_class": "Enzyme",
+        "expected_iuphar_target_id": "2397",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "751",
+            "family_name": "S1: Chymotrypsin",
+            "family_type": "enzyme",
+            "source_record": 2275
+          }
+        ],
+        "input_hgnc_ids": [
+          "9475"
+        ],
+        "official_hgnc_ids": [
+          "9475"
+        ],
+        "primary_uniprot": "P07477",
+        "target_chembl_id": "CHEMBL209",
+        "taxon": "9606"
+      },
+      {
+        "expected_iuphar_class": "Receptor",
+        "expected_iuphar_target_id": "71",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "14",
+            "family_name": "Chemokine receptors",
+            "family_type": "gpcr",
+            "source_record": 100
+          }
+        ],
+        "input_hgnc_ids": [
+          "2561"
+        ],
+        "official_hgnc_ids": [
+          "2561"
+        ],
+        "primary_uniprot": "P61073",
+        "target_chembl_id": "CHEMBL2107",
+        "taxon": "9606"
+      },
+      {
+        "expected_iuphar_class": "Enzyme",
+        "expected_iuphar_target_id": "1542",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "474",
+            "family_name": "AMPK subfamily",
+            "family_type": "enzyme",
+            "source_record": 1148
+          }
+        ],
+        "input_hgnc_ids": [
+          "9377"
+        ],
+        "official_hgnc_ids": [
+          "9377"
+        ],
+        "primary_uniprot": "P54646",
+        "target_chembl_id": "CHEMBL2116",
+        "taxon": "9606"
+      },
+      {
+        "expected_iuphar_class": "Receptor",
+        "expected_iuphar_target_id": "2441",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "760",
+            "family_name": "Integrins",
+            "family_type": "catalytic_receptor",
+            "source_record": 846
+          }
+        ],
+        "input_hgnc_ids": [
+          "6138"
+        ],
+        "official_hgnc_ids": [
+          "6138"
+        ],
+        "primary_uniprot": "P08514",
+        "target_chembl_id": "CHEMBL212",
+        "taxon": "9606"
+      },
+      {
+        "expected_iuphar_class": "Receptor",
+        "expected_iuphar_target_id": "325",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "52",
+            "family_name": "P2Y receptors",
+            "family_type": "gpcr",
+            "source_record": 328
+          }
+        ],
+        "input_hgnc_ids": [
+          "8542"
+        ],
+        "official_hgnc_ids": [
+          "8542"
+        ],
+        "primary_uniprot": "P51582",
+        "target_chembl_id": "CHEMBL2123",
+        "taxon": "9606"
+      },
+      {
+        "expected_iuphar_class": "Receptor",
+        "expected_iuphar_target_id": "325",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "52",
+            "family_name": "P2Y receptors",
+            "family_type": "gpcr",
+            "source_record": 328
+          }
+        ],
+        "input_hgnc_ids": [],
+        "official_hgnc_ids": [],
+        "primary_uniprot": "O35811",
+        "target_chembl_id": "CHEMBL2124",
+        "taxon": "10116"
+      },
+      {
+        "expected_iuphar_class": "Enzyme",
+        "expected_iuphar_target_id": "2065",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "623",
+            "family_name": "STE7 family",
+            "family_type": "enzyme",
+            "source_record": 2368
+          }
+        ],
+        "input_hgnc_ids": [],
+        "official_hgnc_ids": [],
+        "primary_uniprot": "P47809",
+        "target_chembl_id": "CHEMBL2201",
+        "taxon": "10090"
+      },
+      {
+        "expected_iuphar_class": "Enzyme",
+        "expected_iuphar_target_id": "1354",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "265",
+            "family_name": "CYP5, CYP7 and CYP8 families",
+            "family_type": "enzyme",
+            "source_record": 1395
+          }
+        ],
+        "input_hgnc_ids": [],
+        "official_hgnc_ids": [],
+        "primary_uniprot": "Q64505",
+        "target_chembl_id": "CHEMBL2212",
+        "taxon": "10090"
+      },
+      {
+        "expected_iuphar_class": "Transporter",
+        "expected_iuphar_target_id": "926",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "176",
+            "family_name": "Monoamine transporter subfamily",
+            "family_type": "transporter",
+            "source_record": 2614
+          }
+        ],
+        "input_hgnc_ids": [
+          "11048"
+        ],
+        "official_hgnc_ids": [
+          "11048"
+        ],
+        "primary_uniprot": "P23975",
+        "target_chembl_id": "CHEMBL222",
+        "taxon": "9606"
+      },
+      {
+        "expected_iuphar_class": "Receptor",
+        "expected_iuphar_target_id": "319",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "50",
+            "family_name": "Opioid receptors",
+            "family_type": "gpcr",
+            "source_record": 310
+          }
+        ],
+        "input_hgnc_ids": [
+          "8156"
+        ],
+        "official_hgnc_ids": [
+          "8156"
+        ],
+        "primary_uniprot": "P35372",
+        "target_chembl_id": "CHEMBL233",
+        "taxon": "9606"
+      },
+      {
+        "expected_iuphar_class": "Enzyme",
+        "expected_iuphar_target_id": "1354",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "265",
+            "family_name": "CYP5, CYP7 and CYP8 families",
+            "family_type": "enzyme",
+            "source_record": 1395
+          }
+        ],
+        "input_hgnc_ids": [],
+        "official_hgnc_ids": [],
+        "primary_uniprot": "P18125",
+        "target_chembl_id": "CHEMBL2339",
+        "taxon": "10116"
+      },
+      {
+        "expected_iuphar_class": "Receptor",
+        "expected_iuphar_target_id": "365",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "65",
+            "family_name": "Urotensin receptor",
+            "family_type": "gpcr",
+            "source_record": 406
+          }
+        ],
+        "input_hgnc_ids": [],
+        "official_hgnc_ids": [],
+        "primary_uniprot": "Q8VIH9",
+        "target_chembl_id": "CHEMBL2346494",
+        "taxon": "10090"
+      },
+      {
+        "expected_iuphar_class": "Enzyme",
+        "expected_iuphar_target_id": "1952",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "561",
+            "family_name": "CAMK1 family",
+            "family_type": "enzyme",
+            "source_record": 1232
+          }
+        ],
+        "input_hgnc_ids": [
+          "1459"
+        ],
+        "official_hgnc_ids": [
+          "1459"
+        ],
+        "primary_uniprot": "Q14012",
+        "target_chembl_id": "CHEMBL2493",
+        "taxon": "9606"
+      },
+      {
+        "expected_iuphar_class": "Receptor",
+        "expected_iuphar_target_id": "323",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "52",
+            "family_name": "P2Y receptors",
+            "family_type": "gpcr",
+            "source_record": 326
+          }
+        ],
+        "input_hgnc_ids": [],
+        "official_hgnc_ids": [],
+        "primary_uniprot": "P49651",
+        "target_chembl_id": "CHEMBL2497",
+        "taxon": "10116"
+      },
+      {
+        "expected_iuphar_class": "Receptor",
+        "expected_iuphar_target_id": "334",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "55",
+            "family_name": "Platelet-activating factor receptor",
+            "family_type": "gpcr",
+            "source_record": 336
+          }
+        ],
+        "input_hgnc_ids": [
+          "9582"
+        ],
+        "official_hgnc_ids": [
+          "9582"
+        ],
+        "primary_uniprot": "P25105",
+        "target_chembl_id": "CHEMBL250",
+        "taxon": "9606"
+      },
+      {
+        "expected_iuphar_class": "Enzyme",
+        "expected_iuphar_target_id": "1609",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "748",
+            "family_name": "M28: Aminopeptidase Y",
+            "family_type": "enzyme",
+            "source_record": 1835
+          }
+        ],
+        "input_hgnc_ids": [
+          "14526"
+        ],
+        "official_hgnc_ids": [
+          "14526"
+        ],
+        "primary_uniprot": "Q9Y3Q0",
+        "target_chembl_id": "CHEMBL2609",
+        "taxon": "9606"
+      },
+      {
+        "expected_iuphar_class": "Enzyme",
+        "expected_iuphar_target_id": "1611",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "740",
+            "family_name": "M13: Neprilysin",
+            "family_type": "enzyme",
+            "source_record": 1784
+          }
+        ],
+        "input_hgnc_ids": [],
+        "official_hgnc_ids": [],
+        "primary_uniprot": "Q61391",
+        "target_chembl_id": "CHEMBL2642",
+        "taxon": "10090"
+      },
+      {
+        "expected_iuphar_class": "Enzyme",
+        "expected_iuphar_target_id": "2206",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "619",
+            "family_name": "Src family",
+            "family_type": "enzyme",
+            "source_record": 2351
+          }
+        ],
+        "input_hgnc_ids": [
+          "11283"
+        ],
+        "official_hgnc_ids": [
+          "11283"
+        ],
+        "primary_uniprot": "P12931",
+        "target_chembl_id": "CHEMBL267",
+        "taxon": "9606"
+      },
+      {
+        "expected_iuphar_class": "Other Protein Target",
+        "expected_iuphar_target_id": "2530",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "783",
+            "family_name": "Fatty acid-binding proteins",
+            "family_type": "other_protein",
+            "source_record": 3180
+          }
+        ],
+        "input_hgnc_ids": [
+          "2339"
+        ],
+        "official_hgnc_ids": [
+          "2339"
+        ],
+        "primary_uniprot": "P29373",
+        "target_chembl_id": "CHEMBL2692",
+        "taxon": "9606"
+      },
+      {
+        "expected_iuphar_class": "Receptor",
+        "expected_iuphar_target_id": "1813",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "324",
+            "family_name": "Type IV RTKs: VEGF (vascular endothelial growth factor) receptor family",
+            "family_type": "catalytic_receptor",
+            "source_record": 1024
+          }
+        ],
+        "input_hgnc_ids": [
+          "6307"
+        ],
+        "official_hgnc_ids": [
+          "6307"
+        ],
+        "primary_uniprot": "P35968",
+        "target_chembl_id": "CHEMBL279",
+        "taxon": "9606"
+      },
+      {
+        "expected_iuphar_class": "Enzyme",
+        "expected_iuphar_target_id": "2636",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "851",
+            "family_name": "DNA topoisomerases",
+            "family_type": "enzyme",
+            "source_record": 1430
+          }
+        ],
+        "input_hgnc_ids": [],
+        "official_hgnc_ids": [],
+        "primary_uniprot": "Q04750",
+        "target_chembl_id": "CHEMBL2814",
+        "taxon": "10090"
+      },
+      {
+        "expected_iuphar_class": "Enzyme",
+        "expected_iuphar_target_id": "1276",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "256",
+            "family_name": "Decarboxylases",
+            "family_type": "enzyme",
+            "source_record": 1413
+          }
+        ],
+        "input_hgnc_ids": [],
+        "official_hgnc_ids": [],
+        "primary_uniprot": "P00860",
+        "target_chembl_id": "CHEMBL2840",
+        "taxon": "10090"
+      },
+      {
+        "expected_iuphar_class": "Enzyme",
+        "expected_iuphar_target_id": "2046",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "629",
+            "family_name": "Tec family",
+            "family_type": "enzyme",
+            "source_record": 2403
+          }
+        ],
+        "input_hgnc_ids": [
+          "6171"
+        ],
+        "official_hgnc_ids": [
+          "6171"
+        ],
+        "primary_uniprot": "Q08881",
+        "target_chembl_id": "CHEMBL2959",
+        "taxon": "9606"
+      },
+      {
+        "expected_iuphar_class": "Enzyme",
+        "expected_iuphar_target_id": "2398",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "751",
+            "family_name": "S1: Chymotrypsin",
+            "family_type": "enzyme",
+            "source_record": 2276
+          }
+        ],
+        "input_hgnc_ids": [
+          "9483"
+        ],
+        "official_hgnc_ids": [
+          "9483"
+        ],
+        "primary_uniprot": "P07478",
+        "target_chembl_id": "CHEMBL3159",
+        "taxon": "9606"
+      },
+      {
+        "expected_iuphar_class": "Receptor",
+        "expected_iuphar_target_id": "1813",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "324",
+            "family_name": "Type IV RTKs: VEGF (vascular endothelial growth factor) receptor family",
+            "family_type": "catalytic_receptor",
+            "source_record": 1024
+          }
+        ],
+        "input_hgnc_ids": [],
+        "official_hgnc_ids": [],
+        "primary_uniprot": "P35918",
+        "target_chembl_id": "CHEMBL3337",
+        "taxon": "10090"
+      },
+      {
+        "expected_iuphar_class": "Enzyme",
+        "expected_iuphar_target_id": "1611",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "740",
+            "family_name": "M13: Neprilysin",
+            "family_type": "enzyme",
+            "source_record": 1784
+          }
+        ],
+        "input_hgnc_ids": [],
+        "official_hgnc_ids": [],
+        "primary_uniprot": "P07861",
+        "target_chembl_id": "CHEMBL3369",
+        "taxon": "10116"
+      },
+      {
+        "expected_iuphar_class": "Enzyme",
+        "expected_iuphar_target_id": "1344",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "264",
+            "family_name": "CYP4 family",
+            "family_type": "enzyme",
+            "source_record": 1385
+          }
+        ],
+        "input_hgnc_ids": [
+          "2645"
+        ],
+        "official_hgnc_ids": [
+          "2645"
+        ],
+        "primary_uniprot": "P78329",
+        "target_chembl_id": "CHEMBL3379",
+        "taxon": "9606"
+      },
+      {
+        "expected_iuphar_class": "Enzyme",
+        "expected_iuphar_target_id": "1276",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "256",
+            "family_name": "Decarboxylases",
+            "family_type": "enzyme",
+            "source_record": 1413
+          }
+        ],
+        "input_hgnc_ids": [],
+        "official_hgnc_ids": [],
+        "primary_uniprot": "P09057",
+        "target_chembl_id": "CHEMBL3511",
+        "taxon": "10116"
+      },
+      {
+        "expected_iuphar_class": "Receptor",
+        "expected_iuphar_target_id": "1812",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "324",
+            "family_name": "Type IV RTKs: VEGF (vascular endothelial growth factor) receptor family",
+            "family_type": "catalytic_receptor",
+            "source_record": 1023
+          }
+        ],
+        "input_hgnc_ids": [],
+        "official_hgnc_ids": [],
+        "primary_uniprot": "P35969",
+        "target_chembl_id": "CHEMBL3516",
+        "taxon": "10090"
+      },
+      {
+        "expected_iuphar_class": "Receptor",
+        "expected_iuphar_target_id": "1808",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "323",
+            "family_name": "Type V RTKs: FGF (fibroblast growth factor) receptor family",
+            "family_type": "catalytic_receptor",
+            "source_record": 1033
+          }
+        ],
+        "input_hgnc_ids": [
+          "3688"
+        ],
+        "official_hgnc_ids": [
+          "3688"
+        ],
+        "primary_uniprot": "P11362",
+        "target_chembl_id": "CHEMBL3650",
+        "taxon": "9606"
+      },
+      {
+        "expected_iuphar_class": "Enzyme",
+        "expected_iuphar_target_id": "1325",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "262",
+            "family_name": "CYP2 family: drug metabolising subset",
+            "family_type": "enzyme",
+            "source_record": 1363
+          }
+        ],
+        "input_hgnc_ids": [
+          "2622"
+        ],
+        "official_hgnc_ids": [
+          "2622"
+        ],
+        "primary_uniprot": "P10632",
+        "target_chembl_id": "CHEMBL3721",
+        "taxon": "9606"
+      },
+      {
+        "expected_iuphar_class": "Receptor",
+        "expected_iuphar_target_id": "265",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "33",
+            "family_name": "Histamine receptors",
+            "family_type": "gpcr",
+            "source_record": 248
+          }
+        ],
+        "input_hgnc_ids": [
+          "17383"
+        ],
+        "official_hgnc_ids": [
+          "17383"
+        ],
+        "primary_uniprot": "Q9H3N8",
+        "target_chembl_id": "CHEMBL3759",
+        "taxon": "9606"
+      },
+      {
+        "expected_iuphar_class": "Receptor",
+        "expected_iuphar_target_id": "365",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "65",
+            "family_name": "Urotensin receptor",
+            "family_type": "gpcr",
+            "source_record": 406
+          }
+        ],
+        "input_hgnc_ids": [
+          "4468"
+        ],
+        "official_hgnc_ids": [
+          "4468"
+        ],
+        "primary_uniprot": "Q9UKP6",
+        "target_chembl_id": "CHEMBL3764",
+        "taxon": "9606"
+      },
+      {
+        "expected_iuphar_class": "Enzyme",
+        "expected_iuphar_target_id": "2351",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "728",
+            "family_name": "C1: Papain",
+            "family_type": "enzyme",
+            "source_record": 1218
+          }
+        ],
+        "input_hgnc_ids": [
+          "2537"
+        ],
+        "official_hgnc_ids": [
+          "2537"
+        ],
+        "primary_uniprot": "P07711",
+        "target_chembl_id": "CHEMBL3837",
+        "taxon": "9606"
+      },
+      {
+        "expected_iuphar_class": "Receptor",
+        "expected_iuphar_target_id": "347",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "59",
+            "family_name": "Proteinase-activated receptors",
+            "family_type": "gpcr",
+            "source_record": 349
+          }
+        ],
+        "input_hgnc_ids": [
+          "3537"
+        ],
+        "official_hgnc_ids": [
+          "3537"
+        ],
+        "primary_uniprot": "P25116",
+        "target_chembl_id": "CHEMBL3974",
+        "taxon": "9606"
+      },
+      {
+        "expected_iuphar_class": "Transporter",
+        "expected_iuphar_target_id": "929",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "177",
+            "family_name": "GABA transporter subfamily",
+            "family_type": "transporter",
+            "source_record": 2549
+          }
+        ],
+        "input_hgnc_ids": [],
+        "official_hgnc_ids": [],
+        "primary_uniprot": "P23978",
+        "target_chembl_id": "CHEMBL4054",
+        "taxon": "10116"
+      },
+      {
+        "expected_iuphar_class": "Enzyme",
+        "expected_iuphar_target_id": "2343",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "728",
+            "family_name": "C1: Papain",
+            "family_type": "enzyme",
+            "source_record": 1213
+          }
+        ],
+        "input_hgnc_ids": [
+          "2527"
+        ],
+        "official_hgnc_ids": [
+          "2527"
+        ],
+        "primary_uniprot": "P07858",
+        "target_chembl_id": "CHEMBL4072",
+        "taxon": "9606"
+      },
+      {
+        "expected_iuphar_class": "Ion Channel",
+        "expected_iuphar_target_id": "539",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "81",
+            "family_name": "Voltage-gated potassium channels (K<sub>v</sub>)",
+            "family_type": "vgic",
+            "source_record": 559
+          }
+        ],
+        "input_hgnc_ids": [],
+        "official_hgnc_ids": [],
+        "primary_uniprot": "P63142",
+        "target_chembl_id": "CHEMBL4105982",
+        "taxon": "10116"
+      },
+      {
+        "expected_iuphar_class": "Other Protein Target",
+        "expected_iuphar_target_id": "2530",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "783",
+            "family_name": "Fatty acid-binding proteins",
+            "family_type": "other_protein",
+            "source_record": 3180
+          }
+        ],
+        "input_hgnc_ids": [],
+        "official_hgnc_ids": [],
+        "primary_uniprot": "P22935",
+        "target_chembl_id": "CHEMBL4172",
+        "taxon": "10090"
+      },
+      {
+        "expected_iuphar_class": "Ion Channel",
+        "expected_iuphar_target_id": "542",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "81",
+            "family_name": "Voltage-gated potassium channels (K<sub>v</sub>)",
+            "family_type": "vgic",
+            "source_record": 562
+          }
+        ],
+        "input_hgnc_ids": [],
+        "official_hgnc_ids": [],
+        "primary_uniprot": "P19024",
+        "target_chembl_id": "CHEMBL4295724",
+        "taxon": "10116"
+      },
+      {
+        "expected_iuphar_class": "Enzyme",
+        "expected_iuphar_target_id": "2377",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "751",
+            "family_name": "S1: Chymotrypsin",
+            "family_type": "enzyme",
+            "source_record": 2268
+          }
+        ],
+        "input_hgnc_ids": [],
+        "official_hgnc_ids": [],
+        "primary_uniprot": "Q91VE3",
+        "target_chembl_id": "CHEMBL4295910",
+        "taxon": "10090"
+      },
+      {
+        "expected_iuphar_class": "Enzyme",
+        "expected_iuphar_target_id": "2219",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "545",
+            "family_name": "MST subfamily",
+            "family_type": "enzyme",
+            "source_record": 1887
+          }
+        ],
+        "input_hgnc_ids": [],
+        "official_hgnc_ids": [],
+        "primary_uniprot": "Q9JI10",
+        "target_chembl_id": "CHEMBL4310",
+        "taxon": "10090"
+      },
+      {
+        "expected_iuphar_class": "Receptor",
+        "expected_iuphar_target_id": "323",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "52",
+            "family_name": "P2Y receptors",
+            "family_type": "gpcr",
+            "source_record": 326
+          }
+        ],
+        "input_hgnc_ids": [
+          "8539"
+        ],
+        "official_hgnc_ids": [
+          "8539"
+        ],
+        "primary_uniprot": "P47900",
+        "target_chembl_id": "CHEMBL4315",
+        "taxon": "9606"
+      },
+      {
+        "expected_iuphar_class": "Other Protein Target",
+        "expected_iuphar_target_id": "2530",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "783",
+            "family_name": "Fatty acid-binding proteins",
+            "family_type": "other_protein",
+            "source_record": 3180
+          }
+        ],
+        "input_hgnc_ids": [],
+        "official_hgnc_ids": [],
+        "primary_uniprot": "P51673",
+        "target_chembl_id": "CHEMBL4345",
+        "taxon": "10116"
+      },
+      {
+        "expected_iuphar_class": "Enzyme",
+        "expected_iuphar_target_id": "1542",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "474",
+            "family_name": "AMPK subfamily",
+            "family_type": "enzyme",
+            "source_record": 1148
+          }
+        ],
+        "input_hgnc_ids": [],
+        "official_hgnc_ids": [],
+        "primary_uniprot": "Q09137",
+        "target_chembl_id": "CHEMBL4637",
+        "taxon": "10116"
+      },
+      {
+        "expected_iuphar_class": "Enzyme",
+        "expected_iuphar_target_id": "2219",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "545",
+            "family_name": "MST subfamily",
+            "family_type": "enzyme",
+            "source_record": 1887
+          }
+        ],
+        "input_hgnc_ids": [
+          "11406"
+        ],
+        "official_hgnc_ids": [
+          "11406"
+        ],
+        "primary_uniprot": "Q13188",
+        "target_chembl_id": "CHEMBL4708",
+        "taxon": "9606"
+      },
+      {
+        "expected_iuphar_class": "Enzyme",
+        "expected_iuphar_target_id": "1597",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "743",
+            "family_name": "M14: Carboxypeptidase A",
+            "family_type": "enzyme",
+            "source_record": 1797
+          }
+        ],
+        "input_hgnc_ids": [
+          "2312"
+        ],
+        "official_hgnc_ids": [
+          "2312"
+        ],
+        "primary_uniprot": "P15169",
+        "target_chembl_id": "CHEMBL4713",
+        "taxon": "9606"
+      },
+      {
+        "expected_iuphar_class": "Receptor",
+        "expected_iuphar_target_id": "365",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "65",
+            "family_name": "Urotensin receptor",
+            "family_type": "gpcr",
+            "source_record": 406
+          }
+        ],
+        "input_hgnc_ids": [],
+        "official_hgnc_ids": [],
+        "primary_uniprot": "P49684",
+        "target_chembl_id": "CHEMBL4921",
+        "taxon": "10116"
+      },
+      {
+        "expected_iuphar_class": "Enzyme",
+        "expected_iuphar_target_id": "2219",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "545",
+            "family_name": "MST subfamily",
+            "family_type": "enzyme",
+            "source_record": 1887
+          }
+        ],
+        "input_hgnc_ids": [],
+        "official_hgnc_ids": [],
+        "primary_uniprot": "O54748",
+        "target_chembl_id": "CHEMBL5169099",
+        "taxon": "10116"
+      },
+      {
+        "expected_iuphar_class": "Enzyme",
+        "expected_iuphar_target_id": "2351",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "728",
+            "family_name": "C1: Papain",
+            "family_type": "enzyme",
+            "source_record": 1218
+          }
+        ],
+        "input_hgnc_ids": [],
+        "official_hgnc_ids": [],
+        "primary_uniprot": "P06797",
+        "target_chembl_id": "CHEMBL5291",
+        "taxon": "10090"
+      },
+      {
+        "expected_iuphar_class": "Transporter",
+        "expected_iuphar_target_id": "929",
+        "expected_match_status": "matched",
+        "family_evidence": [
+          {
+            "family_id": "177",
+            "family_name": "GABA transporter subfamily",
+            "family_type": "transporter",
+            "source_record": 2549
+          }
+        ],
+        "input_hgnc_ids": [],
+        "official_hgnc_ids": [],
+        "primary_uniprot": "P31648",
+        "target_chembl_id": "CHEMBL5445",
+        "taxon": "10090"
+      }
+    ],
+    "distinct_iuphar_target_ids": 42,
+    "expected": 64,
+    "expected_class_counts": {
+      "Enzyme": 36,
+      "Ion Channel": 2,
+      "Other Protein Target": 3,
+      "Receptor": 19,
+      "Transporter": 4
+    },
+    "passed": 64
+  },
+  "human_review_claimed": false,
+  "limitations": [
+    "The reviewed official scope contains family-level data for three named species.",
+    "Absence outside projected variants is not established. Five usable species variants are held with four inseparable multivalued target groups.",
+    "This decision binds source scope and 64 source-derived expected direct identities/classes. The executed RF-008 receipt and effective outcomes for its additional mandatory categories are separate artifacts.",
+    "Other supplementary rows and inferred biological correctness are outside this approval."
+  ],
+  "matching_policy_version": "hgnc-uniprot-reviewed-target-class-v1",
+  "orthology": {
+    "decision": "APPROVED_CLASS_ONLY",
+    "ec_number": "3.4.21.5",
+    "effective_class": "Enzyme.Hydrolase",
+    "iuphar_target_id": null,
+    "legacy_target_csv_ordinal_including_header": 46,
+    "ortholog": {
+      "hgnc": "3535",
+      "iuphar_id": "2362",
+      "primary_uniprot": "P00734",
+      "species": "9606"
+    },
+    "primary_uniprot": "P00735",
+    "rationale": "Frozen ChEMBL rows identify cattle F2 and its own hydrolase EC. Official target 2362 lists human, mouse and rat accessions. The old CSV bovine accession with a human HGNC must not produce a direct bovine ID.",
+    "review_reference": "urn:bioetl:rf008:issue-13408:independent-source-review:20261127#CHEMBL4471",
+    "source_urls": [
+      "https://www.ncbi.nlm.nih.gov/gene/280685",
+      "https://www.ncbi.nlm.nih.gov/gene/2147",
+      "https://pubchem.ncbi.nlm.nih.gov/protein/P00735",
+      "https://pubchem.ncbi.nlm.nih.gov/gene/280685"
+    ],
+    "target_chembl_id": "CHEMBL4471",
+    "taxon": "9913"
+  },
+  "provenance": {
+    "acquisition_sha256": "bae61522358800cd2e090524fc2d5517fadcf9784418373cb736b479003b1d02",
+    "attached_source_sha256": {
+      "_IUPHAR_family.csv": "3d56abada7f06068af153eca88e3b0d9fc04755ba319fd2d9acc00033875ecc3",
+      "_IUPHAR_target.csv": "4756ff664c195aa5b54031d4403fe8eed8a144abfe9a6c3882978d1ec445b440"
+    },
+    "candidate_cases_sha256": "3a928617f8e873be22d02e8dad4f9c19e7ad072c6f42eceb26219a2e4fd07cfb",
+    "delta_tables": {
+      "gold": {
+        "commit_log_sha256": "048c48ca19880b84b1145bb63cb7ed7cdd379c39ad4cbfffc5c0d7673af2fbc3",
+        "version": 11
+      },
+      "silver": {
+        "commit_log_sha256": "34d75296771e6447670e3930070ae8fbce7ea087de0329bedf56761b52c21c51",
+        "version": 23
+      }
+    },
+    "historical_64_index_sha256": "d5da0db2ac16ccd85e25d1200b809f1a300d3662f627dac3f45f18c651db07be",
+    "method": "Independent CSV parsing and source-to-source identity joins. The diagnostic classifier output was not an input.",
+    "official_raw_csv_sha256": "9e91ae4eed1e147f0c5b01dd2e0645c2d57edb39442114d3128c70232b0d39fb",
+    "official_raw_csv_url": "https://www.guidetopharmacology.org/DATA/targets_and_families.csv",
+    "proposed_scope_input_sha256": "883bfb68433044e47a67dd766f4e09b4f21b94d79ff4122be42d9e9d4c564542",
+    "provider_release": "2026.3.1",
+    "scope_sha256": "883bfb68433044e47a67dd766f4e09b4f21b94d79ff4122be42d9e9d4c564542"
+  },
+  "reviewed_supplement": {
+    "decision": "APPROVED_ADD_PRIMARY_ACCESSION_TO_EXISTING_OFFICIAL_VARIANT",
+    "expected_iuphar_class": "Other Protein Target",
+    "familyIds": [
+      "852"
+    ],
+    "family_csv_ordinals_including_header": [
+      636
+    ],
+    "hgncId": "1116",
+    "official_annotation_precedence": true,
+    "official_data_record_ordinals": [
+      3100
+    ],
+    "reviewReference": "urn:bioetl:rf008:issue-13408:independent-source-review:20261127#3127",
+    "source_urls": [
+      "https://www.guidetopharmacology.org/GRAC/ObjectDisplayForward?familyId=852&familyType=OTHER&objectId=3127",
+      "https://www.uniprot.org/uniprotkb/P35613/entry"
+    ],
+    "targetId": "3127",
+    "target_csv_ordinals_including_header": [
+      135,
+      6639
+    ],
+    "taxonId": "9606",
+    "uniprotIds": [
+      "P35613"
+    ]
+  },
+  "reviewer_reference": "agent:/root/rf008_reference_review",
+  "schema_version": 1,
+  "scope_result": {
+    "absence_claim_allowed": false,
+    "annotation_capability": "family_only",
+    "exclusions_by_reason": {
+      "multivalued species gene identity needs explicit resolution": 4,
+      "subunit/complex target needs explicit reviewed exclusion": 71,
+      "target without supported species identity needs explicit exclusion": 75
+    },
+    "held_valid_species_variants": [
+      {
+        "reason": "multivalued species gene identity needs explicit resolution",
+        "target_id": "34",
+        "taxon_id": "9606"
+      },
+      {
+        "reason": "multivalued species gene identity needs explicit resolution",
+        "target_id": "2997",
+        "taxon_id": "10116"
+      },
+      {
+        "reason": "multivalued species gene identity needs explicit resolution",
+        "target_id": "2997",
+        "taxon_id": "9606"
+      },
+      {
+        "reason": "multivalued species gene identity needs explicit resolution",
+        "target_id": "3348",
+        "taxon_id": "10090"
+      },
+      {
+        "reason": "multivalued species gene identity needs explicit resolution",
+        "target_id": "3348",
+        "taxon_id": "10116"
+      }
+    ],
+    "included_official_species_variants": 9057,
+    "included_provider_target_ids": 3154,
+    "official_provider_target_ids": 3304,
+    "official_raw_records": 3390,
+    "variants_by_taxon": {
+      "10090": 2976,
+      "10116": 2932,
+      "9606": 3149
+    }
+  },
+  "status": "APPROVED_BOUNDED_TECHNICAL_SOURCE_SCOPE_AND_CASES"
+}

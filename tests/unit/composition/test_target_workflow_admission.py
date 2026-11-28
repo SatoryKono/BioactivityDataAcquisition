@@ -94,6 +94,7 @@ def _target_config(mode="off"):
             "target_classification": config.target_classification.model_copy(
                 update={
                     "mode": mode,
+                    "table_contract": None,
                     "snapshot_manifest": "not-admitted.json"
                     if mode == "enrich"
                     else None,
