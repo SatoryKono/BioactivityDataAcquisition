@@ -27,6 +27,10 @@ jobs:
               with:
                   node-version: "24"
                   package-manager-cache: false
+            - name: Restore the supported TypeScript range and resolve the lock
+              run: |
+                  npm pkg set 'devDependencies.typescript=>=6.0.3 <6.1'
+                  npm install --package-lock-only --ignore-scripts --no-audit --no-fund
             - name: Install locked packages
               run: npm ci --ignore-scripts --no-audit --no-fund
             - name: Run selector tests
@@ -44,7 +48,8 @@ jobs:
                   import subprocess
                   root = pathlib.Path(subprocess.check_output(["git", "rev-parse", "--show-toplevel"], text=True).strip())
                   out = pathlib.Path("dist-adaptive")
-                  for path in sorted(out.rglob("*")):
+                  changed_inputs = [pathlib.Path("package.json"), pathlib.Path("package-lock.json")]
+                  for path in sorted([*out.rglob("*"), *changed_inputs]):
                       if not path.is_file():
                           continue
                       relative = path.resolve().relative_to(root).as_posix()
