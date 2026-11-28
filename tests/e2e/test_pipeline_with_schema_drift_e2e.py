@@ -24,7 +24,7 @@
 # pyright: reportFunctionMemberAccess=false
 # pyright: reportConstantRedefinition=false
 # pyright: reportInvalidTypeForm=false
-# PD6 residual test mock/fixture surface — product NewTypes/Ports stay strict (#7048).
+# PD6 residual test mock/fixture surface - product NewTypes/Ports stay strict (#7048).
 """E2E tests for pipeline schema evolution handling.
 
 Tests the pipeline's handling of schema drift scenarios:
@@ -38,12 +38,6 @@ Per domain/config.py TableConfig:
 
 from __future__ import annotations
 
-from bioetl.infrastructure.storage.silver.runtime_helpers import (
-    SilverWriterRuntimeServicesRequest,
-)
-
-from tests.helpers.clock import fixed_test_clock
-
 from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock
@@ -54,6 +48,11 @@ import pytest
 from bioetl.domain.exceptions import SchemaEvolutionError
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.delta.schema_ops import delta_schema_to_pyarrow
+from bioetl.infrastructure.storage.delta.table_ops import read_delta_records
+from bioetl.infrastructure.storage.silver.runtime_helpers import (
+    SilverWriterRuntimeServicesRequest,
+)
+from tests.helpers.clock import fixed_test_clock
 from tests.helpers.deterministic_ids import deterministic_batch_id, deterministic_run_id
 
 
@@ -239,14 +238,14 @@ class TestSchemaEvolutionErrorMode:
         )
         from deltalake import DeltaTable
 
-        persisted = DeltaTable(
-            str(e2e_data_dir / "silver" / table_name)
-        ).to_pyarrow_table()
+        persisted = DeltaTable(str(e2e_data_dir / "silver" / table_name))
         omitted_row = next(
-            row for row in persisted.to_pylist() if row["entity_id"] == "entity_4"
+            row
+            for row in read_delta_records(persisted)
+            if row["entity_id"] == "entity_4"
         )
         assert omitted_row["name"] is None
-        assert "name" in persisted.schema.names
+        assert "name" in delta_schema_to_pyarrow(persisted.schema()).names
 
         # Remove the field from the declared schema as well as the records.
         # Omitted nullable values alone are not a schema removal.
@@ -308,7 +307,7 @@ class TestSchemaEvolutionEvolveMode:
             on_schema_mismatch="evolve",
         )
 
-        initial_count = len(DeltaTable(str(table_path)).to_pyarrow_table())
+        initial_count = len(read_delta_records(DeltaTable(str(table_path))))
         assert initial_count == 2
 
         # Second write with evolved schema (new field)
@@ -323,7 +322,7 @@ class TestSchemaEvolutionEvolveMode:
 
         # Verify records were added
         dt = DeltaTable(str(table_path))
-        final_count = len(dt.to_pyarrow_table())
+        final_count = len(read_delta_records(dt))
         assert final_count == 3  # 2 original + 1 new
         assert "new_field" in delta_schema_to_pyarrow(dt.schema()).names
 
@@ -438,7 +437,7 @@ class TestSchemaEvolutionIgnoreMode:
         )
 
         # Verify initial write succeeded
-        assert len(DeltaTable(str(table_path)).to_pyarrow_table()) > 0
+        assert len(read_delta_records(DeltaTable(str(table_path)))) > 0
 
         # Second write with evolved records - should not raise
         await writer.write_silver(
@@ -452,7 +451,7 @@ class TestSchemaEvolutionIgnoreMode:
 
         # Records should be written (new_field filtered out)
         dt = DeltaTable(str(table_path))
-        final_count = len(dt.to_pyarrow_table())
+        final_count = len(read_delta_records(dt))
         assert final_count == 3
 
 
@@ -497,7 +496,7 @@ class TestSchemaEvolutionEdgeCases:
         # Table should now exist
         assert table_path.exists()
         dt = DeltaTable(str(table_path))
-        assert len(dt.to_pyarrow_table()) == 2
+        assert len(read_delta_records(dt)) == 2
 
     async def test_same_schema_no_drift(
         self, e2e_data_dir: Path, base_schema: pa.Schema, base_records
@@ -680,5 +679,5 @@ class TestSchemaEvolutionEdgeCases:
 
         # Verify all records present
         dt = DeltaTable(str(table_path))
-        table = dt.to_pyarrow_table()
+        table = read_delta_records(dt)
         assert len(table) == 3

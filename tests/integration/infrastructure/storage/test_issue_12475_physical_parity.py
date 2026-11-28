@@ -12,23 +12,26 @@ import pyarrow as pa
 import pytest
 import yaml
 from deltalake import DeltaTable
-from bioetl.domain.exceptions import SchemaEvolutionError
+from pandera.pandas import Column, DataFrameSchema
+
 from bioetl.domain.constants import NONDETERMINISTIC_PERSISTED_FIELDS
+from bioetl.domain.exceptions import SchemaEvolutionError
 from bioetl.domain.ports.noop import NoOpMetrics
+from bioetl.domain.types import ScdConfig
 from bioetl.domain.types.enums import RunType
 from bioetl.infrastructure.config.pipeline_config_api import (
     load_pipeline_config_from_root,
 )
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
+from bioetl.infrastructure.storage.delta.schema_ops import delta_schema_to_pyarrow
+from bioetl.infrastructure.storage.delta.table_ops import read_delta_records
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from bioetl.infrastructure.storage.silver.runtime_helpers import (
     SilverWriterRuntimeServicesRequest,
 )
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
 from tests.helpers.clock import fixed_test_clock
-from bioetl.domain.types import ScdConfig
-from pandera.pandas import Column, DataFrameSchema
 from tests.helpers.deterministic_ids import (
     deterministic_batch_id,
     deterministic_run_id,
@@ -138,8 +141,8 @@ async def test_every_resolved_pipeline_config_writes_and_reads_all_layers(
             for field in _silver_schema(value_type=pa.int64())
             if field.name not in NONDETERMINISTIC_PERSISTED_FIELDS
         )
-        assert silver_table.schema().to_pyarrow().equals(expected_silver)
-        silver_rows = silver_table.to_pyarrow_table().to_pylist()
+        assert delta_schema_to_pyarrow(silver_table.schema()).equals(expected_silver)
+        silver_rows = read_delta_records(silver_table)
         assert len(silver_rows) == 1
         assert silver_rows[0]["entity_id"] == record_id
         assert silver_rows[0]["value"] == 1
@@ -181,14 +184,14 @@ async def test_every_resolved_pipeline_config_writes_and_reads_all_layers(
                     "_version": pa.int64(),
                 }
             )
-        physical_gold = gold_table.schema().to_pyarrow()
+        physical_gold = delta_schema_to_pyarrow(gold_table.schema())
         assert {
             field.name: field.type for field in physical_gold
         } == expected_gold_types
         # Preserve #12475 finding explicitly; owner disposition is required for
         # #12474 acceptance. Logical required-field validation remains separate.
         assert all(field.nullable for field in physical_gold)
-        gold_rows = gold_table.to_pyarrow_table().to_pylist()
+        gold_rows = read_delta_records(gold_table)
         assert len(gold_rows) == 1
         assert gold_rows[0]["entity_id"] == record_id
         assert gold_rows[0]["value"] == 1.5
@@ -305,7 +308,7 @@ async def test_silver_delta_evolve_readback_matches_types_and_nullability(
     )
 
     table = DeltaTable(str(table_path))
-    actual = table.schema().to_pyarrow()
+    actual = delta_schema_to_pyarrow(table.schema())
     expected = pa.schema(
         [
             field
@@ -318,7 +321,7 @@ async def test_silver_delta_evolve_readback_matches_types_and_nullability(
     assert [field.nullable for field in actual] == [
         field.nullable for field in expected
     ]
-    assert table.to_pyarrow_table().num_rows == 2
+    assert len(read_delta_records(table)) == 2
 
 
 @pytest.mark.integration
@@ -348,7 +351,7 @@ async def test_silver_existing_float_schema_accepts_int_after_arrow_coercion(
         on_schema_mismatch="evolve",
     )
 
-    rows = DeltaTable(str(table_path)).to_pyarrow_table().to_pylist()
+    rows = read_delta_records(DeltaTable(str(table_path)))
     assert {row["entity_id"]: row["value"] for row in rows} == {
         "e1": 1.5,
         "e2": 2.0,
@@ -384,6 +387,6 @@ async def test_silver_delta_type_change_negative_control_is_schema_mismatch(
 
     assert outcome.value.changed_fields == {"value": ("string", "int64")}
     assert "changed field types" in str(outcome.value)
-    actual = DeltaTable(str(table_path)).schema().to_pyarrow()
+    actual = delta_schema_to_pyarrow(DeltaTable(str(table_path)).schema())
     assert actual.field("value").type == pa.string()
     assert table_path.exists()

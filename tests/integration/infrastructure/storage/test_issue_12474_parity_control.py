@@ -9,8 +9,9 @@ from pathlib import Path
 import pyarrow as pa
 import pytest
 from deltalake import DeltaTable, write_deltalake
-
 from scripts.engineering.ci.pr_lane_results import NEGATIVE_CONTROL_ENV
+
+from bioetl.infrastructure.storage.delta.schema_ops import delta_schema_to_pyarrow
 
 pytestmark = pytest.mark.integration
 
@@ -20,7 +21,7 @@ def test_real_delta_schema_matches_logical_contract(tmp_path: Path) -> None:
     schema = pa.schema([pa.field("value", pa.int64(), nullable=False)])
     table_path = tmp_path / "synthetic_parity_control"
     write_deltalake(str(table_path), pa.Table.from_pylist([{"value": 1}], schema))
-    actual = DeltaTable(str(table_path)).schema().to_pyarrow()
+    actual = delta_schema_to_pyarrow(DeltaTable(str(table_path)).schema())
     expected = schema
     if os.environ.get(NEGATIVE_CONTROL_ENV) == "1":
         expected = pa.schema([pa.field("value", pa.string(), nullable=False)])

@@ -8,7 +8,7 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, cast
-from urllib.parse import unquote, urlparse
+from urllib.parse import quote, unquote, urlparse
 
 import pyarrow as pa
 import pyarrow.parquet as pq
@@ -64,7 +64,8 @@ def _read_records_from_active_parquet_files(
     if len(tables) == 1:
         rows: list[BronzeRecord] = tables[0].to_pylist()
         return rows
-    concatenated = pa.concat_tables(tables)
+    # Files written before and after an evolution may differ in nullability.
+    concatenated = pa.concat_tables(tables, promote_options="default")
     return cast("list[BronzeRecord]", concatenated.to_pylist())
 
 
@@ -73,7 +74,7 @@ class _PartitionInfo:
     root: Path
     columns: list[str]
     schema: pa.Schema
-    values: dict[str, dict[str, str | None]]
+    values: dict[str, dict[str, object]]
 
 
 def _partition_info(
@@ -82,14 +83,15 @@ def _partition_info(
     columns = table.metadata().partition_columns
     if not columns:
         return None
+    actions = pa.table(table.get_add_actions())
+    partition_field = (
+        "partition" if "partition" in actions.column_names else "partition_values"
+    )
     return _PartitionInfo(
         Path(resolve_parquet_file_uri(table.table_uri)).resolve(),
         columns,
         schema if schema is not None else delta_schema_to_pyarrow(table.schema()),
-        {
-            item["path"]: item["partition_values"]
-            for item in table.get_add_actions().to_pylist()
-        },
+        {item["path"]: item[partition_field] for item in actions.to_pylist()},
     )
 
 
@@ -107,7 +109,13 @@ def _align_table_to_schema(
         )
     if not target:
         return result
-    return result.select(target)
+    projected = result.select(target)
+    for index, name in enumerate(target):
+        target_type = schema.field(name).type
+        column = projected.column(index)
+        if column.type != target_type:
+            projected = projected.set_column(index, name, column.cast(target_type))
+    return projected
 
 
 def _physical_columns_for_read(
@@ -177,7 +185,18 @@ def _append_partition_columns(
 ) -> pa.Table:
     """Restore partition fields from Delta add-actions with Delta-native types."""
     relative = Path(path).resolve().relative_to(partition_info.root).as_posix()
-    values = partition_info.values[relative]
+    values = partition_info.values.get(relative)
+    if values is None:
+        # delta-rs and the local filesystem can expose different URI escaping.
+        aliases = {unquote(relative), quote(relative, safe="/=")}
+        matches = [
+            partition_info.values[key]
+            for key in aliases
+            if key in partition_info.values
+        ]
+        if len(matches) != 1:
+            raise KeyError(f"Cannot match Delta add action for {relative!r}")
+        (values,) = matches
     for name in partition_info.columns:
         if columns is not None and name not in columns:
             continue
@@ -246,7 +265,7 @@ def read_delta_records(
             for batch in batches:
                 records.extend(batch.to_pylist())
             return records
-        # Dataset path available but no reader — fall through carefully.
+        # Dataset path available but no reader - fall through carefully.
         return _read_records_from_active_parquet_files(table, columns=columns)
 
     return _read_records_from_active_parquet_files(table, columns=columns)

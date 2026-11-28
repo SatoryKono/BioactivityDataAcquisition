@@ -7,27 +7,24 @@
 # pyright: reportOptionalMemberAccess=false
 # pyright: reportOperatorIssue=false
 # pyright: reportAbstractUsage=false
-# PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
+# PD5 test mock/fixture surface - product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Integration tests for version-aware Gold dual-write behavior."""
 
 from __future__ import annotations
-from bioetl.domain.exceptions.gold_write import GoldWriteFailure
 
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import cast
 from unittest.mock import MagicMock
-from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
-import pytest
 import pyarrow as pa
-
+import pytest
 from pandera.pandas import Column, DataFrameSchema
 
 from bioetl.domain.contracts.gold._chembl_reference_publication_schemas import (
     ChEMBLPublicationGoldSchema,
 )
-from bioetl.domain.types.gold_contracts import GoldWriteCategory
+from bioetl.domain.exceptions.gold_write import GoldWriteFailure
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import (
     GoldSchemaPolicyByVersion,
@@ -35,20 +32,23 @@ from bioetl.domain.types import (
     ScdConfig,
 )
 from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
+from bioetl.domain.types.gold_contracts import GoldWriteCategory
+from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+from bioetl.infrastructure.storage.delta.schema_ops import delta_schema_to_pyarrow
 from bioetl.infrastructure.storage.delta.table_ops import (
     load_delta_table,
     read_delta_records,
-)
-from bioetl.infrastructure.storage.gold.runtime_helpers import (
-    GoldWriterRuntimeServices,
-    build_gold_writer_runtime_services,
 )
 from bioetl.infrastructure.storage.gold.pipeline_helpers import (
     GoldWriteDispatchContext,
     GoldWritePostwriteContext,
 )
+from bioetl.infrastructure.storage.gold.runtime_helpers import (
+    GoldWriterRuntimeServices,
+    build_gold_writer_runtime_services,
+)
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
-from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 
 @pytest.fixture
@@ -229,7 +229,7 @@ async def test_gold_writer_dual_write_fails_fast_when_shadow_target_errors(
 
     writer._dispatch_write = _dispatch_with_failure  # type: ignore[method-assign]
 
-    with pytest.raises(GoldWriteFailure) as outcome:
+    with pytest.raises(GoldWriteFailure):
         await writer.write_gold(
             table_name="chembl.activity",
             records=[
@@ -362,7 +362,7 @@ async def test_gold_writer_overwrite_is_idempotent_for_identical_records(
     ]
     assert second_rows == first_rows
     table_path = _versioned_table_path(tmp_path / "gold", "chembl.activity")
-    physical = load_delta_table(str(table_path)).schema().to_pyarrow()
+    physical = delta_schema_to_pyarrow(load_delta_table(str(table_path)).schema())
     expected = {"entity_id": pa.string(), "value": pa.float64()}
     assert {field.name: field.type for field in physical} == expected
     assert all(field.nullable for field in physical)
@@ -516,7 +516,9 @@ async def test_issue_12475_gold_scd2_repeat_write_keeps_history_and_current_row(
 
     rows = _load_gold_rows(tmp_path / "gold", "chembl.publication")
     table_path = tmp_path / "gold" / "chembl" / "publication"
-    physical_schema = load_delta_table(str(table_path)).schema().to_pyarrow()
+    physical_schema = delta_schema_to_pyarrow(
+        load_delta_table(str(table_path)).schema()
+    )
     arrow_types = {
         "str": pa.string(),
         "string[pyarrow]": pa.string(),
