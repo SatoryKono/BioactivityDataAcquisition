@@ -758,7 +758,7 @@ def test_workflows_do_not_use_unhashed_pip_or_npm_install() -> None:
 def test_scorecard_workflow_is_non_blocking_weekly_baseline() -> None:
     workflow = _load_yaml(ROOT / ".github/workflows/scorecard.yml")
     triggers = cast(dict[str, Any], workflow.get("on", workflow.get(True)))
-    scorecard_sha = "fa7117db83c52d787ae5a89f350999701505d78e"
+    scorecard_sha = "23f22cd43608bae7a1f1fa2603d7314dee9538a5"
     assert scorecard_sha in policy.ALLOWED_USES["ossf/scorecard-action"]
     jobs = cast(dict[str, dict[str, Any]], workflow["jobs"])
 
@@ -834,7 +834,7 @@ def test_nightly_deterministic_lanes_stay_daily_until_shadow_acceptance() -> Non
 def test_syft_sbom_is_generated_on_release_and_ghcr_push() -> None:
     release = _load_yaml(RELEASE_WORKFLOW)
     docker = _load_yaml(ROOT / ".github/workflows/docker-publish.yml")
-    sbom_sha = "66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c"
+    sbom_sha = "dfcb83b97731532d72be422cbc51ee64adb6fd56"
     assert sbom_sha in policy.ALLOWED_USES["anchore/sbom-action"]
     release_uses = _step_uses(release, "build")
     docker_uses = _step_uses(docker, "docker-push")
@@ -1014,7 +1014,7 @@ def test_canonical_uv_action_pair_is_setup_python_uv() -> None:
 def test_zizmor_workflow_is_path_filtered_and_sha_pinned() -> None:
     workflow = _load_yaml(ROOT / ".github/workflows/zizmor.yml")
     triggers = cast(dict[str, Any], workflow.get("on", workflow.get(True)))
-    zizmor_sha = "45d7276c9ca790aabd705e31ca99c6185c3e76dd"
+    zizmor_sha = "1b4550e929643b8b26a62303c6bd64814271a4f1"
     assert zizmor_sha in policy.ALLOWED_USES["zizmorcore/zizmor-action"]
     zizmor_step = next(
         step

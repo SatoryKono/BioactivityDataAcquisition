@@ -261,11 +261,11 @@ def test_local_action_yaml_suffix_passes_and_escape_fails(tmp_path: Path) -> Non
 
 DOCKER_LANE_PIN = (
     "SatoryKono/BioactivityDataAcquisition/.github/workflows/docker.yml"
-    "@84548f8bfed680b9415fc6855d6be059ffd9d1ab"
+    "@cfc518a21c94eba702157209946b38cd21a9ce7a"
 )
 DOCS_LANE_PIN = (
     "SatoryKono/BioactivityDataAcquisition/.github/workflows/docs.yml"
-    "@f6f924bd6d3cf362e14a20206bd611179ca800a3"
+    "@cfc518a21c94eba702157209946b38cd21a9ce7a"
 )
 
 
