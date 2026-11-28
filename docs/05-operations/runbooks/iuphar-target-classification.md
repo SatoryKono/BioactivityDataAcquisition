@@ -1268,6 +1268,12 @@ Delta versions and passed round-trip verification. The journal and original
 bundle are retained under `backup/`. The migration lock was released and the
 active configuration admitted subsequent incremental writes.
 
+Apply the accepted V31 configuration through the migration procedure as a
+deployment-local override. The checked-in `configs/entities/chembl/target.yaml`
+continues to select `off` and V30 for a clean checkout. Before resuming jobs on
+the already migrated Silver and Gold tables, verify that every writer uses
+the active V31 configuration and the admitted profile digest listed above.
+
 The deployment host retains the evidence and exports in
 `reports/local/iuphar-13410-rf013-20261127-1700/`.
 
