@@ -26,7 +26,7 @@ dependencies = [
     # >=0.25: target_candidates imports PostCommitHookProperties at module load;
     # older bounds admit versions without that symbol (ImportError). Verified
     # against the locked 0.25.5 on 2026-11-26.
-    "deltalake>=0.25,<1.0",
+    "deltalake>=0.25,<2.0",
     # NOTE (AUD-006): no arro3-core pin. deltalake<1.0 does not require arro3
     # and nothing in src/scripts/tests imports it (verified 2026-09-19).
     # Re-add only as part of a deltalake>=1.0 migration with Windows-CI proof.
