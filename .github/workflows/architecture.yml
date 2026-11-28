@@ -2,6 +2,11 @@ name: Architecture Metrics
 
 on:
     workflow_dispatch:
+        inputs:
+            source_sha:
+                description: Exact BioETL candidate commit to verify
+                required: true
+                type: string
 
 permissions:
     contents: read
@@ -13,7 +18,7 @@ jobs:
         steps:
             - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
               with:
-                  ref: c0b4b98ef7ef8a42066fb8815c4e1f2c1dd9812d
+                  ref: ${{ inputs.source_sha }}
                   persist-credentials: false
             - name: Setup Python + uv
               uses: ./.github/actions/setup-python-uv
