@@ -1,5 +1,5 @@
 {
-  "duplicate_basename_count": 78,
+  "duplicate_basename_count": 77,
   "duplicate_basenames": {
     "test_adapter.py": [
       "tests/integration/adapters/openalex/test_adapter.py",
@@ -296,10 +296,6 @@
     "test_storage_factory.py": [
       "tests/unit/composition/factories/storage/test_storage_factory.py",
       "tests/unit/infrastructure/test_storage_factory.py"
-    ],
-    "test_target_fk_repair.py": [
-      "tests/unit/composition/test_target_fk_repair.py",
-      "tests/unit/infrastructure/storage/test_target_fk_repair.py"
     ],
     "test_transformations.py": [
       "tests/unit/application/pipelines/test_transformations.py",

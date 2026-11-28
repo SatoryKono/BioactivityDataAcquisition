@@ -150,6 +150,7 @@ tracked_suite_inventory:
     - tests/integration/memory/test_workflow_tooling.py
     - tests/integration/normalization/test_chembl_edge_observed_values.py
     - tests/integration/normalization/test_non_chembl_edge_observed_values.py
+    - tests/integration/pipelines/test_chembl_target_fk_repair.py
     - tests/integration/pipelines/test_crossref_date_normalization.py
     - tests/integration/pipelines/test_pubmed_date_normalization.py
     - tests/integration/run_reports/test_current_metrics_rehydrate.py
