@@ -2208,6 +2208,14 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         "tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py",
         "tests/unit/scripts/ops/docker/test_runtime_identity.py",
     ),
+    "scripts/ops/runtime/docker/compose.ghcr.yml": (
+        DOCKER_RUNTIME_CONTRACT_TEST,
+        "tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager_recovery_networks.py",
+    ),
+    "docs/DOCKER_QUICKSTART.md": (
+        DOCKER_RUNTIME_CONTRACT_TEST,
+        *DOCUMENTATION_CLEANUP_INVENTORY_TESTS,
+    ),
     "docker-compose.monitoring.yml": (
         DOCKER_RUNTIME_CONTRACT_TEST,
         "tests/integration/test_grafana_datasource_provisioning.py",

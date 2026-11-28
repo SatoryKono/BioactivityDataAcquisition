@@ -20,6 +20,35 @@ Docker — optional local adjunct. Канонический runtime: Python/venv
 Выполняйте команды из Linux filesystem mirror, не из `WSL-mounted Windows paths` или `/tmp`,
 и не создавайте/не изменяйте `.env`.
 
+## Быстрый запуск health/metrics из GHCR
+
+Для работы с Python-кодом и обычных тестов используйте локальный venv.
+Если нужен только контейнер health/metrics, можно скачать готовый образ из
+[GHCR](https://github.com/SatoryKono/BioactivityDataAcquisition/pkgs/container/bioactivitydataacquisition).
+Выберите опубликованный digest для вашей платформы и проверьте совместимость
+версии образа с локальными конфигами и форматом отчётов.
+
+Из основного checkout, который обслуживает стек, запустите `main` через
+runtime manager. Он подготавливает сети и аттестацию источника отчётов,
+подключает оверлей Compose и скачивает образ, если этого digest ещё нет локально.
+
+```bash
+BIOETL_GHCR_DIGEST='sha256:<published-digest>' \
+  python scripts/ops/runtime/docker/runtime_manager.py start --stack main --timeout 300
+```
+
+После запуска проверьте `/health/live` и `/health/ready`. Для отката повторите
+команду с предыдущим рабочим digest. Для локальных исправлений выполните
+`make docker-build` и запустите `main` без `BIOETL_GHCR_DIGEST`:
+
+```bash
+python scripts/ops/runtime/docker/runtime_manager.py start --stack main
+```
+
+Для повторного запуска вспомогательных стеков с GHCR-образом выполните
+`BIOETL_GHCR_DIGEST='sha256:<published-digest>' make docker-start-full`.
+Для локального режима используйте `make docker-start-full` без переменной и при необходимости предварительно выполните `make docker-build`.
+
 ## Default release surface
 
 | Stack | Default? | Назначение |
