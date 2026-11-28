@@ -262,7 +262,7 @@ jobs:
 
       - name: Run zizmor
         id: zizmor
-        uses: zizmorcore/zizmor-action@45d7276c9ca790aabd705e31ca99c6185c3e76dd # v0.8.1
+        uses: zizmorcore/zizmor-action@1b4550e929643b8b26a62303c6bd64814271a4f1 # v0.9.2
         with:
           inputs: |
             .github/workflows
@@ -842,7 +842,7 @@ jobs:
       contents: read
     # Pin must stay on trusted main (#11232). docs.yml owns diagram/docs
     # governance so arch-pytest can ignore the expensive Mermaid modules (#12374).
-    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/docs.yml@f6f924bd6d3cf362e14a20206bd611179ca800a3
+    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/docs.yml@cfc518a21c94eba702157209946b38cd21a9ce7a
 
   docker-lane:
     name: Docker lane
@@ -859,7 +859,7 @@ jobs:
       packages: write
       id-token: write
       attestations: write
-    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/docker.yml@84548f8bfed680b9415fc6855d6be059ffd9d1ab
+    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/docker.yml@cfc518a21c94eba702157209946b38cd21a9ce7a
 
   pr-gate-complete:
     name: pr-gate-complete
