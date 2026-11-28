@@ -67,7 +67,7 @@ def failed_runs(
     return failed
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--since", help="UTC start date or timestamp (inclusive)")
     parser.add_argument("--until", help="UTC end date or timestamp (exclusive)")
@@ -76,7 +76,7 @@ def main() -> int:
         default=os.environ.get("GITHUB_REPOSITORY"),
         help="owner/repository; defaults to gh repository",
     )
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     now = datetime.now(UTC)
     since = args.since or (now - timedelta(hours=24)).isoformat(timespec="seconds")
     until = args.until or now.isoformat(timespec="seconds")

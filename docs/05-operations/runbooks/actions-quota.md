@@ -62,7 +62,7 @@ suitable code-scanning permissions.
 Record evidence and resume merges only after the incident owner accepts recovery.
 
 For retrospective inspection run
-`python scripts/engineering/ops/check_actions_health.py --since 2026-10-03 --until 2026-10-05`.
+`python -m scripts.engineering.ci actions-health --since 2026-10-03 --until 2026-10-05`.
 Dates are UTC; the end is exclusive. Authenticate `gh` with repository Actions
 read access. The check reports all failed zero-step jobs, not just billing locks.
 
