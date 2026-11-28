@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-28T16:19:23.763840+00:00",
+  "generated_at": "2026-11-28T16:39:17.945727+00:00",
   "summary": {
     "total_scripts": 780,
     "status_counts": {
@@ -12107,7 +12107,7 @@
         },
         {
           "path": "tests/unit/scripts/ci/test_docker_publication_guards.py",
-          "line": 47,
+          "line": 49,
           "source_group": "tests",
           "text": "source = (ROOT / \"scripts/engineering/ci/publish_docker_image.sh\").read_text("
         }
