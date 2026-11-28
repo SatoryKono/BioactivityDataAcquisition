@@ -1,0 +1,5 @@
+# Optional overlay for the published health/metrics runtime.
+services:
+  bioetl:
+    build: !reset null
+    image: "ghcr.io/satorykono/bioactivitydataacquisition@${BIOETL_GHCR_DIGEST:?Set BIOETL_GHCR_DIGEST to a published sha256 digest}"

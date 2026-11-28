@@ -20,6 +20,46 @@ Docker — optional local adjunct. Канонический runtime: Python/venv
 Выполняйте команды из Linux filesystem mirror, не из `WSL-mounted Windows paths` или `/tmp`,
 и не создавайте/не изменяйте `.env`.
 
+## Быстрый запуск health/metrics из GHCR
+
+Для работы с Python-кодом и обычных тестов используйте локальный venv.
+Если нужен только контейнер health/metrics, можно скачать готовый образ из
+[GHCR](https://github.com/SatoryKono/BioactivityDataAcquisition/pkgs/container/bioactivitydataacquisition).
+Выберите опубликованный digest для вашей платформы и проверьте совместимость
+версии образа с локальными конфигами и форматом отчётов.
+
+Из того же основного checkout, который обслуживает стек, один раз подготовьте
+сети штатной командой `ensure-networks`. Затем укажите выбранный digest в
+переменной текущей сессии и выполните команды ниже. Первый файл Compose задаёт
+пути монтирования и проект. Оверлей выбирает готовый образ.
+
+```bash
+export BIOETL_GHCR_DIGEST='sha256:<published-digest>'
+docker compose -p bioetl-main -f docker-compose.yml \
+  -f scripts/ops/runtime/docker/compose.ghcr.yml config --images
+docker compose -p bioetl-main -f docker-compose.yml \
+  -f scripts/ops/runtime/docker/compose.ghcr.yml pull bioetl
+docker compose -p bioetl-main -f docker-compose.yml \
+  -f scripts/ops/runtime/docker/compose.ghcr.yml up -d --no-build --pull never --wait bioetl
+```
+
+`pull` нужен при первом запуске или выборе нового digest. После запуска
+проверьте `/health/live`, `/health/ready` и источник отчётов. Для отката
+выберите предыдущий рабочий digest и повторите запуск сервиса.
+
+Для проверки локальных исправлений соберите образ командой
+`docker compose -p bioetl-main -f docker-compose.yml build bioetl` или
+`make docker-build`. Затем запустите основной Compose без оверлея:
+
+```bash
+docker compose -p bioetl-main -f docker-compose.yml \
+  up -d --no-build --pull never --wait bioetl
+```
+
+Для повторного запуска вспомогательных стеков используйте `make docker-start-full`.
+Команда больше не запускает предварительную сборку. Если требуется новый
+локальный образ, сначала выполните `make docker-build` явно.
+
 ## Default release surface
 
 | Stack | Default? | Назначение |

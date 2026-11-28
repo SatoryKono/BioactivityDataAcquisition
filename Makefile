@@ -284,17 +284,17 @@ docker-check:
 # Build BioETL image
 docker-build: docker-check
 	@echo "Building BioETL image..."
-	docker build -t bioetl:latest -f Dockerfile.bioetl . \
-		--build-arg BUILDKIT_INLINE_CACHE=1 \
-		--progress=plain
+	docker compose --progress plain -p bioetl-main -f docker-compose.yml build \
+		--build-arg BUILDKIT_INLINE_CACHE=1 bioetl
+	docker image tag bioetl-main-bioetl bioetl:latest
 	@echo "✓ BioETL image built"
 
 # Start services (main only)
 docker-start: docker-check
 	bash scripts/ops/docker-setup.sh start main
 
-# Start full helper stack (monitoring is opt-in)
-docker-start-full: docker-check docker-build
+# Start full helper stack using the available main image (monitoring is opt-in)
+docker-start-full: docker-check
 	bash scripts/ops/docker-setup.sh start-full
 
 # Opt-in monitoring (Prometheus/Grafana/renderer only; no Loki/Tempo/Quarantine UI)
