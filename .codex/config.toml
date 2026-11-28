@@ -1,12 +1,111 @@
-# Portable project-scoped Codex settings for trusted repository sessions.
-# Authentication, model selection, providers, and user MCP credentials remain
-# user-scoped and MUST NOT be committed here.
-#
-# `max_threads` is the portable project default. Validated for Codex CLI 0.146.1.
-# Versioned compatibility check confirmed support for current key semantics.
-# User model, auth, provider, and MCP configuration stay user-local.
+[agents]
+max_threads = 3
 
-# Dotted key keeps the root table open so a --profile overlay cannot
-# accidentally bind `model = "..."` under [agents] (AgentRoleToml flatten).
-agents.max_threads = 3
+[mcp_servers.adr-analysis]
+command = "bash"
+args = ["scripts/ai/mcp/mcp_adr_analysis_wrapper.sh"]
 
+[mcp_servers.adr-analysis.env]
+PROJECT_PATH = "."
+ADR_PATH = "docs/02-architecture/decisions"
+
+[mcp_servers.ast-grep]
+command = "bash"
+args = ["scripts/ai/mcp/mcp_ast_grep_wrapper.sh"]
+
+[mcp_servers.brave-search]
+command = "bash"
+args = ["scripts/ai/mcp/mcp_brave_search_wrapper.sh"]
+
+[mcp_servers.code-analyzer]
+command = "bash"
+args = ["scripts/ai/mcp/mcp_code_analyzer_wrapper.sh"]
+
+[mcp_servers.code-analyzer.env]
+PROJECT_PATH = "."
+
+[mcp_servers.context7]
+command = "bash"
+args = ["scripts/ai/mcp/mcp_context7_wrapper.sh"]
+
+[mcp_servers.deja]
+command = "bash"
+args = ["scripts/ai/mcp/mcp_deja_wrapper.sh"]
+
+[mcp_servers.deja.env]
+NPM_CONFIG_CACHE = ".cache/npm-cache"
+
+[mcp_servers.docker]
+command = "bash"
+args = ["scripts/ai/mcp/mcp_docker_wrapper.sh"]
+
+[mcp_servers.fetch]
+command = "bash"
+args = ["scripts/ai/mcp/mcp_fetch_wrapper.sh"]
+
+[mcp_servers.fetch.env]
+UV_CACHE_DIR = ".cache/uv-cache"
+UV_TOOL_DIR = ".cache/uv-tools"
+NPM_CONFIG_CACHE = ".cache/npm-cache"
+
+[mcp_servers.filesystem]
+command = "bash"
+args = ["scripts/ai/mcp/mcp_filesystem_wrapper.sh"]
+
+[mcp_servers.filesystem.env]
+NPM_CONFIG_CACHE = ".cache/npm-cache"
+
+[mcp_servers.github]
+command = "bash"
+args = ["scripts/ai/mcp/github-mcp-wrapper.sh"]
+
+[mcp_servers.github.env]
+GITHUB_TOOLSETS = "context,issues,pull_requests,repos,users,actions,code_security,dependabot,notifications"
+GITHUB_EXCLUDE_TOOLS = "create_or_update_file,push_files,delete_file,fork_repository,create_repository,merge_pull_request,actions_run_trigger"
+GITHUB_LOCKDOWN_MODE = "true"
+
+[mcp_servers.github-actions]
+command = "bash"
+args = ["scripts/ai/mcp/mcp_github_actions_wrapper.sh"]
+
+[mcp_servers.grafana]
+command = "bash"
+args = ["scripts/ai/mcp/mcp_grafana_wrapper.sh"]
+
+[mcp_servers.mcp-code-interpreter]
+command = "bash"
+args = ["scripts/ai/mcp/mcp_code_interpreter_wrapper.sh"]
+
+[mcp_servers.memory]
+command = "bash"
+args = ["scripts/ai/mcp/mcp_memory_wrapper.sh"]
+
+[mcp_servers.memory.env]
+NPM_CONFIG_CACHE = ".cache/npm-cache"
+MEMORY_SEED_PATH = "docs/00-project/ai/memory/mcp-memory.json"
+
+[mcp_servers.mermaid]
+command = "bash"
+args = ["scripts/ai/mcp/mcp_mermaid_wrapper.sh"]
+
+[mcp_servers.mutmut]
+command = "bash"
+args = ["scripts/ai/mcp/mcp_mutmut_wrapper.sh"]
+
+[mcp_servers.mutmut.env]
+MUTMUT_PROJECT_PATH = "."
+
+[mcp_servers.neo4j-cypher]
+command = "bash"
+args = ["scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh"]
+
+[mcp_servers.neo4j-memory]
+command = "bash"
+args = ["scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh"]
+
+[mcp_servers.prometheus]
+command = "bash"
+args = ["scripts/ai/mcp/mcp_prometheus_wrapper.sh"]
+
+[mcp_servers.ref]
+url = "https://api.ref.tools/mcp"
