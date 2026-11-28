@@ -6,7 +6,11 @@ import subprocess
 import sys
 from unittest.mock import patch
 
+import pytest
+
 from scripts.engineering.ops import check_actions_health
+
+pytestmark = pytest.mark.unit
 
 
 def test_reports_all_failed_zero_step_runs(capsys):
