@@ -230,14 +230,14 @@
     },
     {
       "category": "helper_asserted",
-      "line": "241",
+      "line": "249",
       "path": "tests/unit/infrastructure/adapters/iuphar/test_target_classification.py",
       "rationale": "tests that delegate verification to check/validate/verify helper calls",
       "test_name": "test_candidate_reclassification_uses_the_stored_row_identity"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "466",
+      "line": "516",
       "path": "tests/unit/infrastructure/audit/test_file_audit.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_file_audit_adapter__aclose_is_idempotent__cb75761c"
@@ -440,6 +440,13 @@
     },
     {
       "category": "intentional_no_exception_contract",
+      "line": "40",
+      "path": "tests/unit/infrastructure/storage/test_target_v31_refresh_history.py",
+      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+      "test_name": "test_accepts_exactly_one_delta_version"
+    },
+    {
+      "category": "intentional_no_exception_contract",
       "line": "118",
       "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_dq.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
@@ -520,7 +527,7 @@
     "architecture_helper_guard": 0,
     "benchmark_or_performance": 0,
     "helper_asserted": 2,
-    "intentional_no_exception_contract": 67,
+    "intentional_no_exception_contract": 68,
     "weak_no_value": 0
   },
   "assertless_examples": [
@@ -762,6 +769,12 @@
         "intentional_no_exception_contract": 5
       }
     },
+    "tests/unit/infrastructure/storage/test_target_v31_refresh_history.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "intentional_no_exception_contract": 1
+      }
+    },
     "tests/unit/infrastructure/test_checkpoint.py": {
       "assertless_tests": 2,
       "categories": {
@@ -817,7 +830,7 @@
       }
     }
   },
-  "assertless_total_candidates": 69,
+  "assertless_total_candidates": 70,
   "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
@@ -991,7 +1004,7 @@
       ".yml"
     ]
   },
-  "intentional_no_exception_contract": 67,
+  "intentional_no_exception_contract": 68,
   "markerless_examples": [],
   "markerless_test_functions": 0,
   "parse_errors": [],
@@ -1237,14 +1250,14 @@
       },
       {
         "category": "helper_asserted",
-        "line": "241",
+        "line": "249",
         "path": "tests/unit/infrastructure/adapters/iuphar/test_target_classification.py",
         "rationale": "tests that delegate verification to check/validate/verify helper calls",
         "test_name": "test_candidate_reclassification_uses_the_stored_row_identity"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "466",
+        "line": "516",
         "path": "tests/unit/infrastructure/audit/test_file_audit.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_file_audit_adapter__aclose_is_idempotent__cb75761c"
@@ -1447,6 +1460,13 @@
       },
       {
         "category": "intentional_no_exception_contract",
+        "line": "40",
+        "path": "tests/unit/infrastructure/storage/test_target_v31_refresh_history.py",
+        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+        "test_name": "test_accepts_exactly_one_delta_version"
+      },
+      {
+        "category": "intentional_no_exception_contract",
         "line": "118",
         "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_dq.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
@@ -1527,7 +1547,7 @@
       "architecture_helper_guard": 0,
       "benchmark_or_performance": 0,
       "helper_asserted": 2,
-      "intentional_no_exception_contract": 67,
+      "intentional_no_exception_contract": 68,
       "weak_no_value": 0
     },
     "assertless_examples": [
@@ -1557,7 +1577,7 @@
       "tests/unit/infrastructure/test_issue_10469_stream_a_infra_twenty_one.py:507",
       "tests/unit/infrastructure/test_storage_factory.py:820"
     ],
-    "assertless_total_candidates": 69,
+    "assertless_total_candidates": 70,
     "compatibility_examples": [],
     "compatibility_files": [],
     "compatibility_test_files": 0,
@@ -1749,8 +1769,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 3413,
-      "test_python_file_count": 3668,
+      "test_glob_file_count": 3418,
+      "test_python_file_count": 3674,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -1791,21 +1811,21 @@
       "top_level_directory_count_including_pycache": 16
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 3413,
-    "total_test_functions": 34587,
+    "total_test_files": 3418,
+    "total_test_functions": 34696,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "97c6956e3699456c67d13d24c10919648644c3cfd676a3589f67a35ee3363e1e",
+  "source_tree_sha256": "119c90715e4b8858fedec6a8e80660973eb5d46c0c0278169aa05df92c3efdf3",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
-    "assertless_total_candidates": 69,
+    "assertless_total_candidates": 70,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
-    "intentional_no_exception_contract": 67,
+    "intentional_no_exception_contract": 68,
     "markerless_examples": [],
     "markerless_test_functions": 0,
     "refined_assertless_tests": 0,
@@ -1817,8 +1837,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 3413,
-    "test_python_file_count": 3668,
+    "test_glob_file_count": 3418,
+    "test_python_file_count": 3674,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -1859,8 +1879,8 @@
     "top_level_directory_count_including_pycache": 16
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 3413,
-  "total_test_functions": 34587,
+  "total_test_files": 3418,
+  "total_test_functions": 34696,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
