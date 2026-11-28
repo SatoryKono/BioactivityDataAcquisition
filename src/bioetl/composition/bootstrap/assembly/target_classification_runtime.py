@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Iterator, Mapping
+from contextlib import contextmanager
+from contextvars import ContextVar
 
 from bioetl.application.core.wiring.registry import (
     TargetClassifiedTransformer,
@@ -36,6 +38,21 @@ from bioetl.infrastructure.schemas.pipeline_contract_policy import (
 )
 
 
+_isolated_v30_repair: ContextVar[PipelineYamlConfig | None] = ContextVar(
+    "isolated_v30_target_fk_repair", default=None
+)
+
+
+@contextmanager
+def isolated_v30_target_fk_repair(config: PipelineYamlConfig) -> Iterator[None]:
+    """Bind the exact config whose V30 contract and isolated sinks the repair verified."""
+    token = _isolated_v30_repair.set(config)
+    try:
+        yield
+    finally:
+        _isolated_v30_repair.reset(token)
+
+
 def resolve_target_runtime_config(
     config: PipelineYamlConfig, *, exact_replay: bool = False
 ) -> PipelineYamlConfig:
@@ -45,13 +62,14 @@ def resolve_target_runtime_config(
         config.entity_type,
     ) != ("chembl", "target"):
         return config
-    binding = None if exact_replay else get_target_classification_dependency()
+    historical = exact_replay or config is _isolated_v30_repair.get()
+    binding = None if historical else get_target_classification_dependency()
     if binding is not None:
         payload = binding.get("target_config")
         if not isinstance(payload, Mapping):
             raise ValueError("workflow target dependency has no pinned configuration")
         config = hydrate_target_runtime_config(payload)
-    if not exact_replay:
+    if not historical:
         config.target_classification.to_domain().require_active()
     return resolve_target_classification_profile(config).resolved_yaml_config
 
@@ -65,10 +83,11 @@ def validate_target_runtime_dependency(
         or config.pipeline_name != "chembl_target"
     ):
         return
-    if not exact_replay:
+    historical = exact_replay or config is _isolated_v30_repair.get()
+    if not historical:
         config.target_classification.to_domain().require_active()
     profile = load_target_runtime_profile(config)
-    stored = None if exact_replay else get_target_classification_dependency()
+    stored = None if historical else get_target_classification_dependency()
     if stored is None or profile is None:
         return
     if (
