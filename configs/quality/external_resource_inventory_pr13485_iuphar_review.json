@@ -1,10 +1,11 @@
 {
   "schema_version": 1,
   "catalog_ref": "0946083e1bea0325de3d992cd24733bff8d6895b",
-  "source_ref": "c8abdff94228af33d2518c63a8f6ebb47b9576fb",
+  "source_ref": "8663c9340e7c7c84458193dfb37eec6999f44e32",
   "source_reviews": {
     "src/bioetl/composition/bootstrap/assembly/target_classification_identity.py": "Always resolve target identity from the selected configuration. Existing pinned configuration resolution retains its resource ownership.",
-    "src/bioetl/composition/bootstrap/assembly/target_classification_runtime.py": "Validate active ordinary writers before using the existing classification session factory. Historical replay uses the pinned configuration or bypasses a session when no pinned configuration is present.",
+    "src/bioetl/composition/bootstrap/assembly/target_classification_runtime.py": "Ordinary writers validate their active profile. Exact replay restores the pinned configuration. A context variable binds only the isolated V30 repair configuration during factory and preflight, and restores the previous binding on exit. Existing profile loads retain their ownership.",
+    "src/bioetl/composition/bootstrap/cli/lineage.py": "The V30 repair binds its prevalidated, isolated configuration around runner creation and execution. Frozen source reads, isolated writes, and cleanup retain the same owners and lifetime.",
     "src/bioetl/composition/bootstrap/cli/lock.py": "Require active classification for target writes without historical replay. Existing lock, pipeline configuration and admission calls keep their resource ownership.",
     "src/bioetl/composition/bootstrap/runtime/assay_replay.py": "Carry the historical replay marker even when a pinned target configuration is present. Existing replay wiring and table reads keep the same acquisition expressions and owners.",
     "src/bioetl/domain/config/target_classification.py": "Add pure validation of the target classification mode without any resource acquisition.",
