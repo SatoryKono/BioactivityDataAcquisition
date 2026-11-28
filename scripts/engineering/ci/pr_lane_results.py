@@ -2718,6 +2718,10 @@ AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
         "tests/architecture/test_ai_session_memory_placement.py",
         "tests/architecture/test_pretest_guardrails_memory_phase.py",
     ),
+    "scripts/ops/runtime/mcp/": (
+        MCP_SETUP_COPILOT_CODEX_TEST,
+        "tests/unit/scripts/test_ensure_mcp.py",
+    ),
 }
 
 FAST_GOVERNANCE = "fast-governance"
