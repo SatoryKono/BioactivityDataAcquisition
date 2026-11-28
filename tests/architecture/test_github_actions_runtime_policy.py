@@ -1386,7 +1386,26 @@ def test_build_provenance_binds_release_files_and_published_ghcr_digest() -> Non
     push_step = next(step for step in publish["steps"] if step.get("id") == "publish")
     assert 'docker push "${sha_ref}"' in push_step["run"]
     assert "imagetools inspect" in push_step["run"]
-    assert "{{.Manifest.Digest}}" in push_step["run"]
+    assert 'sha256sum "${manifest}"' in push_step["run"]
+    sbom = next(
+        step for step in publish["steps"] if step["name"] == "Generate GHCR image SBOM"
+    )
+    assert sbom["with"]["image"] == (
+        "${{ steps.ghcr.outputs.image_base }}@${{ steps.publish.outputs.digest }}"
+    )
+    promote = next(
+        step
+        for step in publish["steps"]
+        if step["name"] == "Promote the attested image to the main tag"
+    )
+    assert publish["steps"].index(sbom) < publish["steps"].index(image_attest)
+    assert publish["steps"].index(image_attest) < publish["steps"].index(promote)
+    assert promote["env"]["EXPECTED_DIGEST"] == "${{ steps.publish.outputs.digest }}"
+    assert "imagetools create --prefer-index=false" in promote["run"]
+    assert promote["run"].index("/branches/main") < promote["run"].index(
+        "imagetools create"
+    )
+    assert '"sha256:${actual_digest%% *}" != "${EXPECTED_DIGEST}"' in promote["run"]
     assert 'echo "digest=${digest}" >> "$GITHUB_OUTPUT"' in push_step["run"]
     assert publish["steps"].index(push_step) < publish["steps"].index(image_attest)
     assert publish["environment"] == "ghcr-publish"
