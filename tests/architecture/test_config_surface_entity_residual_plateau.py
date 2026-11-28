@@ -124,8 +124,13 @@ def test_config_surface_duplication_audit_matches_live_backlog() -> None:
     assert "**/*.json" in scope["ignored_by_jscpd_patterns"]
     assert scope["excluded_generated_roots"] == ["configs/_schema"]
     assert scope["excluded_generated_files"] == [
-        "configs/quality/test_telemetry_baseline.yaml"
+        "configs/quality/test_telemetry_baseline.yaml",
+        "configs/reference/iuphar/2026.3.1/projection-audit.json",
     ]
+    reference = PROJECT_ROOT / "configs" / "reference" / "iuphar" / "2026.3.1"
+    scanned = backlog_report._iter_duplication_surface_files()
+    assert reference / "projection-audit.json" not in scanned
+    assert reference / "sources" / "coverage" / "coverage.json" in scanned
     assert scope["excluded_review_evidence_patterns"] == [
         "configs/quality/external_resource_inventory_security_aud003_review.json",
         "configs/quality/external_resource_inventory_security_aud004_review.json",
