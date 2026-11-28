@@ -17,7 +17,7 @@ pytestmark = pytest.mark.unit
 ROOT = next(
     path
     for path in Path(__file__).resolve().parents
-    if (path / ".circleci/config.yml").is_file()
+    if (path / "pyproject.toml").is_file()
 )
 SHA = "a" * 40
 IMAGE_ID = "sha256:" + "b" * 64
@@ -246,16 +246,23 @@ def test_verified_attestations_bind_predicates_and_digest(guard, corruption):
         guard("CLAIMS")
 
 
-def test_publish_requires_main_security_approval_and_restricted_context():
-    config = yaml.safe_load((ROOT / ".circleci/config.yml").read_text(encoding="utf-8"))
-    lane = config["workflows"]["docker-publish"]
-    assert {"equal": ["main", "<< pipeline.git.branch >>"]} in lane["when"]["and"]
-    jobs = {name: args for row in lane["jobs"] for name, args in row.items()}
-    assert jobs["docker-security-baseline"]["context"] == "bioetl-github-read-only"
-    assert jobs["docker-publish-approval"] == {
-        "type": "approval",
-        "requires": ["docker-security-baseline"],
-    }
-    assert jobs["docker-publish"]["requires"] == ["docker-publish-approval"]
-    assert jobs["docker-publish"]["context"] == "bioetl-ghcr-publish"
-    assert jobs["docker-publish"]["serial-group"].endswith("/docker-publication")
+def test_github_publish_requires_successful_main_integrity_and_current_main():
+    caller = yaml.safe_load(
+        (ROOT / ".github/workflows/main-ghcr-publish.yml").read_text(encoding="utf-8")
+    )
+    workflow = yaml.safe_load(
+        (ROOT / ".github/workflows/docker-publish.yml").read_text(encoding="utf-8")
+    )
+    publish = caller["jobs"]["publish"]
+    assert "workflow_run.conclusion == 'success'" in publish["if"]
+    assert "workflow_run.event == 'push'" in publish["if"]
+    assert "workflow_run.head_branch == 'main'" in publish["if"]
+    assert publish["uses"] == "./.github/workflows/docker-publish.yml"
+    assert publish["with"]["artifact-run-id"] == "${{ github.event.workflow_run.id }}"
+    gate = workflow["jobs"]["docker-publish-gate"]
+    push = workflow["jobs"]["docker-push"]
+    assert gate["if"] == "github.ref == 'refs/heads/main'"
+    assert push["needs"] == ["docker-publish-gate"]
+    assert "needs.docker-publish-gate.outputs.current == 'true'" in push["if"]
+    assert push["environment"] == "ghcr-publish"
+    assert push["concurrency"]["cancel-in-progress"] is False

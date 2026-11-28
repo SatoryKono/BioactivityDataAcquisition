@@ -233,24 +233,25 @@ def test_cli_rejects_arbitrary_output_before_publication(publication):
     assert not output.exists()
 
 
-def test_writer_is_main_only_and_requires_approved_read_only_analysis():
+def test_github_scorecard_upload_follows_successful_analysis():
     root = next(
         path
         for path in Path(__file__).resolve().parents
-        if (path / ".circleci/config.yml").is_file()
+        if (path / "pyproject.toml").is_file()
     )
-    config = yaml.safe_load((root / ".circleci/config.yml").read_text(encoding="utf-8"))
-    workflow = config["workflows"]["scorecard-publish"]
-    assert {"equal": ["main", "<< pipeline.git.branch >>"]} in workflow["when"]["and"]
-    jobs = {name: value for entry in workflow["jobs"] for name, value in entry.items()}
-    assert jobs["scorecard-analysis"]["context"] == "bioetl-github-read-only"
-    assert jobs["scorecard-publish-approval"] == {
-        "type": "approval",
-        "requires": ["scorecard-analysis"],
-    }
-    assert jobs["scorecard-publish"]["context"] == "bioetl-security-events-write"
-    assert jobs["scorecard-publish"]["requires"] == ["scorecard-publish-approval"]
-    assert jobs["scorecard-publish"]["serial-group"].endswith("/scorecard-publication")
+    config = yaml.safe_load(
+        (root / ".github/workflows/scorecard.yml").read_text(encoding="utf-8")
+    )
+    analysis = config["jobs"]["analysis"]
+    assert "github.event_name != 'pull_request_target'" in analysis["if"]
+    assert "github.event.repository.default_branch" in analysis["if"]
+    assert analysis["permissions"]["security-events"] == "write"
+    steps = {step["name"]: step for step in analysis["steps"]}
+    assert steps["Run analysis"]["id"] == "scorecard"
+    assert steps["Run analysis"]["with"]["publish_results"] is True
+    upload = steps["Upload to code-scanning"]
+    assert "steps.scorecard.outcome == 'success'" in upload["if"]
+    assert upload["with"]["sarif_file"] == "results.sarif"
 
 
 @pytest.mark.parametrize("version", ["v5.5.0", "5.4.0", "5.5.0-dev", None])
