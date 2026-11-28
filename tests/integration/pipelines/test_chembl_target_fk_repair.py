@@ -31,7 +31,7 @@ from bioetl.infrastructure.config.pipeline_config_api import (
 from bioetl.infrastructure.config.settings_api import Settings
 from tests.unit.infrastructure.storage.test_target_fk_repair import make_source
 
-pytestmark = pytest.mark.unit
+pytestmark = pytest.mark.integration
 
 
 def _raw_record() -> dict:
