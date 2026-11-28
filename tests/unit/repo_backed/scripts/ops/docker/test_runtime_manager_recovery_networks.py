@@ -31,6 +31,51 @@ from tests.unit.repo_backed.scripts.ops.docker.test_runtime_manager import (
 pytestmark = pytest.mark.repo_backed
 
 
+def test_main_ghcr_mode_uses_pinned_overlay_without_build(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    digest = "sha256:" + "a" * 64
+    monkeypatch.setenv("BIOETL_GHCR_DIGEST", digest)
+
+    spec = runtime_manager.resolve_stack(runtime_manager.DEFAULT_CONTRACT, "main")
+
+    assert spec.expected_images["bioetl"] == (
+        f"ghcr.io/satorykono/bioactivitydataacquisition@{digest}"
+    )
+    assert runtime_manager._compose(spec, "up", "-d", "bioetl") == [
+        "docker",
+        "compose",
+        "-p",
+        "bioetl-main",
+        "-f",
+        str(spec.compose_file),
+        "-f",
+        str(runtime_manager.ROOT / "scripts/ops/runtime/docker/compose.ghcr.yml"),
+        "up",
+        "--no-build",
+        "--pull",
+        "missing",
+        "-d",
+        "bioetl",
+    ]
+    neo4j = runtime_manager.resolve_stack(runtime_manager.DEFAULT_CONTRACT, "neo4j")
+    assert neo4j.compose_overlay is None
+
+    monkeypatch.delenv("BIOETL_GHCR_DIGEST")
+    local = runtime_manager.resolve_stack(runtime_manager.DEFAULT_CONTRACT, "main")
+    assert local.compose_overlay is None
+    assert "bioetl" not in local.expected_images
+
+
+def test_main_ghcr_mode_rejects_mutable_tag(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("BIOETL_GHCR_DIGEST", "main")
+
+    with pytest.raises(ValueError, match="must be a sha256 image digest"):
+        runtime_manager.resolve_stack(runtime_manager.DEFAULT_CONTRACT, "main")
+
+
 def test_clean_requires_confirmation_and_never_deletes_data(tmp_path: Path) -> None:
     calls: list[list[str]] = []
 
