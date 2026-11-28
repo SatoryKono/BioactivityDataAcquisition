@@ -11,6 +11,10 @@ import polars as pl
 from deltalake import DeltaTable
 import pytest
 
+from bioetl.infrastructure.schemas.target_classification_config import (
+    TargetClassificationYamlConfig,
+)
+
 from iuphar_target_class.bioetl_input import project_target_fields
 from iuphar_target_class.identifier_roles import MATCHING_POLICY_VERSION
 
@@ -757,8 +761,11 @@ def test_pinned_replay_classification_uses_supplied_settings(
     stage, _classifier, _evidence = _stage()
     settings = Settings(data_dir=tmp_path / "replay")
     yaml_config = SimpleNamespace(
-        target_classification=SimpleNamespace(
-            mode="enrich", to_domain=lambda: SimpleNamespace(contract_version="3.2.0")
+        target_classification=TargetClassificationYamlConfig(
+            mode="enrich",
+            table_contract="3.2.0",
+            snapshot_manifest="profile.json",
+            snapshot_manifest_sha256="0" * 64,
         )
     )
     monkeypatch.setattr(runtime, "hydrate_target_runtime_config", lambda _: yaml_config)

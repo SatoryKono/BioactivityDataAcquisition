@@ -28,6 +28,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Ordinary ChEMBL target runs use the versioned IUPHAR profile and physical
+  contract `3.1.0`. Direct, workflow and composite writers check the pinned
+  inputs before writing. Historical exact replay restores its original mode.
+
 - **ChEMBL Molecule phase recovery (#13197, #13200):** decimal provider strings
   such as `"4.0"` and `"0.5"` retain their canonical numeric phase before hashing.
   Previously damaged Silver and derived outputs require processing preserved

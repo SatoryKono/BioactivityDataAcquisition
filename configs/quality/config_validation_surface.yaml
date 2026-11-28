@@ -77,6 +77,16 @@ families:
     validation_depth: cross_file
     enforcing_surfaces:
       - tests/architecture/test_config_validation_surface.py
+  - family_id: iuphar_reference_snapshot
+    path_prefixes:
+      - configs/reference/iuphar/
+    owner: "@bioetl-domain"
+    validation_mechanism: pinned_snapshot_and_profile_admission
+    validation_depth: cross_file
+    enforcing_surfaces:
+      - tests/architecture/test_config_validation_surface.py
+      - tests/unit/composition/test_target_classification_admission.py
+      - tests/unit/composition/test_target_classification_runtime.py
   - family_id: quality_governance
     path_prefixes:
       - configs/quality/

@@ -1,0 +1,16 @@
+{
+  "acquisition_sha256": "bae61522358800cd2e090524fc2d5517fadcf9784418373cb736b479003b1d02",
+  "approval_reference": "urn:bioetl:rf008:issue-13408:independent-source-review:20261127",
+  "artifact": "bioetl_iuphar_scope_review",
+  "biological_accuracy_accepted": false,
+  "evidence_references": [
+    {
+      "path": "independent-evidence.json",
+      "sha256": "0e40ee4c6368b6555ebe8c35b3ed0e00ae1f3f3017c9daf9dc9a5ac5ce6fc516"
+    }
+  ],
+  "human_review_claimed": false,
+  "reviewer_reference": "agent:/root/rf008_reference_review",
+  "schema_version": 1,
+  "scope_sha256": "883bfb68433044e47a67dd766f4e09b4f21b94d79ff4122be42d9e9d4c564542"
+}

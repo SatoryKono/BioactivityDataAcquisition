@@ -202,7 +202,8 @@
     ],
     "scope": {
       "excluded_generated_files": [
-        "configs/quality/test_telemetry_baseline.yaml"
+        "configs/quality/test_telemetry_baseline.yaml",
+        "configs/reference/iuphar/2026.3.1/projection-audit.json"
       ],
       "excluded_generated_roots": [
         "configs/_schema"
@@ -232,7 +233,7 @@
         ".yml",
         ".json"
       ],
-      "files_scanned": 278,
+      "files_scanned": 287,
       "ignored_by_jscpd_patterns": [
         "**/configs/**",
         "**/*.yaml",

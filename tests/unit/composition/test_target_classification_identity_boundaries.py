@@ -45,7 +45,7 @@ def _mode(config, mode):
     return config.model_copy(
         update={
             "target_classification": config.target_classification.model_copy(
-                update={"mode": mode}
+                update={"mode": mode, "table_contract": None}
             )
         }
     )
@@ -93,7 +93,7 @@ def test_explicit_v32_contract_selects_the_v32_identity():
 
 
 def test_disabled_or_unrelated_config_has_no_classification_dependency():
-    config = load_pipeline_config("chembl_target")
+    config = _mode(load_pipeline_config("chembl_target"), "off")
     assert load_target_runtime_profile(config) is None
     assert build_target_classification_session(config, object()) is None
     assert target_classification_source_refs(config) == ()
@@ -113,6 +113,7 @@ def test_relative_profile_uses_actual_configs_parent_and_checks_frozen_bytes(
             "target_classification": config.target_classification.model_copy(
                 update={
                     "mode": "shadow",
+                    "table_contract": None,
                     "snapshot_manifest": str(
                         (root / "profile.json").relative_to(tmp_path)
                     ),

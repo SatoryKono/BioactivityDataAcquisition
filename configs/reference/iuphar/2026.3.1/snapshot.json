@@ -1,0 +1,39 @@
+{
+  "acquisition": {
+    "path": "sources/acquisition/acquisition.json",
+    "sha256": "bae61522358800cd2e090524fc2d5517fadcf9784418373cb736b479003b1d02"
+  },
+  "annotation_capability": "family_only",
+  "artifact": "bioetl_iuphar_snapshot",
+  "coverage": {
+    "path": "sources/coverage/coverage.json",
+    "sha256": "b5b06e9679bf776dc3ae222ffa57df8661d11f31ab8baaf4c51e671f0a95fc6e"
+  },
+  "format": "gtopdb_target_species_payload_v2",
+  "projection_audit": {
+    "path": "projection-audit.json",
+    "sha256": "d0de7f8dac1ab367834ef8b301f67b8a1e01e161f585c1d7ec9bc3ebdd0bf6c4"
+  },
+  "provider_release": "2026.3.1",
+  "retrieved_at": "2026-11-16T16:48:57.114983+00:00",
+  "reviewed_inputs": {
+    "path": "reviewed-inputs.json",
+    "sha256": "18ebd722d13b7bee3db3397d356d9f414276e917ec87a8ef8a2cfe37a3b5f6a1"
+  },
+  "schema_version": 2,
+  "snapshot_id": "gtopdb:2026.3.1:48825b4fb54b0051d4eb01fd045fc448f14e44cc2ada4fd3ffe620d932a249f7",
+  "supplemental_csvs": {
+    "_IUPHAR_family.csv": {
+      "path": "sources/reviewed/_IUPHAR_family.csv",
+      "sha256": "3d56abada7f06068af153eca88e3b0d9fc04755ba319fd2d9acc00033875ecc3"
+    },
+    "_IUPHAR_target.csv": {
+      "path": "sources/reviewed/_IUPHAR_target.csv",
+      "sha256": "4756ff664c195aa5b54031d4403fe8eed8a144abfe9a6c3882978d1ec445b440"
+    }
+  },
+  "targets": {
+    "path": "targets.json",
+    "sha256": "7ae2abf8b7f5fc1047512c112076d08bd3c9c10e94b8e058ba8573e925c0fcb2"
+  }
+}

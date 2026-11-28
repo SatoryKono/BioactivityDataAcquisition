@@ -202,12 +202,6 @@ def restore_target_replay_config(
 
     if not isinstance(current_config, PipelineYamlConfig):
         return current_config
-    has_parent = bool(
-        getattr(ctx, "replay_of_manifest_id", None)
-        or getattr(ctx, "replay_of_run_id", None)
-    )
-    if not has_parent and not current_config.target_classification.to_domain().enabled:
-        return current_config
     parent = resolve_parent(ctx=ctx, settings=settings)
     if parent.pipeline_name != "chembl_target":
         raise ValueError("target replay parent pipeline mismatch")

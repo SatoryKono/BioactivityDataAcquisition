@@ -97,7 +97,7 @@ class _Source:
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("mode", ["off", "shadow"])
+@pytest.mark.parametrize("mode", ["enrich", "shadow"])
 async def test_real_factory_preserves_canonical_dq_and_writes_isolated_data_and_reports(
     tmp_path, monkeypatch, mode, isolated_working_directory
 ):
@@ -109,12 +109,14 @@ async def test_real_factory_preserves_canonical_dq_and_writes_isolated_data_and_
                 "target_classification": config.target_classification.model_copy(
                     update={
                         "mode": "shadow",
+                        "table_contract": "3.0.0",
                         "snapshot_manifest": str(output / "profile.json"),
                         "snapshot_manifest_sha256": bundle.profile_sha256,
                     }
                 )
             }
         )
+    assert config.target_classification.mode == mode
     canonical = isolated_working_directory
     sentinels = []
     for layer in ("bronze", "silver", "gold"):

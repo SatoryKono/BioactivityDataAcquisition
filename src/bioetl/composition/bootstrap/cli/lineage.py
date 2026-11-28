@@ -5,6 +5,9 @@ from pathlib import Path
 from bioetl.application.services.lineage.lineage_inspection_service import (
     LineageInspectionService,
 )
+from bioetl.composition.bootstrap.assembly.target_classification_runtime import (
+    isolated_v30_target_fk_repair,
+)
 from bioetl.composition.factories.services.port_factories import create_metrics
 from bioetl.composition.runtime_builders.config_access import get_settings
 from bioetl.infrastructure.control_plane import (
@@ -296,17 +299,18 @@ async def _execute_isolated_recovery(
         strict_validation=True,
         strict_gold_validation=True,
     )
-    runner = factory.create_runner(
-        PipelineCreateRunnerRequest(
-            run_id=RunID(request.run_id),
-            started_at=request.started_at,
-            runtime=runtime,
-            settings=settings,
-            config=config,
-            observability=observability,
+    with isolated_v30_target_fk_repair(config):
+        runner = factory.create_runner(
+            PipelineCreateRunnerRequest(
+                run_id=RunID(request.run_id),
+                started_at=request.started_at,
+                runtime=runtime,
+                settings=settings,
+                config=config,
+                observability=observability,
+            )
         )
-    )
-    await runner.run()
+        await runner.run()
     metrics = runner.execution_metrics
     for key in ("records_silver", "records_gold"):
         if metrics.get(key) != len(source.records):

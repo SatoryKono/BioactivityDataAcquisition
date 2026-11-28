@@ -1,4 +1,4 @@
-"""Immutable, opt-in configuration for offline IUPHAR target classification.
+"""Immutable configuration for offline IUPHAR target classification.
 
 RF-001 (#13309) field-layer contract (semantics only; no biological admission):
 
@@ -157,6 +157,14 @@ class TargetClassificationConfig:
     @property
     def enabled(self) -> bool:
         return self.mode != "off"
+
+    def require_active(self) -> None:
+        """Only a restored historical target run can use an unclassified writer."""
+        if not self.enabled:
+            raise ValueError(
+                "chembl_target requires enrich or an explicit shadow profile; "
+                "off requires exact replay of a pinned historical configuration"
+            )
 
     @property
     def contract_version(self) -> str:

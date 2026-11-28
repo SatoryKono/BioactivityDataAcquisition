@@ -10,19 +10,28 @@ from uuid import UUID
 
 import pyarrow as pa
 import pytest
+import yaml
 from deltalake import DeltaTable, write_deltalake
 
+from bioetl.composition.bootstrap.assembly.target_classification_runtime import (
+    isolated_v30_target_fk_repair,
+    resolve_target_runtime_config,
+    validate_target_runtime_dependency,
+)
 from bioetl.composition.bootstrap.cli.lineage import (
     TargetFKRepairRequest,
     _verify_isolated_paths,
     isolate_recovery_config,
     prepare_target_fk_repair,
 )
-from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
+from bioetl.infrastructure.config.pipeline_config_api import (
+    load_pipeline_config,
+    load_pipeline_config_from_root,
+)
 from bioetl.infrastructure.config.settings_api import Settings
 from tests.unit.infrastructure.storage.test_target_fk_repair import make_source
 
-pytestmark = pytest.mark.unit
+pytestmark = pytest.mark.integration
 
 
 def _raw_record() -> dict:
@@ -47,7 +56,7 @@ def _raw_record() -> dict:
 
 
 @pytest.fixture
-def repair_request(tmp_path, monkeypatch):
+def active_repair_request(tmp_path, monkeypatch):
     repo = Path(__file__).resolve().parents[3]
     root = tmp_path / "synthetic-repo"
     old = {
@@ -81,6 +90,44 @@ def repair_request(tmp_path, monkeypatch):
         UUID("00000000-0000-4000-8000-0000000000a1"),
         datetime(2026, 11, 16, 18, 0, tzinfo=UTC),
     )
+
+
+@pytest.fixture
+def repair_request(active_repair_request):
+    target_path = (
+        active_repair_request.repo_root / "configs/entities/chembl/target.yaml"
+    )
+    document = yaml.safe_load(target_path.read_bytes())
+    document["pipeline"]["target_classification"] = {"mode": "off"}
+    target_path.write_text(yaml.safe_dump(document), encoding="utf-8")
+    return active_repair_request
+
+
+@pytest.mark.asyncio
+async def test_active_profile_cannot_prepare_v30_candidate(active_repair_request):
+    with pytest.raises(
+        ValueError, match="V30 recovery requires classification mode off"
+    ):
+        await prepare_target_fk_repair(active_repair_request)
+    assert not active_repair_request.output_directory.exists()
+
+
+@pytest.mark.parametrize(
+    "check", [resolve_target_runtime_config, validate_target_runtime_dependency]
+)
+def test_v30_repair_admission_is_scoped_to_the_isolated_config(repair_request, check):
+    ordinary = load_pipeline_config_from_root(
+        "chembl_target", configs_root=repair_request.repo_root / "configs"
+    )
+    isolated = isolate_recovery_config(
+        ordinary, repair_request.output_directory / "execution" / "data"
+    )
+    with isolated_v30_target_fk_repair(isolated):
+        check(isolated)
+        with pytest.raises(ValueError, match="off requires exact replay"):
+            check(ordinary)
+    with pytest.raises(ValueError, match="off requires exact replay"):
+        check(isolated)
 
 
 @pytest.mark.asyncio

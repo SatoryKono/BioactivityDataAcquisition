@@ -62,11 +62,15 @@ def rehearsal(tmp_path, monkeypatch):
     repository = Path(__file__).resolve().parents[3]
     active = workspace / "configs"
     copytree(repository / "configs", active, ignore=ignore_patterns(".env*", "*.env"))
+    # This occurrence starts with a historical V30 config and physical V30 tables.
+    active_target = active / "entities/chembl/target.yaml"
+    document = yaml.safe_load(active_target.read_bytes())
+    document["pipeline"]["target_classification"] = {"mode": "off"}
+    active_target.write_text(yaml.safe_dump(document), encoding="utf-8")
     occurrence = workspace / "reports/local/rehearsal-occurrence"
     copied = occurrence / "configs"
     copytree(active, copied, ignore=ignore_patterns(".env*", "*.env"))
     config = copied / "entities/chembl/target.yaml"
-    document = yaml.safe_load(config.read_bytes())
     fields = tuple(document["hash_policy"]["hash_policy"]["include_fields"])
     profile = bundle / "enrich-profile.json"
     document["pipeline"]["target_classification"] = {

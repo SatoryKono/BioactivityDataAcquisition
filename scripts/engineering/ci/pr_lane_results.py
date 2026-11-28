@@ -1388,6 +1388,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
         EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
         EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
     ),
+    "configs/quality/external_resource_inventory_pr13485_iuphar_review.json": (
+        EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
+        EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
+    ),
     "configs/quality/external_resource_inventory_pr13414_iuphar_review.json": (
         EXTERNAL_RESOURCE_INVENTORY_CATALOG_TEST,
         EXTERNAL_RESOURCE_INVENTORY_REQUALIFY_TEST,
@@ -2515,6 +2519,11 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
 AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
     "tests/fixtures/agent-tools/": (
         "tests/unit/repo_backed/scripts/ai/agent_tools/test_install_contracts.py",
+    ),
+    "configs/reference/iuphar/": (
+        CONFIG_VALIDATION_SURFACE_TEST,
+        "tests/unit/composition/test_target_classification_admission.py",
+        "tests/unit/composition/test_target_classification_runtime.py",
     ),
     "configs/ide/zed/": (
         "tests/integration/ide/test_zed_portability.py",

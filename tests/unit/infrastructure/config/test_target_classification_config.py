@@ -475,18 +475,17 @@ def test_explicit_table_contract_selects_v32_without_changing_default_enrich() -
     ]
 
 
-def test_absent_selector_matches_a_manifest_written_before_the_field() -> None:
-    current = load_pipeline_config_from_root(
-        "chembl_target", configs_root=ROOT / "configs"
-    )
-    stored = current.model_dump(mode="json")
-    stored_classification = stored["target_classification"]
-    assert isinstance(stored_classification, dict)
-    stored_classification.pop("table_contract", None)
-    dumped = current.model_dump(mode="json")
-    assert dumped["target_classification"] == stored_classification
-    selected = _config("enrich", "3.2.0").model_dump(mode="json")
-    assert selected["target_classification"]["table_contract"] == "3.2.0"
+@pytest.mark.parametrize(
+    ("mode", "version"), [("off", "3.0.0"), ("shadow", "3.0.0"), ("enrich", "3.1.0")]
+)
+def test_absent_selector_matches_a_manifest_written_before_the_field(
+    mode, version
+) -> None:
+    stored = _config(mode, version).target_classification.model_dump(mode="json")
+    del stored["table_contract"]
+    restored = TargetClassificationYamlConfig.model_validate(stored)
+    assert restored.model_dump(mode="json") == stored
+    assert restored.to_domain().contract_version == version
 
 
 def test_v32_gold_contract_records_the_detail_normalization_profile() -> None:

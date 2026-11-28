@@ -9,7 +9,7 @@ Reviewers:
 - BioETL Team
   Priority: P2
   Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-  Last verified: '2026-11-27'
+  Last verified: '2026-11-28'
 
 ______________________________________________________________________
 
@@ -137,7 +137,11 @@ no dedicated workflow or pipeline CLI flag.
 
 ## Impact
 
-The checked-in configuration defaults to `mode: "off"`. The historical dictionary
+Ordinary target runs load the checked-in RF-008 profile in `enrich` mode with
+physical table contract `3.1.0`. Direct runs, workflows and the composite
+post-join stage verify the pinned dependency before writing Silver or Gold.
+Exact replay restores the mode and inputs recorded for the parent run.
+The historical dictionary
 is an unqualified legacy source with unresolved classification disagreements.
 Retrieving official export bytes and passing software tests does not approve a
 snapshot's coverage or reference cases. Require the actual acquisition,
@@ -153,7 +157,7 @@ configuration and contract during a deployment.
 
 | Mode | Business rows and hash policy | Required dependency |
 | --- | --- | --- |
-| `"off"` | Unchanged V30, contract 3.0.0 | None |
+| `"off"` | Historical replay of V30, contract 3.0.0 | Parent configuration |
 | `shadow` | Unchanged V30, contract 3.0.0; separate classification evidence | Pinned profile envelope and snapshot |
 | `enrich` | V31, contract 3.1.0, unless `table_contract` explicitly selects `3.2.0`; nine additional nullable business columns enter the explicit hash scope. `3.2.0` also persists source type, completeness, family ids, subclasses, structured paths, local status and rule ids, effective subclasses, conflict codes and evidence refs | Admitted, publishable scoped snapshot and executed V2 reference acceptance; compatible physical tables |
 
@@ -317,11 +321,14 @@ The canonical setting is under `pipeline` in
 ```yaml
 pipeline:
   target_classification:
-    mode: "off"
+    mode: enrich
+    table_contract: "3.1.0"
+    snapshot_manifest: configs/reference/iuphar/2026.3.1/profile.json
+    snapshot_manifest_sha256: "b02152d8cce606caa43915f9039c2275b99a098861e52acf47643a128640dd15"
 ```
 
-Quote `"off"`: YAML 1.1 readers can interpret an unquoted `off` as a boolean,
-which the strict configuration rejects.
+The profile directory includes the acceptance receipt, snapshot and pinned input
+files used by the runtime. Git preserves their exact bytes across checkouts.
 
 For shadow validation, prepare a separately reviewed configuration with:
 
@@ -1001,8 +1008,8 @@ Shadow, the isolated `--limit 1000` enrich, composite enrich, migration, and
 live readback are separate statuses. A passing smoke does not prove the full
 cohort. `biological_accuracy_accepted` stays false for a bounded RF-008
 reference; a matched count must not be recorded as biological qualification.
-For V30 → V31, keep the canonical entity document in `mode: "off"` until
-`promotion_decision` is `READY`. For V31 → V31, verify that the canonical
+For V30 → V31, keep ordinary writers paused and use the frozen V30 source
+configuration until `promotion_decision` is `READY`. For V31 → V31, verify that the canonical
 configuration resolves to `enrich` with the accepted profile stored in the
 current rows and use a separate candidate configuration. After `READY`,
 `promote` runs in a window with no writers. `LIVE_ACCEPTED`
@@ -1261,11 +1268,11 @@ Delta versions and passed round-trip verification. The journal and original
 bundle are retained under `backup/`. The migration lock was released and the
 active configuration admitted subsequent incremental writes.
 
-Apply the accepted V31 configuration through the migration procedure as a
-deployment-local override. The checked-in `configs/entities/chembl/target.yaml`
-continues to select `off` and V30 for a clean checkout. Before resuming jobs on
-the already migrated Silver and Gold tables, verify that every writer uses
-the active V31 configuration and the admitted profile digest listed above.
+At the time of this refresh, V31 was applied as a deployment-local override.
+The checked-in `configs/entities/chembl/target.yaml` now selects the admitted
+V31 profile by default. Before resuming jobs on the migrated Silver and Gold
+tables, verify that every writer uses the active V31 configuration and the
+admitted profile digest listed above.
 
 The deployment host retains the evidence and exports in
 `reports/local/iuphar-13410-rf013-20261127-1700/`.
@@ -1285,8 +1292,8 @@ The deployment host retains the evidence and exports in
 
 ## Compliance
 
-Keep production `"off"` until the admission and promotion procedure has actual
-reviewed inputs. Use one contract for all shared-table writers, preserve
+Use the admitted profile for ordinary writers. A new profile requires reviewed
+inputs and the promotion procedure. Use one contract for shared-table writers, preserve
 historical and recovery artifacts, and keep local inference separate from
 direct IUPHAR evidence. Software contract fixtures cannot waive acceptance.
 
@@ -1339,7 +1346,7 @@ Primary accessions come from `component_accessions`. `target_xref_uniprot_ids` a
 
 Connected local rules use catalog version `iuphar-local-rules-20261123`. EC 7 is Translocase under Enzyme. It is not Transporter. The pinned snapshot capability remains `family_only`. Paths are stored root to leaf. A `family_only` snapshot is not upgraded to full annotation.
 
-Table contract `3.2.0` adds nullable detail columns to the nine V31 fields. Arrays are canonical JSON text. Null means the value was not computed. Default enrich stays on `3.1.0`. `off` and `shadow` cannot select `3.1.0` or `3.2.0`. Production `configs/entities/chembl/target.yaml` stays `mode: "off"`.
+Table contract `3.2.0` adds nullable detail columns to the nine V31 fields. Arrays are canonical JSON text. Null means the value was not computed. Default enrich stays on `3.1.0`. `off` and `shadow` cannot select `3.1.0` or `3.2.0`. The production entity configuration pins `enrich` and table contract `3.1.0`.
 
 Standard XLSX export splits long text across the original data column and additional columns such as `<column>__bioetl_part_0002`. The `_bioetl_export_manifest` sheet records the part columns and source schema. Restore uses the manifest to reassemble the source columns.
 

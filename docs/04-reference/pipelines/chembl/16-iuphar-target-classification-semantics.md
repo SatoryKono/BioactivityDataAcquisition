@@ -8,7 +8,7 @@ Reviewers:
 
 - BioETL Team
   Priority: P1
-  Last verified: '2026-11-23'
+  Last verified: '2026-11-28'
 
 ______________________________________________________________________
 
@@ -65,8 +65,8 @@ They remain distinct.
 | `composite_target` | 1 | After dependency joins | UniProt protein, idmapping accession, L1–L5 protein-class summary. |
 | standalone `chembl_target` | 2 | No | Seed fields only; early classification cannot use post-join features. |
 
-Production `target_classification.mode` remains `"off"` until a later RF admits
-enrich. Matched counts are not biological accuracy.
+Ordinary runs use the RF-008 accepted profile in `enrich` mode. The match count
+measures IUPHAR identifier coverage.
 `biological_accuracy_accepted` stays `false` unless independently proven.
 
 ## Paths, missing markers, legacy Other

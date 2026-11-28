@@ -31,6 +31,8 @@ DUPLICATION_FILE_SUFFIXES = (".yaml", ".yml", ".json")
 GENERATED_DUPLICATION_SURFACE_DIRS = (ROOT / "configs" / "_schema",)
 GENERATED_DUPLICATION_SURFACE_FILES = (
     ROOT / "configs" / "quality" / "test_telemetry_baseline.yaml",
+    # compile_snapshot_bundle renders this audit from the reviewed coverage source.
+    ROOT / "configs" / "reference" / "iuphar" / "2026.3.1" / "projection-audit.json",
 )
 REVIEW_EVIDENCE_DUPLICATION_PATTERNS = (
     "configs/quality/external_resource_inventory_security_aud003_review.json",
